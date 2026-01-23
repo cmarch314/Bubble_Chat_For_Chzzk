@@ -64,7 +64,7 @@ function createSkullOverlay() {
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'skull-overlay';
-        overlay.innerHTML = '<div class="skull-emoji">☠️</div>';
+        overlay.innerHTML = '<div class="skull-emoji">☠️</div><div class="film-grain"></div>';
         document.body.appendChild(overlay);
     }
 }
@@ -150,42 +150,56 @@ function triggerHeartEffect() {
             const emojiContainer = overlay.querySelector('.heart-emoji');
             let step = 0;
 
-            // [Sequence Logic] Update every 2 seconds
-            const updateState = () => {
+            // [Sequence Logic] Variable Intervals
+            // Step 0 (Start): P1
+            // Step 1 (+2250ms): P2
+            // Step 2 (+2250ms -> 4500ms): H3
+            // Step 3 (+1125ms -> 5625ms): Combined
+            // End (+Remaining -> 9000ms): Cleanup
+
+            const updateState = (currentStep) => {
                 // Color Change
                 const hue = Math.floor(Math.random() * 360);
                 overlay.style.backgroundColor = `hsla(${hue}, 100%, 70%, 0.3)`;
 
+                // [Animation Reset]
+                emojiContainer.classList.remove('grow-effect');
+                void emojiContainer.offsetWidth;
+                emojiContainer.classList.add('grow-effect');
+
                 // Content Change
-                emojiContainer.style.fontSize = '20rem'; // Reset font size
-                if (step === 0) {
+                emojiContainer.style.fontSize = '20rem';
+                if (currentStep === 0) {
                     emojiContainer.innerText = p1;
-                } else if (step === 1) {
+                } else if (currentStep === 1) {
                     emojiContainer.innerText = p2;
-                } else if (step === 2) {
+                } else if (currentStep === 2) {
                     emojiContainer.innerText = h3;
-                } else if (step === 3) {
+                } else if (currentStep === 3) {
                     emojiContainer.innerText = `${p1}${h3}${p2}`;
-                    emojiContainer.style.fontSize = '10rem'; // Shrink to fit 3 emojis
+                    emojiContainer.style.fontSize = '13rem';
                 }
-                step++;
             };
 
-            updateState(); // Run immediately for step 0
-            const colorInterval = setInterval(updateState, 2200);
+            // Execute Sequence
+            updateState(0); // T+0
 
+            setTimeout(() => { updateState(1); }, 2250); // T+2250
+            setTimeout(() => { updateState(2); }, 4500); // T+4500 (2250+2250)
+            setTimeout(() => { updateState(3); }, 5625); // T+5625 (4500+1125)
+
+            // Cleanup at T+9000
             setTimeout(() => {
-                clearInterval(colorInterval);
                 overlay.style.backgroundColor = '';
                 overlay.classList.remove('visible');
-                emojiContainer.innerText = '❤️‍🩹'; // Reset default
+                emojiContainer.innerText = '❤️‍🩹';
                 emojiContainer.style.fontSize = '';
                 isHeartActive = false;
-            }, 8000); // Duration: 8 seconds
+            }, 9000);
         } else {
             isHeartActive = false;
         }
-    }, 11600); // 11.2 seconds delay
+    }, 11600); // 11.6 seconds delay
 }
 
 // ==========================================
