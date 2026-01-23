@@ -1,7 +1,5 @@
 const idElement = document.getElementById('id');
-// [Config Priority] 1. LocalStorage -> 2. Attribute -> 3. Fallback
-const storedId = localStorage.getItem('CHZZK_CHANNEL_ID');
-const CHZZK_CHANNEL_ID = storedId || (idElement ? (idElement.getAttribute('twitchId') || idElement.getAttribute('chzzkHash')) : null);
+const CHZZK_CHANNEL_ID = idElement ? (idElement.getAttribute('twitchId') || idElement.getAttribute('chzzkHash')) : null; // Read from index.html
 const c_color = document.getElementById("color").getAttribute("color");
 const chatEle = document.getElementById('chat');
 const chatEleSub = document.getElementById('chatSub');
@@ -57,21 +55,6 @@ function handleConfigCommand(data) {
         triggerSkullEffect();
     } else if (type === 'reload') {
         location.reload();
-    } else if (type === 'setChannel') {
-        // Save ID and Reload
-        if (data.channelId) {
-            localStorage.setItem('CHZZK_CHANNEL_ID', data.channelId);
-            location.reload();
-        }
-    } else if (type === 'updateConfig') {
-        // [New Feature] Real-time Config Update
-        if (data.soundConfig) {
-            updateSoundHive(data.soundConfig);
-        }
-        if (data.visualConfig) {
-            visualConfig = data.visualConfig;
-            console.log("Visual Config Updated", visualConfig);
-        }
     }
 }
 
@@ -505,40 +488,13 @@ function showPrompt({ chan, type, message = '', data = {}, timeout = 35000, attr
     // Proceeding to showMessage which is the core.
 }
 // [오버마인드의 음향 저장소]
-let soundHive = {};
-// [오버마인드의 시각 효과 저장소]
-let visualConfig = {};
+const rawSoundConfig = window.HIVE_SOUND_CONFIG || {};
+const soundHive = {};
 
-function updateSoundHive(config) {
-    soundHive = {}; // Reset
-    for (const [key, value] of Object.entries(config)) {
-        soundHive[key] = `SFX/${value}`;
-    }
-    console.log("Sound Hive Updated", soundHive);
+// [SFX Base Path Optimization]
+for (const [key, value] of Object.entries(rawSoundConfig)) {
+    soundHive[key] = `SFX/${value}`;
 }
-
-function loadConfigs() {
-    // 1. Load Defaults from window (index.html)
-    const defaultsSound = window.HIVE_SOUND_CONFIG || {};
-    const defaultsVisual = window.HIVE_VISUAL_CONFIG || {};
-
-    // 2. Load Overrides from LocalStorage
-    const savedSound = localStorage.getItem('HIVE_SOUND_CONFIG');
-    const savedVisual = localStorage.getItem('HIVE_VISUAL_CONFIG');
-
-    // 3. Merge (Priority: LocalStorage > Default)
-    // Actually, if LocalStorage exists, we should probably treat it as the "Active" config
-    // to avoid zombie defaults coming back after user deleted them.
-    // If LocalStorage is NULL (never saved), use Defaults.
-
-    let activeSoundConfig = savedSound ? JSON.parse(savedSound) : defaultsSound;
-    updateSoundHive(activeSoundConfig);
-
-    visualConfig = savedVisual ? JSON.parse(savedVisual) : defaultsVisual;
-    console.log("Visual Config Loaded", visualConfig);
-}
-
-loadConfigs(); // Init on startup
 
 // 소리 재생을 담당하는 중추 함수
 function playZergSound(fileName) {
@@ -595,9 +551,9 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 6500, attr
 
     // [Special Effect Trigger]
     // [Visual Effect Trigger - Dynamic]
-    // Uses global 'visualConfig' loaded at startup
+    // Uses window.HIVE_VISUAL_CONFIG from index.html
+    const visualConfig = window.HIVE_VISUAL_CONFIG || {};
     Object.keys(visualConfig).forEach(keyword => {
-
         if (message.includes(keyword)) {
             const effectType = visualConfig[keyword];
             if (effectType === 'skull') triggerSkullEffect();
