@@ -1,4 +1,5 @@
-const CHZZK_CHANNEL_ID = "057a9a03fea9b368eb0c76b9e95e1ae5"; // User provided Chzzk ID
+const idElement = document.getElementById('id');
+const CHZZK_CHANNEL_ID = idElement ? (idElement.getAttribute('twitchId') || idElement.getAttribute('chzzkHash')) : null; // Read from index.html
 const c_color = document.getElementById("color").getAttribute("color");
 const chatEle = document.getElementById('chat');
 const chatEleSub = document.getElementById('chatSub');
@@ -473,37 +474,13 @@ function showPrompt({ chan, type, message = '', data = {}, timeout = 35000, attr
     // Proceeding to showMessage which is the core.
 }
 // [오버마인드의 음향 저장소]
-const soundHive = {
-    //화면 이팩트
-    "해골": "SFX/SkullMeme.mp3",
-    "커플": "SFX/DieWithASmile.mp3",
+const rawSoundConfig = window.HIVE_SOUND_CONFIG || {};
+const soundHive = {};
 
-
-    //채팅 이팩트
-    "아하하": "SFX/Laugh3.mp3",
-    "ㅋㅋㅋㅋㅋ": "SFX/Laugh.mp3",
-    "ㅋㅋㅋㅋㅋㅋ": "SFX/Laugh4.mp3",
-    "안되": "SFX/No.mp3",
-    "홋치": "SFX/whip.mp3",
-    "오옷": "SFX/Ot.wav",
-    "헤으응": "SFX/careless.mp3",
-    "뚝": "SFX/DDuk.wav",
-    "갓겜": "SFX/godgame.mp3",
-    "멈춰": "SFX/Stop.mp3",
-    "스트레스도 필요하다": "SFX/StressNeeds.mp3",
-    "운동 많이 된다": "SFX/workouthard.mp3",
-    "진짜 많이 배운다": "SFX/Learing.mp3",
-    "야스": "SFX/Yas.mp3",
-    "앙": "SFX/Ahng.mp3",
-    "잠시후": "SFX/FUmomentsLater.mp3",
-    "와우": "SFX/Wow.mp3",
-    "디코": "SFX/discord.mp3",
-    "카톡": "SFX/Katalk.wav",
-    "전화": "SFX/Call.WAV",
-    "보이스콜": "SFX/KakaoCall.mp3",
-    "!유격": "SFX/MohyungTower.mp3"
-
-};
+// [SFX Base Path Optimization]
+for (const [key, value] of Object.entries(rawSoundConfig)) {
+    soundHive[key] = `SFX/${value}`;
+}
 
 // 소리 재생을 담당하는 중추 함수
 function playZergSound(fileName) {
