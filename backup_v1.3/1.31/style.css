@@ -912,6 +912,7 @@ p {
   border: 0px solid;
   border-radius: 15px;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   max-height: 50px;
   overflow: hidden;
 }
@@ -934,6 +935,7 @@ p {
   padding: 0 0.3em;
   overflow: hidden;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
 }
 
 .user-name .badges img {
@@ -949,6 +951,7 @@ p {
   word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

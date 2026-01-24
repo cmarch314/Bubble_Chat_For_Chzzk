@@ -227,12 +227,38 @@ const ScreenEffectRegistry = {
 
                     const emojiContainer = overlay.querySelector('.heart-emoji');
 
-                    // Heart Animation Data (Cleaned)
-                    const personList = ['👨', '🧔', '👩', '👱‍♀️', '🧑', '👶', '🤵', '👸', '🎅', '🤶', '🦸', '🦹', '🥷', '🧟', '🧚', '🧞', '🧜', '🧛'];
-                    const heartList = ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💖', '💗', '💓', '💘', '💝'];
-                    const p1 = personList[Math.floor(Math.random() * personList.length)];
-                    const p2 = personList[Math.floor(Math.random() * personList.length)];
-                    const h3 = heartList[Math.floor(Math.random() * heartList.length)];
+                    // [Emoji Engine] Unicode 기반 무작위 추출기
+                    const getRandomFromRanges = (ranges) => {
+                        let total = 0;
+                        ranges.forEach(r => total += (r[1] - r[0] + 1));
+                        let randomIdx = Math.floor(Math.random() * total);
+                        for (let r of ranges) {
+                            let size = (r[1] - r[0] + 1);
+                            if (randomIdx < size) return String.fromCodePoint(r[0] + randomIdx);
+                            randomIdx -= size;
+                        }
+                        return String.fromCodePoint(ranges[0][0]);
+                    };
+
+                    // Expanded Unicode Ranges
+                    const personRanges = [
+                        [0x1F600, 0x1F64F], // Emoticons (Faces)
+                        [0x1F466, 0x1F480], // People (Boys, Girls, Men, Women)
+                        [0x1F9DC, 0x1F9DF], // Fantasy (Merperson, Elf, Genie, Zombie)
+                        [0x1F470, 0x1F478]  // Bride, Princess, Prince, etc.
+                    ];
+
+                    const heartRanges = [
+                        [0x1F493, 0x1F49F], // Beats, Broken, Sparkling Hearts
+                        [0x2764, 0x2764],   // Heavy Black Heart (Red)
+                        [0x1F9E1, 0x1F9E1], // Orange
+                        [0x1F90D, 0x1F90E], // White, Brown
+                        [0x1F48B, 0x1F48D]  // Kiss Mark, Love Letter, Ring
+                    ];
+
+                    const p1 = getRandomFromRanges(personRanges);
+                    const p2 = getRandomFromRanges(personRanges);
+                    const h3 = getRandomFromRanges(heartRanges);
 
                     const updateState = (step) => {
                         const hue = Math.floor(Math.random() * 360);
