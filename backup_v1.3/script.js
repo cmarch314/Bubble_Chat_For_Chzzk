@@ -118,117 +118,114 @@ function createHeartOverlay() {
 }
 createHeartOverlay();
 
-let isSkullActive = false;
-let isHeartActive = false;
+let globalVisualLock = false; // Global lock for all visual effects
 
-function triggerSkullEffect() {
-    if (isSkullActive || isHeartActive) return; // Prevent multiple overlapping triggers
-    isSkullActive = true;
+// [Visual Effect Registry] - 정의서만 추가하면 매니저가 자동으로 처리함
+const VisualEffects = {
+    skull: {
+        soundKey: "해골",
+        execute: (context = {}) => {
+            const overlay = document.getElementById('skull-overlay');
+            if (!overlay) return Promise.resolve();
 
-    // [Sound] Play immediately
-    if (soundEnabled) playZergSound(soundHive["해골"]);
+            // [NEW] Show raw message text in the center
+            const centerMsgSnippet = document.createElement('div');
+            centerMsgSnippet.className = 'visual-center-text';
+            centerMsgSnippet.innerText = context.message || "";
+            document.body.appendChild(centerMsgSnippet);
 
-    setTimeout(() => {
-        const overlay = document.getElementById('skull-overlay');
-        if (overlay) {
-            overlay.classList.add('visible');
-            setTimeout(() => {
-                overlay.classList.remove('visible');
-                isSkullActive = false; // Release lock
-            }, 8000); // 8 seconds visible
-        } else {
-            isSkullActive = false; // Release lock if overlay missing
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    // Remove center text and show skull
+                    if (centerMsgSnippet) centerMsgSnippet.remove();
+                    overlay.classList.add('visible');
+                    setTimeout(() => {
+                        overlay.classList.remove('visible');
+                        resolve(); // 효과 종료
+                    }, 8000);
+                }, 4000);
+            });
         }
-    }, 4000); // 4 seconds delay before overlay appears
-}
+    },
 
-function triggerHeartEffect() {
-    if (isSkullActive || isHeartActive) return;
-    isHeartActive = true;
+    heart: {
+        soundKey: "커플",
+        execute: () => {
+            const flashback = document.getElementById('flashback-overlay');
+            const overlay = document.getElementById('heart-overlay');
+            if (!flashback || !overlay) return Promise.resolve();
 
-    if (soundEnabled) playZergSound(soundHive["커플"]);
+            return new Promise(resolve => {
+                flashback.classList.add('visible');
+                setTimeout(() => {
+                    flashback.classList.remove('visible');
+                    overlay.classList.add('visible');
+                    const emojiContainer = overlay.querySelector('.heart-emoji');
 
-    // [Flashback Start]
-    const flashback = document.getElementById('flashback-overlay');
-    if (flashback) flashback.classList.add('visible');
+                    // Heart Animation Data (Cleaned)
+                    const personList = ['👨', '🧔', '👩', '👱‍♀️', '🧑', '👶', '🤵', '👸', '🎅', '🤶', '🦸', '🦹', '🥷', '🧟', '🧚', '🧞', '🧜', '🧛'];
+                    const heartList = ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💖', '💗', '💓', '💘', '💝'];
+                    const p1 = personList[Math.floor(Math.random() * personList.length)];
+                    const p2 = personList[Math.floor(Math.random() * personList.length)];
+                    const h3 = heartList[Math.floor(Math.random() * heartList.length)];
 
-    setTimeout(() => {
-        // [Flashback End]
-        if (flashback) flashback.classList.remove('visible');
+                    const updateState = (step) => {
+                        const hue = Math.floor(Math.random() * 360);
+                        overlay.style.backgroundColor = `hsla(${hue}, 100%, 70%, 0.3)`;
+                        emojiContainer.classList.remove('grow-effect');
+                        void emojiContainer.offsetWidth;
+                        emojiContainer.classList.add('grow-effect');
+                        emojiContainer.style.fontSize = (step === 3) ? '13rem' : '20rem';
+                        if (step === 0) emojiContainer.innerText = p1;
+                        else if (step === 1) emojiContainer.innerText = p2;
+                        else if (step === 2) emojiContainer.innerText = h3;
+                        else if (step === 3) emojiContainer.innerText = `${p1}${h3}${p2}`;
+                    };
 
-        const overlay = document.getElementById('heart-overlay');
-        if (overlay) {
-            overlay.classList.add('visible');
+                    updateState(0);
+                    setTimeout(() => updateState(1), 2250);
+                    setTimeout(() => updateState(2), 4500);
+                    setTimeout(() => updateState(3), 5625);
 
-            // [Sequence Data]
-            const personList = [
-                // Men
-                '👨', '🧔', '👨‍', '‍🦱', '👨', '🤵', '🤴', '🎅', '🧙‍♂️', '🧟‍♂️', '🧞‍♂️', '🧜‍♂️', '🧚‍♂️', '👮‍♂️', '👷‍♂️', '💂‍♂️', '🕵️‍♂️', '👨‍⚕️', '👨‍🌾', '👨‍🍳', '👨‍🎓', '👨‍🎤', '👨‍🏫', '👨‍🏭', '👨‍💻', '👨‍💼', '👨‍🔧', '👨‍🔬', '👨‍🎨', '👨‍🚒', '👨‍✈️', '👨‍🚀', '👨‍⚖️', '🕺', '🕴️', '🧗‍♂️', '🧘‍♂️', '🏌️‍♂️', '🏄‍♂️', '🏊‍♂️', '⛹️‍♂️', '🏋️‍♂️', '🚴‍♂️', '🚵‍♂️', '🤸‍♂️', '🤼‍♂️', '🤽‍♂️', '🤾‍♂️', '🤹‍♂️',
-                // Women
-                '👩', '👱‍♀️', '👩‍', '👩‍', '‍🦳', '👩‍', '👸', '🤶', '🤰', '🤱', '🧙‍♀️', '🧛‍♀️', '🧟‍♀️', '🧞‍♀️', '🧜‍♀️', '👮‍♀️', '👷‍♀️', '💂‍♀️', '🕵️‍♀️', '👩‍⚕️', '👩‍🌾', '👩‍🍳', '👩‍🎓', '👩‍🎤', '👩‍🏫', '👩‍🏭', '👩‍💻', '👩‍💼', '👩‍🔧', '👩‍🔬', '👩‍🎨', '👩‍🚒', '👩‍✈️', '👩‍🚀', '👩‍⚖️', '💃', '🧖‍♀️', '🧗‍♀️', '🧘‍♀️', '🏌️‍♀️', '🏄‍♀️', '🚣‍♀️', '🏊‍♀️', '⛹️‍♀️', '🏋️‍♀️', '🚴‍♀️', '🚵‍♀️', '🤸‍♀️', '🤼‍♀️', '🤽‍♀️', '🤾‍♀️', '🤹‍♀️',
-                // Others / Generic
-                '🧑', '🧒', '🧓', '👲', '👳', '👮', '👷', '💂', '🕵️', '🧑‍⚕️', '🧑‍🌾', '🧑‍🍳', '🧑‍🎓', '🧑‍🎤', '🧑‍🏫', '🧑‍🏭', '🧑‍💻', '🧑‍💼', '🧑‍🔧', '🧑‍🔬', '🧑‍🎨', '🧑‍🚒', '🧑‍✈️', '🧑‍🚀', '🧑‍⚖️', '🦸', '🦹', '🥷', '🧖', '🧗', '🛀', '🤺', '🏇', '⛷️', '🏂', '🏋️', '⛹️', '🧗', '🧟', '🧚', '👶'
-            ];
-            const heartList = ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❤️‍🔥', '❤️‍🩹', '💖', '💗', '💓', '💘', '💝'];
-
-            const p1 = personList[Math.floor(Math.random() * personList.length)];
-            const p2 = personList[Math.floor(Math.random() * personList.length)];
-            const h3 = heartList[Math.floor(Math.random() * heartList.length)];
-
-            const emojiContainer = overlay.querySelector('.heart-emoji');
-            let step = 0;
-
-            // [Sequence Logic] Variable Intervals
-            // Step 0 (Start): P1
-            // Step 1 (+2250ms): P2
-            // Step 2 (+2250ms -> 4500ms): H3
-            // Step 3 (+1125ms -> 5625ms): Combined
-            // End (+Remaining -> 9000ms): Cleanup
-
-            const updateState = (currentStep) => {
-                // Color Change
-                const hue = Math.floor(Math.random() * 360);
-                overlay.style.backgroundColor = `hsla(${hue}, 100%, 70%, 0.3)`;
-
-                // [Animation Reset]
-                emojiContainer.classList.remove('grow-effect');
-                void emojiContainer.offsetWidth;
-                emojiContainer.classList.add('grow-effect');
-
-                // Content Change
-                emojiContainer.style.fontSize = '20rem';
-                if (currentStep === 0) {
-                    emojiContainer.innerText = p1;
-                } else if (currentStep === 1) {
-                    emojiContainer.innerText = p2;
-                } else if (currentStep === 2) {
-                    emojiContainer.innerText = h3;
-                } else if (currentStep === 3) {
-                    emojiContainer.innerText = `${p1}${h3}${p2}`;
-                    emojiContainer.style.fontSize = '13rem';
-                }
-            };
-
-            // Execute Sequence
-            updateState(0); // T+0
-
-            setTimeout(() => { updateState(1); }, 2250); // T+2250
-            setTimeout(() => { updateState(2); }, 4500); // T+4500 (2250+2250)
-            setTimeout(() => { updateState(3); }, 5625); // T+5625 (4500+1125)
-
-            // Cleanup at T+9000
-            setTimeout(() => {
-                overlay.style.backgroundColor = '';
-                overlay.classList.remove('visible');
-                emojiContainer.innerText = '❤️‍🩹';
-                emojiContainer.style.fontSize = '';
-                isHeartActive = false;
-            }, 9000);
-        } else {
-            isHeartActive = false;
+                    setTimeout(() => {
+                        overlay.style.backgroundColor = '';
+                        overlay.classList.remove('visible');
+                        emojiContainer.innerText = '❤️‍🩹';
+                        emojiContainer.style.fontSize = '';
+                        resolve();
+                    }, 9000);
+                }, 11600);
+            });
         }
-    }, 11600); // 11.6 seconds delay
-}
+    }
+};
+
+// [Visual Effect Manager] - 중앙 통제 장치
+const VisualEffectManager = {
+    async trigger(effectType, context = {}) {
+        if (globalVisualLock) return;
+        const effect = VisualEffects[effectType];
+        if (!effect) return;
+
+        globalVisualLock = true;
+        console.log(`🎬 Triggering Visual Effect: ${effectType}`);
+
+        // 1. 소리 재생
+        if (soundEnabled && effect.soundKey) {
+            playZergSound(soundHive[effect.soundKey]);
+        }
+
+        // 2. 효과 실행
+        try {
+            await effect.execute(context);
+        } catch (e) {
+            console.error("Effect Execution Failed:", e);
+        } finally {
+            globalVisualLock = false;
+            console.log(`✅ Visual Effect Finished: ${effectType}`);
+        }
+    }
+};
 
 // ==========================================
 // [1] Chzzk Connection Logic (Replaces tmi.client)
@@ -515,10 +512,12 @@ function showPrompt({ chan, type, message = '', data = {}, timeout = 35000, attr
     // the user wants "minimal changes" so leaving the function there is safer than deleting it.
     // Proceeding to showMessage which is the core.
 }
-// [오버마인드의 음향 저장소]
-let soundHive = {};
 // [오버마인드의 시각 효과 저장소]
 let visualConfig = {};
+
+// [중복 실행 방지 잠금 장치]
+const activeSoundLocks = new Set();
+const activeVisualLocks = new Set();
 
 function updateSoundHive(config) {
     soundHive = {}; // Reset
@@ -561,12 +560,13 @@ function loadConfigs() {
 
 loadConfigs(); // Init on startup
 
-// 소리 재생을 담당하는 중추 함수
-function playZergSound(fileName) {
+// 소리 재생을 담당하는 중추 함수 (중복 방지 강화)
+function playZergSound(fileName, keyword = null) {
     if (!soundEnabled) return;
 
-    // [FIX] Absolute path resolution for OBS Browser Source compatibility
-    // Resolves file names relative to the index.html location
+    // 만약 특정 키워드로 잠금이 걸려있다면 재생하지 않음
+    if (keyword && activeSoundLocks.has(keyword)) return;
+
     let finalUrl;
     try {
         finalUrl = new URL(fileName, window.location.href).href;
@@ -579,11 +579,22 @@ function playZergSound(fileName) {
 
     const audio = new Audio(finalUrl);
     audio.volume = 0.5;
-    audio.play().catch(e => {
+
+    // 잠금 설정
+    if (keyword) activeSoundLocks.add(keyword);
+
+    audio.play().then(() => {
+        // 재생이 끝나면 잠금 해제
+        audio.onended = () => {
+            if (keyword) activeSoundLocks.delete(keyword);
+            console.log(`🔇 Sound finished, lock released: ${keyword}`);
+        };
+    }).catch(e => {
         console.error("❌ Audio playback failed:", e.message, "| Path:", finalUrl);
+        if (keyword) activeSoundLocks.delete(keyword); // 에러 발생 시에도 잠금 해제
     });
 }
-function showMessage({ chan, type, message = '', data = {}, timeout = 6500, attribs = {} } = {}) {
+function showMessage({ chan, type, message = '', data = {}, timeout = 10000, attribs = {} } = {}) {
     let nameBox = document.createElement('div');
     let chatBox = document.createElement('div');
     let chatLine_ = document.createElement('div');
@@ -629,23 +640,24 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 6500, attr
         }
     }
 
-    // [Visual Effect Trigger - Dynamic]
-    // Uses global 'visualConfig' loaded at startup
+    // [Visual Effect Trigger - Dynamic] (중복 방지 및 상호 간섭 방지 적용)
     const normMessage = message.normalize('NFC');
 
     Object.keys(visualConfig).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
-        if (normMessage.includes(normKey)) {
+        // [REFINE] Only trigger if the message starts with the keyword (trimmed)
+        if (normMessage.trim().startsWith(normKey)) {
+            // 비주얼 효과 통합 관리자를 통해 실행
             const effectType = visualConfig[keyword];
-            if (effectType === 'skull') triggerSkullEffect();
-            if (effectType === 'heart') triggerHeartEffect();
+            VisualEffectManager.trigger(effectType, { message: message });
         }
     });
 
     Object.keys(soundHive).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
         if (normMessage.includes(normKey)) {
-            playZergSound(soundHive[keyword]);
+            // playZergSound 내부에서 activeSoundLocks 처리를 수행함
+            playZergSound(soundHive[keyword], normKey);
         }
     });
 
@@ -804,14 +816,16 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 6500, attr
         messageEle.style.whiteSpace = "nowrap";
 
         messageEle.innerText = message;
-        // [FIX] Fixed starting position for tower effect
-        chatBox.style.left = "50%";
-        chatBox.style.transform = "translateX(-50%)"; // Center alignment
-        chatBox.style.bottom = "1300px";
+        // [FIX] Use TOP-left baseline for intuitive downward movement
+        chatBox.style.left = "0";
+        chatBox.style.top = "0";
+        chatBox.style.bottom = "auto";
+        chatBox.style.transform = "none";
+
         chatBox.style.animationName = "slideDiagonal";
         chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationTimingFunction = "cubic-bezier(0.310, 0.440, 0.445, 1.650)";
-        chatBox.style.animationDuration = "8s";
+        chatBox.style.animationTimingFunction = "linear";
+        chatBox.style.animationDuration = "3s";
         chatBox.style.animationFillMode = "forwards";
         messageEle.style.fontSize = "2.5em";
         messageEle.style.position = "middle";

@@ -374,12 +374,18 @@ p {
 
 @keyframes slideDiagonal {
   0% {
-    transform: translate(-800px, 200px)scale(0.01) rotate(0deg);
+    /* 왼쪽 상단 구석 위쪽에서 대기 */
+    transform: translate(-1100px, -1800px) scale(0.1) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
   }
 
   100% {
-    transform: translate(1600px, 1000px) scale(1.5) rotate(0deg);
-    /* 화면을 가로질러 쭉 내려감 */
+    /* 오른쪽 하단 너머로 시원하게 퇴장 */
+    transform: translate(3000px, 200px) scale(1.5) rotate(0deg);
   }
 }
 
@@ -1247,5 +1253,35 @@ p {
 
   100% {
     transform: scale(1) skew(0deg);
+  }
+}
+
+/* [New] Giant Center Text for Visual Effects (Initial Delay) */
+.visual-center-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8rem;
+  font-weight: 900;
+  color: white;
+  text-shadow:
+    0 0 20px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(255, 255, 255, 0.4);
+  z-index: 10000;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: pulseFade 1s infinite alternate;
+}
+
+@keyframes pulseFade {
+  from {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
   }
 }

@@ -447,14 +447,14 @@
             </div>
 
             <!-- Permanence Section -->
+            <!-- Permanence Section -->
             <div class="config-section">
-                <div class="config-header">💾 Permanence (index.html)</div>
+                <div class="config-header">💾 설정 변경사항 저장하기 (config.js)</div>
                 <p style="font-size: 0.85rem; color: #888; line-height: 1.5; margin-bottom: 15px;">
-                    Browser cache may clear. Click below to generate code, then copy it into your <b>index.html</b>
-                    <code>&lt;script&gt;</code> tag.
+                    변경한 내용을 영구적으로 적용하려면, 아래 버튼을 눌러 생성된 코드를 복사한 뒤 <b>config.js</b> 파일을 덮어써 저장해주세요.
                 </p>
-                <button onclick="exportConfig()" class="secondary" style="width:100%; letter-spacing: 1px;">GENERATE
-                    OVERWRITE CODE</button>
+                <button onclick="exportConfig()" class="secondary" style="width:100%; letter-spacing: 1px;">저장하기 (덮어쓰기
+                    필수)</button>
                 <textarea id="configExport" style="display:none;" readonly></textarea>
             </div>
         </div>
@@ -507,9 +507,18 @@
 
         async function loadFromIndexHtml() {
             try {
-                const res = await fetch('index.html');
+                const res = await fetch('config.js');
                 if (res.ok) {
-                    const html = await res.text();
+                    const js = await res.text();
+                    // We don't necessarily need to parse it here as config.js 
+                    // is already loaded by this page's script tag theoretically, 
+                    // but we check for sync-ability or ID if index.html is needed.
+                }
+
+                // Keep ID sync from index.html specifically
+                const indexRes = await fetch('index.html');
+                if (indexRes.ok) {
+                    const html = await indexRes.text();
                     const doc = new DOMParser().parseFromString(html, 'text/html');
                     const idEl = doc.getElementById('id');
                     if (idEl) {
@@ -517,7 +526,7 @@
                         if (foundId) updateIdDisplay(foundId, "Sync");
                     }
                 }
-            } catch (e) { console.warn("Index fallback failed"); }
+            } catch (e) { console.warn("Sync fallback failed"); }
         }
 
         function updateIdDisplay(id, source) {
@@ -620,11 +629,19 @@
         }
 
         function exportConfig() {
-            const area = document.getElementById('configExport');
-            area.value = `window.HIVE_SOUND_CONFIG = ${JSON.stringify(soundConfig, null, 4)};\nwindow.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
-            area.style.display = 'block';
-            area.select();
-            statusDiv.innerText = "Code Exported Successfully!";
+            const code = `// [Config Logic] Centralized Configuration for BubbleChat\n// You can manually edit this file or overwrite it using the Export function in config.html\n\nwindow.HIVE_SOUND_CONFIG = ${JSON.stringify(soundConfig, null, 4)};\n\nwindow.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
+
+            const blob = new Blob([code], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'config.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            statusDiv.innerText = "config.js 다운로드 완료! 파일을 덮어씌워 주세요.";
         }
 
         // Utils
