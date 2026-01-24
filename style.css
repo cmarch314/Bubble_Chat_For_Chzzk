@@ -3008,7 +3008,7 @@ p {
   z-index: 2147483647 !important;
   left: 50%;
   transform: translate(-50%, 100vh);
-  animation: leadJump 3s cubic-bezier(0.1, 0.6, 0.4, 1) forwards;
+  animation: leadWild 15s cubic-bezier(0.1, 0.6, 0.4, 1) forwards;
   opacity: 1 !important;
   visibility: visible !important;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
@@ -3016,16 +3016,16 @@ p {
 
 .surfer-actor {
   position: absolute;
-  font-size: 8rem !important;
+  font-size: 10rem !important;
   z-index: 2147483646 !important;
-  animation: surferGlide 10s linear forwards;
+  animation: surferGlide 30s linear forwards;
   opacity: 1 !important;
   visibility: visible !important;
 }
 
 .sea-jump {
   position: absolute;
-  font-size: 5rem !important;
+  font-size: 7rem !important;
   z-index: 2147483645 !important;
   animation: seaJumpArc 4s linear forwards;
   opacity: 1 !important;
@@ -3047,6 +3047,50 @@ p {
   visibility: visible !important;
 }
 
+/* [NEW] Bottom Sea & Waves */
+.dolphin-sea-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 25vh;
+  background: linear-gradient(to bottom, rgba(0, 150, 255, 0.6), rgba(0, 0, 139, 0.8));
+  z-index: 2147483641 !important;
+  /* Behind actors (..44-47), above base */
+  overflow: visible;
+}
+
+.sea-wave {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: 200%;
+  height: 40px;
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%230096FF" fill-opacity="0.6"/></svg>');
+  background-size: 50% 100%;
+  animation: waveFlow 10s linear infinite, waveBob 3s ease-in-out infinite alternate;
+}
+
+@keyframes waveFlow {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes waveBob {
+  0% {
+    top: -25px;
+  }
+
+  100% {
+    top: -15px;
+  }
+}
+
 .dolphin-text {
   position: fixed;
   bottom: 15%;
@@ -3057,29 +3101,64 @@ p {
   text-shadow: 0 0 10px blue, 0 0 20px #00ffff;
   z-index: 2147483647 !important;
   font-family: 'CookieRun-Regular', sans-serif;
-  white-space: nowrap;
+  white-space: pre-wrap;
+  text-align: center;
+  line-height: 1.2;
   animation: fadeIn 0.5s forwards;
 }
 
-@keyframes leadJump {
+@keyframes leadWild {
   0% {
-    transform: translate(-50%, 100vh) rotate(-20deg);
+    transform: translate(-50%, 100vh) rotate(0deg);
+  }
+
+  5% {
+    transform: translate(-50%, 40vh) rotate(-80deg);
+  }
+
+  10% {
+    transform: translate(-110%, 15vh) rotate(-180deg);
+  }
+
+  15% {
+    transform: translate(-10%, 70vh) rotate(120deg);
+  }
+
+  20% {
+    transform: translate(-50%, 5vh) rotate(270deg) scale(1.1);
+  }
+
+  30% {
+    transform: translate(-110%, 90vh) rotate(-200deg);
   }
 
   40% {
-    transform: translate(-50%, -10vh) rotate(-10deg);
+    transform: translate(-10%, 10vh) rotate(400deg);
   }
 
   50% {
-    transform: translate(-50%, -15vh) rotate(0deg);
+    transform: translate(-50%, 60vh) rotate(540deg) scale(1.2);
   }
 
+  /* Flip */
   60% {
-    transform: translate(-50%, -10vh) rotate(10deg);
+    transform: translate(-110%, 25vh) rotate(320deg);
+  }
+
+  70% {
+    transform: translate(-10%, 85vh) rotate(720deg);
+  }
+
+  80% {
+    transform: translate(-50%, 5vh) rotate(-450deg) scale(1.1);
+  }
+
+  90% {
+    transform: translate(-50%, 75vh) rotate(180deg);
   }
 
   100% {
-    transform: translate(-50%, 100vh) rotate(40deg);
+    transform: translate(-50%, 100vh) rotate(360deg);
   }
 }
 
@@ -3093,25 +3172,29 @@ p {
   }
 }
 
+/* [MODIFIED] Jump Height to 50vh with Parabolic Arch & Directional Scale */
 @keyframes seaJumpArc {
   0% {
-    transform: translate(var(--sx), 100vh) rotate(var(--sr));
+    transform: translate(var(--sx), 100vh) rotate(var(--sr)) scaleX(var(--sc));
   }
 
   25% {
-    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.25), 0vh) rotate(var(--mr));
+    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.25), 60vh) rotate(var(--mr)) scaleX(var(--sc));
   }
 
+  /* 60vh for smoother curve */
   50% {
-    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.5), -10vh) rotate(0deg);
+    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.5), 50vh) rotate(0deg) scaleX(var(--sc));
   }
 
+  /* Peak at 50vh */
   75% {
-    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.75), 0vh) rotate(var(--mr));
+    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.75), 60vh) rotate(var(--mr)) scaleX(var(--sc));
   }
 
+  /* 60vh for smoother curve */
   100% {
-    transform: translate(var(--ex), 100vh) rotate(var(--er));
+    transform: translate(var(--ex), 100vh) rotate(var(--er)) scaleX(var(--sc));
   }
 }
 
@@ -3132,5 +3215,62 @@ p {
   100% {
     opacity: 0;
     transform: translate(var(--x-end), var(--y-end)) rotate(var(--r-end));
+  }
+}
+
+/* [NEW] Party Lighting Effect */
+.dolphin-light {
+  position: absolute;
+  top: -100px;
+  width: 100vw;
+  height: 500vh;
+  z-index: 2147483642;
+  /* Above sea, behind actors */
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+.dolphin-light-left {
+  left: -3vw;
+  background: conic-gradient(from 125deg at top left, transparent 0deg, rgba(255, 0, 255, 0.7) 20deg, rgba(0, 255, 255, 0.7) 40deg, transparent 60deg);
+  transform-origin: top left;
+  animation: lightColorShift 8s linear infinite;
+}
+
+.dolphin-light-right {
+  right: -3vw;
+  background: conic-gradient(from 175deg at top right, transparent 0deg, rgba(255, 255, 0, 0.7) 20deg, rgba(0, 255, 0, 0.7) 40deg, transparent 60deg);
+  transform-origin: top right;
+  animation: lightColorShift 8s linear infinite;
+}
+
+@keyframes lightSwayLeft {
+  0% {
+    transform: rotate(-5deg);
+  }
+
+  100% {
+    transform: rotate(15deg);
+  }
+}
+
+@keyframes lightSwayRight {
+  0% {
+    transform: rotate(5deg);
+  }
+
+  100% {
+    transform: rotate(-15deg);
+  }
+}
+
+@keyframes lightColorShift {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+
+  100% {
+    filter: hue-rotate(360deg);
   }
 }

@@ -349,9 +349,13 @@ const ScreenEffectRegistry = {
             const id = 'dolphin-overlay-root';
             let ov = document.getElementById(id); if (ov) ov.remove();
             ov = document.createElement('div'); ov.id = id;
-            // [Background Removed] Simple transparent overlay
+            // [Background Removed] Simple transparent overlay but with Bottom Sea
             ov.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483640; pointer-events:none; transition:opacity 0.5s;";
-            ov.innerHTML = `<div id="dolphin-overlay" class="visible"></div>`;
+            ov.innerHTML = `<div id="dolphin-overlay" class="visible">
+                <div class="dolphin-light dolphin-light-left"></div>
+                <div class="dolphin-light dolphin-light-right"></div>
+                <div class="dolphin-sea-bottom"><div class="sea-wave"></div></div>
+            </div>`;
             document.body.appendChild(ov);
 
             const overlayContainer = ov.querySelector('#dolphin-overlay');
@@ -376,31 +380,66 @@ const ScreenEffectRegistry = {
                 }
 
                 overlayContainer.appendChild(el);
-                // Randomize z-index slightly to avoid flat look, but keep high
-                el.style.zIndex = Math.floor(2147483640 + Math.random() * 10);
+
+                // [FIX] Randomize z-index for extras only. Lead Dolphin must stay top!
+                if (type !== 'lead-dolphin') {
+                    // Randomize z-index slightly to avoid flat look
+                    el.style.zIndex = Math.floor(2147483640 + Math.random() * 10);
+                }
+
                 setTimeout(() => el.remove(), opts.duration || 5000);
             };
 
             // 1. Surfer
-            spawnActor('surfer-actor', "🏄", { duration: 10000 });
+            spawnActor('surfer-actor', "🏄", { duration: 21000 }); // Lasts full duration
 
-            // 2. Extra Fish (Sea Jump)
-            const seaCreatures = ["🐬", "🐳", "🐡", "🐠", "🐟"];
-            for (let i = 0; i < 20; i++) {
+            // 2. Sea Jump
+            const seaCreatures = ["🐋", "🐳", "🦈", "🦭"];
+            for (let i = 0; i < 7; i++) {
+                // [MODIFIED] Random Timing & Symmetric Spawning
+                const randomDelay = Math.random() * 20000 + 500; // Spread over 20s
                 setTimeout(() => {
-                    const fromLeft = Math.random() > 0.5;
+                    // Start from Left if even index, Right if odd (Symmetry)
+                    const fromLeft = (i % 2 === 0);
                     const sx = fromLeft ? '-10vw' : '110vw';
                     const ex = fromLeft ? '110vw' : '-10vw';
+
+                    // [Natural Rotation Logic]
+                    // If moving Left->Right (fromLeft): Flip X (Nose Right), Rotate -45 (Up-Right) -> 45 (Down-Right)
+                    // If moving Right->Left: Nose Left, Rotate 45 (Up-Left) -> -45 (Down-Left)
+                    const sc = fromLeft ? '-1' : '1';
+
+                    // [NEW] Random chance for extreme rotation (30% chance)
+                    const isWildSpin = Math.random() < 0.3;
+                    let sr, er;
+
+                    if (isWildSpin) {
+                        // Extreme rotation: 360-720 degrees of spinning!
+                        const spinAmount = 360 + Math.random() * 360; // 360-720 degrees
+                        const direction = Math.random() < 0.5 ? 1 : -1;
+                        sr = fromLeft ? `${-45 * direction}deg` : `${45 * direction}deg`;
+                        er = fromLeft ? `${spinAmount * direction}deg` : `${-spinAmount * direction}deg`;
+                    } else {
+                        // Normal rotation
+                        sr = fromLeft ? '-45deg' : '45deg';
+                        er = fromLeft ? '45deg' : '-45deg';
+                    }
+
                     spawnActor('sea-jump', seaCreatures[Math.floor(Math.random() * seaCreatures.length)], {
                         duration: 4000,
-                        styles: { '--sx': sx, '--ex': ex, '--sr': '-45deg', '--er': '45deg', '--mr': '0deg' }
+                        styles: {
+                            '--sx': sx, '--ex': ex,
+                            '--sr': sr, '--er': er, '--mr': '0deg',
+                            '--sc': sc
+                        }
                     });
-                }, i * 800);
+                }, randomDelay);
             }
 
             // 3. [NEW] More Extras (Floating Marine Life)
-            const extraEmojis = ["🦞", "🦀", "🦑", "🐙", "🦐", "🦪", "🐋"];
-            for (let i = 0; i < 25; i++) { // Increased count slightly
+            const extraEmojis = ["🦞", "🦀", "🦑", "🐙", "🦐", "🦪"];
+            for (let i = 0; i < 40; i++) { // Increased count for better density over 21s
+                const randomDelay = Math.random() * 19000; // Spread spawning over 19s
                 setTimeout(() => {
                     const emoji = extraEmojis[Math.floor(Math.random() * extraEmojis.length)];
 
@@ -434,16 +473,38 @@ const ScreenEffectRegistry = {
                             '--r-end': rotEnd
                         }
                     });
-                }, i * 400); // Stagger spawning
+                }, randomDelay);
             }
 
             // 4. Lead Dolphin (Center)
-            setTimeout(() => { spawnActor('lead-dolphin', "🐬", { duration: 5000 }); }, 13000);
+            // [MODIFIED] Spawn earlier at 6s, lasts 15s (Wild Mode)
+            setTimeout(() => { spawnActor('lead-dolphin', "🐬", { duration: 15000 }); }, 6000);
 
             // 5. Message
             let msg = (context.message || "").trim(); if (msg.startsWith("돌핀")) msg = msg.substring(2).trim();
+
+            // [Smart Text Wrapping]
+            if (msg.length > 25) {
+                const limit = 25;
+                const sub = msg.substring(0, limit);
+                const lastSpace = sub.lastIndexOf(" ");
+
+                if (lastSpace !== -1) {
+                    // Split at the last space within the limit
+                    msg = msg.substring(0, lastSpace) + "<br>" + msg.substring(lastSpace + 1);
+                } else {
+                    // Fallback: Force split at the limit if no space found
+                    msg = msg.substring(0, limit) + "<br>" + msg.substring(limit);
+                }
+            }
+
             if (msg) {
-                const txt = document.createElement('div'); txt.className = 'dolphin-text'; txt.innerText = msg; overlayContainer.appendChild(txt);
+                setTimeout(() => {
+                    const txt = document.createElement('div');
+                    txt.className = 'dolphin-text';
+                    txt.innerHTML = msg; // Use innerHTML for <br> support
+                    overlayContainer.appendChild(txt);
+                }, 6000);
             }
 
             return new Promise(resolve => {
@@ -451,7 +512,7 @@ const ScreenEffectRegistry = {
                 setTimeout(() => {
                     ov.style.opacity = '0';
                     setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 2000);
-                }, 19000);
+                }, 21000);
             });
         }
     }
