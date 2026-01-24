@@ -1396,7 +1396,7 @@ p {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-size: 4rem;
+  font-size: 7rem;
   font-weight: bold;
   text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #00ffff;
   z-index: 2147483647;
