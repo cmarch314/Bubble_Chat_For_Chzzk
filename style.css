@@ -1272,9 +1272,11 @@ p {
 
 /* [New] Skull-Specific Slam Effect */
 .visual-center-text.skull-style {
-  font-size: 8rem;
+  font-size: 5rem;
   font-weight: 900;
   text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px black;
+  white-space: nowrap;
+  /* Force browser to respect JS line breaks */
   animation: slamText 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
