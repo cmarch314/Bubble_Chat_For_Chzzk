@@ -176,16 +176,57 @@ const VisualEffects = {
 
     heart: {
         soundKey: "커플",
-        execute: () => {
+        execute: (context = {}) => {
             const flashback = document.getElementById('flashback-overlay');
             const overlay = document.getElementById('heart-overlay');
             if (!flashback || !overlay) return Promise.resolve();
 
+            // [Text Logic]
+            const centerMsgSnippet = document.createElement('div');
+            centerMsgSnippet.className = 'visual-center-text heart-style';
+            let displayMsg = (context.message || "").trim();
+
+            const triggerKw = "커플";
+            if (displayMsg.startsWith(triggerKw)) {
+                displayMsg = displayMsg.substring(triggerKw.length).trim();
+            }
+
+            const words = displayMsg.split(' ');
+            let lines = [];
+            let currentLine = words[0] || "";
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                if ((currentLine + " " + word).length <= 20) {
+                    currentLine += " " + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            if (currentLine) lines.push(currentLine);
+            centerMsgSnippet.innerHTML = lines.join('<br>');
+            centerMsgSnippet.style.animation = "fadeIn 1s forwards"; // Start Fade In
+
+            document.body.appendChild(centerMsgSnippet);
+
             return new Promise(resolve => {
                 flashback.classList.add('visible');
+
+                // Timeline: 
+                // 0s: Text Fade In Start
+                // 3s: Text Fade Out Start
+                // 4s: Text Remove, Heart Emoji Start
+
                 setTimeout(() => {
+                    centerMsgSnippet.style.animation = "fadeOut 1s forwards"; // Start Fade Out
+                }, 3000);
+
+                setTimeout(() => {
+                    if (centerMsgSnippet) centerMsgSnippet.remove(); // Cleanup Text
                     flashback.classList.remove('visible');
-                    overlay.classList.add('visible');
+                    overlay.classList.add('visible'); // Start Emoji Sequence
+
                     const emojiContainer = overlay.querySelector('.heart-emoji');
 
                     // Heart Animation Data (Cleaned)
@@ -220,7 +261,7 @@ const VisualEffects = {
                         emojiContainer.style.fontSize = '';
                         resolve();
                     }, 9000);
-                }, 11600);
+                }, 4000); // 4s total wait before visuals (3s read + 1s fade)
             });
         }
     }

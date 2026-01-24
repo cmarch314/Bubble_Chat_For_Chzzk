@@ -1298,3 +1298,33 @@ p {
     opacity: 1;
   }
 }
+
+/* [New] Heart-Specific Text Style */
+.visual-center-text.heart-style {
+  font-size: 5rem;
+  font-weight: 900;
+  color: #ff69b4;
+  /* Hot Pink */
+  text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px white;
+  white-space: nowrap;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
