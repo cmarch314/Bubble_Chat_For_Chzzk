@@ -140,14 +140,14 @@ const VisualEffects = {
                 displayMsg = displayMsg.substring(triggerKw.length).trim();
             }
 
-            // 2. Word Wrap Logic (Max 15 chars per line)
+            // 2. Word Wrap Logic (Max 20 chars per line)
             const words = displayMsg.split(' ');
             let lines = [];
             let currentLine = words[0] || "";
 
             for (let i = 1; i < words.length; i++) {
                 const word = words[i];
-                if ((currentLine + " " + word).length <= 15) {
+                if ((currentLine + " " + word).length <= 20) {
                     currentLine += " " + word;
                 } else {
                     lines.push(currentLine);
