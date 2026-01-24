@@ -39,7 +39,6 @@ window.HIVE_SOUND_CONFIG = {
     // [Commands & Others]
     "배운다": "Learing.mp3",
     "운동": "workouthard.mp3",
-    "유격": "MohyungTower.mp3",
     "!유격": "MohyungTower.mp3",
     "홋치": "whip.mp3"
 };
