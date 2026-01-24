@@ -371,10 +371,12 @@ const ScreenEffectRegistry = {
                             shard.style.setProperty('--ty', flyY);
                             shard.style.setProperty('--rot', rot);
 
-                            shard.style.animation = `shardFly 1.2s ease-out forwards`;
+                            // Random duration for different falling speeds (1.5s ~ 3.5s)
+                            const duration = 1.5 + Math.random() * 2;
+                            shard.style.animation = `shardFly ${duration}s ease-out forwards`;
                             overlay.appendChild(shard);
 
-                            setTimeout(() => shard.remove(), 1200);
+                            setTimeout(() => shard.remove(), duration * 1000);
                         }
                     });
 
