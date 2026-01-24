@@ -1439,7 +1439,10 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         messageEle.style.fontSize = 3.0 + "em";
         messageEle.style.position = "middle";
         messageEle.style.textAlign = "center";
-        messageEle.innerText = "))";
+
+        // [FIX] Conserve original message content
+        // messageEle.innerText = "))"; // Removed to keep user text
+
         messageEle.style.animationName = "hipDance";
         messageEle.style.animationIterationCount = 5;
         messageEle.style.animationDuration = "1.8s";
@@ -1489,7 +1492,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationFillMode = "forwards";
     }
-    else if ((includesAny(["덜렁덜렁", "ㄷㄹㄷㄹ", "출렁출렁", "덜렁"], message))) {
+    else if (includesAny(["덜렁덜렁", "ㄷㄹㄷㄹ", "출렁출렁", "덜렁"], message)) {
         chatBox.style.animationName = "balls";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationDuration = "2s";

@@ -11,6 +11,7 @@ window.HIVE_SOUND_CONFIG = {
     "하트": "Heart.mp3",
 
     // [Reactions & Memes]
+    "ㅋㅋㅋ": "Laugh5.mp3",
     "ㅋㅋㅋㅋㅋ": "Laugh.mp3",
     "ㅋㅋㅋㅋㅋㅋ": "Laugh4.mp3",
     "아하하": "Laugh3.mp3",
@@ -91,7 +92,6 @@ window.HIVE_SOUND_CONFIG = {
     "끼얏호": "Yiaho.mp3",
     "헬로": "Hello1.mp3",
     "안녕하세요": "Hello2.mp3",
-    "ㅋㅋㅋ": "Laugh5.mp3",
 
     // [New Mappings - Batch 4]
     "내눈": "AhMyEyes.mp3",
