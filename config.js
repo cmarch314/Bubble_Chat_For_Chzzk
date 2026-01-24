@@ -45,5 +45,6 @@ window.HIVE_SOUND_CONFIG = {
 
 window.HIVE_VISUAL_CONFIG = {
     "해골": "skull",
-    "커플": "heart"
+    "커플": "heart",
+    "폭풍": "storm"
 };
