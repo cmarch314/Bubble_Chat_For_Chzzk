@@ -371,10 +371,10 @@ const ScreenEffectRegistry = {
                             shard.style.setProperty('--ty', flyY);
                             shard.style.setProperty('--rot', rot);
 
-                            shard.style.animation = `shardFly 0.8s ease-out forwards`;
+                            shard.style.animation = `shardFly 1.2s ease-out forwards`;
                             overlay.appendChild(shard);
 
-                            setTimeout(() => shard.remove(), 1000);
+                            setTimeout(() => shard.remove(), 1200);
                         }
                     });
 

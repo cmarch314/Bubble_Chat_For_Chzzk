@@ -1426,8 +1426,15 @@ p {
     opacity: 1;
   }
 
+  30% {
+    /* Initial burst from shatter */
+    transform: translate(var(--tx), var(--ty)) rotate(calc(var(--rot) * 0.3));
+    opacity: 1;
+  }
+
   100% {
-    transform: translate(var(--tx), var(--ty)) rotate(var(--rot));
+    /* Fall down by gravity */
+    transform: translate(var(--tx), calc(var(--ty) + 800px)) rotate(var(--rot));
     opacity: 0;
   }
 }
