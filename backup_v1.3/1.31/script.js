@@ -118,10 +118,8 @@ function createHeartOverlay() {
 }
 createHeartOverlay();
 
-let globalVisualLock = false; // Global lock for all visual effects
-
-// [Visual Effect Registry] - 정의서만 추가하면 매니저가 자동으로 처리함
-const VisualEffects = {
+// [Screen Effect Registry] - 정의서만 추가하면 매니저가 자동으로 처리함
+const ScreenEffectRegistry = {
     skull: {
         soundKey: "해골",
         execute: (context = {}) => {
@@ -216,7 +214,7 @@ const VisualEffects = {
                 // Timeline: 
                 // 0s: Text Fade In Start
                 // Emoji Start: 11800ms
-                // Text Fade Out Start: 11800ms - 1000ms (Gap) - 1000ms (Fade Duration) = 9800ms
+                // Text Fade Out Start: 11800ms - 1000ms (Gap) - 1000ms (Fade Duration) = 10300ms
 
                 setTimeout(() => {
                     centerMsgSnippet.style.animation = "fadeOut 1s forwards"; // Start Fade Out
@@ -267,30 +265,45 @@ const VisualEffects = {
     }
 };
 
-// [Visual Effect Manager] - 중앙 통제 장치
-const VisualEffectManager = {
-    async trigger(effectType, context = {}) {
-        if (globalVisualLock) return;
-        const effect = VisualEffects[effectType];
+// [Screen Effect Manager] - 큐(Queue) 시스템 적용
+const ScreenEffectManager = {
+    queue: [],
+    isLocked: false,
+
+    trigger(effectType, context = {}) {
+        const effect = ScreenEffectRegistry[effectType];
         if (!effect) return;
 
-        globalVisualLock = true;
-        console.log(`🎬 Triggering Visual Effect: ${effectType}`);
+        console.log(`📥 Queuing Visual Effect: ${effectType}`);
+        this.queue.push({ effect, context });
+        this._processNext();
+    },
 
-        // 1. 소리 재생
+    async _processNext() {
+        if (this.isLocked || this.queue.length === 0) return;
+
+        this.isLocked = true;
+        const current = this.queue.shift();
+        const { effect, context } = current;
+
+        // 1. Sound
         if (soundEnabled && effect.soundKey) {
             playZergSound(soundHive[effect.soundKey]);
         }
 
-        // 2. 효과 실행
+        // 2. Visual Execution
         try {
             await effect.execute(context);
         } catch (e) {
-            console.error("Effect Execution Failed:", e);
-        } finally {
-            globalVisualLock = false;
-            console.log(`✅ Visual Effect Finished: ${effectType}`);
+            console.error("Visual Effect Failure:", e);
         }
+
+        // 3. Cool-down (1s)
+        await new Promise(r => setTimeout(r, 1000));
+
+        // 4. Release Lock & Recurse
+        this.isLocked = false;
+        this._processNext();
     }
 };
 
@@ -715,10 +728,13 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         const normKey = keyword.normalize('NFC');
         // [REFINE] Only trigger if the message starts with the keyword (trimmed)
         if (normMessage.trim().startsWith(normKey)) {
-            // 비주얼 효과 통합 관리자를 통해 실행
+            // Screen Effect Manager를 통해 대기열 등록
             const effectType = visualConfig[keyword];
-            VisualEffectManager.trigger(effectType, { message: message });
-            isVisualCommand = true;
+            // Check if effect exists in new Registry
+            if (typeof ScreenEffectRegistry !== 'undefined' && ScreenEffectRegistry[effectType]) {
+                ScreenEffectManager.trigger(effectType, { message: message });
+                isVisualCommand = true;
+            }
         }
     });
 
