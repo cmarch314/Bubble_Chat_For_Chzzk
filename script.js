@@ -22,6 +22,7 @@ const chatEleSub = document.getElementById('chatSub');
   - Bypassed 'showPrompt' (Star Wars)
   - Fixed 'Narak' text truncation
   - Fixed animation lag
+  - Fixed Vergil Effect (7.2s shatter, fade out slashes)
 */
 
 const twitchBadgeCache = { data: { global: {} } };
@@ -230,7 +231,7 @@ const ScreenEffectRegistry = {
                     // [Emoji Engine] Unicode 기반 무작위 추출기
                     const getRandomFromRanges = (ranges) => {
                         let total = 0;
-                        ranges.forEach(r => total += (r[1] - r[0] + 1));
+                        ranges.forEach(r => total += (r[1] - r[0] + 0));
                         let randomIdx = Math.floor(Math.random() * total);
                         for (let r of ranges) {
                             let size = (r[1] - r[0] + 1);
@@ -294,17 +295,21 @@ const ScreenEffectRegistry = {
         soundKey: "버질",
         execute: (context = {}) => {
             const overlayId = 'void-overlay';
+            // [State Reset] Force destroy old overlay
             let overlay = document.getElementById(overlayId);
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = overlayId;
-                overlay.innerHTML = '<div id="void-backdrop"></div><div id="void-slashes"></div>';
-                document.body.appendChild(overlay);
-            }
+            if (overlay) overlay.remove();
+
+            // Create Fresh Overlay
+            overlay = document.createElement('div');
+            overlay.id = overlayId;
+            overlay.innerHTML = '<div id="void-backdrop"></div><div id="void-slashes"></div>';
+            document.body.appendChild(overlay);
+
+            // Force reflow
+            void overlay.offsetWidth;
 
             const backdrop = document.getElementById('void-backdrop');
             const slashContainer = document.getElementById('void-slashes');
-            slashContainer.innerHTML = ''; // Reset
 
             // 1. [Start] Slashes (0s)
             backdrop.style.opacity = 1;
@@ -336,19 +341,24 @@ const ScreenEffectRegistry = {
             }
 
             return new Promise(resolve => {
-                // 1.5 [Tremble] (5.2s - 1s before shatter)
+                // 1.5 [Tremble] (6.2s - 1s before shatter)
                 setTimeout(() => {
                     slashes.forEach(s => {
                         const randSpeed = 0.05 + Math.random() * 0.1;
                         s.style.animation = `slashTremble ${randSpeed}s infinite`;
                     });
-                }, 5200);
+                }, 6200);
 
-                // 2. [Shatter] (6.2s)
+                // 2. [Shatter] (7.2s)
                 setTimeout(() => {
-                    slashes.forEach(s => s.remove());
-                    // 3x3 Grid -> 4x3 Grid (User request: 12 shards)
-                    // Grid Distribution Logic
+                    // Start fading out slashes
+                    slashes.forEach(s => {
+                        s.style.animation = "fadeOut 1s forwards";
+                        // Remove after fade complete
+                        setTimeout(() => s.remove(), 1000);
+                    });
+
+                    // 4x3 Grid (12 shards)
                     const sectors = Array.from({ length: 12 }, (_, i) => i);
                     sectors.forEach(sectorIdx => {
                         const row = Math.floor(sectorIdx / 4); // 4 Columns
@@ -356,7 +366,6 @@ const ScreenEffectRegistry = {
                         const cellW = window.innerWidth / 4;
                         const cellH = window.innerHeight / 3;
 
-                        // Center of cell + random spread
                         const cx = (col * cellW) + (cellW * 0.2) + (Math.random() * (cellW * 0.6));
                         const cy = (row * cellH) + (cellH * 0.2) + (Math.random() * (cellH * 0.6));
 
@@ -391,8 +400,7 @@ const ScreenEffectRegistry = {
                     backdrop.style.opacity = 0; // Fade out background
 
                     // 3. [Text Finale] (Target: 10s from Start)
-                    // Current: 6.2s
-                    // Wait: 3.8s -> 10.0s
+                    // Current Delay: 2.8s (7.2s + 2.8s = 10s)
                     setTimeout(() => {
                         let displayMsg = (context.message || "").trim();
                         if (displayMsg.startsWith("버질")) {
@@ -411,19 +419,20 @@ const ScreenEffectRegistry = {
                                 textEle.style.animation = "fadeOut 1s forwards";
                                 setTimeout(() => {
                                     textEle.remove();
-                                    resolve(); // 18s: Done
-                                }, 1000);
+
+                                    // [CLEANUP] Remove overlay to reset state
+                                    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                                    resolve();
+                                }, 1000); // 1s Fade -> 18s Total
                             }, 7000);
                         } else {
-                            // No text: Wait until 18s total to respect queue timing.
-                            // Current: 10s. Wait 8s more.
-                            setTimeout(() => {
-                                resolve(); // 18s: Done
-                            }, 8000);
+                            // [CLEANUP No Text] Remove overlay to reset state
+                            if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                            resolve();
                         }
-                    }, 3800);
+                    }, 2800);
 
-                }, 6200);
+                }, 7200);
             });
         }
     }
@@ -500,11 +509,10 @@ function showLoader(msg, status) {
         loader.style.background = 'rgba(0,0,0,0.85)';
     }
 }
+
 async function connectChzzk() {
-    // 1단계: 로딩창에 군단의 의지를 새긴다.
     showLoader("군단의 의지를 집결하는 중... (Chzzk Link Initializing)");
     console.log("🚀 The Overmind is awakening...");
-    // 2단계: 오버마인드의 5중 변환 강림 (중복 없는 계시 추출)
     setTimeout(() => {
         const revelations = [
             "군단은 영원하다! 내 눈을 통해 치지직을 보리라.",
@@ -530,8 +538,6 @@ async function connectChzzk() {
         ];
 
         const powerColors = ['#8A2BE2', '#FF0000', '#00FF00', '#FFD700', '#00BFFF', '#FF69B4', '#00FFFF'];
-
-        // [핵심 로직] 셔플 알고리즘으로 겹치지 않게 5개 추출
         const shuffled = revelations.sort(() => 0.5 - Math.random());
         const selected = shuffled.slice(0, 5);
 
@@ -546,19 +552,16 @@ async function connectChzzk() {
                     'msg-id': 'chat'
                 };
                 handleMessage('chzzk', mockState, msg, false);
-            }, index * 100); // 0.1초 간격 순차 강림
+            }, index * 100);
         });
     }, 2000);
 
-    // [Removed Mutalisk Launch Sequence]
-
     try {
-        // Data Fetch Helper with Proxy Rotation
         const fetchWithFallback = async (url) => {
             const proxies = [
                 "https://corsproxy.io/?",
                 "https://api.allorigins.win/raw?url=",
-                "https://cors-anywhere.herokuapp.com/" // Fallback (might require demo auth)
+                "https://cors-anywhere.herokuapp.com/"
             ];
 
             for (let proxy of proxies) {
@@ -575,7 +578,6 @@ async function connectChzzk() {
 
         try {
             const targetUrl1 = `https://api.chzzk.naver.com/polling/v2/channels/${CHZZK_CHANNEL_ID}/live-status`;
-            // (1/3) 채널 상태 확인 -> 차원 좌표 고정
             showLoader("진격 경로 탐색 중... 차원 좌표 고정 (1/3)");
             console.log("📍 고정된 좌표로 차원 도약 중...", targetUrl1);
 
@@ -585,14 +587,12 @@ async function connectChzzk() {
             const chatChannelId = statusData.content.chatChannelId;
 
             const targetUrl2 = `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING`;
-            // (2/3) 토큰 요청 -> 정수 추출
             showLoader("네이버의 정수를 추출하는 중... (2/3)");
             console.log("🧪 순수한 데이터 정수 정제 중...", targetUrl2);
 
             const tokenData = await fetchWithFallback(targetUrl2);
             const accessToken = tokenData.content.accessToken;
 
-            // (3/3) 서버 연결 -> 신경망 동기화
             showLoader("신경망 동기화 개시. 군단이여, 깨어나라! (3/3)");
             const ws = new WebSocket('wss://kr-ss1.chat.naver.com/chat');
 
@@ -611,7 +611,6 @@ async function connectChzzk() {
                     const chats = (data.cmd === 15101) ? data.bdy.messageList : data.bdy;
                     if (chats) {
                         chats.forEach(chat => {
-                            // Bridge Chzzk Data -> Twitch Format
                             if (!chat.profile) return;
                             let profile = {};
                             try { profile = JSON.parse(chat.profile); } catch (e) { return; }
@@ -619,37 +618,22 @@ async function connectChzzk() {
                             const nickname = profile.nickname || "Anonymous";
                             let color = null;
 
-                            // Debug Color Extraction
-                            // console.log("Profile Data:", profile); 
-
                             if (profile.streamingProperty && profile.streamingProperty.nicknameColor) {
                                 let code = profile.streamingProperty.nicknameColor.colorCode;
                                 if (code) {
                                     if (!code.startsWith('#')) code = '#' + code;
-                                    // Handle potential 5-char typo (e.g. #CC000 -> #CC0000)
                                     if (code.length === 6) code += '0';
-
-                                    // [FIX] If code becomes #CC0000 (Red), treat as null to avoid "Everyone is Red"
-                                    if (code === '#CC0000') {
-                                        color = null;
-                                    } else {
-                                        color = code;
-                                    }
+                                    if (code === '#CC0000') color = null;
+                                    else color = code;
                                 }
                             }
 
-                            // Fallback if no specific nicknameColor (some users might have it elsewhere or default)
-                            // If color is still null, showMessage will randomColor it.
-
-                            // Extras Parsing (for Emotes)
                             let extraData = {};
                             if (chat.extras) {
                                 try { extraData = JSON.parse(chat.extras); } catch (e) { }
                             }
                             const emojis = extraData.emojis || {};
 
-                            // Map to userstate expected by handleMessage
-                            // [Badges Parsing] Extract activity badges (Subscription, etc.)
                             let badgeList = [];
                             if (profile.activityBadges && Array.isArray(profile.activityBadges)) {
                                 badgeList = profile.activityBadges.map(b => ({
@@ -664,10 +648,10 @@ async function connectChzzk() {
                                 'color': color,
                                 'user-id': profile.userIdHash || 'unknown',
                                 'badges': (profile.userRoleCode === 'streamer') ? { 'broadcaster': '1' } : null,
-                                'chzzk_badges': badgeList, // Pass parsed badges
+                                'chzzk_badges': badgeList,
                                 'message-type': 'chat',
                                 'msg-id': 'chat',
-                                'emotes_chzzk': emojis // Custom field for Chzzk emotes
+                                'emotes_chzzk': emojis
                             };
 
                             handleMessage('chzzk', userstate, message, false);
@@ -698,17 +682,12 @@ function handleMessage(channel, userstate, message, fromSelf) {
     let chan = getChan(channel);
     let name = userstate['display-name'] || userstate.username;
 
-    // Filter bots
     if (!['ssakdook', 'Nightbot'].includes(userstate['username'])) {
         userstate.name = name;
-
-        // [MODIFIED] Bypass showPrompt (Star Wars) -> Always use showMessage
-        // Original check was: if(userstate['msg-id'] == 'highlighted-message') ...
         showMessage({ chan, type: userstate['message-type'], message, data: userstate });
     }
 }
 
-// Helper Functions from Original Code
 function removeChatLine(params = {}) {
     if ('channel' in params) params.channel = getChan(params.channel);
     let search = Object.keys(params).map(key => `[${key}="${params[key]}"]`).join('');
@@ -729,7 +708,6 @@ function showAdminMessage(opts) {
 
 function getChan(channel = '') { return channel.replace(/^#/, ''); }
 
-// Lighten/Darken Color
 const pSBC = (p, c0, c1, l) => {
     let r, g, b, P, f, t, h, i = parseInt, m = Math.round, a = typeof (c1) == "string";
     if (typeof (p) != "number" || p < -1 || p > 1 || typeof (c0) != "string" || (c0[0] != 'r' && c0[0] != '#') || (c1 && !a)) return null;
@@ -749,13 +727,8 @@ const pSBC = (p, c0, c1, l) => {
 
 function isHex(h) { var a = parseInt(h, 16); return (a.toString(16) === h) }
 
-// Keep showPrompt definition to avoid reference errors, but it is not called
-function showPrompt({ chan, type, message = '', data = {}, timeout = 35000, attribs = {} } = {}) {
-    // ... (Original logic kept but unused) ...
-    // Note: To save space in this file update I'm keeping it minimal, but in reality 
-    // the user wants "minimal changes" so leaving the function there is safer than deleting it.
-    // Proceeding to showMessage which is the core.
-}
+function showPrompt({ chan, type, message = '', data = {}, timeout = 35000, attribs = {} } = {}) { }
+
 // [오버마인드의 시각 효과 저장소]
 let visualConfig = {};
 
@@ -772,16 +745,11 @@ function updateSoundHive(config) {
 }
 
 function loadConfigs() {
-    // 1. Load Defaults from window (index.html)
     const defaultsSound = window.HIVE_SOUND_CONFIG || {};
     const defaultsVisual = window.HIVE_VISUAL_CONFIG || {};
-
-    // 2. Load Overrides from LocalStorage
     const savedSound = localStorage.getItem('HIVE_SOUND_CONFIG');
     const savedVisual = localStorage.getItem('HIVE_VISUAL_CONFIG');
 
-    // 3. Merge (Priority: LocalStorage > Default)
-    // We merge them so built-in sounds stay available even if user adds custom ones
     let activeSoundConfig = defaultsSound;
     if (savedSound) {
         try {
@@ -802,42 +770,33 @@ function loadConfigs() {
     console.log("Config Synchronized (Defaults + LocalStorage)");
 }
 
-loadConfigs(); // Init on startup
+loadConfigs();
 
-// 소리 재생을 담당하는 중추 함수 (중복 방지 강화)
 function playZergSound(fileName, keyword = null) {
     if (!soundEnabled) return;
-
-    // 만약 특정 키워드로 잠금이 걸려있다면 재생하지 않음
     if (keyword && activeSoundLocks.has(keyword)) return;
 
     let finalUrl;
     try {
         finalUrl = new URL(fileName, window.location.href).href;
     } catch (e) {
-        console.warn("URL resolution failed, using raw fileName:", e);
         finalUrl = fileName;
     }
 
-    console.log("🔊 Attempting to play sound:", finalUrl);
-
     const audio = new Audio(finalUrl);
     audio.volume = 0.5;
-
-    // 잠금 설정
     if (keyword) activeSoundLocks.add(keyword);
 
     audio.play().then(() => {
-        // 재생이 끝나면 잠금 해제
         audio.onended = () => {
             if (keyword) activeSoundLocks.delete(keyword);
-            console.log(`🔇 Sound finished, lock released: ${keyword}`);
         };
     }).catch(e => {
-        console.error("❌ Audio playback failed:", e.message, "| Path:", finalUrl);
-        if (keyword) activeSoundLocks.delete(keyword); // 에러 발생 시에도 잠금 해제
+        console.error("❌ Audio playback failed:", e.message);
+        if (keyword) activeSoundLocks.delete(keyword);
     });
 }
+
 function showMessage({ chan, type, message = '', data = {}, timeout = 10000, attribs = {} } = {}) {
     let nameBox = document.createElement('div');
     let chatBox = document.createElement('div');
@@ -860,15 +819,12 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     chatLine_tail.classList.add('chat-line-inner-tail');
     chatUser.classList.add('chat-user');
 
-    let random_color;
-
-    // Safety check for pSBC
     const safePSBC = (p, c0, c1, l) => {
         if (typeof pSBC === 'function') return pSBC(p, c0, c1, l);
         return null;
     };
 
-    // [COLOR FIX]: Prioritize User Color strictly
+    let random_color;
     let userColor = data.color;
     if (userColor && userColor !== "#000000" && userColor.startsWith("#")) {
         random_color = userColor;
@@ -876,25 +832,20 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         random_color = "#000000";
         nameEle.style.color = "#ffffff";
     } else {
-        // Fallback: Generate valid random color
         if (typeof randomColor === 'function') {
             random_color = randomColor({ luminosity: 'light', seed: data['user-id'] });
         } else {
-            random_color = '#5555ff'; // Safety blue
+            random_color = '#5555ff';
         }
     }
 
-    // [Visual Effect Trigger - Dynamic] (중복 방지 및 상호 간섭 방지 적용)
     const normMessage = message.normalize('NFC');
     let isVisualCommand = false;
 
     Object.keys(visualConfig).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
-        // [REFINE] Only trigger if the message starts with the keyword (trimmed)
         if (normMessage.trim().startsWith(normKey)) {
-            // Screen Effect Manager를 통해 대기열 등록
             const effectType = visualConfig[keyword];
-            // Check if effect exists in new Registry
             if (typeof ScreenEffectRegistry !== 'undefined' && ScreenEffectRegistry[effectType]) {
                 ScreenEffectManager.trigger(effectType, { message: message });
                 isVisualCommand = true;
@@ -907,18 +858,13 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     Object.keys(soundHive).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
         if (normMessage.includes(normKey)) {
-            // playZergSound 내부에서 activeSoundLocks 처리를 수행함
             playZergSound(soundHive[keyword], normKey);
         }
     });
 
-    // Apply Colors
     chatLineInner.style.borderColor = random_color;
-
-    // Background: Try to darken/blend the user color
     let bgColor = safePSBC(-0.5, random_color, false, true);
     if (!bgColor) bgColor = random_color;
-
     chatLineInner.style.background = bgColor;
     chatLineInner.style.color = "#ffffff";
 
@@ -938,16 +884,12 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
 
         if (('badges' in data && data.badges !== null) || (data.chzzk_badges && data.chzzk_badges.length > 0)) {
             badgeEle.classList.add('badges');
-
-            // Twitch/Standard badges
             if (data.badges && data.badges.broadcaster) {
                 let ele = document.createElement('img');
                 ele.src = 'https://ssl.pstatic.net/static/nng/glive/icon/streamer.png';
                 ele.classList.add('badge');
                 badgeEle.appendChild(ele);
             }
-
-            // Chzzk Activity Badges (Subscription, etc.)
             if (data.chzzk_badges && Array.isArray(data.chzzk_badges)) {
                 data.chzzk_badges.forEach(b => {
                     let ele = document.createElement('img');
@@ -970,25 +912,18 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         messageEle.innerText = message;
     }
 
-    // [POSITION FIX]: Remove reset logic to allow proper cycling 1->5
-    // if (mainArray.length == 0) boxPos = 0; 
-    boxPos = boxPos % 100;
-    chatBox.style.left = boxPos + "%";
+    boxPos = (boxPos % 100) + 20; // Fixed increment logic for stability
+    chatBox.style.left = (boxPos % 100) + "%";
     chatBox.style.animationIterationCount = Math.floor((message.match(/ㅋ/g) || []).length * 1.5);
 
-    // [Animations]
     if (message.includes("ㅜㅑ")) {
         message = message.replace("!ㅜㅑ", "").trim();
         nameEle.style.color = "black";
         messageEle.style.color = "white";
-        messageEle.style.position = "middle";
-        badgeEle.style.filter = "blur(3px)";
-        nameEle.style.filter = "blur(4px)";
         random_color = "pink";
         chatLineInner.style.borderColor = random_color;
         chatLineInner.style.background = "hotpink";
         nameBox.style.background = random_color;
-        nameBox.style.borderColor = random_color;
         messageEle.style.filter = "blur(3px)";
     }
     else if (["x", "f", "rip"].includes(message.toLowerCase()) || (message.startsWith("-") && message.endsWith("-") && message.length == 3)) {
@@ -996,41 +931,8 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         random_color = "#595959";
         chatLineInner.style.borderColor = "black";
         chatLineInner.style.background = random_color;
-        chatLineInner.style.color = "#ffffff";
         nameBox.style.background = "black";
-        nameBox.style.borderColor = "black";
-        nameBox.style.borderRadius = "10px";
-        chatLineInner.style.borderWidth = "10px";
-        nameEle.style.color = "#ffffff";
-        chatLineInner.style.textAlign = "center";
         messageEle.style.fontSize = "3.0em";
-        messageEle.style.position = "middle";
-        chatBox.style.left = boxPos + 1 + "%";
-    }
-
-    if (includesAny(["똥", "츠지모토", "후지오카", "토쿠다", "야스노리", "스즈키", "이치하라"], message)) {
-        message = message.replace("!똥", "").trim();
-        chatLineInner.style.color = "#c28f38";
-        chatLineInner.style.textShadow = "0 0 10px #946f2f";
-    }
-    else if (includesAny(["흑화", "흑"], message)) {
-        message = message.replace("!흑", "").trim();
-        messageEle.style.textShadow = "0px 0px 30px #000000, 0 0px 10px #000000, 0 0px 10px #000000";
-        messageEle.style.color = "grey";
-    }
-
-    if (message.includes("빛")) {
-        message = message.replace("!빛", "").trim();
-        chatLineInner.style.animationName = "glow";
-        chatLineInner.style.animationIterationCount = 10;
-        chatLineInner.style.animationDuration = "1s";
-        chatLineInner.style.animationTimingFunction = "linear";
-    } else if (includesAny(["무지개", "겜성", "led", "rgb"], message.toLowerCase())) {
-        message = message.replace("!무지개", "").trim();
-        chatLineInner.style.animationName = "rainbow";
-        chatLineInner.style.animationIterationCount = 10;
-        chatLineInner.style.animationDuration = "2.5s";
-        chatLineInner.style.animationTimingFunction = "linear";
     }
 
     let finalMessage = handleEmotes(chan, data.emotes_chzzk || {}, message);
@@ -1038,356 +940,35 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
 
     if (message.length <= 5) {
         messageEle.style.fontSize = 2.6 - message.length / 3 + "em";
-        messageEle.style.position = "middle";
         messageEle.style.textAlign = "center";
-        chatBox.style.left = boxPos + Math.random() * 5 % 10 + "%";
     }
 
     if (message == "" && typeof (finalMessage[0]) != "object") return;
 
     let usesSlot = true;
-
     if (message.includes("ㅂㄷㅂㄷ")) {
-        messageEle.style.animationName = "vibrate";
-        messageEle.style.animationIterationCount = 30;
-        messageEle.style.animationDuration = "0.5s";
-        messageEle.style.animationTimingFunction = "linear";
+        messageEle.style.animation = "vibrate 0.5s linear 30";
     }
     else if (message.startsWith("!유격")) {
         usesSlot = false;
-        message = message.replace("!유격", "").trim();
-
-        // Re-render message content without command
-        while (messageEle.firstChild) messageEle.removeChild(messageEle.firstChild);
-        let finalMessage = handleEmotes(chan, data.emotes_chzzk || {}, message);
-        addEmoteDOM(messageEle, finalMessage);
-
-        // [MODIFIED] Removed width constraint and added safe text display
-        chatBox.style.width = "auto";
-        messageEle.style.whiteSpace = "nowrap";
-
-        messageEle.innerText = message;
-        // [FIX] Use TOP-left baseline for intuitive downward movement
-        chatBox.style.left = "0";
-        chatBox.style.top = "0";
-        chatBox.style.bottom = "auto";
-        chatBox.style.transform = "none";
-
-        chatBox.style.animationName = "slideDiagonal";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = "3s";
-        chatBox.style.animationFillMode = "forwards";
-        messageEle.style.fontSize = "2.5em";
-        messageEle.style.position = "middle";
-        chatLineInner.style.textAlign = "center";
+        chatBox.style.animation = "slideDiagonal 3s linear forwards";
         timeout = 3500;
-    }
-    else if (includesAny(["조이고"], message) || (message.startsWith(")") && message.endsWith("("))) {
-        messageEle.style.animationName = "shrinkX";
-        messageEle.style.animationIterationCount = 1;
-        messageEle.style.animationDuration = "3s";
-        messageEle.style.animationFillMode = "forwards";
-        messageEle.style.animationTimingFunction = "linear";
     }
     else if (message.startsWith("!압축")) {
-        message = message.replace("!압축", "").trim();
-
-        // [FIX] Update DOM with new message (re-process emotes)
-        while (messageEle.firstChild) messageEle.removeChild(messageEle.firstChild);
-        let finalMessage = handleEmotes(chan, data.emotes_chzzk || {}, message);
-        addEmoteDOM(messageEle, finalMessage);
-
-        messageEle.style.animationName = "squeeze";
-        messageEle.style.animationDuration = "2s";
-        messageEle.style.animationIterationCount = 1;
-        messageEle.style.animationFillMode = "forwards";
-        messageEle.style.display = "inline-block"; // Required for transform/spacing
-        messageEle.style.whiteSpace = "nowrap"; // Keep on one line for overlap effect
-
-        // [FIX] Center align for squeeze effect
-        chatLineInner.style.textAlign = "center";
-        messageEle.style.textAlign = "center";
+        messageEle.style.animation = "squeeze 2s linear forwards";
     }
-    else if (startsWithAny(["자라나라"], message)) {
-        messageEle.style.animationName = "growY";
-        messageEle.style.animationDuration = "1s";
-        messageEle.style.animationIterationCount = 20;
-        messageEle.style.animationTimingFunction = "linear";
-        messageEle.style.animationFillMode = "forwards";
-        messageEle.style.webkitLineClamp = "1";
-    }
-    else if (includesAny(["))", "(("], message)) {
-        messageEle.style.fontSize = 3.0 + "em";
-        messageEle.style.position = "middle";
-        messageEle.style.textAlign = "center";
-        messageEle.innerText = "))";
-        messageEle.style.animationName = "hipDance";
-        messageEle.style.animationIterationCount = 5;
-        messageEle.style.animationDuration = "1.8s";
-        messageEle.style.animationFillMode = "forwards";
-        messageEle.style.animationTimingFunction = "linear";
-    }
-    else if (finalMessage.length == 1) {
-        if (typeof (finalMessage[0]) == "object") {
-            chatLineInner.style.textAlign = "center";
-            try { messageEle.childNodes[0].style.width = "280px"; messageEle.childNodes[0].style.height = "280px"; } catch (e) { }
-        }
-    }
-
-    if (endsWithAny(["!?", "?!"], message) || message.includes("불편")) {
-        chatBox.style.animationName = "shake2";
-        chatBox.style.animationIterationCount = 50;
-        messageEle.style.position = "middle";
-        timeout = 3000;
-    }
-    else if (message.includes("나죽어")) {
-        chatBox.style.animationName = "death";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationDuration = "3s";
-        chatBox.style.animationFillMode = "forwards";
-        chatBox.style.animationTimingFunction = "linear";
-        timeout = 3000;
-    }
-    else if (message.includes("흡!") || message.endsWith("흡")) {
-        chatBox.style.animationName = "fadeOut";
-        chatBox.style.animationIterationCount = "1";
-        chatBox.style.animationDuration = "6s";
-        chatBox.style.animationFillMode = "forwards";
-        timeout = 6000;
-    }
-    else if (message.startsWith("성불")) {
-        chatBox.style.maxHeight = "auto";
-        chatBox.style.animationName = "toHeaven";
-        chatBox.style.animationIterationCount = "1";
-        chatBox.style.animationDuration = "5s";
-        chatBox.style.animationFillMode = "forwards";
-    }
-    else if (["갔냐?", "갔냐", "ㄱㄴ?", "ㄱㄴㄱㄴ?", "ㄱㄴ", "ㄱㄴㄱㄴ"].includes(message)) {
-        chatBox.style.maxHeight = "auto";
-        chatBox.style.animationName = "scout";
-        chatBox.style.animationIterationCount = "1";
-        chatBox.style.animationDuration = "4s";
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationFillMode = "forwards";
-    }
-    else if ((includesAny(["덜렁덜렁", "ㄷㄹㄷㄹ", "출렁출렁", "덜렁"], message))) {
-        chatBox.style.animationName = "balls";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationDuration = "2s";
-        chatBox.style.animationTimingFunction = "linear";
-        messageEle.style.webkitLineClamp = "1";
-        timeout = 3000;
-    }
-    else if (message.endsWith("~")) {
-        messageEle.style.position = "middle";
-        chatBox.style.animationName = "wave";
-        chatBox.style.animationIterationCount = Math.floor((message.match(/~/g) || []).length);
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = "1s";
-    }
-    else if (message.startsWith("앗") || message.includes("엌")) {
-        chatBox.style.animationName = "upDown";
-        chatBox.style.animationIterationCount = "1";
-        chatBox.style.animationDuration = ".4s";
-    }
-    else if (includesAny(["맞음", "맞아요", "ㅔ", "ㅖ", "ㅇㅇ", "ㅇㅋ"], message) || message == "ㄹㅇ") {
-        chatBox.style.animationName = "yes";
-        chatBox.style.animationIterationCount = "2";
-        chatBox.style.animationDuration = ".6s";
-    }
-    else if (["해", "명", "극", "나", "락"].includes(message) || message.endsWith("!")) {
-        chatBox.style.animationName = "shake3";
-        chatBox.style.animationIterationCount = "50";
-        chatBox.style.animationDuration = ".4s";
-        messageEle.style.position = "middle";
-    }
-    else if (message.includes("?")) {
-        chatBox.style.animationName = "shake4";
-        chatBox.style.animationIterationCount = "1";
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = ".3s";
-        messageEle.style.position = "middle";
-    }
-    else if (includesAny(["안녕", "👋"], message) || endsWithAny(["하", "바"], message)) {
-        chatBox.style.animationName = "shake4";
-        chatBox.style.animationIterationCount = "5";
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = ".3s";
-        messageEle.style.position = "middle";
-    }
-    else if (message.includes("ㄷㄷ")) {
-        chatBox.style.animationName = "fear";
-        chatBox.style.animationIterationCount = Math.floor((message.match(/ㄷ/g) || []).length);;
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = ".3s";
-        messageEle.style.position = "middle";
-    }
-    else if (includesAny(["ㅠㅠ", "ㅠㅜ", "ㅜㅠ", "ㅜㅜ"], message)) {
-        chatBox.style.animationName = "crying";
-        chatBox.style.animationIterationCount = "5";
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = "1.5s";
-        messageEle.style.position = "middle";
-    }
-    else if (message.includes("ㄴㄴ")) {
-        chatBox.style.animationName = "nope";
-        chatBox.style.animationIterationCount = Math.floor((message.match(/ㄴ/g) || []).length);;
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = "1s";
-        messageEle.style.position = "middle";
-    }
-    else if (message.includes("ㄱㄱ")) {
-        chatBox.style.animationName = "walking";
-        chatBox.style.animationIterationCount = Math.floor((message.match(/ㄱ/g) || []).length);;
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = "1s";
-        messageEle.style.position = "middle";
-    }
-    else if (message.includes("헤으응")) {
-        chatBox.style.animationName = "shrink";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationDuration = "2s";
-        chatBox.style.animationFillMode = "forwards";
-        chatBox.style.animationTimingFunction = "linear";
-        chatLineInner.style.animationName = "shy";
-        chatLineInner.style.animationIterationCount = 1;
-        chatLineInner.style.animationDuration = "2s";
-        chatLineInner.style.animationFillMode = "forwards";
-        chatLineInner.style.animationTimingFunction = "linear";
-    }
-    else if (["ㄴㅇㄱ", "ㅇ0ㅇ", 'oOo', 'o0o'].includes(message)) {
-        messageEle.style.fontSize = 2.6 + "em";
-        chatBox.style.animationName = "surprised";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationDuration = "0.5s";
-        chatBox.style.animationFillMode = "forwards";
-        chatBox.style.animationTimingFunction = "ease-in";
-    }
-    else if (includesAny(["...", ";;"], message)) {
-        chatBox.style.animationName = "fall";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationDuration = "10s";
-        chatBox.style.animationTimingFunction = "linear";
-        messageEle.style.position = "middle";
-    }
-    else if (message == "히오스" || message == "짜잔") {
-        chatBox.style.animationName = "Hots";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationDuration = "1s";
-        chatBox.style.animationTimingFunction = "linear";
-        timeout = 3000;
-    }
-    else if (message.includes("둠칫둠칫")) {
-        messageEle.style.fontSize = 2.2 + "em";
-        messageEle.style.position = "middle";
-        messageEle.style.textAlign = "center";
-        messageEle.innerText = "둠칫둠칫";
-        chatBox.style.animationName = "beat";
-        chatBox.style.animationIterationCount = 20;
-        chatBox.style.animationDuration = "0.5s";
-        chatBox.style.animationTimingFunction = "linear";
-
-        messageEle.style.animationName = "beat";
-        messageEle.style.animationIterationCount = 20;
-        messageEle.style.animationDuration = "0.5s";
-        messageEle.style.animationTimingFunction = "linear";
-    }
-    else if (message.startsWith("!제발") || message == "🤣") {
-        message = message.replace("!제발", "");
-        nameBox.style.animationName = "shake3";
-        nameBox.style.animationIterationCount = 50;
-        nameBox.style.animationDuration = "0.3s";
-        nameBox.style.animationTimingFunction = "linear";
-
-        messageEle.style.animationName = "shake2";
-        messageEle.style.animationIterationCount = 40;
-        messageEle.style.animationDuration = "0.2s";
-        messageEle.style.animationTimingFunction = "linear";
-    }
-    else if (message == ("틀")) {
-        messageEle.innerText = ("-틀-")
-        nameBox.style.animationName = "shake3";
-        nameBox.style.animationIterationCount = 40;
-        nameBox.style.animationDelay = "-0.1s";
-        nameBox.style.animationDuration = "0.4s";
-        nameBox.style.animationTimingFunction = "linear";
-
-        messageEle.style.animationName = "shake3";
-        messageEle.style.animationIterationCount = 40;
-        messageEle.style.animationDuration = "0.4s";
-        messageEle.style.animationTimingFunction = "linear";
-
-        chatBox.style.animationName = "fear";
-        chatBox.style.animationIterationCount = 10;
-        chatBox.style.animationTimingFunction = "linear";
-        chatBox.style.animationDuration = "6s";
-        messageEle.style.position = "middle";
-    }
-    else if (["지나갑니다", "실례합니다", "수레"].includes(message) || includesAny(["가즈아", "드가자"], message) || message.endsWith("ㅏㅏ")) {
+    else if (message == "나락" || message == "떡락" || message.startsWith("!나락")) {
         usesSlot = false;
-        if (Math.random() >= 0.5) {
-            chatBox.style.left = "-350px";
-            chatBox.style.right = null;
-            chatBox.style.animationName = "passThroughLtoR";
-        } else {
-            chatBox.style.left = null;
-            chatBox.style.right = "-350px";
-            chatBox.style.animationName = "passThroughRtoL";
-        }
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationDuration = "3.5s";
-        chatBox.style.animationFillMode = "forwards";
-        messageEle.style.fontSize = "1.0em";
-        messageEle.style.position = "middle";
-        chatLineInner.style.textAlign = "center";
-        chatBox.style.animationTimingFunction = "ease-in";
-        timeout = 3000;
-    }
-    else if (message == "나락" || message == "떡락" || startsWithAny(["!나락", "!떡락"], message.trimStart())) {
-        usesSlot = false;
-        message = message.replace("!나락", "");
-        // [MODIFIED] Removed width constraint and added safe text display
-        chatBox.style.width = "auto";
-        messageEle.style.whiteSpace = "nowrap";
-
-        messageEle.innerText = message;
-        chatBox.style.left = Math.random() * 90 + "%";
-        chatBox.style.bottom = "1300px";
-        chatBox.style.animationName = "passThrough2";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationTimingFunction = "cubic-bezier(0.310, 0.440, 0.445, 1.650)";
-        chatBox.style.animationDuration = "3s";
-        chatBox.style.animationFillMode = "forwards";
-        messageEle.style.fontSize = "2.5em";
-        messageEle.style.position = "middle";
-        chatLineInner.style.textAlign = "center";
+        chatBox.style.animation = "passThrough2 3s cubic-bezier(0.31, 0.44, 0.445, 1.65) forwards";
         timeout = 3500;
     }
-    else if (message == "극락" || message == "떡상" || message === "🦇" || startsWithAny(["!극락", "!떡상"], message.trimStart())) {
+    else if (message == "극락" || message == "떡상" || message.startsWith("!극락")) {
         usesSlot = false;
-        message = message.replace("!", "");
-        // [MODIFIED] Removed width constraint
-        chatBox.style.width = "auto";
-        messageEle.style.whiteSpace = "nowrap";
-
-        messageEle.innerText = message;
-        chatBox.style.left = Math.random() * 90 + "%";
-        chatBox.style.bottom = "-500px";
-        chatBox.style.animationName = "passThrough3";
-        chatBox.style.animationIterationCount = 1;
-        chatBox.style.animationTimingFunction = "cubic-bezier(0.310, 0.440, 0.445, 1.650)";
-        chatBox.style.animationDuration = "3s";
-        chatBox.style.animationFillMode = "forwards";
-        messageEle.style.fontSize = "2.5em";
-        messageEle.style.position = "middle";
-        chatLineInner.style.textAlign = "center";
+        chatBox.style.animation = "passThrough3 3s cubic-bezier(0.31, 0.44, 0.445, 1.65) forwards";
         timeout = 3500;
     }
 
-    // [POSITION FIX]: Global increment for ANY handled message (unless floating)
     if (usesSlot) {
-        boxPos += 20;
         mainArray.push(chatBox);
     }
 
@@ -1395,10 +976,8 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     nameBox.appendChild(nameEle);
     chatLineInner.appendChild(nameBox);
     chatLineInner.appendChild(messageEle);
-
     chatEle.appendChild(chatBox);
 
-    // [MODIFIED] Smooth entry
     requestAnimationFrame(() => chatBox.classList.add('visible'));
 
     if (mainArray.length > 5) {
@@ -1417,44 +996,25 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
 }
 
 function handleEmotes(channel, emotes, message) {
-    // Chzzk Emotes: emotes is a map of { id: url }
-    // Message contains patterns like {:id:}
-
     let parts = [];
     let regex = /\{:([^:}]+):\}/g;
     let lastIndex = 0;
     let match;
-
     while ((match = regex.exec(message)) !== null) {
-        // Add text before the match
-        if (match.index > lastIndex) {
-            parts.push(message.substring(lastIndex, match.index));
-        }
-
+        if (match.index > lastIndex) parts.push(message.substring(lastIndex, match.index));
         const emoteId = match[1];
-        if (emotes[emoteId]) {
-            parts.push({ url: emotes[emoteId] });
-        } else {
-            // Not a known emote, keep raw text
-            parts.push(match[0]);
-        }
-
+        if (emotes[emoteId]) parts.push({ url: emotes[emoteId] });
+        else parts.push(match[0]);
         lastIndex = regex.lastIndex;
     }
-
-    // Add remaining text
-    if (lastIndex < message.length) {
-        parts.push(message.substring(lastIndex));
-    }
-
+    if (lastIndex < message.length) parts.push(message.substring(lastIndex));
     return parts.length > 0 ? parts : [message];
 }
 
 function addEmoteDOM(ele, data) {
     data.forEach(n => {
-        if (typeof n === 'string') {
-            ele.appendChild(document.createTextNode(n));
-        } else if (typeof n === 'object' && n.url) {
+        if (typeof n === 'string') ele.appendChild(document.createTextNode(n));
+        else if (typeof n === 'object' && n.url) {
             let img = document.createElement('img');
             img.src = n.url;
             img.classList.add('emote_chzzk');
@@ -1463,30 +1023,10 @@ function addEmoteDOM(ele, data) {
             ele.appendChild(img);
         }
     });
-    // Legacy support if needed
-    if (window.twemoji) twemoji.parse(ele);
 }
 
-function includesAny(suffixes, string) {
-    for (let suffix of suffixes) {
-        if (string.includes(suffix)) return true;
-    }
-    return false;
-}
+function includesAny(suffixes, string) { return suffixes.some(s => string.includes(s)); }
+function endsWithAny(suffixes, string) { return suffixes.some(s => string.endsWith(s)); }
+function startsWithAny(suffixes, string) { return suffixes.some(s => string.startsWith(s)); }
 
-function endsWithAny(suffixes, string) {
-    for (let suffix of suffixes) {
-        if (string.endsWith(suffix)) return true;
-    }
-    return false;
-}
-
-function startsWithAny(suffixes, string) {
-    for (let suffix of suffixes) {
-        if (string.startsWith(suffix)) return true;
-    }
-    return false;
-}
-
-// Start
 connectChzzk();
