@@ -1020,14 +1020,14 @@ function showPrompt({ chan, type, message = '', data = {}, timeout = 35000, attr
 // [오버마인드의 시각 효과 저장소]
 let visualConfig = {};
 
-// [중복 실행 방지 잠금 장치]
-const activeSoundLocks = new Set();
-const activeVisualLocks = new Set();
-
 function updateSoundHive(config) {
     soundHive = {}; // Reset
     for (const [key, value] of Object.entries(config)) {
-        soundHive[key] = `SFX/${value}`;
+        if (Array.isArray(value)) {
+            soundHive[key] = value.map(v => `SFX/${v}`);
+        } else {
+            soundHive[key] = `SFX/${value}`;
+        }
     }
     console.log("Sound Hive Updated", soundHive);
 }
@@ -1066,11 +1066,8 @@ function loadConfigs() {
 loadConfigs(); // Init on startup
 
 // 소리 재생을 담당하는 중추 함수 (중복 방지 강화)
-function playZergSound(fileName, keyword = null) {
+function playZergSound(fileName) {
     if (!soundEnabled) return;
-
-    // 만약 특정 키워드로 잠금이 걸려있다면 재생하지 않음
-    if (keyword && activeSoundLocks.has(keyword)) return;
 
     let finalUrl;
     try {
@@ -1085,18 +1082,8 @@ function playZergSound(fileName, keyword = null) {
     const audio = new Audio(finalUrl);
     audio.volume = 0.5;
 
-    // 잠금 설정
-    if (keyword) activeSoundLocks.add(keyword);
-
-    audio.play().then(() => {
-        // 재생이 끝나면 잠금 해제
-        audio.onended = () => {
-            if (keyword) activeSoundLocks.delete(keyword);
-            console.log(`🔇 Sound finished, lock released: ${keyword}`);
-        };
-    }).catch(e => {
+    audio.play().catch(e => {
         console.error("❌ Audio playback failed:", e.message, "| Path:", finalUrl);
-        if (keyword) activeSoundLocks.delete(keyword); // 에러 발생 시에도 잠금 해제
     });
 }
 function showMessage({ chan, type, message = '', data = {}, timeout = 10000, attribs = {} } = {}) {
@@ -1145,33 +1132,48 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         }
     }
 
-    // [Visual Effect Trigger - Dynamic] (중복 방지 및 상호 간섭 방지 적용)
+    // [Visual Effect Trigger - Dynamic] (Longest Match Priority)
     const normMessage = message.normalize('NFC');
-    let isVisualCommand = false;
+    let bestVisualMatch = { length: 0, effectType: null };
 
     Object.keys(visualConfig).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
-        // [REFINE] Only trigger if the message starts with the keyword (trimmed)
         if (normMessage.trim().startsWith(normKey)) {
-            // Screen Effect Manager를 통해 대기열 등록
-            const effectType = visualConfig[keyword];
-            // Check if effect exists in new Registry
-            if (typeof ScreenEffectRegistry !== 'undefined' && ScreenEffectRegistry[effectType]) {
-                ScreenEffectManager.trigger(effectType, { message: message });
-                isVisualCommand = true;
+            if (normKey.length > bestVisualMatch.length) {
+                bestVisualMatch = { length: normKey.length, effectType: visualConfig[keyword] };
             }
         }
     });
 
-    if (isVisualCommand) return;
+    if (bestVisualMatch.effectType) {
+        const effectType = bestVisualMatch.effectType;
+        if (typeof ScreenEffectRegistry !== 'undefined' && ScreenEffectRegistry[effectType]) {
+            ScreenEffectManager.trigger(effectType, { message: message });
+            return; // Visual command found, stop here
+        }
+    }
 
+    // [Sound Effect Trigger] Max-Span Priority (Earliest start, then furthest end)
+    let bestSoundMatch = { endIndex: -1, length: 0, sound: null, keyword: null };
     Object.keys(soundHive).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
-        if (normMessage.includes(normKey)) {
-            // playZergSound 내부에서 activeSoundLocks 처리를 수행함
-            playZergSound(soundHive[keyword], normKey);
+        const index = normMessage.indexOf(normKey);
+        if (index !== -1) {
+            const endIndex = index + normKey.length;
+            // Prioritize the one that ends furthest. If tie, prioritize the longest one.
+            if (endIndex > bestSoundMatch.endIndex || (endIndex === bestSoundMatch.endIndex && normKey.length > bestSoundMatch.length)) {
+                bestSoundMatch = { endIndex, length: normKey.length, sound: soundHive[keyword], keyword: normKey };
+            }
         }
     });
+
+    if (bestSoundMatch.sound) {
+        let soundFile = bestSoundMatch.sound;
+        if (Array.isArray(soundFile)) {
+            soundFile = soundFile[Math.floor(Math.random() * soundFile.length)];
+        }
+        playZergSound(soundFile);
+    }
 
     // Apply Colors
     chatLineInner.style.borderColor = random_color;
