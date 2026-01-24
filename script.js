@@ -172,7 +172,7 @@ const ScreenEffectRegistry = {
         }
     },
 
-    heart: {
+    couple: {
         soundKey: "커플",
         execute: (context = {}) => {
             const flashback = document.getElementById('flashback-overlay');
@@ -286,6 +286,147 @@ const ScreenEffectRegistry = {
                         resolve();
                     }, 9000);
                 }, 11800); // 4s total wait before visuals (3s read + 1s fade)
+            });
+        }
+    },
+
+    heart: {
+        soundKey: "하트",
+        execute: (context = {}) => {
+            const id = 'heart-dreamy-overlay-root';
+            let ov = document.getElementById(id); if (ov) ov.remove();
+            ov = document.createElement('div'); ov.id = id;
+            ov.innerHTML = `
+                <div id="heart-dreamy-overlay">
+                    <div id="heart-dreamy-backdrop"></div>
+                    <div class="heart-emoji-container"></div>
+                    <div class="heart-flash"></div>
+                </div>
+            `;
+            document.body.appendChild(ov);
+
+            const overlay = ov.querySelector('#heart-dreamy-overlay');
+            const backdrop = ov.querySelector('#heart-dreamy-backdrop');
+            const flash = ov.querySelector('.heart-flash');
+            const emojiContainer = ov.querySelector('.heart-emoji-container');
+
+            // [Message Logic] Same as before...
+            let rawMsg = (context.message || "").trim();
+            if (rawMsg.startsWith("하트")) rawMsg = rawMsg.substring(2).trim();
+
+            const allWords = rawMsg.split(' ').filter(w => w.length > 0);
+            let parts = ["", "", "", ""];
+            if (allWords.length === 0) { }
+            else if (allWords.length === 1) { parts[3] = allWords[0]; }
+            else {
+                parts[3] = allWords.pop();
+                const remainder = allWords;
+                const totalWords = remainder.length;
+                if (totalWords === 1) { parts[0] = remainder[0]; }
+                else if (totalWords === 2) { parts[0] = remainder[0]; parts[1] = remainder[1]; }
+                else {
+                    const p1Len = Math.ceil(totalWords / 3);
+                    const p2Len = Math.ceil((totalWords - p1Len) / 2);
+                    parts[0] = remainder.slice(0, p1Len).join(' ');
+                    parts[1] = remainder.slice(p1Len, p1Len + p2Len).join(' ');
+                    parts[2] = remainder.slice(p1Len + p2Len).join(' ');
+                }
+            }
+
+            const showText = (text, delay, duration) => {
+                if (!text) return;
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'heart-dreamy-text';
+                    el.innerText = text;
+                    overlay.appendChild(el);
+                    el.style.animation = "fadeIn 0.5s forwards";
+                    setTimeout(() => {
+                        el.style.animation = "fadeOut 0.5s forwards";
+                        setTimeout(() => el.remove(), 500);
+                    }, duration - 500);
+                }, delay);
+            };
+
+            showText(parts[0], 0, 4000); //하나
+            showText(parts[1], 4000, 3500); //둘
+            showText(parts[2], 7500, 2800); //셋
+            showText(parts[3], 10300, 1000); // 넷 finish
+
+            setTimeout(() => {
+                overlay.classList.add('visible');
+                backdrop.classList.add('visible');
+            }, 100);
+
+            const startEmojiTime = 11000;
+            const getRandomFromRanges = (ranges) => {
+                let total = 0;
+                ranges.forEach(r => total += (r[1] - r[0] + 1));
+                let randomIdx = Math.floor(Math.random() * total);
+                for (let r of ranges) {
+                    let size = (r[1] - r[0] + 1);
+                    if (randomIdx < size) return String.fromCodePoint(r[0] + randomIdx);
+                    randomIdx -= size;
+                }
+                return String.fromCodePoint(ranges[0][0]);
+            };
+
+            const allEmojiRanges = [
+                [0x1F600, 0x1F64F], [0x1F300, 0x1F5FF], [0x1F680, 0x1F6FF],
+                [0x1F900, 0x1F9FF], [0x2600, 0x26FF], [0x2700, 0x27BF]
+            ];
+
+            const delays = [1000, 300, 700];
+            let delayIdx = 0;
+            let currentTime = startEmojiTime;
+            const endTime = 18000;
+            let nextFlashTime = startEmojiTime;
+
+            while (currentTime < endTime) {
+                const time = currentTime;
+                setTimeout(() => {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'absolute';
+                    wrapper.style.left = `${Math.random() * 80 + 10}%`;
+                    wrapper.style.top = `${Math.random() * 80 + 10}%`;
+                    wrapper.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 60 - 30}deg)`;
+                    wrapper.style.zIndex = '15';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.justifyContent = 'center';
+                    wrapper.style.alignItems = 'center';
+                    wrapper.style.width = '10rem'; // Enough space
+                    wrapper.style.height = '10rem';
+
+                    const em = document.createElement('div');
+                    em.className = 'heart-dreamy-emoji';
+                    em.innerText = getRandomFromRanges(allEmojiRanges);
+
+                    wrapper.appendChild(em);
+                    emojiContainer.appendChild(wrapper);
+                    setTimeout(() => wrapper.remove(), 2500);
+                }, time);
+
+                if (Math.abs(time - nextFlashTime) < 100) {
+                    setTimeout(() => {
+                        flash.style.opacity = '1';
+                        setTimeout(() => { flash.style.opacity = '0'; }, 500);
+                    }, time);
+                    nextFlashTime += 3000;
+                }
+
+                currentTime += delays[delayIdx % delays.length];
+                delayIdx++;
+            }
+
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    ov.style.transition = 'opacity 1s';
+                    ov.style.opacity = '0';
+                    setTimeout(() => {
+                        if (ov.parentNode) ov.remove();
+                        resolve();
+                    }, 1000);
+                }, 18000);
             });
         }
     },

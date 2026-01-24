@@ -8,6 +8,7 @@ window.HIVE_SOUND_CONFIG = {
     "버질": "I AM THE STORM.mp3",
     "돌핀": "Dolphin.mp3",
     "폭풍": "I AM THE STORM.mp3",
+    "하트": "Heart.mp3",
 
     // [Reactions & Memes]
     "ㅋㅋㅋㅋㅋ": "Laugh.mp3",
@@ -47,7 +48,8 @@ window.HIVE_SOUND_CONFIG = {
 
 window.HIVE_VISUAL_CONFIG = {
     "해골": "skull",
-    "커플": "heart",
+    "커플": "couple",
+    "하트": "heart",
     "버질": "vergil",
     "돌핀": "dolphin"
 };
