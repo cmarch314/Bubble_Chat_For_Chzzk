@@ -288,93 +288,92 @@ const ScreenEffectRegistry = {
                 }, 11800); // 4s total wait before visuals (3s read + 1s fade)
             });
         }
-    }
-},
+    },
 
     storm: {
         soundKey: "폭풍",
         execute: () => {
             let overlay = document.getElementById('void-overlay');
-if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'void-overlay';
-    overlay.innerHTML = '<div id="void-backdrop"></div><div id="void-slashes"></div>';
-    document.body.appendChild(overlay);
-}
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'void-overlay';
+                overlay.innerHTML = '<div id="void-backdrop"></div><div id="void-slashes"></div>';
+                document.body.appendChild(overlay);
+            }
 
-const backdrop = document.getElementById('void-backdrop');
-const slashContainer = document.getElementById('void-slashes');
-slashContainer.innerHTML = ''; // Clear previous
+            const backdrop = document.getElementById('void-backdrop');
+            const slashContainer = document.getElementById('void-slashes');
+            slashContainer.innerHTML = ''; // Clear previous
 
-// 1. Enter Void
-backdrop.style.opacity = 1;
+            // 1. Enter Void
+            backdrop.style.opacity = 1;
 
-// 2. Generate Slashes (Multi-Line Dimensional Tear)
-const slashCount = 4;
-const slashes = [];
+            // 2. Generate Slashes (Multi-Line Dimensional Tear)
+            const slashCount = 4;
+            const slashes = [];
 
-for (let i = 0; i < slashCount; i++) {
-    const slash = document.createElement('div');
-    slash.className = 'void-slash';
+            for (let i = 0; i < slashCount; i++) {
+                const slash = document.createElement('div');
+                slash.className = 'void-slash';
 
-    // Random Variations
-    const heightVar = 5 + Math.random() * 25; // 5px - 30px thick
-    const angleVar = -15 + (Math.random() * 4 - 2); // Slight angle jitter
-    const delay = i * 0.05; // Staggered entry
-    const zIndex = 200 - i; // Layering
+                // Random Variations
+                const heightVar = 5 + Math.random() * 25; // 5px - 30px thick
+                const angleVar = -15 + (Math.random() * 4 - 2); // Slight angle jitter
+                const delay = i * 0.05; // Staggered entry
+                const zIndex = 200 - i; // Layering
 
-    slash.style.height = `${heightVar}px`;
-    slash.style.transform = `translate(-50%, -50%) rotate(${angleVar}deg) scaleX(0)`;
-    slash.style.zIndex = zIndex;
-    slash.style.animation = `slashEnter 0.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards ${delay}s`;
+                slash.style.height = `${heightVar}px`;
+                slash.style.transform = `translate(-50%, -50%) rotate(${angleVar}deg) scaleX(0)`;
+                slash.style.zIndex = zIndex;
+                slash.style.animation = `slashEnter 0.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards ${delay}s`;
 
-    slashContainer.appendChild(slash);
-    slashes.push(slash);
-}
+                slashContainer.appendChild(slash);
+                slashes.push(slash);
+            }
 
-return new Promise(resolve => {
-    // 3. Hold for 6 seconds
-    setTimeout(() => {
-        // 4. Shatter (Exit)
-        slashes.forEach(s => s.remove());
+            return new Promise(resolve => {
+                // 3. Hold for 6 seconds
+                setTimeout(() => {
+                    // 4. Shatter (Exit)
+                    slashes.forEach(s => s.remove());
 
-        // Generate Shards
-        const shardCount = 15;
-        for (let i = 0; i < shardCount; i++) {
-            const shard = document.createElement('div');
-            shard.className = 'void-shard';
+                    // Generate Shards
+                    const shardCount = 15;
+                    for (let i = 0; i < shardCount; i++) {
+                        const shard = document.createElement('div');
+                        shard.className = 'void-shard';
 
-            // Center start position + random spread
-            const startX = window.innerWidth / 2 + (Math.random() * 200 - 100);
-            const startY = window.innerHeight / 2 + (Math.random() * 50 - 25);
+                        // Center start position + random spread
+                        const startX = window.innerWidth / 2 + (Math.random() * 200 - 100);
+                        const startY = window.innerHeight / 2 + (Math.random() * 50 - 25);
 
-            // Explosion vector
-            const flyX = (Math.random() * 400 - 200) + 'px';
-            const flyY = (Math.random() * 400 - 200) + 'px';
-            const rot = (Math.random() * 360) + 'deg';
+                        // Explosion vector
+                        const flyX = (Math.random() * 400 - 200) + 'px';
+                        const flyY = (Math.random() * 400 - 200) + 'px';
+                        const rot = (Math.random() * 360) + 'deg';
 
-            shard.style.left = startX + 'px';
-            shard.style.top = startY + 'px';
-            shard.style.setProperty('--tx', flyX);
-            shard.style.setProperty('--ty', flyY);
-            shard.style.setProperty('--rot', rot);
+                        shard.style.left = startX + 'px';
+                        shard.style.top = startY + 'px';
+                        shard.style.setProperty('--tx', flyX);
+                        shard.style.setProperty('--ty', flyY);
+                        shard.style.setProperty('--rot', rot);
 
-            shard.style.animation = `shardFly 0.6s ease-out forwards`;
-            overlay.appendChild(shard);
+                        shard.style.animation = `shardFly 0.6s ease-out forwards`;
+                        overlay.appendChild(shard);
 
-            // Clean individual shard
-            setTimeout(() => shard.remove(), 600);
-        }
+                        // Clean individual shard
+                        setTimeout(() => shard.remove(), 600);
+                    }
 
-        // Fade out background
-        backdrop.style.opacity = 0;
+                    // Fade out background
+                    backdrop.style.opacity = 0;
 
-        // 5. Cleanup & Resolve
-        setTimeout(() => {
-            resolve();
-        }, 600); // Wait for shards to disappear
-    }, 6000); // 6s Hold
-});
+                    // 5. Cleanup & Resolve
+                    setTimeout(() => {
+                        resolve();
+                    }, 600); // Wait for shards to disappear
+                }, 6000); // 6s Hold
+            });
         }
     }
 };
