@@ -473,20 +473,20 @@ const ScreenEffectRegistry = {
             }
 
             return new Promise(resolve => {
-                // Duration: 15s before cleanup
+                // [DURATION] 19s display + 2s cleanup = 21s Total (matches audio)
                 setTimeout(() => {
                     const root = document.getElementById(overlayId);
                     if (root) {
                         root.style.opacity = '0';
                         root.style.transition = 'opacity 2s';
                         setTimeout(() => {
-                            root.remove();
-                            resolve();
+                            if (root.parentNode) root.parentNode.removeChild(root);
+                            resolve(); // Release queue lock
                         }, 2000);
                     } else {
                         resolve();
                     }
-                }, 13000); // 13s show + 2s fade = 15s total
+                }, 19000);
             });
         }
     }
