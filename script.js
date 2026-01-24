@@ -668,6 +668,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
 
     // [Visual Effect Trigger - Dynamic] (중복 방지 및 상호 간섭 방지 적용)
     const normMessage = message.normalize('NFC');
+    let isVisualCommand = false;
 
     Object.keys(visualConfig).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
@@ -676,8 +677,11 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
             // 비주얼 효과 통합 관리자를 통해 실행
             const effectType = visualConfig[keyword];
             VisualEffectManager.trigger(effectType, { message: message });
+            isVisualCommand = true;
         }
     });
+
+    if (isVisualCommand) return;
 
     Object.keys(soundHive).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
