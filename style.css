@@ -1331,3 +1331,61 @@ p {
     opacity: 0;
   }
 }
+/* [Void Slash Effect] */
+#void-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483640; /* Just below text overlays */
+  pointer-events: none;
+}
+
+#void-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 15, 30, 0.9); /* Deep, cold void */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.void-slash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120vw;
+  height: 15px; /* Base height */
+  background: white;
+  box-shadow: 
+    0 0 10px #00ffff, 
+    0 0 20px #0000ff, 
+    0 0 40px #ffffff;
+  transform-origin: left center;
+  transform: translate(-50%, -50%) rotate(-15deg) scaleX(0);
+  opacity: 0.9;
+  /* Asymmetric Taper: Sharp Left, Thick Right */
+  clip-path: polygon(0% 40%, 100% 0%, 100% 100%, 0% 60%); 
+}
+
+.void-shard {
+  position: absolute;
+  width: 40px;
+  height: 10px;
+  background: rgba(200, 240, 255, 0.8);
+  box-shadow: 0 0 10px white;
+  opacity: 1;
+}
+
+@keyframes slashEnter {
+  0% { transform: translate(-50%, -50%) rotate(-15deg) scaleX(0); filter: blur(5px); }
+  100% { transform: translate(-50%, -50%) rotate(-15deg) scaleX(1); filter: blur(0px); }
+}
+
+@keyframes shardFly {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 0; }
+}
