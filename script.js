@@ -369,14 +369,15 @@ const ScreenEffectRegistry = {
                         const cx = (col * cellW) + (cellW * 0.2) + (Math.random() * (cellW * 0.6));
                         const cy = (row * cellH) + (cellH * 0.2) + (Math.random() * (cellH * 0.6));
 
-                        const shardCount = 10;
+                        const shardCount = 20; // Increased count for bigger effect
                         for (let i = 0; i < shardCount; i++) {
                             const shard = document.createElement('div');
                             shard.className = 'void-shard';
                             const startX = cx + (Math.random() * 40 - 20);
                             const startY = cy + (Math.random() * 40 - 20);
                             const angle = Math.random() * 360;
-                            const dist = 100 + Math.random() * 200;
+                            // Wider burst distance (200px ~ 600px)
+                            const dist = 200 + Math.random() * 400;
 
                             const flyX = (Math.cos(angle * Math.PI / 180) * dist) + 'px';
                             const flyY = (Math.sin(angle * Math.PI / 180) * dist) + 'px';
