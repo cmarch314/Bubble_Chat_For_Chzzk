@@ -436,6 +436,59 @@ const ScreenEffectRegistry = {
                 }, 6200);
             });
         }
+    },
+
+    dolphin: {
+        soundKey: "돌핀",
+        execute: (context = {}) => {
+            const overlayId = 'dolphin-overlay-root';
+            let overlay = document.getElementById(overlayId);
+            if (overlay) overlay.remove();
+
+            overlay = document.createElement('div');
+            overlay.id = overlayId;
+            overlay.className = 'visible'; // Using transition in CSS
+            overlay.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483640; pointer-events:none;";
+            overlay.innerHTML = `
+                <div id="dolphin-overlay" class="visible">
+                    <div class="dolphin-sky">
+                        <div class="dolphin-sun"></div>
+                    </div>
+                    <div class="dolphin-sea"></div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            let displayMsg = (context.message || "").trim();
+            const triggerKw = "돌핀";
+            if (displayMsg.startsWith(triggerKw)) {
+                displayMsg = displayMsg.substring(triggerKw.length).trim();
+            }
+
+            if (displayMsg) {
+                const textEle = document.createElement('div');
+                textEle.className = 'dolphin-text';
+                textEle.innerText = displayMsg;
+                overlay.appendChild(textEle);
+            }
+
+            return new Promise(resolve => {
+                // Duration: 15s before cleanup
+                setTimeout(() => {
+                    const root = document.getElementById(overlayId);
+                    if (root) {
+                        root.style.opacity = '0';
+                        root.style.transition = 'opacity 2s';
+                        setTimeout(() => {
+                            root.remove();
+                            resolve();
+                        }, 2000);
+                    } else {
+                        resolve();
+                    }
+                }, 13000); // 13s show + 2s fade = 15s total
+            });
+        }
     }
 };
 
