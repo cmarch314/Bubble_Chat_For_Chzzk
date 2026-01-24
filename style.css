@@ -1028,7 +1028,7 @@ p {
   }
 
   50% {
-    transform: scale(1.1);
+    transform: scale(1.05);
   }
 
   100% {
@@ -2347,13 +2347,134 @@ p {
   pointer-events: auto;
 }
 
+/* Wrapper handles the continuous Pulse */
+.skull-wrapper {
+  animation: skullPulse 2.5s infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .skull-emoji {
+  position: relative;
   color: #ffffff;
   font-size: 20rem;
   line-height: 1;
   text-align: center;
   margin: 0;
-  animation: skullPulse 1s infinite;
+  z-index: 1;
+  /* Base state: No animation other than what wrapper provides */
+}
+
+.skull-emoji::before,
+.skull-emoji::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: -1;
+}
+
+/* Triggered Classes for Glitch (Run ONCE) */
+.skull-emoji.glitching {
+  animation: skullTearMain 0.2s linear forwards;
+}
+
+.skull-emoji.glitching::before {
+  opacity: 1;
+  color: #ff0000;
+  animation: skullGlitchRed 0.2s linear forwards;
+}
+
+.skull-emoji.glitching::after {
+  opacity: 1;
+  color: #00ffff;
+  animation: skullGlitchCyan 0.2s linear forwards;
+}
+
+
+/* Keyframes mapped to 0-100% for a single 0.2s burst */
+@keyframes skullGlitchRed {
+  0% {
+    transform: translate(0);
+    clip-path: none;
+    opacity: 1;
+  }
+
+  25% {
+    transform: translate(-15px, -5px);
+    clip-path: polygon(0 15%, 100% 15%, 100% 30%, 0 30%);
+  }
+
+  50% {
+    transform: translate(10px, 5px);
+    clip-path: polygon(0 45%, 100% 45%, 100% 60%, 0 60%);
+  }
+
+  75% {
+    transform: translate(-20px, 10px);
+    clip-path: polygon(0 75%, 100% 75%, 100% 90%, 0 90%);
+  }
+
+  100% {
+    transform: translate(0);
+    clip-path: none;
+    opacity: 1;
+  }
+}
+
+@keyframes skullGlitchCyan {
+  0% {
+    transform: translate(0);
+    clip-path: none;
+    opacity: 1;
+  }
+
+  25% {
+    transform: translate(15px, 5px);
+    clip-path: polygon(0 10%, 100% 10%, 100% 25%, 0 25%);
+  }
+
+  50% {
+    transform: translate(-10px, -5px);
+    clip-path: polygon(0 35%, 100% 35%, 100% 50%, 0 50%);
+  }
+
+  75% {
+    transform: translate(20px, -10px);
+    clip-path: polygon(0 65%, 100% 65%, 100% 80%, 0 80%);
+  }
+
+  100% {
+    transform: translate(0);
+    clip-path: none;
+    opacity: 1;
+  }
+}
+
+@keyframes skullTearMain {
+  0% {
+    transform: translate(0);
+    filter: none;
+  }
+
+  25% {
+    transform: translate(5px, 0);
+    filter: drop-shadow(-5px 0 #ff0000);
+  }
+
+  50% {
+    transform: translate(-5px, 0);
+    filter: drop-shadow(5px 0 #00ffff);
+  }
+
+  100% {
+    transform: translate(0);
+    filter: none;
+  }
 }
 
 @keyframes skullPulse {

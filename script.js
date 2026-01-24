@@ -89,10 +89,16 @@ function handleConfigCommand(data) {
 // [New Feature] Skull Overlay Injection
 function createSkullOverlay() {
     let overlay = document.getElementById('skull-overlay');
+    // Force recreate if old structure exists (wrapper check)
+    if (overlay && !overlay.querySelector('.skull-wrapper')) {
+        overlay.remove();
+        overlay = null;
+    }
+
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'skull-overlay';
-        overlay.innerHTML = '<div class="skull-emoji">☠️</div><div class="film-grain"></div>';
+        overlay.innerHTML = '<div class="skull-wrapper"><div class="skull-emoji" data-text="☠️">☠️</div></div><div class="film-grain"></div>';
         document.body.appendChild(overlay);
     }
 }
@@ -126,46 +132,92 @@ const ScreenEffectRegistry = {
             const overlay = document.getElementById('skull-overlay');
             if (!overlay) return Promise.resolve();
 
-            // [NEW] Show raw message text in the center
-            const centerMsgSnippet = document.createElement('div');
-            centerMsgSnippet.className = 'visual-center-text skull-style';
-
             let displayMsg = (context.message || "").trim();
-
-            // 1. Remove Trigger Keyword
             const triggerKw = "해골";
             if (displayMsg.startsWith(triggerKw)) {
                 displayMsg = displayMsg.substring(triggerKw.length).trim();
             }
 
-            // 2. Word Wrap Logic (Max 20 chars per line)
-            const words = displayMsg.split(' ');
-            let lines = [];
-            let currentLine = words[0] || "";
+            // Split into Part 1 (everything but last word) and Part 2 (last word)
+            const words = displayMsg.split(/\s+/).filter(w => w.length > 0);
+            let part1 = "", part2 = "";
 
-            for (let i = 1; i < words.length; i++) {
-                const word = words[i];
-                if ((currentLine + " " + word).length <= 20) {
-                    currentLine += " " + word;
-                } else {
-                    lines.push(currentLine);
-                    currentLine = word;
-                }
+            if (words.length > 1) {
+                part2 = words.pop();
+                part1 = words.join(' ');
+            } else if (words.length === 1) {
+                part2 = words[0];
+                part1 = "";
             }
-            if (currentLine) lines.push(currentLine);
 
-            // 3. Render
-            centerMsgSnippet.innerHTML = lines.join('<br>');
-            document.body.appendChild(centerMsgSnippet);
+            const showText = (text, delay, duration) => {
+                if (!text) return;
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'visual-center-text skull-style';
+
+                    // Word Wrap Logic (Max 20 chars per line)
+                    const w = text.split(' ');
+                    let lines = [];
+                    let currentLine = w[0] || "";
+                    for (let i = 1; i < w.length; i++) {
+                        if ((currentLine + " " + w[i]).length <= 20) currentLine += " " + w[i];
+                        else { lines.push(currentLine); currentLine = w[i]; }
+                    }
+                    if (currentLine) lines.push(currentLine);
+                    el.innerHTML = lines.join('<br>');
+
+                    document.body.appendChild(el);
+                    el.style.animation = "fadeIn 0.2s forwards";
+                    setTimeout(() => {
+                        el.style.animation = "fadeOut 0.2s forwards";
+                        setTimeout(() => el.remove(), 200);
+                    }, duration - 200);
+                }, delay);
+            };
+
+            // Timing Phase
+            showText(part1, 0, 3700);    // 0s ~ 3.8s
+            showText(part2, 3600, 700);  // 3.5s ~ 4.1s (0.1s overlap with skull, 0.3s overlap with part1)
 
             return new Promise(resolve => {
+                // Skull Animation Start at 4s
                 setTimeout(() => {
-                    // Remove center text and show skull
-                    if (centerMsgSnippet) centerMsgSnippet.remove();
                     overlay.classList.add('visible');
+
+                    // [Glitch Logic] Random Trigger Loop
+                    const emojiEl = overlay.querySelector('.skull-emoji');
+                    let isActive = true;
+
+                    const triggerGlitch = () => {
+                        if (!isActive) return;
+
+                        // Force Reflow
+                        void emojiEl.offsetWidth;
+
+                        // Add glitch class
+                        if (emojiEl) emojiEl.classList.add('glitching');
+
+                        // Remove after 0.2s (duration of animation)
+                        setTimeout(() => {
+                            if (emojiEl) emojiEl.classList.remove('glitching');
+
+                            // Schedule next glitch (0.26s to 1.04s random - 30% slower)
+                            if (isActive) {
+                                const nextDelay = 260 + Math.random() * 780;
+                                setTimeout(triggerGlitch, nextDelay);
+                            }
+                        }, 200);
+                    };
+
+                    // Initial Trigger
+                    triggerGlitch();
+
+                    // Cleanup after 8s
                     setTimeout(() => {
+                        isActive = false;
                         overlay.classList.remove('visible');
-                        resolve(); // 효과 종료
+                        resolve();
                     }, 8000);
                 }, 4000);
             });
@@ -1069,6 +1121,13 @@ loadConfigs(); // Init on startup
 function playZergSound(fileName) {
     if (!soundEnabled) return;
 
+    // Handle random selection if an array of sounds is provided
+    if (Array.isArray(fileName)) {
+        fileName = fileName[Math.floor(Math.random() * fileName.length)];
+    }
+
+    if (!fileName) return;
+
     let finalUrl;
     try {
         finalUrl = new URL(fileName, window.location.href).href;
@@ -1168,11 +1227,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     });
 
     if (bestSoundMatch.sound) {
-        let soundFile = bestSoundMatch.sound;
-        if (Array.isArray(soundFile)) {
-            soundFile = soundFile[Math.floor(Math.random() * soundFile.length)];
-        }
-        playZergSound(soundFile);
+        playZergSound(bestSoundMatch.sound);
     }
 
     // Apply Colors

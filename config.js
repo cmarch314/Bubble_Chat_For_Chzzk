@@ -3,7 +3,7 @@
 
 window.HIVE_SOUND_CONFIG = {
     // [Screen Effects]
-    "해골": "SkullMeme.mp3",
+    "해골": ["skullmeme.mp3", "skullmeme2.mp3", "skullmeme3.mp3", "skullmeme4.mp3", "skullmeme6.mp3", "skullmeme8.mp3", "skullmeme9.mp3", "skullmeme10.mp3", "skullmeme11.mp3"],
     "커플": "DieWithASmile.mp3",
     "버질": "I AM THE STORM.mp3",
     "돌핀": "Dolphin.mp3",
@@ -56,7 +56,6 @@ window.HIVE_SOUND_CONFIG = {
     "도파민": "Dopamin.mp3",
     "FBI": "FBI.mp3",
     "으아아": "Half-falling.mp3",
-    "어림없": "NeverEver.mp3",
     "놉": "Nope.mp3",
     "더러워": "dirty.mp3",
     "비둘기": "pigeon.mp3",
@@ -97,7 +96,7 @@ window.HIVE_SOUND_CONFIG = {
     // [New Mappings - Batch 4]
     "내눈": "AhMyEyes.mp3",
     "기모찌": "AngKiMoChi.mp3",
-    "!쌍욕": ["Bitch.mp3", "SuchABitch.mp3"],
+    "!쌍욕": ["Bitch.mp3", "Fuck.mp3", "SuchABitch.mp3"],
     "응원": ["Cheer.mp3", "Cheer2.mp3", "Cheer3.mp3", "Cheer4.mp3", "Cheer6.mp3", "Cheer7.mp3", "Cheer9.mp3", "Cheer10.mp3"],
     "미국맛": "Disconnected.mp3",
     "개소리": ["DogShit.mp3", "DogShit2.mp3", "DogShit3.mp3"],
@@ -118,7 +117,9 @@ window.HIVE_SOUND_CONFIG = {
     "부끝": "willBeRightBack.mp3",
     "대박": "Wow10.mp3",
     "오오오": "Chant4.mp3",
-    "시작": "Begin.mp3"
+    "시작": "Begin.mp3",
+    "어림 없": "NoWay.mp3",
+    "어림없": "NoWay.mp3"
 };
 
 window.HIVE_VISUAL_CONFIG = {
