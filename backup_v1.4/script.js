@@ -341,6 +341,119 @@ const ScreenEffectRegistry = {
                 }, 6200);
             });
         }
+    },
+
+    dolphin: {
+        soundKey: "돌핀",
+        execute: (context = {}) => {
+            const id = 'dolphin-overlay-root';
+            let ov = document.getElementById(id); if (ov) ov.remove();
+            ov = document.createElement('div'); ov.id = id;
+            // [Background Removed] Simple transparent overlay
+            ov.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483640; pointer-events:none; transition:opacity 0.5s;";
+            ov.innerHTML = `<div id="dolphin-overlay" class="visible"></div>`;
+            document.body.appendChild(ov);
+
+            const overlayContainer = ov.querySelector('#dolphin-overlay');
+            const spawnActor = (type, emoji, opts = {}) => {
+                const el = document.createElement('div');
+                el.className = type;
+                el.innerText = emoji;
+
+                // [FIX] Force Emoji Font & Reset Color
+                el.style.fontFamily = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+                el.style.color = "initial"; // Prevent inheriting white text color
+
+                // [FIX] Handle CSS Variables correctly
+                if (opts.styles) {
+                    Object.entries(opts.styles).forEach(([key, val]) => {
+                        if (key.startsWith('--')) {
+                            el.style.setProperty(key, val);
+                        } else {
+                            el.style[key] = val;
+                        }
+                    });
+                }
+
+                overlayContainer.appendChild(el);
+                // Randomize z-index slightly to avoid flat look, but keep high
+                el.style.zIndex = Math.floor(2147483640 + Math.random() * 10);
+                setTimeout(() => el.remove(), opts.duration || 5000);
+            };
+
+            // 1. Surfer
+            spawnActor('surfer-actor', "🏄", { duration: 10000 });
+
+            // 2. Extra Fish (Sea Jump)
+            const seaCreatures = ["🐬", "🐳", "🐡", "🐠", "🐟"];
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const fromLeft = Math.random() > 0.5;
+                    const sx = fromLeft ? '-10vw' : '110vw';
+                    const ex = fromLeft ? '110vw' : '-10vw';
+                    spawnActor('sea-jump', seaCreatures[Math.floor(Math.random() * seaCreatures.length)], {
+                        duration: 4000,
+                        styles: { '--sx': sx, '--ex': ex, '--sr': '-45deg', '--er': '45deg', '--mr': '0deg' }
+                    });
+                }, i * 800);
+            }
+
+            // 3. [NEW] More Extras (Floating Marine Life)
+            const extraEmojis = ["🦞", "🦀", "🦑", "🐙", "🦐", "🦪", "🐋"];
+            for (let i = 0; i < 25; i++) { // Increased count slightly
+                setTimeout(() => {
+                    const emoji = extraEmojis[Math.floor(Math.random() * extraEmojis.length)];
+
+                    // Randomize Movement Parameters
+                    // Position: 0 ~ 100vw
+                    const startX = Math.random() * 95 + 'vw';
+
+                    // Rise Height: 20vh ~ 45vh (reaching roughly 1/4 to 1/2 of screen from bottom)
+                    // Negative value for translateY to move UP
+                    const riseHeight = -(20 + Math.random() * 25) + 'vh';
+
+                    // Horizontal Drift: -15vw to +15vw
+                    const driftX = (Math.random() * 30 - 15) + 'vw';
+
+                    // Rotation
+                    const rotStart = (Math.random() * 60 - 30) + 'deg';
+                    const rotEnd = (Math.random() * 90 - 45) + 'deg';
+
+                    // Duration: 5s ~ 8s
+                    const duration = 5000 + Math.random() * 3000;
+
+                    spawnActor('sea-extra', emoji, {
+                        duration: duration,
+                        styles: {
+                            left: startX,
+                            bottom: '-10vh', // Start below screen
+                            top: 'auto',     // Clear top positioning
+                            '--x-end': driftX,
+                            '--y-end': riseHeight,
+                            '--r-start': rotStart,
+                            '--r-end': rotEnd
+                        }
+                    });
+                }, i * 400); // Stagger spawning
+            }
+
+            // 4. Lead Dolphin (Center)
+            setTimeout(() => { spawnActor('lead-dolphin', "🐬", { duration: 5000 }); }, 13000);
+
+            // 5. Message
+            let msg = (context.message || "").trim(); if (msg.startsWith("돌핀")) msg = msg.substring(2).trim();
+            if (msg) {
+                const txt = document.createElement('div'); txt.className = 'dolphin-text'; txt.innerText = msg; overlayContainer.appendChild(txt);
+            }
+
+            return new Promise(resolve => {
+                // [Total Duration Compliance] 21s
+                setTimeout(() => {
+                    ov.style.opacity = '0';
+                    setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 2000);
+                }, 19000);
+            });
+        }
     }
 };
 
