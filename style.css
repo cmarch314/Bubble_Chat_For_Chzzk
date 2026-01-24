@@ -1331,6 +1331,7 @@ p {
     opacity: 0;
   }
 }
+
 /* [Void Slash Effect] */
 #void-overlay {
   position: fixed;
@@ -1338,7 +1339,8 @@ p {
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 2147483640; /* Just below text overlays */
+  z-index: 2147483640;
+  /* Just below text overlays */
   pointer-events: none;
 }
 
@@ -1348,7 +1350,8 @@ p {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(10, 15, 30, 0.9); /* Deep, cold void */
+  background: rgba(10, 15, 30, 0.9);
+  /* Deep, cold void */
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -1357,93 +1360,167 @@ p {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 120vw;
-  height: 15px; /* Base height */
+  width: 400vw;
+  /* 3x Length */
+  height: 15px;
+  /* Base height */
   background: white;
-  box-shadow: 
-    0 0 10px #00ffff, 
-    0 0 20px #0000ff, 
+  box-shadow:
+    0 0 10px #00ffff,
+    0 0 20px #0000ff,
     0 0 40px #ffffff;
-  transform-origin: left center;
-  transform: translate(-50%, -50%) rotate(-15deg) scaleX(0);
+  transform-origin: center center;
+  /* Rotate around center */
+  transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(0);
   opacity: 0.9;
   /* Asymmetric Taper: Sharp Left, Thick Right */
-  clip-path: polygon(0% 40%, 100% 0%, 100% 100%, 0% 60%); 
+  clip-path: polygon(0% 40%, 100% 0%, 100% 100%, 0% 60%);
 }
 
 .void-shard {
   position: absolute;
   width: 40px;
   height: 10px;
-  background: rgba(200, 240, 255, 0.8);
-  box-shadow: 0 0 10px white;
+  background: rgba(255, 255, 255, 0.95);
+  /* Pure White */
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(200, 255, 255, 0.5);
+  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+  /* Shard shape */
+  backdrop-filter: blur(2px);
   opacity: 1;
 }
 
+.vergil-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 4rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #00ffff;
+  z-index: 2147483647;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  white-space: pre-wrap;
+  font-family: 'CookieRun-Regular', sans-serif;
+  animation: fadeIn 2s forwards;
+}
+
 @keyframes slashEnter {
-  0% { transform: translate(-50%, -50%) rotate(-15deg) scaleX(0); filter: blur(5px); }
-  100% { transform: translate(-50%, -50%) rotate(-15deg) scaleX(1); filter: blur(0px); }
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(0);
+    filter: blur(5px);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1);
+    filter: blur(0px);
+  }
 }
 
 @keyframes shardFly {
-  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
-  100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 0; }
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--tx), var(--ty)) rotate(var(--rot));
+    opacity: 0;
+  }
 }
 
 /* [Void Slash Distortion Upgrade] */
 #slash-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 99999;
-    overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+  overflow: hidden;
 }
 
 .slash-flash {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    opacity: 0;
-    animation: flashFade 0.2s linear;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  animation: flashFade 0.2s linear;
 }
 
 .slash-distortion {
-    position: absolute;
-    width: 150vw; /* Extend beyond screen */
-    height: 30px; /* Thicker cut */
-    background: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px #00ffff;
-    backdrop-filter: invert(0.2) hue-rotate(90deg) blur(2px); 
-    mix-blend-mode: hard-light;
-    transform-origin: center;
-    transform: scaleX(0);
-    animation: slashStrike 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1) forwards;
+  position: absolute;
+  width: 150vw;
+  /* Extend beyond screen */
+  height: 30px;
+  /* Thicker cut */
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px #00ffff;
+  backdrop-filter: invert(0.2) hue-rotate(90deg) blur(2px);
+  mix-blend-mode: hard-light;
+  transform-origin: center;
+  transform: scaleX(0);
+  animation: slashStrike 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1) forwards;
 }
 
 @keyframes slashStrike {
-    0% { transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(0); opacity: 1; }
-    40% { transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1); opacity: 1; }
-    100% { transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(0);
+    opacity: 1;
+  }
+
+  40% {
+    transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1);
+    opacity: 0;
+  }
 }
 
 @keyframes flashFade {
-    0% { opacity: 0.8; }
-    100% { opacity: 0; }
+  0% {
+    opacity: 0.8;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 .screen-impact {
-    animation: impactShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  animation: impactShake 0.5s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes impactShake {
-    10%, 90% { transform: translate3d(-5px, 0, 0); }
-    20%, 80% { transform: translate3d(10px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-10px, 0, 0); }
-    40%, 60% { transform: translate3d(10px, 0, 0); }
+
+  10%,
+  90% {
+    transform: translate3d(-5px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(10px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-10px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(10px, 0, 0);
+  }
 }

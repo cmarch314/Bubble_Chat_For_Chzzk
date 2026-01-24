@@ -290,89 +290,130 @@ const ScreenEffectRegistry = {
         }
     },
 
-    storm: {
-        soundKey: "폭풍",
-        execute: () => {
-            let overlay = document.getElementById('void-overlay');
+    vergil: {
+        soundKey: "버질",
+        execute: (context = {}) => {
+            const overlayId = 'void-overlay';
+            let overlay = document.getElementById(overlayId);
             if (!overlay) {
                 overlay = document.createElement('div');
-                overlay.id = 'void-overlay';
+                overlay.id = overlayId;
                 overlay.innerHTML = '<div id="void-backdrop"></div><div id="void-slashes"></div>';
                 document.body.appendChild(overlay);
             }
 
             const backdrop = document.getElementById('void-backdrop');
             const slashContainer = document.getElementById('void-slashes');
-            slashContainer.innerHTML = ''; // Clear previous
+            slashContainer.innerHTML = ''; // Reset
 
-            // 1. Enter Void
+            // 1. [Start] Slashes (0s)
             backdrop.style.opacity = 1;
-
-            // 2. Generate Slashes (Multi-Line Dimensional Tear)
-            const slashCount = 4;
+            const slashCount = 30;
             const slashes = [];
 
             for (let i = 0; i < slashCount; i++) {
                 const slash = document.createElement('div');
                 slash.className = 'void-slash';
+                // Thread-like (1px) to Thick (50px)
+                const heightVar = 1 + Math.random() * 49;
+                const angleVar = Math.random() * 360;
+                const delay = i * 0.02;
+                const zIndex = 200 - i;
 
-                // Random Variations
-                const heightVar = 5 + Math.random() * 25; // 5px - 30px thick
-                const angleVar = -15 + (Math.random() * 4 - 2); // Slight angle jitter
-                const delay = i * 0.05; // Staggered entry
-                const zIndex = 200 - i; // Layering
+                const topPos = 10 + Math.random() * 80 + "%";
+                const leftPos = 10 + Math.random() * 80 + "%";
 
+                slash.style.position = 'absolute';
+                slash.style.top = topPos;
+                slash.style.left = leftPos;
                 slash.style.height = `${heightVar}px`;
-                slash.style.transform = `translate(-50%, -50%) rotate(${angleVar}deg) scaleX(0)`;
+                slash.style.setProperty('--rot', `${angleVar}deg`);
                 slash.style.zIndex = zIndex;
-                slash.style.animation = `slashEnter 0.3s cubic-bezier(0.1, 0.9, 0.2, 1) forwards ${delay}s`;
+                slash.style.animation = `slashEnter 0.2s cubic-bezier(0.1, 0.9, 0.2, 1) forwards ${delay}s`;
 
                 slashContainer.appendChild(slash);
                 slashes.push(slash);
             }
 
             return new Promise(resolve => {
-                // 3. Hold for 6 seconds
+                // 2. [Shatter] (6.2s)
                 setTimeout(() => {
-                    // 4. Shatter (Exit)
                     slashes.forEach(s => s.remove());
+                    // 3x3 Grid -> 4x3 Grid (User request: 12 shards)
+                    // Grid Distribution Logic
+                    const sectors = Array.from({ length: 12 }, (_, i) => i);
+                    sectors.forEach(sectorIdx => {
+                        const row = Math.floor(sectorIdx / 4); // 4 Columns
+                        const col = sectorIdx % 4;
+                        const cellW = window.innerWidth / 4;
+                        const cellH = window.innerHeight / 3;
 
-                    // Generate Shards
-                    const shardCount = 15;
-                    for (let i = 0; i < shardCount; i++) {
-                        const shard = document.createElement('div');
-                        shard.className = 'void-shard';
+                        // Center of cell + random spread
+                        const cx = (col * cellW) + (cellW * 0.2) + (Math.random() * (cellW * 0.6));
+                        const cy = (row * cellH) + (cellH * 0.2) + (Math.random() * (cellH * 0.6));
 
-                        // Center start position + random spread
-                        const startX = window.innerWidth / 2 + (Math.random() * 200 - 100);
-                        const startY = window.innerHeight / 2 + (Math.random() * 50 - 25);
+                        const shardCount = 10;
+                        for (let i = 0; i < shardCount; i++) {
+                            const shard = document.createElement('div');
+                            shard.className = 'void-shard';
+                            const startX = cx + (Math.random() * 40 - 20);
+                            const startY = cy + (Math.random() * 40 - 20);
+                            const angle = Math.random() * 360;
+                            const dist = 100 + Math.random() * 200;
 
-                        // Explosion vector
-                        const flyX = (Math.random() * 400 - 200) + 'px';
-                        const flyY = (Math.random() * 400 - 200) + 'px';
-                        const rot = (Math.random() * 360) + 'deg';
+                            const flyX = (Math.cos(angle * Math.PI / 180) * dist) + 'px';
+                            const flyY = (Math.sin(angle * Math.PI / 180) * dist) + 'px';
+                            const rot = (Math.random() * 360) + 'deg';
 
-                        shard.style.left = startX + 'px';
-                        shard.style.top = startY + 'px';
-                        shard.style.setProperty('--tx', flyX);
-                        shard.style.setProperty('--ty', flyY);
-                        shard.style.setProperty('--rot', rot);
+                            shard.style.left = startX + 'px';
+                            shard.style.top = startY + 'px';
+                            shard.style.setProperty('--tx', flyX);
+                            shard.style.setProperty('--ty', flyY);
+                            shard.style.setProperty('--rot', rot);
 
-                        shard.style.animation = `shardFly 0.6s ease-out forwards`;
-                        overlay.appendChild(shard);
+                            shard.style.animation = `shardFly 0.8s ease-out forwards`;
+                            overlay.appendChild(shard);
 
-                        // Clean individual shard
-                        setTimeout(() => shard.remove(), 600);
-                    }
+                            setTimeout(() => shard.remove(), 1000);
+                        }
+                    });
 
-                    // Fade out background
-                    backdrop.style.opacity = 0;
+                    backdrop.style.opacity = 0; // Fade out background
 
-                    // 5. Cleanup & Resolve
+                    // 3. [Text Finale] (Target: 10s from Start)
+                    // Current: 6.2s
+                    // Wait: 3.8s -> 10.0s
                     setTimeout(() => {
-                        resolve();
-                    }, 600); // Wait for shards to disappear
-                }, 6000); // 6s Hold
+                        let displayMsg = (context.message || "").trim();
+                        if (displayMsg.startsWith("버질")) {
+                            displayMsg = displayMsg.substring(2).trim();
+                        }
+
+                        if (displayMsg) {
+                            const textEle = document.createElement('div');
+                            textEle.className = 'vergil-text';
+                            textEle.innerText = displayMsg;
+                            document.body.appendChild(textEle);
+
+                            // Text Duration (7s)
+                            // 10s + 7s = 17s (Fade Out Start)
+                            setTimeout(() => {
+                                textEle.style.animation = "fadeOut 1s forwards";
+                                setTimeout(() => {
+                                    textEle.remove();
+                                    resolve(); // 18s: Done
+                                }, 1000);
+                            }, 7000);
+                        } else {
+                            // No text: Wait until 18s total to respect queue timing.
+                            // Current: 10s. Wait 8s more.
+                            setTimeout(() => {
+                                resolve(); // 18s: Done
+                            }, 8000);
+                        }
+                    }, 3800);
+
+                }, 6200);
             });
         }
     }
