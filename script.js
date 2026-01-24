@@ -317,19 +317,28 @@ const ScreenEffectRegistry = {
             const allWords = rawMsg.split(' ').filter(w => w.length > 0);
             let parts = ["", "", "", ""];
             if (allWords.length === 0) { }
-            else if (allWords.length === 1) { parts[3] = allWords[0]; }
+            else if (allWords.length === 1) {
+                parts[3] = allWords[0];
+            }
             else {
-                parts[3] = allWords.pop();
+                const lastWord = allWords.pop();
                 const remainder = allWords;
-                const totalWords = remainder.length;
-                if (totalWords === 1) { parts[0] = remainder[0]; }
-                else if (totalWords === 2) { parts[0] = remainder[0]; parts[1] = remainder[1]; }
-                else {
-                    const p1Len = Math.ceil(totalWords / 3);
-                    const p2Len = Math.ceil((totalWords - p1Len) / 2);
+                const totalRemainder = remainder.length;
+
+                if (totalRemainder === 1) {
+                    parts[0] = parts[1] = parts[2] = remainder[0];
+                    parts[3] = lastWord;
+                } else if (totalRemainder === 2) {
+                    parts[0] = parts[1] = remainder[0];
+                    parts[2] = remainder[1];
+                    parts[3] = lastWord;
+                } else {
+                    const p1Len = Math.ceil(totalRemainder / 3);
+                    const p2Len = Math.ceil((totalRemainder - p1Len) / 2);
                     parts[0] = remainder.slice(0, p1Len).join(' ');
                     parts[1] = remainder.slice(p1Len, p1Len + p2Len).join(' ');
                     parts[2] = remainder.slice(p1Len + p2Len).join(' ');
+                    parts[3] = lastWord;
                 }
             }
 
@@ -372,30 +381,40 @@ const ScreenEffectRegistry = {
             };
 
             const allEmojiRanges = [
-                [0x1F600, 0x1F64F], [0x1F300, 0x1F5FF], [0x1F680, 0x1F6FF],
-                [0x1F900, 0x1F9FF], [0x2600, 0x26FF], [0x2700, 0x27BF]
+                [0x1F600, 0x1F64F], // Smileys & People (Faces, Gestures)
+                [0x1F9D1, 0x1F9D1], // Specific People
+                [0x2764, 0x2764],   // Heart (❤️)
+                [0x1F493, 0x1F49F], // Heart category (Beating, Sparkling, etc)
+                [0x1F466, 0x1F469], // Boy, Girl, Man, Woman
+                [0x1F48B, 0x1F48B]  // Kiss Mark
             ];
-
             const delays = [1000, 300, 700];
             let delayIdx = 0;
             let currentTime = startEmojiTime;
             const endTime = 18000;
-            let nextFlashTime = startEmojiTime;
+            let emojiCounter = 0;
+            let lastWrapper = null; // Track previous for overlap
 
             while (currentTime < endTime) {
                 const time = currentTime;
+                const currentCount = ++emojiCounter;
+
                 setTimeout(() => {
+                    const prev = lastWrapper; // Capture previous
+
                     const wrapper = document.createElement('div');
                     wrapper.style.position = 'absolute';
-                    wrapper.style.left = `${Math.random() * 80 + 10}%`;
-                    wrapper.style.top = `${Math.random() * 80 + 10}%`;
+                    const x = Math.random() * 30 + 35;
+                    const y = Math.random() * 30 + 35;
+                    wrapper.style.left = `${x}%`;
+                    wrapper.style.top = `${y}%`;
                     wrapper.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 60 - 30}deg)`;
                     wrapper.style.zIndex = '15';
                     wrapper.style.display = 'flex';
                     wrapper.style.justifyContent = 'center';
                     wrapper.style.alignItems = 'center';
-                    wrapper.style.width = '10rem'; // Enough space
-                    wrapper.style.height = '10rem';
+                    wrapper.style.width = '40rem';
+                    wrapper.style.height = '40rem';
 
                     const em = document.createElement('div');
                     em.className = 'heart-dreamy-emoji';
@@ -403,16 +422,28 @@ const ScreenEffectRegistry = {
 
                     wrapper.appendChild(em);
                     emojiContainer.appendChild(wrapper);
-                    setTimeout(() => wrapper.remove(), 2500);
-                }, time);
+                    lastWrapper = wrapper; // Set as current
 
-                if (Math.abs(time - nextFlashTime) < 100) {
-                    setTimeout(() => {
-                        flash.style.opacity = '1';
-                        setTimeout(() => { flash.style.opacity = '0'; }, 500);
-                    }, time);
-                    nextFlashTime += 3000;
-                }
+                    if (window.twemoji) twemoji.parse(wrapper);
+
+                    // [OVERLAP LOGIC] 0.1s after the NEW one appears, remove the PREVIOUS one
+                    if (prev) {
+                        setTimeout(() => { if (prev.parentNode) prev.remove(); }, 100);
+                    }
+
+                    // Flash Logic: Every 3rd starting from 1st
+                    if ((currentCount - 1) % 3 === 0) {
+                        flash.style.transition = 'none';
+                        flash.style.opacity = '0.3';
+                        setTimeout(() => {
+                            flash.style.transition = 'opacity 0.5s';
+                            flash.style.opacity = '0';
+                        }, 100);
+                    }
+
+                    // Final cleanup fallback
+                    setTimeout(() => { if (wrapper.parentNode) wrapper.remove(); }, 2000);
+                }, time);
 
                 currentTime += delays[delayIdx % delays.length];
                 delayIdx++;
