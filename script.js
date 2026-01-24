@@ -336,6 +336,14 @@ const ScreenEffectRegistry = {
             }
 
             return new Promise(resolve => {
+                // 1.5 [Tremble] (5.2s - 1s before shatter)
+                setTimeout(() => {
+                    slashes.forEach(s => {
+                        const randSpeed = 0.05 + Math.random() * 0.1;
+                        s.style.animation = `slashTremble ${randSpeed}s infinite`;
+                    });
+                }, 5200);
+
                 // 2. [Shatter] (6.2s)
                 setTimeout(() => {
                     slashes.forEach(s => s.remove());
