@@ -341,15 +341,15 @@ const ScreenEffectRegistry = {
             }
 
             return new Promise(resolve => {
-                // 1.5 [Tremble] (6.2s - 1s before shatter)
+                // 1.5 [Tremble] (5.2s - 1s before shatter)
                 setTimeout(() => {
                     slashes.forEach(s => {
                         const randSpeed = 0.05 + Math.random() * 0.1;
                         s.style.animation = `slashTremble ${randSpeed}s infinite`;
                     });
-                }, 6200);
+                }, 5200);
 
-                // 2. [Shatter] (7.2s)
+                // 2. [Shatter] (6.2s)
                 setTimeout(() => {
                     // Start fading out slashes
                     slashes.forEach(s => {
@@ -400,7 +400,7 @@ const ScreenEffectRegistry = {
                     backdrop.style.opacity = 0; // Fade out background
 
                     // 3. [Text Finale] (Target: 10s from Start)
-                    // Current Delay: 2.8s (7.2s + 2.8s = 10s)
+                    // Current Delay: 3.8s (6.2s + 3.8s = 10s)
                     setTimeout(() => {
                         let displayMsg = (context.message || "").trim();
                         if (displayMsg.startsWith("버질")) {
@@ -432,7 +432,7 @@ const ScreenEffectRegistry = {
                         }
                     }, 2800);
 
-                }, 7200);
+                }, 6200);
             });
         }
     }
