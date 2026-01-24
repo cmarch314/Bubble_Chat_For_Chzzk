@@ -390,13 +390,13 @@ const ScreenEffectRegistry = {
                         }
 
                         if (displayMsg) {
+                            // [TIMELINE 10.0s] Text Appears (Slow Fade In 2s)
                             const textEle = document.createElement('div');
                             textEle.className = 'vergil-text';
                             textEle.innerText = displayMsg;
                             document.body.appendChild(textEle);
 
-                            // Text Duration (7s)
-                            // 10s + 7s = 17s (Fade Out Start)
+                            // Text Duration (7s) -> Hold until 17s mark
                             setTimeout(() => {
                                 textEle.style.animation = "fadeOut 1s forwards";
                                 setTimeout(() => {
