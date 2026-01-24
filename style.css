@@ -1275,10 +1275,14 @@ p {
 
 /* [New] Skull-Specific Slam Effect */
 .visual-center-text.skull-style {
-  font-size: 5rem;
+  font-size: 7rem;
   font-weight: 900;
   text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px black;
-  white-space: nowrap;
+  white-space: pre-wrap;
+  width: 100%;
+  line-height: 1.1;
+  box-sizing: border-box;
+  padding: 0 20px;
   /* Force browser to respect JS line breaks */
   animation: slamText 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
@@ -1304,12 +1308,16 @@ p {
 
 /* [New] Heart-Specific Text Style */
 .visual-center-text.heart-style {
-  font-size: 5rem;
+  font-size: 7rem;
   font-weight: 900;
   color: #ff69b4;
   /* Hot Pink */
   text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px white;
-  white-space: nowrap;
+  white-space: pre-wrap;
+  width: 100%;
+  line-height: 1.1;
+  box-sizing: border-box;
+  padding: 0 20px;
 }
 
 @keyframes fadeIn {
