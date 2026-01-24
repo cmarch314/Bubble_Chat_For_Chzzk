@@ -261,7 +261,7 @@ const VisualEffects = {
                         emojiContainer.style.fontSize = '';
                         resolve();
                     }, 9000);
-                }, 4000); // 4s total wait before visuals (3s read + 1s fade)
+                }, 11800); // 4s total wait before visuals (3s read + 1s fade)
             });
         }
     }
