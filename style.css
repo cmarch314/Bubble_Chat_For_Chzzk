@@ -1389,3 +1389,61 @@ p {
   0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
   100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 0; }
 }
+
+/* [Void Slash Distortion Upgrade] */
+#slash-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 99999;
+    overflow: hidden;
+}
+
+.slash-flash {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    opacity: 0;
+    animation: flashFade 0.2s linear;
+}
+
+.slash-distortion {
+    position: absolute;
+    width: 150vw; /* Extend beyond screen */
+    height: 30px; /* Thicker cut */
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px #00ffff;
+    backdrop-filter: invert(0.2) hue-rotate(90deg) blur(2px); 
+    mix-blend-mode: hard-light;
+    transform-origin: center;
+    transform: scaleX(0);
+    animation: slashStrike 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1) forwards;
+}
+
+@keyframes slashStrike {
+    0% { transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(0); opacity: 1; }
+    40% { transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1); opacity: 0; }
+}
+
+@keyframes flashFade {
+    0% { opacity: 0.8; }
+    100% { opacity: 0; }
+}
+
+.screen-impact {
+    animation: impactShake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes impactShake {
+    10%, 90% { transform: translate3d(-5px, 0, 0); }
+    20%, 80% { transform: translate3d(10px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-10px, 0, 0); }
+    40%, 60% { transform: translate3d(10px, 0, 0); }
+}
