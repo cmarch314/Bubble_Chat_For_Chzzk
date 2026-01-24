@@ -130,8 +130,34 @@ const VisualEffects = {
 
             // [NEW] Show raw message text in the center
             const centerMsgSnippet = document.createElement('div');
-            centerMsgSnippet.className = 'visual-center-text';
-            centerMsgSnippet.innerText = context.message || "";
+            centerMsgSnippet.className = 'visual-center-text skull-style';
+
+            let displayMsg = (context.message || "").trim();
+
+            // 1. Remove Trigger Keyword
+            const triggerKw = "해골";
+            if (displayMsg.startsWith(triggerKw)) {
+                displayMsg = displayMsg.substring(triggerKw.length).trim();
+            }
+
+            // 2. Word Wrap Logic (Max 25 chars per line)
+            const words = displayMsg.split(' ');
+            let lines = [];
+            let currentLine = words[0] || "";
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                if ((currentLine + " " + word).length <= 25) {
+                    currentLine += " " + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            if (currentLine) lines.push(currentLine);
+
+            // 3. Render
+            centerMsgSnippet.innerHTML = lines.join('<br>');
             document.body.appendChild(centerMsgSnippet);
 
             return new Promise(resolve => {
