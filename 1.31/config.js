@@ -5,8 +5,6 @@ window.HIVE_SOUND_CONFIG = {
     // [Screen Effects]
     "해골": "SkullMeme.mp3",
     "커플": "DieWithASmile.mp3",
-    "버질": "I AM THE STORM.mp3",
-    "돌핀": "Dolphin.mp3",
     "폭풍": "I AM THE STORM.mp3",
 
     // [Reactions & Memes]
@@ -47,7 +45,5 @@ window.HIVE_SOUND_CONFIG = {
 
 window.HIVE_VISUAL_CONFIG = {
     "해골": "skull",
-    "커플": "heart",
-    "버질": "vergil",
-    "돌핀": "dolphin"
+    "커플": "heart"
 };
