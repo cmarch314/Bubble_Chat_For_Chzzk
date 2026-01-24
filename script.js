@@ -215,12 +215,12 @@ const VisualEffects = {
 
                 // Timeline: 
                 // 0s: Text Fade In Start
-                // 3s: Text Fade Out Start
-                // 4s: Text Remove, Heart Emoji Start
+                // Emoji Start: 11800ms
+                // Text Fade Out Start: 11800ms - 1000ms (Gap) - 1000ms (Fade Duration) = 9800ms
 
                 setTimeout(() => {
                     centerMsgSnippet.style.animation = "fadeOut 1s forwards"; // Start Fade Out
-                }, 3000);
+                }, 9800);
 
                 setTimeout(() => {
                     if (centerMsgSnippet) centerMsgSnippet.remove(); // Cleanup Text
