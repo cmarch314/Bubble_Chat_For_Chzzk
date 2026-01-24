@@ -715,13 +715,10 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         const normKey = keyword.normalize('NFC');
         // [REFINE] Only trigger if the message starts with the keyword (trimmed)
         if (normMessage.trim().startsWith(normKey)) {
-            // Screen Effect Manager를 통해 대기열 등록
+            // 비주얼 효과 통합 관리자를 통해 실행
             const effectType = visualConfig[keyword];
-            // Check if effect exists in new Registry
-            if (typeof ScreenEffectRegistry !== 'undefined' && ScreenEffectRegistry[effectType]) {
-                ScreenEffectManager.trigger(effectType, { message: message });
-                isVisualCommand = true;
-            }
+            VisualEffectManager.trigger(effectType, { message: message });
+            isVisualCommand = true;
         }
     });
 
