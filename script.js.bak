@@ -181,9 +181,9 @@ const ScreenEffectRegistry = {
                     el.innerHTML = lines.join('<br>');
 
                     document.body.appendChild(el);
-                    el.style.animation = "hvn-skull-fadeIn 0.2s forwards";
+                    el.style.animation = "fadeIn 0.2s forwards";
                     setTimeout(() => {
-                        el.style.animation = "hvn-skull-fadeOut 0.2s forwards";
+                        el.style.animation = "fadeOut 0.2s forwards";
                         setTimeout(() => el.remove(), 200);
                     }, duration - 200);
                 }, delay);
@@ -208,7 +208,7 @@ const ScreenEffectRegistry = {
                         setTimeout(() => {
                             hammer.style.opacity = '1';
                             // 3.14s cycle
-                            hammer.style.animation = "hvn-skull-hammerStrike 3.14s infinite";
+                            hammer.style.animation = "hammerStrike 3.14s infinite";
                         }, 1200);
                     }
 
@@ -291,9 +291,9 @@ const ScreenEffectRegistry = {
                     el.innerHTML = lines.join('<br>');
 
                     document.body.appendChild(el);
-                    el.style.animation = "hvn-skull-fadeIn 0.2s forwards";
+                    el.style.animation = "fadeIn 0.2s forwards";
                     setTimeout(() => {
-                        el.style.animation = "hvn-skull-fadeOut 0.2s forwards";
+                        el.style.animation = "fadeOut 0.2s forwards";
                         setTimeout(() => el.remove(), 200);
                     }, duration - 200);
                 }, delay);
@@ -379,7 +379,7 @@ const ScreenEffectRegistry = {
             }
             if (currentLine) lines.push(currentLine);
             centerMsgSnippet.innerHTML = lines.join('<br>');
-            centerMsgSnippet.style.animation = "hvn-couple-fadeIn 1s forwards"; // Start Fade In
+            centerMsgSnippet.style.animation = "fadeIn 1s forwards"; // Start Fade In
 
             document.body.appendChild(centerMsgSnippet);
 
@@ -392,7 +392,7 @@ const ScreenEffectRegistry = {
                 // Text Fade Out Start: 11800ms - 1000ms (Gap) - 1000ms (Fade Duration) = 10300ms
 
                 setTimeout(() => {
-                    centerMsgSnippet.style.animation = "hvn-couple-fadeOut 1s forwards"; // Start Fade Out
+                    centerMsgSnippet.style.animation = "fadeOut 1s forwards"; // Start Fade Out
                 }, 10300);
 
                 setTimeout(() => {
@@ -524,9 +524,9 @@ const ScreenEffectRegistry = {
                     el.className = 'heart-dreamy-text';
                     el.innerText = text;
                     overlay.appendChild(el);
-                    el.style.animation = "hvn-heart-fadeIn 0.5s forwards";
+                    el.style.animation = "fadeIn 0.5s forwards";
                     setTimeout(() => {
-                        el.style.animation = "hvn-heart-fadeOut 0.5s forwards";
+                        el.style.animation = "fadeOut 0.5s forwards";
                         setTimeout(() => el.remove(), 500);
                     }, duration - 500);
                 }, delay);
@@ -724,9 +724,9 @@ const ScreenEffectRegistry = {
                     el.className = 'heart-dreamy-text';
                     el.innerText = text;
                     overlay.appendChild(el);
-                    el.style.animation = "hvn-heart-fadeIn 0.5s forwards";
+                    el.style.animation = "fadeIn 0.5s forwards";
                     setTimeout(() => {
-                        el.style.animation = "hvn-heart-fadeOut 0.5s forwards";
+                        el.style.animation = "fadeOut 0.5s forwards";
                         setTimeout(() => el.remove(), 500);
                     }, duration - 500);
                 }, delay);
@@ -850,7 +850,7 @@ const ScreenEffectRegistry = {
             const slashes = [];
             for (let i = 0; i < 30; i++) {
                 const s = document.createElement('div'); s.className = 'void-slash';
-                s.style.cssText = `position:absolute; top:${10 + Math.random() * 80}%; left:${10 + Math.random() * 80}%; height:${1 + Math.random() * 49}px; --rot:${Math.random() * 360}deg; z-index:${200 - i}; animation:hvn-vergil-slashEnter 0.2s forwards ${i * 0.02}s;`;
+                s.style.cssText = `position:absolute; top:${10 + Math.random() * 80}%; left:${10 + Math.random() * 80}%; height:${1 + Math.random() * 49}px; --rot:${Math.random() * 360}deg; z-index:${200 - i}; animation:slashEnter 0.2s forwards ${i * 0.02}s;`;
                 slashC.appendChild(s); slashes.push(s);
             }
             return new Promise(resolve => {
@@ -861,9 +861,9 @@ const ScreenEffectRegistry = {
                     resolve();
                 }, 19000);
 
-                setTimeout(() => { slashes.forEach(s => s.style.animation = `hvn-vergil-slashTremble ${0.05 + Math.random() * 0.1}s infinite`); }, 5200);
+                setTimeout(() => { slashes.forEach(s => s.style.animation = `slashTremble ${0.05 + Math.random() * 0.1}s infinite`); }, 5200);
                 setTimeout(() => {
-                    slashes.forEach(s => { s.style.animation = "hvn-vergil-fadeOut 1s forwards"; setTimeout(() => s.remove(), 1000); });
+                    slashes.forEach(s => { s.style.animation = "fadeOut 1s forwards"; setTimeout(() => s.remove(), 1000); });
                     for (let i = 0; i < 12; i++) {
                         const row = Math.floor(i / 4), col = i % 4, w = window.innerWidth / 4, h = window.innerHeight / 3;
                         const cx = (col * w) + (w * 0.2) + (Math.random() * w * 0.6), cy = (row * h) + (h * 0.2) + (Math.random() * h * 0.6);
@@ -871,7 +871,7 @@ const ScreenEffectRegistry = {
                             const shard = document.createElement('div'); shard.className = 'void-shard';
                             const ang = Math.random() * 360, d = 200 + Math.random() * 400;
                             shard.style.cssText = `left:${cx + Math.random() * 40 - 20}px; top:${cy + Math.random() * 40 - 20}px; --tx:${Math.cos(ang * Math.PI / 180) * d}px; --ty:${Math.sin(ang * Math.PI / 180) * d}px; --rot:${Math.random() * 360}deg;`;
-                            const dur = 1.5 + Math.random() * 2; shard.style.animation = `hvn-vergil-shardFly ${dur}s ease-out forwards`;
+                            const dur = 1.5 + Math.random() * 2; shard.style.animation = `shardFly ${dur}s ease-out forwards`;
                             ov.appendChild(shard); setTimeout(() => shard.remove(), dur * 1000);
                         }
                     }
@@ -882,7 +882,7 @@ const ScreenEffectRegistry = {
                             const txt = document.createElement('div'); txt.className = 'vergil-text'; txt.innerText = msg; document.body.appendChild(txt);
                             // Text Fade Out starts at 17s (6200 + 3800 + 7000 = 17000)
                             // Finishes at 18s. 
-                            setTimeout(() => { txt.style.animation = "hvn-vergil-fadeOut 1s forwards"; setTimeout(() => { txt.remove(); }, 1000); }, 7000);
+                            setTimeout(() => { txt.style.animation = "fadeOut 1s forwards"; setTimeout(() => { txt.remove(); }, 1000); }, 7000);
                         }
                     }, 3800);
                 }, 6200);
@@ -1850,8 +1850,9 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     chatBox.style.animationIterationCount = Math.floor((message.match(/ㅋ/g) || []).length * 1.5);
 
     // [Animations]
-    if (originalMessage.includes("ㅜㅑ")) {
+    if (originalMessage.includes("ㅜㅑ") || originalMessage.includes("!ㅜㅑ")) {
         // message is already stripped of !ㅜㅑ by global stripper
+        if (message.includes("ㅜㅑ")) message = message.replace("ㅜㅑ", "").trim();
         nameEle.style.color = "black";
         messageEle.style.color = "white";
         messageEle.style.position = "middle";
@@ -1891,12 +1892,13 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     }
 
     if (originalMessage.includes("빛")) {
-        chatLineInner.style.animationName = "chat-hvn-glow";
+        chatLineInner.style.animationName = "glow";
         chatLineInner.style.animationIterationCount = 10;
         chatLineInner.style.animationDuration = "1s";
         chatLineInner.style.animationTimingFunction = "linear";
     } else if (includesAny(["무지개", "겜성", "led", "rgb"], originalMessage.toLowerCase())) {
-        chatLineInner.style.animationName = "chat-hvn-rainbow";
+        message = message.replace("무지개", "").trim();
+        chatLineInner.style.animationName = "rainbow";
         chatLineInner.style.animationIterationCount = 10;
         chatLineInner.style.animationDuration = "2.5s";
         chatLineInner.style.animationTimingFunction = "linear";
@@ -1917,7 +1919,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     let usesSlot = true;
 
     if (originalMessage.includes("ㅂㄷㅂㄷ")) {
-        messageEle.style.animationName = "chat-hvn-vibrate";
+        messageEle.style.animationName = "vibrate";
         messageEle.style.animationIterationCount = 30;
         messageEle.style.animationDuration = "0.5s";
         messageEle.style.animationTimingFunction = "linear";
@@ -1941,7 +1943,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         chatBox.style.bottom = "auto";
         chatBox.style.transform = "none";
 
-        chatBox.style.animationName = "chat-hvn-slideDiagonal";
+        chatBox.style.animationName = "slideDiagonal";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = "3s";
@@ -1952,7 +1954,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         timeout = 3500;
     }
     else if (includesAny(["조이고"], message) || (message.startsWith(")") && message.endsWith("("))) {
-        messageEle.style.animationName = "chat-hvn-shrinkX";
+        messageEle.style.animationName = "shrinkX";
         messageEle.style.animationIterationCount = 1;
         messageEle.style.animationDuration = "3s";
         messageEle.style.animationFillMode = "forwards";
@@ -1966,7 +1968,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         let finalMessage = handleEmotes(chan, data.emotes_chzzk || {}, message);
         addEmoteDOM(messageEle, finalMessage);
 
-        messageEle.style.animationName = "chat-hvn-squeeze";
+        messageEle.style.animationName = "squeeze";
         messageEle.style.animationDuration = "2s";
         messageEle.style.animationIterationCount = 1;
         messageEle.style.animationFillMode = "forwards";
@@ -1978,32 +1980,22 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         messageEle.style.textAlign = "center";
     }
     else if (startsWithAny(["자라나라"], message)) {
-        messageEle.style.animationName = "chat-hvn-growY";
+        messageEle.style.animationName = "growY";
         messageEle.style.animationDuration = "1s";
         messageEle.style.animationIterationCount = 20;
         messageEle.style.animationTimingFunction = "linear";
         messageEle.style.animationFillMode = "forwards";
         messageEle.style.webkitLineClamp = "1";
     }
-    else if (message.includes("))")) {
+    else if (includesAny(["))", "(("], message)) {
         messageEle.style.fontSize = 3.0 + "em";
         messageEle.style.position = "middle";
         messageEle.style.textAlign = "center";
 
-        // )) moves with normal hipDance (right to left swing)
-        messageEle.style.animationName = "chat-hvn-hipDance";
-        messageEle.style.animationIterationCount = 5;
-        messageEle.style.animationDuration = "1.8s";
-        messageEle.style.animationFillMode = "forwards";
-        messageEle.style.animationTimingFunction = "linear";
-    }
-    else if (message.includes("((")) {
-        messageEle.style.fontSize = 3.0 + "em";
-        messageEle.style.position = "middle";
-        messageEle.style.textAlign = "center";
+        // [FIX] Conserve original message content
+        // messageEle.innerText = "))"; // Removed to keep user text
 
-        // (( moves with reversed hipDance (left to right swing)
-        messageEle.style.animationName = "chat-hvn-hipDanceReverse";
+        messageEle.style.animationName = "hipDance";
         messageEle.style.animationIterationCount = 5;
         messageEle.style.animationDuration = "1.8s";
         messageEle.style.animationFillMode = "forwards";
@@ -2017,13 +2009,13 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     }
 
     if (endsWithAny(["!?", "?!"], message) || message.includes("불편")) {
-        chatBox.style.animationName = "chat-hvn-shake2";
+        chatBox.style.animationName = "shake2";
         chatBox.style.animationIterationCount = 50;
         messageEle.style.position = "middle";
         timeout = 3000;
     }
     else if (message.includes("나죽어")) {
-        chatBox.style.animationName = "chat-hvn-death";
+        chatBox.style.animationName = "death";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationDuration = "3s";
         chatBox.style.animationFillMode = "forwards";
@@ -2031,7 +2023,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         timeout = 3000;
     }
     else if (message.includes("흡!") || message.endsWith("흡")) {
-        chatBox.style.animationName = "chat-hvn-fadeOutFall";
+        chatBox.style.animationName = "fadeOut";
         chatBox.style.animationIterationCount = "1";
         chatBox.style.animationDuration = "6s";
         chatBox.style.animationFillMode = "forwards";
@@ -2039,21 +2031,21 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     }
     else if (message.startsWith("성불")) {
         chatBox.style.maxHeight = "auto";
-        chatBox.style.animationName = "chat-hvn-toHeaven";
+        chatBox.style.animationName = "toHeaven";
         chatBox.style.animationIterationCount = "1";
         chatBox.style.animationDuration = "5s";
         chatBox.style.animationFillMode = "forwards";
     }
     else if (["갔냐?", "갔냐", "ㄱㄴ?", "ㄱㄴㄱㄴ?", "ㄱㄴ", "ㄱㄴㄱㄴ"].includes(message)) {
         chatBox.style.maxHeight = "auto";
-        chatBox.style.animationName = "chat-hvn-scout";
+        chatBox.style.animationName = "scout";
         chatBox.style.animationIterationCount = "1";
         chatBox.style.animationDuration = "4s";
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationFillMode = "forwards";
     }
     else if (includesAny(["덜렁덜렁", "ㄷㄹㄷㄹ", "출렁출렁", "덜렁"], message)) {
-        chatBox.style.animationName = "chat-hvn-balls";
+        chatBox.style.animationName = "balls";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationDuration = "2s";
         chatBox.style.animationTimingFunction = "linear";
@@ -2062,76 +2054,76 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     }
     else if (message.endsWith("~")) {
         messageEle.style.position = "middle";
-        chatBox.style.animationName = "chat-hvn-wave";
+        chatBox.style.animationName = "wave";
         chatBox.style.animationIterationCount = Math.floor((message.match(/~/g) || []).length);
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = "1s";
     }
     else if (message.startsWith("앗") || message.includes("엌")) {
-        chatBox.style.animationName = "chat-hvn-upDown";
+        chatBox.style.animationName = "upDown";
         chatBox.style.animationIterationCount = "1";
         chatBox.style.animationDuration = ".4s";
     }
     else if (includesAny(["맞음", "맞아요", "ㅔ", "ㅖ", "ㅇㅇ", "ㅇㅋ"], message) || message == "ㄹㅇ") {
-        chatBox.style.animationName = "chat-hvn-yes";
+        chatBox.style.animationName = "yes";
         chatBox.style.animationIterationCount = "2";
         chatBox.style.animationDuration = ".6s";
     }
     else if (["해", "명", "극", "나", "락"].includes(message) || message.endsWith("!")) {
-        chatBox.style.animationName = "chat-hvn-shake3";
+        chatBox.style.animationName = "shake3";
         chatBox.style.animationIterationCount = "50";
         chatBox.style.animationDuration = ".4s";
         messageEle.style.position = "middle";
     }
     else if (message.includes("?")) {
-        chatBox.style.animationName = "chat-hvn-shake4";
+        chatBox.style.animationName = "shake4";
         chatBox.style.animationIterationCount = "1";
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = ".3s";
         messageEle.style.position = "middle";
     }
     else if (includesAny(["안녕", "👋"], message) || endsWithAny(["하", "바"], message)) {
-        chatBox.style.animationName = "chat-hvn-shake4";
+        chatBox.style.animationName = "shake4";
         chatBox.style.animationIterationCount = "5";
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = ".3s";
         messageEle.style.position = "middle";
     }
     else if (message.includes("ㄷㄷ")) {
-        chatBox.style.animationName = "chat-hvn-fear";
+        chatBox.style.animationName = "fear";
         chatBox.style.animationIterationCount = Math.floor((message.match(/ㄷ/g) || []).length);;
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = ".3s";
         messageEle.style.position = "middle";
     }
     else if (includesAny(["ㅠㅠ", "ㅠㅜ", "ㅜㅠ", "ㅜㅜ"], message)) {
-        chatBox.style.animationName = "chat-hvn-crying";
+        chatBox.style.animationName = "crying";
         chatBox.style.animationIterationCount = "5";
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = "1.5s";
         messageEle.style.position = "middle";
     }
     else if (message.includes("ㄴㄴ")) {
-        chatBox.style.animationName = "chat-hvn-nope";
+        chatBox.style.animationName = "nope";
         chatBox.style.animationIterationCount = Math.floor((message.match(/ㄴ/g) || []).length);;
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = "1s";
         messageEle.style.position = "middle";
     }
     else if (message.includes("ㄱㄱ")) {
-        chatBox.style.animationName = "chat-hvn-walking";
+        chatBox.style.animationName = "walking";
         chatBox.style.animationIterationCount = Math.floor((message.match(/ㄱ/g) || []).length);;
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = "1s";
         messageEle.style.position = "middle";
     }
     else if (message.includes("헤으응")) {
-        chatBox.style.animationName = "chat-hvn-shrink";
+        chatBox.style.animationName = "shrink";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationDuration = "2s";
         chatBox.style.animationFillMode = "forwards";
         chatBox.style.animationTimingFunction = "linear";
-        chatLineInner.style.animationName = "chat-hvn-shy";
+        chatLineInner.style.animationName = "shy";
         chatLineInner.style.animationIterationCount = 1;
         chatLineInner.style.animationDuration = "2s";
         chatLineInner.style.animationFillMode = "forwards";
@@ -2139,21 +2131,21 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     }
     else if (["ㄴㅇㄱ", "ㅇ0ㅇ", 'oOo', 'o0o'].includes(message)) {
         messageEle.style.fontSize = 2.6 + "em";
-        chatBox.style.animationName = "chat-hvn-surprised";
+        chatBox.style.animationName = "surprised";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationDuration = "0.5s";
         chatBox.style.animationFillMode = "forwards";
         chatBox.style.animationTimingFunction = "ease-in";
     }
     else if (includesAny(["...", ";;"], message)) {
-        chatBox.style.animationName = "chat-hvn-fall";
+        chatBox.style.animationName = "fall";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationDuration = "10s";
         chatBox.style.animationTimingFunction = "linear";
         messageEle.style.position = "middle";
     }
     else if (message == "히오스" || message == "짜잔") {
-        chatBox.style.animationName = "chat-hvn-Hots";
+        chatBox.style.animationName = "Hots";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationDuration = "1s";
         chatBox.style.animationTimingFunction = "linear";
@@ -2164,42 +2156,42 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         messageEle.style.position = "middle";
         messageEle.style.textAlign = "center";
         messageEle.innerText = "둠칫둠칫";
-        chatBox.style.animationName = "chat-hvn-beat";
+        chatBox.style.animationName = "beat";
         chatBox.style.animationIterationCount = 20;
         chatBox.style.animationDuration = "0.5s";
         chatBox.style.animationTimingFunction = "linear";
 
-        messageEle.style.animationName = "chat-hvn-beat";
+        messageEle.style.animationName = "beat";
         messageEle.style.animationIterationCount = 20;
         messageEle.style.animationDuration = "0.5s";
         messageEle.style.animationTimingFunction = "linear";
     }
     else if (normOriginal.startsWith("!제발") || message == "🤣") {
         // [Global Strip] !제발 is already removed from 'message'
-        nameBox.style.animationName = "chat-hvn-shake3";
+        nameBox.style.animationName = "shake3";
         nameBox.style.animationIterationCount = 50;
         nameBox.style.animationDuration = "0.3s";
         nameBox.style.animationTimingFunction = "linear";
 
-        messageEle.style.animationName = "chat-hvn-shake2";
+        messageEle.style.animationName = "shake2";
         messageEle.style.animationIterationCount = 40;
         messageEle.style.animationDuration = "0.2s";
         messageEle.style.animationTimingFunction = "linear";
     }
     else if (message == ("틀")) {
         messageEle.innerText = ("-틀-")
-        nameBox.style.animationName = "chat-hvn-shake3";
+        nameBox.style.animationName = "shake3";
         nameBox.style.animationIterationCount = 40;
         nameBox.style.animationDelay = "-0.1s";
         nameBox.style.animationDuration = "0.4s";
         nameBox.style.animationTimingFunction = "linear";
 
-        messageEle.style.animationName = "chat-hvn-shake3";
+        messageEle.style.animationName = "shake3";
         messageEle.style.animationIterationCount = 40;
         messageEle.style.animationDuration = "0.4s";
         messageEle.style.animationTimingFunction = "linear";
 
-        chatBox.style.animationName = "chat-hvn-fear";
+        chatBox.style.animationName = "fear";
         chatBox.style.animationIterationCount = 10;
         chatBox.style.animationTimingFunction = "linear";
         chatBox.style.animationDuration = "6s";
@@ -2210,11 +2202,11 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         if (Math.random() >= 0.5) {
             chatBox.style.left = "-350px";
             chatBox.style.right = null;
-            chatBox.style.animationName = "chat-hvn-passThroughLtoR";
+            chatBox.style.animationName = "passThroughLtoR";
         } else {
             chatBox.style.left = null;
             chatBox.style.right = "-350px";
-            chatBox.style.animationName = "chat-hvn-passThroughRtoL";
+            chatBox.style.animationName = "passThroughRtoL";
         }
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationDuration = "3.5s";
@@ -2235,7 +2227,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         messageEle.innerText = message;
         chatBox.style.left = Math.random() * 90 + "%";
         chatBox.style.bottom = "1300px";
-        chatBox.style.animationName = "chat-hvn-passThrough2";
+        chatBox.style.animationName = "passThrough2";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationTimingFunction = "cubic-bezier(0.310, 0.440, 0.445, 1.650)";
         chatBox.style.animationDuration = "3s";
@@ -2255,7 +2247,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         messageEle.innerText = message;
         chatBox.style.left = Math.random() * 90 + "%";
         chatBox.style.bottom = "-500px";
-        chatBox.style.animationName = "chat-hvn-passThrough3";
+        chatBox.style.animationName = "passThrough3";
         chatBox.style.animationIterationCount = 1;
         chatBox.style.animationTimingFunction = "cubic-bezier(0.310, 0.440, 0.445, 1.650)";
         chatBox.style.animationDuration = "3s";

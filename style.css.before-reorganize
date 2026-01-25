@@ -27,11 +27,6 @@
   animation: hvn-heart-grow 2.0s ease-out forwards;
 }
 
-
-/* ============================================================================
-   3. BASE HTML & BODY STYLES
-   ============================================================================ */
-
 html {
   font-size: 90%;
 }
@@ -84,11 +79,6 @@ body {
   height: 1px;
   background-color: white;
 }
-
-
-/* ============================================================================
-   4. LAYOUT COMPONENTS (Star Wars Scroll, Loading)
-   ============================================================================ */
 
 .intro {
   font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
@@ -185,10 +175,6 @@ p {
 }
 
 
-/* ============================================================================
-   5. CHAT BOX BASE STYLES
-   ============================================================================ */
-
 .chat-box {
   position: absolute;
   bottom: -7px;
@@ -203,10 +189,6 @@ p {
   animation-iteration-count: 0;
 }
 
-
-/* ============================================================================
-   6. GENERAL CHAT ANIMATIONS (chat-hvn-*)
-   ============================================================================ */
 
 @keyframes chat-hvn-glow {
   0% {
@@ -758,49 +740,6 @@ p {
   }
 }
 
-@keyframes chat-hvn-hipDanceReverse {
-  0% {
-    transform: scaleX(-1);
-  }
-
-  12.5% {
-    transform: scaleX(-1) translate(-23px, -5px);
-  }
-
-  25% {
-    transform: scaleX(-1) translate(-20px, 0px);
-  }
-
-  37.5% {
-    transform: scaleX(-1) translate(-23px, -5px);
-  }
-
-  50% {
-    transform: scaleX(-1) translate(-20px, 0px);
-  }
-
-  51% {
-    transform: scaleX(1);
-  }
-
-  62.5% {
-    transform: translate(-23px, -5px);
-  }
-
-  75% {
-    transform: translate(-20px, 0px);
-  }
-
-  87.5% {
-    transform: translate(-23px, -5px);
-  }
-
-  100% {
-    transform: translate(-20px, 0px);
-  }
-}
-
-
 @keyframes chat-hvn-vibrate {
 
   0% {
@@ -1135,135 +1074,6 @@ p {
   filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
 }
 
-
-
-/* [NEW] Heart Effect (Dreamy) */
-#heart-dreamy-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2147483645;
-  pointer-events: none;
-}
-
-#heart-dreamy-backdrop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at center, rgba(255, 200, 150, 0.4), rgba(255, 100, 100, 0.2));
-  backdrop-filter: blur(5px) sepia(30%);
-  opacity: 0;
-  transition: opacity 2s;
-  z-index: 1;
-}
-
-#heart-dreamy-backdrop.visible {
-  opacity: 1;
-}
-
-.heart-emoji-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.heart-flash {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: white;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 20;
-  transition: opacity 0.5s;
-}
-
-.heart-dreamy-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 8rem;
-  color: #fff;
-  font-weight: 900;
-  text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff1493;
-  width: 90%;
-  text-align: center;
-  z-index: 30;
-  opacity: 0;
-  font-family: 'CookieRun-Regular', sans-serif;
-}
-
-.heart-dreamy-emoji {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  font-size: 40rem;
-  /* Reduced from 60rem (~33% reduction) */
-  color: white;
-  /* Changed animation to be smoother: large/transparent -> normal size/opaque */
-  animation: smoothIn 0.6s ease-out forwards;
-  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
-  will-change: transform, opacity;
-}
-
-/* Ensure Twemoji images also scale to the new size */
-.heart-dreamy-emoji img.emoji {
-  width: 40rem;
-  height: 40rem;
-  object-fit: contain;
-}
-
-@keyframes smoothIn {
-  0% {
-    transform: scale(2);
-    /* Start large */
-    opacity: 0;
-    filter: blur(10px) drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
-  }
-
-  100% {
-    transform: scale(1);
-    /* Return to normal */
-    opacity: 1;
-    filter: blur(0px) drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
-  }
-}
-
-
-/* Couple Effect Animations */
-@keyframes hvn-couple-fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes hvn-couple-fadeOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
 /* [New Feature] Old Film Noise Overlay */
 .film-grain {
   position: absolute;
@@ -1406,10 +1216,7 @@ p {
 }
 
 
-/* ============================================================================
-   8. FILM EFFECTS (Flashback, Grain, Scratch)
-   ============================================================================ */
-
+/* Flashback Filter Overlay */
 /* Flashback Filter Overlay */
 #flashback-overlay {
   position: fixed;
@@ -1537,6 +1344,22 @@ p {
 }
 
 /* [New Animation] Heart Effect Grow */
+@keyframes hvn-heart-grow {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  30% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
 
 .grow-effect {
   animation: hvn-heart-grow 2.0s ease-out forwards;
@@ -1591,6 +1414,536 @@ body {
   background-color: white;
 }
 
+.intro {
+  font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
+  margin: auto;
+  position: absolute;
+  top: 40%;
+  left: 28%;
+
+  z-index: 1;
+  animation: chat-hvn-intro 6s ease-out 0.5s;
+  color: rgb(75, 213, 238);
+  font-weight: 400;
+  font-size: 300%;
+  opacity: 0;
+}
+
+@keyframes chat-hvn-intro {
+  0% {
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+p {
+  color: #FFFF82;
+}
+
+/* Set the font, lean the board, position it */
+#board {
+  align-content: center;
+  font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
+  transform: perspective(300px) rotateX(18deg);
+  transform-origin: 50% 100%;
+  text-align: justify;
+  position: absolute;
+  margin-left: -9em;
+  font-weight: bold;
+  overflow: hidden;
+  font-size: 400%;
+  height: 50em;
+  width: 18em;
+  bottom: 0;
+  left: 50%;
+}
+
+#board:after {
+  margin: auto;
+  position: absolute;
+  content: ' ';
+  bottom: 60%;
+  left: 0;
+  right: 0;
+  top: 0;
+}
+
+/* Set the scrolling animation and position it */
+#content {
+  animation: chat-hvn-scroll 170s linear 0s;
+  position: absolute;
+  top: 100%;
+  text-align: justify;
+}
+
+#title {
+  font-size: 450%;
+  text-align: center;
+  margin-bottom: 0%;
+}
+
+#subtitle {
+  text-align: right;
+  margin-bottom: 0%;
+}
+
+@keyframes chat-hvn-scroll {
+  0% {
+    top: 100%;
+  }
+
+  100% {
+    top: -120%;
+  }
+}
+
+
+.chat-box {
+  position: absolute;
+  bottom: -7px;
+  width: auto;
+  max-width: 380px;
+  background: tranparent;
+  overflow: hidden;
+  max-height: 0px;
+  transition: opacity 2s, max-height 1s, margin-top 1s;
+
+  animation: chat-hvn-shake .2s;
+  animation-iteration-count: 0;
+}
+
+
+@keyframes chat-hvn-glow {
+  0% {
+    text-shadow: 0 0 10px #fff, 0 0 10px #fff;
+  }
+
+  50% {
+    text-shadow: 0 0 30px #fff, 0 0 10px #fff, 0 0 10px #fff;
+  }
+
+  100% {
+    text-shadow: 0 0 10px #fff, 0 0 10px #fff;
+  }
+}
+
+@keyframes chat-hvn-darken {
+  0% {
+    text-shadow: 0px 0px 10px #000000, 0 0px 10px #000000;
+  }
+
+  50% {
+    text-shadow: 0px 0px 30px #000000, 0 0px 10px #000000, 0 0px 10px #000000;
+  }
+
+  100% {
+    text-shadow: 0 0px 10px #000000, 0 0px 10px #000000;
+  }
+}
+
+@keyframes chat-hvn-shy {
+
+  100% {
+    color: pink;
+    text-shadow: 0 0px 20px pink, 0 0px 10px pink;
+  }
+}
+
+@keyframes chat-hvn-rainbow {
+  0% {
+    color: red;
+  }
+
+  10% {
+    color: orange;
+  }
+
+  20% {
+    color: yellow;
+  }
+
+  30% {
+    color: green;
+  }
+
+  40% {
+    color: cyan;
+  }
+
+  50% {
+    color: blue;
+  }
+
+  65% {
+    color: navy;
+  }
+
+  80% {
+    color: purple;
+  }
+
+  90% {
+    color: magenta;
+  }
+}
+
+@keyframes chat-hvn-fadeOutFall {
+  0% {
+    opacity: 1
+  }
+
+  95% {
+    opacity: 0.4;
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(0px, 200px) rotate(90deg);
+  }
+}
+
+@keyframes chat-hvn-toHeaven {
+  0% {
+    opacity: 1;
+    transform: translate(0px, 0px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(0px, -30px);
+  }
+}
+
+@keyframes fall {
+  0% {
+    transform: translate(0px, -20px) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(0px, 50px) rotate(0deg);
+  }
+}
+
+@keyframes chat-hvn-shake {
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+
+  20% {
+    transform: translate(-1px, -2px) rotate(-1deg);
+  }
+
+  40% {
+    transform: translate(-3px, 0px) rotate(1deg);
+  }
+
+  60% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+
+  80% {
+    transform: translate(1px, -1px) rotate(1deg);
+  }
+
+  100% {
+    transform: translate(-1px, 2px) rotate(-1deg);
+  }
+}
+
+@keyframes chat-hvn-shake2 {
+  0% {
+    transform: translate(1px, 1px) rotate(0deg);
+  }
+
+  20% {
+    transform: translate(-1px, -2px) rotate(-10deg);
+  }
+
+  40% {
+    transform: translate(-3px, 0px) rotate(10deg);
+  }
+
+  60% {
+    transform: translate(3px, 2px) rotate(0deg);
+  }
+
+  80% {
+    transform: translate(1px, -1px) rotate(10deg);
+  }
+
+  100% {
+    transform: translate(-1px, 2px) rotate(-10deg);
+  }
+}
+
+
+@keyframes chat-hvn-passThroughRtoL {
+  100% {
+    transform: translate(-2500px, 0px);
+  }
+}
+
+@keyframes chat-hvn-passThroughLtoR {
+  100% {
+    transform: translate(2500px, 0px);
+  }
+}
+
+@keyframes chat-hvn-passThrough2 {
+  0% {
+    transform: translate(-5px, -400px);
+  }
+
+  100% {
+    transform: translate(-5px, 1700px);
+  }
+}
+
+@keyframes chat-hvn-slideDiagonal {
+  0% {
+    /* 왼쪽 상단 구석 위쪽에서 대기 */
+    transform: translate(-1100px, -1800px) scale(0.1) rotate(0deg);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    /* 오른쪽 하단 너머로 시원하게 퇴장 */
+    transform: translate(3000px, 200px) scale(1.5) rotate(0deg);
+  }
+}
+
+@keyframes chat-hvn-passThrough3 {
+  100% {
+    transform: translate(-5px, 400px);
+  }
+
+  100% {
+    transform: translate(-5px, -1700px);
+  }
+}
+
+@keyframes chat-hvn-shake3 {
+  0% {
+    transform: translate(0px, 5px) rotate(0deg);
+  }
+
+  20% {
+    transform: translate(0px, -5px) rotate(0deg);
+  }
+
+  40% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+
+  60% {
+    transform: translate(0px, 5px) rotate(0deg);
+  }
+
+  80% {
+    transform: translate(0px, -5px) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+}
+
+@keyframes chat-hvn-shake4 {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: translate(15px, -15px) rotate(20deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes chat-hvn-upDown {
+  0% {
+    transform: translate(0px, -5px);
+  }
+
+  25% {
+    transform: translate(0px, -10px);
+  }
+
+  50% {
+    transform: translate(0px, -15px);
+  }
+
+  75% {
+    transform: translate(0px, -20px);
+  }
+
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes chat-hvn-crying {
+  0% {
+    transform: translate(0px, -0px);
+  }
+
+  25% {
+    transform: translate(0px, -10px);
+  }
+
+  50% {
+    transform: translate(0px, -15px);
+  }
+
+  75% {
+    transform: translate(0px, -10px);
+  }
+
+  100% {
+    transform: translate(0px, -0px);
+  }
+}
+
+@keyframes chat-hvn-walking {
+  0% {
+    transform: translate(0px, 0px);
+  }
+
+  20% {
+    transform: translate(0px, -7px) rotate(5deg);
+  }
+
+  50% {
+    transform: translate(0px, 0px);
+  }
+
+  70% {
+    transform: translate(0px, -7px)rotate(-5deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes chat-hvn-yes {
+  0% {
+    transform: translate(0px, 0px);
+  }
+
+  50% {
+    transform: translate(0px, 10px);
+  }
+
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes chat-hvn-fear {
+  0% {
+    transform: translate(5px, 0px) rotate(0deg);
+  }
+
+  20% {
+    transform: translate(-5px, 0px) rotate(0deg);
+  }
+
+  40% {
+    transform: translate(5px, 0px) rotate(0deg);
+  }
+
+  60% {
+    transform: translate(-5px, 0px) rotate(0deg);
+  }
+
+  80% {
+    transform: translate(5px, 0px) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-5px, 0px) rotate(0deg);
+  }
+}
+
+@keyframes chat-hvn-nope {
+  0% {
+    transform: translate(8px, 0px) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(-8px, 0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translate(8px, -1px) rotate(0deg);
+  }
+
+  75% {
+    transform: translate(-8px, 0px) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(8px, 0px) rotate(0deg);
+  }
+}
+
+@keyframes chat-hvn-wave {
+  0% {
+    transform: translate(0px, 0px) rotate(5deg);
+  }
+
+  20% {
+    transform: translate(0px, -10px) rotate(5deg);
+  }
+
+  40% {
+    transform: translate(0px, -10px) rotate(0deg);
+  }
+
+  60% {
+    transform: translate(0px, 10px) rotate(-5deg);
+  }
+
+  80% {
+    transform: translate(0px, 10px) rotate(0deg);
+  }
+
+  95% {
+    transform: translate(0px, 5px) rotate(5deg);
+  }
+
+  100% {
+    transform: translate(0px, 0px) rotate(5deg);
+  }
+}
+
+@keyframes chat-hvn-Hots {
+  0% {
+    transform: scale(0.1) rotate(0deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(1800deg);
+  }
+}
 
 @keyframes chat-hvn-shrink {
   0% {
@@ -2567,10 +2920,6 @@ body {
   transition: opacity 0.3s;
 }
 
-/* ============================================================================
-   9. SPECIAL EFFECT: VERGIL ANIMATIONS
-   ============================================================================ */
-
 .void-slash {
   position: absolute;
   top: 50%;
@@ -2634,16 +2983,6 @@ body {
 
   100% {
     opacity: 1;
-  }
-}
-
-@keyframes hvn-vergil-fadeOut {
-  0% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
   }
 }
 
@@ -3036,4 +3375,3 @@ body {
     transform: translate(-50%, -20px);
   }
 }
-
