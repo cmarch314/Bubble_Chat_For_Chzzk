@@ -27,6 +27,10 @@
   animation: growScale 2.0s ease-out forwards;
 }
 
+html {
+  font-size: 90%;
+}
+
 body {
   background: transparent;
   color: transparent;
@@ -2347,6 +2351,29 @@ p {
   pointer-events: auto;
 }
 
+/* Usho Overlay Effect (Clone of Skull) */
+#usho-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+
+#usho-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
 /* Wrapper handles the continuous Pulse */
 .skull-wrapper {
   animation: skullPulse 2.5s infinite;
@@ -2374,9 +2401,68 @@ p {
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: -1;
+}
+
+/* Usho Elements (Clone of Skull) */
+.usho-wrapper {
+  position: relative;
+  /* Context for absolute hammer */
+  animation: skullPulse 2.5s infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.usho-emoji {
+  position: relative;
+  color: #ffffff;
+  font-size: 20rem;
+  line-height: 1;
+  text-align: center;
+  margin: 0;
+  z-index: 1;
+}
+
+.usho-hammer {
+  position: absolute;
+  font-size: 20rem;
+  z-index: 10;
+  opacity: 0;
+  /* Hidden initially */
+  transform-origin: bottom right;
+  /* Pivot for swing */
+}
+
+.usho-emoji::before,
+.usho-emoji::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
   z-index: -1;
 }
+
+/* Triggered Classes for Usho Glitch */
+.usho-emoji.glitching {
+  animation: skullTearMain 0.2s linear forwards;
+}
+
+.usho-emoji.glitching::before {
+  opacity: 1;
+  color: #ff0000;
+  animation: skullGlitchRed 0.2s linear forwards;
+}
+
+.usho-emoji.glitching::after {
+  opacity: 1;
+  color: #00ffff;
+  animation: skullGlitchCyan 0.2s linear forwards;
+}
+
 
 /* Triggered Classes for Glitch (Run ONCE) */
 .skull-emoji.glitching {
@@ -2742,6 +2828,21 @@ p {
   animation: slamText 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
+/* [New] Usho-Specific Slam Effect (Clone of Skull) */
+.visual-center-text.usho-style {
+  font-size: 7rem;
+  font-weight: 900;
+  text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px black;
+  white-space: pre-wrap;
+  width: 100%;
+  line-height: 1.1;
+  box-sizing: border-box;
+  padding: 0 20px;
+  /* Force browser to respect JS line breaks */
+  animation: slamText 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+
 @keyframes slamText {
   0% {
     transform: translate(-50%, -50%) scale(5);
@@ -3015,375 +3116,172 @@ p {
   }
 }
 
-/* [Dolphin Effect] */
+/* =========================================
+   [RESTORED] DOLPHIN & SEA CREATURES CSS
+   ========================================= */
+
+
 #dolphin-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 2147483640;
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  transition: opacity 0.5s;
-  pointer-events: none;
-}
-
-#dolphin-overlay.visible {
-  opacity: 1;
-}
-
-.dolphin-sky {
-  width: 100%;
-  height: 33.33vh;
-  background: linear-gradient(to bottom, #ff4500, #ff8c00, #ffd700);
-  position: relative;
   overflow: hidden;
 }
 
-.dolphin-sun {
-  position: absolute;
-  bottom: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 15rem;
-  height: 15rem;
-  background: radial-gradient(circle, #fff 20%, #ffff00 60%, transparent 100%);
-  border-radius: 50%;
-  box-shadow: 0 0 50px #ffcc00, 0 0 100px #ff6600;
-}
-
-.dolphin-sea {
-  width: 100%;
-  height: 66.66vh;
-  background: linear-gradient(to bottom, #00bfff 0%, #00008b 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Add shimmer effect to the sea */
-.dolphin-sea::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: repeating-linear-gradient(45deg,
-      rgba(255, 255, 255, 0.05) 0px,
-      rgba(255, 255, 255, 0.05) 50px,
-      transparent 50px,
-      transparent 100px);
-  animation: waveMove 10s linear infinite;
-}
-
-@keyframes waveMove {
-  from {
-    background-position: 0 0;
-  }
-
-  to {
-    background-position: 500px 500px;
-  }
-}
-
-.dolphin-text {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #fff1c1;
-  font-size: 7rem;
-  font-weight: 900;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 40px #e67e22;
-  z-index: 2147483647;
-  text-align: center;
-  width: 100%;
-  line-height: 1.1;
-  box-sizing: border-box;
-  padding: 0 20px;
-  font-family: 'CookieRun-Regular', sans-serif;
-  opacity: 0;
-  animation: fadeIn 1s forwards 5.1s;
-  /* Fade in @ 5.1s */
-}
-
-
-/* [Dolphin Effect] - Icons Only Mode */
-#dolphin-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2147483647;
-  /* Max Z-Index */
-}
-
-/* Actors - Enforce Visibility */
+/* 1. Main Lead Dolphin */
 .lead-dolphin {
   position: absolute;
-  font-size: 30rem !important;
-  z-index: 2147483647 !important;
-  left: 50%;
-  transform: translate(-50%, 100vh);
-  animation: leadWild 15s cubic-bezier(0.1, 0.6, 0.4, 1) forwards;
-  opacity: 1 !important;
-  visibility: visible !important;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  /* top/left will be set by JS */
+  font-size: 20rem;
+  z-index: 2147483645;
+  /* High Priority */
+  pointer-events: none;
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
 }
 
-.surfer-actor {
-  position: absolute;
-  font-size: 10rem !important;
-  z-index: 2147483646 !important;
-  animation: surferGlide 30s linear forwards;
-  opacity: 1 !important;
-  visibility: visible !important;
+/* [NEW] Event-Based Emoji Coloring - Targeted to Lead Dolphin only */
+.event-rare .lead-dolphin .actor-emoji {
+  animation: rainbow-filter 0.5s linear infinite;
 }
 
+.event-normal .lead-dolphin .actor-emoji {
+  filter: brightness(130%) saturate(120%) hue-rotate(10deg);
+}
+
+
+/* 2. Sea Jumpers (Whales, Sharks) */
 .sea-jump {
-  position: absolute;
-  font-size: 7rem !important;
-  z-index: 2147483645 !important;
-  animation: seaJumpArc 4s linear forwards;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* [NEW] Extra Marine Life */
-.sea-extra {
-  position: absolute;
-  font-size: 3rem !important;
-  z-index: 2147483644 !important;
-  /* Use CSS variables for randomization */
-  /* --x-end: horizontal drift */
-  /* --y-end: vertical rise distance (negative value to go up) */
-  /* --r-start, --r-end: rotation */
-  animation: riseFade 6s ease-out forwards;
-  opacity: 0;
-  /* Start invisible */
-  visibility: visible !important;
-}
-
-/* [NEW] Bottom Sea & Waves */
-.dolphin-sea-bottom {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 100%;
-  height: 25vh;
-  background: linear-gradient(to bottom, rgba(0, 150, 255, 0.6), rgba(0, 0, 139, 0.8));
-  z-index: 2147483641 !important;
-  /* Behind actors (..44-47), above base */
-  overflow: visible;
+  font-size: 8rem;
+  z-index: 2147483642;
+  animation: seaJumpArc 4s linear forwards;
+  /* CSS vars --sx, --ex, --sr, --er are set by JS */
 }
 
-.sea-wave {
-  position: absolute;
-  top: -20px;
-  left: 0;
-  width: 200%;
-  height: 40px;
-  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%230096FF" fill-opacity="0.6"/></svg>');
-  background-size: 50% 100%;
-  animation: waveFlow 10s linear infinite, waveBob 3s ease-in-out infinite alternate;
-}
-
-@keyframes waveFlow {
+@keyframes seaJumpArc {
   0% {
-    transform: translateX(0);
+    left: var(--sx);
+    bottom: -10vh;
+    transform: rotate(var(--sr)) scaleX(var(--sc));
   }
 
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes waveBob {
-  0% {
-    top: -25px;
-  }
-
-  100% {
-    top: -15px;
-  }
-}
-
-.dolphin-text {
-  position: fixed;
-  bottom: 15%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 4rem;
-  color: white;
-  text-shadow: 0 0 10px blue, 0 0 20px #00ffff;
-  z-index: 2147483647 !important;
-  font-family: 'CookieRun-Regular', sans-serif;
-  white-space: pre-wrap;
-  text-align: center;
-  line-height: 1.2;
-  animation: fadeIn 0.5s forwards;
-}
-
-@keyframes leadWild {
-  0% {
-    transform: translate(-50%, 100vh) rotate(0deg);
-  }
-
-  5% {
-    transform: translate(-50%, 40vh) rotate(-80deg);
-  }
-
-  10% {
-    transform: translate(-110%, 15vh) rotate(-180deg);
-  }
-
-  15% {
-    transform: translate(-10%, 70vh) rotate(120deg);
-  }
-
-  20% {
-    transform: translate(-50%, 5vh) rotate(270deg) scale(1.1);
-  }
-
-  30% {
-    transform: translate(-110%, 90vh) rotate(-200deg);
-  }
-
-  40% {
-    transform: translate(-10%, 10vh) rotate(400deg);
+  25% {
+    bottom: 50vh;
+    /* Peak Height */
   }
 
   50% {
-    transform: translate(-50%, 60vh) rotate(540deg) scale(1.2);
-  }
-
-  /* Flip */
-  60% {
-    transform: translate(-110%, 25vh) rotate(320deg);
-  }
-
-  70% {
-    transform: translate(-10%, 85vh) rotate(720deg);
-  }
-
-  80% {
-    transform: translate(-50%, 5vh) rotate(-450deg) scale(1.1);
-  }
-
-  90% {
-    transform: translate(-50%, 75vh) rotate(180deg);
+    transform: rotate(var(--mr, 0deg)) scaleX(var(--sc));
   }
 
   100% {
-    transform: translate(-50%, 100vh) rotate(360deg);
+    left: var(--ex);
+    bottom: -10vh;
+    transform: rotate(var(--er)) scaleX(var(--sc));
   }
+}
+
+/* 3. Surfer */
+.surfer-actor {
+  position: absolute;
+  top: 60%;
+  left: -20vw;
+  font-size: 10rem;
+  z-index: 2147483643;
+  animation: surferGlide 21s linear forwards;
+}
+
+/* [FIX] Only flip the EMOJI, not the text! */
+.surfer-actor .actor-emoji {
+  /* transform: scaleX(-1); REMOVED - Natural Face is Left */
+  display: inline-block;
 }
 
 @keyframes surferGlide {
   0% {
-    transform: translate(110vw, 20vh) rotate(-5deg);
+    left: 120vw;
+    transform: rotate(0deg);
+  }
+
+  /* Start Right, Natural Face (Left) */
+  20% {
+    transform: rotate(5deg) translateY(-20px);
+  }
+
+  40% {
+    transform: rotate(-5deg) translateY(20px);
+  }
+
+  60% {
+    transform: rotate(5deg) translateY(-20px);
+  }
+
+  80% {
+    transform: rotate(-5deg) translateY(20px);
   }
 
   100% {
-    transform: translate(-20vw, 20vh) rotate(5deg);
+    left: -20vw;
+    transform: rotate(0deg);
   }
+
+  /* End Left */
 }
 
-/* [MODIFIED] Jump Height to 50vh with Parabolic Arch & Directional Scale */
-@keyframes seaJumpArc {
-  0% {
-    transform: translate(var(--sx), 100vh) rotate(var(--sr)) scaleX(var(--sc));
-  }
-
-  25% {
-    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.25), 60vh) rotate(var(--mr)) scaleX(var(--sc));
-  }
-
-  /* 60vh for smoother curve */
-  50% {
-    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.5), 50vh) rotate(0deg) scaleX(var(--sc));
-  }
-
-  /* Peak at 50vh */
-  75% {
-    transform: translate(calc(var(--sx) + (var(--ex) - var(--sx))*0.75), 60vh) rotate(var(--mr)) scaleX(var(--sc));
-  }
-
-  /* 60vh for smoother curve */
-  100% {
-    transform: translate(var(--ex), 100vh) rotate(var(--er)) scaleX(var(--sc));
-  }
+/* 4. Sea Extras (Crabs, etc.) */
+.sea-extra {
+  position: absolute;
+  font-size: 5rem;
+  z-index: 2147483641;
+  animation: riseFade var(--duration, 5s) linear forwards;
 }
 
 @keyframes riseFade {
   0% {
-    opacity: 0;
     transform: translate(0, 0) rotate(var(--r-start));
+    opacity: 0;
   }
 
-  15% {
-    opacity: 1;
-  }
-
-  70% {
+  10% {
     opacity: 1;
   }
 
   100% {
-    opacity: 0;
     transform: translate(var(--x-end), var(--y-end)) rotate(var(--r-end));
+    opacity: 0;
   }
 }
 
-/* [NEW] Party Lighting Effect */
+/* [Restored] Party Lighting Effect - Enhanced Visibility */
 .dolphin-light {
   position: absolute;
-  top: -100px;
+  top: 0;
   width: 100vw;
-  height: 500vh;
-  z-index: 2147483642;
-  /* Above sea, behind actors */
+  height: 200vh;
+  /* Scaled down but still plenty */
+  z-index: 2147483647;
+  /* Top priority */
   pointer-events: none;
-  mix-blend-mode: screen;
-  opacity: 0.9;
+  opacity: 0.7;
+  /* Lowered by 30% from 1.0 */
 }
 
 .dolphin-light-left {
-  left: -3vw;
-  background: conic-gradient(from 125deg at top left, transparent 0deg, rgba(255, 0, 255, 0.7) 20deg, rgba(0, 255, 255, 0.7) 40deg, transparent 60deg);
-  transform-origin: top left;
+  left: 0;
+  background: conic-gradient(from 120deg at 0% 0%, transparent 0deg, rgba(255, 0, 255, 0.8) 30deg, rgba(0, 255, 255, 0.8) 60deg, transparent 90deg);
+  transform-origin: 0% 0%;
   animation: lightColorShift 8s linear infinite;
 }
 
 .dolphin-light-right {
-  right: -3vw;
-  background: conic-gradient(from 175deg at top right, transparent 0deg, rgba(255, 255, 0, 0.7) 20deg, rgba(0, 255, 0, 0.7) 40deg, transparent 60deg);
-  transform-origin: top right;
+  right: 0;
+  background: conic-gradient(from 150deg at 100% 0%, transparent 0deg, rgba(255, 255, 0, 0.8) 30deg, rgba(0, 255, 0, 0.8) 60deg, transparent 90deg);
+  transform-origin: 100% 0%;
   animation: lightColorShift 8s linear infinite;
-}
-
-@keyframes lightSwayLeft {
-  0% {
-    transform: rotate(-5deg);
-  }
-
-  100% {
-    transform: rotate(15deg);
-  }
-}
-
-@keyframes lightSwayRight {
-  0% {
-    transform: rotate(5deg);
-  }
-
-  100% {
-    transform: rotate(-15deg);
-  }
 }
 
 @keyframes lightColorShift {
@@ -3396,107 +3294,74 @@ p {
   }
 }
 
-/* [NEW] Heart Effect (Dreamy) */
-#heart-dreamy-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2147483645;
-  pointer-events: none;
-}
-
-#heart-dreamy-backdrop {
+/* 5. Environment (Sea Bottom) */
+.dolphin-sea-bottom {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at center, rgba(255, 200, 150, 0.4), rgba(255, 100, 100, 0.2));
-  backdrop-filter: blur(5px) sepia(30%);
-  opacity: 0;
-  transition: opacity 2s;
-  z-index: 1;
+  height: 15vh;
+  background: linear-gradient(to top, #005f99, #00aaff);
+  opacity: 0.8;
+  z-index: 2147483640;
+  overflow: hidden;
 }
 
-#heart-dreamy-backdrop.visible {
-  opacity: 1;
-}
-
-.heart-emoji-container {
+.sea-wave {
   position: absolute;
-  top: 0;
+  top: -20px;
   left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10;
+  width: 200%;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%23ffffff" fill-opacity="0.3"/></svg>');
+  background-size: 50% 100%;
+  animation: waveMove 10s linear infinite;
 }
 
-.heart-flash {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: white;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 20;
-  transition: opacity 0.5s;
-}
-
-.heart-dreamy-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 8rem;
-  color: #fff;
-  font-weight: 900;
-  text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff1493;
-  width: 90%;
-  text-align: center;
-  z-index: 30;
-  opacity: 0;
-  font-family: 'CookieRun-Regular', sans-serif;
-}
-
-.heart-dreamy-emoji {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  font-size: 40rem;
-  /* Reduced from 60rem (~33% reduction) */
-  color: white;
-  /* Changed animation to be smoother: large/transparent -> normal size/opaque */
-  animation: smoothIn 0.6s ease-out forwards;
-  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
-  will-change: transform, opacity;
-}
-
-/* Ensure Twemoji images also scale to the new size */
-.heart-dreamy-emoji img.emoji {
-  width: 40rem;
-  height: 40rem;
-  object-fit: contain;
-}
-
-@keyframes smoothIn {
+@keyframes waveMove {
   0% {
-    transform: scale(2);
-    /* Start large */
-    opacity: 0;
-    filter: blur(10px) drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
+    transform: translateX(0);
   }
 
   100% {
-    transform: scale(1);
-    /* Return to normal */
+    transform: translateX(-50%);
+  }
+}
+
+/* 6. Text Overlay */
+.dolphin-text {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 5rem;
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00aaff, 0 0 20px #005f99;
+  z-index: 2147483646;
+  text-align: center;
+  white-space: nowrap;
+  animation: fadeInOut 15s ease-in-out forwards;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+
+  10% {
     opacity: 1;
-    filter: blur(0px) drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
+    transform: translate(-50%, 0);
+  }
+
+  90% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -20px);
   }
 }

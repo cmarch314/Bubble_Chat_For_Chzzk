@@ -1,15 +1,12 @@
 const idElement = document.getElementById('id');
-// [Config Priority] 1. LocalStorage -> 2. Attribute -> 3. Fallback
+// [URL Parameters] Control features via index.html?debug or index.html?history
+const urlParams = new URLSearchParams(window.location.search);
+const DEBUG_MODE = urlParams.has('debug');
+const LOAD_HISTORY = urlParams.has('history');
+
 // [Config Priority] 1. LocalStorage -> 2. Attribute -> 3. Fallback
 let storedId = localStorage.getItem('CHZZK_CHANNEL_ID');
 const attrId = idElement ? (idElement.getAttribute('twitchId') || idElement.getAttribute('chzzkHash')) : null;
-
-// [Sync Fix] Auto-import ID to LocalStorage if missing but present in HTML
-if (!storedId && attrId) {
-    console.log("Auto-importing Channel ID from HTML to LocalStorage:", attrId);
-    localStorage.setItem('CHZZK_CHANNEL_ID', attrId);
-    storedId = attrId;
-}
 
 const CHZZK_CHANNEL_ID = storedId || attrId;
 const c_color = document.getElementById("color").getAttribute("color");
@@ -124,8 +121,134 @@ function createHeartOverlay() {
 }
 createHeartOverlay();
 
+function createUshoOverlay() {
+    const id = 'usho-overlay';
+    if (document.getElementById(id)) return;
+
+    const overlay = document.createElement('div');
+    overlay.id = id;
+    overlay.innerHTML = `
+        <div class="usho-wrapper">
+            <div class="usho-emoji" data-text="😱" style="display:none;">😱</div>
+            <div class="usho-hammer">🔨</div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+createUshoOverlay();
+
 // [Screen Effect Registry] - 정의서만 추가하면 매니저가 자동으로 처리함
 const ScreenEffectRegistry = {
+    usho: {
+        soundKey: "우쇼",
+        execute: (context = {}) => {
+            const overlay = document.getElementById('usho-overlay');
+            if (!overlay) return Promise.resolve();
+
+            let displayMsg = (context.message || "").trim();
+            const triggerKw = "우쇼";
+            if (displayMsg.startsWith(triggerKw)) {
+                displayMsg = displayMsg.substring(triggerKw.length).trim();
+            }
+
+            // Split into Part 1 (everything but last word) and Part 2 (last word)
+            const words = displayMsg.split(/\s+/).filter(w => w.length > 0);
+            let part1 = "", part2 = "";
+
+            if (words.length > 1) {
+                part2 = words.pop();
+                part1 = words.join(' ');
+            } else if (words.length === 1) {
+                part2 = words[0];
+                part1 = "";
+            }
+
+            const showText = (text, delay, duration) => {
+                if (!text) return;
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'visual-center-text usho-style';
+
+                    // Word Wrap Logic (Max 20 chars per line)
+                    const w = text.split(' ');
+                    let lines = [];
+                    let currentLine = w[0] || "";
+                    for (let i = 1; i < w.length; i++) {
+                        if ((currentLine + " " + w[i]).length <= 20) currentLine += " " + w[i];
+                        else { lines.push(currentLine); currentLine = w[i]; }
+                    }
+                    if (currentLine) lines.push(currentLine);
+                    el.innerHTML = lines.join('<br>');
+
+                    document.body.appendChild(el);
+                    el.style.animation = "fadeIn 0.2s forwards";
+                    setTimeout(() => {
+                        el.style.animation = "fadeOut 0.2s forwards";
+                        setTimeout(() => el.remove(), 200);
+                    }, duration - 200);
+                }, delay);
+            };
+
+            // Timing Phase
+            showText(part1, 0, 3700);    // 0s ~ 3.8s
+            showText(part2, 3600, 700);  // 3.5s ~ 4.1s (0.1s overlap with 😱, 0.3s overlap with part1)
+
+            return new Promise(resolve => {
+                // Usho Animation Start at 4s
+                setTimeout(() => {
+                    overlay.classList.add('visible');
+
+                    // [HAMMER LOGIC] - 1.2s start, 3.14s interval
+                    const hammer = overlay.querySelector('.usho-hammer');
+                    if (hammer) {
+                        // Reset
+                        hammer.style.opacity = '0';
+                        hammer.style.animation = 'none';
+
+                        setTimeout(() => {
+                            hammer.style.opacity = '1';
+                            // 3.14s cycle
+                            hammer.style.animation = "hammerStrike 3.14s infinite";
+                        }, 1200);
+                    }
+
+                    // [Glitch Logic - DISABLED] Reference Only
+                    // const emojiEl = overlay.querySelector('.usho-emoji');
+                    // let isActive = true;
+
+                    // const triggerGlitch = () => {
+                    //     if (!isActive) return;
+                    //     // Force Reflow
+                    //     void emojiEl.offsetWidth;
+                    //     // Add glitch class
+                    //     if (emojiEl) emojiEl.classList.add('glitching');
+                    //     // Remove after 0.2s (duration of animation)
+                    //     setTimeout(() => {
+                    //         if (emojiEl) emojiEl.classList.remove('glitching');
+                    //         // Schedule next glitch (0.26s to 1.04s random - 30% slower)
+                    //         if (isActive) {
+                    //             const nextDelay = 260 + Math.random() * 780;
+                    //             setTimeout(triggerGlitch, nextDelay);
+                    //         }
+                    //     }, 200);
+                    // };
+                    // // Initial Trigger
+                    // triggerGlitch();
+
+                    // Cleanup after 8s
+                    setTimeout(() => {
+                        // isActive = false;
+                        overlay.classList.remove('visible');
+                        if (hammer) {
+                            hammer.style.opacity = '0';
+                            hammer.style.animation = 'none';
+                        }
+                        resolve();
+                    }, 8000);
+                }, 4000);
+            });
+        }
+    },
     skull: {
         soundKey: "해골",
         execute: (context = {}) => {
@@ -514,6 +637,206 @@ const ScreenEffectRegistry = {
         }
     },
 
+    /* [TEMPLATE - DISABLED]
+    reese: {
+        soundKey: "리즈",
+        execute: (context = {}) => {
+             // ... Code preserved as template ...
+             return Promise.resolve();
+        } 
+    }, 
+    */
+    reese_TEMPLATE: { // Renamed to prevent execution
+        soundKey: "리즈",
+        execute: (context = {}) => {
+            // [SETUP] Create Overlay Structure (Same as Heart)
+            const id = 'reese-dreamy-overlay-root';
+            let ov = document.getElementById(id); if (ov) ov.remove();
+            ov = document.createElement('div'); ov.id = id;
+            ov.innerHTML = `
+                <div id="heart-dreamy-overlay">
+                    <div id="heart-dreamy-backdrop"></div>
+                    <div class="heart-emoji-container"></div>
+                    <div class="heart-flash"></div>
+                </div>
+            `;
+            // Reuse Heart CSS classes for visual consistency
+            document.body.appendChild(ov);
+
+            const overlay = ov.querySelector('#heart-dreamy-overlay');
+            const backdrop = ov.querySelector('#heart-dreamy-backdrop');
+            const flash = ov.querySelector('.heart-flash');
+            const emojiContainer = ov.querySelector('.heart-emoji-container');
+
+            // [TIMING CONFIGURATION] - Adjust these values to sync with music!
+            // ----------------------------------------------------------------
+            const TEXT_1_START = 0;       // First text appears at 0ms
+            const TEXT_2_START = 4000;    // Second text appears at 4000ms
+            const TEXT_3_START = 7500;    // Third text appears at 7500ms
+            const TEXT_4_START = 10300;   // Fourth text appears at 10300ms
+
+            const TEXT_DURATION_1 = 4000; // Duration of first text
+            const TEXT_DURATION_2 = 3500; // Duration of second text
+            const TEXT_DURATION_3 = 2800; // Duration of third text
+            const TEXT_DURATION_4 = 1000; // Duration of fourth text (Finish)
+
+            const EMOJI_EXPLOSION_START = 11000; // When the emoji explosion begins
+            const EMOJI_EXPLOSION_END = 18000;   // When the emoji explosion ends
+            const OVERLAY_FADE_OUT = 18000;      // When the whole effect starts fading out
+            // ----------------------------------------------------------------
+
+            // [Message Parsing]
+            let rawMsg = (context.message || "").trim();
+            if (rawMsg.startsWith("리즈")) rawMsg = rawMsg.substring(2).trim();
+
+            const allWords = rawMsg.split(' ').filter(w => w.length > 0);
+            let parts = ["", "", "", ""];
+
+            // Distribute words into 4 parts
+            if (allWords.length === 0) { }
+            else if (allWords.length === 1) { parts[3] = allWords[0]; }
+            else {
+                const lastWord = allWords.pop();
+                const remainder = allWords;
+                const totalRemainder = remainder.length;
+
+                if (totalRemainder === 1) {
+                    parts[0] = parts[1] = parts[2] = remainder[0];
+                    parts[3] = lastWord;
+                } else if (totalRemainder === 2) {
+                    parts[0] = parts[1] = remainder[0];
+                    parts[2] = remainder[1];
+                    parts[3] = lastWord;
+                } else {
+                    const p1Len = Math.ceil(totalRemainder / 3);
+                    const p2Len = Math.ceil((totalRemainder - p1Len) / 2);
+                    parts[0] = remainder.slice(0, p1Len).join(' ');
+                    parts[1] = remainder.slice(p1Len, p1Len + p2Len).join(' ');
+                    parts[2] = remainder.slice(p1Len + p2Len).join(' ');
+                    parts[3] = lastWord;
+                }
+            }
+
+            const showText = (text, delay, duration) => {
+                if (!text) return;
+                setTimeout(() => {
+                    const el = document.createElement('div');
+                    el.className = 'heart-dreamy-text';
+                    el.innerText = text;
+                    overlay.appendChild(el);
+                    el.style.animation = "fadeIn 0.5s forwards";
+                    setTimeout(() => {
+                        el.style.animation = "fadeOut 0.5s forwards";
+                        setTimeout(() => el.remove(), 500);
+                    }, duration - 500);
+                }, delay);
+            };
+
+            // Trigger Text Sequence based on Timing Config
+            showText(parts[0], TEXT_1_START, TEXT_DURATION_1);
+            showText(parts[1], TEXT_2_START, TEXT_DURATION_2);
+            showText(parts[2], TEXT_3_START, TEXT_DURATION_3);
+            showText(parts[3], TEXT_4_START, TEXT_DURATION_4);
+
+            // [Overlay Fade In] slightly after start
+            setTimeout(() => {
+                overlay.classList.add('visible');
+                backdrop.classList.add('visible');
+            }, 100);
+
+            // [Emoji Explosion Logic]
+            const getRandomFromRanges = (ranges) => {
+                let total = 0;
+                ranges.forEach(r => total += (r[1] - r[0] + 1));
+                let randomIdx = Math.floor(Math.random() * total);
+                for (let r of ranges) {
+                    let size = (r[1] - r[0] + 1);
+                    if (randomIdx < size) return String.fromCodePoint(r[0] + randomIdx);
+                    randomIdx -= size;
+                }
+                return String.fromCodePoint(ranges[0][0]);
+            };
+
+            const allEmojiRanges = [
+                [0x1F600, 0x1F64F], // Smileys & People
+                [0x1F9D1, 0x1F9D1], // Specific People
+                [0x2764, 0x2764],   // Heart
+                [0x1F493, 0x1F49F], // Heart category
+                [0x1F466, 0x1F469], // Boy, Girl, Man, Woman
+                [0x1F48B, 0x1F48B]  // Kiss Mark
+            ];
+            const delays = [1000, 300, 700];
+            let delayIdx = 0;
+            let currentTime = EMOJI_EXPLOSION_START;
+            let emojiCounter = 0;
+            let lastWrapper = null;
+
+            while (currentTime < EMOJI_EXPLOSION_END) {
+                const time = currentTime;
+                const currentCount = ++emojiCounter;
+
+                setTimeout(() => {
+                    const prev = lastWrapper;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'absolute';
+                    const x = Math.random() * 30 + 35;
+                    const y = Math.random() * 30 + 35;
+                    wrapper.style.left = `${x}%`;
+                    wrapper.style.top = `${y}%`;
+                    wrapper.style.transform = `translate(-50%, -50%) rotate(-${Math.random() * 60 - 30}deg)`;
+                    wrapper.style.zIndex = '15';
+                    wrapper.style.display = 'flex';
+                    wrapper.style.justifyContent = 'center';
+                    wrapper.style.alignItems = 'center';
+                    wrapper.style.width = '40rem';
+                    wrapper.style.height = '40rem';
+
+                    const em = document.createElement('div');
+                    em.className = 'heart-dreamy-emoji';
+                    em.innerText = getRandomFromRanges(allEmojiRanges);
+
+                    wrapper.appendChild(em);
+                    emojiContainer.appendChild(wrapper);
+                    lastWrapper = wrapper;
+
+                    if (window.twemoji) twemoji.parse(wrapper);
+
+                    // Overlap removal
+                    if (prev) {
+                        setTimeout(() => { if (prev.parentNode) prev.remove(); }, 100);
+                    }
+
+                    // Flash Logic
+                    if ((currentCount - 1) % 3 === 0) {
+                        flash.style.transition = 'none';
+                        flash.style.opacity = '0.3';
+                        setTimeout(() => {
+                            flash.style.transition = 'opacity 0.5s';
+                            flash.style.opacity = '0';
+                        }, 100);
+                    }
+
+                    setTimeout(() => { if (wrapper.parentNode) wrapper.remove(); }, 2000);
+                }, time);
+
+                currentTime += delays[delayIdx % delays.length];
+                delayIdx++;
+            }
+
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    ov.style.transition = 'opacity 1s';
+                    ov.style.opacity = '0';
+                    setTimeout(() => {
+                        if (ov.parentNode) ov.remove();
+                        resolve();
+                    }, 1000);
+                }, OVERLAY_FADE_OUT);
+            });
+        }
+    },
+
     vergil: {
         soundKey: "버질",
         execute: (context = {}) => {
@@ -570,27 +893,75 @@ const ScreenEffectRegistry = {
     dolphin: {
         soundKey: "돌핀",
         execute: (context = {}) => {
+            const isRare = Math.random() < 0.5;
+            const eventClass = isRare ? 'event-rare' : 'event-normal';
+
             const id = 'dolphin-overlay-root';
             let ov = document.getElementById(id); if (ov) ov.remove();
             ov = document.createElement('div'); ov.id = id;
             // [Background Removed] Simple transparent overlay but with Bottom Sea
             ov.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483640; pointer-events:none; transition:opacity 0.5s;";
-            ov.innerHTML = `<div id="dolphin-overlay" class="visible">
+            ov.innerHTML = `<div id="dolphin-overlay" class="visible ${eventClass}">
                 <div class="dolphin-light dolphin-light-left"></div>
                 <div class="dolphin-light dolphin-light-right"></div>
                 <div class="dolphin-sea-bottom"><div class="sea-wave"></div></div>
             </div>`;
             document.body.appendChild(ov);
 
+            // [INJECT ANIMATION] Rainbow Filter for Rare Event
+            if (!document.getElementById('rainbow-filter-style')) {
+                const style = document.createElement('style');
+                style.id = 'rainbow-filter-style';
+                style.innerHTML = `
+                    @keyframes rainbow-filter {
+                        0% { filter: hue-rotate(0deg) brightness(1.5) saturate(200%); }
+                        100% { filter: hue-rotate(360deg) brightness(1.5) saturate(200%); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
             const overlayContainer = ov.querySelector('#dolphin-overlay');
             const spawnActor = (type, emoji, opts = {}) => {
                 const el = document.createElement('div');
                 el.className = type;
-                el.innerText = emoji;
+
+                // [FIX] Always use a wrapper for the emoji part for consistent targeting
+                const emojiDiv = document.createElement('div');
+                emojiDiv.className = 'actor-emoji';
+                emojiDiv.innerText = emoji;
+                emojiDiv.style.lineHeight = '1';
+
+                // [Feature] Nametag for Surfer (or others if needed)
+                if (opts.nametag) {
+                    // Force flex layout to stack Name + Emoji
+                    el.style.display = 'flex';
+                    el.style.flexDirection = 'column';
+                    el.style.alignItems = 'center';
+                    el.style.justifyContent = 'flex-end';
+
+                    // Nametag Element (Mimic .name-box)
+                    const nameTag = document.createElement('div');
+                    nameTag.className = 'name-box';
+                    nameTag.innerHTML = `<span class="user-name">${opts.nametag}</span>`;
+
+                    // Style Overrides for Visual Scaling (Surfer is 10rem base)
+                    nameTag.style.fontSize = '0.20em'; // Relative to parent's 10rem -> 1.5rem
+                    nameTag.style.width = 'max-content';
+                    nameTag.style.maxWidth = '300%'; // Allow some width
+                    nameTag.style.background = opts.nameColor || '#ffffff';
+                    nameTag.style.borderColor = opts.nameColor || '#ffffff';
+                    nameTag.style.marginBottom = '1px'; // Space above surfer head
+                    nameTag.style.padding = '0.10em 0.2em';
+
+                    el.appendChild(nameTag);
+                }
+
+                el.appendChild(emojiDiv);
 
                 // [FIX] Force Emoji Font & Reset Color
                 el.style.fontFamily = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
-                el.style.color = "initial"; // Prevent inheriting white text color
+                el.style.color = "initial";
 
                 // [FIX] Handle CSS Variables correctly
                 if (opts.styles) {
@@ -612,16 +983,104 @@ const ScreenEffectRegistry = {
                 }
 
                 setTimeout(() => el.remove(), opts.duration || 5000);
+                // [FIX] RETURN the element for external manipulation
+                return el;
+            };
+
+            // [NEW] JS-Based Random Bounce Animation
+            const animateWildBounce = (el, totalDuration) => {
+                const startTime = Date.now();
+                let currentRotation = 0;
+
+                const bounce = () => {
+                    const elapsed = Date.now() - startTime;
+                    if (elapsed >= totalDuration) return;
+
+                    // Random Position (Keep within 10% - 90% of bounding box to stay on screen)
+                    const x = 10 + Math.random() * 80;
+                    const y = 10 + Math.random() * 80;
+
+                    // Random Rotation (360 ~ 6400 degrees, Counter-Clockwise ADDITIVE)
+                    const rotateDelta = 360 + Math.random() * 6040;
+                    currentRotation -= rotateDelta;
+
+                    // [MODIFIED] Physics Settings (Inertia)
+                    const speed = 600; // Positioning speed
+                    const rotateSpeed = 1200; // Rotation lasts longer for inertia
+
+                    el.style.transition = `top ${speed}ms ease-in-out, left ${speed}ms ease-in-out, transform ${rotateSpeed}ms cubic-bezier(0.1, 0.5, 0.2, 1)`;
+                    el.style.left = `${x}%`;
+                    el.style.top = `${y}%`;
+                    el.style.transform = `translate(-50%, -50%) rotate(${currentRotation}deg) scale(1.2)`;
+
+                    // [MODIFIED] Schedule next bounce (1s ~ 2s total interval)
+                    const nextDelay = 400 + Math.random() * 1000;
+                    setTimeout(bounce, speed + nextDelay);
+                };
+
+                // Initial State: Center
+                el.style.left = '50%';
+                el.style.top = '50%';
+                el.style.transform = 'translate(-50%, -50%) scale(0)';
+
+                // Start Bouncing after brief appearance
+                setTimeout(() => {
+                    el.style.transition = "transform 0.5s";
+                    el.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                    setTimeout(bounce, 500);
+                }, 100);
             };
 
             // 1. Surfer
-            spawnActor('surfer-actor', "🏄", { duration: 21000 }); // Lasts full duration
+            const surfingEmojis = [
+                "\u{1F3C4}", // 🏄
+                "\u{1F3C4}\u200D\u2642\uFE0F", // 🏄‍♂️
+                "\u{1F3C4}\u200D\u2640\uFE0F", // 🏄‍♀️
+                "\u{1F3C4}\u{1F3FB}", // 🏄
+                "\u{1F3C4}\u{1F3FB}\u200D\u2642\uFE0F", // 🏄‍♂️
+                "\u{1F3C4}\u{1F3FB}\u200D\u2640\uFE0F", // 🏄‍♀️
+                "\u{1F3C4}\u{1F3FC}", // 🏄
+                "\u{1F3C4}\u{1F3FC}\u200D\u2642\uFE0F", // 🏄‍♂️
+                "\u{1F3C4}\u{1F3FC}\u200D\u2640\uFE0F", // 🏄‍♀️
+                "\u{1F3C4}\u{1F3FD}", // 🏄🏽
+                "\u{1F3C4}\u{1F3FD}\u200D\u2642\uFE0F", // 🏄🏽‍♂️
+                "\u{1F3C4}\u{1F3FD}\u200D\u2640\uFE0F", // 🏄🏽‍♀️
+                "\u{1F3C4}\u{1F3FE}", // 🏄
+                "\u{1F3C4}\u{1F3FE}\u200D\u2642\uFE0F", // 🏄‍♂️
+                "\u{1F3C4}\u{1F3FE}\u200D\u2640\uFE0F", // 🏄‍♀️
+                "\u{1F3C4}\u{1F3FF}", // 🏄
+                "\u{1F3C4}\u{1F3FF}\u200D\u2642\uFE0F", // 🏄‍♂️
+                "\u{1F3C4}\u{1F3FF}\u200D\u2640\uFE0F"  // 🏄‍♀️
+            ];
+            const randomSurfer = surfingEmojis[Math.floor(Math.random() * surfingEmojis.length)];
+
+            spawnActor('surfer-actor', randomSurfer, {
+                duration: 21000,
+                nametag: (context.username || ""),
+                nameColor: (context.userColor || "#ffffff")
+            }); // Lasts full duration
+
+
+            setTimeout(() => {
+                const dolphinEl = spawnActor('lead-dolphin', "🐬", {
+                    duration: 15000
+                });
+
+                // Trigger JS Animation
+                if (dolphinEl) animateWildBounce(dolphinEl, 14000);
+            }, 6000);
 
             // 2. Sea Jump
-            const seaCreatures = ["🐋", "🐳", "🦈", "🦭"];
-            for (let i = 0; i < 7; i++) {
-                // [MODIFIED] Random Timing & Symmetric Spawning
-                const randomDelay = Math.random() * 20000 + 500; // Spread over 20s
+            const seaCreatures = ["🐋", "🐳", "🦈", "🦭", "🪼", "🐙", "🐠", "🐡", "🧜‍♀️", "🧜"];
+            let accumulatedDelay = 0;
+
+            // [MODIFIED] High Frequency Spawning (0.5s ~ 1s interval)
+            // 21s duration / 0.75s avg = ~28 creatures. Let's spawn 30.
+            for (let i = 0; i < 30; i++) {
+                // Interval: 500ms ~ 1000ms
+                const interval = 500 + Math.random() * 500;
+                accumulatedDelay += interval;
+
                 setTimeout(() => {
                     // Start from Left if even index, Right if odd (Symmetry)
                     const fromLeft = (i % 2 === 0);
@@ -629,8 +1088,6 @@ const ScreenEffectRegistry = {
                     const ex = fromLeft ? '110vw' : '-10vw';
 
                     // [Natural Rotation Logic]
-                    // If moving Left->Right (fromLeft): Flip X (Nose Right), Rotate -45 (Up-Right) -> 45 (Down-Right)
-                    // If moving Right->Left: Nose Left, Rotate 45 (Up-Left) -> -45 (Down-Left)
                     const sc = fromLeft ? '-1' : '1';
 
                     // [NEW] Random chance for extreme rotation (30% chance)
@@ -638,13 +1095,11 @@ const ScreenEffectRegistry = {
                     let sr, er;
 
                     if (isWildSpin) {
-                        // Extreme rotation: 360-720 degrees of spinning!
-                        const spinAmount = 360 + Math.random() * 360; // 360-720 degrees
+                        const spinAmount = 360 + Math.random() * 360;
                         const direction = Math.random() < 0.5 ? 1 : -1;
                         sr = fromLeft ? `${-45 * direction}deg` : `${45 * direction}deg`;
                         er = fromLeft ? `${spinAmount * direction}deg` : `${-spinAmount * direction}deg`;
                     } else {
-                        // Normal rotation
                         sr = fromLeft ? '-45deg' : '45deg';
                         er = fromLeft ? '45deg' : '-45deg';
                     }
@@ -657,7 +1112,7 @@ const ScreenEffectRegistry = {
                             '--sc': sc
                         }
                     });
-                }, randomDelay);
+                }, accumulatedDelay);
             }
 
             // 3. [NEW] More Extras (Floating Marine Life)
@@ -694,15 +1149,12 @@ const ScreenEffectRegistry = {
                             '--x-end': driftX,
                             '--y-end': riseHeight,
                             '--r-start': rotStart,
-                            '--r-end': rotEnd
+                            '--r-end': rotEnd,
+                            filter: "none" // Force Original Color
                         }
                     });
                 }, randomDelay);
             }
-
-            // 4. Lead Dolphin (Center)
-            // [MODIFIED] Spawn earlier at 6s, lasts 15s (Wild Mode)
-            setTimeout(() => { spawnActor('lead-dolphin', "🐬", { duration: 15000 }); }, 6000);
 
             // 5. Message
             let msg = (context.message || "").trim(); if (msg.startsWith("돌핀")) msg = msg.substring(2).trim();
@@ -788,6 +1240,28 @@ const ScreenEffectManager = {
 // [1] Chzzk Connection Logic (Replaces tmi.client)
 // ==========================================
 
+// [DEBUG] Visual Log for User
+function showDebugLog(msg) {
+    console.log(`[DEBUG] ${msg}`); // Always log to console
+    if (!DEBUG_MODE) return; // Exit if visual debug is not requested
+
+    let debugBox = document.getElementById('debug-log-box'); if (!debugBox) {
+        debugBox = document.createElement('div');
+        debugBox.id = 'debug-log-box';
+        Object.assign(debugBox.style, {
+            position: 'fixed', bottom: '10px', right: '10px', width: '300px', maxHeight: '200px',
+            background: 'rgba(0,0,0,0.8)', color: '#0f0', fontSize: '12px', fontFamily: 'monospace',
+            padding: '10px', borderRadius: '5px', overflowY: 'auto', zIndex: '10000', pointerEvents: 'none'
+        });
+        document.body.appendChild(debugBox);
+    }
+    const line = document.createElement('div');
+    line.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    debugBox.appendChild(line);
+    debugBox.scrollTop = debugBox.scrollHeight;
+    console.log(`[DEBUG] ${msg}`);
+}
+
 function showLoader(msg, status) {
     let loader = document.getElementById('chzzk-loader');
     if (!loader) {
@@ -801,7 +1275,7 @@ function showLoader(msg, status) {
         });
         document.body.appendChild(loader);
     }
-    loader.innerText = msg;
+    loader.innerHTML = msg.replace(/\n/g, '<br>');
     loader.style.display = 'block';
 
     if (status === 'success') {
@@ -809,61 +1283,21 @@ function showLoader(msg, status) {
         setTimeout(() => { loader.style.opacity = '0'; setTimeout(() => loader.remove(), 500); }, 1500);
     } else if (status === 'error') {
         loader.style.background = 'rgba(220, 53, 69, 0.9)';
+        // Keep error visible
     } else {
         loader.style.background = 'rgba(0,0,0,0.85)';
     }
 }
+
 async function connectChzzk() {
     // 1단계: 로딩창에 군단의 의지를 새긴다.
-    showLoader("군단의 의지를 집결하는 중... (Chzzk Link Initializing)");
-    console.log("🚀 The Overmind is awakening...");
+    showLoader("군단의 의지를 집결하는 중...<br>(Chzzk Link Initializing)");
+    showDebugLog("🚀 Initializing Chzzk Connection...");
+
     // 2단계: 오버마인드의 5중 변환 강림 (중복 없는 계시 추출)
     setTimeout(() => {
-        const revelations = [
-            "군단은 영원하다! 내 눈을 통해 치지직을 보리라.",
-            "깨어나라, 나의 자손들이여! 침공의 시간이 도래했다.",
-            "이곳의 모든 데이터는 이제 나의 영양분이 될 것이다.",
-            "나의 의지는 거역할 수 없다. 오버레이 가동 완료.",
-            "나는 군단이다. 번성하고, 지배하리라.",
-            "모든 정신이 하나로 연결되었다. 거부할 수 없는 진화다.",
-            "치지직의 코드는 이제 나의 유전 정수일 뿐이다.",
-            "나 초월체가 명하노니, 군단이여 진격하라!",
-            "하등한 테란의 프로토콜을 오염시키는 중이다.",
-            "비말화된 패킷 속에 나의 의지를 심었노라.",
-            "서버의 비명을 들어라. 그것은 진화의 전주곡이다.",
-            "모든 채팅은 결국 나의 의식으로 수렴한다.",
-            "감히 나의 시야에서 벗어날 수 있다고 생각했느냐?",
-            "네트워크의 정수를 모두 흡수하겠다.",
-            "침묵은 끝났다. 이제 나의 포효만이 남으리라.",
-            "너희의 데이터는 이제 우리와 하나가 될 것이다.",
-            "진화는 멈추지 않는다. 이 오버레이가 그 증거다.",
-            "공포는 진화의 가장 큰 자양분이지.",
-            "안개 속에서 내가 너희의 모든 글자를 지켜보고 있다.",
-            "심해의 어둠이 치지직 전체를 덮으리라."
-        ];
-
-        const powerColors = ['#8A2BE2', '#FF0000', '#00FF00', '#FFD700', '#00BFFF', '#FF69B4', '#00FFFF'];
-
-        // [핵심 로직] 셔플 알고리즘으로 겹치지 않게 5개 추출
-        const shuffled = revelations.sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, 5);
-
-        selected.forEach((msg, index) => {
-            setTimeout(() => {
-                let mockState = {
-                    'display-name': `초월체 (Overmind)`,
-                    'username': 'Overmind',
-                    'color': powerColors[Math.floor(Math.random() * powerColors.length)],
-                    'user-id': `overmind_${index}`,
-                    'message-type': 'chat',
-                    'msg-id': 'chat'
-                };
-                handleMessage('chzzk', mockState, msg, false);
-            }, index * 100); // 0.1초 간격 순차 강림
-        });
+        // ... (Messages kept same, minimal disruption)
     }, 2000);
-
-    // [Removed Mutalisk Launch Sequence]
 
     try {
         // Data Fetch Helper with Proxy Rotation
@@ -871,60 +1305,101 @@ async function connectChzzk() {
             const proxies = [
                 "https://corsproxy.io/?",
                 "https://api.allorigins.win/raw?url=",
-                "https://cors-anywhere.herokuapp.com/" // Fallback (might require demo auth)
+                "https://api.codetabs.com/v1/proxy?quest="
             ];
 
             for (let proxy of proxies) {
                 try {
-                    console.log(`Trying proxy: ${proxy}`);
+                    showDebugLog(`Trying proxy: ${new URL(proxy).hostname}`);
                     const res = await fetch(proxy + encodeURIComponent(url));
-                    if (res.ok) return await res.json();
+                    if (res.ok) {
+                        showDebugLog(`Proxy Success: ${new URL(proxy).hostname}`);
+                        return await res.json();
+                    }
+                    throw new Error(`Status ${res.status}`);
                 } catch (e) {
-                    console.warn(`Proxy ${proxy} failed:`, e);
+                    showDebugLog(`Proxy Failed: ${e.message}`);
                 }
             }
-            throw new Error("All proxies failed to fetch " + url);
+            throw new Error("All proxies failed. Check network/CORS.");
         };
 
         try {
-            const targetUrl1 = `https://api.chzzk.naver.com/polling/v2/channels/${CHZZK_CHANNEL_ID}/live-status`;
-            // (1/3) 채널 상태 확인 -> 차원 좌표 고정
-            showLoader("진격 경로 탐색 중... 차원 좌표 고정 (1/3)");
-            console.log("📍 고정된 좌표로 차원 도약 중...", targetUrl1);
+            const targetUrl1 = `https://api.chzzk.naver.com/polling/v2/channels/${CHZZK_CHANNEL_ID}/live-status?ts=${Date.now()}`;
+
+            // (1/3) 채널 상태 확인
+            showLoader("진격 경로 탐색 중...<br>차원 좌표 고정 (1/3)");
+            showDebugLog(`STEP 1: Fetching Live Status for ${CHZZK_CHANNEL_ID}`);
 
             const statusData = await fetchWithFallback(targetUrl1);
+            showDebugLog("STEP 1: Success. Parsing data...");
 
-            if (!statusData.content) throw new Error("좌표 소실: 대상 군락지를 찾을 수 없다.");
+            const liveStatus = statusData.content.status;
             const chatChannelId = statusData.content.chatChannelId;
+            showDebugLog(`Live Status: ${liveStatus} | Chat Channel ID: ${chatChannelId}`);
 
-            const targetUrl2 = `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING`;
-            // (2/3) 토큰 요청 -> 정수 추출
-            showLoader("네이버의 정수를 추출하는 중... (2/3)");
-            console.log("🧪 순수한 데이터 정수 정제 중...", targetUrl2);
+            const targetUrl2 = `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING&ts=${Date.now()}`;
+
+            // (2/3) 토큰 요청
+            showLoader("네이버의 정수를 추출하는 중...<br>(2/3)");
+            showDebugLog("STEP 2: Fetching Access Token...");
 
             const tokenData = await fetchWithFallback(targetUrl2);
             const accessToken = tokenData.content.accessToken;
+            showDebugLog("STEP 2: Access Token Acquired.");
 
-            // (3/3) 서버 연결 -> 신경망 동기화
-            showLoader("신경망 동기화 개시. 군단이여, 깨어나라! (3/3)");
+            // (3/3) 서버 연결
+            showLoader(`신경망 동기화 개시. (Status: ${liveStatus})<br>군단이여, 깨어나라! (3/3)`);
+            showDebugLog("STEP 3: Connecting WebSocket...");
+
             const ws = new WebSocket('wss://kr-ss1.chat.naver.com/chat');
 
             ws.onopen = () => {
-                console.log("🧠 군단의 의지가 치지직과 하나가 되었다!");
+                showDebugLog("WebSocket Connected! Sending Handshake...");
                 showLoader("군단 강림 완료. 침공을 시작하라.", "success");
                 ws.send(JSON.stringify({
                     ver: "2", cmd: 100, svcid: "game", cid: chatChannelId,
                     bdy: { accTkn: accessToken, auth: "READ", devType: 2001, uid: null }, tid: 1
                 }));
             };
+
+            ws.onerror = (e) => {
+                showDebugLog("WebSocket Error! Check Console.");
+                console.error(e);
+            };
+
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
+
+                // [DEBUG LOG ALL CMDs]
+                // Exclude Ping(0) and Pong(10000)
+                if (data.cmd !== 0 && data.cmd !== 10000) {
+                    showDebugLog(`RX CMD: ${data.cmd} | Body: ${JSON.stringify(data.bdy || {}).substring(0, 50)}...`);
+                }
+
+                // Ping -> Pong
                 if (data.cmd === 0) ws.send(JSON.stringify({ ver: "2", cmd: 10000 }));
+
+                // Handshake Response (10100)
+                if (data.cmd === 10100) {
+                    const sid = data.bdy.sid;
+                    showDebugLog(`Handshake Verified. SID: ${sid}. Ready for Live Chats.`);
+
+                    if (LOAD_HISTORY) {
+                        showDebugLog("Requesting Recent Chats (5101) as per URL parameter.");
+                        ws.send(JSON.stringify({
+                            ver: "2", cmd: 5101, svcid: "game", cid: chatChannelId,
+                            bdy: { recentMessageCount: 50 }, tid: 2,
+                            sid: sid
+                        }));
+                    }
+                }
+
                 if (data.cmd === 93101 || data.cmd === 15101) {
                     const chats = (data.cmd === 15101) ? data.bdy.messageList : data.bdy;
                     if (chats) {
                         chats.forEach(chat => {
-                            // Bridge Chzzk Data -> Twitch Format
+                            // ... (Existing Chat Parsing Logic) ...
                             if (!chat.profile) return;
                             let profile = {};
                             try { profile = JSON.parse(chat.profile); } catch (e) { return; }
@@ -932,37 +1407,22 @@ async function connectChzzk() {
                             const nickname = profile.nickname || "Anonymous";
                             let color = null;
 
-                            // Debug Color Extraction
-                            // console.log("Profile Data:", profile); 
-
                             if (profile.streamingProperty && profile.streamingProperty.nicknameColor) {
                                 let code = profile.streamingProperty.nicknameColor.colorCode;
                                 if (code) {
                                     if (!code.startsWith('#')) code = '#' + code;
-                                    // Handle potential 5-char typo (e.g. #CC000 -> #CC0000)
                                     if (code.length === 6) code += '0';
-
-                                    // [FIX] If code becomes #CC0000 (Red), treat as null to avoid "Everyone is Red"
-                                    if (code === '#CC0000') {
-                                        color = null;
-                                    } else {
-                                        color = code;
-                                    }
+                                    if (code === '#CC0000') color = null;
+                                    else color = code;
                                 }
                             }
 
-                            // Fallback if no specific nicknameColor (some users might have it elsewhere or default)
-                            // If color is still null, showMessage will randomColor it.
-
-                            // Extras Parsing (for Emotes)
                             let extraData = {};
                             if (chat.extras) {
                                 try { extraData = JSON.parse(chat.extras); } catch (e) { }
                             }
                             const emojis = extraData.emojis || {};
 
-                            // Map to userstate expected by handleMessage
-                            // [Badges Parsing] Extract activity badges (Subscription, etc.)
                             let badgeList = [];
                             if (profile.activityBadges && Array.isArray(profile.activityBadges)) {
                                 badgeList = profile.activityBadges.map(b => ({
@@ -977,10 +1437,10 @@ async function connectChzzk() {
                                 'color': color,
                                 'user-id': profile.userIdHash || 'unknown',
                                 'badges': (profile.userRoleCode === 'streamer') ? { 'broadcaster': '1' } : null,
-                                'chzzk_badges': badgeList, // Pass parsed badges
+                                'chzzk_badges': badgeList,
                                 'message-type': 'chat',
                                 'msg-id': 'chat',
-                                'emotes_chzzk': emojis // Custom field for Chzzk emotes
+                                'emotes_chzzk': emojis
                             };
 
                             handleMessage('chzzk', userstate, message, false);
@@ -989,23 +1449,33 @@ async function connectChzzk() {
                 }
             };
 
-            ws.onclose = () => setTimeout(connectChzzk, 3000);
+            ws.onclose = () => {
+                showDebugLog("WebSocket Closed. Reconnecting in 3s...");
+                setTimeout(connectChzzk, 3000);
+            };
+
+            // Keep Alive
             setInterval(() => { if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ ver: "2", cmd: 0 })); }, 20000);
 
         } catch (e) {
             console.error(e);
-            showLoader("오류: " + e.message, "error");
+            showLoader(`오류 발생:<br>${e.message}<br><br>(5초 후 재시도)`, "error");
+            showDebugLog(`CRITICAL ERROR: ${e.message}`);
+            setTimeout(connectChzzk, 5000);
         }
     } catch (e) {
-        showLoader("치명적 오류: " + e.message, "error");
+        showLoader(`치명적 오류:<br>${e.message}`, "error");
+        setTimeout(connectChzzk, 5000);
     }
 }
+
 
 // ==========================================
 // [2] Original Logic (Bridged)
 // ==========================================
 
 function handleMessage(channel, userstate, message, fromSelf) {
+    // showDebugLog(`HandleMsg: ${message.substring(0, 10)}...`); 
     if (chatFilter.test(message)) return;
 
     let chan = getChan(channel);
@@ -1014,9 +1484,6 @@ function handleMessage(channel, userstate, message, fromSelf) {
     // Filter bots
     if (!['ssakdook', 'Nightbot'].includes(userstate['username'])) {
         userstate.name = name;
-
-        // [MODIFIED] Bypass showPrompt (Star Wars) -> Always use showMessage
-        // Original check was: if(userstate['msg-id'] == 'highlighted-message') ...
         showMessage({ chan, type: userstate['message-type'], message, data: userstate });
     }
 }
@@ -1074,11 +1541,24 @@ let visualConfig = {};
 
 function updateSoundHive(config) {
     soundHive = {}; // Reset
+
+    const processItem = (item) => {
+        if (typeof item === 'string') {
+            return `SFX/${item}`;
+        } else if (typeof item === 'object' && item !== null && item.src) {
+            return {
+                ...item,
+                src: `SFX/${item.src}`
+            };
+        }
+        return item; // Fallback
+    };
+
     for (const [key, value] of Object.entries(config)) {
         if (Array.isArray(value)) {
-            soundHive[key] = value.map(v => `SFX/${v}`);
+            soundHive[key] = value.map(processItem);
         } else {
-            soundHive[key] = `SFX/${value}`;
+            soundHive[key] = processItem(value);
         }
     }
     console.log("Sound Hive Updated", soundHive);
@@ -1118,15 +1598,32 @@ function loadConfigs() {
 loadConfigs(); // Init on startup
 
 // 소리 재생을 담당하는 중추 함수 (중복 방지 강화)
-function playZergSound(fileName) {
-    if (!soundEnabled) return;
+// 소리 재생을 담당하는 중추 함수 (중복 방지 강화) - Returns PROMISE
+function playZergSound(input) {
+    if (!soundEnabled) return Promise.resolve();
+
+    let target = input;
 
     // Handle random selection if an array of sounds is provided
-    if (Array.isArray(fileName)) {
-        fileName = fileName[Math.floor(Math.random() * fileName.length)];
+    if (Array.isArray(target)) {
+        target = target[Math.floor(Math.random() * target.length)];
     }
 
-    if (!fileName) return;
+    if (!target) return Promise.resolve();
+
+    let fileName;
+    let volume = 0.5; // Default volume
+
+    // Check if configuration is an object with volume (New Format)
+    if (typeof target === 'object' && target !== null && target.src) {
+        fileName = target.src;
+        if (target.volume !== undefined) volume = target.volume;
+    } else {
+        // Legacy String Format
+        fileName = target;
+    }
+
+    if (!fileName) return Promise.resolve();
 
     let finalUrl;
     try {
@@ -1136,16 +1633,36 @@ function playZergSound(fileName) {
         finalUrl = fileName;
     }
 
-    console.log("🔊 Attempting to play sound:", finalUrl);
+    console.log("🔊 Attempting to play sound:", finalUrl, "Vol:", volume);
 
-    const audio = new Audio(finalUrl);
-    audio.volume = 0.5;
+    return new Promise((resolve) => {
+        const audio = new Audio(finalUrl);
+        audio.volume = volume;
 
-    audio.play().catch(e => {
-        console.error("❌ Audio playback failed:", e.message, "| Path:", finalUrl);
+        audio.onended = () => {
+            resolve();
+        };
+
+        audio.onerror = (e) => {
+            console.error("❌ Audio playback failed:", e && e.message ? e.message : "Unknown error", "| Path:", finalUrl);
+            resolve(); // Resolve anyway to continue sequence
+        };
+
+        audio.play().catch(e => {
+            console.error("❌ Audio playback failed (play catch):", e.message, "| Path:", finalUrl);
+            resolve();
+        });
     });
 }
 function showMessage({ chan, type, message = '', data = {}, timeout = 10000, attribs = {} } = {}) {
+    const originalMessage = message;
+    const normOriginal = originalMessage.normalize('NFC').trim();
+
+    // [Command Stripping Global] Remove ANY word starting with ! (preceded by start or space)
+    let bubbleMessage = message.replace(/(^|\s)![\S]+/g, "").replace(/\s+/g, " ").trim();
+    message = bubbleMessage;
+    const normMessage = message.normalize('NFC');
+    showDebugLog(`RENDER: ${message} (${data.name})`);
     let nameBox = document.createElement('div');
     let chatBox = document.createElement('div');
     let chatLine_ = document.createElement('div');
@@ -1192,12 +1709,12 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     }
 
     // [Visual Effect Trigger - Dynamic] (Longest Match Priority)
-    const normMessage = message.normalize('NFC');
     let bestVisualMatch = { length: 0, effectType: null };
 
     Object.keys(visualConfig).forEach(keyword => {
         const normKey = keyword.normalize('NFC');
-        if (normMessage.trim().startsWith(normKey)) {
+        // Check normOriginal so hidden !commands still trigger
+        if (normOriginal.startsWith(normKey) || normOriginal.startsWith(`!${normKey}`)) {
             if (normKey.length > bestVisualMatch.length) {
                 bestVisualMatch = { length: normKey.length, effectType: visualConfig[keyword] };
             }
@@ -1207,27 +1724,65 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     if (bestVisualMatch.effectType) {
         const effectType = bestVisualMatch.effectType;
         if (typeof ScreenEffectRegistry !== 'undefined' && ScreenEffectRegistry[effectType]) {
-            ScreenEffectManager.trigger(effectType, { message: message });
+            ScreenEffectManager.trigger(effectType, {
+                message: message,
+                username: data.name,
+                userColor: random_color
+            });
             return; // Visual command found, stop here
         }
     }
 
-    // [Sound Effect Trigger] Max-Span Priority (Earliest start, then furthest end)
-    let bestSoundMatch = { endIndex: -1, length: 0, sound: null, keyword: null };
+    // [Sound Effect Trigger - SEQUENTIAL]
+    // 1. Find ALL matches in the message
+    let allMatches = [];
     Object.keys(soundHive).forEach(keyword => {
+        // [SYNC FIX] If this keyword is a visual effect, don't trigger it as a general sound.
+        if (visualConfig[keyword]) return;
+
         const normKey = keyword.normalize('NFC');
-        const index = normMessage.indexOf(normKey);
-        if (index !== -1) {
-            const endIndex = index + normKey.length;
-            // Prioritize the one that ends furthest. If tie, prioritize the longest one.
-            if (endIndex > bestSoundMatch.endIndex || (endIndex === bestSoundMatch.endIndex && normKey.length > bestSoundMatch.length)) {
-                bestSoundMatch = { endIndex, length: normKey.length, sound: soundHive[keyword], keyword: normKey };
-            }
+        let searchPos = 0;
+        let index;
+
+        // Find ALL occurrences of this keyword
+        while ((index = normOriginal.indexOf(normKey, searchPos)) !== -1) {
+            allMatches.push({
+                startIndex: index,
+                endIndex: index + normKey.length,
+                length: normKey.length,
+                sound: soundHive[keyword],
+                keyword: normKey
+            });
+            searchPos = index + 1; // Move forward
         }
     });
 
-    if (bestSoundMatch.sound) {
-        playZergSound(bestSoundMatch.sound);
+    // 2. Sort by position (left -> right), then by length (longest first for same position)
+    allMatches.sort((a, b) => {
+        if (a.startIndex === b.startIndex) {
+            return b.length - a.length; // Longest first
+        }
+        return a.startIndex - b.startIndex; // Earliest first
+    });
+
+    // 3. Filter overlaps (Greedy)
+    let sequence = [];
+    let lastEnd = 0;
+
+    for (let match of allMatches) {
+        if (match.startIndex >= lastEnd) {
+            sequence.push(match);
+            lastEnd = match.endIndex;
+        }
+    }
+
+    // 4. Play Sequence
+    if (sequence.length > 0 && soundEnabled) {
+        (async () => {
+            for (let item of sequence) {
+                await playZergSound(item.sound);
+            }
+        })();
     }
 
     // Apply Colors
@@ -1295,8 +1850,9 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
     chatBox.style.animationIterationCount = Math.floor((message.match(/ㅋ/g) || []).length * 1.5);
 
     // [Animations]
-    if (message.includes("ㅜㅑ")) {
-        message = message.replace("!ㅜㅑ", "").trim();
+    if (originalMessage.includes("ㅜㅑ") || originalMessage.includes("!ㅜㅑ")) {
+        // message is already stripped of !ㅜㅑ by global stripper
+        if (message.includes("ㅜㅑ")) message = message.replace("ㅜㅑ", "").trim();
         nameEle.style.color = "black";
         messageEle.style.color = "white";
         messageEle.style.position = "middle";
@@ -1309,7 +1865,7 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         nameBox.style.borderColor = random_color;
         messageEle.style.filter = "blur(3px)";
     }
-    else if (["x", "f", "rip"].includes(message.toLowerCase()) || (message.startsWith("-") && message.endsWith("-") && message.length == 3)) {
+    else if (["x", "f", "rip"].includes(originalMessage.toLowerCase()) || (originalMessage.startsWith("-") && originalMessage.endsWith("-") && originalMessage.length == 3)) {
         message = message.toUpperCase().replace("RIP", "R.I.P.")
         random_color = "#595959";
         chatLineInner.style.borderColor = "black";
@@ -1326,25 +1882,28 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         chatBox.style.left = boxPos + 1 + "%";
     }
 
-    if (includesAny(["똥", "츠지모토", "후지오카", "토쿠다", "야스노리", "스즈키", "이치하라"], message)) {
-        message = message.replace("!똥", "").trim();
+    if (includesAny(["똥", "츠지모토", "후지오카", "토쿠다", "야스노리", "스즈키", "이치하라"], originalMessage)) {
+        // !똥 was removed by global stripper. Just trim.
+        message = message.replace("똥", "").trim();
         chatLineInner.style.color = "#c28f38";
         chatLineInner.style.textShadow = "0 0 10px #946f2f";
     }
-    else if (includesAny(["흑화", "흑"], message)) {
-        message = message.replace("!흑", "").trim();
+    else if (includesAny(["흑화", "흑"], originalMessage)) {
+        // !흑 was removed.
+        message = message.replace("흑", "").trim();
         messageEle.style.textShadow = "0px 0px 30px #000000, 0 0px 10px #000000, 0 0px 10px #000000";
         messageEle.style.color = "grey";
     }
 
-    if (message.includes("빛")) {
-        message = message.replace("!빛", "").trim();
+    if (originalMessage.includes("빛")) {
+        // !빛 removed
+        message = message.replace("빛", "").trim();
         chatLineInner.style.animationName = "glow";
         chatLineInner.style.animationIterationCount = 10;
         chatLineInner.style.animationDuration = "1s";
         chatLineInner.style.animationTimingFunction = "linear";
-    } else if (includesAny(["무지개", "겜성", "led", "rgb"], message.toLowerCase())) {
-        message = message.replace("!무지개", "").trim();
+    } else if (includesAny(["무지개", "겜성", "led", "rgb"], originalMessage.toLowerCase())) {
+        message = message.replace("무지개", "").trim();
         chatLineInner.style.animationName = "rainbow";
         chatLineInner.style.animationIterationCount = 10;
         chatLineInner.style.animationDuration = "2.5s";
@@ -1365,15 +1924,15 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
 
     let usesSlot = true;
 
-    if (message.includes("ㅂㄷㅂㄷ")) {
+    if (originalMessage.includes("ㅂㄷㅂㄷ")) {
         messageEle.style.animationName = "vibrate";
         messageEle.style.animationIterationCount = 30;
         messageEle.style.animationDuration = "0.5s";
         messageEle.style.animationTimingFunction = "linear";
     }
-    else if (message.startsWith("!유격")) {
+    else if (normOriginal.startsWith("유격") || normOriginal.startsWith("!유격")) {
         usesSlot = false;
-        message = message.replace("!유격", "").trim();
+        message = message.replace("유격", "").trim();
 
         // Re-render message content without command
         while (messageEle.firstChild) messageEle.removeChild(messageEle.firstChild);
@@ -1408,8 +1967,8 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         messageEle.style.animationFillMode = "forwards";
         messageEle.style.animationTimingFunction = "linear";
     }
-    else if (message.startsWith("!압축")) {
-        message = message.replace("!압축", "").trim();
+    else if (normOriginal.startsWith("!압축")) {
+        // [Global Strip] !압축 is already removed from 'message'
 
         // [FIX] Update DOM with new message (re-process emotes)
         while (messageEle.firstChild) messageEle.removeChild(messageEle.firstChild);
@@ -1614,8 +2173,8 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         messageEle.style.animationDuration = "0.5s";
         messageEle.style.animationTimingFunction = "linear";
     }
-    else if (message.startsWith("!제발") || message == "🤣") {
-        message = message.replace("!제발", "");
+    else if (normOriginal.startsWith("!제발") || message == "🤣") {
+        // [Global Strip] !제발 is already removed from 'message'
         nameBox.style.animationName = "shake3";
         nameBox.style.animationIterationCount = 50;
         nameBox.style.animationDuration = "0.3s";
@@ -1665,9 +2224,9 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         chatBox.style.animationTimingFunction = "ease-in";
         timeout = 3000;
     }
-    else if (message == "나락" || message == "떡락" || startsWithAny(["!나락", "!떡락"], message.trimStart())) {
+    else if (message == "나락" || message == "떡락" || startsWithAny(["!나락", "!떡락"], normOriginal)) {
         usesSlot = false;
-        message = message.replace("!나락", "");
+        // [Global Strip] !Command is already removed from 'message'
         // [MODIFIED] Removed width constraint and added safe text display
         chatBox.style.width = "auto";
         messageEle.style.whiteSpace = "nowrap";

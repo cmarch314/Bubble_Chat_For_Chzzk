@@ -347,6 +347,7 @@
             background: #555;
         }
     </style>
+    <script src="config.js?v=2"></script>
 </head>
 
 <body>
@@ -383,8 +384,14 @@
                             No file selected
                         </div>
                     </div>
+
+                    <!-- Volume Slider -->
                     <button onclick="addSound()" class="action-btn" style="padding: 16px;">REGISTER SOUND
                         SHORTCUT</button>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
+                        <button onclick="previewSound()" class="secondary" style="padding: 6px 12px; font-size: 0.8rem;"
+                            title="Test selected file">▶ Test File</button>
+                    </div>
                 </div>
             </div>
 
@@ -476,6 +483,7 @@
 
         // [State] New File Picker Logic
         let currentlyPickedFile = null;
+        let previewFileObject = null;
         const soundPicker = document.getElementById('soundPicker');
         const selectedFileNameDiv = document.getElementById('selectedFileName');
 
@@ -484,6 +492,7 @@
                 const file = e.target.files[0];
                 if (file) {
                     currentlyPickedFile = file.name;
+                    previewFileObject = file;
                     selectedFileNameDiv.innerText = file.name;
                     statusDiv.innerText = "File Selected: " + file.name;
                 }
@@ -491,6 +500,13 @@
         }
 
         // Init
+        if (!window.HIVE_SOUND_CONFIG) {
+            statusDiv.innerHTML = "<span style='color:red; font-weight:bold;'>ERROR: config.js Not Loaded! Values may be incorrect.</span>";
+            console.error("HIVE_SOUND_CONFIG not found on window.");
+        } else {
+            statusDiv.innerHTML = "<span style='color:#4CAF50;'>Config.js Loaded Successfully.</span>";
+        }
+
         updateCurrentChannelUI();
         loadFromIndexHtml();
 
@@ -503,6 +519,15 @@
                 currentIdVisible.innerText = savedId;
                 currentName.innerText = savedName || "Unknown";
                 currentIcon.src = savedImg || 'https://ssl.pstatic.net/static/nng/glive/icon/streamer.png';
+            }
+
+            // Slider Event Listener
+            const soundVol = document.getElementById('soundVol');
+            const volDisplay = document.getElementById('volDisplay');
+            if (soundVol && volDisplay) {
+                soundVol.addEventListener('input', (e) => {
+                    volDisplay.innerText = Math.round(e.target.value * 100) + "%";
+                });
             }
         }
 
@@ -552,18 +577,34 @@
         }
 
         // Config Data
-        let soundConfig = JSON.parse(localStorage.getItem('HIVE_SOUND_CONFIG')) || {};
-        let visualConfig = JSON.parse(localStorage.getItem('HIVE_VISUAL_CONFIG')) || {};
+        // 1. Try LocalStorage
+        let localSound = JSON.parse(localStorage.getItem('HIVE_SOUND_CONFIG'));
+        let localVisual = JSON.parse(localStorage.getItem('HIVE_VISUAL_CONFIG'));
 
-        const defaultSoundConfig = {
-            "해골": "SkullMeme.mp3", "커플": "DieWithASmile.mp3", "전화": "Call.wav",
-            "헤으응": "Careless.mp3", "뚝": "DDuk.wav", "커플곡": "DieWithASmile.mp3",
-            "안돼": "no (1).mp3", "멈춰": "Stop.mp3", "야스": "Yas.mp3"
-        };
-        const defaultVisualConfig = { "해골": "skull", "커플": "heart" };
+        // 2. Load Window Global (config.js)
+        const fileSound = window.HIVE_SOUND_CONFIG || {};
+        const fileVisual = window.HIVE_VISUAL_CONFIG || {};
 
-        if (!Object.keys(soundConfig).length && !localStorage.getItem('HIVE_SOUND_CONFIG')) soundConfig = { ...defaultSoundConfig };
-        if (!Object.keys(visualConfig).length && !localStorage.getItem('HIVE_VISUAL_CONFIG')) visualConfig = { ...defaultVisualConfig };
+        // 3. Strict Merge (Priority: Config.js > LocalStorage)
+        // Since the user is actively editing config.js, we MUST reflect those changes.
+        // We will only use localStorage for keys that DO NOT exist in config.js (user added in UI).
+
+        let soundConfig = { ...fileSound };
+        if (localSound) {
+            Object.keys(localSound).forEach(key => {
+                // Only keep local if it's NOT in the file (User added custom sound via UI)
+                if (!soundConfig[key]) {
+                    soundConfig[key] = localSound[key];
+                }
+            });
+        }
+
+        let visualConfig = { ...fileVisual };
+        if (localVisual) {
+            Object.keys(localVisual).forEach(key => {
+                if (!visualConfig[key]) visualConfig[key] = localVisual[key];
+            });
+        }
 
         renderLists();
 
@@ -573,8 +614,87 @@
             Object.entries(soundConfig).forEach(([key, val]) => {
                 const div = document.createElement('div');
                 div.className = 'config-item';
-                div.innerHTML = `<span><b>${key}</b> : ${val}</span><button class="delete-btn" onclick="deleteSound('${key}')">Del</button>`;
-                sList.appendChild(div);
+                div.style.flexWrap = "wrap"; // Allow wrapping for controls
+                div.style.gap = "10px";
+
+                let displaySrc = "";
+                let vol = 0.5;
+                let isArray = Array.isArray(val);
+
+                if (isArray) {
+                    // Array of Objects handling - Render individual items
+                    val.forEach((item, idx) => {
+                        let itemVol = 0.5;
+                        let itemSrc = "";
+
+                        if (typeof item === 'object' && item !== null) {
+                            itemSrc = item.src;
+                            if (item.volume !== undefined) itemVol = item.volume;
+                        } else {
+                            itemSrc = item; // Legacy string
+                        }
+
+                        let itemDiv = document.createElement('div');
+                        itemDiv.className = 'config-item';
+                        itemDiv.style.flexWrap = "wrap";
+                        itemDiv.style.gap = "10px";
+                        itemDiv.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:10px; flex-grow:1; min-width: 200px;">
+                                <span style="min-width:60px;"><b>${key}</b> <span style="font-size:0.8rem; color:#888;">#${idx + 1}</span></span>
+                                <span style="color:#aaa; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px;" title="${itemSrc}">${itemSrc}</span>
+                            </div>
+                            
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="font-size:0.8rem; color:#aaa;">Vol:</span>
+                                <input type="range" min="0.1" max="1.0" step="0.1" value="${itemVol}" 
+                                    onchange="updateVolume('${key}', ${idx}, this.value)" 
+                                    oninput="this.nextElementSibling.innerText = Math.round(this.value*100) + '%'"
+                                    style="width: 80px; cursor: pointer;">
+                                <span style="font-size:0.8rem; font-family:monospace; min-width:30px; text-align:right;">${Math.round(itemVol * 100)}%</span>
+                                
+                                <button onclick="previewItem('${key}', ${idx}, ${itemVol})" class="secondary" style="padding:4px 8px; font-size:0.85rem;" title="Play">▶</button>
+                                <button class="delete-btn" onclick="deleteSound('${key}', ${idx})">Del</button>
+                            </div>
+                        `;
+                        sList.appendChild(itemDiv);
+                    });
+
+                } else if (typeof val === 'object' && val.src) {
+                    // Single Object
+                    displaySrc = val.src;
+                    if (val.volume !== undefined) vol = val.volume;
+                    renderSingleItem(key, displaySrc, vol);
+                } else {
+                    // Legacy String
+                    displaySrc = val;
+                    renderSingleItem(key, displaySrc, vol);
+                }
+
+                function renderSingleItem(k, src, v) {
+                    const div = document.createElement('div');
+                    div.className = 'config-item';
+                    div.style.flexWrap = "wrap";
+                    div.style.gap = "10px";
+                    div.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:10px; flex-grow:1; min-width: 200px;">
+                            <span style="min-width:60px;"><b>${k}</b></span>
+                            <span style="color:#aaa; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px;" title="${src}">${src}</span>
+                        </div>
+                        
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:0.8rem; color:#aaa;">Vol:</span>
+                            <input type="range" min="0.1" max="1.0" step="0.1" value="${v}" 
+                                onchange="updateVolume('${k}', null, this.value)" 
+                                oninput="this.nextElementSibling.innerText = Math.round(this.value*100) + '%'"
+                                style="width: 80px; cursor: pointer;">
+                            <span style="font-size:0.8rem; font-family:monospace; min-width:30px; text-align:right;">${Math.round(v * 100)}%</span>
+                            
+                            <button onclick="previewItem('${k}', null, ${v})" class="secondary" style="padding:4px 8px; font-size:0.85rem;" title="Play">▶</button>
+                            <button class="delete-btn" onclick="deleteSound('${k}', null)">Del</button>
+                        </div>
+                    `;
+                    sList.appendChild(div);
+                }
             });
 
             const vList = document.getElementById('visualList');
@@ -587,20 +707,92 @@
             });
         }
 
+        function updateVolume(key, idx, newVol) {
+            const vol = parseFloat(newVol);
+            let current = soundConfig[key];
+
+            if (Array.isArray(current) && idx !== null) {
+                // Update specific item in array
+                // Ensure it's an object
+                let targetItem = current[idx];
+                let src = typeof targetItem === 'string' ? targetItem : targetItem.src;
+
+                // Mutate the object at index
+                current[idx] = { src: src, volume: vol };
+                soundConfig[key] = [...current]; // Trigger update (though obj ref same)
+            } else {
+                // Single item
+                let src = current;
+                if (typeof current === 'object' && current.src) src = current.src;
+                soundConfig[key] = { src: src, volume: vol };
+            }
+            saveConfigs();
+        }
+
+        function previewItem(key, idx, vol) {
+            let target = soundConfig[key];
+            let src = "";
+
+            if (idx !== null && Array.isArray(target)) {
+                // Preview specific item
+                const item = target[idx];
+                src = typeof item === 'string' ? item : item.src;
+            } else if (Array.isArray(target)) {
+                // Fallback random (shouldn't happen with new UI)
+                const item = target[Math.floor(Math.random() * target.length)];
+                src = typeof item === 'string' ? item : item.src;
+            } else {
+                src = typeof target === 'object' ? target.src : target;
+            }
+
+            if (!src.startsWith("blob:") && !src.startsWith("http")) {
+                src = "SFX/" + src;
+            }
+
+            const audio = new Audio(src);
+            audio.volume = vol || 0.5; // fallback
+            audio.play().catch(e => console.log("Preview error:", e));
+        }
+
         function addSound() {
             let key = document.getElementById('soundKey').value.trim();
             const val = currentlyPickedFile;
+
             if (key && val) {
                 key = key.normalize('NFC');
+                // Default add as string or object? String is cleaner for default 0.5
                 soundConfig[key] = val;
                 saveConfigs();
+
                 document.getElementById('soundKey').value = '';
                 selectedFileNameDiv.innerText = 'No file selected';
                 currentlyPickedFile = null;
+                previewFileObject = null;
                 statusDiv.innerText = "Sound Registered: " + key;
             } else { statusDiv.innerText = "Error: Input keyword AND select a file."; }
         }
-        function deleteSound(key) { delete soundConfig[key]; saveConfigs(); }
+
+        function previewSound() {
+            // Preview from File Picker (Bottom)
+            if (previewFileObject) {
+                const url = URL.createObjectURL(previewFileObject);
+                const audio = new Audio(url);
+                audio.volume = 0.5; // Default preview vol
+                audio.play();
+                statusDiv.innerText = `Previewing: ${previewFileObject.name} (50%)`;
+            } else {
+                statusDiv.innerText = "No file selected for picker preview.";
+            }
+        }
+        function deleteSound(key, idx) {
+            if (idx !== null && Array.isArray(soundConfig[key])) {
+                soundConfig[key].splice(idx, 1);
+                if (soundConfig[key].length === 0) delete soundConfig[key];
+            } else {
+                delete soundConfig[key];
+            }
+            saveConfigs();
+        }
 
         function addVisual() {
             let key = document.getElementById('visualKey').value.trim();
@@ -647,7 +839,11 @@
 
         // Utils
         async function fetchWithFallback(url) {
-            const proxies = ["https://corsproxy.io/?", "https://api.allorigins.win/raw?url="];
+            const proxies = [
+                "https://corsproxy.io/?",
+                "https://api.allorigins.win/raw?url=",
+                "https://api.codetabs.com/v1/proxy?quest="
+            ];
             for (let proxy of proxies) {
                 try {
                     const res = await fetch(proxy + encodeURIComponent(url));
