@@ -1793,11 +1793,10 @@ function showMessage({ chan, type, message = '', data = {}, timeout = 10000, att
         }
     }
 
-    // 4. Play Sequence (Max 5 sounds per message)
+    // 4. Play Sequence
     if (sequence.length > 0 && soundEnabled) {
-        const limitedSequence = sequence.slice(0, 5);
         (async () => {
-            for (let item of limitedSequence) {
+            for (let item of sequence) {
                 await playZergSound(item.sound);
             }
         })();

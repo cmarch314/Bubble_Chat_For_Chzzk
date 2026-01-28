@@ -758,6 +758,49 @@ p {
   }
 }
 
+@keyframes chat-hvn-hipDanceReverse {
+  0% {
+    transform: scaleX(-1);
+  }
+
+  12.5% {
+    transform: scaleX(-1) translate(-23px, -5px);
+  }
+
+  25% {
+    transform: scaleX(-1) translate(-20px, 0px);
+  }
+
+  37.5% {
+    transform: scaleX(-1) translate(-23px, -5px);
+  }
+
+  50% {
+    transform: scaleX(-1) translate(-20px, 0px);
+  }
+
+  51% {
+    transform: scaleX(1);
+  }
+
+  62.5% {
+    transform: translate(-23px, -5px);
+  }
+
+  75% {
+    transform: translate(-20px, 0px);
+  }
+
+  87.5% {
+    transform: translate(-23px, -5px);
+  }
+
+  100% {
+    transform: translate(-20px, 0px);
+  }
+}
+
+
 @keyframes chat-hvn-vibrate {
 
   0% {
@@ -1092,6 +1135,135 @@ p {
   filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
 }
 
+
+
+/* [NEW] Heart Effect (Dreamy) */
+#heart-dreamy-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2147483645;
+  pointer-events: none;
+}
+
+#heart-dreamy-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(255, 200, 150, 0.4), rgba(255, 100, 100, 0.2));
+  backdrop-filter: blur(5px) sepia(30%);
+  opacity: 0;
+  transition: opacity 2s;
+  z-index: 1;
+}
+
+#heart-dreamy-backdrop.visible {
+  opacity: 1;
+}
+
+.heart-emoji-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.heart-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+  transition: opacity 0.5s;
+}
+
+.heart-dreamy-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 8rem;
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 0 20px #ff69b4, 0 0 40px #ff1493;
+  width: 90%;
+  text-align: center;
+  z-index: 30;
+  opacity: 0;
+  font-family: 'CookieRun-Regular', sans-serif;
+}
+
+.heart-dreamy-emoji {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 40rem;
+  /* Reduced from 60rem (~33% reduction) */
+  color: white;
+  /* Changed animation to be smoother: large/transparent -> normal size/opaque */
+  animation: smoothIn 0.6s ease-out forwards;
+  filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
+  will-change: transform, opacity;
+}
+
+/* Ensure Twemoji images also scale to the new size */
+.heart-dreamy-emoji img.emoji {
+  width: 40rem;
+  height: 40rem;
+  object-fit: contain;
+}
+
+@keyframes smoothIn {
+  0% {
+    transform: scale(2);
+    /* Start large */
+    opacity: 0;
+    filter: blur(10px) drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
+  }
+
+  100% {
+    transform: scale(1);
+    /* Return to normal */
+    opacity: 1;
+    filter: blur(0px) drop-shadow(0 0 30px rgba(255, 255, 255, 0.6));
+  }
+}
+
+
+/* Couple Effect Animations */
+@keyframes hvn-couple-fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hvn-couple-fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 /* [New Feature] Old Film Noise Overlay */
 .film-grain {
   position: absolute;
@@ -1365,22 +1537,6 @@ p {
 }
 
 /* [New Animation] Heart Effect Grow */
-@keyframes hvn-heart-grow {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  30% {
-    transform: scale(1.4);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1.5);
-    opacity: 1;
-  }
-}
 
 .grow-effect {
   animation: hvn-heart-grow 2.0s ease-out forwards;
@@ -2481,6 +2637,16 @@ body {
   }
 }
 
+@keyframes hvn-vergil-fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes hvn-vergil-slashEnter {
   0% {
     transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(0);
@@ -2870,3 +3036,4 @@ body {
     transform: translate(-50%, -20px);
   }
 }
+

@@ -1,6 +1,6 @@
 // [Config Logic] Centralized Configuration for BubbleChat
 // You can manually edit this file or overwrite it using the Export function in config.html
-// AI Should Not Change Any Mapping that is already present
+
 window.HIVE_SOUND_CONFIG = {
     // [Screen Effects]
     "해골": [
@@ -28,18 +28,12 @@ window.HIVE_SOUND_CONFIG = {
     "ㅋㅋㅋㅋ": { "src": "Laugh6.mp3", "volume": 0.3 },
     "ㅋㅋㅋㅋㅋ": { "src": "Laugh.mp3", "volume": 0.3 },
     "ㅋㅋㅋㅋㅋㅋ": { "src": "Laugh7.mp3", "volume": 0.3 },
-    "ㅋㅋㅋㅋㅋㅋㅋ": { "src": "Laugh8.mp3", "volume": 0.5 },
     "ㅋㅋㅋㅋㅋㅋㅋㅋ": { "src": "Laugh4.mp3", "volume": 0.15 },
-    "ㅋㅋㅋㅋㅋㅋㅋㅋㅋ": { "src": "Laugh10.mp3", "volume": 0.5 },
-
     "아항항": { "src": "Laugh3.mp3", "volume": 0.6 },
     "와우": { "src": "Wow.mp3", "volume": 0.5 },
     "오옷": { "src": "Ot.wav", "volume": 0.4 },
     "헤으응": { "src": "Careless.mp3", "volume": 0.4 },
-    "아흥": { "src": "ahng.mp3", "volume": 0.5 },
-    "아항": { "src": "ah2.mp3", "volume": 0.4 },
-    "아하앙": { "src": "ah3.mp3", "volume": 0.4 },
-    "하앙": { "src": "ah4.mp3", "volume": 0.4 },
+    "앗흥": { "src": "ahng.mp3", "volume": 0.5 },
     "윽": { "src": "ast5.mp3", "volume": 0.5 },
     "야스": { "src": "Yas.mp3", "volume": 0.5 },
     "갓겜": { "src": "godgame.mp3", "volume": 0.5 },
@@ -85,11 +79,7 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "Doit2.mp3", "volume": 0.5 }
     ],
     "망했": { "src": "Doomed.mp3", "volume": 0.5 },
-    "내눈": [
-        { "src": "MyEyes01.mp3", "volume": 0.4 },
-        { "src": "MyEyes02.mp3", "volume": 0.4 },
-        { "src": "MyEyes03.mp3", "volume": 0.4 }
-    ],
+    "내눈": { "src": "AhMyEyes.mp3", "volume": 0.4 },
     "쌍욕": [
         { "src": "Bitch.mp3", "volume": 0.4 },
         { "src": "Fuck.mp3", "volume": 0.4 },
@@ -184,75 +174,23 @@ window.HIVE_SOUND_CONFIG = {
     "뭣?": { "src": "Huh.mp3", "volume": 0.5 },
     "ㅔ?": { "src": "Huh.mp3", "volume": 0.5 },
     "ㅖ?": { "src": "Huh.mp3", "volume": 0.5 },
-    "마인": { "src": "MineMine.mp3", "volume": 0.5 },
+    "내꺼": { "src": "MineMine.mp3", "volume": 0.5 },
     "제꺼": { "src": "NowMine.mp3", "volume": 0.8 },
     "마이!": [
         { "src": "MineMine.mp3", "volume": 0.5 }
     ],
     "마이쩡": { "src": "SoDelicious.mp3", "volume": 0.5 },
     "마이쪙": { "src": "SoDelicious.mp3", "volume": 0.5 },
-    "뭐지": { "src": "WhatIsIT.mp3", "volume": 0.4 },
-    "뭐야": { "src": "WhatIsThis.mp3", "volume": 0.4 },
+    "뭐임": { "src": "WhatIsIT.mp3", "volume": 0.4 },
+    "뭐지": { "src": "WhatIsThis.mp3", "volume": 0.4 },
     "돌핀": { "src": "Dolphin.mp3", "volume": 0.5 },
     "우쇼": { "src": "Usho.mp3", "volume": 0.5 },
 
-    // [New Additions 2026-01-27]
-    "아메리칸": { "src": "Crysis_Amercans.mp3", "volume": 0.3 },
-    "남자답게": { "src": "Crysis_Be_A_Man.mp3", "volume": 0.3 },
-    "못숨지": { "src": "Crysis_Cant_Hide.mp3", "volume": 0.3 },
-    "찾을거야": { "src": "Crysis_Find.mp3", "volume": 0.3 },
-    "다이": { "src": "DieYouSOB.mp3", "volume": 0.3 },
-    "죽었어": { "src": "Crysis_death.mp3", "volume": 0.3 },
-    "최고야": { "src": "AreYouBest.mp3", "volume": 0.4 },
-    "다메난데": { "src": "Damenandesu.mp3", "volume": 0.5 },
-    "하지마이": { "src": "Don'tDoIt.mp3", "volume": 0.4 },
-    "피버": { "src": "Fever.mp3", "volume": 0.4 },
-    "꼼짝": { "src": "Frozen.mp3", "volume": 0.3 },
-    "간드아": { "src": "Ganda.mp3", "volume": 0.4 },
-    "하야이": { "src": "Hayay.mp3", "volume": 0.4 },
-    "헉": { "src": "Huk.mp3", "volume": 0.8 },
-    "흡": { "src": "Hup.mp3", "volume": 0.5 },
-    "자기생각": { "src": "Life3.mp3", "volume": 0.3 },
-    "그래서재미": { "src": "Life4.mp3", "volume": 0.3 },
-    "인생이란": { "src": "Life_is.mp3", "volume": 0.3 },
-    "사랑해요": { "src": "LoveYou.mp3", "volume": 0.5 },
-    "메이플": { "src": "Maple.mp3", "volume": 0.4 },
-    "오케이": [
-        { "src": "Okay.mp3", "volume": 0.5 },
-        { "src": "Okey1.mp3", "volume": 0.5 }
-    ],
-    "오네가이": { "src": "OnegaySimasu.mp3", "volume": 0.5 },
-    "헐떡": { "src": "Panting.mp3", "volume": 0.8 },
-    "꿀떡": { "src": "Swallow.mp3", "volume": 0.8 },
-    "섹": { "src": "Sax.mp3", "volume": 0.6 },
-    "재밌잖아": { "src": "SoFun.mp3", "volume": 0.3 },
-    "트리스트람": { "src": "Stay_awhile.mp3", "volume": 0.35 },
-    "난재밌어": { "src": "ToMeIt'sSoFun.mp3", "volume": 0.3 },
-    "회전회오리": { "src": "Tornado.mp3", "volume": 0.4 },
-    "와츄고나두": { "src": "WaChuGoNaDo.mp3", "volume": 0.35 },
-    "꺄악": { "src": "Whilhelm.mp3", "volume": 0.4 },
-    "USB": { "src": "Windows 10 USB Disconnect.mp3", "volume": 0.5 },
-    "예야": { "src": "Yaeya.mp3", "volume": 0.3 },
-    "아앙": { "src": "aang.mp3", "volume": 0.65 },
-    "고자라니": { "src": "gozarani1.mp3", "volume": 0.3 },
-    "몬소리": [
-        { "src": "mon_sound2.mp3", "volume": 0.2 },
-        { "src": "mon_sound3.mp3", "volume": 0.2 },
-        { "src": "mon_sound1.mp3", "volume": 0.2 },
-    ],
-    "난테네": { "src": "nantene.mp3", "volume": 0.5 },
-    "썸씽": { "src": "SomeThingOnYourMind.mp3", "volume": 0.5 },
-    "예압": { "src": "Yeap.mp3", "volume": 0.5 },
-    "뭐였지": [
-        { "src": "what_was_it.mp3", "volume": 0.2 },
-        { "src": "what_was_it2.mp3", "volume": 0.2 },
-        { "src": "what_was_it_3.mp3", "volume": 0.2 }],
-
     // [Auto-Discovered]
-    "존나몬창": { "src": "Johnna MC.mp3", "volume": 0.2 },
+    "존나몬창": { "src": "Johnna MC.mp3", "volume": 0.3 },
     "잉곳": { "src": "ingot.mp3", "volume": 0.5 },
     "잉기잇": { "src": "ingit.mp3", "volume": 0.5 },
-    "네전태": { "src": "OKLS.mp3", "volume": 0.5 },
+    "내전태": { "src": "OKLS.mp3", "volume": 0.5 },
     "끼야": { "src": "Screem.mp3", "volume": 0.5 },
     "이상한데수": { "src": "weird.mp3", "volume": 0.5 },
     "이왜대발": { "src": "whydps.mp3", "volume": 0.5 },
