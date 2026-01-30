@@ -3,6 +3,11 @@
 // AI Should Not Change Any Mapping that is already present
 window.HIVE_SOUND_CONFIG = {
     // [Screen Effects]
+    "커플": { "src": "DieWithASmile.mp3", "volume": 0.5 },
+    "버질": { "src": "I AM THE STORM.mp3", "volume": 0.5 },
+    "돌핀": { "src": "Dolphin.mp3", "volume": 0.5 },
+    "하트": { "src": "Heart.mp3", "volume": 0.5 },
+
     "해골": [
         { "src": "skullmeme.mp3", "volume": 0.5 },
         { "src": "skullmeme2.mp3", "volume": 0.5 },
@@ -18,10 +23,6 @@ window.HIVE_SOUND_CONFIG = {
     "재밌다": { "src": "Fun.wav", "volume": 0.4 },
     "당근": { "src": "Carrot.mp3", "volume": 0.4 },
     "알림": { "src": "Alarm.mp3", "volume": 0.4 },
-    "커플": { "src": "DieWithASmile.mp3", "volume": 0.5 },
-    "버질": { "src": "I AM THE STORM.mp3", "volume": 0.5 },
-    "돌핀": { "src": "Dolphin.mp3", "volume": 0.5 },
-    "하트": { "src": "Heart.mp3", "volume": 0.5 },
 
     // [Reactions & Memes]
     "ㅋㅋㅋ": { "src": "Laugh5.mp3", "volume": 0.3 },

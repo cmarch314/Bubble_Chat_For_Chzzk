@@ -758,7 +758,7 @@ p {
   }
 }
 
-@keyframes chat-hvn-vibrate {
+@keyframes chat-hvn-vibrate-laugh {
 
   0% {
     transform: translate(1px, 1px);
@@ -1013,84 +1013,7 @@ p {
   }
 }
 
-/* Skull Overlay Effect */
-#skull-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  z-index: 2147483647;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s;
-}
 
-#skull-overlay.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.skull-emoji {
-  color: #ffffff;
-  font-size: 20rem;
-  line-height: 1;
-  text-align: center;
-  margin: 0;
-  animation: hvn-skull-pulse 1s infinite;
-}
-
-@keyframes skullPulse {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Heart Overlay Effect (Bright) */
-#heart-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(255, 255, 255, 0.3);
-  /* Lowered brightness */
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 2147483647;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 1s;
-}
-
-#heart-overlay.visible {
-  display: flex !important;
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.heart-emoji {
-  color: #ff0000;
-  font-size: 20rem;
-  line-height: 1;
-  text-align: center;
-  margin: 0;
-  margin: 0;
-  filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
-}
 
 /* [New Feature] Old Film Noise Overlay */
 .film-grain {
@@ -1357,83 +1280,6 @@ p {
   }
 }
 
-@font-face {
-  font-family: 'CookieRun-Regular';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/CookieRun-Regular.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-}
-
-/* [New Animation] Heart Effect Grow */
-@keyframes hvn-heart-grow {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-
-  30% {
-    transform: scale(1.4);
-    opacity: 1;
-  }
-
-  100% {
-    transform: scale(1.5);
-    opacity: 1;
-  }
-}
-
-.grow-effect {
-  animation: hvn-heart-grow 2.0s ease-out forwards;
-}
-
-body {
-  background: transparent;
-  color: transparent;
-  font-family: 'CookieRun-Regular', sans-serif;
-  overflow: hidden;
-}
-
-
-
-
-#chat {
-  display: flex;
-  position: absolute;
-  bottom: 0px;
-  width: 100%;
-}
-
-.starwars-box {
-  position: absolute;
-  background: black;
-  overflow: hidden;
-
-  bottom: 300px;
-  left: 10%;
-  width: 1280px;
-  height: 720px;
-
-  -moz-transition: opacity 0.7s linear;
-  -o-transition: opacity 0.7s linear;
-  -webkit-transition: opacity 0.7s linear;
-  transition: opacity 2s linear;
-}
-
-.starwars-box.fade-in {
-  opacity: 1;
-}
-
-.starwars-box.fade-out {
-  opacity: 0;
-}
-
-
-.star {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  background-color: white;
-}
 
 
 @keyframes chat-hvn-shrink {
@@ -1565,32 +1411,6 @@ body {
   }
 }
 
-@keyframes chat-hvn-vibrate {
-
-  0% {
-    transform: translate(1px, 1px);
-  }
-
-  20% {
-    transform: translate(-1px, -1px);
-  }
-
-  40% {
-    transform: translate(-1px, 0px);
-  }
-
-  60% {
-    transform: translate(1px, 1px);
-  }
-
-  80% {
-    transform: translate(1px, -1px);
-  }
-
-  100% {
-    transform: translate(-1px, 1px);
-  }
-}
 
 @keyframes chat-hvn-shrinkX {
   0% {
@@ -1820,29 +1640,14 @@ body {
   }
 }
 
-/* Skull Overlay Effect */
-#skull-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  z-index: 2147483647;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.5s;
-}
 
-#skull-overlay.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
 
-/* Usho Overlay Effect (Clone of Skull) */
+/* ============================================================================
+   SECTION: SKULL & USHO EFFECT
+   ============================================================================ */
+
+/* Skull & Usho Overlays */
+#skull-overlay,
 #usho-overlay {
   position: fixed;
   top: 0;
@@ -1859,13 +1664,42 @@ body {
   transition: opacity 0.5s;
 }
 
+#skull-overlay.visible,
 #usho-overlay.visible {
   opacity: 1;
   pointer-events: auto;
 }
 
+/* Pulse Animations */
+@keyframes skullPulse {
+  0% {
+    transform: scale(1);
+  }
 
-/* Wrapper handles the continuous Pulse */
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes hvn-skull-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Wrappers */
 .skull-wrapper {
   animation: hvn-skull-pulse 2.5s infinite;
   display: flex;
@@ -2068,41 +1902,16 @@ body {
   }
 }
 
-/* Heart Overlay Effect (Bright) */
-#heart-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(255, 255, 255, 0.3);
-  /* Lowered brightness */
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 2147483647;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 1s;
-}
 
-#heart-overlay.visible {
-  display: flex !important;
-  opacity: 1;
-  pointer-events: auto;
-}
 
-.heart-emoji {
-  color: #ff0000;
-  font-size: 20rem;
-  line-height: 1;
-  text-align: center;
-  margin: 0;
-  margin: 0;
-  filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
-}
 
-/* [New Feature] Old Film Noise Overlay */
+
+
+
+/* ============================================================================
+   8. FILM EFFECTS (Grain, Scratch, Flashback)
+   ============================================================================ */
+
 .film-grain {
   position: absolute;
   top: 0;
@@ -2110,7 +1919,6 @@ body {
   width: 100%;
   height: 100%;
   opacity: 0.5;
-  /* User Requested 50% opacity */
   pointer-events: none;
   z-index: 10;
   overflow: hidden;
@@ -2134,12 +1942,28 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: repeating-linear-gradient(90deg,
-      transparent 0,
-      transparent 2px,
-      rgba(0, 0, 0, 0.1) 3px,
-      transparent 4px);
+  background: repeating-linear-gradient(90deg, transparent 0, transparent 2px, rgba(0, 0, 0, 0.1) 3px, transparent 4px);
   animation: chat-hvn-scratch 4s steps(1) infinite;
+}
+
+#flashback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: grayscale(90%) sepia(20%) blur(1px);
+  background: rgba(50, 50, 50, 0.35);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2s;
+  z-index: 10000;
+}
+
+#flashback-overlay.visible {
+  opacity: 1;
+  display: block !important;
+  animation: chat-hvn-distortion 8s infinite linear;
 }
 
 @keyframes chat-hvn-grain {
@@ -2187,7 +2011,9 @@ body {
 }
 
 @keyframes chat-hvn-scratch {
-  0% {
+
+  0%,
+  100% {
     transform: translateX(0);
     opacity: 0.3;
   }
@@ -2236,37 +2062,6 @@ body {
     transform: translateX(20px);
     opacity: 0.3;
   }
-
-  100% {
-    transform: translateX(0);
-    opacity: 0.3;
-  }
-}
-
-
-/* Flashback Filter Overlay */
-/* Flashback Filter Overlay */
-#flashback-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  backdrop-filter: grayscale(90%) sepia(20%) blur(1px);
-  /* Stronger filter + blur */
-  background: rgba(50, 50, 50, 0.35);
-  /* 20% darker/more intense tint */
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 2s;
-  z-index: 10000;
-  /* Below Heart/Skull (2147483647) */
-}
-
-#flashback-overlay.visible {
-  opacity: 1;
-  animation: chat-hvn-distortion 8s infinite linear;
-  /* Slow wobble */
 }
 
 @keyframes chat-hvn-distortion {
@@ -2291,37 +2086,90 @@ body {
   }
 }
 
-/* [Refined] Visual Center Text Base */
-.visual-center-text {
+/* ============================================================================
+   SECTION: SKULL & USHO EFFECT
+   ============================================================================ */
+
+#skull-overlay,
+#usho-overlay {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
   z-index: 2147483647;
-  text-align: center;
-  font-family: 'CookieRun-Regular', sans-serif;
+  opacity: 0;
   pointer-events: none;
-  opacity: 0.8;
+  transition: opacity 0.5s;
 }
 
-/* [New] Skull-Specific Slam Effect */
-.visual-center-text.skull-style {
-  font-size: 7rem;
-  font-weight: 900;
-  text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px black;
-  white-space: pre-wrap;
+.skull-wrapper,
+.usho-wrapper {
+  animation: hvn-skull-pulse 2.5s infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.skull-emoji,
+.usho-emoji {
+  position: relative;
+  color: #ffffff;
+  font-size: 20rem;
+  line-height: 1;
+  text-align: center;
+  margin: 0;
+  z-index: 1;
+}
+
+.usho-hammer {
+  position: absolute;
+  font-size: 20rem;
+  z-index: 10;
+  opacity: 0;
+  transform-origin: bottom right;
+}
+
+.usho-emoji::before,
+.usho-emoji::after,
+.skull-emoji::before,
+.skull-emoji::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  line-height: 1.1;
-  box-sizing: border-box;
-  padding: 0 20px;
-  /* Force browser to respect JS line breaks */
-  animation: hvn-skull-slam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  height: 100%;
+  opacity: 1;
+  z-index: -1;
 }
 
-/* [New] Usho-Specific Slam Effect (Clone of Skull) */
+.usho-emoji.glitching,
+.skull-emoji.glitching {
+  animation: skullTearMain 0.2s linear forwards;
+}
+
+.usho-emoji.glitching::before,
+.skull-emoji.glitching::before {
+  opacity: 1;
+  color: #ff0000;
+  animation: skullGlitchRed 0.2s linear forwards;
+}
+
+.usho-emoji.glitching::after,
+.skull-emoji.glitching::after {
+  opacity: 1;
+  color: #00ffff;
+  animation: skullGlitchCyan 0.2s linear forwards;
+}
+
+.visual-center-text.skull-style,
 .visual-center-text.usho-style {
-  font-size: 7rem;
+  font-size: 13rem;
   font-weight: 900;
   text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px black;
   white-space: pre-wrap;
@@ -2329,10 +2177,36 @@ body {
   line-height: 1.1;
   box-sizing: border-box;
   padding: 0 20px;
-  /* Force browser to respect JS line breaks */
   animation: hvn-skull-slam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
+@keyframes skullPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes hvn-skull-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
 
 @keyframes hvn-skull-slam {
   0% {
@@ -2353,41 +2227,580 @@ body {
   }
 }
 
-/* [New] Heart-Specific Text Style */
-.visual-center-text.heart-style {
-  font-size: 7rem;
-  font-weight: 900;
+@keyframes skullGlitchRed {
+  0% {
+    transform: translate(0);
+    clip-path: none;
+    opacity: 1;
+  }
+
+  25% {
+    transform: translate(-15px, -5px);
+    clip-path: polygon(0 15%, 100% 15%, 100% 30%, 0 30%);
+  }
+
+  50% {
+    transform: translate(10px, 5px);
+    clip-path: polygon(0 45%, 100% 45%, 100% 60%, 0 60%);
+  }
+
+  75% {
+    transform: translate(-20px, 10px);
+    clip-path: polygon(0 75%, 100% 75%, 100% 90%, 0 90%);
+  }
+
+  100% {
+    transform: translate(0);
+    clip-path: none;
+    opacity: 1;
+  }
+}
+
+@keyframes skullGlitchCyan {
+  0% {
+    transform: translate(0);
+    clip-path: none;
+    opacity: 1;
+  }
+
+  25% {
+    transform: translate(15px, 5px);
+    clip-path: polygon(0 10%, 100% 10%, 100% 25%, 0 25%);
+  }
+
+  50% {
+    transform: translate(-10px, -5px);
+    clip-path: polygon(0 35%, 100% 35%, 100% 50%, 0 50%);
+  }
+
+  75% {
+    transform: translate(20px, -10px);
+    clip-path: polygon(0 65%, 100% 65%, 100% 80%, 0 80%);
+  }
+
+  100% {
+    transform: translate(0);
+    clip-path: none;
+    opacity: 1;
+  }
+}
+
+@keyframes skullTearMain {
+  0% {
+    transform: translate(0);
+    filter: none;
+  }
+
+  25% {
+    transform: translate(5px, 0);
+    filter: drop-shadow(-5px 0 #ff0000);
+  }
+
+  50% {
+    transform: translate(-5px, 0);
+    filter: drop-shadow(5px 0 #00ffff);
+  }
+
+  100% {
+    transform: translate(0);
+    filter: none;
+  }
+}
+
+/* ============================================================================
+   SECTION: HEART EFFECT
+   ============================================================================ */
+
+#heart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s;
+}
+
+#heart-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255, 182, 193, 0.4) 0%, rgba(255, 20, 147, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 1s;
+  z-index: -1;
+}
+
+.heart-emoji-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 101;
+}
+
+.heart-emoji {
+  color: #ff0000;
+  font-size: 20rem;
+  line-height: 1;
+  text-align: center;
+  margin: 0;
+  filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
+}
+
+.heart-dreamy-emoji {
+  display: inline-block;
+  font-size: 40rem;
+  animation: hvn-heart-impact 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  line-height: 1;
+  transform-origin: center;
+}
+
+.heart-dreamy-emoji img {
+  width: 1em !important;
+  height: 1em !important;
+  display: block;
+}
+
+.heart-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.heart-dreamy-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
   color: #ff69b4;
-  /* Hot Pink */
-  text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px white;
+  text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+  opacity: 0;
+  z-index: 100;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.heart-premium-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2147483647;
+  text-align: center;
+  font-family: 'CookieRun-Regular', sans-serif;
+  pointer-events: none;
+  font-size: 15rem;
+  font-weight: 900;
+  color: #ff1493;
+  text-shadow: 0 0 20px rgba(255, 20, 147, 0.7);
+  line-height: 1.1;
   white-space: pre-wrap;
   width: 100%;
-  line-height: 1.1;
   box-sizing: border-box;
   padding: 0 20px;
 }
 
-@keyframes hvn-heart-fadeIn {
-  from {
+.visual-center-text.heart-style {
+  font-size: 5rem;
+  font-weight: 900;
+  color: #ff69b4;
+  text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px white;
+  white-space: nowrap;
+}
+
+@keyframes hvn-heart-impact {
+  0% {
+    transform: scale(4);
     opacity: 0;
+    filter: blur(20px);
   }
 
-  to {
+  20% {
+    transform: scale(1);
     opacity: 1;
+    filter: blur(0px);
+  }
+
+  80% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes hvn-heart-fadeIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
   }
 }
 
 @keyframes hvn-heart-fadeOut {
-  from {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+}
+
+@keyframes hvn-heart-grow {
+  0% {
+    transform: scale(1);
     opacity: 1;
   }
 
-  to {
+  30% {
+    transform: scale(1.4);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   SECTION: DOLPHIN EFFECT
+   ============================================================================ */
+
+#dolphin-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.lead-dolphin {
+  position: absolute;
+  font-size: 40rem;
+  z-index: 2147483645 !important;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
+  display: inline-block;
+  width: min-content;
+  white-space: nowrap;
+}
+
+.surfer-actor {
+  position: absolute;
+  top: 60%;
+  left: -20vw;
+  font-size: 25rem;
+  z-index: 2147483643 !important;
+  animation: hvn-dolphin-surfer 21s linear forwards;
+  display: inline-block;
+  width: min-content;
+}
+
+.sea-jump {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 10rem;
+  z-index: 2147483642 !important;
+  animation: hvn-dolphin-jump 4s linear forwards;
+}
+
+.sea-extra {
+  position: absolute;
+  font-size: 7rem;
+  z-index: 2147483641 !important;
+  animation: hvn-dolphin-rise var(--duration, 5s) linear forwards;
+}
+
+.actor-emoji {
+  display: inline-block;
+  line-height: 1;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+}
+
+.actor-emoji img {
+  width: 1em;
+  height: 1em;
+}
+
+.dolphin-sea-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15vh;
+  background: linear-gradient(to top, #005f99, #00aaff);
+  opacity: 0.8;
+  z-index: 2147483638 !important;
+  overflow: hidden;
+}
+
+.sea-wave {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  width: 200%;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%23ffffff" fill-opacity="0.3"/></svg>');
+  background-size: 50% 100%;
+  animation: hvn-dolphin-wave 10s linear infinite;
+}
+
+.dolphin-light {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 200vh;
+  z-index: 2147483639 !important;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.dolphin-light-left {
+  left: 0;
+  background: conic-gradient(from 120deg at 0% 0%, transparent 0deg, rgba(255, 0, 255, 0.8) 30deg, rgba(0, 255, 255, 0.8) 60deg, transparent 90deg);
+  transform-origin: 0% 0%;
+  animation: hvn-dolphin-lightShift 8s linear infinite;
+}
+
+.dolphin-light-right {
+  right: 0;
+  background: conic-gradient(from 150deg at 100% 0%, transparent 0deg, rgba(255, 255, 0, 0.8) 30deg, rgba(0, 255, 0, 0.8) 60deg, transparent 90deg);
+  transform-origin: 100% 0%;
+  animation: hvn-dolphin-lightShift 8s linear infinite;
+}
+
+.dolphin-text {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 5rem;
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00aaff, 0 0 20px #005f99;
+  z-index: 2147483646;
+  text-align: center;
+  white-space: nowrap;
+  animation: hvn-dolphin-textFade 15s ease-in-out forwards;
+}
+
+@keyframes hvn-dolphin-jump {
+  0% {
+    left: var(--sx);
+    bottom: -10vh;
+    transform: rotate(var(--sr)) scaleX(var(--sc));
+  }
+
+  25% {
+    bottom: 50vh;
+  }
+
+  50% {
+    transform: rotate(var(--mr, 0deg)) scaleX(var(--sc));
+  }
+
+  100% {
+    left: var(--ex);
+    bottom: -10vh;
+    transform: rotate(var(--er)) scaleX(var(--sc));
+  }
+}
+
+@keyframes hvn-dolphin-surfer {
+  0% {
+    left: 120vw;
+    transform: rotate(0deg);
+  }
+
+  20% {
+    transform: rotate(5deg) translateY(-20px);
+  }
+
+  40% {
+    transform: rotate(-5deg) translateY(20px);
+  }
+
+  60% {
+    transform: rotate(5deg) translateY(-20px);
+  }
+
+  80% {
+    transform: rotate(-5deg) translateY(20px);
+  }
+
+  100% {
+    left: -20vw;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes hvn-dolphin-rise {
+  0% {
+    transform: translate(0, 0) rotate(var(--r-start));
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--x-end), var(--y-end)) rotate(var(--r-end));
     opacity: 0;
   }
 }
 
-/* [Void Slash Effect] */
+@keyframes hvn-dolphin-lightShift {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes hvn-dolphin-wave {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes hvn-dolphin-textFade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+
+  10% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  90% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+  }
+}
+
+.lead-dolphin,
+.surfer-actor,
+.sea-jump,
+.sea-extra {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+}
+
+/* ============================================================================
+   SECTION: COUPLE EFFECT
+   ============================================================================ */
+
+.couple-premium-text {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2147483647;
+  text-align: center;
+  font-family: 'CookieRun-Regular', sans-serif;
+  pointer-events: none;
+  font-size: 13rem;
+  font-weight: 900;
+  color: #ff0090;
+  text-shadow: 0 0 20px rgba(255, 120, 235, 0.7);
+  line-height: 1.1;
+  white-space: pre-wrap;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+
+.grow-effect {
+  animation: hvn-grow-bounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes hvn-grow-bounce {
+  0% {
+    transform: scale(0);
+  }
+
+  70% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes hvn-couple-fadeIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes hvn-couple-fadeOut {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+}
+
+/* ============================================================================
+   SECTION: VERGIL EFFECT
+   ============================================================================ */
+
 #void-overlay {
   position: fixed;
   top: 0;
@@ -2395,7 +2808,6 @@ body {
   width: 100vw;
   height: 100vh;
   z-index: 2147483640;
-  /* Just below text overlays */
   pointer-events: none;
 }
 
@@ -2406,33 +2818,21 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(10, 15, 30, 0.9);
-  /* Deep, cold void */
   opacity: 0;
   transition: opacity 0.3s;
 }
-
-/* ============================================================================
-   9. SPECIAL EFFECT: VERGIL ANIMATIONS
-   ============================================================================ */
 
 .void-slash {
   position: absolute;
   top: 50%;
   left: 50%;
   width: 400vw;
-  /* 3x Length */
   height: 15px;
-  /* Base height */
   background: white;
-  box-shadow:
-    0 0 10px #00ffff,
-    0 0 20px #0000ff,
-    0 0 40px #ffffff;
+  box-shadow: 0 0 10px #00ffff, 0 0 20px #0000ff, 0 0 40px #ffffff;
   transform-origin: center center;
-  /* Rotate around center */
   transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(0);
   opacity: 0.9;
-  /* Asymmetric Taper: Sharp Left, Thick Right */
   clip-path: polygon(0% 40%, 100% 0%, 100% 100%, 0% 60%);
 }
 
@@ -2441,10 +2841,8 @@ body {
   width: 40px;
   height: 10px;
   background: rgba(255, 255, 255, 0.95);
-  /* Pure White */
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(200, 255, 255, 0.5);
   clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
-  /* Shard shape */
   backdrop-filter: blur(2px);
   opacity: 1;
 }
@@ -2455,7 +2853,7 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-size: 7rem;
+  font-size: 13rem;
   font-weight: bold;
   text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #00ffff;
   z-index: 2147483647;
@@ -2469,6 +2867,45 @@ body {
   padding: 0 20px;
   font-family: 'CookieRun-Regular', sans-serif;
   animation: hvn-vergil-fadeIn 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+#slash-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+  overflow: hidden;
+}
+
+.slash-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  animation: hvn-vergil-flashFade 0.2s linear;
+}
+
+.slash-distortion {
+  position: absolute;
+  width: 150vw;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px #00ffff;
+  backdrop-filter: invert(0.2) hue-rotate(90deg) blur(2px);
+  mix-blend-mode: hard-light;
+  transform-origin: center;
+  transform: scaleX(0);
+  animation: hvn-vergil-slashStrike 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1) forwards;
+}
+
+.screen-impact {
+  animation: hvn-vergil-impactShake 0.5s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes hvn-vergil-fadeIn {
@@ -2516,54 +2953,14 @@ body {
   }
 
   30% {
-    /* Initial burst from shatter */
     transform: translate(var(--tx), var(--ty)) rotate(calc(var(--rot) * 0.3));
     opacity: 1;
   }
 
   100% {
-    /* Fall down by gravity */
     transform: translate(var(--tx), calc(var(--ty) + 800px)) rotate(var(--rot));
     opacity: 0;
   }
-}
-
-/* [Void Slash Distortion Upgrade] */
-#slash-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: 99999;
-  overflow: hidden;
-}
-
-.slash-flash {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: white;
-  opacity: 0;
-  animation: hvn-vergil-flashFade 0.2s linear;
-}
-
-.slash-distortion {
-  position: absolute;
-  width: 150vw;
-  /* Extend beyond screen */
-  height: 30px;
-  /* Thicker cut */
-  background: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px #00ffff;
-  backdrop-filter: invert(0.2) hue-rotate(90deg) blur(2px);
-  mix-blend-mode: hard-light;
-  transform-origin: center;
-  transform: scaleX(0);
-  animation: hvn-vergil-slashStrike 0.4s cubic-bezier(0.1, 0.7, 1.0, 0.1) forwards;
 }
 
 @keyframes hvn-vergil-slashStrike {
@@ -2593,10 +2990,6 @@ body {
   }
 }
 
-.screen-impact {
-  animation: hvn-vergil-impactShake 0.5s cubic-bezier(.36, .07, .19, .97) both;
-}
-
 @keyframes hvn-vergil-impactShake {
 
   10%,
@@ -2621,252 +3014,22 @@ body {
   }
 }
 
-/* =========================================
-   [RESTORED] DOLPHIN & SEA CREATURES CSS
-   ========================================= */
+/* ============================================================================
+   SECTION: COMMON SYNC & WRAPPERS
+   ============================================================================ */
 
-
-#dolphin-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+#skull-overlay.visible,
+#usho-overlay.visible,
+#heart-overlay.visible,
+#void-overlay.visible,
+#flashback-overlay.visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  display: flex !important;
 }
 
-/* 1. Main Lead Dolphin */
-.lead-dolphin {
-  position: absolute;
-  /* top/left will be set by JS */
-  font-size: 20rem;
-  z-index: 2147483645;
-  /* High Priority */
-  pointer-events: none;
-  filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
-}
-
-/* [NEW] Event-Based Emoji Coloring - Targeted to Lead Dolphin only */
-.event-rare .lead-dolphin .actor-emoji {
-  animation: rainbow-filter 0.5s linear infinite;
-}
-
-.event-normal .lead-dolphin .actor-emoji {
-  filter: brightness(130%) saturate(120%) hue-rotate(10deg);
-}
-
-
-/* 2. Sea Jumpers (Whales, Sharks) */
-.sea-jump {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  font-size: 8rem;
-  z-index: 2147483642;
-  animation: hvn-dolphin-jump 4s linear forwards;
-  /* CSS vars --sx, --ex, --sr, --er are set by JS */
-}
-
-@keyframes hvn-dolphin-jump {
-  0% {
-    left: var(--sx);
-    bottom: -10vh;
-    transform: rotate(var(--sr)) scaleX(var(--sc));
-  }
-
-  25% {
-    bottom: 50vh;
-    /* Peak Height */
-  }
-
-  50% {
-    transform: rotate(var(--mr, 0deg)) scaleX(var(--sc));
-  }
-
-  100% {
-    left: var(--ex);
-    bottom: -10vh;
-    transform: rotate(var(--er)) scaleX(var(--sc));
-  }
-}
-
-/* 3. Surfer */
-.surfer-actor {
-  position: absolute;
-  top: 60%;
-  left: -20vw;
-  font-size: 10rem;
-  z-index: 2147483643;
-  animation: hvn-dolphin-surfer 21s linear forwards;
-}
-
-/* [FIX] Only flip the EMOJI, not the text! */
-.surfer-actor .actor-emoji {
-  /* transform: scaleX(-1); REMOVED - Natural Face is Left */
-  display: inline-block;
-}
-
-@keyframes hvn-dolphin-surfer {
-  0% {
-    left: 120vw;
-    transform: rotate(0deg);
-  }
-
-  /* Start Right, Natural Face (Left) */
-  20% {
-    transform: rotate(5deg) translateY(-20px);
-  }
-
-  40% {
-    transform: rotate(-5deg) translateY(20px);
-  }
-
-  60% {
-    transform: rotate(5deg) translateY(-20px);
-  }
-
-  80% {
-    transform: rotate(-5deg) translateY(20px);
-  }
-
-  100% {
-    left: -20vw;
-    transform: rotate(0deg);
-  }
-
-  /* End Left */
-}
-
-/* 4. Sea Extras (Crabs, etc.) */
-.sea-extra {
-  position: absolute;
-  font-size: 5rem;
-  z-index: 2147483641;
-  animation: hvn-dolphin-rise var(--duration, 5s) linear forwards;
-}
-
-@keyframes hvn-dolphin-rise {
-  0% {
-    transform: translate(0, 0) rotate(var(--r-start));
-    opacity: 0;
-  }
-
-  10% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: translate(var(--x-end), var(--y-end)) rotate(var(--r-end));
-    opacity: 0;
-  }
-}
-
-/* [Restored] Party Lighting Effect - Enhanced Visibility */
-.dolphin-light {
-  position: absolute;
-  top: 0;
-  width: 100vw;
-  height: 200vh;
-  /* Scaled down but still plenty */
-  z-index: 2147483647;
-  /* Top priority */
-  pointer-events: none;
-  opacity: 0.7;
-  /* Lowered by 30% from 1.0 */
-}
-
-.dolphin-light-left {
-  left: 0;
-  background: conic-gradient(from 120deg at 0% 0%, transparent 0deg, rgba(255, 0, 255, 0.8) 30deg, rgba(0, 255, 255, 0.8) 60deg, transparent 90deg);
-  transform-origin: 0% 0%;
-  animation: hvn-dolphin-lightShift 8s linear infinite;
-}
-
-.dolphin-light-right {
-  right: 0;
-  background: conic-gradient(from 150deg at 100% 0%, transparent 0deg, rgba(255, 255, 0, 0.8) 30deg, rgba(0, 255, 0, 0.8) 60deg, transparent 90deg);
-  transform-origin: 100% 0%;
-  animation: hvn-dolphin-lightShift 8s linear infinite;
-}
-
-@keyframes hvn-dolphin-lightShift {
-  0% {
-    filter: hue-rotate(0deg);
-  }
-
-  100% {
-    filter: hue-rotate(360deg);
-  }
-}
-
-/* 5. Environment (Sea Bottom) */
-.dolphin-sea-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 15vh;
-  background: linear-gradient(to top, #005f99, #00aaff);
-  opacity: 0.8;
-  z-index: 2147483640;
-  overflow: hidden;
-}
-
-.sea-wave {
-  position: absolute;
-  top: -20px;
-  left: 0;
-  width: 200%;
-  height: 40px;
-  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="%23ffffff" fill-opacity="0.3"/></svg>');
-  background-size: 50% 100%;
-  animation: hvn-dolphin-wave 10s linear infinite;
-}
-
-@keyframes hvn-dolphin-wave {
-  0% {
-    transform: translateX(0);
-  }
-
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-/* 6. Text Overlay */
-.dolphin-text {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 5rem;
-  color: white;
-  font-weight: bold;
-  text-shadow: 0 0 10px #00aaff, 0 0 20px #005f99;
-  z-index: 2147483646;
-  text-align: center;
-  white-space: nowrap;
-  animation: hvn-dolphin-textFade 15s ease-in-out forwards;
-}
-
-@keyframes hvn-dolphin-textFade {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 20px);
-  }
-
-  10% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-
-  90% {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -20px);
-  }
+#dolphin-overlay.visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  display: block !important;
 }
