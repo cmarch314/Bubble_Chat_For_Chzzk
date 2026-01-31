@@ -217,10 +217,9 @@ body {
 }
 
 .message img {
-  vertical-align: text-bottom;
-  margin: 0px -1.5%;
-  width: 46px;
-  height: 46px;
+  vertical-align: middle;
+  margin: 0 2px;
+  width: auto;
 }
 
 .chat-box[username="Mutalisk"] {
@@ -1254,9 +1253,7 @@ body {
   /* Changed from 0.8 to ensure full vibrance */
 }
 
-/* [New] Skull-Specific Slam Effect */
-.visual-center-text.skull-style,
-.visual-center-text.usho-style {
+.visual-center-text.skull-style {
   font-size: 6rem;
   font-weight: 900;
   text-shadow: 0 0 20px rgba(255, 0, 0, 0.8), 0 0 40px black;
@@ -1684,8 +1681,7 @@ body {
    ============================================================================ */
 
 /* Skull & Usho Overlays */
-#skull-overlay,
-#usho-overlay {
+#skull-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -1701,7 +1697,28 @@ body {
   transition: opacity 0.5s;
 }
 
-#skull-overlay.visible,
+#skull-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#usho-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: transparent;
+  /* Slightly darker for impact */
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-overlay-premium);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+
 #usho-overlay.visible {
   opacity: 1;
   pointer-events: auto;
@@ -1747,7 +1764,8 @@ body {
 .skull-emoji {
   position: relative;
   color: #ffffff;
-  font-size: 7rem;
+  font-size: 15rem;
+  /* Increased from 7rem */
   line-height: 1;
   text-align: center;
   margin: 0;
@@ -1766,63 +1784,218 @@ body {
   z-index: var(--z-background);
 }
 
-/* Usho Elements (Clone of Skull) */
-.usho-wrapper {
+/* [NEW] Usho GIF & Rainbow Overlay */
+/* [NEW] Usho Multi-Phase Animation */
+.usho-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+}
+
+/* Phase 1: Scanning */
+.usho-scan-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+}
+
+#usho-overlay.phase-scan .usho-scan-wrapper {
+  display: block;
+}
+
+.usho-gif-scan {
+  width: 300vw;
+  /* Center 1/3 fits 100vw */
+  height: auto;
+  min-height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  animation: usho-scan-move 7.2s linear forwards;
+}
+
+@keyframes usho-scan-move {
+  0% {
+    transform: translate(-50%, calc(100vh - 100% - 2px));
+  }
+
+  100% {
+    transform: translate(-50%, -2px);
+  }
+}
+
+/* Phase 2 & 3: Reveal and Expand */
+.usho-reveal-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: transparent;
+  overflow: hidden;
+  /* Added to ensure expansion is contained if needed */
+}
+
+#usho-overlay.phase-reveal .usho-reveal-wrapper {
+  display: flex;
+  animation:
+    usho-fade-in 0.5s ease-out forwards,
+    usho-doom-chit 1s infinite 0.5s;
+  /* 1초에 2번 비트 (둠칫) */
+}
+
+@keyframes usho-doom-chit {
+  0% {
+    transform: scale(1);
+  }
+
+  20% {
+    transform: scale(1.15);
+  }
+
+  /* 둠 (크게) */
+  40% {
+    transform: scale(1);
+  }
+
+  60% {
+    transform: scale(1.06);
+  }
+
+  /* 칫 (작게) */
+  80% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.usho-reveal-content-wrapper {
   position: relative;
-  /* Context for absolute hammer */
-  animation: hvn-skull-pulse 2.5s infinite;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  /* Apply the expansion crop here so it affects both GIF and Overlay */
+  animation: usho-expand-crop 5.8s ease-in-out forwards;
 }
 
-.usho-emoji {
-  position: relative;
-  color: #ffffff;
-  font-size: 20rem;
-  line-height: 1;
-  text-align: center;
-  margin: 0;
-  z-index: 1;
+.usho-gif-reveal {
+  height: 100vh;
+  width: auto;
+  display: block;
+  transform: translateY(-2px);
+  /* 2px top fix */
 }
 
-.usho-hammer {
+@keyframes usho-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes usho-expand-crop {
+  0% {
+    clip-path: inset(0 33.33% 0 33.33%);
+  }
+
+  100% {
+    clip-path: inset(0 0% 0 0%);
+  }
+}
+
+/* Impact Flash */
+.usho-flash {
   position: absolute;
-  font-size: 20rem;
-  z-index: 10;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  z-index: 20;
   opacity: 0;
-  /* Hidden initially */
-  transform-origin: bottom right;
-  /* Pivot for swing */
+  pointer-events: none;
 }
 
-.usho-emoji::before,
-.usho-emoji::after {
-  content: attr(data-text);
+#usho-overlay.phase-reveal .usho-flash {
+  animation: usho-flash-burst 0.5s ease-out forwards;
+}
+
+@keyframes usho-flash-burst {
+  0% {
+    opacity: 0.8;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+.usho-rainbow-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
-  z-index: var(--z-background);
+  pointer-events: none;
+  opacity: 0.8;
+  /* Complex Multi-Layer Rainbow */
+  background:
+    linear-gradient(45deg, rgba(255, 0, 0, 0.5), rgba(255, 165, 0, 0.5), rgba(255, 255, 0, 0.5), rgba(0, 255, 0, 0.5), rgba(0, 0, 255, 0.5), rgba(75, 0, 130, 0.5), rgba(238, 130, 238, 0.5)),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.3), transparent 40%, rgba(0, 0, 0, 0.3)),
+    radial-gradient(circle at center, transparent 30%, rgba(255, 255, 255, 0.4) 100%);
+  background-size: 200% 200%, 300% 300%, 150% 150%;
+  animation:
+    usho-rainbow-move 3s linear infinite,
+    usho-rainbow-shimmer 2s ease-in-out infinite alternate;
+  mix-blend-mode: color-dodge;
+  /* Much more vivid and interaction-rich */
+  filter: saturate(2) brightness(1.3) contrast(1.2);
 }
 
-/* Triggered Classes for Usho Glitch */
-.usho-emoji.glitching {
-  animation: skullTearMain 0.2s linear forwards;
+@keyframes usho-rainbow-shimmer {
+  0% {
+    opacity: 0.6;
+    filter: saturate(1.8) brightness(1.1);
+  }
+
+  100% {
+    opacity: 0.9;
+    filter: saturate(2.5) brightness(1.5);
+  }
 }
 
-.usho-emoji.glitching::before {
-  opacity: 1;
-  color: #ff0000;
-  animation: skullGlitchRed 0.2s linear forwards;
-}
+@keyframes usho-rainbow-move {
+  0% {
+    background-position: 0% 50%;
+  }
 
-.usho-emoji.glitching::after {
-  opacity: 1;
-  color: #00ffff;
-  animation: skullGlitchCyan 0.2s linear forwards;
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 
@@ -1844,86 +2017,7 @@ body {
 }
 
 
-/* Keyframes mapped to 0-100% for a single 0.2s burst */
-@keyframes skullGlitchRed {
-  0% {
-    transform: translate(0);
-    clip-path: none;
-    opacity: 1;
-  }
 
-  25% {
-    transform: translate(-15px, -5px);
-    clip-path: polygon(0 15%, 100% 15%, 100% 30%, 0 30%);
-  }
-
-  50% {
-    transform: translate(10px, 5px);
-    clip-path: polygon(0 45%, 100% 45%, 100% 60%, 0 60%);
-  }
-
-  75% {
-    transform: translate(-20px, 10px);
-    clip-path: polygon(0 75%, 100% 75%, 100% 90%, 0 90%);
-  }
-
-  100% {
-    transform: translate(0);
-    clip-path: none;
-    opacity: 1;
-  }
-}
-
-@keyframes skullGlitchCyan {
-  0% {
-    transform: translate(0);
-    clip-path: none;
-    opacity: 1;
-  }
-
-  25% {
-    transform: translate(15px, 5px);
-    clip-path: polygon(0 10%, 100% 10%, 100% 25%, 0 25%);
-  }
-
-  50% {
-    transform: translate(-10px, -5px);
-    clip-path: polygon(0 35%, 100% 35%, 100% 50%, 0 50%);
-  }
-
-  75% {
-    transform: translate(20px, -10px);
-    clip-path: polygon(0 65%, 100% 65%, 100% 80%, 0 80%);
-  }
-
-  100% {
-    transform: translate(0);
-    clip-path: none;
-    opacity: 1;
-  }
-}
-
-@keyframes skullTearMain {
-  0% {
-    transform: translate(0);
-    filter: none;
-  }
-
-  25% {
-    transform: translate(5px, 0);
-    filter: drop-shadow(-5px 0 #ff0000);
-  }
-
-  50% {
-    transform: translate(-5px, 0);
-    filter: drop-shadow(5px 0 #00ffff);
-  }
-
-  100% {
-    transform: translate(0);
-    filter: none;
-  }
-}
 
 @keyframes hvn-skull-pulse {
   0% {
@@ -2115,77 +2209,7 @@ body {
   }
 }
 
-/* 4-2. SKULL & USHO EFFECT (해골) */
-#skull-overlay,
-#usho-overlay {
-  background-color: rgba(0, 0, 0, 0.7);
-  transition: opacity 0.5s;
-}
-
-.skull-wrapper,
-.usho-wrapper {
-  animation: hvn-skull-pulse 2.5s infinite;
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  color: #ffffff;
-  font-size: 20rem;
-  line-height: 1;
-  text-align: center;
-}
-
-.skull-emoji,
-.usho-emoji {
-  position: relative;
-  color: #ffffff;
-  font-size: 20rem;
-  line-height: 1;
-  text-align: center;
-  margin: 0;
-  z-index: 1;
-}
-
-.usho-hammer {
-  position: absolute;
-  font-size: 20rem;
-  z-index: 10;
-  opacity: 0;
-  transform-origin: bottom right;
-}
-
-.usho-emoji::before,
-.usho-emoji::after,
-.skull-emoji::before,
-.skull-emoji::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 1;
-  z-index: var(--z-background);
-}
-
-.usho-emoji.glitching,
-.skull-emoji.glitching {
-  animation: skullTearMain 0.2s linear forwards;
-}
-
-.usho-emoji.glitching::before,
-.skull-emoji.glitching::before {
-  opacity: 1;
-  color: #ff0000;
-  animation: skullGlitchRed 0.2s linear forwards;
-}
-
-.usho-emoji.glitching::after,
-.skull-emoji.glitching::after {
-  opacity: 1;
-  color: #00ffff;
-  animation: skullGlitchCyan 0.2s linear forwards;
-}
+/* Removed duplicate Usho styles */
 
 
 @keyframes skullPulse {
@@ -2243,17 +2267,17 @@ body {
   }
 
   25% {
-    transform: translate(-15px, -5px);
+    transform: translate(-30px, -10px);
     clip-path: polygon(0 15%, 100% 15%, 100% 30%, 0 30%);
   }
 
   50% {
-    transform: translate(10px, 5px);
+    transform: translate(20px, 10px);
     clip-path: polygon(0 45%, 100% 45%, 100% 60%, 0 60%);
   }
 
   75% {
-    transform: translate(-20px, 10px);
+    transform: translate(-40px, 20px);
     clip-path: polygon(0 75%, 100% 75%, 100% 90%, 0 90%);
   }
 
@@ -2272,17 +2296,17 @@ body {
   }
 
   25% {
-    transform: translate(15px, 5px);
+    transform: translate(30px, 10px);
     clip-path: polygon(0 10%, 100% 10%, 100% 25%, 0 25%);
   }
 
   50% {
-    transform: translate(-10px, -5px);
+    transform: translate(-20px, -10px);
     clip-path: polygon(0 35%, 100% 35%, 100% 50%, 0 50%);
   }
 
   75% {
-    transform: translate(20px, -10px);
+    transform: translate(40px, -20px);
     clip-path: polygon(0 65%, 100% 65%, 100% 80%, 0 80%);
   }
 
@@ -2300,13 +2324,13 @@ body {
   }
 
   25% {
-    transform: translate(5px, 0);
-    filter: drop-shadow(-5px 0 #ff0000);
+    transform: translate(10px, 0);
+    filter: drop-shadow(-10px 0 #ff0000);
   }
 
   50% {
-    transform: translate(-5px, 0);
-    filter: drop-shadow(5px 0 #00ffff);
+    transform: translate(-10px, 0);
+    filter: drop-shadow(10px 0 #00ffff);
   }
 
   100% {
@@ -2349,7 +2373,8 @@ body {
 
 .heart-emoji {
   color: #ff0000;
-  font-size: 7rem;
+  font-size: 15rem;
+  /* Increased from 7rem */
   line-height: 1;
   text-align: center;
   margin: 0;
@@ -2404,8 +2429,9 @@ body {
 .visual-center-text.heart-style {
   font-size: 5rem;
   font-weight: 900;
-  color: #ff69b4;
-  text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px white;
+  color: #c28f38;
+  /* Poop color requested */
+  text-shadow: 0 0 20px rgba(194, 143, 56, 0.8), 0 0 40px white;
   white-space: nowrap;
 }
 

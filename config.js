@@ -59,8 +59,7 @@ window.HIVE_SOUND_CONFIG = {
     "와!": [
         { "src": "chant1.mp3", "volume": 0.45 },
         { "src": "chant2.mp3", "volume": 0.5 },
-        { "src": "chant3.mp3", "volume": 0.5 },
-        { "src": "Chant4.mp3", "volume": 0.35 }
+        { "src": "chant3.mp3", "volume": 0.5 }
     ],
     "우와": { "src": "OMG_Good.mp3", "volume": 0.5 },
     "맙소사": { "src": "OMG.mp3", "volume": 0.5 },
@@ -140,9 +139,9 @@ window.HIVE_SOUND_CONFIG = {
 
     // [Situation / Alerts]
     "하이": [
-        { "src": "Hi1.mp3", "volume": 0.5 },
-        { "src": "Hi2.mp3", "volume": 0.5 },
-        { "src": "Hi3.mp3", "volume": 0.5 }
+        { "src": "Hi1.mp3", "volume": 0.3 },
+        { "src": "Hi2.mp3", "volume": 0.3 },
+        { "src": "Hi3.mp3", "volume": 0.3 }
     ],
     "안녕하세요": { "src": "Hello1.mp3", "volume": 0.5 },
     "헬로": { "src": "Hello2.mp3", "volume": 1 },

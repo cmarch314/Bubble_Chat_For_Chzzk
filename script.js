@@ -110,11 +110,12 @@ class ChzzkGateway {
         this.onMessage = messageHandler;
         this.ws = null;
         this.proxies = [
+            "https://api.allorigins.win/get?url=", // Wrapper proxy (Excellent reliability)
             "https://corsproxy.io/?",
-            "https://api.allorigins.win/raw?url=",
             "https://api.codetabs.com/v1/proxy?quest=",
             "https://thingproxy.freeboard.io/fetch/",
-            "https://corsproxy.io/?url=" // Fallback variation
+            "https://api.cors.lol/?url=", // New addition
+            "https://cors-anywhere.herokuapp.com/" // Fallback (often rate limited but worth a try)
         ];
         this.attemptCount = 1;
     }
@@ -132,12 +133,14 @@ class ChzzkGateway {
             const statusData = await this._fetchWithProxy(
                 `https://api.chzzk.naver.com/polling/v2/channels/${this.config.channelId}/live-status`
             );
+            if (!statusData || !statusData.content) throw new Error("채널 라이브 상태 정보를 가져올 수 없습니다.");
             const { chatChannelId } = statusData.content;
 
             this._showLoader(`채팅 서버 접근 권한 요청 중... [${id}] (${this.attemptCount}번째 시도)`, "loading");
             const tokenData = await this._fetchWithProxy(
                 `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING`
             );
+            if (!tokenData || !tokenData.content) throw new Error("채팅 토큰 정보를 가져올 수 없습니다.");
             const accessToken = tokenData.content.accessToken;
 
             this._connectSocket(chatChannelId, accessToken);
@@ -195,13 +198,39 @@ class ChzzkGateway {
             }
         }
 
-        if ([93101, 15101].includes(data.cmd)) {
+        // [FIX] 93102 (후원/구독) 코드 필수 포함
+        if ([93101, 93102, 15101, 94101].includes(data.cmd)) {
             const chats = (data.cmd === 15101) ? data.bdy.messageList : data.bdy;
-            if (!chats) return;
+            if (!chats) return; // Null check added back for stability
 
-            chats.forEach(chat => {
-                const profile = chat.profile ? JSON.parse(chat.profile) : {};
-                const extra = chat.extras ? JSON.parse(chat.extras) : {};
+            // 93102나 94101이 단일 객체로 올 수 있으므로 배열로 변환
+            const chatArray = Array.isArray(chats) ? chats : [chats];
+
+            chatArray.forEach(chat => {
+                if (!chat) return; // Individual chat null check
+                let profile = {}, extra = {};
+                try {
+                    profile = chat.profile ? JSON.parse(chat.profile) : {};
+                    extra = chat.extras ? JSON.parse(chat.extras) : {};
+                } catch (e) {
+                    console.error("JSON Parse Error (Profile/Extras):", e);
+                    return; // Skip malformed chat
+                }
+
+                // [Protocol V1.0] 타입 코드 식별 (msgTypeCode fallback 추가)
+                const msgType = chat.messageTypeCode || chat.msgTypeCode || 1;
+                const isDonation = (msgType === 10);
+                const isSubscription = (msgType === 11);
+
+                let donationAmount = 0;
+                let subMonth = 0;
+
+                if (isDonation) {
+                    donationAmount = extra.payAmount || 0;
+                }
+                if (isSubscription) {
+                    subMonth = extra.month || 1;
+                }
 
                 const messageData = {
                     message: chat.msg || chat.content || "",
@@ -211,7 +240,14 @@ class ChzzkGateway {
                     emojis: extra.emojis || {},
                     isStreamer: profile.userRoleCode === 'streamer',
                     uid: profile.userIdHash,
-                    type: 'chat'
+                    type: 'chat',
+
+                    // [Antigravity 확장 필드]
+                    isDonation: isDonation,
+                    donationAmount: donationAmount,
+                    isSubscription: isSubscription,
+                    subMonth: subMonth,
+                    msgType: msgType
                 };
 
                 this.onMessage(messageData);
@@ -222,26 +258,28 @@ class ChzzkGateway {
     async _fetchWithProxy(url) {
         let errors = [];
 
-        // 1. Primary: AllOrigins Wrapper (Wraps response in JSON to bypass CORS more effectively)
+        // 1. Primary: AllOrigins (Most reliable for Chzzk APIs)
         try {
-            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+            // Add cache buster to prevent stale error responses
+            const cacheBuster = `&_t=${Date.now()}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}${cacheBuster}`;
+            const res = await fetch(proxyUrl);
             if (res.ok) {
                 const wrapper = await res.json();
-                if (wrapper && wrapper.status && wrapper.status.http_code === 200) {
+                if (wrapper && wrapper.contents) {
                     const data = JSON.parse(wrapper.contents);
                     if (data && data.code !== undefined && data.code !== 200) throw new Error(`Chzzk ${data.code}`);
                     return data;
                 }
-                errors.push(`AllOrig: HTTP ${wrapper?.status?.http_code || 'Err'}`);
-            } else {
-                errors.push(`AllOrig: Fetch ${res.status}`);
             }
+            errors.push("AllOrigins Failed");
         } catch (e) {
-            errors.push(`AllOrig: ${e.message.substring(0, 15)}`);
+            errors.push(`AllOrigins: ${e.message.substring(0, 20)}`);
         }
 
-        // 2. Secondary: Raw Proxies (Iterative)
+        // 2. Secondary: Iterative Proxies
         for (let proxy of this.proxies) {
+            if (proxy.includes("allorigins")) continue; // Skip if already tried
             const fullUrl = proxy + encodeURIComponent(url);
             try {
                 const res = await fetch(fullUrl);
@@ -250,20 +288,17 @@ class ChzzkGateway {
                     if (data && data.code !== undefined && data.code !== 200) throw new Error(`Chzzk ${data.code}`);
                     return data;
                 }
-                errors.push(`${proxy.split('/')[2].substring(0, 8)}: H${res.status}`);
+                errors.push(`${proxy.split('/')[2]}: H${res.status}`);
             } catch (e) {
-                errors.push(`${proxy.split('/')[2].substring(0, 8)}: ${e.message.substring(0, 15)}`);
+                errors.push(`${proxy.split('/')[2]}: ${e.message.substring(0, 15)}`);
             }
         }
 
-        // 3. Fallback: Direct Fetch
+        // 3. Final Fallback: Direct (May fail due to CORS)
         try {
             const res = await fetch(url);
             if (res.ok) return await res.json();
-            errors.push(`Direct: H${res.status}`);
-        } catch (e) {
-            errors.push(`Direct: ${e.message.substring(0, 15)}`);
-        }
+        } catch (e) { }
 
         throw new Error(`연결 실패 (${errors.join(' | ')})`);
     }
@@ -319,8 +354,8 @@ class AudioManager {
     }
 
     // 소리만 재생 (채팅 트리거용)
-    checkAndPlay(message) {
-        if (!this.enabled) return;
+    checkAndPlay(message, force = false) {
+        if (!this.enabled && !force) return;
         const normOriginal = message.normalize('NFC').trim();
 
         // Visual Config에 있는 키워드는 사운드 트리거에서 제외 (중복 방지)
@@ -355,14 +390,14 @@ class AudioManager {
 
         if (sequence.length > 0) {
             (async () => {
-                for (let item of sequence.slice(0, 5)) { await this.playSound(item.sound); }
+                for (let item of sequence.slice(0, 5)) { await this.playSound(item.sound, force); }
             })();
         }
     }
 
     // 외부(VisualDirector 등)에서 호출 가능
-    playSound(input) {
-        if (!this.enabled) return Promise.resolve();
+    playSound(input, force = false) {
+        if (!this.enabled && !force) return Promise.resolve();
         let target = input;
         if (Array.isArray(target)) target = target[Math.floor(Math.random() * target.length)];
         if (!target) return Promise.resolve();
@@ -400,7 +435,8 @@ class ChatRenderer {
     }
 
     render(data) {
-        const { message, nickname, color, badges, emotes, type, uid } = data;
+        const { message, nickname, color, badges, emojis, type, uid } = data;
+        const emotes = emojis || {}; // Map emojis to emotes for compatibility
         const originalMessage = message;
         const normOriginal = originalMessage.normalize('NFC').trim();
 
@@ -437,8 +473,14 @@ class ChatRenderer {
         this._applyTextFilters(originalMessage, elements, userColor);
 
         // 이모티콘 처리 및 메시지 삽입
-        const emoteParts = this._parseEmotes(displayMessage, emotes);
-        this._appendMessageContent(messageEle, emoteParts);
+        // [Fix] 이모티콘 처리 (Using Helper)
+        const safeMsg = displayMessage.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+        messageEle.innerHTML = renderMessageWithEmotesHTML(safeMsg, emotes);
+
+        // Ensure Twemoji is applied
+        if (window.twemoji) {
+            try { twemoji.parse(messageEle); } catch (e) { }
+        }
 
         // 메시지 길이 기반 스타일 조정
         if (displayMessage.length <= 5) {
@@ -662,13 +704,25 @@ class ChatRenderer {
     }
 
     _parseEmotes(message, emotes) {
-        let parts = [], regex = /\{:?[^:{} ]+:?\}/g, lastIndex = 0, match;
+        // [Debug] Log incoming data for emoji debugging
+        if (emotes && Object.keys(emotes).length > 0) {
+            console.log("Parsing Emotes:", { message, keys: Object.keys(emotes) });
+        }
+
+        let parts = [], regex = /\{[^}]+\}/g, lastIndex = 0, match;
         while ((match = regex.exec(message)) !== null) {
             if (match.index > lastIndex) parts.push(message.substring(lastIndex, match.index));
-            const emoteId = match[0].replace(/[\{:?\}]/g, "");
+
+            // Flexible ID cleanup: remove { } : and whitespace
+            const emoteId = match[0].replace(/[\{\}:]/g, "").trim();
             const emoteData = emotes[emoteId];
+
             let emoteUrl = (emoteData && (typeof emoteData === 'string' ? emoteData : (emoteData.imageUrl || emoteData.url))) || null;
-            if (emoteUrl) parts.push({ url: emoteUrl }); else parts.push(match[0]);
+            if (emoteUrl) {
+                parts.push({ url: emoteUrl });
+            } else {
+                parts.push(match[0]); // Not found, keep original text
+            }
             lastIndex = regex.lastIndex;
         }
         if (lastIndex < message.length) parts.push(message.substring(lastIndex));
@@ -685,7 +739,9 @@ class ChatRenderer {
                 ele.appendChild(img);
             }
         });
-        if (window.twemoji) twemoji.parse(ele);
+        if (window.twemoji) {
+            try { twemoji.parse(ele); } catch (e) { console.error("Twemoji Parse Error:", e); }
+        }
     }
 
     _includesAny(suffixes, string) { for (let s of suffixes) if (string.includes(s)) return true; return false; }
@@ -700,11 +756,17 @@ class VisualDirector {
         this.config = config;
         this.queue = [];
         this.isLocked = false;
+        this.enabled = false; // [Default] OFF (Manual trigger keywords)
+        this.alertsEnabled = true; // [Default] ON (Sub/Donation Alerts)
         this._initOverlays();
         this.registry = this._buildRegistry();
     }
 
+    setEnabled(enabled) { this.enabled = enabled; }
+    setAlertsEnabled(enabled) { this.alertsEnabled = enabled; } // [New] Setter
+
     trigger(effectType, context = {}) {
+        // [Refinement] enabled 체크는 호출부(network callback)에서 세밀하게 처리하므로 여기선 제외
         if (!this.registry[effectType]) return;
         console.log(`📥 [VisualDirector] Queuing: ${effectType}`);
         this.queue.push({ effect: this.registry[effectType], context });
@@ -717,9 +779,10 @@ class VisualDirector {
         this.isLocked = true;
         const { effect, context } = this.queue.shift();
 
-        // 1. Sound (Using Audio Manager)
-        if (soundEnabled && effect.soundKey && window.audioManager) {
-            window.audioManager.playSound(window.soundHive[effect.soundKey]);
+        // 1. Sound (Using Audio Manager - Real-time enabled check)
+        const isSoundActive = window.audioManager ? (window.audioManager.enabled || context.isStreamer) : false;
+        if (isSoundActive && effect.soundKey && window.audioManager) {
+            window.audioManager.playSound(window.soundHive[effect.soundKey], context.isStreamer);
         }
 
         // 2. Visual
@@ -745,7 +808,20 @@ class VisualDirector {
             document.body.appendChild(div);
         };
         create('skull-overlay', '<div class="skull-wrapper"><div class="skull-emoji" data-text="☠️">☠️</div></div><div class="film-grain"></div>');
-        create('usho-overlay', '<div class="usho-wrapper"><div class="usho-emoji" data-text="😱" style="display:none;">😱</div><div class="usho-hammer">🔨</div></div>');
+        create('usho-overlay', `
+            <div class="usho-flash"></div>
+            <div class="usho-container">
+                <div class="usho-scan-wrapper">
+                    <img class="usho-gif-scan" src="./img/usho.gif">
+                </div>
+                <div class="usho-reveal-wrapper">
+                    <div class="usho-reveal-content-wrapper">
+                        <img class="usho-gif-reveal" src="./img/usho.gif">
+                        <div class="usho-rainbow-overlay"></div>
+                    </div>
+                </div>
+            </div>
+        `);
         create('heart-overlay', '<div class="heart-emoji">❤️‍🩹</div>');
         create('flashback-overlay');
     }
@@ -762,25 +838,30 @@ class VisualDirector {
     }
 
     _runSkull(context) {
-        return this._genericSkullLikeEffect('skull-overlay', '해골', 'skull-style', 'skull-emoji', context);
+        return this._genericSkullLikeEffect('skull-overlay', '!해골', 'skull-style', 'skull-emoji', context);
     }
 
     _runUsho(context) {
         const overlay = document.getElementById('usho-overlay');
         if (!overlay) return Promise.resolve();
-        const parts = this._parseMessage(context.message, "우쇼");
-        this._showFloatingText(parts.rest, 0, 3700, 'usho-style', context.emotes);
-        this._showFloatingText(parts.last, 3600, 700, 'usho-style', context.emotes);
+
         return new Promise(resolve => {
+            // Reset phases
+            overlay.classList.remove('phase-scan', 'phase-reveal', 'visible');
+            void overlay.offsetWidth; // Force reflow
+
+            overlay.classList.add('visible', 'phase-scan');
+
+            // 7.2초 후 임팩트 및 리빌 단계 전환
             setTimeout(() => {
-                overlay.classList.add('visible');
-                const hammer = overlay.querySelector('.usho-hammer');
-                if (hammer) {
-                    hammer.style.opacity = '0'; hammer.style.animation = 'none';
-                    setTimeout(() => { hammer.style.opacity = '1'; hammer.style.animation = "hvn-skull-hammerStrike 3.14s infinite"; }, 1200);
-                }
-                setTimeout(() => { overlay.classList.remove('visible'); if (hammer) { hammer.style.opacity = '0'; hammer.style.animation = 'none'; } resolve(); }, 8000);
-            }, 4000);
+                overlay.classList.replace('phase-scan', 'phase-reveal');
+            }, 7200);
+
+            // 13초 후 종료
+            setTimeout(() => {
+                overlay.classList.remove('visible', 'phase-reveal', 'phase-scan');
+                resolve();
+            }, 13000);
         });
     }
 
@@ -790,7 +871,7 @@ class VisualDirector {
         if (!flashback || !overlay) return Promise.resolve();
 
         let displayMsg = (context.message || "").trim();
-        const triggerKw = "커플";
+        const triggerKw = "!커플";
         if (displayMsg.startsWith(triggerKw)) displayMsg = displayMsg.substring(triggerKw.length).trim();
 
         const wrappedMsg = this._wrapText(displayMsg, 200);
@@ -862,7 +943,7 @@ class VisualDirector {
         const overlay = ov.querySelector('#heart-overlay'), backdrop = ov.querySelector('#heart-backdrop'), flash = ov.querySelector('.heart-flash'), emojiContainer = ov.querySelector('.heart-emoji-container');
         backdrop.style.opacity = 1; // Ensure background is visible
 
-        let msg = context.message || ""; if (msg.startsWith("하트")) msg = msg.substring(2).trim();
+        let msg = context.message || ""; if (msg.startsWith("!하트")) msg = msg.substring(3).trim();
         const parts = this._splitMessageIntoParts(msg, 4);
 
         const showPart = (text, delay, duration, isFinal = false) => {
@@ -944,7 +1025,11 @@ class VisualDirector {
                 }
                 backdrop.style.opacity = 0;
                 setTimeout(() => {
-                    let msg = context.message || ""; if (msg.startsWith("버질")) msg = msg.substring(2).trim();
+                    let msg = context.message || "";
+                    const kw = "!버질";
+                    if (msg.startsWith(kw)) msg = msg.substring(kw.length).trim();
+                    else if (msg.startsWith("버질")) msg = msg.substring(2).trim(); // Fallback
+
                     if (msg) {
                         const txt = document.createElement('div'); txt.className = 'vergil-text';
                         txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {}); ov.appendChild(txt); // Append to overlay root
@@ -1025,7 +1110,7 @@ class VisualDirector {
             }, Math.random() * 15000);
         }
 
-        let msg = context.message || ""; if (msg.startsWith("돌핀")) msg = msg.substring(2).trim();
+        let msg = context.message || ""; if (msg.startsWith("!돌핀")) msg = msg.substring(3).trim();
         if (msg) {
             setTimeout(() => {
                 const txt = document.createElement('div'); txt.className = 'dolphin-text';
@@ -1041,8 +1126,8 @@ class VisualDirector {
     _genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context) {
         const overlay = document.getElementById(overlayId); if (!overlay) return Promise.resolve();
         const parts = this._parseMessage(context.message, kw);
-        this._showFloatingText(parts.rest, 0, 3700, styleClass, context.emotes);
-        this._showFloatingText(parts.last, 3600, 700, styleClass, context.emotes);
+        this._showFloatingText(parts.rest, 0, 3500, styleClass, context.emotes);
+        this._showFloatingText(parts.last, 3600, 500, styleClass, context.emotes);
         return new Promise(resolve => {
             setTimeout(() => {
                 overlay.classList.add('visible');
@@ -1113,39 +1198,137 @@ class VisualDirector {
 }
 
 // ==========================================
+// [Class 6] System Controller (Toggles)
+// ==========================================
+class SystemController {
+    constructor(audio, visual, renderer) {
+        this.audio = audio;
+        this.visual = visual;
+        this.renderer = renderer;
+        this.commands = {
+            '!소리끄기': { action: () => this.audio.setEnabled(false), msg: "🔇 사운드 효과가 꺼졌습니다." },
+            '!소리켜기': { action: () => this.audio.setEnabled(true), msg: "🔊 사운드 효과가 켜졌습니다." },
+            '!이펙트끄기': { action: () => this.visual.setEnabled(false), msg: "🚫 비주얼 이펙트가 꺼졌습니다." },
+            '!이펙트켜기': { action: () => this.visual.setEnabled(true), msg: "✨ 비주얼 이펙트가 켜졌습니다." },
+            '!알람끄기': { action: () => this.visual.setAlertsEnabled(false), msg: "🔔 알람(구독/후원) 이펙트가 꺼졌습니다." },
+            '!알람켜기': { action: () => this.visual.setAlertsEnabled(true), msg: "🔔 알람(구독/후원) 이펙트가 켜졌습니다." },
+            '!전체끄기': {
+                action: () => {
+                    this.audio.setEnabled(false);
+                    this.visual.setEnabled(false);
+                    this.visual.setAlertsEnabled(false);
+                },
+                msg: "🔒 모든 효과가 꺼졌습니다."
+            },
+            '!전체켜기': {
+                action: () => {
+                    this.audio.setEnabled(true);
+                    this.visual.setEnabled(true);
+                    this.visual.setAlertsEnabled(true);
+                },
+                msg: "🔓 모든 효과가 켜졌습니다."
+            }
+        };
+    }
+
+    handle(msgData) {
+        if (!msgData.isStreamer) return false;
+        const cmd = msgData.message.trim();
+        const config = this.commands[cmd];
+        if (config) {
+            config.action();
+            this.renderer.render({ ...msgData, message: config.msg });
+            return true;
+        }
+        return false;
+    }
+}
+
+// ==========================================
 // [Execution & Init]
 // ==========================================
 const appConfig = new ConfigManager();
 const audioManager = new AudioManager();
 const chatRenderer = new ChatRenderer();
 const visualDirector = new VisualDirector(appConfig);
+const systemController = new SystemController(audioManager, visualDirector, chatRenderer);
 
 // 전역 참조 (디버깅 및 호환성용)
 window.audioManager = audioManager;
 window.visualDirector = visualDirector;
+window.systemController = systemController;
 
 // 네트워크 연결 시작
 const network = new ChzzkGateway(appConfig, (msgData) => {
+    // 0. 스트리머 전용 제어 명령어 처리 (Refactored)
+    if (systemController.handle(msgData)) return;
+
+    // 구독 알람의 경우 메시지가 없으면 기본 문구 삽입 (Protocol V1.0)
+    if (msgData.isSubscription && !msgData.message) {
+        msgData.message = `${msgData.nickname}님 ${msgData.subMonth}개월 구독`;
+    }
+
+    // [Debug] 모든 채팅 끝에 msgType 표시 (제거됨)
+    const updatedTrimmedMsg = msgData.message ? msgData.message.trim() : "";
+
+    // 0.5 특별 이벤트(구독) 처리
+    if (msgData.isSubscription) {
+        if (visualDirector.alertsEnabled || msgData.isStreamer) {
+            visualDirector.trigger('dolphin', {
+                message: "!돌핀 " + msgData.message,
+                emotes: msgData.emojis,
+                nickname: msgData.nickname,
+                color: msgData.color,
+                isStreamer: msgData.isStreamer
+            });
+        }
+        return; // 구독은 항상 버블 숨김
+    }
+
+    // (0.6 로직은 아래에서 통합 처리)
+
     // 1. 시각 효과 트리거 확인 (강화: 매핑 시스템 적용)
     const visualMap = {
         '해골': 'skull', '우쇼': 'usho', '커플': 'couple',
         '하트': 'heart', '버질': 'vergil', '돌핀': 'dolphin'
     };
-    const trimmedMsg = msgData.message.trim();
-    const foundKeyword = Object.keys(visualMap).find(k => trimmedMsg.startsWith(k) || trimmedMsg.startsWith('!' + k));
+
+    const foundKeyword = Object.keys(visualMap).find(k => updatedTrimmedMsg.startsWith('!' + k));
 
     if (foundKeyword) {
         const effectType = visualMap[foundKeyword];
-        visualDirector.trigger(effectType, {
-            message: msgData.message,
-            emotes: msgData.emojis,
-            nickname: msgData.nickname,
-            color: msgData.color
-        });
+        let shouldTrigger = false;
+
+        if (msgData.isDonation) {
+            // 후원은 알람 토글(alertsEnabled) 기준
+            if (visualDirector.alertsEnabled || msgData.isStreamer) shouldTrigger = true;
+        } else {
+            // 일반 채팅은 이펙트 토글(enabled) 기준
+            if (visualDirector.enabled || msgData.isStreamer) shouldTrigger = true;
+        }
+
+        if (shouldTrigger) {
+            visualDirector.trigger(effectType, {
+                message: updatedTrimmedMsg,
+                emotes: msgData.emojis,
+                nickname: msgData.nickname,
+                color: msgData.color,
+                isStreamer: msgData.isStreamer
+            });
+        }
+
+        if (msgData.isDonation) {
+            audioManager.checkAndPlay(msgData.message, msgData.isStreamer);
+            return;
+        }
     } else {
-        // 2. 일반 채팅 렌더링 (사운드 재생 포함)
-        audioManager.checkAndPlay(msgData.message);
-        chatRenderer.render(msgData);
+        audioManager.checkAndPlay(msgData.message, msgData.isStreamer);
+        if (msgData.isDonation) return;
+        try {
+            chatRenderer.render(msgData);
+        } catch (e) {
+            console.error("Renderer Error:", e);
+        }
     }
 });
 
@@ -1153,15 +1336,22 @@ const network = new ChzzkGateway(appConfig, (msgData) => {
 network.connect();
 
 // [Utility Helpers Compatibility]
-function renderMessageWithEmotesHTML(message, emotes, scale = 1.0) {
+function renderMessageWithEmotesHTML(message, emotes, scale = 1) {
     // Legacy helper for VisualDirector
     let content = message;
     if (emotes && Object.keys(emotes).length > 0) {
-        content = message.replace(/\{:?[^:{} ]+:?\}/g, (match) => {
-            const emoteId = match.replace(/[\{:?\}]/g, "");
+        // [Fix] Broaden regex to catch {:d_15:} or {d_15} or other variants
+        content = message.replace(/\{[^}]+\}/g, (match) => {
+            // Remove {, }, : and whitespace to get pure ID
+            const emoteId = match.replace(/[\{\}:]/g, "").trim();
             const d = emotes[emoteId];
             const url = (d && (typeof d === 'string' ? d : (d.imageUrl || d.url))) || null;
-            return url ? `<img src="${url}" class="emote_chzzk_inline" style="height: ${1.2 * scale}em; vertical-align: middle; display: inline-block;" alt="${emoteId}">` : match;
+            // [Fix] Use height:auto and max-width to preserve aspect ratio, preventing flattening
+            // [Fix] Check if message is JUST this emote to scale it up
+            const isSingleEmote = message.trim() === match;
+            const sizeStyle = isSingleEmote ? "height: 10em; width: auto;" : `height: ${3 * scale}em; width: auto;`;
+
+            return url ? `<img src="${url}" class="emote_chzzk_inline" style="${sizeStyle} vertical-align: middle; display: inline-block;" alt="${emoteId}">` : match;
         });
     }
 
