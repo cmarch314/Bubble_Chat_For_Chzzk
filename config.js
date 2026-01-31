@@ -130,10 +130,9 @@ window.HIVE_SOUND_CONFIG = {
     "죽고 싶지 않": { "src": "Don'tWannaDie.mp3", "volume": 0.5 },
     "장비를 정지": { "src": "Half-Stop.mp3", "volume": 0.5 },
     "너무한": { "src": "TooHarsh.mp3", "volume": 0.65 },
+    "안되잖아": { "src": "Half-not-working.mp3", "volume": 0.5 },
     "정지가 안돼": [
-        { "src": "Half-not-working.mp3", "volume": 0.5 },
         { "src": "Half-not-working2.mp3", "volume": 0.5 },
-        { "src": "half-not-working3.mp3", "volume": 0.5 },
         { "src": "half-not-working4.mp3", "volume": 0.5 }
     ],
 
@@ -230,7 +229,7 @@ window.HIVE_SOUND_CONFIG = {
     "트리스트람": { "src": "Stay_awhile.mp3", "volume": 0.35 },
     "난재밌어": { "src": "ToMeIt'sSoFun.mp3", "volume": 0.3 },
     "회전회오리": { "src": "Tornado.mp3", "volume": 0.4 },
-    "와츄고나두": { "src": "WaChuGoNaDo.mp3", "volume": 0.35 },
+    "와츄고나두": { "src": "WaChuGoNaDo.mp3", "volume": 0.45 },
     "꺄악": { "src": "Whilhelm.mp3", "volume": 0.4 },
     "USB": { "src": "Windows 10 USB Disconnect.mp3", "volume": 0.5 },
     "예야": { "src": "Yaeya.mp3", "volume": 0.3 },
