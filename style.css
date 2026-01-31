@@ -1,8 +1,70 @@
-﻿@font-face {
+﻿/* ============================================================================
+   TABLE OF CONTENTS
+   ============================================================================
+   1. GLOBAL SETTINGS (:root, body, reset, utility)
+   2. CHAT BUBBLE STYLES (말풍선 디자인)
+   3. ANIMATION: CHAT ACTIONS (채팅 애니메이션)
+   4. ANIMATION: FULL SCREEN EFFECTS
+      4-1. Film Effects (Film)
+      4-2. Skull & Usho (Skull)
+      4-3. Heart Effect (Heart)
+      4-4. Dolphin Effect (Dolphin)
+      4-5. Void/Vergil Effect (Void)
+   ============================================================================ */
+
+/* ============================================================================
+   1. GLOBAL SETTINGS (:root, body, reset, utility)
+   ============================================================================ */
+
+@font-face {
   font-family: 'CookieRun-Regular';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/CookieRun-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
+}
+
+:root {
+  /* 1. LAYER MANAGEMENT (Z-Index Control) */
+  --z-background: -1;
+  --z-overlay-under: 5;
+  --z-overlay-premium: 10;
+  --z-overlay-normal: 20;
+  --z-overlay-high: 30;
+  --z-chat: 2147483647;
+  /* Skull, Dolphin, etc. */
+
+  /* 2. COMMON FONTS & COLORS */
+  --font-main: 'CookieRun-Regular', sans-serif;
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --color-text-default: #ffffff;
+  --color-shadow: rgba(0, 0, 0, 0.5);
+
+  /* 3. COMMON ANIMATION SPEEDS */
+  --anim-speed-fast: 0.3s;
+  --anim-speed-normal: 1s;
+}
+
+/* ============================================================================
+   2. UTILITY CLASSES
+   ============================================================================ */
+
+/* Common Overlay Style: Use for Skull, Heart, Dolphin, Vergil, etc. */
+.fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  /* Click-through by default */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  /* Default to visible */
+  transition: opacity 0.5s;
+  z-index: var(--z-overlay-premium);
+  overflow: hidden;
 }
 
 /* [New Animation] Heart Effect Grow */
@@ -39,33 +101,146 @@ html {
 body {
   background: transparent;
   color: transparent;
-  font-family: 'CookieRun-Regular', sans-serif;
+  font-family: var(--font-main);
   overflow: hidden;
 }
 
 
 
+
+/* ============================================================================
+   2. CHAT BUBBLE STYLES (말풍선 디자인)
+   ============================================================================ */
 
 #chat {
   display: flex;
   position: absolute;
   bottom: 0px;
   width: 100%;
+  z-index: var(--z-chat);
 }
+
+.chat-box {
+  position: absolute;
+  bottom: -7px;
+  width: auto;
+  max-width: 380px;
+  background: transparent;
+  overflow: hidden;
+  max-height: 0px;
+  transition: opacity 2s, max-height 1s, margin-top 1s;
+  animation: chat-hvn-shake .2s;
+  animation-iteration-count: 0;
+}
+
+.chat-box.visible {
+  margin-top: 0px;
+  max-height: 350px;
+  transition: opacity 1s, max-height .8ms, margin-top 30ms;
+}
+
+.chat-line.visible {
+  margin-top: 2px;
+  max-height: 340px;
+  transition: opacity 1s, max-height 1ms, margin-top 30ms;
+}
+
+.chat-line .chat-user {
+  width: 0px;
+  height: 0px;
+  margin-left: 6px;
+  background-repeat: no-repeat !important;
+}
+
+.chat-line .chat-line-bg {
+  background: #241841;
+  border-radius: 28px;
+}
+
+.chat-line .chat-line-inner {
+  position: relative;
+  margin-bottom: 12px;
+  font-size: 1.6em;
+  line-height: 1.8em;
+  color: #444;
+  background-color: #19123233;
+  border: 5px solid black;
+  border-radius: 24px;
+  overflow-wrap: break-word;
+}
+
+.name-box {
+  display: block;
+  margin-top: -1px;
+  margin-left: -2px;
+  margin-right: -1px;
+  padding-left: 0.4em;
+  padding-right: 0.04em;
+  border: 0px solid;
+  border-radius: 15px;
+  line-clamp: 1;
+  max-height: 50px;
+  overflow: hidden;
+}
+
+.name-box .badges img {
+  vertical-align: -5px;
+  width: 26px;
+  height: 26px;
+}
+
+.chat-line .chat-line-inner.admin .message {
+  opacity: 0.4;
+}
+
+.user-name {
+  font-size: 1.0em;
+  font-weight: bolder;
+  color: #191232;
+  padding: 0 0.3em;
+  overflow: hidden;
+  line-clamp: 1;
+}
+
+.message {
+  font-size: 1.1em;
+  white-space: normal;
+  line-height: 1.3;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0.01em 0.8em;
+}
+
+.message img {
+  vertical-align: text-bottom;
+  margin: 0px -1.5%;
+  width: 46px;
+  height: 46px;
+}
+
+.chat-box[username="Mutalisk"] {
+  z-index: var(--z-chat);
+  filter: drop-shadow(0 0 5px #A020F0);
+}
+
+
+/* ============================================================================
+   3. ANIMATION: CHAT ACTIONS (채팅 애니메이션)
+   ============================================================================ */
 
 .starwars-box {
   position: absolute;
   background: black;
   overflow: hidden;
-
   bottom: 300px;
   left: 10%;
   width: 1280px;
   height: 720px;
-
-  -moz-transition: opacity 0.7s linear;
-  -o-transition: opacity 0.7s linear;
-  -webkit-transition: opacity 0.7s linear;
   transition: opacity 2s linear;
 }
 
@@ -77,7 +252,6 @@ body {
   opacity: 0;
 }
 
-
 .star {
   position: absolute;
   width: 1px;
@@ -85,18 +259,12 @@ body {
   background-color: white;
 }
 
-
-/* ============================================================================
-   4. LAYOUT COMPONENTS (Star Wars Scroll, Loading)
-   ============================================================================ */
-
 .intro {
   font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
   margin: auto;
   position: absolute;
   top: 40%;
   left: 28%;
-
   z-index: 1;
   animation: chat-hvn-intro 6s ease-out 0.5s;
   color: rgb(75, 213, 238);
@@ -123,11 +291,6 @@ body {
   }
 }
 
-p {
-  color: #FFFF82;
-}
-
-/* Set the font, lean the board, position it */
 #board {
   align-content: center;
   font-family: Century Gothic, CenturyGothic, AppleGothic, sans-serif;
@@ -155,7 +318,6 @@ p {
   top: 0;
 }
 
-/* Set the scrolling animation and position it */
 #content {
   animation: chat-hvn-scroll 170s linear 0s;
   position: absolute;
@@ -166,11 +328,6 @@ p {
 #title {
   font-size: 450%;
   text-align: center;
-  margin-bottom: 0%;
-}
-
-#subtitle {
-  text-align: right;
   margin-bottom: 0%;
 }
 
@@ -185,28 +342,8 @@ p {
 }
 
 
-/* ============================================================================
-   5. CHAT BOX BASE STYLES
-   ============================================================================ */
-
-.chat-box {
-  position: absolute;
-  bottom: -7px;
-  width: auto;
-  max-width: 380px;
-  background: tranparent;
-  overflow: hidden;
-  max-height: 0px;
-  transition: opacity 2s, max-height 1s, margin-top 1s;
-
-  animation: chat-hvn-shake .2s;
-  animation-iteration-count: 0;
-}
 
 
-/* ============================================================================
-   6. GENERAL CHAT ANIMATIONS (chat-hvn-*)
-   ============================================================================ */
 
 @keyframes chat-hvn-glow {
   0% {
@@ -888,112 +1025,6 @@ p {
   }
 }
 
-.chat-box.visible {
-  margin-top: 0px;
-  max-height: 350px;
-  transition: opacity 1s, max-height .8ms, margin-top 30ms;
-}
-
-.chat-line.visible {
-  margin-top: 2px;
-  max-height: 340px;
-  transition: opacity 1s, max-height 1ms, margin-top 30ms;
-}
-
-.chat-line .chat-user {
-  width: 0px;
-  height: 0px;
-  margin-left: 6px;
-  background-repeat: no-repeat !important;
-}
-
-.chat-line .chat-line-bg {
-  background: #241841;
-  border-radius: 28px;
-}
-
-.chat-line .chat-line-inner {
-  position: relative;
-  margin-bottom: 12px;
-  font-size: 1.6em;
-  line-height: 1.8em;
-  color: #444;
-  background-color: #19123233;
-  border: 5px solid black;
-  border-radius: 24px;
-  overflow-wrap: break-word;
-}
-
-.name-box {
-  display: block;
-  margin-top: -1px;
-  margin-left: -2px;
-  margin-right: -1px;
-  padding-left: 0.4em;
-  padding-right: 0.04em;
-  border: 0px solid;
-  border-radius: 15px;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
-  max-height: 50px;
-  overflow: hidden;
-}
-
-
-.name-box .badges img {
-  vertical-align: -5px;
-  width: 26px;
-  height: 26px;
-}
-
-.chat-line .chat-line-inner.admin .message {
-  opacity: 0.4;
-}
-
-.user-name {
-  font-size: 1.0em;
-  font-weight: bolder;
-  color: #191232;
-  padding: 0 0.3em;
-  overflow: hidden;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
-}
-
-.user-name .badges img {
-  vertical-align: text-bottom;
-  margin: 0px -1%;
-  width: 32px;
-}
-
-.message {
-  font-size: 1.1em;
-  white-space: normal;
-  line-height: 1.3;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 0.01em 0.8em;
-}
-
-.message img {
-  vertical-align: text-bottom;
-  margin: 0px -1.5%;
-  width: 46px;
-  height: 46px;
-}
-
-
-/* 뮤탈리스크 떼를 위한 특수 효과 (선택 사항) */
-.chat-box[username="Mutalisk"] {
-  z-index: 999;
-  filter: drop-shadow(0 0 5px #A020F0);
-  /* 뮤탈리스크의 광기 어린 아우라 */
-}
 
 @keyframes chat-hvn-squeeze {
   0% {
@@ -1008,14 +1039,15 @@ p {
 
   100% {
     letter-spacing: -20px;
-    /* 글자가 서로 겹쳐질 정도로 좁게 */
     opacity: 0.8;
   }
 }
 
+/* ============================================================================
+   4. ANIMATION: FULL SCREEN EFFECTS
+   ============================================================================ */
 
-
-/* [New Feature] Old Film Noise Overlay */
+/* 4-1. FILM EFFECTS (Grain, Scratch, Flashback) */
 .film-grain {
   position: absolute;
   top: 0;
@@ -1175,7 +1207,7 @@ p {
   pointer-events: none;
   opacity: 0;
   transition: opacity 2s;
-  z-index: 10000;
+  z-index: var(--z-overlay-high);
   /* Below Heart/Skull (2147483647) */
 }
 
@@ -1214,11 +1246,12 @@ p {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  z-index: 2147483647;
+  z-index: var(--z-overlay-premium);
   text-align: center;
-  font-family: 'CookieRun-Regular', sans-serif;
+  font-family: var(--font-main);
   pointer-events: none;
-  opacity: 0.8;
+  opacity: 1;
+  /* Changed from 0.8 to ensure full vibrance */
 }
 
 /* [New] Skull-Specific Slam Effect */
@@ -1260,7 +1293,7 @@ p {
   font-weight: 900;
   color: #ff69b4;
   /* Hot Pink */
-  text-shadow: 0 0 20px rgba(255, 105, 180, 0.8), 0 0 40px white;
+  text-shadow: 0 0 20px rgba(255, 105, 180, 0.9), 0 0 40px rgba(255, 255, 255, 0.8), 0 0 60px #ff1493;
   white-space: nowrap;
 }
 
@@ -1662,7 +1695,7 @@ p {
   display: flex !important;
   justify-content: center;
   align-items: center;
-  z-index: 2147483647;
+  z-index: var(--z-overlay-premium);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.5s;
@@ -1730,7 +1763,7 @@ p {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
+  z-index: var(--z-background);
 }
 
 /* Usho Elements (Clone of Skull) */
@@ -1772,7 +1805,7 @@ p {
   width: 100%;
   height: 100%;
   opacity: 0;
-  z-index: -1;
+  z-index: var(--z-background);
 }
 
 /* Triggered Classes for Usho Glitch */
@@ -1924,7 +1957,7 @@ p {
   height: 100%;
   opacity: 0.5;
   pointer-events: none;
-  z-index: 10;
+  z-index: var(--z-overlay-under, 5);
   overflow: hidden;
 }
 
@@ -1951,17 +1984,9 @@ p {
 }
 
 #flashback-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
   backdrop-filter: grayscale(90%) sepia(20%) blur(1px);
   background: rgba(50, 50, 50, 0.35);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 2s;
-  z-index: 10000;
+  z-index: var(--z-overlay-high);
 }
 
 #flashback-overlay.visible {
@@ -2090,33 +2115,24 @@ p {
   }
 }
 
-/* ============================================================================
-   SECTION: SKULL & USHO EFFECT
-   ============================================================================ */
-
+/* 4-2. SKULL & USHO EFFECT (해골) */
 #skull-overlay,
 #usho-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
   background-color: rgba(0, 0, 0, 0.7);
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  z-index: 2147483647;
-  opacity: 0;
-  pointer-events: none;
   transition: opacity 0.5s;
 }
 
 .skull-wrapper,
 .usho-wrapper {
   animation: hvn-skull-pulse 2.5s infinite;
-  display: flex;
+  display: flex !important;
   justify-content: center;
   align-items: center;
+  position: relative;
+  color: #ffffff;
+  font-size: 20rem;
+  line-height: 1;
+  text-align: center;
 }
 
 .skull-emoji,
@@ -2149,7 +2165,7 @@ p {
   width: 100%;
   height: 100%;
   opacity: 1;
-  z-index: -1;
+  z-index: var(--z-background);
 }
 
 .usho-emoji.glitching,
@@ -2299,23 +2315,13 @@ p {
   }
 }
 
-/* ============================================================================
-   SECTION: HEART EFFECT
-   ============================================================================ */
+/* 4-3. HEART EFFECT (하트) */
 
 #heart-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   background-color: rgba(255, 255, 255, 0.1);
   display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 2147483647;
-  opacity: 0;
-  pointer-events: none;
   transition: opacity 1s;
 }
 
@@ -2328,7 +2334,7 @@ p {
   background: radial-gradient(circle, rgba(255, 182, 193, 0.4) 0%, rgba(255, 20, 147, 0.1) 100%);
   opacity: 0;
   transition: opacity 1s;
-  z-index: -1;
+  z-index: var(--z-background);
 }
 
 .heart-emoji-container {
@@ -2338,7 +2344,7 @@ p {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 101;
+  z-index: calc(var(--z-overlay-premium) + 1);
 }
 
 .heart-emoji {
@@ -2374,7 +2380,7 @@ p {
   background: white;
   opacity: 0;
   pointer-events: none;
-  z-index: 10;
+  z-index: calc(var(--z-overlay-premium) - 1);
 }
 
 .heart-dreamy-text {
@@ -2382,33 +2388,17 @@ p {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 10rem;
-  color: #ff69b4;
-  text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
-  opacity: 0;
-  z-index: 100;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-.heart-premium-text {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2147483647;
-  text-align: center;
-  font-family: 'CookieRun-Regular', sans-serif;
-  pointer-events: none;
-  font-size: 8rem;
+  font-family: var(--font-main);
   font-weight: 900;
-  color: #ff1493;
-  text-shadow: 0 0 20px rgba(255, 20, 147, 0.7);
-  line-height: 1.1;
+  font-size: 8rem;
+  color: #ff69b4;
+  text-shadow: 0 0 20px rgba(255, 105, 180, 0.7);
+  opacity: 0;
+  z-index: var(--z-overlay-premium);
+  pointer-events: none;
   white-space: pre-wrap;
+  text-align: center;
   width: 100%;
-  box-sizing: border-box;
-  padding: 0 20px;
 }
 
 .visual-center-text.heart-style {
@@ -2484,22 +2474,18 @@ p {
   }
 }
 
-/* ============================================================================
-   SECTION: DOLPHIN EFFECT
-   ============================================================================ */
+/* 4-4. DOLPHIN EFFECT (돌핀) */
 
+/* #dolphin-overlay used for semantic grouping, layout handled by .fullscreen-overlay */
 #dolphin-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
 .surfer-nametag {
   position: relative;
-  font-family: 'CookieRun-Regular', sans-serif;
+  font-family: var(--font-main);
   font-size: 0.28em;
   padding: 8px 24px;
   border-radius: 50px;
@@ -2526,7 +2512,7 @@ p {
 .lead-dolphin {
   position: absolute;
   font-size: 30rem;
-  z-index: 2147483645 !important;
+  z-index: calc(var(--z-overlay-premium) - 2) !important;
   pointer-events: none;
   filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
   display: inline-block;
@@ -2539,7 +2525,7 @@ p {
   top: 60%;
   left: -20vw;
   font-size: 16rem;
-  z-index: 2147483643 !important;
+  z-index: calc(var(--z-overlay-premium) - 4) !important;
   animation: hvn-dolphin-surfer 21s linear forwards;
   display: inline-block;
   width: min-content;
@@ -2550,21 +2536,21 @@ p {
   bottom: 0;
   left: 0;
   font-size: 10rem;
-  z-index: 2147483642 !important;
+  z-index: calc(var(--z-overlay-premium) - 5) !important;
   animation: hvn-dolphin-jump 4s linear forwards;
 }
 
 .sea-extra {
   position: absolute;
   font-size: 7rem;
-  z-index: 2147483641 !important;
+  z-index: calc(var(--z-overlay-premium) - 6) !important;
   animation: hvn-dolphin-rise var(--duration, 5s) linear forwards;
 }
 
 .actor-emoji {
   display: inline-block;
   line-height: 1;
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+  font-family: var(--font-emoji) !important;
 }
 
 .actor-emoji img {
@@ -2580,7 +2566,7 @@ p {
   height: 15vh;
   background: linear-gradient(to top, #005f99, #00aaff);
   opacity: 0.8;
-  z-index: 2147483638 !important;
+  z-index: calc(var(--z-overlay-premium) - 9) !important;
   overflow: hidden;
 }
 
@@ -2600,7 +2586,7 @@ p {
   top: 0;
   width: 100vw;
   height: 200vh;
-  z-index: 2147483639 !important;
+  z-index: calc(var(--z-overlay-premium) - 8) !important;
   pointer-events: none;
   opacity: 0.7;
 }
@@ -2628,7 +2614,7 @@ p {
   color: white;
   font-weight: bold;
   text-shadow: 0 0 10px #00aaff, 0 0 20px #005f99;
-  z-index: 2147483646;
+  z-index: calc(var(--z-overlay-premium) - 1);
   text-align: center;
   white-space: nowrap;
   animation: hvn-dolphin-textFade 15s ease-in-out forwards;
@@ -2746,7 +2732,7 @@ p {
 .surfer-actor,
 .sea-jump,
 .sea-extra {
-  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+  font-family: var(--font-emoji) !important;
 }
 
 /* ============================================================================
@@ -2758,9 +2744,9 @@ p {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 2147483647;
+  z-index: var(--z-overlay-premium);
   text-align: center;
-  font-family: 'CookieRun-Regular', sans-serif;
+  font-family: var(--font-main);
   pointer-events: none;
   font-size: 13rem;
   font-weight: 900;
@@ -2815,18 +2801,20 @@ p {
   }
 }
 
-/* ============================================================================
-   SECTION: VERGIL EFFECT
-   ============================================================================ */
-
 #void-overlay {
-  position: fixed;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+}
+
+#void-slashes {
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2147483640;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
+  z-index: 20;
 }
 
 #void-backdrop {
@@ -2874,7 +2862,7 @@ p {
   font-size: 13rem;
   font-weight: bold;
   text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 40px #00ffff;
-  z-index: 2147483647;
+  z-index: var(--z-overlay-premium);
   opacity: 0;
   pointer-events: none;
   text-align: center;
@@ -2883,7 +2871,7 @@ p {
   line-height: 1.1;
   box-sizing: border-box;
   padding: 0 20px;
-  font-family: 'CookieRun-Regular', sans-serif;
+  font-family: var(--font-main);
   animation: hvn-vergil-fadeIn 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
@@ -2894,7 +2882,7 @@ p {
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  z-index: 99999;
+  z-index: var(--z-overlay-high);
   overflow: hidden;
 }
 
@@ -3036,18 +3024,23 @@ p {
    SECTION: COMMON SYNC & WRAPPERS
    ============================================================================ */
 
+/* Ensure all overlays are visible when they have the .visible class */
 #skull-overlay.visible,
 #usho-overlay.visible,
 #heart-overlay.visible,
 #void-overlay.visible,
-#flashback-overlay.visible {
+#flashback-overlay.visible,
+#dolphin-overlay.visible,
+#heart-overlay-root.visible,
+#dolphin-overlay-root.visible,
+.fullscreen-overlay.visible {
   opacity: 1 !important;
   pointer-events: auto !important;
   display: flex !important;
 }
 
-#dolphin-overlay.visible {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  display: block !important;
+/* Specific case for Dolphin which needs opacity for transition */
+#dolphin-overlay-root,
+#heart-overlay-root {
+  transition: opacity 0.5s;
 }

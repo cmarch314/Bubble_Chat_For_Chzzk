@@ -740,6 +740,7 @@ class VisualDirector {
         const create = (id, html) => {
             if (document.getElementById(id)) return;
             const div = document.createElement('div'); div.id = id;
+            div.className = 'fullscreen-overlay'; // Apply utility class
             if (html) div.innerHTML = html;
             document.body.appendChild(div);
         };
@@ -854,11 +855,12 @@ class VisualDirector {
     _runHeart(context) {
         const id = 'heart-overlay-root'; let ov = document.getElementById(id); if (ov) ov.remove();
         ov = document.createElement('div'); ov.id = id;
-        ov.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483647; pointer-events:none;";
+        ov.className = 'fullscreen-overlay visible'; // Apply utility class and make visible
         ov.innerHTML = `<div id="heart-overlay" class="visible"><div id="heart-backdrop"></div><div class="heart-emoji-container"></div><div class="heart-flash"></div></div>`;
         document.body.appendChild(ov);
 
         const overlay = ov.querySelector('#heart-overlay'), backdrop = ov.querySelector('#heart-backdrop'), flash = ov.querySelector('.heart-flash'), emojiContainer = ov.querySelector('.heart-emoji-container');
+        backdrop.style.opacity = 1; // Ensure background is visible
 
         let msg = context.message || ""; if (msg.startsWith("하트")) msg = msg.substring(2).trim();
         const parts = this._splitMessageIntoParts(msg, 4);
@@ -866,17 +868,12 @@ class VisualDirector {
         const showPart = (text, delay, duration, isFinal = false) => {
             if (!text) return;
             setTimeout(() => {
-                const el = document.createElement('div'); el.className = isFinal ? 'heart-premium-text' : 'heart-dreamy-text';
-                const scale = isFinal ? 1.5 : 1.3;
+                const el = document.createElement('div'); el.className = 'heart-dreamy-text';
+                const scale = 1.3;
                 let html = renderMessageWithEmotesHTML(this._wrapText(text, 200), context.emotes || {}, scale);
 
-                // If final and single emoji, don't let it be 15rem (premium-text default)
-                if (isFinal && !text.includes(' ') && text.length <= 2) {
-                    el.style.fontSize = '8rem';
-                }
-
                 el.innerHTML = html;
-                document.body.appendChild(el);
+                ov.appendChild(el); // Append to overlay root instead of body
                 el.style.animation = "hvn-heart-fadeIn 0.5s forwards";
                 setTimeout(() => { el.style.animation = "hvn-heart-fadeOut 0.5s forwards"; setTimeout(() => el.remove(), 500); }, duration - 500);
             }, delay);
@@ -919,6 +916,7 @@ class VisualDirector {
     _runVergil(context) {
         const id = 'void-overlay'; let ov = document.getElementById(id); if (ov) ov.remove();
         ov = document.createElement('div'); ov.id = id;
+        ov.className = 'fullscreen-overlay visible'; // Add visible class
         ov.innerHTML = '<div id="void-backdrop"></div><div id="void-slashes"></div>'; document.body.appendChild(ov);
         const slashC = document.getElementById('void-slashes'), backdrop = document.getElementById('void-backdrop');
         backdrop.style.opacity = 1;
@@ -949,7 +947,7 @@ class VisualDirector {
                     let msg = context.message || ""; if (msg.startsWith("버질")) msg = msg.substring(2).trim();
                     if (msg) {
                         const txt = document.createElement('div'); txt.className = 'vergil-text';
-                        txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {}); document.body.appendChild(txt);
+                        txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {}); ov.appendChild(txt); // Append to overlay root
                         setTimeout(() => { txt.style.animation = "hvn-vergil-fadeOut 1s forwards"; setTimeout(() => txt.remove(), 1000); }, 7000);
                     }
                 }, 3800);
@@ -960,7 +958,7 @@ class VisualDirector {
     _runDolphin(context) {
         const id = 'dolphin-overlay-root'; let ov = document.getElementById(id); if (ov) ov.remove();
         ov = document.createElement('div'); ov.id = id;
-        ov.style.cssText = "position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:2147483640; pointer-events:none; transition:opacity 0.5s; overflow:hidden;";
+        ov.className = 'fullscreen-overlay visible'; // Apply utility class and make visible
         ov.innerHTML = `<div id="dolphin-overlay" class="visible event-normal"><div class="dolphin-light dolphin-light-left"></div><div class="dolphin-light dolphin-light-right"></div><div class="dolphin-sea-bottom"><div class="sea-wave"></div></div></div>`;
         document.body.appendChild(ov);
 
@@ -993,13 +991,13 @@ class VisualDirector {
             if (dolphinEl) animateWildBounce(dolphinEl, 14000);
         }, 6000);
 
-        const seaCreatures = ["🐋", "🐳", "🦈", "🦭", "🪼", "🐙", "🐠", "🐡", "🧜‍♀️", "🧜"];
+        const smallSeaCreatures = ["🦐", "🦀", "🐡", "🐠", "🐟", "🦑", "🐙", "🐚", "🦞"];
         let accDelay = 0;
         for (let i = 0; i < 30; i++) {
             const interval = 500 + Math.random() * 500; accDelay += interval;
             setTimeout(() => {
                 const fromLeft = (i % 2 === 0);
-                this._spawnActor(overlayC, 'sea-jump', seaCreatures[Math.floor(Math.random() * seaCreatures.length)], {
+                this._spawnActor(overlayC, 'sea-jump', smallSeaCreatures[Math.floor(Math.random() * smallSeaCreatures.length)], {
                     duration: 4000,
                     styles: {
                         '--sx': (fromLeft ? '-10%' : '110%'), '--ex': (fromLeft ? '110%' : '-10%'),
@@ -1010,12 +1008,29 @@ class VisualDirector {
             }, accDelay);
         }
 
+        // Extra small rising creatures (shrimp, crabs, etc.)
+        for (let i = 0; i < 40; i++) {
+            setTimeout(() => {
+                this._spawnActor(overlayC, 'sea-extra', smallSeaCreatures[Math.floor(Math.random() * smallSeaCreatures.length)], {
+                    duration: 3000 + Math.random() * 2000,
+                    styles: {
+                        left: `${Math.random() * 100}%`,
+                        top: '110%',
+                        '--x-end': `${(Math.random() - 0.5) * 20}vw`,
+                        '--y-end': `-${20 + Math.random() * 10}vh`, // Rise up to ~1/4 of screen
+                        '--r-start': `${Math.random() * 360}deg`,
+                        '--r-end': `${Math.random() * 360}deg`
+                    }
+                });
+            }, Math.random() * 15000);
+        }
+
         let msg = context.message || ""; if (msg.startsWith("돌핀")) msg = msg.substring(2).trim();
         if (msg) {
             setTimeout(() => {
                 const txt = document.createElement('div'); txt.className = 'dolphin-text';
                 txt.innerHTML = renderMessageWithEmotesHTML(this._wrapText(msg, 200, "<br>"), context.emotes || {}, 2.0);
-                overlayC.appendChild(txt);
+                ov.appendChild(txt); // Append to overlay root
             }, 6000);
         }
         return new Promise(resolve => {
