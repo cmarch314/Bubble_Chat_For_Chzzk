@@ -31,15 +31,24 @@
   --z-overlay-normal: 20;
   --z-overlay-high: 30;
   --z-chat: 2147483647;
-  /* Skull, Dolphin, etc. */
 
-  /* 2. COMMON FONTS & COLORS */
-  --font-main: 'CookieRun-Regular', sans-serif;
-  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  /* 2. COLORS & THEME */
   --color-text-default: #ffffff;
   --color-shadow: rgba(0, 0, 0, 0.5);
 
-  /* 3. COMMON ANIMATION SPEEDS */
+  --chat-bg-color: #241841;
+  --chat-text-bg-color: #19123233;
+  --chat-text-border-color: black;
+  --chat-text-color: #444;
+  --chat-user-name-color: #191232;
+
+  --chat-border-radius-outer: 28px;
+  --chat-border-radius-inner: 24px;
+  --chat-font-size-base: 1.6em;
+
+  /* 3. FONTS & ANIMATION SPEEDS */
+  --font-main: 'CookieRun-Regular', sans-serif;
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   --anim-speed-fast: 0.3s;
   --anim-speed-normal: 1s;
 }
@@ -196,7 +205,7 @@ body {
 .user-name {
   font-size: 1.0em;
   font-weight: bolder;
-  color: #191232;
+  color: var(--chat-user-name-color);
   padding: 0 0.3em;
   overflow: hidden;
   line-clamp: 1;
@@ -3111,4 +3120,101 @@ body {
 #dolphin-overlay-root,
 #heart-overlay-root {
   transition: opacity 0.5s;
+}
+
+/* ============================================================================
+   [New] Premium Loading Screen
+   ============================================================================ */
+#loading-screen {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: auto;
+  height: auto;
+  min-width: 300px;
+  padding: 40px;
+  background: rgba(26, 26, 46, 0.85);
+  /* Semi-transparent dark box */
+  border-radius: 30px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  /* Glassmorphism effect */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.8s ease-out, visibility 0.8s;
+  opacity: 1;
+  visibility: visible;
+}
+
+#loading-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top: 4px solid #00ffa3;
+  /* Brand accent color */
+  border-radius: 50%;
+  animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+  box-shadow: 0 0 20px rgba(0, 255, 163, 0.4);
+}
+
+.loader-text {
+  font-family: 'Century Gothic', sans-serif;
+  color: #fff;
+  font-size: 1.6em;
+  /* Increased by ~30% */
+  letter-spacing: 3px;
+  font-weight: bold;
+  text-transform: uppercase;
+  animation: pulse 1.5s infinite;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(180deg) scale(1.1);
+  }
+
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+  }
+
+  100% {
+    opacity: 0.6;
+    transform: scale(0.98);
+  }
 }

@@ -11,8 +11,7 @@ let visualConfig = {};
 let soundHive = {};
 
 // [Refactor] Twitch -> Chzzk 변수명 변경
-const chzzkBadgeCache = { data: { global: {} } }; // twitchBadgeCache 대체
-// const bttvEmoteCache... (이건 BetterTTV라 그대로 둬도 되지만, 안 쓴다면 삭제 가능)
+const chzzkBadgeCache = { data: { global: {} } };
 
 // ==========================================
 // [Class 1] Config & State Manager
@@ -64,7 +63,10 @@ class ConfigManager {
                 }
                 break;
             case 'updateConfig':
-                if (window.audioManager) window.audioManager.updateConfig(data.soundConfig);
+                if (window.audioManager) {
+                    if (data.soundConfig) window.audioManager.updateConfig(data.soundConfig);
+                    if (data.volumeConfig) window.audioManager.updateVolumeConfig(data.volumeConfig);
+                }
                 if (data.visualConfig) window.visualConfig = data.visualConfig; // 레거시 호환
                 break;
         }
@@ -80,8 +82,17 @@ class ConfigManager {
             try { activeSound = { ...defaultsSound, ...JSON.parse(savedSound) }; } catch (e) { }
         }
 
+        const defaultsVolume = window.HIVE_VOLUME_CONFIG || { master: 1.0, visual: 1.0, sfx: 1.0 };
+        const savedVolume = localStorage.getItem('HIVE_VOLUME_CONFIG');
+        let activeVolume = defaultsVolume;
+
+        if (savedVolume) {
+            try { activeVolume = { ...defaultsVolume, ...JSON.parse(savedVolume) }; } catch (e) { }
+        }
+
         // AudioManager가 생성된 후 설정 주입을 위해 전역에 잠시 저장
         window.__INITIAL_SOUND_CONFIG = activeSound;
+        window.__INITIAL_VOLUME_CONFIG = activeVolume;
     }
 
     log(msg) {
@@ -130,7 +141,7 @@ class ChzzkGateway {
     async connect() {
         const id = this.config.channelId || "NULL";
         const src = this.config.idSource || "Unknown";
-        this._showLoader(`치지직 채널 탐색 중...<br>[ID: ${id}] (출처: ${src})<br>(${this.attemptCount}번째 시도)`, "loading");
+        this._showLoader(`치지직 채널 접속 중...<br><div style="font-size: 0.5em; margin-top: 10px; opacity: 0.7; word-break: break-all;">ID: ${id}</div><div style="font-size: 0.4em; margin-top: 5px; opacity: 0.5;">(${this.attemptCount}번째 시도)</div>`, "loading");
 
         try {
             if (!this.config.channelId || this.config.channelId === "NULL") {
@@ -312,22 +323,44 @@ class ChzzkGateway {
     }
 
     _showLoader(msg, type) {
-        let loader = document.getElementById('chzzk-loader');
-        if (!loader) {
-            loader = document.createElement('div');
-            loader.id = 'chzzk-loader';
-            document.body.appendChild(loader);
-            Object.assign(loader.style, {
-                position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-                background: 'rgba(0,0,0,0.8)', color: 'white', padding: '20px', borderRadius: '10px', zIndex: '9999',
-                fontSize: '3em'
-            });
-        }
-        loader.innerHTML = msg;
-        loader.style.display = 'block';
+        // [Refactor] Use Premium Loading Screen
+        const loader = document.getElementById('loading-screen');
+        const loaderText = loader ? loader.querySelector('.loader-text') : null;
 
-        if (type === 'success') {
-            setTimeout(() => { loader.style.opacity = 0; setTimeout(() => loader.remove(), 500); }, 1000);
+        if (loader && loaderText) {
+            // Update text
+            // Strip HTML tags for cleaner look if needed, or keep them if styling allows
+            loaderText.innerHTML = msg;
+            loader.classList.remove('hidden');
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    setTimeout(() => loader.remove(), 1000);
+                }, 1000);
+            } else if (type === 'error') {
+                // Keep error visible or style it differently
+                loaderText.style.color = '#ff4444';
+            }
+        } else {
+            // Fallback: Create legacy loader if premium one is missing
+            let legacyLoader = document.getElementById('chzzk-loader');
+            if (!legacyLoader) {
+                legacyLoader = document.createElement('div');
+                legacyLoader.id = 'chzzk-loader';
+                document.body.appendChild(legacyLoader);
+                Object.assign(legacyLoader.style, {
+                    position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+                    background: 'rgba(0,0,0,0.8)', color: 'white', padding: '20px', borderRadius: '10px', zIndex: '9999',
+                    fontSize: '3em'
+                });
+            }
+            legacyLoader.innerHTML = msg;
+            legacyLoader.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => { legacyLoader.style.opacity = 0; setTimeout(() => legacyLoader.remove(), 500); }, 1000);
+            }
         }
     }
 }
@@ -339,11 +372,19 @@ class AudioManager {
     constructor() {
         this.soundHive = {};
         this.enabled = true;
+        this.soundHive = {};
+        this.enabled = true;
+        this.volumeConfig = window.__INITIAL_VOLUME_CONFIG || { master: 1.0, visual: 1.0, sfx: 1.0 };
         this.updateConfig(window.__INITIAL_SOUND_CONFIG || {});
     }
 
     setEnabled(enabled) {
         this.enabled = enabled;
+    }
+
+    updateVolumeConfig(config) {
+        if (!config) return;
+        this.volumeConfig = { ...this.volumeConfig, ...config };
     }
 
     updateConfig(config) {
@@ -367,7 +408,15 @@ class AudioManager {
         const normOriginal = message.normalize('NFC').trim();
 
         // Visual Config에 있는 키워드는 사운드 트리거에서 제외 (중복 방지)
-        const visualKeys = window.HIVE_VISUAL_CONFIG ? Object.keys(window.HIVE_VISUAL_CONFIG) : [];
+        const visualKeys = [];
+        if (window.HIVE_VISUAL_CONFIG) {
+            Object.keys(window.HIVE_VISUAL_CONFIG).forEach(k => {
+                visualKeys.push(k); // Add the key itself (legacy)
+                // If it's the new object format { soundKey: '...' }, add that too
+                const val = window.HIVE_VISUAL_CONFIG[k];
+                if (val && val.soundKey) visualKeys.push(val.soundKey);
+            });
+        }
 
         let allMatches = [];
         Object.keys(this.soundHive).forEach(keyword => {
@@ -380,7 +429,8 @@ class AudioManager {
                     startIndex: index,
                     endIndex: index + normKey.length,
                     length: normKey.length,
-                    sound: this.soundHive[keyword]
+                    sound: this.soundHive[keyword],
+                    keyword: keyword // [Fix] Store keyword for dedup
                 });
                 searchPos = index + 1;
             }
@@ -389,22 +439,39 @@ class AudioManager {
         allMatches.sort((a, b) => (a.startIndex === b.startIndex) ? b.length - a.length : a.startIndex - b.startIndex);
 
         let sequence = [], lastEnd = 0;
+        let usedKeywords = new Set(); // [Fix] Track used keywords
+
         for (let match of allMatches) {
+            // Check overlap AND uniqueness
             if (match.startIndex >= lastEnd) {
-                sequence.push(match);
-                lastEnd = match.endIndex;
+                if (!usedKeywords.has(match.keyword)) {
+                    sequence.push(match);
+                    lastEnd = match.endIndex;
+                    usedKeywords.add(match.keyword); // [Fix] Mark as used
+                }
             }
         }
 
         if (sequence.length > 0) {
             (async () => {
-                for (let item of sequence.slice(0, 5)) { await this.playSound(item.sound, force); }
+                for (let item of sequence.slice(0, 5)) { await this.playSound(item.sound, { force, type: 'sfx' }); }
             })();
         }
     }
 
     // 외부(VisualDirector 등)에서 호출 가능
-    playSound(input, force = false) {
+    playSound(input, options = {}) {
+        // Options handling: support old signature (input, force)
+        let force = false;
+        let type = 'sfx'; // visual | sfx
+
+        if (typeof options === 'boolean') {
+            force = options;
+        } else {
+            force = options.force || false;
+            type = options.type || 'sfx';
+        }
+
         if (!this.enabled && !force) return Promise.resolve();
         let target = input;
         if (Array.isArray(target)) target = target[Math.floor(Math.random() * target.length)];
@@ -424,7 +491,13 @@ class AudioManager {
 
         return new Promise((resolve) => {
             const audio = new Audio(finalUrl);
-            audio.volume = volume;
+
+            // Volume Calculation: Item Volume * Master * Category(Visual/SFX)
+            const masterVol = this.volumeConfig.master !== undefined ? this.volumeConfig.master : 1.0;
+            const typeVol = this.volumeConfig[type] !== undefined ? this.volumeConfig[type] : 1.0;
+
+            audio.volume = Math.min(1.0, Math.max(0, volume * masterVol * typeVol));
+
             audio.onended = () => resolve();
             audio.onerror = () => resolve();
             audio.play().catch(() => resolve());
@@ -774,6 +847,14 @@ class VisualDirector {
 
     setEnabled(enabled) { this.enabled = enabled; }
     setAlertsEnabled(enabled) { this.alertsEnabled = enabled; } // [New] Setter
+    clearQueue() {
+        console.log("🧹 [VisualDirector] Clearing Queue...");
+        this.queue = [];
+        this.isLocked = false;
+        // Optionally remove active overlays immediately? 
+        // For now, let's just stop new ones. Active ones can finish naturally or be force removed.
+        document.querySelectorAll('.fullscreen-overlay.visible').forEach(el => el.classList.remove('visible'));
+    }
 
     trigger(effectType, context = {}) {
         // [Refinement] enabled 체크는 호출부(network callback)에서 세밀하게 처리하므로 여기선 제외
@@ -792,7 +873,7 @@ class VisualDirector {
         // 1. Sound (Using Audio Manager - Real-time enabled check)
         const isSoundActive = window.audioManager ? (window.audioManager.enabled || context.isStreamer) : false;
         if (isSoundActive && effect.soundKey && window.audioManager) {
-            window.audioManager.playSound(window.soundHive[effect.soundKey], context.isStreamer);
+            window.audioManager.playSound(window.soundHive[effect.soundKey], { force: context.isStreamer, type: 'visual' });
         }
 
         // 2. Visual
@@ -855,6 +936,20 @@ class VisualDirector {
         const overlay = document.getElementById('usho-overlay');
         if (!overlay) return Promise.resolve();
 
+        // [Config Support] Use centralized config or fallback
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.usho) ? window.VISUAL_CONFIG.usho : {
+            scanPhase: 7200,
+            duration: 13000,
+            gifPath: './img/usho.gif'
+        };
+
+        // Inject GIF path dynamically if needed (Optional: if img tag src isn't set dynamically)
+        // For now, simpler to just rely on CSS or pre-set HTML, but let's update src if present
+        const imgs = overlay.querySelectorAll('img');
+        imgs.forEach(img => {
+            if (conf.gifPath && !img.src.includes(conf.gifPath)) img.src = conf.gifPath;
+        });
+
         return new Promise(resolve => {
             // Reset phases
             overlay.classList.remove('phase-scan', 'phase-reveal', 'visible');
@@ -862,16 +957,16 @@ class VisualDirector {
 
             overlay.classList.add('visible', 'phase-scan');
 
-            // 7.2초 후 임팩트 및 리빌 단계 전환
+            // Scan Phase
             setTimeout(() => {
                 overlay.classList.replace('phase-scan', 'phase-reveal');
-            }, 7200);
+            }, conf.scanPhase);
 
-            // 13초 후 종료
+            // End
             setTimeout(() => {
                 overlay.classList.remove('visible', 'phase-reveal', 'phase-scan');
                 resolve();
-            }, 13000);
+            }, conf.duration);
         });
     }
 
@@ -1059,13 +1154,17 @@ class VisualDirector {
 
         const overlayC = ov.querySelector('#dolphin-overlay');
         const surfingEmojis = ["🏄", "🏄‍♂️", "🏄‍♀️"];
+
+        // [Config Support]
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.dolphin) ? window.VISUAL_CONFIG.dolphin : { duration: 21000 };
+
         this._spawnActor(overlayC, 'surfer-actor', surfingEmojis[Math.floor(Math.random() * surfingEmojis.length)], {
-            duration: 21000,
+            duration: conf.duration,
             styles: {
                 nametag: (context.nickname || "Anonymous"),
                 nameColor: (context.color || "#00ffa3"),
                 left: '-20vw',
-                animation: 'hvn-dolphin-surfer 21s linear forwards'
+                animation: `hvn-dolphin-surfer ${conf.duration / 1000}s linear forwards`
             }
         });
 
@@ -1237,17 +1336,33 @@ class SystemController {
                     this.visual.setAlertsEnabled(true);
                 },
                 msg: "🔓 모든 효과가 켜졌습니다."
+            },
+            '!데모': {
+                action: (args) => {
+                    const duration = args[0] ? parseInt(args[0], 10) : 60;
+                    window.runDemoSequence(duration);
+                },
+                msg: "🎬 데모 모드를 실행합니다."
             }
         };
     }
 
     handle(msgData) {
         if (!msgData.isStreamer) return false;
-        const cmd = msgData.message.trim();
+        const fullCmd = msgData.message.trim();
+        const parts = fullCmd.split(' ');
+        const cmd = parts[0];
+        const args = parts.slice(1);
+
         const config = this.commands[cmd];
         if (config) {
-            config.action();
-            this.renderer.render({ ...msgData, message: config.msg });
+            config.action(args);
+            // Optional: Customize confirmation message based on args if needed
+            let confirmMsg = config.msg;
+            if (cmd === '!데모' && args[0]) {
+                confirmMsg = `🎬 ${args[0]}초간 데모 모드를 실행합니다.`;
+            }
+            this.renderer.render({ ...msgData, message: confirmMsg });
             return true;
         }
         return false;
@@ -1296,15 +1411,22 @@ window.processMessage = (msgData) => {
         return; // 구독은 항상 버블 숨김
     }
 
-    // (0.6 로직은 아래에서 통합 처리)
+    // 1. 비주얼 이펙트 트리거 확인 (VisualDirector 위임)
+    // [Fix] Check if VisualDirector has a handler for this keyword
+    // Iterate registry keys to find match at start of message
+    let foundKeyword = null;
+    const visualMap = window.visualDirector.registry; // Access registry directly or via getter
 
-    // 1. 시각 효과 트리거 확인 (강화: 매핑 시스템 적용)
-    const visualMap = {
-        '해골': 'skull', '우쇼': 'usho', '커플': 'couple',
-        '하트': 'heart', '버질': 'vergil', '돌핀': 'dolphin'
-    };
-
-    const foundKeyword = Object.keys(visualMap).find(k => updatedTrimmedMsg.startsWith('!' + k));
+    // Check strict matches "!명령어"
+    for (const key in visualMap) {
+        const effect = visualMap[key];
+        const soundKey = effect.soundKey; // e.g. "해골"
+        // Check "!해골" or "!skull" (if mapped)
+        if (updatedTrimmedMsg.startsWith("!" + soundKey)) {
+            foundKeyword = key;
+            break;
+        }
+    }
 
     if (foundKeyword) {
         const effectType = visualMap[foundKeyword];
@@ -1319,7 +1441,7 @@ window.processMessage = (msgData) => {
         }
 
         if (shouldTrigger) {
-            visualDirector.trigger(effectType, {
+            visualDirector.trigger(foundKeyword, {
                 message: updatedTrimmedMsg,
                 emotes: msgData.emojis,
                 nickname: msgData.nickname,
@@ -1346,13 +1468,85 @@ window.processMessage = (msgData) => {
 // 네트워크 연결 시작
 const network = new ChzzkGateway(appConfig, window.processMessage);
 
+// [Feature] Demo Mode (Triggered by !데모)
+window.runDemoSequence = (durationSeconds = 60) => {
+    const maxDuration = durationSeconds * 1000;
+    console.log(`🎬 Starting Demo Sequence (${durationSeconds}s)...`);
+    let demoCount = 0;
+    const intervalTime = 1500; // Fast pace
+    const names = window.RANDOM_NAMES || ["Anonymous", "트수", "시청자"];
+
+    const demoInterval = setInterval(() => {
+        if (!window.WELCOME_MESSAGES || window.WELCOME_MESSAGES.length === 0) return;
+
+        // Random Message
+        const msg = window.WELCOME_MESSAGES[Math.floor(Math.random() * window.WELCOME_MESSAGES.length)];
+        const name = names[Math.floor(Math.random() * names.length)];
+
+        window.processMessage({
+            message: msg,
+            nickname: name,
+            color: null,
+            badges: [],
+            emojis: {},
+            isStreamer: true, // Force trigger effects
+            uid: 'demo_' + Date.now(),
+            type: 'chat',
+            isDonation: false,
+            isSubscription: false
+        });
+
+        demoCount++;
+    }, intervalTime);
+
+    // Stop after duration
+    setTimeout(() => {
+        clearInterval(demoInterval);
+        console.log("🎬 Demo Sequence Finished.");
+        window.processMessage({
+            message: "데모가 종료되었습니다.",
+            nickname: "System",
+            isStreamer: true,
+            type: 'chat'
+        });
+    }, maxDuration);
+};
+
 // [Feature] Startup Random Welcome Messages (Continuous until Connected)
 if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
     const names = window.RANDOM_NAMES || ["Anonymous"];
     console.log("Starting Welcome Message Loop...");
 
+    // Visual Effect Pool from Config
+    const visualKeys = window.HIVE_VISUAL_CONFIG ? Object.keys(window.HIVE_VISUAL_CONFIG) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼'];
+
+    // [Fix] Startup Sequence: Guaranteed Visual Effect
+    setTimeout(() => {
+        const keys = visualKeys;
+        if (keys.length > 0) {
+            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+            console.log(`🚀 [Startup] Triggering Guaranteed Effect: ${randomKey}`);
+            window.visualDirector.trigger(randomKey, {
+                message: `✨ 시스템 시작: ${randomKey} 이펙트 테스트`, // [Fix] User-friendly message
+                nickname: "System",
+                isStreamer: true // Force bypass permissions
+            });
+        }
+    }, 1000); // 1 second after load
+
     const welcomeInterval = setInterval(() => {
-        const msg = window.WELCOME_MESSAGES[Math.floor(Math.random() * window.WELCOME_MESSAGES.length)];
+        // 10% Chance to FORCE a visual effect message if not already picked
+        let msg = window.WELCOME_MESSAGES[Math.floor(Math.random() * window.WELCOME_MESSAGES.length)];
+        let isVisual = false;
+
+        // "비주얼 이팩트도 랜덤하게 띄워줘" - Explicitly inject visual command occasionally
+        if (!msg.startsWith('!') && Math.random() < 0.3) {
+            const randomVisual = visualKeys[Math.floor(Math.random() * visualKeys.length)];
+            // Prepend visual command to the message
+            msg = `!${randomVisual} ${msg}`;
+            isVisual = true;
+        }
+
         const randomName = names[Math.floor(Math.random() * names.length)];
         const randomUid = 'bot_' + Math.random().toString(36).substr(2, 9);
 
@@ -1363,21 +1557,35 @@ if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
             color: null, // Let renderer pick random color
             badges: [],
             emojis: {},
-            isStreamer: false,
+            isStreamer: isVisual, // [Fix] If it's a visual triggering message, pretend it's streamer to bypass 'enabled' check
             uid: randomUid,
             type: 'chat',
             isDonation: false,
             isSubscription: false
         });
-    }, 1500); // Every 1.5 seconds
+    }, 2000); // Slower interval (2s) to let effects play out
 
     // Stop loop when connected
     window.addEventListener('chzzk_connected', () => {
         console.log("Connection Established. Stopping Welcome Messages.");
         clearInterval(welcomeInterval);
+
+        // [New] Clear queued visual effects from startup
+        if (window.visualDirector) {
+            window.visualDirector.clearQueue();
+        }
+
+        // [New] Hide Loading Screen
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+            loader.classList.add('hidden');
+            setTimeout(() => loader.remove(), 1000); // Remove from DOM after transition
+        }
     }, { once: true });
 }
 
+// [New] Dynamic Status Merger
+// Detects legacy "치지직 채널 탐색중..." elements and merges them into the premium loader
 // 자동 시작
 network.connect();
 

@@ -420,6 +420,43 @@
 
         <!-- Right Column: Settings & Controls -->
         <div class="config-column">
+            <!-- Global Volume Settings (New) -->
+            <div class="config-section">
+                <div class="config-header">🔊 Global Volume Controls</div>
+
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Master Volume -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: bold; color: #4CAF50;">Master Volume</span>
+                            <span id="volMasterDisplay" style="font-family: monospace;">100%</span>
+                        </div>
+                        <input type="range" id="volMaster" min="0" max="1" step="0.01" value="1"
+                            style="width: 100%; cursor: pointer;">
+                    </div>
+
+                    <!-- Visual Volume -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: bold; color: #2196F3;">Visual Effects</span>
+                            <span id="volVisualDisplay" style="font-family: monospace;">100%</span>
+                        </div>
+                        <input type="range" id="volVisual" min="0" max="1" step="0.01" value="1"
+                            style="width: 100%; cursor: pointer;">
+                    </div>
+
+                    <!-- SFX Volume -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: bold; color: #FF9800;">Sound Effects (Chat)</span>
+                            <span id="volSfxDisplay" style="font-family: monospace;">100%</span>
+                        </div>
+                        <input type="range" id="volSfx" min="0" max="1" step="0.01" value="1"
+                            style="width: 100%; cursor: pointer;">
+                    </div>
+                </div>
+            </div>
+
             <!-- Channel Profile Section -->
             <div class="config-section">
                 <div class="config-header">👤 Channel Settings</div>
@@ -432,6 +469,7 @@
                         <div id="currentIdDisplay" style="display:none;"></div>
                     </div>
                 </div>
+                <!-- ... existing search ... -->
                 <div class="add-form">
                     <div style="display: flex; gap: 8px;">
                         <input type="text" id="searchInput" placeholder="Search Chzzk Streamer..."
@@ -580,10 +618,13 @@
         // 1. Try LocalStorage
         let localSound = JSON.parse(localStorage.getItem('HIVE_SOUND_CONFIG'));
         let localVisual = JSON.parse(localStorage.getItem('HIVE_VISUAL_CONFIG'));
+        let localVolume = JSON.parse(localStorage.getItem('HIVE_VOLUME_CONFIG'));
 
         // 2. Load Window Global (config.js)
         const fileSound = window.HIVE_SOUND_CONFIG || {};
         const fileVisual = window.HIVE_VISUAL_CONFIG || {};
+        const fileVolume = window.HIVE_VOLUME_CONFIG || { master: 1.0, visual: 1.0, sfx: 1.0 };
+
 
         // 3. Strict Merge (Priority: Config.js > LocalStorage)
         // Since the user is actively editing config.js, we MUST reflect those changes.
@@ -606,7 +647,42 @@
             });
         }
 
+        let volumeConfig = { ...fileVolume };
+        if (localVolume) {
+            // Basic merge
+            volumeConfig = { ...fileVolume, ...localVolume };
+        }
+
+        // Initialize Vol Sliders
+        (function initVolumeUI() {
+            const setUI = (id, val, dispId) => {
+                const el = document.getElementById(id);
+                const disp = document.getElementById(dispId);
+                if (el && disp) {
+                    el.value = val;
+                    disp.innerText = Math.round(val * 100) + "%";
+                    el.addEventListener('input', (e) => {
+                        const v = parseFloat(e.target.value);
+                        disp.innerText = Math.round(v * 100) + "%";
+                        updateGlobalVolume(id, v);
+                    });
+                }
+            };
+
+            setUI('volMaster', volumeConfig.master, 'volMasterDisplay');
+            setUI('volVisual', volumeConfig.visual, 'volVisualDisplay');
+            setUI('volSfx', volumeConfig.sfx, 'volSfxDisplay');
+        })();
+
         renderLists();
+
+        function updateGlobalVolume(id, val) {
+            if (id === 'volMaster') volumeConfig.master = val;
+            if (id === 'volVisual') volumeConfig.visual = val;
+            if (id === 'volSfx') volumeConfig.sfx = val;
+
+            saveConfigs();
+        }
 
         function renderLists() {
             const sList = document.getElementById('soundList');
@@ -810,19 +886,48 @@
         function saveConfigs() {
             localStorage.setItem('HIVE_SOUND_CONFIG', JSON.stringify(soundConfig));
             localStorage.setItem('HIVE_VISUAL_CONFIG', JSON.stringify(visualConfig));
+            localStorage.setItem('HIVE_VOLUME_CONFIG', JSON.stringify(volumeConfig));
             renderLists();
-            sendCommand('updateConfig', { soundConfig, visualConfig });
+            sendCommand('updateConfig', { soundConfig, visualConfig, volumeConfig });
         }
 
         function resetDefaults(type) {
             if (!confirm("Reset to default settings?")) return;
-            if (type === 'sound') soundConfig = { ...defaultSoundConfig };
-            if (type === 'visual') visualConfig = { ...defaultVisualConfig };
+            // Note: defaultSoundConfig/defaultVisualConfig variables are expected to be defined elsewhere or we use file* fallback
+            if (type === 'sound') soundConfig = { ...(window.HIVE_SOUND_CONFIG || {}) };
+            if (type === 'visual') visualConfig = { ...(window.HIVE_VISUAL_CONFIG || {}) };
+            if (type === 'volume') {
+                volumeConfig = { master: 1.0, visual: 1.0, sfx: 1.0 };
+                document.getElementById('volMaster').value = 1.0;
+                document.getElementById('volVisual').value = 1.0;
+                document.getElementById('volSfx').value = 1.0;
+                ['volMasterDisplay', 'volVisualDisplay', 'volSfxDisplay'].forEach(id => document.getElementById(id).innerText = "100%");
+            }
             saveConfigs();
+        }
+        saveConfigs();
         }
 
         function exportConfig() {
-            const code = `// [Config Logic] Centralized Configuration for BubbleChat\n// You can manually edit this file or overwrite it using the Export function in config.html\n\nwindow.HIVE_SOUND_CONFIG = ${JSON.stringify(soundConfig, null, 4)};\n\nwindow.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
+            const randomNames = window.RANDOM_NAMES || [];
+            const welcomeMessages = window.WELCOME_MESSAGES || [];
+            const chzzkId = window.CHZZK_CHANNEL_ID || localStorage.getItem('CHZZK_CHANNEL_ID') || "";
+
+            const code = `// [Config Logic] Centralized Configuration for BubbleChat
+// You can manually edit this file or overwrite it using the Export function in config.html
+// AI Should Not Change Any Mapping that is already present
+window.CHZZK_CHANNEL_ID = "${chzzkId}"; // [Optional] Set your Channel ID here to skip lookup
+
+window.HIVE_VOLUME_CONFIG = ${JSON.stringify(volumeConfig, null, 4)};
+
+// [Startup Configuration]
+window.RANDOM_NAMES = ${JSON.stringify(randomNames, null, 4)};
+
+window.WELCOME_MESSAGES = ${JSON.stringify(welcomeMessages, null, 4)};
+
+window.HIVE_SOUND_CONFIG = ${JSON.stringify(soundConfig, null, 4)};
+
+window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
 
             const blob = new Blob([code], { type: 'text/javascript' });
             const url = URL.createObjectURL(blob);
