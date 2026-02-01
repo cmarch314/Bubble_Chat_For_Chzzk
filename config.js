@@ -221,7 +221,7 @@ window.HIVE_SOUND_CONFIG = {
     "알림": { "src": "Alarm.mp3", "volume": 0.4 },
 
     // [Reactions & Memes]
-    "ㅋㅋ": [{ "src": "Laugh1.mp3", "volume": 0.5 },
+    "ㅋㅋㅋ": [{ "src": "Laugh1.mp3", "volume": 0.5 },
     { "src": "Laugh2.mp3", "volume": 0.3 },
     { "src": "Laugh3.mp3", "volume": 0.6 },
     { "src": "Laugh6.mp3", "volume": 0.3 },
