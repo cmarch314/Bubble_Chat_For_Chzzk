@@ -894,6 +894,48 @@ body {
   }
 }
 
+@keyframes chat-hvn-hipDanceReverse {
+  0% {
+    transform: scaleX(-1);
+  }
+
+  12.5% {
+    transform: translate(-23px, -5px) scaleX(-1);
+  }
+
+  25% {
+    transform: translate(-20px, 0px) scaleX(-1);
+  }
+
+  37.5% {
+    transform: translate(-23px, -5px) scaleX(-1);
+  }
+
+  50% {
+    transform: translate(-20px, 0px) scaleX(-1);
+  }
+
+  51% {
+    transform: scaleX(1);
+  }
+
+  62.5% {
+    transform: scaleX(1) translate(-23px, -5px);
+  }
+
+  75% {
+    transform: scaleX(1) translate(-20px, 0px);
+  }
+
+  87.5% {
+    transform: scaleX(1) translate(-23px, -5px);
+  }
+
+  100% {
+    transform: scaleX(1) translate(-20px, 0px);
+  }
+}
+
 @keyframes chat-hvn-vibrate-laugh {
 
   0% {

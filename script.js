@@ -23,11 +23,13 @@ class ConfigManager {
     _resolveChannelId() {
         const urlParams = new URLSearchParams(window.location.search);
         const urlId = urlParams.get('id') || urlParams.get('channelId') || urlParams.get('channel');
+        const configId = window.CHZZK_CHANNEL_ID || null;
         const local = localStorage.getItem('CHZZK_CHANNEL_ID');
         const attr = document.getElementById('id')?.getAttribute('chzzkHash');
 
-        let id = urlId || local || attr;
+        let id = urlId || configId || local || attr;
         if (urlId) this.idSource = "URL Parameter";
+        else if (configId) this.idSource = "Config File";
         else if (local) this.idSource = "LocalStorage";
         else if (attr) this.idSource = "index.html Attribute";
         else this.idSource = "None Found";
@@ -159,6 +161,7 @@ class ChzzkGateway {
         this.ws.onopen = () => {
             this.config.log("WS Open. Sending Handshake.");
             this._showLoader("채팅 서버 연결 완료!", "success");
+            window.dispatchEvent(new CustomEvent('chzzk_connected')); // Signal connection success
             this.attemptCount = 1; // Success! Reset counter
             this.ws.send(JSON.stringify({
                 ver: "2", cmd: 100, svcid: "game", cid: chatChannelId,
@@ -463,9 +466,11 @@ class ChatRenderer {
             badgeEle.classList.add('badges');
             badges.forEach(b => {
                 let img = document.createElement('img');
-                img.src = b.url;
-                img.classList.add('badge');
-                badgeEle.appendChild(img);
+                img.src = b.imageUrl || b.url; // [Fix] Chzzk uses 'imageUrl'
+                if (img.src) {
+                    img.classList.add('badge');
+                    badgeEle.appendChild(img);
+                }
             });
         }
 
@@ -1259,7 +1264,8 @@ window.visualDirector = visualDirector;
 window.systemController = systemController;
 
 // 네트워크 연결 시작
-const network = new ChzzkGateway(appConfig, (msgData) => {
+// [Global Refactor] Process Message Logic for portability (Real & Fake)
+window.processMessage = (msgData) => {
     // 0. 스트리머 전용 제어 명령어 처리 (Refactored)
     if (systemController.handle(msgData)) return;
 
@@ -1330,7 +1336,42 @@ const network = new ChzzkGateway(appConfig, (msgData) => {
             console.error("Renderer Error:", e);
         }
     }
-});
+};
+
+// 네트워크 연결 시작
+const network = new ChzzkGateway(appConfig, window.processMessage);
+
+// [Feature] Startup Random Welcome Messages (Continuous until Connected)
+if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
+    const names = window.RANDOM_NAMES || ["Anonymous"];
+    console.log("Starting Welcome Message Loop...");
+
+    const welcomeInterval = setInterval(() => {
+        const msg = window.WELCOME_MESSAGES[Math.floor(Math.random() * window.WELCOME_MESSAGES.length)];
+        const randomName = names[Math.floor(Math.random() * names.length)];
+        const randomUid = 'bot_' + Math.random().toString(36).substr(2, 9);
+
+        // Simulate incoming message
+        window.processMessage({
+            message: msg,
+            nickname: randomName,
+            color: null, // Let renderer pick random color
+            badges: [],
+            emojis: {},
+            isStreamer: false,
+            uid: randomUid,
+            type: 'chat',
+            isDonation: false,
+            isSubscription: false
+        });
+    }, 1500); // Every 1.5 seconds
+
+    // Stop loop when connected
+    window.addEventListener('chzzk_connected', () => {
+        console.log("Connection Established. Stopping Welcome Messages.");
+        clearInterval(welcomeInterval);
+    }, { once: true });
+}
 
 // 자동 시작
 network.connect();
