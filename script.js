@@ -1,9 +1,18 @@
 // ==========================================
-// [Global Variables] 기본 전역 변수 (호환성 유지)
+// [Global Variables] 기본 전역 변수
 // ==========================================
 const idElement = document.getElementById('id');
 const chatEle = document.getElementById('chat');
-let soundEnabled = true; // ConfigManager와 동기화됨
+let boxPos = 0;
+const mainArray = [];
+let soundEnabled = true;
+const promptQue = [];
+let visualConfig = {};
+let soundHive = {};
+
+// [Refactor] Twitch -> Chzzk 변수명 변경
+const chzzkBadgeCache = { data: { global: {} } }; // twitchBadgeCache 대체
+// const bttvEmoteCache... (이건 BetterTTV라 그대로 둬도 되지만, 안 쓴다면 삭제 가능)
 
 // ==========================================
 // [Class 1] Config & State Manager
@@ -15,26 +24,22 @@ class ConfigManager {
         this.loadHistory = urlParams.has('history');
         this.channelId = this._resolveChannelId();
 
-        // 초기 동기화
         this._initBroadcastChannel();
         this._loadLocalConfig();
     }
 
     _resolveChannelId() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlId = urlParams.get('id') || urlParams.get('channelId') || urlParams.get('channel');
-        const configId = window.CHZZK_CHANNEL_ID || null;
+        // 1. 로컬 스토리지 값 최우선
         const local = localStorage.getItem('CHZZK_CHANNEL_ID');
+
+        // 2. Config 파일 (README에 명시된 기능 복구)
+        const configId = window.CHZZK_CHANNEL_ID || null;
+
+        // 3. HTML 속성 확인 (이제 chzzkHash만 찾습니다)
         const attr = document.getElementById('id')?.getAttribute('chzzkHash');
 
-        let id = urlId || configId || local || attr;
-        if (urlId) this.idSource = "URL Parameter";
-        else if (configId) this.idSource = "Config File";
-        else if (local) this.idSource = "LocalStorage";
-        else if (attr) this.idSource = "index.html Attribute";
-        else this.idSource = "None Found";
-
-        return id;
+        // twitchId는 이제 지원하지 않음
+        return local || configId || attr;
     }
 
     _initBroadcastChannel() {

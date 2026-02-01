@@ -570,15 +570,15 @@ window.HIVE_SOUND_CONFIG = {
 
     // [CMC음성]
     "알피엠": { "src": "5000알피엠.mp3", "volume": 0.5 },
-    "발파루크입브금틀어주세요": { "src": "ValstraxVoiceCover.mp3", "volume": 0.5 },
-    "가자부 FULL": { "src": "가자부 FULL.mp3", "volume": 0.5 },
-    "가자부": [{ "src": "가자부1.mp3", "volume": 0.5 },
-    { "src": "가자부2.mp3", "volume": 0.5 }],
-    "가즈아": { "src": "가즈아.mp3", "volume": 0.5 },
+    "발파루크풀버전틀어주세요": { "src": "ValstraxVoiceCover.mp3", "volume": 0.35 },
+    "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.5 },
+    "가자부": [{ "src": "가자부1.mp3", "volume": 0.3 },
+    { "src": "가자부2.mp3", "volume": 0.4 }],
+    "가즈아": { "src": "가즈아.mp3", "volume": 0.4 },
     "갓겜": [{ "src": "갓겜0.mp3", "volume": 0.5 },
     { "src": "갓겜1.mp3", "volume": 0.5 }],
     "갓겜합시다": { "src": "갓겜합시다1.mp3", "volume": 0.5 },
-    "갓겜합시다FULL": { "src": "갓겜합시다FULL.mp3", "volume": 0.5 },
+    "갓겜합시다풀버전틀어주세요": { "src": "갓겜합시다FULL.mp3", "volume": 0.5 },
     "개꿀잼": { "src": "개꿀잼.mp3", "volume": 0.5 },
     "개쓰래기게임": { "src": "개쓰래기게임.mp3", "volume": 0.5 },
     "게임이어렵 [vocals]": { "src": "게임이어렵 [vocals].mp3", "volume": 0.5 },
@@ -715,6 +715,8 @@ window.HIVE_SOUND_CONFIG = {
     { "src": "하하하8.mp3", "volume": 0.5 },
     { "src": "하하하9.mp3", "volume": 0.5 }],
     "흔들리며산다": { "src": "흔들리며산다.mp3", "volume": 0.5 },
+    "좋아?": { "src": "좋아.mp3", "volume": 0.5 },
+    "만족해?": { "src": "만족해.mp3", "volume": 0.5 }
 };
 
 window.HIVE_VISUAL_CONFIG = {
