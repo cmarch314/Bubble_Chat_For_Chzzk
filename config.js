@@ -163,6 +163,15 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "skullmeme11.mp3", "volume": 0.7 },*/
     ],
 
+    // [Songs / Full Version]
+    "발파루크풀버전틀어주세요": { "src": "ValstraxVoiceCover.mp3", "volume": 0.45 },
+    "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.55 },
+    "갓겜합시다풀버전틀어주세요": { "src": "갓겜합시다FULL.mp3", "volume": 0.6 },
+    "물설산씨티풀버전틀어주세요": { "src": "물설산씨티.mp3", "volume": 0.6 },
+    "몬창의왕풀버전틀어주세요": { "src": "아들아.mp3", "volume": 0.7 },
+    "토끼경단풀버전틀어주세요": { "src": "토끼경단.mp3", "volume": 0.6 },
+    "방종송풀버전틀어주세요": { "src": "방종송.mp3", "volume": 0.5 },
+
     // [Reactions & Memes]
     "앙": { "src": "Ang.mp3", "volume": 0.7 },
     "재밌다": { "src": "Fun.wav", "volume": 0.6 },
@@ -172,7 +181,7 @@ window.HIVE_SOUND_CONFIG = {
     { "src": "Laugh2.mp3", "volume": 0.5 },
     { "src": "Laugh3.mp3", "volume": 0.8 },
     { "src": "Laugh6.mp3", "volume": 0.5 },
-    { "src": "Laugh.mp3", "volume": 0.5 },
+    { "src": "laugh.mp3", "volume": 0.5 },
     { "src": "Laugh7.mp3", "volume": 0.5 },
     { "src": "Laugh8.mp3", "volume": 0.7 },
     { "src": "Laugh4.mp3", "volume": 0.35 },
@@ -324,14 +333,14 @@ window.HIVE_SOUND_CONFIG = {
     "운동": { "src": "workouthard.mp3", "volume": 0.6 },
     "유격": { "src": "MohyungTower.mp3", "volume": 0.7 },
     "일어나": [
-        { "src": "WakeUp1.mp3", "volume": 0.7 },
-        { "src": "WakeUp2.mp3", "volume": 0.7 },
-        { "src": "WakeUp3.mp3", "volume": 0.7 },
-        { "src": "WakeUp4.mp3", "volume": 0.7 },
-        { "src": "WakeUp6.mp3", "volume": 0.7 },
-        { "src": "WakeUp7.mp3", "volume": 0.7 },
-        { "src": "WakeUp8.mp3", "volume": 0.7 },
-        { "src": "WakeUp9.mp3", "volume": 0.7 }
+        { "src": "WakeUp1.mp3", "volume": 0.9 },
+        { "src": "WakeUp2.mp3", "volume": 0.9 },
+        { "src": "WakeUp3.mp3", "volume": 0.9 },
+        { "src": "WakeUp4.mp3", "volume": 0.9 },
+        { "src": "WakeUp6.mp3", "volume": 0.9 },
+        { "src": "WakeUp7.mp3", "volume": 0.9 },
+        { "src": "WakeUp8.mp3", "volume": 0.9 },
+        { "src": "WakeUp9.mp3", "volume": 0.9 }
     ],
     "뭐임?": { "src": "WTF.mp3", "volume": 0.7 },
     "엥?": { "src": "Huh.mp3", "volume": 0.7 },
@@ -355,7 +364,7 @@ window.HIVE_SOUND_CONFIG = {
     "못숨지": { "src": "Crysis_Cant_Hide.mp3", "volume": 0.5 },
     "찾을거야": { "src": "Crysis_Find.mp3", "volume": 0.5 },
     "다이": { "src": "DieYouSOB.mp3", "volume": 0.5 },
-    "죽었어": { "src": "Crysis_death.mp3", "volume": 0.5 },
+    "죽었어": { "src": "Crysis_death.mp3", "volume": 0.4 },
     "최고야": { "src": "AreYouBest.mp3", "volume": 0.6 },
     "다메난데": { "src": "Damenandesu.mp3", "volume": 0.7 },
     "하지마이": { "src": "Don'tDoIt.mp3", "volume": 0.6 },
@@ -409,7 +418,7 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "Defcon1.mp3", "volume": 0.6 },
         { "src": "Defcon2.mp3", "volume": 0.6 }],
     "인성문제": { "src": "DoYouHavePersonalityProblem.mp3", "volume": 0.6 },
-    "명령하지마라": { "src": "DontGiveMeOrders.mp3", "volume": 0.6 },
+    "명령하지마라": { "src": "DontGiveMeOrders.mp3", "volume": 0.9 },
     "없어요": [
         { "src": "DontHaveOne.mp3", "volume": 0.7 },
         { "src": "DontHaveOne2.mp3", "volume": 0.7 },
@@ -504,11 +513,11 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "에에8.mp3", "volume": 0.7 }
     ],
     "예쁜칼": { "src": "예쁜칼.mp3", "volume": 1 },
-    "왜자르지않": { "src": "왜자르지않.mp3", "volume": 0.5 },
+    "왜자르지않": { "src": "왜자르지않.mp3", "volume": 0.9 },
     "이대구빡이": { "src": "이대구빡이.mp3", "volume": 0.5 },
     "인생꼬": { "src": "인생꼬.mp3", "volume": 0.5 },
     "임마": { "src": "임마.mp3", "volume": 0.5 },
-    "자르라": { "src": "잘르라.mp3", "volume": 0.9 },
+    "자르라": { "src": "잘르라.mp3", "volume": 1 },
     "좋은날이있": { "src": "좋은날이있.mp3", "volume": 0.6 },
     "죽을죄": { "src": "죽을죄.mp3", "volume": 0.7 },
     "팬티를": { "src": "팬티를.mp3", "volume": 0.9 },
@@ -568,7 +577,7 @@ window.HIVE_SOUND_CONFIG = {
     "도킹좋": { "src": "도킹좋.mp3", "volume": 0.7 },
     "따사!": { "src": "따사.mp3", "volume": 0.7 },
     "뜨겁게해줄게": { "src": "뜨겁게해줄게.mp3", "volume": 0.7 },
-    "랜스!": { "src": "랜스.mp3", "volume": 0.7 },
+    "랜스!": { "src": "랜스.mp3", "volume": 1 },
     "만져보고싶다": { "src": "만져보고싶다.mp3", "volume": 0.5 },
     "만져본지언제": { "src": "만져본지언제.mp3", "volume": 0.6 },
     "말도안돼": [{ "src": "말도안되.mp3", "volume": 0.7 },
@@ -626,7 +635,7 @@ window.HIVE_SOUND_CONFIG = {
     "외출한김에": { "src": "외출한김에.mp3", "volume": 0.7 },
     "욧샤": { "src": "욧샤.mp3", "volume": 0.7 },
     "용조종너무": { "src": "용조종너무.mp3", "volume": 0.7 },
-    "위이": { "src": "위이.mp3", "volume": 0.7 },
+    "위이": [{ "src": "위이.mp3", "volume": 0.7 }, { "src": "Wieeee.mp3", "volume": 0.7 }],
     "응애": { "src": "응애.mp3", "volume": 0.7 },
     "이거실화야": { "src": "이거실화야.mp3", "volume": 0.7 },
     "이걸왜유투브": { "src": "이걸왜유투브.mp3", "volume": 0.7 },
@@ -672,14 +681,16 @@ window.HIVE_SOUND_CONFIG = {
     "딜개못해": { "src": "에에엥 딜 개못해.mp3", "volume": 0.7 },
     "여죽남범": { "src": "여죽남범.mp3", "volume": 0.7 },
 
-    // [Songs / Full Version]
-    "발파루크풀버전틀어주세요": { "src": "ValstraxVoiceCover.mp3", "volume": 0.45 },
-    "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.55 },
-    "갓겜합시다풀버전틀어주세요": { "src": "갓겜합시다FULL.mp3", "volume": 0.6 },
-    "물설산씨티풀버전틀어주세요": { "src": "물설산씨티.mp3", "volume": 0.6 },
-    "몬창의왕풀버전틀어주세요": { "src": "아들아.mp3", "volume": 0.7 },
-    "토끼경단풀버전틀어주세요": { "src": "토끼경단.mp3", "volume": 0.6 },
-    "방종송풀버전틀어주세요": { "src": "방종송.mp3", "volume": 0.5 },
+
+    //"함정카드": { "src": "YouJustActivatedMyTrapCard.mp3", "volume": 0.8 }, 함정카드 임시 제외
+    "ㅅㅅㄲ": { "src": "ㅅㅅㄲ.mp3", "volume": 0.7 },
+    "가지고싶다": { "src": "가지고싶다.mp3", "volume": 0.7 },
+    "갓겜합시다": { "src": "갓겜합시다1.mp3", "volume": 0.7 },
+    "기쁨이폭발": { "src": "기쁨이폭발.mp3", "volume": 0.7 },
+    "나만못해": { "src": "나만못해.mp3", "volume": 0.7 },
+    "미안합니다": { "src": "미안합니다.mp3", "volume": 0.7 },
+    "설산을할수가": { "src": "설산을할수가.mp3", "volume": 0.7 },
+    "용의항문": { "src": "용의항문.mp3", "volume": 0.7 },
 
 };
 
@@ -688,38 +699,118 @@ window.HIVE_SOUND_CONFIG = {
 // * 이펙트의 지속 시간이나 GIF 경로를 설정합니다.
 // ==========================================
 window.VISUAL_CONFIG = {
-    // 우쇼 (GIF 이펙트)
+    // ==========================================
+    // [공통 설정]
+    // 모든 이펙트에 공통적으로 적용되거나 전역적인 설정입니다.
+    // ==========================================
+    common: {
+        textWrapLimit: 200,     // 텍스트 자동 줄바꿈 기준 글자수 (이 길이 넘어가면 <br> 삽입)
+        cooldown: 1000          // 이펙트 실행 후 다음 이펙트까지의 최소 대기 시간 (ms)
+    },
+
+    // ==========================================
+    // [우쇼 이펙트] (GIF 스캔 연출)
+    // 화면을 스캔하듯 지나가는 GIF 애니메이션입니다.
+    // ==========================================
     usho: {
-        gifPath: './img/usho.gif', // GIF 파일 경로
-        duration: 13000,           // 전체 지속 시간 (ms)
-        scanPhase: 7200,           // 스캔 연출 시간 (ms)
-        soundKey: '우쇼'           // [중요] 위 사운드 설정의 "키워드"와 같아야 함
+        gifPath: './img/usho.gif', // 사용할 GIF 이미지 경로
+        duration: 13000,        // 전체 이펙트 지속 시간 (ms)
+        scanPhase: 7200,        // 스캔 단계(첫 번째 페이즈) 지속 시간 (ms)
+        soundKey: '우쇼'          // 연결된 사운드 키 (config.js의 HIVE_SOUND_CONFIG 참조)
     },
 
-    // 돌핀 (바다 이펙트)
+    // ==========================================
+    // [돌핀 이펙트] (바다 서핑 연출)
+    // 화면에 물결이 차오르고 돌핀/서퍼가 지나가는 연출입니다.
+    // ==========================================
     dolphin: {
-        duration: 21000,
-        soundKey: '돌핀'
+        duration: 21000,        // 전체 이펙트 지속 시간 (ms)
+        soundKey: '돌핀',         // 연결된 사운드 키
+        dolphinDelay: 6000,     // 메인 돌핀(서퍼/리더)이 등장하기까지의 지연 시간 (ms)
+        creatureCount: 30,      // 화면을 돌아다니는 작은 바다 생물(물고기 등)의 개수
+        extraCount: 40,         // 화면 아래에서 위로 솟아오르는 추가 생물 개수
+        fontSize: '2.5rem',     // [Deprecated] 바다 생물 이모지의 기본 크기 (하위 호환용)
+        creatureSize: '8rem', // [New] 바다 생물(물고기, 조개 등)의 크기
+        nametagColor: '#00ffa3', // 서퍼 위에 표시될 이름표(닉네임)의 색상
+
+        // [Deep Tuning] - 심화 설정
+        dolphinScale: 1.5,      // 돌핀/서퍼의 크기 배율 (기본값: 1.5)
+        dolphinRotation: 360,   // 돌핀이 튀어오를 때 회전하는 각도 (클수록 많이 회전)
+        bounceSpeed: 1.0,       // [New] 돌핀의 이동 및 반동 속도 배율 (1.0 = 기본, 2.0 = 2배 빠름)
+        surfingEmojis: ["🏄", "🏄‍♂️", "🏄‍♀️"], // 서퍼로 사용할 이모지 목록
+        creaturePool: ["🦐", "🦀", "🐡", "🐠", "🐟", "🦑", "🐙", "🐚", "🦞"] // 바다 생물로 사용할 이모지 목록
     },
 
-    // 해골 (공포 이펙트)
+    // ==========================================
+    // [해골 이펙트] (공포/글리치 연출)
+    // 화면이 어두워지고 글자가 깨지는 듯한(글리치) 효과와 함께 해골이 등장합니다.
+    // ==========================================
     skull: {
-        soundKey: '해골'
+        duration: 12000,         // 전체 이펙트 지속 시간 (ms)
+        soundKey: '해골',         // 연결된 사운드 키
+        floatingTextDuration: 4000, // 초반부에 떠다니는 텍스트들이 유지되는 시간 (ms)
+        fontSize: '10rem',      // 중앙 해골 이모지의 크기
+
+        // [Deep Tuning] - 심화 설정
+        glitchMinDelay: 260,    // 글리치(지지직거림) 효과 최소 간격 (ms)
+        glitchMaxDelay: 780,    // 글리치 효과 최대 간격 (ms)
+        textScale: 1.5          // 주변에 떠다니는 공포 텍스트의 크기 배율
     },
 
-    // 버질 (차원참 이펙트)
+    // ==========================================
+    // [버질 이펙트] (차원참/검기 연출)
+    // 화면을 베는 듯한 검기 연출 후 유리가 깨지듯 파편이 튀는 효과입니다.
+    // ==========================================
     vergil: {
-        soundKey: '버질'
+        duration: 19000,        // 전체 이펙트 지속 시간 (ms)
+        soundKey: '버질',         // 연결된 사운드 키
+        slashCount: 30,         // 화면에 그어지는 검기(Slash)의 개수
+        shardCount: 20,         // 폭발 시 생성되는 파편 조각의 구역당 개수
+        textDelay: 10000,       // 파편 폭발 후 메시지가 나타나기까지의 지연 시간 (ms)
+
+        // [Deep Tuning] - 심화 설정
+        slashTrembleTime: 5200, // 검기가 그어진 후 부들부들 떨리기 시작하는 시간 (ms)
+        explosionTime: 6200,    // 검기가 폭발하며 파편이 튀는 시간 (ms)
+        slashStagger: 0.02,     // [New] 검기가 순차적으로 그어질 때의 시간 간격 (초) (작을수록 동시에 그어짐)
+        shardSpeedMin: 1.5,     // 파편이 날아가는 최소 속도 (초)
+        shardSpeedMax: 2.5,     // 파편이 날아가는 최대 속도 (초)
+        shardDistance: 600      // 파편이 날아가는 거리 (px)
     },
 
-    // 하트
+    // ==========================================
+    // [하트 이펙트] (사랑/분수 연출)
+    // 화면 가득 하트와 이모지들이 분수처럼 뿜어져 나오는 연출입니다.
+    // ==========================================
     heart: {
-        soundKey: '하트'
+        duration: 18000,        // 전체 이펙트 지속 시간 (ms)
+        soundKey: '하트',         // 연결된 사운드 키
+        emojiCount: 1.5,        // 초당 생성되는 이모지의 개수 (밀도)
+        fontSize: '1.5rem',     // 뿜어져 나오는 이모지의 크기
+
+        // [Deep Tuning] - 심화 설정
+        textScale: 1.3,         // 초반 텍스트(메시지)의 크기 배율
+        phaseTiming: 11000,     // 텍스트 페이즈가 끝나고 본격적인 분수가 시작되는 시점 (ms)
+        phaseInitialDelay: 800, // 텍스트 페이즈가 시작되기 전의 초기 대기 시간 (ms)
+        emojiStartDelay: 11000, // 이모지 분수가 시작되는 대기 시간 (ms, phaseTiming과 맞추는 것 권장)
+        rotationRange: 60,      // [New] 이모지가 회전하는 각도 범위 (+-값)
+        emojiPool: [[0x1F600, 0x1F64F], [0x1F9D1, 0x1F9D1], [0x2764, 0x2764], [0x1F493, 0x1F49F], [0x1F466, 0x1F469], [0x1F48B, 0x1F48B]] // 사용할 이모지 범위 (유니코드)
     },
 
-    // 커플
+    // ==========================================
+    // [커플 이펙트] (로맨틱/합체 연출)
+    // 두 개의 이모지가 만나 합체하며 하트가 되는 서사적인 연출입니다.
+    // ==========================================
     couple: {
-        soundKey: '커플'
+        duration: 21000,        // 전체 이펙트 지속 시간 (ms)
+        soundKey: '커플',         // 연결된 사운드 키
+        fontSize: '13rem',      // 중앙 메인 이모지(합체 전/후)의 크기
+        flashbackDuration: 11800, // 초반 플래시백(메시지 보여주는) 단계의 지속 시간 (ms)
+
+        // [Deep Tuning] - 심화 설정
+        intermediateScale: 1.5, // 합체 과정에서 보여지는 중간 단계 이모지들의 크기 배율
+        bgOpacity: 0.3,         // [New] 이펙트 시 배경이 얼마나 어두워질지/색이 입혀질지 (0.0 ~ 1.0)
+        personEmojiRanges: [[0x1F600, 0x1F64F], [0x1F466, 0x1F480], [0x1F9DC, 0x1F9DF], [0x1F470, 0x1F478]], // 사람 이모지 범위
+        heartEmojiRanges: [[0x1F493, 0x1F49F], [0x2764, 0x2764], [0x1F9E1, 0x1F9E1], [0x1F90D, 0x1F90E], [0x1F48B, 0x1F48D]] // 하트 이모지 범위
     }
 };
 

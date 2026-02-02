@@ -1020,7 +1020,8 @@ class VisualDirector {
         }
 
         // 3. Cooldown
-        await new Promise(r => setTimeout(r, 1000));
+        const cooldown = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.common && window.VISUAL_CONFIG.common.cooldown) || 1000;
+        await new Promise(r => setTimeout(r, cooldown));
 
         this.isLocked = false;
         this._processQueue();
@@ -1065,40 +1066,38 @@ class VisualDirector {
     }
 
     _runSkull(context) {
-        return this._genericSkullLikeEffect('skull-overlay', '!해골', 'skull-style', 'skull-emoji', context);
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.skull) ? window.VISUAL_CONFIG.skull : {
+            duration: 8000,
+            floatingTextDuration: 4000
+        };
+        return this._genericSkullLikeEffect('skull-overlay', '!해골', 'skull-style', 'skull-emoji', context, conf);
     }
 
     _runUsho(context) {
         const overlay = document.getElementById('usho-overlay');
         if (!overlay) return Promise.resolve();
 
-        // [Config Support] Use centralized config or fallback
         const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.usho) ? window.VISUAL_CONFIG.usho : {
             scanPhase: 7200,
             duration: 13000,
             gifPath: './img/usho.gif'
         };
 
-        // Inject GIF path dynamically if needed (Optional: if img tag src isn't set dynamically)
-        // For now, simpler to just rely on CSS or pre-set HTML, but let's update src if present
         const imgs = overlay.querySelectorAll('img');
         imgs.forEach(img => {
             if (conf.gifPath && !img.src.includes(conf.gifPath)) img.src = conf.gifPath;
         });
 
         return new Promise(resolve => {
-            // Reset phases
             overlay.classList.remove('phase-scan', 'phase-reveal', 'visible');
-            void overlay.offsetWidth; // Force reflow
+            void overlay.offsetWidth;
 
             overlay.classList.add('visible', 'phase-scan');
 
-            // Scan Phase
             setTimeout(() => {
                 overlay.classList.replace('phase-scan', 'phase-reveal');
             }, conf.scanPhase);
 
-            // End
             setTimeout(() => {
                 overlay.classList.remove('visible', 'phase-reveal', 'phase-scan');
                 resolve();
@@ -1111,6 +1110,12 @@ class VisualDirector {
         const overlay = document.getElementById('heart-overlay');
         if (!flashback || !overlay) return Promise.resolve();
 
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.couple) ? window.VISUAL_CONFIG.couple : {
+            duration: 21000,
+            fontSize: '13rem',
+            flashbackDuration: 11800
+        };
+
         let displayMsg = (context.message || "").trim();
         const triggerKw = "!커플";
         if (displayMsg.startsWith(triggerKw)) displayMsg = displayMsg.substring(triggerKw.length).trim();
@@ -1118,14 +1123,22 @@ class VisualDirector {
         const wrappedMsg = this._wrapText(displayMsg, 200);
         const centerMsgSnippet = document.createElement('div');
         centerMsgSnippet.className = 'couple-premium-text';
+        centerMsgSnippet.style.fontSize = conf.fontSize; // Apply config font size
         centerMsgSnippet.innerHTML = renderMessageWithEmotesHTML(wrappedMsg, context.emotes || {}, 2.0);
         centerMsgSnippet.style.animation = "hvn-couple-fadeIn 1s forwards";
 
         document.body.appendChild(centerMsgSnippet);
 
         return new Promise(resolve => {
+            const fadeInTime = 1000;
+            const messageTotalTime = conf.flashbackDuration;
+            const emojiPhaseDuration = conf.duration - conf.flashbackDuration;
+
             flashback.classList.add('visible');
-            setTimeout(() => { centerMsgSnippet.style.animation = "hvn-couple-fadeOut 1s forwards"; }, 10300);
+
+            // Fade out message shortly before flashback ends
+            setTimeout(() => { centerMsgSnippet.style.animation = "hvn-couple-fadeOut 1s forwards"; }, messageTotalTime - 1500);
+
             setTimeout(() => {
                 if (centerMsgSnippet) centerMsgSnippet.remove();
                 flashback.classList.remove('visible');
@@ -1144,66 +1157,86 @@ class VisualDirector {
                     return String.fromCodePoint(ranges[0][0]);
                 };
 
-                const personRanges = [[0x1F600, 0x1F64F], [0x1F466, 0x1F480], [0x1F9DC, 0x1F9DF], [0x1F470, 0x1F478]];
-                const heartRanges = [[0x1F493, 0x1F49F], [0x2764, 0x2764], [0x1F9E1, 0x1F9E1], [0x1F90D, 0x1F90E], [0x1F48B, 0x1F48D]];
+                const personRanges = conf.personEmojiRanges || [[0x1F600, 0x1F64F], [0x1F466, 0x1F480], [0x1F9DC, 0x1F9DF], [0x1F470, 0x1F478]];
+                const heartRanges = conf.heartEmojiRanges || [[0x1F493, 0x1F49F], [0x2764, 0x2764], [0x1F9E1, 0x1F9E1], [0x1F90D, 0x1F90E], [0x1F48B, 0x1F48D]];
 
                 const p1 = getRandomFromRanges(personRanges), p2 = getRandomFromRanges(personRanges), h3 = getRandomFromRanges(heartRanges);
 
                 const updateState = (step) => {
                     const hue = Math.floor(Math.random() * 360);
-                    overlay.style.backgroundColor = `hsla(${hue}, 100%, 70%, 0.3)`;
+                    // Use configurable opacity or default 0.3
+                    const dim = (conf.bgOpacity !== undefined) ? conf.bgOpacity : 0.3;
+                    overlay.style.backgroundColor = `hsla(${hue}, 100%, 70%, ${dim})`;
                     emojiContainer.classList.remove('grow-effect'); void emojiContainer.offsetWidth; emojiContainer.classList.add('grow-effect');
-                    emojiContainer.style.fontSize = (step === 3) ? '13rem' : '20rem';
+
+                    if (step === 3) {
+                        emojiContainer.style.fontSize = conf.fontSize;
+                    } else {
+                        // Intermediate emojis are scaled by conf.intermediateScale
+                        emojiContainer.style.fontSize = `calc(${conf.fontSize} * ${conf.intermediateScale || 1.5})`;
+                    }
+
                     if (step === 0) emojiContainer.innerText = p1;
                     else if (step === 1) emojiContainer.innerText = p2;
                     else if (step === 2) emojiContainer.innerText = h3;
                     else if (step === 3) emojiContainer.innerText = `${p1}${h3}${p2}`;
                 };
 
+                const phaseStep = emojiPhaseDuration / 4;
                 updateState(0);
-                setTimeout(() => updateState(1), 2250);
-                setTimeout(() => updateState(2), 4500);
-                setTimeout(() => updateState(3), 5625);
+                setTimeout(() => updateState(1), phaseStep);
+                setTimeout(() => updateState(2), phaseStep * 2);
+                setTimeout(() => updateState(3), phaseStep * 2.5);
 
                 setTimeout(() => {
                     overlay.style.backgroundColor = ''; overlay.classList.remove('visible');
                     emojiContainer.innerText = '❤️‍🩹'; emojiContainer.style.fontSize = '';
                     resolve();
-                }, 9000);
-            }, 11800);
+                }, emojiPhaseDuration);
+            }, conf.flashbackDuration);
         });
     }
 
     _runHeart(context) {
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.heart) ? window.VISUAL_CONFIG.heart : {
+            duration: 18000,
+            emojiCount: 15,
+            fontSize: '1.5rem'
+        };
+
         const id = 'heart-overlay-root'; let ov = document.getElementById(id); if (ov) ov.remove();
         ov = document.createElement('div'); ov.id = id;
-        ov.className = 'fullscreen-overlay visible'; // Apply utility class and make visible
+        ov.className = 'fullscreen-overlay visible';
         ov.innerHTML = `<div id="heart-overlay" class="visible"><div id="heart-backdrop"></div><div class="heart-emoji-container"></div><div class="heart-flash"></div></div>`;
         document.body.appendChild(ov);
 
         const overlay = ov.querySelector('#heart-overlay'), backdrop = ov.querySelector('#heart-backdrop'), flash = ov.querySelector('.heart-flash'), emojiContainer = ov.querySelector('.heart-emoji-container');
-        backdrop.style.opacity = 1; // Ensure background is visible
+        backdrop.style.opacity = 1;
 
         let msg = context.message || ""; if (msg.startsWith("!하트")) msg = msg.substring(3).trim();
-        const parts = this._splitMessageIntoParts(msg, 4);
+        const parts = this._splitMessageIntoParts(msg, 3);
 
-        const showPart = (text, delay, duration, isFinal = false) => {
+        const phaseTime = (conf.phaseTiming || 11000) - (conf.phaseInitialDelay || 0);
+        const stepTime = phaseTime / 3;
+        const showPart = (text, delay, duration) => {
             if (!text) return;
             setTimeout(() => {
                 const el = document.createElement('div'); el.className = 'heart-dreamy-text';
-                const scale = 1.3;
-                let html = renderMessageWithEmotesHTML(this._wrapText(text, 200), context.emotes || {}, scale);
+                el.style.fontSize = `calc(${conf.fontSize} * 6)`; // Proportional to config
+                let html = renderMessageWithEmotesHTML(this._wrapText(text, 200), context.emotes || {}, 1.3);
 
                 el.innerHTML = html;
-                ov.appendChild(el); // Append to overlay root instead of body
+                ov.appendChild(el);
                 el.style.animation = "hvn-heart-fadeIn 0.5s forwards";
                 setTimeout(() => { el.style.animation = "hvn-heart-fadeOut 0.5s forwards"; setTimeout(() => el.remove(), 500); }, duration - 500);
             }, delay);
         };
-        showPart(parts[0], 0, 4000); showPart(parts[1], 4000, 3500); showPart(parts[2], 7500, 2800); showPart(parts[3], 10300, 1000, true);
+        showPart(parts[0], 0, stepTime + conf.phaseInitialDelay);
+        showPart(parts[1], stepTime + conf.phaseInitialDelay, stepTime);
+        showPart(parts[2], stepTime * 2 + conf.phaseInitialDelay, stepTime);
 
         return new Promise(resolve => {
-            const startEmojiTime = 11000, endTime = 18000;
+            const startEmojiTime = conf.emojiStartDelay || 11000, endTime = conf.duration;
             const getRandomFromRanges = (ranges) => {
                 let total = 0; ranges.forEach(r => total += (r[1] - r[0] + 1));
                 let randomIdx = Math.floor(Math.random() * total);
@@ -1213,15 +1246,20 @@ class VisualDirector {
                 }
                 return String.fromCodePoint(ranges[0][0]);
             };
-            const allEmojiRanges = [[0x1F600, 0x1F64F], [0x1F9D1, 0x1F9D1], [0x2764, 0x2764], [0x1F493, 0x1F49F], [0x1F466, 0x1F469], [0x1F48B, 0x1F48B]];
-            const delays = [1000, 300, 700];
-            let delayIdx = 0, currentTime = startEmojiTime, emojiCounter = 0, lastWrapper = null;
+            const allEmojiRanges = conf.emojiPool || [[0x1F600, 0x1F64F], [0x1F9D1, 0x1F9D1], [0x2764, 0x2764], [0x1F493, 0x1F49F], [0x1F466, 0x1F469], [0x1F48B, 0x1F48B]];
 
-            while (currentTime < endTime) {
+            // Generate emojis based on emojiCount (roughly per second)
+            const count = Math.max(1, (endTime - startEmojiTime) / 1000 * conf.emojiCount);
+            const interval = (endTime - startEmojiTime) / count;
+
+            let currentTime = startEmojiTime, emojiCounter = 0, lastWrapper = null;
+
+            for (let i = 0; i < count; i++) {
                 const time = currentTime, currentCount = ++emojiCounter;
                 setTimeout(() => {
                     const prev = lastWrapper, wrapper = document.createElement('div');
-                    wrapper.style.cssText = `position:absolute; left:${Math.random() * 30 + 35}%; top:${Math.random() * 30 + 35}%; transform:translate(-50%,-50%) rotate(${Math.random() * 60 - 30}deg); z-index:15; display:flex; justify-content:center; align-items:center; width:40rem; height:40rem;`;
+                    const rRange = (conf.rotationRange !== undefined) ? conf.rotationRange : 30;
+                    wrapper.style.cssText = `position:absolute; left:${Math.random() * 30 + 35}%; top:${Math.random() * 30 + 35}%; transform:translate(-50%,-50%) rotate(${Math.random() * (rRange * 2) - rRange}deg); z-index:15; display:flex; justify-content:center; align-items:center; width:40rem; height:40rem; font-size:${conf.fontSize};`;
                     const em = document.createElement('div'); em.className = 'heart-dreamy-emoji'; em.innerText = getRandomFromRanges(allEmojiRanges);
                     wrapper.appendChild(em); emojiContainer.appendChild(wrapper); lastWrapper = wrapper;
                     if (window.twemoji) twemoji.parse(wrapper);
@@ -1229,108 +1267,141 @@ class VisualDirector {
                     if ((currentCount - 1) % 3 === 0) { flash.style.transition = 'none'; flash.style.opacity = '0.3'; setTimeout(() => { flash.style.transition = 'opacity 0.5s'; flash.style.opacity = '0'; }, 100); }
                     setTimeout(() => { if (wrapper.parentNode) wrapper.remove(); }, 2000);
                 }, time);
-                currentTime += delays[delayIdx % delays.length]; delayIdx++;
+                currentTime += interval;
             }
-            setTimeout(() => { ov.style.transition = 'opacity 1s'; ov.style.opacity = '0'; setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 1000); }, 18000);
+            setTimeout(() => { ov.style.transition = 'opacity 1s'; ov.style.opacity = '0'; setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 1000); }, conf.duration);
         });
     }
 
     _runVergil(context) {
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.vergil) ? window.VISUAL_CONFIG.vergil : {
+            duration: 19000,
+            slashCount: 30,
+            shardCount: 20,
+            textDelay: 10000
+        };
+
         const id = 'void-overlay'; let ov = document.getElementById(id); if (ov) ov.remove();
         ov = document.createElement('div'); ov.id = id;
-        ov.className = 'fullscreen-overlay visible'; // Add visible class
+        ov.className = 'fullscreen-overlay visible';
         ov.innerHTML = '<div id="void-backdrop"></div><div id="void-slashes"></div>'; document.body.appendChild(ov);
         const slashC = document.getElementById('void-slashes'), backdrop = document.getElementById('void-backdrop');
         backdrop.style.opacity = 1;
+
         const slashes = [];
-        for (let i = 0; i < 30; i++) {
+        const stagger = conf.slashStagger || 0.02;
+        for (let i = 0; i < conf.slashCount; i++) {
             const s = document.createElement('div'); s.className = 'void-slash';
-            s.style.cssText = `position:absolute; top:${10 + Math.random() * 80}%; left:${10 + Math.random() * 80}%; height:${1 + Math.random() * 49}px; --rot:${Math.random() * 360}deg; z-index:${200 - i}; animation:hvn-vergil-slashEnter 0.2s forwards ${i * 0.02}s;`;
+            s.style.cssText = `position:absolute; top:${10 + Math.random() * 80}%; left:${10 + Math.random() * 80}%; height:${1 + Math.random() * 49}px; --rot:${Math.random() * 360}deg; z-index:${200 - i}; animation:hvn-vergil-slashEnter 0.2s forwards ${i * stagger}s;`;
             slashC.appendChild(s); slashes.push(s);
         }
+
         return new Promise(resolve => {
-            setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 19000);
-            setTimeout(() => { slashes.forEach(s => s.style.animation = `hvn-vergil-slashTremble ${0.05 + Math.random() * 0.1}s infinite`); }, 5200);
+            setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, conf.duration);
+
+            const slashTrembleTime = conf.slashTrembleTime || 5200;
+            const explosionTime = conf.explosionTime || 6200;
+
+            setTimeout(() => { slashes.forEach(s => s.style.animation = `hvn-vergil-slashTremble ${0.05 + Math.random() * 0.1}s infinite`); }, slashTrembleTime);
+
             setTimeout(() => {
                 slashes.forEach(s => { s.style.animation = "hvn-vergil-fadeOut 1s forwards"; setTimeout(() => s.remove(), 1000); });
                 for (let i = 0; i < 12; i++) {
                     const row = Math.floor(i / 4), col = i % 4, w = window.innerWidth / 4, h = window.innerHeight / 3;
                     const cx = (col * w) + (w * 0.2) + (Math.random() * w * 0.6), cy = (row * h) + (h * 0.2) + (Math.random() * h * 0.6);
-                    for (let j = 0; j < 20; j++) {
+                    for (let j = 0; j < conf.shardCount; j++) {
                         const shard = document.createElement('div'); shard.className = 'void-shard';
-                        const ang = Math.random() * 360, d = 200 + Math.random() * 400;
+                        const ang = Math.random() * 360;
+                        const d = (conf.shardDistance || 400) * (0.8 + Math.random() * 0.4);
                         shard.style.cssText = `left:${cx + Math.random() * 40 - 20}px; top:${cy + Math.random() * 40 - 20}px; --tx:${Math.cos(ang * Math.PI / 180) * d}px; --ty:${Math.sin(ang * Math.PI / 180) * d}px; --rot:${Math.random() * 360}deg;`;
-                        const dur = 1.5 + Math.random() * 2; shard.style.animation = `hvn-vergil-shardFly ${dur}s ease-out forwards`;
+                        const dur = (conf.shardSpeedMin || 1.5) + Math.random() * ((conf.shardSpeedMax || 2.5) - (conf.shardSpeedMin || 1.5));
+                        shard.style.animation = `hvn-vergil-shardFly ${dur}s ease-out forwards`;
                         ov.appendChild(shard); setTimeout(() => shard.remove(), dur * 1000);
                     }
                 }
                 backdrop.style.opacity = 0;
+
                 setTimeout(() => {
                     let msg = context.message || "";
                     const kw = "!버질";
                     if (msg.startsWith(kw)) msg = msg.substring(kw.length).trim();
-                    else if (msg.startsWith("버질")) msg = msg.substring(2).trim(); // Fallback
-
                     if (msg) {
                         const txt = document.createElement('div'); txt.className = 'vergil-text';
-                        txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {}); ov.appendChild(txt); // Append to overlay root
+                        txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {}); ov.appendChild(txt);
                         setTimeout(() => { txt.style.animation = "hvn-vergil-fadeOut 1s forwards"; setTimeout(() => txt.remove(), 1000); }, 7000);
                     }
-                }, 3800);
-            }, 6200);
+                }, conf.textDelay - explosionTime);
+            }, explosionTime);
         });
     }
 
     _runDolphin(context) {
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.dolphin) ? window.VISUAL_CONFIG.dolphin : {
+            duration: 21000,
+            creatureCount: 30,
+            extraCount: 40,
+            dolphinDelay: 6000,
+            fontSize: '2.5rem',
+            creatureSize: '2.5rem',
+            nametagColor: '#00ffa3'
+        };
+
         const id = 'dolphin-overlay-root'; let ov = document.getElementById(id); if (ov) ov.remove();
         ov = document.createElement('div'); ov.id = id;
-        ov.className = 'fullscreen-overlay visible'; // Apply utility class and make visible
+        ov.className = 'fullscreen-overlay visible';
         ov.innerHTML = `<div id="dolphin-overlay" class="visible event-normal"><div class="dolphin-light dolphin-light-left"></div><div class="dolphin-light dolphin-light-right"></div><div class="dolphin-sea-bottom"><div class="sea-wave"></div></div></div>`;
         document.body.appendChild(ov);
 
         const overlayC = ov.querySelector('#dolphin-overlay');
-        const surfingEmojis = ["🏄", "🏄‍♂️", "🏄‍♀️"];
-
-        // [Config Support]
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.dolphin) ? window.VISUAL_CONFIG.dolphin : { duration: 21000 };
+        const surfingEmojis = conf.surfingEmojis || ["🏄", "🏄‍♂️", "🏄‍♀️"];
 
         this._spawnActor(overlayC, 'surfer-actor', surfingEmojis[Math.floor(Math.random() * surfingEmojis.length)], {
             duration: conf.duration,
             styles: {
                 nametag: (context.nickname || "Anonymous"),
-                nameColor: (context.color || "#00ffa3"),
+                nameColor: (context.color || conf.nametagColor), // Use config fallback
                 left: '-20vw',
                 animation: `hvn-dolphin-surfer ${conf.duration / 1000}s linear forwards`
             }
         });
 
-        const dolphinLife = (conf.duration || 21000) - 6000;
+        const dolphinLife = conf.duration - conf.dolphinDelay;
         setTimeout(() => {
             const dolphinEl = this._spawnActor(overlayC, 'lead-dolphin', "🐬", { duration: dolphinLife + 5000 });
             const animateWildBounce = (el, total) => {
                 const start = Date.now(); let rot = 0;
+                const speed = conf.bounceSpeed || 1.0;
                 const bounce = () => {
                     const elapsed = Date.now() - start; if (elapsed >= total) return;
-                    const x = 5 + Math.random() * 90, y = 5 + Math.random() * 90, d = 360 + Math.random() * 6040;
-                    rot -= d; el.style.transition = `top 800ms ease-in-out, left 800ms ease-in-out, transform 1200ms cubic-bezier(0.1, 0.5, 0.2, 1)`;
-                    el.style.left = `${x}%`; el.style.top = `${y}%`; el.style.transform = `translate(-50%, -50%) rotate(${rot}deg) scale(1.5)`;
-                    setTimeout(bounce, 900 + Math.random() * 300);
+                    const x = 5 + Math.random() * 90, y = 5 + Math.random() * 90;
+                    const d = (conf.dolphinRotation || 360) + Math.random() * 6040;
+                    rot -= d;
+                    el.style.transition = `top ${800 / speed}ms ease-in-out, left ${800 / speed}ms ease-in-out, transform ${1200 / speed}ms cubic-bezier(0.1, 0.5, 0.2, 1)`;
+                    el.style.left = `${x}%`; el.style.top = `${y}%`; el.style.transform = `translate(-50%, -50%) rotate(${rot}deg) scale(${conf.dolphinScale || 1.5})`;
+                    setTimeout(bounce, (900 + Math.random() * 300) / speed);
                 };
                 el.style.left = '50%'; el.style.top = '50%'; el.style.transform = 'translate(-50%, -50%) scale(0)';
-                setTimeout(() => { el.style.transition = "transform 0.5s"; el.style.transform = 'translate(-50%, -50%) scale(1.5)'; setTimeout(bounce, 500); }, 100);
+                setTimeout(() => {
+                    el.style.transition = `transform ${500 / speed}ms`;
+                    el.style.transform = `translate(-50%, -50%) scale(${conf.dolphinScale || 1.5})`;
+                    setTimeout(bounce, 500 / speed);
+                }, 100);
             };
             if (dolphinEl) animateWildBounce(dolphinEl, dolphinLife + 2000);
-        }, 6000);
+        }, conf.dolphinDelay);
 
-        const smallSeaCreatures = ["🦐", "🦀", "🐡", "🐠", "🐟", "🦑", "🐙", "🐚", "🦞"];
+        const smallSeaCreatures = conf.creaturePool || ["🦐", "🦀", "🐡", "🐠", "🐟", "🦑", "🐙", "🐚", "🦞"];
         let accDelay = 0;
-        for (let i = 0; i < 30; i++) {
-            const interval = 500 + Math.random() * 500; accDelay += interval;
+        const jumpInterval = (conf.duration - 2000) / conf.creatureCount;
+
+        for (let i = 0; i < conf.creatureCount; i++) {
+            const interval = jumpInterval * 0.5 + Math.random() * jumpInterval; accDelay += interval;
             setTimeout(() => {
                 const fromLeft = (i % 2 === 0);
                 this._spawnActor(overlayC, 'sea-jump', smallSeaCreatures[Math.floor(Math.random() * smallSeaCreatures.length)], {
                     duration: 4000,
                     styles: {
+                        fontSize: (conf.creatureSize || conf.fontSize),
                         '--sx': (fromLeft ? '-10%' : '110%'), '--ex': (fromLeft ? '110%' : '-10%'),
                         '--sr': (fromLeft ? '-120deg' : '120deg'), '--er': (fromLeft ? '120deg' : '-120deg'),
                         '--sc': (fromLeft ? '-1' : '1')
@@ -1339,58 +1410,70 @@ class VisualDirector {
             }, accDelay);
         }
 
-        // Extra small rising creatures (shrimp, crabs, etc.)
-        for (let i = 0; i < 40; i++) {
+        for (let i = 0; i < conf.extraCount; i++) {
             setTimeout(() => {
                 this._spawnActor(overlayC, 'sea-extra', smallSeaCreatures[Math.floor(Math.random() * smallSeaCreatures.length)], {
                     duration: 3000 + Math.random() * 2000,
                     styles: {
+                        fontSize: `calc(${conf.creatureSize || conf.fontSize} * 0.8)`,
                         left: `${Math.random() * 100}%`,
                         top: '110%',
                         '--x-end': `${(Math.random() - 0.5) * 20}vw`,
-                        '--y-end': `-${20 + Math.random() * 10}vh`, // Rise up to ~1/4 of screen
+                        '--y-end': `-${20 + Math.random() * 10}vh`,
                         '--r-start': `${Math.random() * 360}deg`,
                         '--r-end': `${Math.random() * 360}deg`
                     }
                 });
-            }, Math.random() * 15000);
+            }, Math.random() * (conf.duration - 5000));
         }
 
         let msg = context.message || ""; if (msg.startsWith("!돌핀")) msg = msg.substring(3).trim();
         if (msg) {
             setTimeout(() => {
                 const txt = document.createElement('div'); txt.className = 'dolphin-text';
-                txt.innerHTML = renderMessageWithEmotesHTML(this._wrapText(msg, 200, "<br>"), context.emotes || {}, 2.0);
-                ov.appendChild(txt); // Append to overlay root
-            }, 6000);
+                txt.innerHTML = renderMessageWithEmotesHTML(this._wrapText(msg, (window.VISUAL_CONFIG?.common?.textWrapLimit || 200), "<br>"), context.emotes || {}, 2.0);
+                ov.appendChild(txt);
+            }, conf.dolphinDelay);
         }
         return new Promise(resolve => {
-            setTimeout(() => { ov.style.opacity = '0'; setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 2000); }, 21000);
+            setTimeout(() => { ov.style.opacity = '0'; setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 2000); }, conf.duration);
         });
     }
 
-    _genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context) {
+    _genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context, conf) {
         const overlay = document.getElementById(overlayId); if (!overlay) return Promise.resolve();
         const parts = this._parseMessage(context.message, kw);
-        this._showFloatingText(parts.rest, 0, 3500, styleClass, context.emotes);
-        this._showFloatingText(parts.last, 3600, 500, styleClass, context.emotes);
+        const floatTime = conf.floatingTextDuration || 4000;
+        const textScale = conf.textScale || 1.5;
+        this._showFloatingText(parts.rest, 0, floatTime - 500, styleClass, context.emotes, conf.fontSize, textScale);
+        this._showFloatingText(parts.last, floatTime - 400, 500, styleClass, context.emotes, conf.fontSize, textScale);
         return new Promise(resolve => {
             setTimeout(() => {
                 overlay.classList.add('visible');
                 const emoji = overlay.querySelector('.' + emojiClass);
                 let active = true;
-                const glitch = () => { if (!active) return; void emoji.offsetWidth; emoji.classList.add('glitching'); setTimeout(() => { emoji.classList.remove('glitching'); if (active) setTimeout(glitch, 260 + Math.random() * 780); }, 200); };
+                const glitch = () => {
+                    if (!active) return;
+                    void emoji.offsetWidth;
+                    emoji.classList.add('glitching');
+                    const delay = (conf.glitchMinDelay || 260) + Math.random() * ((conf.glitchMaxDelay || 780) - (conf.glitchMinDelay || 260));
+                    setTimeout(() => {
+                        emoji.classList.remove('glitching');
+                        if (active) setTimeout(glitch, delay);
+                    }, 200);
+                };
                 glitch();
-                setTimeout(() => { active = false; overlay.classList.remove('visible'); resolve(); }, 8000);
-            }, 4000);
+                setTimeout(() => { active = false; overlay.classList.remove('visible'); resolve(); }, conf.duration - floatTime);
+            }, floatTime);
         });
     }
 
-    _showFloatingText(text, delay, duration, styleClass, emotes) {
+    _showFloatingText(text, delay, duration, styleClass, emotes, fontSize, textScale = 1.5) {
         if (!text) return;
         setTimeout(() => {
             const el = document.createElement('div'); el.className = `visual-center-text ${styleClass}`;
-            el.innerHTML = renderMessageWithEmotesHTML(this._wrapText(text, 200), emotes || {}, 1.5);
+            if (fontSize) el.style.fontSize = fontSize;
+            el.innerHTML = renderMessageWithEmotesHTML(this._wrapText(text, (window.VISUAL_CONFIG?.common?.textWrapLimit || 200)), emotes || {}, textScale);
             document.body.appendChild(el);
             el.style.animation = "hvn-skull-fadeIn 0.2s forwards";
             setTimeout(() => { el.style.animation = "hvn-skull-fadeOut 0.2s forwards"; setTimeout(() => el.remove(), 200); }, duration - 200);
@@ -1412,12 +1495,40 @@ class VisualDirector {
     }
 
     _splitMessageIntoParts(msg, count) {
-        const words = msg.split(/\s+/).filter(w => w.length > 0); let parts = new Array(count).fill("");
-        if (words.length === 0) return parts; if (words.length === 1) { parts[count - 1] = words[0]; return parts; }
-        const last = words.pop(); const rem = words;
-        if (rem.length === 1) { parts[0] = parts[1] = parts[2] = rem[0]; parts[3] = last; }
-        else if (rem.length === 2) { parts[0] = parts[1] = rem[0]; parts[2] = rem[1]; parts[3] = last; }
-        else { const p1 = Math.ceil(rem.length / 3); const p2 = Math.ceil((rem.length - p1) / 2); parts[0] = rem.slice(0, p1).join(' '); parts[1] = rem.slice(p1, p1 + p2).join(' '); parts[2] = rem.slice(p1 + p2).join(' '); parts[3] = last; }
+        const words = msg.split(/\s+/).filter(w => w.length > 0);
+        let parts = new Array(count).fill("");
+        if (words.length === 0) return parts;
+
+        // If only one word, put it at the very end (punchline)
+        if (words.length === 1) {
+            parts[count - 1] = words[0];
+            return parts;
+        }
+
+        // Reserve last word for the last part
+        const last = words.pop();
+        parts[count - 1] = last;
+
+        const rem = words;
+        const remainingSlots = count - 1;
+
+        if (rem.length <= remainingSlots) {
+            // If fewer (or equal) words than slots, fill them sequentially.
+            // Empty slots remain empty (no duplication).
+            for (let i = 0; i < rem.length; i++) {
+                parts[i] = rem[i];
+            }
+        } else {
+            // Distribute remaining words across the remaining slots
+            let currentIndex = 0;
+            for (let i = 0; i < remainingSlots; i++) {
+                const slotsLeft = remainingSlots - i;
+                const wordsLeft = rem.length - currentIndex;
+                const take = Math.ceil(wordsLeft / slotsLeft);
+                parts[i] = rem.slice(currentIndex, currentIndex + take).join(' ');
+                currentIndex += take;
+            }
+        }
         return parts;
     }
 
@@ -1454,8 +1565,24 @@ class SystemController {
         this.commands = {
             '!소리끄기': { action: () => this.audio.setEnabled(false), msg: "🔇 사운드 효과가 꺼졌습니다." },
             '!소리켜기': { action: () => this.audio.setEnabled(true), msg: "🔊 사운드 효과가 켜졌습니다." },
+            '!사운드': {
+                action: () => {
+                    const next = !this.audio.enabled;
+                    this.audio.setEnabled(next);
+                    return next ? "🔊 사운드 효과가 켜졌습니다." : "🔇 사운드 효과가 꺼졌습니다.";
+                },
+                msg: ""
+            },
             '!이펙트끄기': { action: () => this.visual.setEnabled(false), msg: "🚫 비주얼 이펙트가 꺼졌습니다." },
             '!이펙트켜기': { action: () => this.visual.setEnabled(true), msg: "✨ 비주얼 이펙트가 켜졌습니다." },
+            '!비주얼': {
+                action: () => {
+                    const next = !this.visual.enabled;
+                    this.visual.setEnabled(next);
+                    return next ? "✨ 비주얼 이펙트가 켜졌습니다." : "🚫 비주얼 이펙트가 꺼졌습니다.";
+                },
+                msg: ""
+            },
             '!알람끄기': { action: () => this.visual.setAlertsEnabled(false), msg: "🔔 알람(구독/후원) 이펙트가 꺼졌습니다." },
             '!알람켜기': { action: () => this.visual.setAlertsEnabled(true), msg: "🔔 알람(구독/후원) 이펙트가 켜졌습니다." },
             '!전체끄기': {
