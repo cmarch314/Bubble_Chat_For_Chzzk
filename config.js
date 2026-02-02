@@ -837,7 +837,7 @@ window.VISUAL_CONFIG = {
     bangjong: {
         duration: 90000,        // 전체 지속 시간 (90초)
         soundKey: '방종송',      // 연결된 사운드 키
-        teostraPath: './img/Trostra.png',
+        teostraPath: './img/Teostra.png',
         lunastraPath: './img/Lunastra.png',
         characterCount: 2,      // 화면에 등장할 캐릭터 총 개수 (테오 1, 나나 1)
         characterSize: '35rem', // 캐릭터 크기

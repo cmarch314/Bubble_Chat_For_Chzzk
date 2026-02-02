@@ -1620,7 +1620,7 @@ class VisualDirector {
     _runBangjong(context) {
         const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.bangjong) ? window.VISUAL_CONFIG.bangjong : {
             duration: 90000,
-            teostraPath: './img/Trostra.png',
+            teostraPath: './img/Teostra.png',
             lunastraPath: './img/Lunastra.png',
             characterCount: 8,
             characterSize: '15rem'
