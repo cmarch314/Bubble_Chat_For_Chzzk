@@ -241,20 +241,21 @@ class ChzzkGateway {
                 const isDonation = (msgType === 10);
                 const isSubscription = (msgType === 11);
 
+                // [Fix] Extract color safely
+                let colorCode = null;
+                if (profile && profile.streamingProperty && profile.streamingProperty.nicknameColor) {
+                    colorCode = profile.streamingProperty.nicknameColor.colorCode;
+                }
+
                 let donationAmount = 0;
                 let subMonth = 0;
-
-                if (isDonation) {
-                    donationAmount = extra.payAmount || 0;
-                }
-                if (isSubscription) {
-                    subMonth = extra.month || 1;
-                }
+                if (isDonation) donationAmount = extra.payAmount || 0;
+                if (isSubscription) subMonth = extra.month || 1;
 
                 const messageData = {
                     message: chat.msg || chat.content || "",
                     nickname: profile.nickname || "Anonymous",
-                    color: profile.streamingProperty?.nicknameColor?.colorCode || null,
+                    color: colorCode,
                     badges: profile.activityBadges || [],
                     emojis: extra.emojis || {},
                     isStreamer: profile.userRoleCode === 'streamer',
@@ -666,12 +667,13 @@ class ChatRenderer {
 
         // 색상 계산
         let userColor = this._resolveColor(color, uid);
-        let bgColor = pSBC(-0.5, userColor, false, true) || userColor;
 
         // 기본 스타일 적용
         chatLineInner.style.borderColor = userColor;
-        chatLineInner.style.background = bgColor;
+        chatLineInner.style.background = "rgba(0, 0, 0, 0.2)"; // 메시지 영역 셰이딩 강화
         chatLineInner.style.color = "#ffffff";
+
+        elements.chatLineBg.style.background = userColor; // 바깥 배경을 유저 색상으로!!
         nameBox.style.background = userColor;
         nameEle.innerText = nickname;
 
@@ -776,9 +778,16 @@ class ChatRenderer {
 
     _resolveColor(color, uid) {
         if (color && color !== "#000000" && color.startsWith("#")) return color;
-        if (color === "#000000") return "#000000"; // Black logic handled in filters
+        if (color === "#000000") return "#000000";
+
+        // [New] Fallback to internal random color if external lib is missing
+        const colors = ["#ff4444", "#44ff44", "#44bbff", "#ffff44", "#ff88ff", "#44ffff", "#ffa500", "#ff6b6b", "#66d9ef", "#a6e22e"];
         if (typeof randomColor === 'function') return randomColor({ luminosity: 'light', seed: uid });
-        return '#5555ff';
+
+        // Seeded random for consistency
+        const seed = uid ? uid.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0) : Math.random();
+        const index = Math.abs(seed) % colors.length;
+        return colors[index];
     }
 
     _applyTextFilters(msg, els, color) {
@@ -1061,7 +1070,8 @@ class VisualDirector {
             couple: { soundKey: "커플", execute: (ctx) => this._runCouple(ctx) },
             heart: { soundKey: "하트", execute: (ctx) => this._runHeart(ctx) },
             vergil: { soundKey: "버질", execute: (ctx) => this._runVergil(ctx) },
-            dolphin: { soundKey: "돌핀", execute: (ctx) => this._runDolphin(ctx) }
+            dolphin: { soundKey: "돌핀", execute: (ctx) => this._runDolphin(ctx) },
+            valstrax: { soundKey: "발파", execute: (ctx) => this.triggerValstrax(ctx.message) }
         };
     }
 
@@ -1440,6 +1450,173 @@ class VisualDirector {
         });
     }
 
+    _runValstrax(context) {
+        // This method is now a placeholder or can be removed if triggerValstrax is the new entry point.
+        // For now, it will just resolve immediately.
+        return Promise.resolve();
+    }
+
+    // [New] Valstrax Logic
+    triggerValstrax(message) {
+        if (!window.VISUAL_CONFIG.valstrax) return Promise.resolve();
+        const conf = window.VISUAL_CONFIG.valstrax;
+
+        return new Promise(resolve => {
+            // 1. 오버레이 생성
+            const overlay = document.createElement('div');
+            overlay.className = 'valstrax-overlay';
+            overlay.style.setProperty('--cloud-height', `${conf.cloudHeight || 180}px`);
+            overlay.style.setProperty('--cloud-size', `${conf.cloudSize || 400}px`);
+            document.body.appendChild(overlay);
+
+            // [New] 초기 배경 이미지 추가 (6초 전까지)
+            const initialBg = document.createElement('div');
+            initialBg.className = 'valstrax-initial-bg';
+            overlay.appendChild(initialBg);
+
+            // 2. 초기 구름 (바닥 3겹) 생성
+            const cloudsContainer = document.createElement('div');
+            cloudsContainer.className = 'valstrax-clouds';
+            cloudsContainer.innerHTML = `
+                <div class="cloud-layer cloud-3"></div>
+                <div class="cloud-layer cloud-2"></div>
+                <div class="cloud-layer cloud-1"></div>
+            `;
+            overlay.appendChild(cloudsContainer);
+
+            // 사운드 재생
+            if (window.AudioManager && conf.soundKey) window.AudioManager.playSFX(conf.soundKey);
+
+            // 3. 5초: 제트기 (붉은 선 - 두 줄) & 제트운 (흰 선)
+            setTimeout(() => {
+                // [Fix] 비행운(흰 선)을 비행기(붉은 선)와 분리하여 그 자리에 남도록 처리
+                const contrailL = document.createElement('div');
+                contrailL.className = 'valstrax-contrail valstrax-jet-left contrail-active';
+                overlay.appendChild(contrailL);
+
+                const contrailR = document.createElement('div');
+                contrailR.className = 'valstrax-contrail valstrax-jet-right contrail-active';
+                overlay.appendChild(contrailR);
+
+                const jetL = document.createElement('div');
+                jetL.className = 'valstrax-jet valstrax-jet-left jet-active';
+                overlay.appendChild(jetL);
+
+                const jetR = document.createElement('div');
+                jetR.className = 'valstrax-jet valstrax-jet-right jet-active';
+                overlay.appendChild(jetR);
+            }, conf.jetDelay);
+
+            // 4. 6초: 시네마틱 구름 서지 (전환 가림막)
+            setTimeout(() => {
+                // [New] 구름 서지 레이어 생성 (전체화면 구름 덮기)
+                const surge = document.createElement('div');
+                surge.className = 'valstrax-surge';
+                overlay.appendChild(surge);
+
+                // 구름이 화면을 완전히 가리는 피크 시점(약 0.6초 뒤)에 요소 교체
+                setTimeout(() => {
+                    overlay.querySelectorAll('.valstrax-clouds, .valstrax-jet, .valstrax-contrail, .valstrax-initial-bg').forEach(el => el.remove());
+
+                    const flashLayer = document.createElement('div');
+                    flashLayer.className = 'valstrax-flash-layer scene-active';
+                    overlay.appendChild(flashLayer);
+
+                    const mountains = document.createElement('div');
+                    mountains.className = 'valstrax-mountains';
+                    overlay.appendChild(mountains);
+
+                    const star = document.createElement('div');
+                    star.className = 'valstrax-star';
+                    star.style.opacity = '1';
+                    overlay.appendChild(star);
+
+                    this.activeStar = star;
+                }, 600); // 0.6s Peak Timing
+
+                // 3초 뒤(페이드아웃 완료 후) 서지 레이어 제거
+                setTimeout(() => surge.remove(), 3000);
+            }, conf.flashDelay);
+
+            // 5. 7.3초: 별 폭발 & 유성 진입
+            setTimeout(() => {
+                if (this.activeStar) this.activeStar.style.display = 'none'; // 별 사라짐
+
+                // [Fix] 쉐이커 컨테이너 추가하여 스케일(접근)과 쉐이크(흔들림) 애니메이션 공존 유도
+                const shaker = document.createElement('div');
+                shaker.className = 'valstrax-shaker shaker-active';
+
+                const meteor = document.createElement('div');
+                meteor.className = 'valstrax-meteor meteor-active';
+
+                shaker.appendChild(meteor);
+                overlay.appendChild(shaker);
+            }, conf.starExplodeDelay);
+
+            // 6. 충돌 임팩트 (impactDelay 지점)
+            setTimeout(() => {
+                const impactFlash = document.createElement('div');
+                impactFlash.className = 'valstrax-impact-flash';
+                overlay.appendChild(impactFlash);
+
+                setTimeout(() => impactFlash.classList.add('flash-fade-out'), 100);
+                setTimeout(() => impactFlash.remove(), 1200);
+
+                // [Fix] 메테오 충돌 후 이전 오브젝트들 완전 정리 (비행운 포함)
+                overlay.querySelectorAll('.valstrax-clouds, .valstrax-mountains, .valstrax-jet, .valstrax-meteor, .valstrax-star, .valstrax-flash-layer, .valstrax-shaker, .valstrax-contrail').forEach(el => el.remove());
+
+                // [New] 최종 배경 GIF 추가 (전체화면)
+                const finalBg = document.createElement('div');
+                finalBg.className = 'valstrax-final-bg';
+                overlay.appendChild(finalBg);
+
+                // [Fix] 충돌과 동시에 구름 등장
+                // 상단 구름 생성
+                const topClouds = document.createElement('div');
+                topClouds.className = 'valstrax-clouds';
+                topClouds.style.top = '0';
+                topClouds.style.bottom = 'auto';
+                topClouds.innerHTML = `
+                    <div class="cloud-layer cloud-3 top"></div>
+                    <div class="cloud-layer cloud-2 top"></div>
+                    <div class="cloud-layer cloud-1 top"></div>
+                `;
+                overlay.appendChild(topClouds);
+
+                // 하단 구름 생성 (바닥에 다시 깔림)
+                const bottomClouds = document.createElement('div');
+                bottomClouds.className = 'valstrax-clouds';
+                bottomClouds.innerHTML = `
+                    <div class="cloud-layer cloud-3"></div>
+                    <div class="cloud-layer cloud-2"></div>
+                    <div class="cloud-layer cloud-1"></div>
+                `;
+                overlay.appendChild(bottomClouds);
+            }, conf.impactDelay);
+
+            // 7. 메시지 등장 (textAppearDelay 지점)
+            setTimeout(() => {
+                let msg = message || "";
+                if (msg.startsWith("!발파")) msg = msg.substring(3).trim();
+
+                const msgBox = document.createElement('div');
+                msgBox.className = 'valstrax-msg-box';
+                msgBox.innerHTML = `<div>${msg}</div>`;
+                overlay.appendChild(msgBox);
+
+                // Fade In 효과
+                requestAnimationFrame(() => msgBox.classList.add('visible'));
+
+            }, conf.textAppearDelay);
+
+            // 7. 18초: 종료
+            setTimeout(() => {
+                overlay.remove();
+                resolve(); // Signal completion to the queue
+            }, conf.duration);
+        });
+    }
+
     _genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context, conf) {
         const overlay = document.getElementById(overlayId); if (!overlay) return Promise.resolve();
         const parts = this._parseMessage(context.message, kw);
@@ -1782,15 +1959,17 @@ window.runDemoSequence = (durationSeconds = 60) => {
         // Random Message
         const msg = window.WELCOME_MESSAGES[Math.floor(Math.random() * window.WELCOME_MESSAGES.length)];
         const name = names[Math.floor(Math.random() * names.length)];
+        const demoColors = ["#ff4444", "#44ff44", "#44bbff", "#ffff44", "#ff88ff", "#44ffff", "#ffa500", "#ffffff"];
+        const color = demoColors[Math.floor(Math.random() * demoColors.length)];
 
         window.processMessage({
             message: msg,
             nickname: name,
-            color: null,
+            color: color,
             badges: [],
             emojis: {},
             isStreamer: true, // Force trigger effects
-            uid: 'demo_' + Date.now(),
+            uid: 'demo_' + Math.random().toString(36).substr(2, 9),
             type: 'chat',
             isDonation: false,
             isSubscription: false
@@ -1822,18 +2001,14 @@ if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
     // Visual Effect Pool from Config
     const visualKeys = window.HIVE_VISUAL_CONFIG ? Object.keys(window.HIVE_VISUAL_CONFIG) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼'];
 
-    // [Fix] Startup Sequence: Guaranteed Visual Effect
+    // [Fix] Startup Sequence: Guaranteed Valstrax Effect
     setTimeout(() => {
-        const keys = visualKeys;
-        if (keys.length > 0) {
-            const randomKey = keys[Math.floor(Math.random() * keys.length)];
-            console.log(`🚀 [Startup] Triggering Guaranteed Effect: ${randomKey}`);
-            window.visualDirector.trigger(randomKey, {
-                message: `✨ 시스템 시작: ${randomKey} 이펙트 테스트`, // [Fix] User-friendly message
-                nickname: "System",
-                isStreamer: true // Force bypass permissions
-            });
-        }
+        console.log(`🚀 [Startup] Triggering Guaranteed Effect: valstrax`);
+        window.visualDirector.trigger('valstrax', {
+            message: `✨ 시스템 시작: 발파루크 이펙트 테스트`,
+            nickname: "System",
+            isStreamer: true
+        });
     }, 1000); // 1 second after load
 
     const welcomeInterval = setInterval(() => {
@@ -1856,10 +2031,10 @@ if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
         window.processMessage({
             message: msg,
             nickname: randomName,
-            color: null, // Let renderer pick random color
+            color: null, // ChatRenderer's _resolveColor will now handle this with seed
             badges: [],
             emojis: {},
-            isStreamer: isVisual, // [Fix] If it's a visual triggering message, pretend it's streamer to bypass 'enabled' check
+            isStreamer: isVisual,
             uid: randomUid,
             type: 'chat',
             isDonation: false,

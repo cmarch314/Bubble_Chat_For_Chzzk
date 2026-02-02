@@ -162,7 +162,6 @@ body {
 }
 
 .chat-line .chat-line-bg {
-  background: #241841;
   border-radius: 28px;
 }
 
@@ -3219,4 +3218,572 @@ body {
     opacity: 0.6;
     transform: scale(0.98);
   }
+}
+
+/* ============================================================================
+   [New] Valstrax Effect (!발파)
+   ============================================================================ */
+.valstrax-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+  background: transparent;
+}
+
+/* 1. Clouds (3 Layers) */
+/* Initial Background (0s ~ 6s) */
+.valstrax-initial-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('img/ValstraxBackGround.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+  /* Very bottom */
+  opacity: 0;
+  animation: initial-bg-fade 1.5s ease-out forwards;
+}
+
+@keyframes initial-bg-fade {
+  from {
+    opacity: 0;
+    transform: scale(1.1);
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+.valstrax-clouds {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.cloud-layer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: var(--cloud-height, 180px);
+  /* [Refine] Larger circles for perfect overlap (no gaps in middle) */
+  background: radial-gradient(circle at 0% 110%, #fff 25%, transparent 26%),
+    radial-gradient(circle at 20% 125%, #fff 35%, transparent 36%),
+    radial-gradient(circle at 45% 115%, #fff 30%, transparent 31%),
+    radial-gradient(circle at 75% 125%, #fff 35%, transparent 36%),
+    radial-gradient(circle at 100% 110%, #fff 25%, transparent 26%);
+  background-size: var(--cloud-size, 800px) 100%;
+  background-repeat: repeat-x;
+  opacity: 0.95;
+  filter: drop-shadow(0 -5px 15px rgba(255, 255, 255, 0.4));
+  will-change: background-position;
+}
+
+.cloud-1 {
+  z-index: 3;
+  animation: cloud-move 4s linear infinite;
+  bottom: -40px;
+}
+
+.cloud-2 {
+  z-index: 2;
+  animation: cloud-move 7s linear infinite;
+  animation-delay: -2s;
+  /* Offsets starting X position */
+  opacity: 0.7;
+  bottom: -10px;
+  transform: scaleY(0.8);
+  /* Vertical scale only to keep horizontal coverage */
+  filter: blur(4px);
+}
+
+.cloud-3 {
+  z-index: 1;
+  animation: cloud-move 10s linear infinite;
+  animation-delay: -5s;
+  /* Offsets starting X position */
+  opacity: 0.5;
+  bottom: 20px;
+  transform: scaleY(0.7);
+  /* Vertical scale only */
+  filter: blur(6px);
+}
+
+@keyframes cloud-move {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: calc(-1 * var(--cloud-size, 800px)) 0;
+  }
+}
+
+/* 2. Red Jet (Crimson Glow - Long Stream) */
+.valstrax-jet {
+  position: absolute;
+  width: 1200px;
+  height: 12px;
+  /* 살짝 두께 조절 */
+  background: linear-gradient(to right, transparent 0%, #ff3333 70%, #fff 100%);
+  box-shadow: 0 0 35px #ff0000, 0 0 70px #ff3333;
+  border-radius: 20px;
+  left: 50%;
+  bottom: -10%;
+  transform-origin: center;
+  opacity: 0;
+  z-index: 50;
+}
+
+/* [NEW] Stationary White Contrail - Unrolls over time */
+.valstrax-contrail {
+  position: absolute;
+  left: 50%;
+  bottom: -10%;
+  /* Match jet start */
+  width: 12px;
+  height: 120vh;
+  /* Cover the entire screen height */
+  background: linear-gradient(to top, transparent 0%, rgba(255, 255, 255, 0.8) 20%, #fff 100%);
+  box-shadow: 0 0 15px #fff;
+  border-radius: 10px;
+  z-index: 45;
+  opacity: 0;
+  transform: translateX(-50%);
+  clip-path: inset(100% 0 0 0);
+  /* Start fully hidden from bottom */
+  filter: blur(2px);
+}
+
+.contrail-active {
+  animation: contrail-unroll 0.8s cubic-bezier(0.1, 0.5, 0.1, 1) forwards;
+}
+
+@keyframes contrail-unroll {
+  0% {
+    opacity: 0;
+    clip-path: inset(100% 0 0 0);
+  }
+
+  30% {
+    opacity: 0.9;
+  }
+
+  100% {
+    opacity: 0.8;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.valstrax-jet-left {
+  margin-left: -15px;
+  /* 왼쪽으로 살짝 오프셋 */
+}
+
+.valstrax-jet-right {
+  margin-left: 15px;
+  /* 오른쪽으로 살짝 오프셋 */
+}
+
+.jet-active {
+  animation: jet-fly 1.2s cubic-bezier(0.1, 0.5, 0.1, 1) forwards;
+}
+
+@keyframes jet-fly {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) rotate(-90deg) scaleX(0.2);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -15vh) rotate(-90deg) scaleX(1);
+  }
+
+  40% {
+    transform: translate(-50%, -45vh) rotate(-90deg) scaleX(1.3);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -120vh) rotate(-90deg) scaleX(2.5);
+  }
+}
+
+/* 3. Flash & Scene Background */
+.valstrax-flash-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  opacity: 0;
+  z-index: 10;
+}
+
+.scene-active {
+  animation: flash-scene 1s ease-out forwards;
+}
+
+@keyframes flash-scene {
+  0% {
+    background: white;
+  }
+
+  30% {
+    background: white;
+    opacity: 1;
+  }
+
+  100% {
+    /* [Max Quality] Epic Cinematic World - Starry Night & Deep Grass */
+    background:
+      /* Sky Stars (Varied sizes) */
+      radial-gradient(1.2px 1.2px at 15% 15%, #fff, transparent),
+      radial-gradient(1px 1px at 40% 10%, #fff, transparent),
+      radial-gradient(1.4px 1.4px at 75% 25%, #fff, transparent),
+      radial-gradient(0.8px 0.8px at 90% 5%, #fff, transparent),
+      radial-gradient(1px 1px at 30% 30%, #fff, transparent),
+      /* Horizon Atmospheric Glow */
+      linear-gradient(to top, transparent 63%, rgba(48, 43, 120, 0.4) 64%, rgba(255, 100, 100, 0.15) 65%, transparent 67%),
+      /* High-Quality Grass Texture Layers */
+      radial-gradient(circle at 30% 100%, #0a2e0a 0%, transparent 70%),
+      radial-gradient(circle at 70% 100%, #052005 0%, transparent 60%),
+      /* Base Gradient */
+      linear-gradient(to bottom,
+        #050510 0%,
+        #1a1a2e 45%,
+        #000 65%,
+        /* Horizon */
+        #0a2e0a 65%,
+        #010501 100%);
+    opacity: 1;
+  }
+}
+
+/* [NEW] Cloud-Surge Transition - Covers and then fades out */
+.valstrax-surge {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* Dense overlapping volumetric clouds */
+  background: radial-gradient(circle at 20% 50%, #fff 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, #eee 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, #fff 0%, transparent 40%),
+    white;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  animation: surge-fade 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes surge-fade {
+  0% {
+    opacity: 0;
+    filter: blur(20px);
+  }
+
+  20% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+
+  /* Covers screen quickly */
+  70% {
+    opacity: 1;
+  }
+
+  /* Hold */
+  100% {
+    opacity: 0;
+    filter: blur(20px);
+  }
+
+  /* Gradual 2s fade out */
+}
+
+/* Mountains */
+.valstrax-mountains {
+  position: absolute;
+  bottom: 35%;
+  width: 100%;
+  height: 40%;
+  /* Taller for more presence */
+  background: linear-gradient(to bottom, #000, #0a0a0a 70%, #000);
+  clip-path: polygon(0% 100%, 5% 75%, 12% 25%, 20% 65%, 28% 15%, 35% 55%, 45% 10%, 55% 50%, 65% 20%, 75% 70%, 85% 30%, 95% 80%, 100% 100%);
+  z-index: 15;
+  opacity: 1;
+  filter: drop-shadow(0 0 20px rgba(0, 0, 0, 1));
+}
+
+/* [New] Atmospheric Horizon Blur for Mountains */
+.valstrax-mountains::before {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: linear-gradient(to top, #020a02, transparent);
+  z-index: 16;
+}
+
+/* [New] Ground Fog/Glow to blend mountains and grass */
+.valstrax-mountains::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+  z-index: 16;
+}
+
+/* 4. Red Star */
+.valstrax-star {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  background: #ff0000;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  /* Star shape */
+  box-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000;
+  z-index: 20;
+  /* Above flash-layer (10) and mountains (15) */
+  opacity: 0;
+  animation: valstrax-twinkle 0.2s infinite alternate;
+}
+
+@keyframes valstrax-twinkle {
+  from {
+    opacity: 0.5;
+    transform: translateX(-50%) scale(1);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.5);
+  }
+}
+
+/* 5. Meteor Impact */
+.valstrax-meteor {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  /* [Refine] Pure Red Star Palette */
+  background: radial-gradient(circle at center, #ff0000 0%, #cc0000 50%, #990000 80%, transparent 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 50px #ff0000,
+    0 0 100px #cc0000,
+    0 0 20px #ff3333;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1);
+  filter: contrast(1.8) brightness(1.2) drop-shadow(0 0 15px #ff0000);
+}
+
+.valstrax-shaker {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  z-index: 20;
+}
+
+.valstrax-meteor::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 68, 68, 0.4) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(2);
+  filter: blur(5px);
+  z-index: -1;
+}
+
+.shaker-active {
+  animation: meteor-shake 0.05s infinite alternate;
+}
+
+.meteor-active {
+  /* Dramatic ease-in: starts slow, ends extremely fast */
+  animation: meteor-strike 2.5s cubic-bezier(0.9, 0, 1, 0.5) forwards;
+}
+
+@keyframes meteor-shake {
+  from {
+    transform: translate(-52%, -50%);
+  }
+
+  to {
+    transform: translate(-48%, -51%);
+  }
+}
+
+@keyframes meteor-strike {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    background: radial-gradient(circle, #ff0000 10%, #cc0000 50%, #660000 80%);
+    box-shadow: 0 0 60px #ff0000;
+  }
+
+  /* [Refine] Keep relatively small until 75% for 'tighter' (쫀득한) feeling */
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(40);
+    background: radial-gradient(circle, #ff3333 5%, #ff0000 40%, #990000 70%);
+    box-shadow: 0 0 150px #ff0000;
+  }
+
+  /* Sudden snap explosion - Final whitening for impact flash */
+  93% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(700);
+    background: #ffffff;
+    box-shadow: 0 0 600px #ffffff, 0 0 200px #ff0000;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(850);
+  }
+}
+
+/* Message Phase Clouds (Top & Bottom) */
+.valstrax-overlay .cloud-layer.top {
+  top: 0;
+  bottom: auto;
+  transform: scaleY(-1);
+  /* Flip horizontally for top clouds */
+}
+
+/* 6. Final Message Box (Transparent background, focus on text) */
+.valstrax-msg-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  /* Start smaller for impact */
+  width: 90%;
+  text-align: center;
+  color: white;
+  font-family: 'CookieRun-Regular', sans-serif;
+  font-size: 4rem;
+  /* Slightly larger */
+  font-weight: bold;
+  text-shadow: 0 0 20px #ff0000, 0 0 40px #ff3333, 0 0 60px rgba(255, 0, 0, 0.5);
+  z-index: 30;
+  opacity: 0;
+  transition: opacity 3s, transform 3s cubic-bezier(0.1, 0.5, 0.1, 1);
+}
+
+/* 5. Meteor Impact & Flash */
+.valstrax-final-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('img/Valstrax.gif');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+  /* Bottom-most layer */
+  opacity: 0;
+  animation: final-bg-fade 1.5s ease-out forwards;
+}
+
+@keyframes final-bg-fade {
+  from {
+    opacity: 0;
+    filter: brightness(2) blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    filter: brightness(1) blur(0);
+  }
+}
+
+.valstrax-impact-flash {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 9999;
+  opacity: 1;
+  pointer-events: none;
+}
+
+.flash-fade-out {
+  animation: impact-fade 1s ease-out forwards;
+}
+
+@keyframes impact-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.valstrax-msg-box.visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Cloud Decoration for Message */
+.msg-clouds-top,
+.msg-clouds-bottom {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: radial-gradient(circle at 20% 50%, #fff 20%, transparent 50%),
+    radial-gradient(circle at 50% 50%, #fff 25%, transparent 50%),
+    radial-gradient(circle at 80% 50%, #fff 20%, transparent 50%);
+  background-size: 200px 100%;
+  filter: blur(10px);
+  opacity: 0.6;
+}
+
+.msg-clouds-top {
+  top: -30px;
+  transform: rotate(180deg);
+}
+
+.msg-clouds-bottom {
+  bottom: -30px;
 }
