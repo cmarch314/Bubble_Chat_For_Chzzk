@@ -365,7 +365,6 @@ window.HIVE_SOUND_CONFIG = {
     "다이": { "src": "DieYouSOB.mp3", "volume": 0.5 },
     "죽었어": { "src": "Crysis_death.mp3", "volume": 0.4 },
     "최고야": { "src": "AreYouBest.mp3", "volume": 0.6 },
-    "다메난데": { "src": "Damenandesu.mp3", "volume": 0.7 },
     "하지마이": { "src": "Don'tDoIt.mp3", "volume": 0.6 },
     "피버": { "src": "Fever.mp3", "volume": 0.6 },
     "꼼짝": { "src": "Frozen.mp3", "volume": 0.5 },
@@ -483,9 +482,9 @@ window.HIVE_SOUND_CONFIG = {
 
     // [Batch 2 Additions]
     "같이밥묵고": { "src": "같이밥묵고.mp3", "volume": 0.65 },
-    "그년한태": { "src": "그년한태.mp3", "volume": 0.6 },
+    "그년한": { "src": "그년한태.mp3", "volume": 0.6 },
     "그땐몰랐어": { "src": "그땐몰랐어.mp3", "volume": 0.7 },
-    "남자가지고싶다": { "src": "남자가지고싶다.mp3", "volume": 1 },
+    "남자가지고": { "src": "남자가지고싶다.mp3", "volume": 1 },
     "가지고싶다": { "src": "가지고싶다.mp3", "volume": 0.7 },
     "내가!": { "src": "내가!.mp3", "volume": 0.7 },
     "누구냐너": { "src": "누구냐너.mp3", "volume": 0.9 },
@@ -514,11 +513,11 @@ window.HIVE_SOUND_CONFIG = {
     ],
     "예쁜칼": { "src": "예쁜칼.mp3", "volume": 1 },
     "왜자르지않": { "src": "왜자르지않.mp3", "volume": 0.9 },
-    "이대구빡이": { "src": "이대구빡이.mp3", "volume": 0.5 },
+    "대구빡이": { "src": "이대구빡이.mp3", "volume": 0.5 },
     "인생꼬": { "src": "인생꼬.mp3", "volume": 0.5 },
     "임마": { "src": "임마.mp3", "volume": 0.5 },
-    "자르라": { "src": "잘르라.mp3", "volume": 1 },
-    "좋은날이있": { "src": "좋은날이있.mp3", "volume": 0.6 },
+    "짤르라": { "src": "잘르라.mp3", "volume": 1 },
+    "좋은날": { "src": "좋은날이있.mp3", "volume": 0.6 },
     "죽을죄": { "src": "죽을죄.mp3", "volume": 0.7 },
     "팬티를": { "src": "팬티를.mp3", "volume": 0.9 },
     "혓바닥이": { "src": "혓바닥이.mp3", "volume": 0.7 },
@@ -535,7 +534,7 @@ window.HIVE_SOUND_CONFIG = {
     "잉기잇": { "src": "ingit.mp3", "volume": 0.7 },
     "네전태": { "src": "OKLS.mp3", "volume": 0.7 },
     "끼야": { "src": "Screem.mp3", "volume": 0.7 },
-    "이상한데수": { "src": "weird.mp3", "volume": 0.7 },
+    "데미지가": { "src": "weird.mp3", "volume": 0.7 },
     "이왜대발": { "src": "whydps.mp3", "volume": 0.7 },
     "알피엠": { "src": "5000알피엠.mp3", "volume": 0.7 },
     "가자부": [{ "src": "가자부1.mp3", "volume": 0.5 },
@@ -557,7 +556,7 @@ window.HIVE_SOUND_CONFIG = {
     "그건싫": { "src": "그건싫.mp3", "volume": 0.7 },
     "그만하세요": { "src": "그만하세요좀.mp3", "volume": 0.7 },
     "근무나갈시간": { "src": "근무나갈시간.mp3", "volume": 0.7 },
-    "기억도나지않는다": { "src": "기억도나지않는다.mp3", "volume": 0.7 },
+    "기억도나지": { "src": "기억도나지않는다.mp3", "volume": 0.7 },
     "기폭용항": { "src": "기폭용항.mp3", "volume": 0.7 },
     "꼬리에선": { "src": "꼬리에선.mp3", "volume": 0.7 },
     "꼬짤": { "src": "꼬짤.mp3", "volume": 0.7 },
@@ -591,7 +590,7 @@ window.HIVE_SOUND_CONFIG = {
     "발차기!": { "src": "발차기.mp3", "volume": 0.7 },
     "배려해야": { "src": "배려해야.mp3", "volume": 0.7 },
     "사나이눈물": { "src": "사나이눈물.mp3", "volume": 0.7 },
-    "세상사람다설산": { "src": "세상사람다설산.mp3", "volume": 0.6 },
+    "세상사람다": { "src": "세상사람다설산.mp3", "volume": 0.6 },
     "수렵돈": { "src": "수렵돈.mp3", "volume": 0.7 },
     "아따시": { "src": "아따시.mp3", "volume": 0.7 },
     "아따시고멘네": { "src": "아따시고멘네.mp3", "volume": 0.7 },
@@ -610,8 +609,8 @@ window.HIVE_SOUND_CONFIG = {
     "앗!": { "src": "앗.mp3", "volume": 0.7 },
     "애널형": { "src": "애널형.mp3", "volume": 0.7 },
     "애널형이어폰": { "src": "애널형이어폰.mp3", "volume": 0.7 },
-    "야이개새끼들아": { "src": "야이개새끼.mp3", "volume": 0.7 },
-    "야이미친놈들아": { "src": "야이미친놈들아.mp3", "volume": 0.7 },
+    "개새끼들아": { "src": "야이개새끼.mp3", "volume": 0.7 },
+    "미친놈들아": { "src": "야이미친놈들아.mp3", "volume": 0.7 },
     "어?": [{ "src": "어.mp3", "volume": 0.7 },
     { "src": "어어.mp3", "volume": 0.7 }],
     "어그로끌어야지": { "src": "어그로끌어야지.mp3", "volume": 0.7 },
@@ -640,7 +639,7 @@ window.HIVE_SOUND_CONFIG = {
     "이거실화야": { "src": "이거실화야.mp3", "volume": 0.7 },
     "이걸왜유투브": { "src": "이걸왜유투브.mp3", "volume": 0.7 },
     "이놈": { "src": "이놈.mp3", "volume": 0.7 },
-    "새낀건랜서": [{ "src": "이새낀건랜서.mp3", "volume": 1 },
+    "건랜서야": [{ "src": "이새낀건랜서.mp3", "volume": 1 },
     { "src": "이새낀건랜서2.mp3", "volume": 0.7 }],
     "이안에사람": { "src": "이안에사람2.mp3", "volume": 0.6 },
     "이해가안돼": { "src": "이해가안되.mp3", "volume": 0.7 },
@@ -680,15 +679,14 @@ window.HIVE_SOUND_CONFIG = {
     "빵빵씨": { "src": "빵빵씨.mp3", "volume": 0.7 },
     "딜개못해": { "src": "에에엥 딜 개못해.mp3", "volume": 0.7 },
     "여죽남범": { "src": "여죽남범.mp3", "volume": 0.7 },
-
+    "갓겜합시다": { "src": "갓겜합시다1.mp3", "volume": 0.5 },
+    "기쁨이폭발": { "src": "기쁨이폭발.mp3", "volume": 0.7 },
+    "나만못해": { "src": "나만못해.mp3", "volume": 0.5 },
+    "미안합니다": { "src": "미안합니다.mp3", "volume": 0.7 },
+    "설산을할수가": { "src": "설산을할수가.mp3", "volume": 0.5 },
+    "용의항문": { "src": "용의항문.mp3", "volume": 0.7 },
 
     //"함정카드": { "src": "YouJustActivatedMyTrapCard.mp3", "volume": 0.8 }, 함정카드 임시 제외
-    "갓겜합시다": { "src": "갓겜합시다1.mp3", "volume": 0.5 },
-    "기쁨이폭발": { "src": "기쁨이폭발.mp3", "volume": 0.5 },
-    "나만못해": { "src": "나만못해.mp3", "volume": 0.5 },
-    "미안합니다": { "src": "미안합니다.mp3", "volume": 0.5 },
-    "설산을할수가": { "src": "설산을할수가.mp3", "volume": 0.5 },
-    "용의항문": { "src": "용의항문.mp3", "volume": 0.5 },
 
 };
 
@@ -830,6 +828,20 @@ window.VISUAL_CONFIG = {
         // [Cloud Settings]
         cloudHeight: 300,       // 구름 레이어의 높이 (px)
         cloudSize: 1000          // 구름 패턴의 가로 크기 (px)
+    },
+
+    // ==========================================
+    // [방종송 이펙트] (강아지 애니메이션 + 화염 테두리)
+    // 테오스트라와 루나스트라가 화면을 뛰어다니며, 화면 테두리에 화염 연출이 발생합니다.
+    // ==========================================
+    bangjong: {
+        duration: 90000,        // 전체 지속 시간 (90초)
+        soundKey: '방종송',      // 연결된 사운드 키
+        teostraPath: './img/Trostra.png',
+        lunastraPath: './img/Lunastra.png',
+        characterCount: 2,      // 화면에 등장할 캐릭터 총 개수 (테오 1, 나나 1)
+        characterSize: '35rem', // 캐릭터 크기
+        flameSpeed: '2s'        // 테두리 화염 일렁임 속도
     }
 };
 

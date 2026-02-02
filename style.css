@@ -10,6 +10,7 @@
       4-3. Heart Effect (Heart)
       4-4. Dolphin Effect (Dolphin)
       4-5. Void/Vergil Effect (Void)
+      4-6. Bangjong Effect (Dogs & Flames)
    ============================================================================ */
 
 /* ============================================================================
@@ -3786,4 +3787,139 @@ body {
 
 .msg-clouds-bottom {
   bottom: -30px;
+}
+
+/* ============================================================================
+   4-6. Bangjong Effect (Dogs & Flames)
+   ============================================================================ */
+#bangjong-overlay {
+  z-index: var(--z-overlay-premium);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+  display: flex !important;
+  /* Overriden by .visible if using shared logic */
+}
+
+#bangjong-overlay.visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.bangjong-flame-border {
+  position: absolute;
+  /* Relative to overlay */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  pointer-events: none;
+  border: 15px solid transparent;
+  animation: hvn-bangjong-flame 1.5s infinite alternate ease-in-out;
+  z-index: 10;
+}
+
+.bangjong-actors-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 5;
+}
+
+@keyframes hvn-bangjong-flame {
+  0% {
+    box-shadow: inset 0 0 60px #ff4400, inset 0 0 20px #ff4400, 0 0 20px #ff4400;
+    border-color: rgba(255, 68, 0, 0.4);
+    filter: brightness(1.2);
+  }
+
+  50% {
+    box-shadow: inset 0 0 100px #0044ff, inset 0 0 40px #0044ff, 0 0 40px #0044ff;
+    border-color: rgba(0, 68, 255, 0.4);
+    filter: brightness(1.5);
+  }
+
+  100% {
+    box-shadow: inset 0 0 80px #ff0000, inset 0 0 30px #ff0000, 0 0 30px #ff0000;
+    border-color: rgba(255, 0, 0, 0.4);
+    filter: brightness(1.1);
+  }
+}
+
+.bangjong-actor {
+  position: absolute;
+  width: 250px;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+  left: 50%;
+  top: 50%;
+  transition: left 2s ease-in-out, top 2s ease-in-out;
+}
+
+.bangjong-actor img {
+  width: 100%;
+  height: auto;
+  display: block;
+  mix-blend-mode: multiply;
+  /* [New] White Chromakey Effect */
+}
+
+/* Dog-like hopping animation - Put on the img to avoid transform conflict with run */
+@keyframes hvn-bangjong-hop {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+
+  20% {
+    transform: translateY(-40px) rotate(10deg);
+  }
+
+  40% {
+    transform: translateY(0) rotate(0);
+  }
+
+  60% {
+    transform: translateY(-20px) rotate(-5deg);
+  }
+
+  80% {
+    transform: translateY(0) rotate(0);
+  }
+}
+
+/* Floating message in the center */
+.bangjong-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 5rem;
+  color: white;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 1), 0 0 10px #ff4400;
+  z-index: 20;
+  font-weight: bold;
+  pointer-events: none;
+  width: 100%;
+  animation: hvn-bangjong-text-pulse 2s infinite alternate;
+}
+
+@keyframes hvn-bangjong-text-pulse {
+  from {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+
+  to {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 1;
+    text-shadow: 0 0 30px #0044ff;
+  }
 }

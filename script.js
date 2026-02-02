@@ -996,9 +996,7 @@ class VisualDirector {
         console.log("🧹 [VisualDirector] Clearing Queue...");
         this.queue = [];
         this.isLocked = false;
-        // Optionally remove active overlays immediately? 
-        // For now, let's just stop new ones. Active ones can finish naturally or be force removed.
-        document.querySelectorAll('.fullscreen-overlay.visible').forEach(el => el.classList.remove('visible'));
+        // [Fix] Removed global overlay removal to allow active effects to finish naturally.
     }
 
     trigger(effectType, context = {}) {
@@ -1061,6 +1059,7 @@ class VisualDirector {
         `);
         create('heart-overlay', '<div class="heart-emoji">❤️‍🩹</div>');
         create('flashback-overlay');
+        create('bangjong-overlay', '<div class="bangjong-flame-border"></div><div class="bangjong-actors-container"></div>');
     }
 
     _buildRegistry() {
@@ -1071,7 +1070,8 @@ class VisualDirector {
             heart: { soundKey: "하트", execute: (ctx) => this._runHeart(ctx) },
             vergil: { soundKey: "버질", execute: (ctx) => this._runVergil(ctx) },
             dolphin: { soundKey: "돌핀", execute: (ctx) => this._runDolphin(ctx) },
-            valstrax: { soundKey: "발파", execute: (ctx) => this.triggerValstrax(ctx.message) }
+            valstrax: { soundKey: "발파", execute: (ctx) => this.triggerValstrax(ctx.message) },
+            bangjong: { soundKey: "방종송", execute: (ctx) => this._runBangjong(ctx) }
         };
     }
 
@@ -1617,6 +1617,105 @@ class VisualDirector {
         });
     }
 
+    _runBangjong(context) {
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.bangjong) ? window.VISUAL_CONFIG.bangjong : {
+            duration: 90000,
+            teostraPath: './img/Trostra.png',
+            lunastraPath: './img/Lunastra.png',
+            characterCount: 8,
+            characterSize: '15rem'
+        };
+
+        const overlay = document.getElementById('bangjong-overlay');
+        if (!overlay) return Promise.resolve();
+
+        const container = overlay.querySelector('.bangjong-actors-container');
+        if (container) container.innerHTML = ''; // Clear previous actors
+
+        // Add text message if any
+        let msg = context.message || "";
+        if (msg.startsWith("!방종송")) msg = msg.substring(4).trim();
+        if (msg) {
+            const txt = document.createElement('div');
+            txt.className = 'bangjong-text';
+            txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {});
+            overlay.appendChild(txt);
+            setTimeout(() => { if (txt.parentNode) txt.remove(); }, conf.duration);
+        }
+
+        // Spawn characters (Teostra & Lunastra)
+        let isActive = true;
+        if (container) {
+            for (let i = 0; i < conf.characterCount; i++) {
+                const isTeostra = (i % 2 === 0);
+                const charPath = isTeostra ? conf.teostraPath : conf.lunastraPath;
+
+                const actor = document.createElement('div');
+                actor.className = 'bangjong-actor';
+                actor.style.width = conf.characterSize;
+
+                // Initial random position (Narrowed range to keep on-screen)
+                const startX = Math.random() * 60 + 20;
+                const startY = Math.random() * 52 + 24;
+                actor.style.left = startX + '%';
+                actor.style.top = startY + '%';
+
+                const img = document.createElement('img');
+                img.src = charPath;
+                actor.appendChild(img);
+                container.appendChild(actor);
+
+                const hopDuration = 0.4 + Math.random() * 0.3;
+                const delay = Math.random() * -5;
+                img.style.animation = `hvn-bangjong-hop ${hopDuration}s ease-in-out infinite ${delay}s`;
+
+                // --- Puppy-like AI Movement ---
+                const movePuppy = () => {
+                    if (!isActive) return;
+
+                    const curX = parseFloat(actor.style.left);
+                    const destX = Math.random() * 60 + 20; // Narrowed: 20-80%
+                    const destY = Math.random() * 52 + 24; // Narrowed: 24-76%
+
+                    // Speed: ~10-20% per second
+                    const distance = Math.sqrt(Math.pow(destX - curX, 2));
+                    const duration = 1.5 + (distance / 15) + Math.random() * 2;
+
+                    // Direction Flip
+                    const movingRight = destX > curX;
+                    let flipped = isTeostra ? !movingRight : movingRight;
+                    actor.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+
+                    actor.style.transition = `left ${duration}s ease-in-out, top ${duration}s ease-in-out`;
+                    actor.style.left = destX + '%';
+                    actor.style.top = destY + '%';
+
+                    // Next move after reaching or pausing
+                    const totalWait = (duration * 1000) + (Math.random() > 0.7 ? 500 + Math.random() * 1500 : 0);
+                    setTimeout(movePuppy, totalWait);
+                };
+
+                // Start AI with a slight staggered delay
+                setTimeout(movePuppy, i * 300);
+            }
+        }
+
+        return new Promise(resolve => {
+            overlay.classList.add('visible');
+            setTimeout(() => {
+                isActive = false;
+                overlay.classList.remove('visible');
+                // Wait for fade out transition (0.5s in CSS) before clearing
+                setTimeout(() => {
+                    if (container) container.innerHTML = '';
+                    const txt = overlay.querySelector('.bangjong-text');
+                    if (txt) txt.remove();
+                    resolve();
+                }, 600);
+            }, conf.duration);
+        });
+    }
+
     _genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context, conf) {
         const overlay = document.getElementById(overlayId); if (!overlay) return Promise.resolve();
         const parts = this._parseMessage(context.message, kw);
@@ -1999,13 +2098,13 @@ if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
     console.log("Starting Welcome Message Loop...");
 
     // Visual Effect Pool from Config
-    const visualKeys = window.HIVE_VISUAL_CONFIG ? Object.keys(window.HIVE_VISUAL_CONFIG) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼'];
+    const visualKeys = window.HIVE_VISUAL_CONFIG ? Object.keys(window.HIVE_VISUAL_CONFIG) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼', '발파', '방종송'];
 
     // [Fix] Startup Sequence: Guaranteed Valstrax Effect
     setTimeout(() => {
-        console.log(`🚀 [Startup] Triggering Guaranteed Effect: valstrax`);
-        window.visualDirector.trigger('valstrax', {
-            message: `✨ 시스템 시작: 발파루크 이펙트 테스트`,
+        console.log(`🚀 [Startup] Triggering Guaranteed Effect: couple`);
+        window.visualDirector.trigger('couple', {
+            message: `✨ 시스템 시작: 커플 이펙트 테스트`,
             nickname: "System",
             isStreamer: true
         });
