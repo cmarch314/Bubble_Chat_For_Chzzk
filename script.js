@@ -1938,7 +1938,74 @@ window.systemController = systemController;
 
 // 네트워크 연결 시작
 // [Global Refactor] Process Message Logic for portability (Real & Fake)
-window.processMessage = (msgData) => {
+// ==========================================
+// [Class 7] Message Queue Manager
+// ==========================================
+class MessageQueue {
+    constructor(processor) {
+        this.processor = processor;
+        this.queue = [];
+        this.isProcessing = false;
+        this.lastProcessTime = Date.now();
+        this.baseDelay = 300; // 0.3s (Requested Base)
+    }
+
+    enqueue(msgData) {
+        this.queue.push({
+            data: msgData,
+            timestamp: Date.now()
+        });
+        if (!this.isProcessing) {
+            console.log("▶ [Queue] Starting Process Loop");
+            this._process();
+        } else {
+            // [Debug] Already processing
+            // console.log(`[Queue] Buffered (Current Size: ${this.queue.length})`);
+        }
+    }
+
+    _process() {
+        if (this.queue.length === 0) {
+            console.log("⏹ [Queue] Auto-Stop (Empty)");
+            this.isProcessing = false;
+            return;
+        }
+
+        this.isProcessing = true;
+        const currentItem = this.queue.shift();
+        const now = Date.now();
+
+        // [Simpler Adaptive Algorithm]
+        // 큐에 있는 메시지 수만큼 속도를 단순 비례로 높입니다.
+        // 공식: 300ms base
+        const queueSize = this.queue.length + 1;
+        let dynamicDelay = 300;
+
+        // [Threshold-based Aggressive Algorithm]
+        if (queueSize >= 5) dynamicDelay = 16;       // 60fps (폭주)
+        else if (queueSize >= 3) dynamicDelay = 60;  // Very Fast
+        else if (queueSize >= 2) dynamicDelay = 150; // Fast
+        else dynamicDelay = 300;                     // Normal (Relaxed)
+
+        // 콘솔에 큐 상태 로그 출력 (디버깅용)
+        console.log(`[Queue] Proc: "${currentItem.data.message.substring(0, 10)}..." | Size: ${queueSize} | Delay: ${dynamicDelay}ms`);
+
+        try {
+            this.processor(currentItem.data);
+        } catch (e) {
+            console.error("[Queue] Processor Error:", e);
+        }
+
+        setTimeout(() => {
+            this._process();
+        }, dynamicDelay);
+    }
+}
+
+// 네트워크 연결 시작
+// [Global Refactor] Process Message Logic for portability (Real & Fake)
+// 내부 처리 함수 (기존 로직)
+const _processMessageInternal = (msgData) => {
     // 0. 스트리머 전용 제어 명령어 처리 (Refactored)
     if (systemController.handle(msgData)) return;
 
@@ -2008,6 +2075,7 @@ window.processMessage = (msgData) => {
             return;
         }
     } else {
+        const t0 = performance.now();
         audioManager.checkAndPlay(msgData.message, msgData.isStreamer);
         if (msgData.isDonation) return;
         try {
@@ -2015,7 +2083,19 @@ window.processMessage = (msgData) => {
         } catch (e) {
             console.error("Renderer Error:", e);
         }
+        const t1 = performance.now();
+        if ((t1 - t0) > 10) {
+            console.warn(`[Slow Render] Took ${(t1 - t0).toFixed(2)}ms`);
+        }
     }
+};
+
+// 큐 인스턴스 생성
+const messageQueue = new MessageQueue(_processMessageInternal);
+
+// 외부 노출 진입점 (큐에 넣기만 함)
+window.processMessage = (msgData) => {
+    messageQueue.enqueue(msgData);
 };
 
 // 네트워크 연결 시작
@@ -2157,13 +2237,76 @@ if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
             loader.classList.add('hidden');
             setTimeout(() => loader.remove(), 1000); // Remove from DOM after transition
         }
+
+        // [New] Run Queue Auto-Test (Disabled in callback, moved to global start)
+        // setTimeout(window.runQueueStressTest, 2000);
+
+        // [New] Stop Stress Test if running
+        if (window._stressTestInterval) {
+            clearInterval(window._stressTestInterval);
+            window._stressTestInterval = null;
+            console.log("🛑 Connection Established. Stopping Stress Test.");
+        }
+
     }, { once: true });
 }
+
+// [Test] Queue Stress Test (Modified for Startup Backlog)
+// [Test] Queue Stress Test (Random Burst Mode)
+window.runQueueStressTest = () => {
+    console.warn("🚀 Starting Queue Stress Test (Random 0-3 msg/sec)...");
+    let msgId = 1;
+    let seconds = 0;
+
+    const sendBatch = (count, label) => {
+        console.log(`🔥 [Test] Sending Batch: ${label} (${count} msgs)`);
+        const messages = window.WELCOME_MESSAGES || ["테스트 메시지"];
+        const names = window.RANDOM_NAMES || ["Tester"];
+
+        for (let i = 0; i < count; i++) {
+            const rawMsg = messages[Math.floor(Math.random() * messages.length)];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+
+            window.processMessage({
+                message: rawMsg,
+                nickname: randomName,
+                isStreamer: false,
+                type: 'chat',
+                uid: 'test_' + msgId + '_' + i
+            });
+            msgId++;
+        }
+    };
+
+    // 1초마다 0~3개 랜덤 전송 (최대 20초)
+    window._stressTestInterval = setInterval(() => {
+        seconds++;
+        if (seconds > 20) {
+            clearInterval(window._stressTestInterval);
+            window._stressTestInterval = null;
+            console.warn("🚀 Stress Test Completed (20s Limit).");
+            return;
+        }
+
+        const randomCount = Math.floor(Math.random() * 4); // 0 ~ 3
+        if (randomCount > 0) {
+            sendBatch(randomCount, `Sec-${seconds}`);
+        } else {
+            console.log(`🔥 [Test] Sec-${seconds}: Skipping (0 msgs)`);
+        }
+
+    }, 1000);
+};
+
+// 즉시 실행 가능하도록 글로벌 등록 (필요시 콘솔에서 window.runQueueStressTest() 입력)
 
 // [New] Dynamic Status Merger
 // Detects legacy "치지직 채널 탐색중..." elements and merges them into the premium loader
 // 자동 시작
 network.connect();
+
+// [Auto-Run] Test Queue immediately to build backlog during connection
+setTimeout(() => window.runQueueStressTest(), 500);
 
 // [Utility Helpers Compatibility]
 function renderMessageWithEmotesHTML(message, emotes, scale = 1) {

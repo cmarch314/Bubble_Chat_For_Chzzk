@@ -146,7 +146,7 @@ body {
 .chat-box.visible {
   margin-top: 0px;
   max-height: 350px;
-  transition: opacity 1s, max-height .8ms, margin-top 30ms;
+  transition: opacity 0.2s, max-height .8ms, margin-top 30ms;
 }
 
 .chat-line.visible {
