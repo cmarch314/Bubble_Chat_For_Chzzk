@@ -1900,8 +1900,51 @@ class SystemController {
                     return "❓ 사용법: !볼륨평준화 [켜기/끄기/도네/채팅]";
                 },
                 msg: ""
+            },
+            // [New] Volume Control (Streamer Only)
+            // Usage: set sfx 0.5 | !set visual 1.0
+            'set': {
+                action: (args) => this._handleSetVolume(args),
+                msg: ""
+            },
+            '!set': {
+                action: (args) => this._handleSetVolume(args),
+                msg: ""
             }
         };
+    }
+
+    // [Helper] Volume Control Logic
+    _handleSetVolume(args) {
+        if (args.length < 2) return "❓ 사용법: set [sfx/visual/master] [0.0~1.0]";
+
+        const target = args[0].toLowerCase();
+        const value = parseFloat(args[1]);
+
+        if (!['sfx', 'visual', 'master'].includes(target)) return "🚫 대상은 sfx, visual, master 중 하나여야 합니다.";
+        if (isNaN(value) || value < 0 || value > 2.0) return "🚫 값은 0.0 ~ 2.0 사이의 숫자여야 합니다.";
+
+        // Update AudioManager
+        if (this.audio && this.audio.volumeConfig) {
+            this.audio.updateVolumeConfig({ [target]: value });
+
+            // Persist to LocalStorage
+            try {
+                const current = JSON.parse(localStorage.getItem('HIVE_VOLUME_CONFIG') || "{}");
+                current[target] = value;
+                localStorage.setItem('HIVE_VOLUME_CONFIG', JSON.stringify(current));
+
+                // Update Global Config (for reference)
+                if (!window.HIVE_VOLUME_CONFIG) window.HIVE_VOLUME_CONFIG = {};
+                window.HIVE_VOLUME_CONFIG[target] = value;
+
+            } catch (e) {
+                console.error("Save Failed:", e);
+            }
+
+            return `🔊 [Sound] ${target.toUpperCase()} 볼륨이 ${value}로 설정되었습니다. (저장됨)`;
+        }
+        return "🚫 오디오 매니저를 찾을 수 없습니다.";
     }
 
     handle(msgData) {
@@ -2172,10 +2215,12 @@ window.runDemoSequence = (durationSeconds = 60) => {
     }, maxDuration);
 };
 
-// [Feature] Startup Random Welcome Messages (Continuous until Connected)
-if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
+// [Feature] Startup Random Welcome Messages (Debug Mode Only)
+let welcomeInterval = null;
+
+if (appConfig.debugMode && window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
     const names = window.RANDOM_NAMES || ["Anonymous"];
-    console.log("Starting Welcome Message Loop...");
+    console.log("Starting Welcome Message Loop (Debug Mode)...");
 
     // Visual Effect Pool from Config
     const visualKeys = window.HIVE_VISUAL_CONFIG ? Object.keys(window.HIVE_VISUAL_CONFIG) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼', '발파', '방종송'];
@@ -2190,7 +2235,7 @@ if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
         });
     }, 1000); // 1 second after load
 
-    const welcomeInterval = setInterval(() => {
+    welcomeInterval = setInterval(() => {
         // 10% Chance to FORCE a visual effect message if not already picked
         let msg = window.WELCOME_MESSAGES[Math.floor(Math.random() * window.WELCOME_MESSAGES.length)];
         let isVisual = false;
@@ -2220,36 +2265,37 @@ if (window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
             isSubscription: false
         });
     }, 2000); // Slower interval (2s) to let effects play out
-
-    // Stop loop when connected
-    window.addEventListener('chzzk_connected', () => {
-        console.log("Connection Established. Stopping Welcome Messages.");
-        clearInterval(welcomeInterval);
-
-        // [New] Clear queued visual effects from startup
-        if (window.visualDirector) {
-            window.visualDirector.clearQueue();
-        }
-
-        // [New] Hide Loading Screen
-        const loader = document.getElementById('loading-screen');
-        if (loader) {
-            loader.classList.add('hidden');
-            setTimeout(() => loader.remove(), 1000); // Remove from DOM after transition
-        }
-
-        // [New] Run Queue Auto-Test (Disabled in callback, moved to global start)
-        // setTimeout(window.runQueueStressTest, 2000);
-
-        // [New] Stop Stress Test if running
-        if (window._stressTestInterval) {
-            clearInterval(window._stressTestInterval);
-            window._stressTestInterval = null;
-            console.log("🛑 Connection Established. Stopping Stress Test.");
-        }
-
-    }, { once: true });
 }
+
+// Global Connection Handler (Always Active)
+window.addEventListener('chzzk_connected', () => {
+    console.log("Connection Established. Stopping Startup Sequences.");
+
+    // Stop Debug Sequences if running
+    if (welcomeInterval) {
+        clearInterval(welcomeInterval);
+        welcomeInterval = null;
+    }
+
+    if (window._stressTestInterval) {
+        clearInterval(window._stressTestInterval);
+        window._stressTestInterval = null;
+        console.log("🛑 Connection Established. Stopping Stress Test.");
+    }
+
+    // [New] Clear queued visual effects from startup
+    if (window.visualDirector) {
+        window.visualDirector.clearQueue();
+    }
+
+    // [New] Hide Loading Screen
+    const loader = document.getElementById('loading-screen');
+    if (loader) {
+        loader.classList.add('hidden');
+        setTimeout(() => loader.remove(), 1000); // Remove from DOM after transition
+    }
+
+}, { once: true });
 
 // [Test] Queue Stress Test (Modified for Startup Backlog)
 // [Test] Queue Stress Test (Random Burst Mode)
