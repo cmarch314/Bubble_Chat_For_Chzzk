@@ -296,6 +296,7 @@ window.HIVE_SOUND_CONFIG = {
     ],
     "튀어": { "src": "RUN.mp3", "volume": 0.7 },
     "시작": { "src": "Begin.mp3", "volume": 0.5 },
+    "하겠습니다": { "src": "하겠습니다.mp3", "volume": 0.7 },
     "가자!": { "src": "LetsGo.mp3", "volume": 0.95 },
     "결제": { "src": "applepay.mp3", "volume": 0.9 },
     "예상대로": { "src": "Predict.mp3", "volume": 0.7 },
@@ -500,7 +501,7 @@ window.HIVE_SOUND_CONFIG = {
 
 
     // [CMC음성]
-    "존나몬창": { "src": "Johnna MC.mp3", "volume": 0.4 },
+    "존나몬창": { "src": "Johnna MC.mp3", "volume": 0.25 },
     "잉곳": { "src": "ingot.mp3", "volume": 0.7 },
     "잉기잇": { "src": "ingit.mp3", "volume": 0.7 },
     "네전태": { "src": "OKLS.mp3", "volume": 0.7 },
@@ -684,6 +685,13 @@ window.HIVE_SOUND_CONFIG = {
     ],
     "야무지게먹어": { "src": "야무지게먹어.mp3", "volume": 0.9 },
     "퇴물인가": { "src": "퇴물인가.mp3", "volume": 0.5 },
+
+    // [Batch 3 Additions]
+    "기쁨이폭발": { "src": "기쁨이폭발.mp3", "volume": 0.7 },
+    "오올": [{ "src": "오올.mp3", "volume": 0.7 }, { "src": "오올2.mp3", "volume": 0.7 }, { "src": "오올3.mp3", "volume": 0.7 }],
+    "왜안들어가": { "src": "왜안들어가.mp3", "volume": 0.7 },
+    "우유통": [{ "src": "우유통존나커.mp3", "volume": 0.7 }, { "src": "우유통짱크지.mp3", "volume": 0.7 }],
+    "죽는다": { "src": "죽는다.mp3", "volume": 0.7 },
 
     //"함정카드": { "src": "YouJustActivatedMyTrapCard.mp3", "volume": 0.8 }, 함정카드 임시 제외
 
