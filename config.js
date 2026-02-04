@@ -687,7 +687,6 @@ window.HIVE_SOUND_CONFIG = {
     "퇴물인가": { "src": "퇴물인가.mp3", "volume": 0.5 },
 
     // [Batch 3 Additions]
-    "기쁨이폭발": { "src": "기쁨이폭발.mp3", "volume": 0.7 },
     "오올": [{ "src": "오올.mp3", "volume": 0.7 }, { "src": "오올2.mp3", "volume": 0.7 }, { "src": "오올3.mp3", "volume": 0.7 }],
     "왜안들어가": { "src": "왜안들어가.mp3", "volume": 0.7 },
     "우유통": [{ "src": "우유통존나커.mp3", "volume": 0.7 }, { "src": "우유통짱크지.mp3", "volume": 0.7 }],
