@@ -397,6 +397,8 @@ class AudioManager {
         this.soundHive = {};
         this.enabled = true;
         this.volumeConfig = window.__INITIAL_VOLUME_CONFIG || { master: 1.0, visual: 1.0, sfx: 1.0 };
+        // [User Request] Start with low SFX volume during loading
+        this.volumeConfig.sfx = 0.1;
         this.updateConfigLegacy(window.__INITIAL_SOUND_CONFIG || {});
     }
 
@@ -2270,6 +2272,12 @@ if (appConfig.debugMode && window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.le
 // Global Connection Handler (Always Active)
 window.addEventListener('chzzk_connected', () => {
     console.log("Connection Established. Stopping Startup Sequences.");
+
+    // [User Request] Restore SFX Volume to 1.0 after loading
+    if (window.audioManager) {
+        window.audioManager.updateVolumeConfig({ sfx: 1.0 });
+        console.log("🔊 [System] Loading complete. SFX Volume restored to 1.0");
+    }
 
     // Stop Debug Sequences if running
     if (welcomeInterval) {

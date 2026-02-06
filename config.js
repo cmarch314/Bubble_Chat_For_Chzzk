@@ -132,7 +132,7 @@ window.HIVE_SOUND_CONFIG = {
     "갓겜합시다풀버전틀어주세요": { "src": "갓겜합시다FULL.mp3", "volume": 0.6 },
     "물설산씨티풀버전틀어주세요": { "src": "물설산씨티.mp3", "volume": 0.6 },
     "몬창의왕풀버전틀어주세요": { "src": "아들아.mp3", "volume": 0.7 },
-    "토끼경단풀버전틀어주세요": { "src": "토끼경단.mp3", "volume": 0.6 },
+    "토끼경단풀버전틀어주세요": { "src": "토끼경단.mp3", "volume": 0.5 },
 
     // [Reactions & Memes]
     "앙": { "src": "Ang.mp3", "volume": 0.7 },
@@ -688,9 +688,9 @@ window.HIVE_SOUND_CONFIG = {
 
     // [Batch 3 Additions]
     "오올": [{ "src": "오올.mp3", "volume": 0.7 }, { "src": "오올2.mp3", "volume": 0.7 }, { "src": "오올3.mp3", "volume": 0.7 }],
-    "왜안들어가": { "src": "왜안들어가.mp3", "volume": 0.7 },
-    "우유통": [{ "src": "우유통존나커.mp3", "volume": 0.7 }, { "src": "우유통짱크지.mp3", "volume": 0.7 }],
-    "죽는다": { "src": "죽는다.mp3", "volume": 0.7 },
+    "왜안들어가": { "src": "왜안들어가.mp3", "volume": 0.6 },
+    "우유통": [{ "src": "우유통존나커.mp3", "volume": 0.5 }, { "src": "우유통짱크지.mp3", "volume": 0.5 }],
+    "죽는다": { "src": "죽는다.mp3", "volume": 0.6 },
 
     //"함정카드": { "src": "YouJustActivatedMyTrapCard.mp3", "volume": 0.8 }, 함정카드 임시 제외
 
