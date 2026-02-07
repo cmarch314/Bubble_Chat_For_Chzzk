@@ -1123,6 +1123,7 @@ class VisualDirector {
         create('heart-overlay', '<div class="heart-emoji">❤️‍🩹</div>');
         create('flashback-overlay');
         create('bangjong-overlay', '<div class="bangjong-flame-border"></div><div class="bangjong-actors-container"></div>');
+        create('dango-overlay', '<video class="dango-video" muted playsinline></video><div class="dango-emoji-container"></div>');
     }
 
     _buildRegistry() {
@@ -1134,7 +1135,8 @@ class VisualDirector {
             vergil: { soundKey: "버질", execute: (ctx) => this._runVergil(ctx) },
             dolphin: { soundKey: "돌핀", execute: (ctx) => this._runDolphin(ctx) },
             valstrax: { soundKey: "발파", execute: (ctx) => this.triggerValstrax(ctx.message) },
-            bangjong: { soundKey: "방종송", execute: (ctx) => this._runBangjong(ctx) }
+            bangjong: { soundKey: "방종송", execute: (ctx) => this._runBangjong(ctx) },
+            dango: { soundKey: "당고", execute: (ctx) => this._runDango(ctx) }
         };
     }
 
@@ -1192,6 +1194,75 @@ class VisualDirector {
             setTimeout(() => {
                 overlay.classList.remove('visible', 'phase-reveal', 'phase-scan');
                 if (video) video.pause();
+                resolve();
+            }, conf.duration);
+        });
+    }
+
+    _runDango(context) {
+        const overlay = document.getElementById('dango-overlay');
+        if (!overlay) return Promise.resolve();
+
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.dango) ? window.VISUAL_CONFIG.dango : {
+            duration: 19000,
+            videoPath: './Video/Dango.mp4',
+            emojiPool: ["🍡", "🍺", "🌀"],
+            emojiCount: 20,
+            emojiSize: '6rem'
+        };
+
+        const video = overlay.querySelector('.dango-video');
+        const container = overlay.querySelector('.dango-emoji-container');
+
+        return new Promise(resolve => {
+            // Clear previous emojis
+            if (container) container.innerHTML = '';
+
+            overlay.classList.add('visible');
+            if (video) {
+                if (conf.videoPath && !video.src.includes(conf.videoPath)) video.src = conf.videoPath;
+                video.currentTime = 0;
+                video.muted = false; // Enable audio for this effect
+                video.volume = 0.7; // Standard volume consistent with SFX
+
+                // Apply configurable size and opacity
+                video.style.width = conf.videoWidth || '100vw';
+                video.style.height = conf.videoHeight || '100vh';
+                video.style.opacity = conf.videoOpacity !== undefined ? conf.videoOpacity : 1;
+
+                video.play().catch(e => console.warn("Dango video play failed:", e));
+            }
+
+            // Spawn emojis
+            if (container && conf.emojiPool) {
+                const variants = ['hvn-dango-move-v1', 'hvn-dango-move-v2', 'hvn-dango-move-v3', 'hvn-dango-move-v4'];
+                for (let i = 0; i < conf.emojiCount; i++) {
+                    const span = document.createElement('span');
+                    span.className = 'dango-emoji';
+                    span.innerText = conf.emojiPool[Math.floor(Math.random() * conf.emojiPool.length)];
+
+                    const variant = variants[Math.floor(Math.random() * variants.length)];
+                    const startTop = 10 + Math.random() * 80;
+                    const startLeft = 10 + Math.random() * 80;
+                    const delay = Math.random() * -10; // Negative delay to start mid-animation
+                    const moveDuration = 10 + Math.random() * 10; // Slower movement: 10s to 20s
+                    const spinDuration = 3 + Math.random() * 5; // Also slower spinning
+
+                    span.style.top = `${startTop}%`;
+                    span.style.left = `${startLeft}%`;
+                    span.style.fontSize = (0.5 + Math.random() * 1.5) * parseFloat(conf.emojiSize) + 'rem';
+                    span.style.animation = `${variant} ${moveDuration}s ease-in-out ${delay}s infinite alternate, hvn-dango-spin ${spinDuration}s linear infinite`;
+
+                    container.appendChild(span);
+                }
+            }
+
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    if (video) video.pause();
+                    if (container) container.innerHTML = '';
+                }, 1000); // Wait for transition
                 resolve();
             }, conf.duration);
         });
@@ -2391,11 +2462,11 @@ setTimeout(() => {
             isStreamer: true
         });
     }
-    // 2. Default Startup Effect (Usho) - Requested by User
+    // 2. Default Startup Effect (Dango) - Requested by User
     else {
-        console.log(`🚀 [Startup] Default Effect: usho`);
-        window.visualDirector.trigger('usho', {
-            message: `✨ 시스템 시작: 우쇼 이펙트`,
+        console.log(`🚀 [Startup] Default Effect: dango`);
+        window.visualDirector.trigger('dango', {
+            message: `✨ 시스템 시작: 당고 이펙트`,
             nickname: "System",
             isStreamer: true
         });

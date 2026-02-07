@@ -9,8 +9,8 @@
       4-2. Skull & Usho (Skull)
       4-3. Heart Effect (Heart)
       4-4. Dolphin Effect (Dolphin)
-      4-5. Void/Vergil Effect (Void)
       4-6. Bangjong Effect (Dogs & Flames)
+      4-7. Dango Effect (Video & Floating Emojis)
    ============================================================================ */
 
 /* ============================================================================
@@ -3958,5 +3958,177 @@ body {
     transform: translate(-50%, -50%) scale(1.1);
     opacity: 1;
     text-shadow: 0 0 30px #0044ff;
+  }
+}
+
+/* ============================================================================
+   4-7. Dango Effect (Video & Floating Emojis)
+   ============================================================================ */
+#dango-overlay {
+  z-index: var(--z-overlay-premium);
+  opacity: 0;
+  transition: opacity 1s;
+  background: black;
+  /* Backdrop for video */
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: transparent;
+  /* Ensure no black background */
+}
+
+#dango-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dango-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 1;
+  animation: hvn-dango-warp 5s ease-in-out infinite;
+}
+
+.dango-emoji-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.dango-emoji {
+  position: absolute;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+  color: white;
+  z-index: 100;
+  will-change: translate, rotate, scale;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+}
+
+/* More dynamic movement across the screen */
+@keyframes hvn-dango-move-v1 {
+  0% {
+    translate: -30vw -30vh;
+    scale: 1;
+  }
+
+  33% {
+    translate: 40vw 10vh;
+    scale: 1.5;
+  }
+
+  66% {
+    translate: -10vw 40vh;
+    scale: 0.8;
+  }
+
+  100% {
+    translate: -30vw -30vh;
+    scale: 1;
+  }
+}
+
+@keyframes hvn-dango-move-v2 {
+  0% {
+    translate: 40vw -40vh;
+  }
+
+  50% {
+    translate: -40vw 40vh;
+  }
+
+  100% {
+    translate: 40vw -40vh;
+  }
+}
+
+@keyframes hvn-dango-move-v3 {
+  0% {
+    translate: 0 50vh;
+    scale: 1.2;
+  }
+
+  25% {
+    translate: 50vw 0;
+    scale: 1;
+  }
+
+  50% {
+    translate: 0 -50vh;
+    scale: 1.4;
+  }
+
+  75% {
+    translate: -50vw 0;
+    scale: 1;
+  }
+
+  100% {
+    translate: 0 50vh;
+    scale: 1.2;
+  }
+}
+
+@keyframes hvn-dango-move-v4 {
+  0% {
+    translate: -50vw 0;
+  }
+
+  100% {
+    translate: 50vw 0;
+  }
+}
+
+@keyframes hvn-dango-warp {
+
+  0%,
+  100% {
+    transform: scale(1.0) skew(0deg);
+    filter: brightness(1) hue-rotate(0deg);
+  }
+
+  25% {
+    transform: scale(1.2) skew(5deg);
+    filter: brightness(1.2) hue-rotate(20deg);
+  }
+
+  50% {
+    transform: scale(1.3) skew(-5deg);
+    filter: brightness(1.4) hue-rotate(-20deg);
+  }
+
+  75% {
+    transform: scale(1.2) skew(2.5deg);
+    filter: brightness(1.2) hue-rotate(10deg);
+  }
+}
+
+/* Spin animation */
+@keyframes hvn-dango-spin {
+  from {
+    rotate: 0deg;
+  }
+
+  to {
+    rotate: 360deg;
   }
 }
