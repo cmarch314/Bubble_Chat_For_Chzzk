@@ -1,0 +1,26 @@
+=== 검증 결과 리포트 ===
+
+[1] 파일 검증
+✅ Config에 등록된 모든 파일이 존재합니다.
+
+⚠️ 맵핑되지 않은 오디오 파일 (11개):
+ - YouJustActivatedMyTrapCard.mp3
+ - foff.mp4
+ - skullmeme10.mp3
+ - skullmeme11.mp3
+ - skullmeme2.mp3
+ - skullmeme3.mp3
+ - skullmeme4.mp3
+ - skullmeme6.mp3
+ - skullmeme8.mp3
+ - skullmeme9.mp3
+ - 우와.mp3
+
+-----------------------------------
+
+[2] 문서(README) 검증
+⚠️ README에 없는 명령어 (문서화 필요) (3개):
+돌핀, 맛있다, 어림없
+
+⚠️ Config에 없는데 README에 있는 명령어 (삭제 필요?) (1개):
+<div id="id" chzzkHash="...">

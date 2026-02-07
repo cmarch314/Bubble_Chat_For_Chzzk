@@ -442,9 +442,9 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "WaSandsWin.mp3", "volume": 0.5 }
     ],
     "왜나만": { "src": "WhyJustMe.mp3", "volume": 0.6 },
+    "시발": { "src": "Yabal2.mp3", "volume": 0.7 },
     "시발롬": [
         { "src": "Yabal1.mp3", "volume": 0.7 },
-        { "src": "Yabal2.mp3", "volume": 0.7 },
         { "src": "YabalFolks2.mp3", "volume": 0.7 },
         { "src": "YabalFolks4.mp3", "volume": 0.7 }
     ],
@@ -716,8 +716,9 @@ window.VISUAL_CONFIG = {
     // ==========================================
     usho: {
         gifPath: './img/usho.gif', // 사용할 GIF 이미지 경로
-        duration: 13000,        // 전체 이펙트 지속 시간 (ms)
-        scanPhase: 7200,        // 스캔 단계(첫 번째 페이즈) 지속 시간 (ms)
+        videoPath: './img/usho.mp4', // [New] 7.2초 후 배경으로 사용할 비디오 경로
+        duration: 19000,        // 전체 이펙트 지속 시간 (ms)
+        scanPhase: 7500,        // 스캔 단계(첫 번째 페이즈) 지속 시간 (ms)
         soundKey: '우쇼'          // 연결된 사운드 키 (config.js의 HIVE_SOUND_CONFIG 참조)
     },
 

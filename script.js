@@ -22,9 +22,65 @@ class ConfigManager {
         this.debugMode = urlParams.has('debug');
         this.loadHistory = urlParams.has('history');
         this.channelId = this._resolveChannelId();
+        this.startupCommand = this._resolveStartupCommand(urlParams);
 
         this._initBroadcastChannel();
         this._loadLocalConfig();
+    }
+
+    _resolveStartupCommand(params) {
+        console.log("[Config] Resolving Startup Command from:", params.toString());
+        // 1. ?debug!EffectName
+        for (const [key, val] of params.entries()) {
+            if (key.includes('!')) {
+                const parts = key.split('!');
+                if (parts[1]) {
+                    try {
+                        const decoded = decodeURIComponent(parts[1]);
+                        console.log("[Config] Found command in key:", decoded);
+                        return decoded;
+                    } catch (e) {
+                        console.warn("[Config] Decoding failed for key:", parts[1], e);
+                        return parts[1];
+                    }
+                }
+            }
+            if (val.startsWith('!')) {
+                try {
+                    const decoded = decodeURIComponent(val.substring(1));
+                    console.log("[Config] Found command in value:", decoded);
+                    return decoded;
+                } catch (e) {
+                    console.warn("[Config] Decoding failed for value:", val, e);
+                    return val.substring(1);
+                }
+            }
+        }
+        // 2. ?effect=EffectName
+        if (params.has('effect')) {
+            try {
+                const decoded = decodeURIComponent(params.get('effect'));
+                console.log("[Config] Found command in effect param:", decoded);
+                return decoded;
+            } catch (e) {
+                console.warn("[Config] Decoding failed for effect param:", params.get('effect'), e);
+                return params.get('effect');
+            }
+        }
+        // 3. ?trigger=EffectName
+        if (params.has('trigger')) {
+            try {
+                const val = params.get('trigger');
+                const decoded = val.startsWith('!') ? decodeURIComponent(val.substring(1)) : decodeURIComponent(val);
+                console.log("[Config] Found command in trigger param:", decoded);
+                return decoded;
+            } catch (e) {
+                console.warn("[Config] Decoding failed for trigger param:", params.get('trigger'), e);
+                return params.get('trigger');
+            }
+        }
+
+        return null; // Default
     }
 
     _resolveChannelId() {
@@ -1053,7 +1109,8 @@ class VisualDirector {
                 </div>
                 <div class="usho-reveal-wrapper">
                     <div class="usho-reveal-content-wrapper">
-                        <img class="usho-gif-reveal" src="./img/usho.gif">
+                        <!-- [New] Video Background -->
+                        <video class="usho-video-reveal" src="./img/usho.mp4" muted playsinline></video>
                         <div class="usho-rainbow-overlay"></div>
                     </div>
                 </div>
@@ -1091,14 +1148,20 @@ class VisualDirector {
 
         const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.usho) ? window.VISUAL_CONFIG.usho : {
             scanPhase: 7200,
-            duration: 13000,
-            gifPath: './img/usho.gif'
+            duration: 19000,
+            gifPath: './img/usho.gif',
+            videoPath: './img/usho.mp4'
         };
 
-        const imgs = overlay.querySelectorAll('img');
-        imgs.forEach(img => {
-            if (conf.gifPath && !img.src.includes(conf.gifPath)) img.src = conf.gifPath;
-        });
+        const img = overlay.querySelector('.usho-gif-scan');
+        if (img && conf.gifPath && !img.src.includes(conf.gifPath)) img.src = conf.gifPath;
+
+        const video = overlay.querySelector('.usho-video-reveal');
+        if (video) {
+            if (conf.videoPath && !video.src.includes(conf.videoPath)) video.src = conf.videoPath;
+            video.currentTime = 0; // Reset video
+            video.pause();
+        }
 
         return new Promise(resolve => {
             overlay.classList.remove('phase-scan', 'phase-reveal', 'visible');
@@ -1108,10 +1171,15 @@ class VisualDirector {
 
             setTimeout(() => {
                 overlay.classList.replace('phase-scan', 'phase-reveal');
+                if (video) {
+                    video.play().catch(e => console.warn("Video play failed:", e));
+                    video.currentTime = 0;
+                }
             }, conf.scanPhase);
 
             setTimeout(() => {
                 overlay.classList.remove('visible', 'phase-reveal', 'phase-scan');
+                if (video) video.pause();
                 resolve();
             }, conf.duration);
         });
@@ -2227,15 +2295,9 @@ if (appConfig.debugMode && window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.le
     // Visual Effect Pool from Config
     const visualKeys = window.HIVE_VISUAL_CONFIG ? Object.keys(window.HIVE_VISUAL_CONFIG) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼', '발파', '방종송'];
 
-    // [Fix] Startup Sequence: Guaranteed Valstrax Effect
-    setTimeout(() => {
-        console.log(`🚀 [Startup] Triggering Guaranteed Effect: couple`);
-        window.visualDirector.trigger('couple', {
-            message: `✨ 시스템 시작: 커플 이펙트 테스트`,
-            nickname: "System",
-            isStreamer: true
-        });
-    }, 1000); // 1 second after load
+    // [Fixed] Moved Startup Sequence outside to ensure URL commands work
+    // OLD Location - Removed
+
 
     welcomeInterval = setInterval(() => {
         // 10% Chance to FORCE a visual effect message if not already picked
@@ -2304,6 +2366,28 @@ window.addEventListener('chzzk_connected', () => {
     }
 
 }, { once: true });
+
+// [Feature] Startup Effect Trigger (Moved from Debug Block)
+setTimeout(() => {
+    // 1. URL Command (Highest Priority)
+    if (appConfig.startupCommand) {
+        console.log(`🚀 [Startup] URL Command Detected: ${appConfig.startupCommand}`);
+        window.visualDirector.trigger(appConfig.startupCommand, {
+            message: `✨ 시스템 시작: ${appConfig.startupCommand}`,
+            nickname: "System",
+            isStreamer: true
+        });
+    }
+    // 2. Default Startup Effect (Usho) - Requested by User
+    else {
+        console.log(`🚀 [Startup] Default Effect: usho`);
+        window.visualDirector.trigger('usho', {
+            message: `✨ 시스템 시작: 우쇼 이펙트`,
+            nickname: "System",
+            isStreamer: true
+        });
+    }
+}, 1000); // 1 second after load
 
 // [Test] Queue Stress Test (Modified for Startup Backlog)
 // [Test] Queue Stress Test (Random Burst Mode)
