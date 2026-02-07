@@ -702,6 +702,7 @@ window.HIVE_SOUND_CONFIG = {
     "타티": { "src": "타티.mp3", "volume": 0.7 },
     "호박고구마": { "src": "호박고구마.mp3", "volume": 0.7 },
     "틀딱": { "src": "틀딱.mp3", "volume": 0.7 },
+    "도전": { "src": "도전.mp3", "volume": 0.7 },
     "휘청": { "src": "휘청.mp3", "volume": 0.7 }
 
 };
@@ -728,7 +729,7 @@ window.VISUAL_CONFIG = {
         gifPath: './img/usho.gif', // 사용할 GIF 이미지 경로
         videoPath: './img/usho.mp4', // [New] 7.2초 후 배경으로 사용할 비디오 경로
         leftGifPath: './img/usho4.gif', // [New] 왼쪽 배경 GIF
-        rightGifPath: './img/usho2.gif', // [New] 오른쪽 배경 GIF
+        rightGifPath: './img/usho6.jpg', // [New] 오른쪽 배경 GIF
         duration: 19000,        // 전체 이펙트 지속 시간 (ms)
         scanPhase: 7500,        // 스캔 단계(첫 번째 페이즈) 지속 시간 (ms)
         soundKey: '우쇼'          // 연결된 사운드 키 (config.js의 HIVE_SOUND_CONFIG 참조)
