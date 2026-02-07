@@ -115,10 +115,11 @@ window.HIVE_SOUND_CONFIG = {
     "방종송": { "src": "방종송.mp3", "volume": 0.7 },
     "해골": { "src": "skullmeme.mp3", "volume": 0.7 },
     "당고": { "src": "dango.mp4", "volume": 0.7 },
+    "갓겜송": { "src": "갓겜합시다FULL.mp3", "volume": 0.7 },
 
     // [Songs / Full Version]
     "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.7 },
-    "갓겜합시다풀버전틀어주세요": { "src": "갓겜합시다FULL.mp3", "volume": 0.7 },
+    // "갓겜합시다풀버전틀어주세요": { "src": "갓겜합시다FULL.mp3", "volume": 0.7 }, // -> !갓겜 비주얼 이펙트로 대체됨
     "물설산씨티풀버전틀어주세요": { "src": "물설산씨티.mp3", "volume": 0.7 },
 
     // [Reactions & Memes]
@@ -703,6 +704,8 @@ window.HIVE_SOUND_CONFIG = {
     "호박고구마": { "src": "호박고구마.mp3", "volume": 0.7 },
     "틀딱": { "src": "틀딱.mp3", "volume": 0.7 },
     "도전": { "src": "도전.mp3", "volume": 0.7 },
+    "성공": { "src": "성공.mp3", "volume": 0.7 },
+    "실패": { "src": "실패.mp3", "volume": 0.7 },
     "휘청": { "src": "휘청.mp3", "volume": 0.7 }
 
 };
@@ -729,10 +732,31 @@ window.VISUAL_CONFIG = {
         gifPath: './img/usho.gif', // 사용할 GIF 이미지 경로
         videoPath: './img/usho.mp4', // [New] 7.2초 후 배경으로 사용할 비디오 경로
         leftGifPath: './img/usho4.gif', // [New] 왼쪽 배경 GIF
-        rightGifPath: './img/usho6.jpg', // [New] 오른쪽 배경 GIF
+        rightGifPath: './img/usho2.gif', // [New] 오른쪽 배경 GIF
         duration: 19000,        // 전체 이펙트 지속 시간 (ms)
         scanPhase: 7500,        // 스캔 단계(첫 번째 페이즈) 지속 시간 (ms)
         soundKey: '우쇼'          // 연결된 사운드 키 (config.js의 HIVE_SOUND_CONFIG 참조)
+    },
+
+    // ==========================================
+    // [갓겜 이펙트] (웅장한 등장)
+    // ==========================================
+    godsong: {
+        duration: 15000,
+        audioPath: './SFX/갓겜합시다FULL.mp3',
+        videoPath: './Video/GodGame.mp4', // [Feature] Background Video
+        videoOpacity: 0.7, // [Feature] Background Opacity (0.0 ~ 1.0)
+        beetleDelay: 7000,   // [New] 🪲 벌레 분수 등장 타이밍 (ms)
+        beetleCount: 50,     // [New] 벌레 개수
+        volume: 0.7,
+        images: [
+            // GodGame1 (Center) - 좌우에서 중앙으로
+            { src: './img/GodGame1.png', width: '35%', top: '30%', slide: 'left', left: '-5%', transform: 'scaleX(-1)', delay: 5000, exitTime: 9000 },
+            { src: './img/GodGame1.png', width: '35%', top: '30%', slide: 'right', right: '-5%', delay: 5000, exitTime: 9000 },
+            // Godgame2 (Bottom) - 좌우에서 하단으로 (조금 늦게 등장)
+            { src: './img/Godgame2.png', width: '45%', bottom: '-5%', slide: 'left', left: '0%', transform: 'scaleX(-1)', delay: 3500, exitTime: 9000 },
+            { src: './img/Godgame2.png', width: '45%', bottom: '-5%', slide: 'right', right: '0%', delay: 3500, exitTime: 9000 }
+        ]
     },
 
     // ==========================================

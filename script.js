@@ -1125,6 +1125,7 @@ class VisualDirector {
         create('bangjong-overlay', '<div class="bangjong-flame-border"></div><div class="bangjong-actors-container"></div>');
         create('dango-overlay', '<video class="dango-video" muted playsinline></video><div class="dango-emoji-container"></div>');
         create('king-overlay', '<img class="king-image" src="" alt="King"><div class="king-snow-container"></div>');
+        create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
     }
 
     _buildRegistry() {
@@ -1138,7 +1139,8 @@ class VisualDirector {
             valstrax: { soundKey: "발파", execute: (ctx) => this.triggerValstrax(ctx.message) },
             bangjong: { soundKey: "방종송", execute: (ctx) => this._runBangjong(ctx) },
             dango: { soundKey: "당고", execute: (ctx) => this._runDango(ctx) },
-            king: { soundKey: "몬창왕", execute: (ctx) => this._runKing(ctx) }
+            king: { soundKey: "몬창왕", execute: (ctx) => this._runKing(ctx) },
+            godsong: { soundKey: "갓겜송", execute: (ctx) => this._runGod(ctx) }
         };
     }
 
@@ -1374,6 +1376,140 @@ class VisualDirector {
                 setTimeout(() => {
                     if (snowContainer) snowContainer.innerHTML = '';
                 }, 1000);
+                resolve();
+            }, conf.duration);
+        });
+    }
+
+    // God Game Effect
+    _runGod(context) {
+        const overlay = document.getElementById('god-overlay');
+        if (!overlay) return Promise.resolve();
+
+        // [Fix] Load config explicitly
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.godsong) ? window.VISUAL_CONFIG.godsong : {
+            duration: 15000,
+            audioPath: './SFX/갓겜합시다FULL.mp3',
+            volume: 0.7,
+            images: [
+                { src: './img/GodGame1.png', width: '30%', top: '30%', slide: 'left', transform: 'scaleX(-1)' }
+            ]
+        };
+
+        // Clear previous content
+        overlay.innerHTML = '';
+
+        // Audio setup
+        let audio = new Audio(conf.audioPath);
+        audio.volume = conf.volume || 0.7;
+
+        return new Promise(resolve => {
+            // 0. Setup Background Video
+            if (conf.videoPath) {
+                const video = document.createElement('video');
+                video.src = conf.videoPath;
+                video.className = 'god-video-bg';
+                video.autoplay = true;
+                video.loop = true; // Loop if video is shorter than duration
+                video.muted = true; // Use separate audio file as requested
+                video.volume = 0;
+                video.style.display = 'block'; // [Fix] Ensure it's not hidden
+                video.style.zIndex = '-1'; // [Fix] Explicitly set z-index
+                // [Feature] Video Opacity
+                if (typeof conf.videoOpacity !== 'undefined') {
+                    video.style.opacity = conf.videoOpacity;
+                }
+
+                // Muted/Play handling
+                video.play().catch(e => console.warn("God video play failed:", e));
+                overlay.appendChild(video);
+            }
+
+            // Setup Images (Wrapper Approach)
+            if (conf.images && Array.isArray(conf.images)) {
+                console.log(`[GodEffect] Rendering ${conf.images.length} images.`);
+                conf.images.forEach((imgConf, index) => {
+                    // 1. Wrapper: Handles Position & Slide Animation
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'god-image-wrapper';
+                    wrapper.style.width = imgConf.width || '30%';
+
+                    // Position
+                    if (imgConf.top) wrapper.style.top = imgConf.top;
+                    if (imgConf.bottom) wrapper.style.bottom = imgConf.bottom;
+
+                    // 2. Inner Image: Handles Content & Flip Transform
+                    const img = document.createElement('img');
+                    img.src = imgConf.src;
+                    img.style.width = '100%';
+                    img.style.display = 'block';
+                    if (imgConf.transform) img.style.transform = imgConf.transform;
+
+                    wrapper.appendChild(img);
+
+                    // 3. Slide Animation on Wrapper (Common Props)
+                    wrapper.style.animationDuration = `${conf.duration / 1000}s`;
+                    wrapper.style.animationTimingFunction = 'ease-out';
+                    wrapper.style.animationFillMode = 'both'; // Ensure initial state (opacity) is applied
+
+                    // Apply Animation Name & Position
+                    if (imgConf.slide === 'left') {
+                        wrapper.style.left = imgConf.left || '0';
+                        wrapper.style.animationName = 'god-slide-in-left';
+                    } else if (imgConf.slide === 'right') {
+                        wrapper.style.right = imgConf.right || '0';
+                        wrapper.style.animationName = 'god-slide-in-right';
+                    } else {
+                        // Center/Default fallback
+                        wrapper.style.left = '50%';
+                        wrapper.style.transform = 'translate(-50%, -50%)';
+                        wrapper.style.animationName = 'hvn-god-appear';
+                    }
+
+                    // [Feature] Configurable Delay
+                    if (imgConf.delay) {
+                        wrapper.style.animationDelay = `${imgConf.delay}ms`;
+                    }
+
+                    // [Feature] Configurable Exit Time (Absolute time from start)
+                    if (imgConf.exitTime) {
+                        setTimeout(() => {
+                            // [Feature] Slide Out Animation
+                            wrapper.style.animationTimingFunction = "ease-in";
+                            wrapper.style.animationDuration = "1.5s"; // Slide out speed
+                            wrapper.style.animationDelay = "0s"; // [Fix] Reset any entrance delay
+                            wrapper.style.animationFillMode = "forwards";
+
+                            if (imgConf.slide === 'left') {
+                                wrapper.style.animationName = "god-slide-out-left";
+                            } else if (imgConf.slide === 'right') {
+                                wrapper.style.animationName = "god-slide-out-right";
+                            } else {
+                                // Fallback for center/other
+                                wrapper.style.transition = "opacity 0.5s ease-out";
+                                wrapper.style.opacity = "0";
+                            }
+
+                            // Remove after animation (Wait 1.5s for slide out)
+                            setTimeout(() => {
+                                if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+                            }, 1500);
+                        }, imgConf.exitTime);
+                    }
+
+                    console.log(`[GodEffect] Image ${index}: slide=${imgConf.slide}, delay=${imgConf.delay}ms, exitTime=${imgConf.exitTime}ms`);
+                    overlay.appendChild(wrapper);
+                });
+            }
+
+            overlay.classList.add('visible');
+            audio.play().catch(e => console.warn("God audio play failed:", e));
+
+            // End effect
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                audio.pause();
+                audio.currentTime = 0;
                 resolve();
             }, conf.duration);
         });
@@ -2376,6 +2512,16 @@ const _processMessageInternal = (msgData) => {
                 color: msgData.color,
                 isStreamer: msgData.isStreamer
             });
+            // [Fix] Hide chat message if visual effect is triggered (Requested by User)
+            // But verify if it's a donation - donation needs to play TTS/Audio via AudioManager?
+            // The original logic flowed down to audioManager.checkAndPlay.
+            // If the user wants to HIDE it from chat ("채팅창에 등장 자체를 안해야하는데"),
+            // we should return here unless it's a donation which might need a bubble?
+            // User said "!갓겜송 is showing up... shouldn't appear".
+            // So we return immediately after trigger.
+            // However, we must ensure donation audio checks if needed.
+            // Since this is a visual effect command, usually audio is handled by the effect itself.
+            return;
         }
 
         if (msgData.isDonation) {
@@ -2573,11 +2719,11 @@ setTimeout(() => {
             isStreamer: true
         });
     }
-    // 2. Default Startup Effect (king) - Requested by User
+    // 2. Default Startup Effect (godsong) - Requested by User
     else {
-        console.log(`🚀 [Startup] Default Effect: king`);
-        window.visualDirector.trigger('king', {
-            message: `✨ 시스템 시작: 몬창왕 이펙트`,
+        console.log(`🚀 [Startup] Default Effect: godsong`);
+        window.visualDirector.trigger('godsong', {
+            message: `✨ 시스템 시작: 갓겜송 이펙트`,
             nickname: "System",
             isStreamer: true
         });

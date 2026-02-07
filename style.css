@@ -4172,3 +4172,106 @@ body {
 #king-overlay.visible {
   opacity: 1;
 }
+
+#god-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 1s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+#god-overlay.visible {
+  opacity: 1;
+}
+
+.god-image {
+  max-width: 80vw;
+  max-height: 80vh;
+  object-fit: contain;
+  transform: scale(0.5);
+  opacity: 0;
+  animation: hvn-god-appear 15s ease-out forwards;
+}
+
+@keyframes hvn-god-appear {
+  0% { transform: scale(0.5); opacity: 0; }
+  10% { transform: scale(1); opacity: 1; }
+  90% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* God Song Slide Animations */
+#god-overlay {
+  display: block; /* Override flex */
+}
+
+.god-image-animated {
+  position: absolute;
+  opacity: 0;
+  /* Animation set via JS */
+}
+
+@keyframes god-slide-in-left {
+  0% { transform: translateX(-100vw); opacity: 0; }
+  10% { transform: translateX(0); opacity: 1; }
+  90% { transform: translateX(0) scale(1.05); opacity: 1; }
+  100% { transform: translateX(-10vw) scale(1.1); opacity: 0; }
+}
+
+@keyframes god-slide-in-right {
+  0% { transform: translateX(100vw); opacity: 0; }
+  10% { transform: translateX(0); opacity: 1; }
+  90% { transform: translateX(0) scale(1.05); opacity: 1; }
+  100% { transform: translateX(10vw) scale(1.1); opacity: 0; }
+}
+
+.god-image-wrapper {
+  position: absolute;
+  /* Animation sets opacity/transform */
+}
+
+.god-video-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+/* God Beetle Effect */
+.god-beetle {
+  position: absolute;
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+}
+
+@keyframes god-beetle-burst {
+  0% { transform: scale(0) translate(0, 0); opacity: 0; }
+  10% { transform: scale(1.5) translate(0, 0); opacity: 1; }
+  100% { transform: scale(1) translate(var(--tx), var(--ty)); opacity: 0; }
+}
+
+/* God Slide Out Animations (Exit) */
+@keyframes god-slide-out-left {
+  0% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(-100vw); opacity: 0; }
+}
+
+@keyframes god-slide-out-right {
+  0% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(100vw); opacity: 0; }
+}
+
