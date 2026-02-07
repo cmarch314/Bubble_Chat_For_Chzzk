@@ -1974,7 +1974,7 @@ body {
   }
 
   100% {
-    transform: scale(2);
+    transform: scale(1.05);
   }
 }
 
@@ -2072,18 +2072,16 @@ body {
   animation: usho-fade-in 0.5s ease-out forwards;
 }
 
-.usho-side-gif {
+.usho-background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
   height: 100vh;
-  width: auto;
+  object-fit: cover;
+  z-index: -1;
   opacity: 1;
-}
-
-.usho-side-gif.left {
-  transform: translateX(-10%) scale(1.3);
-}
-
-.usho-side-gif.right {
-  transform: translateX(10%);
+  /* Slight transparency for effect blending */
 }
 
 
@@ -4132,6 +4130,7 @@ body {
     rotate: 360deg;
   }
 }
+
 .king-snowflake {
   position: absolute;
   top: -20vh;
@@ -4149,8 +4148,15 @@ body {
 }
 
 @keyframes hvn-king-fall {
-  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(120vh) rotate(360deg); opacity: 0.8; }
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(120vh) rotate(360deg);
+    opacity: 0.8;
+  }
 }
 
 #king-overlay {
@@ -4203,15 +4209,31 @@ body {
 }
 
 @keyframes hvn-god-appear {
-  0% { transform: scale(0.5); opacity: 0; }
-  10% { transform: scale(1); opacity: 1; }
-  90% { transform: scale(1.1); opacity: 1; }
-  100% { transform: scale(1.2); opacity: 0; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  10% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  90% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
 }
 
 /* God Song Slide Animations */
 #god-overlay {
-  display: block; /* Override flex */
+  display: block;
+  /* Override flex */
 }
 
 .god-image-animated {
@@ -4221,17 +4243,47 @@ body {
 }
 
 @keyframes god-slide-in-left {
-  0% { transform: translateX(-100vw); opacity: 0; }
-  10% { transform: translateX(0); opacity: 1; }
-  90% { transform: translateX(0) scale(1.05); opacity: 1; }
-  100% { transform: translateX(-10vw) scale(1.1); opacity: 0; }
+  0% {
+    transform: translateX(-100vw);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translateX(0) scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-10vw) scale(1.1);
+    opacity: 0;
+  }
 }
 
 @keyframes god-slide-in-right {
-  0% { transform: translateX(100vw); opacity: 0; }
-  10% { transform: translateX(0); opacity: 1; }
-  90% { transform: translateX(0) scale(1.05); opacity: 1; }
-  100% { transform: translateX(10vw) scale(1.1); opacity: 0; }
+  0% {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translateX(0) scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(10vw) scale(1.1);
+    opacity: 0;
+  }
 }
 
 .god-image-wrapper {
@@ -4259,19 +4311,43 @@ body {
 }
 
 @keyframes god-beetle-burst {
-  0% { transform: scale(0) translate(0, 0); opacity: 0; }
-  10% { transform: scale(1.5) translate(0, 0); opacity: 1; }
-  100% { transform: scale(1) translate(var(--tx), var(--ty)); opacity: 0; }
+  0% {
+    transform: scale(0) translate(0, 0);
+    opacity: 0;
+  }
+
+  10% {
+    transform: scale(1.5) translate(0, 0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1) translate(var(--tx), var(--ty));
+    opacity: 0;
+  }
 }
 
 /* God Slide Out Animations (Exit) */
 @keyframes god-slide-out-left {
-  0% { transform: translateX(0); opacity: 1; }
-  100% { transform: translateX(-100vw); opacity: 0; }
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-100vw);
+    opacity: 0;
+  }
 }
 
 @keyframes god-slide-out-right {
-  0% { transform: translateX(0); opacity: 1; }
-  100% { transform: translateX(100vw); opacity: 0; }
-}
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 
+  100% {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+}

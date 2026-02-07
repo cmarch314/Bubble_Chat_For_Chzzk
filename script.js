@@ -1161,18 +1161,36 @@ class VisualDirector {
             duration: 19000,
             gifPath: './img/usho.gif',
             videoPath: './img/usho.mp4',
-            leftGifPath: './img/usho4.gif',
-            rightGifPath: './img/usho2.gif'
+            backgroundVideoPath: './Video/ushoBack.mp4'
         };
 
         const img = overlay.querySelector('.usho-gif-scan');
         if (img && conf.gifPath && !img.src.includes(conf.gifPath)) img.src = conf.gifPath;
 
-        // [New] Background Layer GIFs
-        const leftImg = overlay.querySelector('.usho-side-gif.left');
-        if (leftImg && conf.leftGifPath && !leftImg.src.includes(conf.leftGifPath)) leftImg.src = conf.leftGifPath;
-        const rightImg = overlay.querySelector('.usho-side-gif.right');
-        if (rightImg && conf.rightGifPath && !rightImg.src.includes(conf.rightGifPath)) rightImg.src = conf.rightGifPath;
+        // [New] Background Video Logic (Replaces Side GIFs)
+        let bgVideo = overlay.querySelector('.usho-background-video');
+        if (!bgVideo && conf.backgroundVideoPath) {
+            bgVideo = document.createElement('video');
+            bgVideo.className = 'usho-background-video';
+            bgVideo.muted = true;
+            bgVideo.loop = true;
+            bgVideo.playsInline = true;
+
+            // Append to background layer
+            const bgLayer = overlay.querySelector('.usho-background-layer');
+            if (bgLayer) {
+                bgLayer.innerHTML = ''; // Clear existing GIFs if any
+                bgLayer.appendChild(bgVideo);
+            }
+        }
+
+        if (bgVideo) {
+            if (conf.backgroundVideoPath && !bgVideo.src.includes(conf.backgroundVideoPath)) {
+                bgVideo.src = conf.backgroundVideoPath;
+            }
+            bgVideo.currentTime = 0;
+            bgVideo.pause();
+        }
 
         const video = overlay.querySelector('.usho-video-reveal');
         if (video) {
@@ -1187,6 +1205,11 @@ class VisualDirector {
 
             overlay.classList.add('visible', 'phase-scan');
 
+            // Start background video immediately (if desired, or sync with phases)
+            if (bgVideo) {
+                bgVideo.play().catch(e => console.warn("Background video play failed:", e));
+            }
+
             setTimeout(() => {
                 overlay.classList.replace('phase-scan', 'phase-reveal');
                 if (video) {
@@ -1198,6 +1221,7 @@ class VisualDirector {
             setTimeout(() => {
                 overlay.classList.remove('visible', 'phase-reveal', 'phase-scan');
                 if (video) video.pause();
+                if (bgVideo) bgVideo.pause();
                 resolve();
             }, conf.duration);
         });
@@ -2722,7 +2746,7 @@ setTimeout(() => {
     // 2. Default Startup Effect (godsong) - Requested by User
     else {
         console.log(`🚀 [Startup] Default Effect: godsong`);
-        window.visualDirector.trigger('godsong', {
+        window.visualDirector.trigger('usho', {
             message: `✨ 시스템 시작: 갓겜송 이펙트`,
             nickname: "System",
             isStreamer: true
