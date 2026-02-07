@@ -1109,10 +1109,14 @@ class VisualDirector {
                 </div>
                 <div class="usho-reveal-wrapper">
                     <div class="usho-reveal-content-wrapper">
-                        <!-- [New] Video Background -->
                         <video class="usho-video-reveal" src="./img/usho.mp4" muted playsinline></video>
                         <div class="usho-rainbow-overlay"></div>
                     </div>
+                </div>
+                <!-- [New] Multi-Layer Background (Moved outside reveal-wrapper for visibility) -->
+                <div class="usho-background-layer">
+                    <img class="usho-side-gif left" src="./img/usho4.gif">
+                    <img class="usho-side-gif right" src="./img/usho2.gif">
                 </div>
             </div>
         `);
@@ -1147,14 +1151,22 @@ class VisualDirector {
         if (!overlay) return Promise.resolve();
 
         const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.usho) ? window.VISUAL_CONFIG.usho : {
-            scanPhase: 7200,
+            scanPhase: 7270,
             duration: 19000,
             gifPath: './img/usho.gif',
-            videoPath: './img/usho.mp4'
+            videoPath: './img/usho.mp4',
+            leftGifPath: './img/usho4.gif',
+            rightGifPath: './img/usho2.gif'
         };
 
         const img = overlay.querySelector('.usho-gif-scan');
         if (img && conf.gifPath && !img.src.includes(conf.gifPath)) img.src = conf.gifPath;
+
+        // [New] Background Layer GIFs
+        const leftImg = overlay.querySelector('.usho-side-gif.left');
+        if (leftImg && conf.leftGifPath && !leftImg.src.includes(conf.leftGifPath)) leftImg.src = conf.leftGifPath;
+        const rightImg = overlay.querySelector('.usho-side-gif.right');
+        if (rightImg && conf.rightGifPath && !rightImg.src.includes(conf.rightGifPath)) rightImg.src = conf.rightGifPath;
 
         const video = overlay.querySelector('.usho-video-reveal');
         if (video) {
@@ -2152,6 +2164,7 @@ const _processMessageInternal = (msgData) => {
 
     // Check strict matches "!명령어"
     for (const key in visualMap) {
+        if (key === 'dolphin') continue; // [Refinement] !돌핀 is subscription-only
         const effect = visualMap[key];
         const soundKey = effect.soundKey; // e.g. "해골"
         // Check "!해골" or "!skull" (if mapped)

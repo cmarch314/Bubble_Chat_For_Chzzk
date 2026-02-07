@@ -136,7 +136,7 @@ window.HIVE_SOUND_CONFIG = {
 
     // [Reactions & Memes]
     "앙": { "src": "Ang.mp3", "volume": 0.7 },
-    "재밌다": { "src": "Fun.wav", "volume": 0.6 },
+    "재밌다": { "src": "Fun.mp3", "volume": 0.6 },
     "당근": { "src": "Carrot.mp3", "volume": 0.6 },
     "알림": { "src": "Alarm.mp3", "volume": 0.6 },
     "ㅋㅋㅋ": [{ "src": "Laugh1.mp3", "volume": 0.7 },
@@ -163,7 +163,7 @@ window.HIVE_SOUND_CONFIG = {
 
     "아항항": { "src": "Laugh3.mp3", "volume": 0.8 },
     "와우": { "src": "Wow.mp3", "volume": 0.7 },
-    "오옷": { "src": "Ot.wav", "volume": 0.6 },
+    "오옷": { "src": "Ot.mp3", "volume": 0.6 },
     "헤으응": { "src": "Careless.mp3", "volume": 0.6 },
     "아흐앙": { "src": "ahng.mp3", "volume": 0.7 },
     "아흐응": { "src": "ah5.mp3", "volume": 0.5 },
@@ -188,7 +188,8 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "chant2.mp3", "volume": 0.7 },
         { "src": "chant3.mp3", "volume": 0.7 }
     ],
-    "우와": { "src": "OMG_Good.mp3", "volume": 0.7 },
+    "우와": { "src": "우와.mp3", "volume": 0.7 },
+    "오마이갓": { "src": "OMG_Good.mp3", "volume": 0.7 },
     "맙소사": { "src": "OMG.mp3", "volume": 0.7 },
     "앙기모띠": { "src": "AngKiMoChi.mp3", "volume": 0.7 },
     "기모띠": { "src": "kimotee.mp3", "volume": 0.7 },
@@ -247,7 +248,7 @@ window.HIVE_SOUND_CONFIG = {
     ],
     "멈춰!": { "src": "Stop.mp3", "volume": 0.85 },
     "꺼져": { "src": "foff.mp3", "volume": 0.65 },
-    "뚝": { "src": "DDuk.wav", "volume": 0.6 },
+    "뚝": { "src": "DDuk.mp3", "volume": 0.6 },
     "쇼크": { "src": "shocked-sound-effect.mp3", "volume": 0.5 },
     "스트레스필요": { "src": "StressNeeds.mp3", "volume": 0.5 },
     "스트레스": [
@@ -280,8 +281,8 @@ window.HIVE_SOUND_CONFIG = {
     "헬로": { "src": "Hello2.mp3", "volume": 1 },
     "바이": { "src": "Bye.mp3", "volume": 1 },
     "안녕히": { "src": "FareWellEveryone.mp3", "volume": 0.7 },
-    "카톡": { "src": "Katalk.wav", "volume": 0.7 },
-    "전화": { "src": "Call.WAV", "volume": 0.7 },
+    "카톡": { "src": "Katalk.mp3", "volume": 0.7 },
+    "전화": { "src": "Call.mp3", "volume": 0.7 },
     "보이스콜": { "src": "KakaoCall.mp3", "volume": 0.7 },
     "디코": { "src": "discord.mp3", "volume": 0.7 },
     "잠시후": { "src": "FUmomentsLater.mp3", "volume": 0.9 },
@@ -717,6 +718,8 @@ window.VISUAL_CONFIG = {
     usho: {
         gifPath: './img/usho.gif', // 사용할 GIF 이미지 경로
         videoPath: './img/usho.mp4', // [New] 7.2초 후 배경으로 사용할 비디오 경로
+        leftGifPath: './img/usho4.gif', // [New] 왼쪽 배경 GIF
+        rightGifPath: './img/usho2.gif', // [New] 오른쪽 배경 GIF
         duration: 19000,        // 전체 이펙트 지속 시간 (ms)
         scanPhase: 7500,        // 스캔 단계(첫 번째 페이즈) 지속 시간 (ms)
         soundKey: '우쇼'          // 연결된 사운드 키 (config.js의 HIVE_SOUND_CONFIG 참조)
