@@ -115,11 +115,10 @@ window.HIVE_SOUND_CONFIG = {
     "방종송": { "src": "방종송.mp3", "volume": 0.7 },
     "해골": { "src": "skullmeme.mp3", "volume": 0.7 },
     "당고": { "src": "dango.mp4", "volume": 0.7 },
-    "갓겜송": { "src": "갓겜합시다FULL.mp3", "volume": 0.7 },
+    "갓겜송": { "src": "갓겜합시다FULL.mp3", "volume": 0.4 },
 
     // [Songs / Full Version]
     "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.7 },
-    // "갓겜합시다풀버전틀어주세요": { "src": "갓겜합시다FULL.mp3", "volume": 0.7 }, // -> !갓겜 비주얼 이펙트로 대체됨
     "물설산씨티풀버전틀어주세요": { "src": "물설산씨티.mp3", "volume": 0.7 },
 
     // [Reactions & Memes]

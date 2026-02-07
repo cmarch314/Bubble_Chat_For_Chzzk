@@ -556,7 +556,8 @@ class AudioManager {
         for (let match of allMatches) {
             if (match.startIndex >= lastEnd) {
                 const firstChar = match.keyword[0];
-                const isSingleCharRepeat = match.keyword.split('').every(c => c === firstChar);
+                // [Fix] Allow single-character keywords (like "쎅") to repeat. Only restrict multi-char repeats (like "ㅋㅋㅋㅋ").
+                const isSingleCharRepeat = match.keyword.length > 1 && match.keyword.split('').every(c => c === firstChar);
 
                 // [사용자 피드백 반영]
                 // 1. "ㅋㅋㅋㅋ" 같은 한 글자 반복형 키워드만 딱 한 번만 나오도록 제한
