@@ -740,6 +740,7 @@ window.VISUAL_CONFIG = {
     // [갓겜 이펙트] (웅장한 등장)
     // ==========================================
     godsong: {
+        soundKey: '갓겜송', // [Fix] Prevent normal chat trigger
         duration: 15000,
         audioPath: './SFX/갓겜합시다FULL.mp3',
         videoPath: './Video/GodGame.mp4', // [Feature] Background Video
