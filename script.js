@@ -1124,6 +1124,7 @@ class VisualDirector {
         create('flashback-overlay');
         create('bangjong-overlay', '<div class="bangjong-flame-border"></div><div class="bangjong-actors-container"></div>');
         create('dango-overlay', '<video class="dango-video" muted playsinline></video><div class="dango-emoji-container"></div>');
+        create('king-overlay', '<img class="king-image" src="" alt="King"><div class="king-snow-container"></div>');
     }
 
     _buildRegistry() {
@@ -1136,7 +1137,8 @@ class VisualDirector {
             dolphin: { soundKey: "돌핀", execute: (ctx) => this._runDolphin(ctx) },
             valstrax: { soundKey: "발파", execute: (ctx) => this.triggerValstrax(ctx.message) },
             bangjong: { soundKey: "방종송", execute: (ctx) => this._runBangjong(ctx) },
-            dango: { soundKey: "당고", execute: (ctx) => this._runDango(ctx) }
+            dango: { soundKey: "당고", execute: (ctx) => this._runDango(ctx) },
+            king: { soundKey: "몬창왕", execute: (ctx) => this._runKing(ctx) }
         };
     }
 
@@ -1263,6 +1265,115 @@ class VisualDirector {
                     if (video) video.pause();
                     if (container) container.innerHTML = '';
                 }, 1000); // Wait for transition
+                resolve();
+            }, conf.duration);
+        });
+    }
+
+    _runKing(context) {
+        const overlay = document.getElementById('king-overlay');
+        if (!overlay) return Promise.resolve();
+
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.king) ? window.VISUAL_CONFIG.king : {
+            duration: 23000,
+            imagePath: './img/King_Of_MH.png',
+            audioPath: './SFX/아들아.mp3',
+            volume: 0.7,
+            emojiPool: ["❄️", "🧊", "⭐"],
+            delayedEmojiPool: ["💩", "🧻", "🤮"],
+            delayedEmojiDelay: 11000
+        };
+
+        const image = overlay.querySelector('.king-image');
+        const snowContainer = overlay.querySelector('.king-snow-container');
+
+        // Audio setup
+        let audio = new Audio(conf.audioPath);
+        audio.volume = conf.volume || 0.7;
+
+        return new Promise(resolve => {
+            // Setup Image
+            if (image) image.src = conf.imagePath;
+
+            // Clear previous flakes and diagnostic tests
+            if (snowContainer) snowContainer.innerHTML = '';
+
+            // Safety: ensure any loose flakes on overlay are also cleared
+            overlay.querySelectorAll('.king-snowflake').forEach(el => el.remove());
+
+            const getEmoji = (pool) => {
+                if (!pool || pool.length === 0) return '❄️';
+                return pool[Math.floor(Math.random() * pool.length)];
+            };
+
+            const createFlake = (pool, isDelayed = false) => {
+                const flake = document.createElement('div');
+                flake.className = 'king-snowflake';
+                flake.style.left = (Math.random() * 100) + 'vw';
+
+                // Animation duration/delay handled here
+                flake.style.animationDuration = (Math.random() * 2 + 3) + 's';
+                flake.style.animationDelay = (Math.random() * -5) + 's';
+
+                // Set size based on config or default random
+                if (conf.emojiSize) {
+                    flake.style.fontSize = conf.emojiSize;
+                } else {
+                    flake.style.fontSize = (Math.random() * 40 + 60) + 'px';
+                }
+
+                flake.innerHTML = getEmoji(pool);
+
+                // If delayed, start with opacity 0 and fade in
+                if (isDelayed) {
+                    flake.style.opacity = '0';
+                    flake.style.transition = 'opacity 2s ease-in';
+
+                    if (snowContainer) snowContainer.appendChild(flake);
+                    else overlay.appendChild(flake);
+
+                    // Trigger fade-in
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            flake.style.opacity = '1';
+                        });
+                    });
+                } else {
+                    flake.style.opacity = '1';
+
+                    if (snowContainer) snowContainer.appendChild(flake);
+                    else overlay.appendChild(flake);
+                }
+            };
+
+            // Initial Heavy Snowstorm
+            const initialCount = conf.emojiCount || 150;
+            for (let i = 0; i < initialCount; i++) {
+                createFlake(conf.emojiPool, false);
+            }
+
+            // Delayed Storm using config delay
+            setTimeout(() => {
+                if (overlay.classList.contains('visible')) {
+                    const delayedCount = conf.delayedEmojiCount || 100;
+                    for (let i = 0; i < delayedCount; i++) {
+                        createFlake(conf.delayedEmojiPool, true);
+                    }
+                }
+            }, conf.delayedEmojiDelay || 11000);
+
+            overlay.classList.add('visible');
+            audio.play().catch(e => console.warn("King audio play failed:", e));
+
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                if (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }
+                setTimeout(() => {
+                    if (snowContainer) snowContainer.innerHTML = '';
+                }, 1000);
                 resolve();
             }, conf.duration);
         });
@@ -2462,11 +2573,11 @@ setTimeout(() => {
             isStreamer: true
         });
     }
-    // 2. Default Startup Effect (Dango) - Requested by User
+    // 2. Default Startup Effect (king) - Requested by User
     else {
-        console.log(`🚀 [Startup] Default Effect: dango`);
-        window.visualDirector.trigger('dango', {
-            message: `✨ 시스템 시작: 당고 이펙트`,
+        console.log(`🚀 [Startup] Default Effect: king`);
+        window.visualDirector.trigger('king', {
+            message: `✨ 시스템 시작: 몬창왕 이펙트`,
             nickname: "System",
             isStreamer: true
         });

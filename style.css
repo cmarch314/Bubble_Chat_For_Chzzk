@@ -4132,3 +4132,43 @@ body {
     rotate: 360deg;
   }
 }
+.king-snowflake {
+  position: absolute;
+  top: -20vh;
+  left: 0;
+  user-select: none;
+  pointer-events: none;
+  z-index: 10000;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  display: block;
+  visibility: visible;
+  animation-name: hvn-king-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes hvn-king-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120vh) rotate(360deg); opacity: 0.8; }
+}
+
+#king-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+#king-overlay.visible {
+  opacity: 1;
+}
