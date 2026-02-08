@@ -1818,7 +1818,7 @@ class VisualDirector {
                 el.style.left = '50%'; el.style.top = '50%'; el.style.transform = 'translate(-50%, -50%) scale(0)';
                 setTimeout(() => {
                     el.style.transition = `transform ${500 / speed}ms`;
-                    el.style.transform = `translate(-50%, -50%) scale(${conf.dolphinScale || 1.5})`;
+                    el.style.transform = `translate(-50%, -50%) rotate(0deg) scale(${conf.dolphinScale || 1.5})`;
                     setTimeout(bounce, 500 / speed);
                 }, 100);
             };
@@ -2507,7 +2507,7 @@ const _processMessageInternal = (msgData) => {
 
     // Check strict matches "!명령어"
     for (const key in visualMap) {
-        if (key === 'dolphin') continue; // [Refinement] !돌핀 is subscription-only
+        if (key === 'dolphin' && !msgData.isStreamer) continue; // [Refinement] !돌핀 is subscription-only (unless streamer)
         const effect = visualMap[key];
         const soundKey = effect.soundKey; // e.g. "해골"
         // Check "!해골" or "!skull" (if mapped)

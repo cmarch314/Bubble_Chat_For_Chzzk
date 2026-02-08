@@ -705,6 +705,9 @@ window.HIVE_SOUND_CONFIG = {
     "도전": { "src": "도전.mp3", "volume": 0.7 },
     "성공": { "src": "성공.mp3", "volume": 0.7 },
     "실패": { "src": "실패.mp3", "volume": 0.7 },
+    "누나나죽어": [
+        { "src": "누나나죽어1.mp3", "volume": 0.7 },
+        { "src": "누나나죽어2.mp3", "volume": 0.7 }],
     "휘청": { "src": "휘청.mp3", "volume": 0.7 }
 
 };
