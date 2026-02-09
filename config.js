@@ -794,7 +794,7 @@ window.VISUAL_CONFIG = {
     // ==========================================
     godsong: {
         soundKey: '갓겜송', // [Fix] Prevent normal chat trigger
-        duration: 15000,
+        duration: 14500,
         audioPath: './SFX/갓겜합시다FULL.mp3',
         videoPath: './Video/GodGame.mp4', // [Feature] Background Video
         videoOpacity: 0.7, // [Feature] Background Opacity (0.0 ~ 1.0)

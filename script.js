@@ -2508,6 +2508,7 @@ const _processMessageInternal = (msgData) => {
     // Check strict matches "!명령어"
     for (const key in visualMap) {
         if (key === 'dolphin' && !msgData.isStreamer) continue; // [Refinement] !돌핀 is subscription-only (unless streamer)
+        if (key === 'bangjong' && !msgData.isStreamer) continue; // [New] !방종송 is streamer-only
         const effect = visualMap[key];
         const soundKey = effect.soundKey; // e.g. "해골"
         // Check "!해골" or "!skull" (if mapped)
