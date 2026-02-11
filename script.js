@@ -432,6 +432,8 @@ class ChzzkGateway {
 class AudioManager {
     constructor() {
         this.basePath = './SFX/';
+        // [Performance] 오디오 버퍼 캐시 (중복 로딩 방지)
+        this.bufferCache = new Map();
 
         // 1. 오디오 엔진 시동
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -527,6 +529,8 @@ class AudioManager {
                 visualKeys.push(k);
                 const val = window.HIVE_VISUAL_CONFIG[k];
                 if (val && val.soundKey) visualKeys.push(val.soundKey);
+                // [New] Also exclude audioOverride keys from chat triggers so they don't double-play or play via chat
+                if (val && val.audioOverride) visualKeys.push(val.audioOverride);
             });
         }
 
@@ -654,45 +658,58 @@ class AudioManager {
 
             try {
                 // [Strategy A] Web Audio Buffer (Drive -> Limiter -> Ceiling)
-                fetch(playPath)
-                    .then(response => {
-                        if (!response.ok) throw new Error("Fetch failed");
-                        return response.arrayBuffer();
-                    })
-                    .then(arrayBuffer => this.audioCtx.decodeAudioData(arrayBuffer))
-                    .then(audioBuffer => {
-                        const source = this.audioCtx.createBufferSource();
-                        source.buffer = audioBuffer;
+                // Helper: Play from decoded buffer
+                const playBuffer = (audioBuffer) => {
+                    const source = this.audioCtx.createBufferSource();
+                    source.buffer = audioBuffer;
 
-                        const preGainNode = this.audioCtx.createGain();
-                        preGainNode.gain.value = driveGain;
+                    const preGainNode = this.audioCtx.createGain();
+                    preGainNode.gain.value = driveGain;
 
-                        source.connect(preGainNode);
+                    source.connect(preGainNode);
 
-                        if (applyNormalizer) {
-                            preGainNode.connect(this.compressor);
-                            console.log(`[Staging] ON - Drive:${driveGain.toFixed(1)} -> Comp -> Ceiling:${outputCeiling.toFixed(1)}`);
-                        } else {
-                            preGainNode.connect(this.masterGain);
-                            console.log(`[Staging] OFF - Drive:${driveGain.toFixed(1)} -> Ceiling:${outputCeiling.toFixed(1)}`);
-                        }
+                    if (applyNormalizer) {
+                        preGainNode.connect(this.compressor);
+                        console.log(`[Staging] ON - Drive:${driveGain.toFixed(1)} -> Comp -> Ceiling:${outputCeiling.toFixed(1)}`);
+                    } else {
+                        preGainNode.connect(this.masterGain);
+                        console.log(`[Staging] OFF - Drive:${driveGain.toFixed(1)} -> Ceiling:${outputCeiling.toFixed(1)}`);
+                    }
 
-                        source.start(0);
-                        source.onended = () => {
-                            source.disconnect();
-                            preGainNode.disconnect();
-                            resolve();
-                        };
-                    })
-                    .catch(e => {
-                        // [Strategy B] HTML5 Fallback
-                        console.warn(`[AudioManager] Fallback for "${fileName}": ${e.message}`);
-                        const audio = new Audio(playPath);
-                        audio.volume = Math.min(1.0, Math.max(0, driveGain * outputCeiling));
-                        audio.onended = () => resolve();
-                        audio.onerror = () => resolve();
-                        audio.play().catch(err => resolve());
-                    });
+                    source.start(0);
+                    source.onended = () => {
+                        source.disconnect();
+                        preGainNode.disconnect();
+                        resolve();
+                    };
+                };
+
+                // 1. Check Cache
+                if (this.bufferCache.has(playPath)) {
+                    playBuffer(this.bufferCache.get(playPath));
+                } else {
+                    // 2. Fetch & Decode & Cache
+                    fetch(playPath)
+                        .then(response => {
+                            if (!response.ok) throw new Error("Fetch failed");
+                            return response.arrayBuffer();
+                        })
+                        .then(arrayBuffer => this.audioCtx.decodeAudioData(arrayBuffer))
+                        .then(audioBuffer => {
+                            // Cache the decoded buffer
+                            this.bufferCache.set(playPath, audioBuffer);
+                            playBuffer(audioBuffer);
+                        })
+                        .catch(e => {
+                            // [Strategy B] HTML5 Fallback
+                            console.warn(`[AudioManager] Fallback for "${fileName}": ${e.message}`);
+                            const audio = new Audio(playPath);
+                            audio.volume = Math.min(1.0, Math.max(0, driveGain * outputCeiling));
+                            audio.onended = () => resolve();
+                            audio.onerror = () => resolve();
+                            audio.play().catch(err => resolve());
+                        });
+                }
 
             } catch (e) {
                 resolve();
@@ -1075,7 +1092,39 @@ class VisualDirector {
         // 1. Sound (Using Audio Manager - Real-time enabled check)
         const isSoundActive = window.audioManager ? (window.audioManager.enabled || context.isStreamer) : false;
         if (isSoundActive && effect.soundKey && window.audioManager) {
-            window.audioManager.playSound(window.soundHive[effect.soundKey], { force: context.isStreamer, type: 'visual' });
+            // [New] Support Audio Override (e.g. !가자부송 -> Play Full Version instead of short clips)
+            // If audioOverride is present in config, use that key instead of soundKey for audio lookup
+            const soundTargetKey = (window.VISUAL_CONFIG && window.VISUAL_CONFIG[effect.key] && window.VISUAL_CONFIG[effect.key].audioOverride)
+                ? window.VISUAL_CONFIG[effect.key].audioOverride
+                : effect.soundKey;
+
+            // However, effect object here comes from registry: { soundKey: "...", execute: ... }
+            // Registry doesn't have the config object directly. 
+            // We need to look up config by finding which config entry matches.
+            // Simplified approach: Registry key matches config key usually.
+            // Let's passed key in queue item? No, queue has { effect, context }.
+            // We need to know the 'key' (e.g. 'gazabu').
+            // Let's modify trigger to pass key or look it up.
+            // Actually, we can just look up based on soundKey if unique, but 'gazabu' config has 'audioOverride'.
+
+            // BETTER APPROACH:
+            // Just use the soundKey from registry.
+            // AND in config.js, set 'gazabu' soundKey to '가자부송' (which might map to nothing or short clip).
+            // BUT if we want override, we should handle it here.
+
+            // Let's try to find the config entry that corresponds to this effect
+            let overrideKey = null;
+            if (window.VISUAL_CONFIG) {
+                for (const [k, v] of Object.entries(window.VISUAL_CONFIG)) {
+                    if (v.soundKey === effect.soundKey && v.audioOverride) {
+                        overrideKey = v.audioOverride;
+                        break;
+                    }
+                }
+            }
+
+            const activeSoundKey = overrideKey || effect.soundKey;
+            window.audioManager.playSound(window.soundHive[activeSoundKey], { force: context.isStreamer, type: 'visual' });
         }
 
         // 2. Visual
@@ -1127,6 +1176,7 @@ class VisualDirector {
         create('dango-overlay', '<video class="dango-video" muted playsinline></video><div class="dango-emoji-container"></div>');
         create('king-overlay', '<img class="king-image" src="" alt="King"><div class="king-snow-container"></div>');
         create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
+        create('gazabu-overlay', '<video class="gazabu-bg" src="" muted playsinline loop></video>'); // [Update] Video Background
     }
 
     _buildRegistry() {
@@ -1141,7 +1191,8 @@ class VisualDirector {
             bangjong: { soundKey: "방종송", execute: (ctx) => this._runBangjong(ctx) },
             dango: { soundKey: "당고", execute: (ctx) => this._runDango(ctx) },
             king: { soundKey: "몬창왕", execute: (ctx) => this._runKing(ctx) },
-            godsong: { soundKey: "갓겜송", execute: (ctx) => this._runGod(ctx) }
+            godsong: { soundKey: "갓겜송", execute: (ctx) => this._runGod(ctx) },
+            gazabu: { soundKey: "가자부송", execute: (ctx) => this._runGazabu(ctx) }
         };
     }
 
@@ -1189,6 +1240,9 @@ class VisualDirector {
             if (conf.backgroundVideoPath && !bgVideo.src.includes(conf.backgroundVideoPath)) {
                 bgVideo.src = conf.backgroundVideoPath;
             }
+            // Apply opacity
+            bgVideo.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
+
             bgVideo.currentTime = 0;
             bgVideo.pause();
         }
@@ -1196,6 +1250,16 @@ class VisualDirector {
         const video = overlay.querySelector('.usho-video-reveal');
         if (video) {
             if (conf.videoPath && !video.src.includes(conf.videoPath)) video.src = conf.videoPath;
+            // Apply opacity to reveal video too? Usually yes if it's part of the 'scene'.
+            // But reveal might be intended to be full visibility?
+            // User asked "Usho also opacity control". 
+            // Let's apply to background video primarily, but maybe reveal video should also be controlled?
+            // Given the context of "opacity control", it likely means the whole effect or the background.
+            // Let's apply to both for consistency, or just background?
+            // Usho effect has a background video and a center reveal video.
+            // Let's apply to both.
+            video.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
+
             video.currentTime = 0; // Reset video
             video.pause();
         }
@@ -2141,6 +2205,39 @@ class VisualDirector {
         });
     }
 
+    _runGazabu(context) {
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.gazabu) ? window.VISUAL_CONFIG.gazabu : {
+            duration: 8000,
+            backgroundPath: './Video/가자부.mp4'
+        };
+
+        const overlay = document.getElementById('gazabu-overlay');
+        if (!overlay) return Promise.resolve();
+
+        // Set background video
+        const bg = overlay.querySelector('.gazabu-bg');
+        if (bg) {
+            bg.src = conf.backgroundPath;
+            bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
+            bg.play().catch(e => console.warn("Gazabu video play failed:", e));
+        }
+
+        return new Promise(resolve => {
+            overlay.classList.add('visible');
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    if (bg) {
+                        bg.pause();
+                        bg.currentTime = 0;
+                        bg.src = "";
+                    }
+                    resolve();
+                }, 600);
+            }, conf.duration);
+        });
+    }
+
     _genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context, conf) {
         const overlay = document.getElementById(overlayId); if (!overlay) return Promise.resolve();
         const parts = this._parseMessage(context.message, kw);
@@ -2509,6 +2606,7 @@ const _processMessageInternal = (msgData) => {
     for (const key in visualMap) {
         if (key === 'dolphin' && !msgData.isStreamer) continue; // [Refinement] !돌핀 is subscription-only (unless streamer)
         if (key === 'bangjong' && !msgData.isStreamer) continue; // [New] !방종송 is streamer-only
+        if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [New] !가자부송 is streamer/donation only
         const effect = visualMap[key];
         const soundKey = effect.soundKey; // e.g. "해골"
         // Check "!해골" or "!skull" (if mapped)
@@ -2748,7 +2846,7 @@ setTimeout(() => {
     // 2. Default Startup Effect (godsong) - Requested by User
     else {
         console.log(`🚀 [Startup] Default Effect: godsong`);
-        window.visualDirector.trigger('usho', {
+        window.visualDirector.trigger('gazabu', {
             message: `✨ 시스템 시작: 갓겜송 이펙트`,
             nickname: "System",
             isStreamer: true

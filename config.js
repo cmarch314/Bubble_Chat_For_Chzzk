@@ -6,7 +6,7 @@ window.CHZZK_CHANNEL_ID = "057a9a03fea9b368eb0c76b9e95e1ae5"; // [Optional] Set 
 window.HIVE_VOLUME_CONFIG = {
     master: 1.0, // Default master volume (1.0 = 100%)
     visual: 1.0, // Multiplier for visual effects
-    sfx: 0.8     // Multiplier for standard sound effects
+    sfx: 0.7     // Multiplier for standard sound effects
 };
 
 
@@ -759,7 +759,15 @@ window.HIVE_SOUND_CONFIG = {
     "아분탕": { "src": "아분탕.mp3", "volume": 0.7 },
     "아종": { "src": "아종.mp3", "volume": 0.7 },
     "이안에기믹": { "src": "이안에기믹.mp3", "volume": 0.7 },
-    "특개": { "src": "특개.mp3", "volume": 0.7 }
+    "특개": { "src": "특개.mp3", "volume": 0.7 },
+
+    // [Batch 6 Additions]
+    "찍으십쇼": { "src": "찍으십쇼.mp3", "volume": 0.7 },
+    "가만느": { "src": "가만느.mp3", "volume": 0.7 },
+    "대공업무": { "src": "대공업무.mp3", "volume": 0.7 },
+    "답은콤푸": { "src": "답은콤푸.mp3", "volume": 0.7 },
+    "삼습만원": { "src": "삼습만원.mp3", "volume": 0.7 },
+    "싸말섹": { "src": "싸말섹.mp3", "volume": 0.7 }
 };
 
 // ==========================================
@@ -784,6 +792,7 @@ window.VISUAL_CONFIG = {
         gifPath: './img/usho.gif', // 사용할 GIF 이미지 경로
         videoPath: './img/usho.mp4', // [New] 7.2초 후 배경으로 사용할 비디오 경로
         backgroundVideoPath: './Video/ushoBack.mp4', // [New] 전체 배경 비디오 (GIF 대체)
+        opacity: 0.8,           // [New] Opacity control (0.0 ~ 1.0)
         duration: 19000,        // 전체 이펙트 지속 시간 (ms)
         scanPhase: 7500,        // 스캔 단계(첫 번째 페이즈) 지속 시간 (ms)
         soundKey: '우쇼'          // 연결된 사운드 키 (config.js의 HIVE_SOUND_CONFIG 참조)
@@ -938,6 +947,18 @@ window.VISUAL_CONFIG = {
         characterCount: 2,      // 화면에 등장할 캐릭터 총 개수 (테오 1, 나나 1)
         characterSize: '35rem', // 캐릭터 크기
         flameSpeed: '2s'        // 테두리 화염 일렁임 속도
+    },
+
+    // ==========================================
+    // [가자부 이펙트] (가자부 댄스/배경)
+    // 화면 전체에 가자부 GIF가 나타나고 전용 BGM(8초)이 재생됩니다.
+    // ==========================================
+    gazabu: {
+        soundKey: '가자부송',      // 연결된 사운드 키 (!가자부송)
+        audioOverride: '가자부풀버전틀어주세요', // [Feature] Override: Play full version instead of short clip
+        backgroundPath: './Video/가자부.mp4',
+        duration: 8000,
+        opacity: 0.8            // [New] Opacity control (0.0 ~ 1.0)
     },
 
     // ==========================================
