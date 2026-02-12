@@ -523,22 +523,21 @@ class AudioManager {
         if (!this.enabled && !force) return;
         const normOriginal = message.normalize('NFC').trim();
 
-        const visualKeys = [];
+        const visualKeys = new Set();
         if (window.HIVE_VISUAL_CONFIG) {
             Object.keys(window.HIVE_VISUAL_CONFIG).forEach(k => {
-                visualKeys.push(k);
+                visualKeys.add(k.normalize('NFC'));
                 const val = window.HIVE_VISUAL_CONFIG[k];
-                if (val && val.soundKey) visualKeys.push(val.soundKey);
+                if (val && val.soundKey) visualKeys.add(val.soundKey.normalize('NFC'));
                 // [New] Also exclude audioOverride keys from chat triggers so they don't double-play or play via chat
-                if (val && val.audioOverride) visualKeys.push(val.audioOverride);
+                if (val && val.audioOverride) visualKeys.add(val.audioOverride.normalize('NFC'));
             });
         }
 
         let allMatches = [];
         Object.keys(this.soundHive).forEach(keyword => {
-            if (visualKeys.includes(keyword)) return;
-
             const normKey = keyword.normalize('NFC');
+            if (visualKeys.has(normKey)) return;
             let searchPos = 0, index;
             while ((index = normOriginal.indexOf(normKey, searchPos)) !== -1) {
                 allMatches.push({
@@ -623,11 +622,18 @@ class AudioManager {
         // [중복 방지] 시각 효과 사운드 중복 차단
         const visualConf = window.HIVE_VISUAL_CONFIG || {};
         const isVisualSound = Object.values(visualConf).some(vConf => {
-            const mapped = (this.soundHive || {})[vConf.soundKey];
-            if (!mapped) return false;
-            const checkSrc = (item) => (typeof item === 'object' ? item.src : item) || "";
-            if (Array.isArray(mapped)) return mapped.some(item => checkSrc(item).includes(fileName));
-            return checkSrc(mapped).includes(fileName);
+            // Check both soundKey and audioOverride
+            const checkKeys = [];
+            if (vConf.soundKey) checkKeys.push(vConf.soundKey);
+            if (vConf.audioOverride) checkKeys.push(vConf.audioOverride);
+
+            return checkKeys.some(k => {
+                const mapped = (this.soundHive || {})[k];
+                if (!mapped) return false;
+                const checkSrc = (item) => (typeof item === 'object' ? item.src : item) || "";
+                if (Array.isArray(mapped)) return mapped.some(item => checkSrc(item).includes(fileName));
+                return checkSrc(mapped).includes(fileName);
+            });
         });
         if (type === 'sfx' && isVisualSound) return;
 
@@ -2881,8 +2887,8 @@ setTimeout(() => {
     // 2. Default Startup Effect (godsong) - Requested by User
     else {
         console.log(`🚀 [Startup] Default Effect: godsong`);
-        window.visualDirector.trigger('gazabu', {
-            message: `✨ 시스템 시작: 갓겜송 이펙트`,
+        window.visualDirector.trigger('mulsulsan', {
+            message: `✨ 시스템 시작: 물설산 이펙트`,
             nickname: "System",
             isStreamer: true
         });
