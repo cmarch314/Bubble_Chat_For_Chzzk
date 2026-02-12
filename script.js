@@ -2652,7 +2652,7 @@ const _processMessageInternal = (msgData) => {
     for (const key in visualMap) {
         if (key === 'dolphin' && !msgData.isStreamer) continue; // [Refinement] !돌핀 is subscription-only (unless streamer)
         if (key === 'bangjong' && !msgData.isStreamer) continue; // [New] !방종송 is streamer-only
-        if (key === 'mulsulsan' && !msgData.isStreamer) continue; // [New] !물설산 is streamer-only
+        if (key === 'mulsulsan' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [Fix] !물설산 is streamer/donation only
         if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [New] !가자부송 is streamer/donation only
         const effect = visualMap[key];
         const soundKey = effect.soundKey; // e.g. "해골"

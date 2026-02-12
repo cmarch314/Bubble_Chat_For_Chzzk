@@ -119,7 +119,6 @@ window.HIVE_SOUND_CONFIG = {
 
     // [Songs / Full Version]
     "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.7 },
-    "물설산씨티풀버전틀어주세요": { "src": "물설산씨티.mp3", "volume": 0.7 },
 
     // [Reactions & Memes]
     "앙": { "src": "Ang.mp3", "volume": 0.7 },
@@ -965,7 +964,7 @@ window.VISUAL_CONFIG = {
         audioOverride: null,
         backgroundPath: './Video/물설산씨티.mp4',
         duration: 35200,
-        opacity: 0.8
+        opacity: 0.9
     },
 
     // ==========================================
