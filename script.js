@@ -1202,7 +1202,7 @@ class VisualDirector {
             king: { soundKey: "몬창왕", execute: (ctx) => this._runKing(ctx) },
             godsong: { soundKey: "갓겜송", execute: (ctx) => this._runGod(ctx) },
             gazabu: { soundKey: "가자부송", execute: (ctx) => this._runGazabu(ctx) },
-            mulsulsan: { soundKey: "물설산송", execute: (ctx) => this._runMulsulsan(ctx) }
+            mulsulsan: { soundKey: "물설산", execute: (ctx) => this._runMulsulsan(ctx) }
         };
     }
 
@@ -2652,6 +2652,7 @@ const _processMessageInternal = (msgData) => {
     for (const key in visualMap) {
         if (key === 'dolphin' && !msgData.isStreamer) continue; // [Refinement] !돌핀 is subscription-only (unless streamer)
         if (key === 'bangjong' && !msgData.isStreamer) continue; // [New] !방종송 is streamer-only
+        if (key === 'mulsulsan' && !msgData.isStreamer) continue; // [New] !물설산 is streamer-only
         if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [New] !가자부송 is streamer/donation only
         const effect = visualMap[key];
         const soundKey = effect.soundKey; // e.g. "해골"
