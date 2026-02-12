@@ -1193,7 +1193,6 @@ class VisualDirector {
             usho: { soundKey: "우쇼", execute: (ctx) => this._runUsho(ctx) },
             skull: { soundKey: "해골", execute: (ctx) => this._runSkull(ctx) },
             couple: { soundKey: "커플", execute: (ctx) => this._runCouple(ctx) },
-            heart: { soundKey: "하트", execute: (ctx) => this._runHeart(ctx) },
             vergil: { soundKey: "버질", execute: (ctx) => this._runVergil(ctx) },
             dolphin: { soundKey: "돌핀", execute: (ctx) => this._runDolphin(ctx) },
             valstrax: { soundKey: "발파", execute: (ctx) => this.triggerValstrax(ctx.message) },
@@ -1706,81 +1705,6 @@ class VisualDirector {
         });
     }
 
-    _runHeart(context) {
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.heart) ? window.VISUAL_CONFIG.heart : {
-            duration: 18000,
-            emojiCount: 15,
-            fontSize: '1.5rem'
-        };
-
-        const id = 'heart-overlay-root'; let ov = document.getElementById(id); if (ov) ov.remove();
-        ov = document.createElement('div'); ov.id = id;
-        ov.className = 'fullscreen-overlay visible';
-        ov.innerHTML = `<div id="heart-overlay" class="visible"><div id="heart-backdrop"></div><div class="heart-emoji-container"></div><div class="heart-flash"></div></div>`;
-        document.body.appendChild(ov);
-
-        const overlay = ov.querySelector('#heart-overlay'), backdrop = ov.querySelector('#heart-backdrop'), flash = ov.querySelector('.heart-flash'), emojiContainer = ov.querySelector('.heart-emoji-container');
-        backdrop.style.opacity = 1;
-
-        let msg = context.message || ""; if (msg.startsWith("!하트")) msg = msg.substring(3).trim();
-        const parts = this._splitMessageIntoParts(msg, 3);
-
-        const phaseTime = (conf.phaseTiming || 11000) - (conf.phaseInitialDelay || 0);
-        const stepTime = phaseTime / 3;
-        const showPart = (text, delay, duration) => {
-            if (!text) return;
-            setTimeout(() => {
-                const el = document.createElement('div'); el.className = 'heart-dreamy-text';
-                el.style.fontSize = `calc(${conf.fontSize} * 6)`; // Proportional to config
-                let html = renderMessageWithEmotesHTML(this._wrapText(text, 200), context.emotes || {}, 1.3);
-
-                el.innerHTML = html;
-                ov.appendChild(el);
-                el.style.animation = "hvn-heart-fadeIn 0.5s forwards";
-                setTimeout(() => { el.style.animation = "hvn-heart-fadeOut 0.5s forwards"; setTimeout(() => el.remove(), 500); }, duration - 500);
-            }, delay);
-        };
-        showPart(parts[0], 0, stepTime + conf.phaseInitialDelay);
-        showPart(parts[1], stepTime + conf.phaseInitialDelay, stepTime);
-        showPart(parts[2], stepTime * 2 + conf.phaseInitialDelay, stepTime);
-
-        return new Promise(resolve => {
-            const startEmojiTime = conf.emojiStartDelay || 11000, endTime = conf.duration;
-            const getRandomFromRanges = (ranges) => {
-                let total = 0; ranges.forEach(r => total += (r[1] - r[0] + 1));
-                let randomIdx = Math.floor(Math.random() * total);
-                for (let r of ranges) {
-                    let size = (r[1] - r[0] + 1); if (randomIdx < size) return String.fromCodePoint(r[0] + randomIdx);
-                    randomIdx -= size;
-                }
-                return String.fromCodePoint(ranges[0][0]);
-            };
-            const allEmojiRanges = conf.emojiPool || [[0x1F600, 0x1F64F], [0x1F9D1, 0x1F9D1], [0x2764, 0x2764], [0x1F493, 0x1F49F], [0x1F466, 0x1F469], [0x1F48B, 0x1F48B]];
-
-            // Generate emojis based on emojiCount (roughly per second)
-            const count = Math.max(1, (endTime - startEmojiTime) / 1000 * conf.emojiCount);
-            const interval = (endTime - startEmojiTime) / count;
-
-            let currentTime = startEmojiTime, emojiCounter = 0, lastWrapper = null;
-
-            for (let i = 0; i < count; i++) {
-                const time = currentTime, currentCount = ++emojiCounter;
-                setTimeout(() => {
-                    const prev = lastWrapper, wrapper = document.createElement('div');
-                    const rRange = (conf.rotationRange !== undefined) ? conf.rotationRange : 30;
-                    wrapper.style.cssText = `position:absolute; left:${Math.random() * 30 + 35}%; top:${Math.random() * 30 + 35}%; transform:translate(-50%,-50%) rotate(${Math.random() * (rRange * 2) - rRange}deg); z-index:15; display:flex; justify-content:center; align-items:center; width:40rem; height:40rem; font-size:${conf.fontSize};`;
-                    const em = document.createElement('div'); em.className = 'heart-dreamy-emoji'; em.innerText = getRandomFromRanges(allEmojiRanges);
-                    wrapper.appendChild(em); emojiContainer.appendChild(wrapper); lastWrapper = wrapper;
-                    if (window.twemoji) twemoji.parse(wrapper);
-                    if (prev) setTimeout(() => { if (prev.parentNode) prev.remove(); }, 100);
-                    if ((currentCount - 1) % 3 === 0) { flash.style.transition = 'none'; flash.style.opacity = '0.3'; setTimeout(() => { flash.style.transition = 'opacity 0.5s'; flash.style.opacity = '0'; }, 100); }
-                    setTimeout(() => { if (wrapper.parentNode) wrapper.remove(); }, 2000);
-                }, time);
-                currentTime += interval;
-            }
-            setTimeout(() => { ov.style.transition = 'opacity 1s'; ov.style.opacity = '0'; setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 1000); }, conf.duration);
-        });
-    }
 
     _runVergil(context) {
         const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.vergil) ? window.VISUAL_CONFIG.vergil : {
