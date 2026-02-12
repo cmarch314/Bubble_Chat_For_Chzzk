@@ -2237,7 +2237,7 @@ class VisualDirector {
             cont.style.left = pos.x;
             cont.style.top = pos.y;
             cont.style.opacity = '0';
-            cont.style.transition = 'opacity 0.5s ease-in-out';
+            cont.style.transition = 'opacity 0.5s ease-in-out, filter 1s ease-in-out';
         });
 
         const shuffle = (array) => array.sort(() => Math.random() - 0.5);
