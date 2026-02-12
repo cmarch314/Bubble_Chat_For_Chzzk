@@ -2217,6 +2217,7 @@ class VisualDirector {
         const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.random_dance) ? window.VISUAL_CONFIG.random_dance : {
             duration: 18000,
             videoWidth: '25rem',
+            cycleInterval: 6000,
             opacity: 0.9,
             positions: { left: { x: '15%', y: '50%' }, right: { x: '85%', y: '50%' } },
             videoPool: []
@@ -2282,7 +2283,7 @@ class VisualDirector {
             overlay.classList.remove('rd-bloom'); // Reset bloom
 
             cycleVideos(); // Initial
-            const interval = setInterval(cycleVideos, 6000);
+            const interval = setInterval(cycleVideos, conf.cycleInterval || 6000);
 
             // [New] Bloom effect (뽀샤시) start at 6s
             const bloomTimeout = setTimeout(() => {
