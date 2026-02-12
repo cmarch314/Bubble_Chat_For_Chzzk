@@ -534,12 +534,16 @@ class AudioManager {
             });
         }
 
+        const lowerOriginal = normOriginal.toLowerCase(); // Case-insensitive matching
+
         let allMatches = [];
         Object.keys(this.soundHive).forEach(keyword => {
             const normKey = keyword.normalize('NFC');
+            const lowerKey = normKey.toLowerCase();
             if (visualKeys.has(normKey)) return;
+
             let searchPos = 0, index;
-            while ((index = normOriginal.indexOf(normKey, searchPos)) !== -1) {
+            while ((index = lowerOriginal.indexOf(lowerKey, searchPos)) !== -1) {
                 allMatches.push({
                     startIndex: index,
                     endIndex: index + normKey.length,
@@ -2687,16 +2691,19 @@ const _processMessageInternal = (msgData) => {
     const visualMap = window.visualDirector.registry; // Access registry directly or via getter
 
     // Check strict matches "!명령어"
+    const lowerTrimmedMsg = updatedTrimmedMsg.toLowerCase();
     for (const key in visualMap) {
-        if (key === 'dolphin' && !msgData.isStreamer) continue; // [Refinement] !돌핀 is subscription-only (unless streamer)
-        if (key === 'bangjong' && !msgData.isStreamer) continue; // [New] !방종송 is streamer-only
-        if (key === 'mulsulsan' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [Fix] !물설산 is streamer/donation only
-        if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [New] !가자부송 is streamer/donation only
-        if (key === 'random_dance' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [New] !랜덤댄스 is streamer/donation only
+        if (key === 'dolphin' && !msgData.isStreamer) continue;
+        if (key === 'bangjong' && !msgData.isStreamer) continue;
+        if (key === 'mulsulsan' && (!msgData.isStreamer && !msgData.isDonation)) continue;
+        if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation)) continue;
+        if (key === 'random_dance' && (!msgData.isStreamer && !msgData.isDonation)) continue;
         const effect = visualMap[key];
         const soundKey = effect.soundKey; // e.g. "해골"
-        // Check "!해골" or "!skull" (if mapped)
-        if (updatedTrimmedMsg.startsWith("!" + soundKey)) {
+        const lowerSoundKey = soundKey.toLowerCase();
+
+        // Check "!해골" or "!skull" (case-insensitive)
+        if (lowerTrimmedMsg.startsWith("!" + lowerSoundKey)) {
             foundKeyword = key;
             break;
         }
