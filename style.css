@@ -4393,7 +4393,7 @@ body {
   height: 100vh;
   z-index: var(--z-overlay-premium);
   opacity: 0;
-  transition: opacity 0.5s, filter 1s ease-in-out;
+  transition: opacity 0.3s, filter 0.3s ease-in-out;
   pointer-events: none;
   display: flex;
 }
@@ -4413,15 +4413,22 @@ body {
   opacity: 0;
   mix-blend-mode: soft-light;
   backdrop-filter: blur(2px);
-  transition: opacity 1.5s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
   pointer-events: none;
   z-index: 5;
 }
 
-/* Film Grain Layer for Random Dance */
-.rd-grain-layer {
+/* Cinematic Movie Filter - Vignette & Color Grading */
+.rd-vignette-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, var(--rd-vignette-op, 0.6)) 100%);
   opacity: 0;
-  transition: opacity 1s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
   z-index: 6;
 }
 
@@ -4429,12 +4436,14 @@ body {
   opacity: var(--rd-bloom-op, 0.5);
 }
 
-#random-dance-overlay.rd-bloom .rd-grain-layer {
-  opacity: var(--rd-grain-op, 0.3);
+#random-dance-overlay.rd-bloom .rd-vignette-layer {
+  opacity: 1;
 }
 
 #random-dance-overlay.rd-bloom .rd-container {
-  filter: brightness(var(--rd-vid-bright, 1.1)) contrast(1.1);
+  /* Cinematic grading: Sepia + Contrast + Custom Brightness */
+  filter:
+    brightness(var(--rd-vid-bright, 1.1)) contrast(var(--rd-contrast, 1.25)) sepia(var(--rd-sepia, 0.15)) drop-shadow(0 0 15px rgba(0, 0, 0, 0.5));
 }
 
 .rd-container {
