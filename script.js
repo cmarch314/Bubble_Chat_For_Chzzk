@@ -1177,6 +1177,7 @@ class VisualDirector {
         create('king-overlay', '<img class="king-image" src="" alt="King"><div class="king-snow-container"></div>');
         create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
         create('gazabu-overlay', '<video class="gazabu-bg" src="" muted playsinline loop></video>'); // [Update] Video Background
+        create('mulsulsan-overlay', '<video class="mulsulsan-bg" src="" muted playsinline loop></video>'); // [New] Mulsulsan Background
     }
 
     _buildRegistry() {
@@ -1192,7 +1193,8 @@ class VisualDirector {
             dango: { soundKey: "당고", execute: (ctx) => this._runDango(ctx) },
             king: { soundKey: "몬창왕", execute: (ctx) => this._runKing(ctx) },
             godsong: { soundKey: "갓겜송", execute: (ctx) => this._runGod(ctx) },
-            gazabu: { soundKey: "가자부송", execute: (ctx) => this._runGazabu(ctx) }
+            gazabu: { soundKey: "가자부송", execute: (ctx) => this._runGazabu(ctx) },
+            mulsulsan: { soundKey: "물설산송", execute: (ctx) => this._runMulsulsan(ctx) }
         };
     }
 
@@ -2220,6 +2222,39 @@ class VisualDirector {
             bg.src = conf.backgroundPath;
             bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
             bg.play().catch(e => console.warn("Gazabu video play failed:", e));
+        }
+
+        return new Promise(resolve => {
+            overlay.classList.add('visible');
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    if (bg) {
+                        bg.pause();
+                        bg.currentTime = 0;
+                        bg.src = "";
+                    }
+                    resolve();
+                }, 600);
+            }, conf.duration);
+        });
+    }
+
+    _runMulsulsan(context) {
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.mulsulsan) ? window.VISUAL_CONFIG.mulsulsan : {
+            duration: 10000,
+            backgroundPath: './Video/물설산씨티.mp4'
+        };
+
+        const overlay = document.getElementById('mulsulsan-overlay');
+        if (!overlay) return Promise.resolve();
+
+        // Set background video
+        const bg = overlay.querySelector('.mulsulsan-bg');
+        if (bg) {
+            bg.src = conf.backgroundPath;
+            bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
+            bg.play().catch(e => console.warn("Mulsulsan video play failed:", e));
         }
 
         return new Promise(resolve => {

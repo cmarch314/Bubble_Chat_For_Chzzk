@@ -960,6 +960,13 @@ window.VISUAL_CONFIG = {
         duration: 8000,
         opacity: 0.8            // [New] Opacity control (0.0 ~ 1.0)
     },
+    mulsulsan: {
+        soundKey: '물설산송',
+        audioOverride: '물설산씨티풀버전틀어주세요',
+        backgroundPath: './Video/물설산씨티.mp4',
+        duration: 10000,
+        opacity: 0.8
+    },
 
     // ==========================================
     // [당고 이펙트] (비디오 + 회전 이모지)
