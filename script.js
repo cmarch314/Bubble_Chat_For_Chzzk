@@ -1186,7 +1186,7 @@ class VisualDirector {
         create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
         create('gazabu-overlay', '<video class="gazabu-bg" src="" muted playsinline loop></video>'); // [Update] Video Background
         create('mulsulsan-overlay', '<video class="mulsulsan-bg" src="" playsinline loop></video>'); // [New] Mulsulsan Background (Unmuted for Audio)
-        create('random-dance-overlay', '<div class="rd-container rd-left"></div><div class="rd-container rd-right"></div><div class="rd-bloom-layer"></div><div class="rd-grain-layer film-grain"></div>');
+        create('random-dance-overlay', '<div class="rd-container rd-left"></div><div class="rd-container rd-right"></div><div class="rd-bloom-layer"></div><div class="rd-vignette-layer"></div>');
     }
 
     _buildRegistry() {
@@ -2221,16 +2221,20 @@ class VisualDirector {
             cycleInterval: 6000,
             bloomOpacity: 0.5,
             videoBrightness: 1.1,
-            grainOpacity: 0.3,
+            vignetteOpacity: 0.6,
+            sepiaIntensity: 0.15,
+            filmContrast: 1.25,
             opacity: 0.9,
             positions: { left: { x: '15%', y: '50%' }, right: { x: '85%', y: '50%' } },
             videoPool: []
         };
 
-        // Apply dynamic visual variables
+        // Apply cinematic visual variables
         overlay.style.setProperty('--rd-bloom-op', conf.bloomOpacity || 0.5);
-        overlay.style.setProperty('--rd-grain-op', conf.grainOpacity || 0.3);
         overlay.style.setProperty('--rd-vid-bright', conf.videoBrightness || 1.1);
+        overlay.style.setProperty('--rd-vignette-op', conf.vignetteOpacity || 0.6);
+        overlay.style.setProperty('--rd-sepia', conf.sepiaIntensity || 0.15);
+        overlay.style.setProperty('--rd-contrast', conf.filmContrast || 1.25);
 
         const leftContainer = overlay.querySelector('.rd-left');
         const rightContainer = overlay.querySelector('.rd-right');

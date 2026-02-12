@@ -1007,7 +1007,9 @@ window.VISUAL_CONFIG = {
         videoHeight: '40rem',
         bloomOpacity: 0.5,
         videoBrightness: 1.1,
-        grainOpacity: 0.3,
+        vignetteOpacity: 0.6,
+        sepiaIntensity: 0.15,
+        filmContrast: 1.25,
         opacity: 0.9,
         positions: {
             left: { x: '15%', y: '50%' },
