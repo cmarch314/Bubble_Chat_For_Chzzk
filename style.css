@@ -4404,7 +4404,7 @@ body {
 
 /* 뽀샤시 (Bloom) Effect Triggered by .rd-bloom class */
 #random-dance-overlay.rd-bloom {
-  filter: brightness(1.2) contrast(1.1) blur(3px);
+  filter: brightness(1.3) saturate(1.5) contrast(1.1) blur(0.8px);
 }
 
 .rd-container {
