@@ -1186,7 +1186,7 @@ class VisualDirector {
         create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
         create('gazabu-overlay', '<video class="gazabu-bg" src="" muted playsinline loop></video>'); // [Update] Video Background
         create('mulsulsan-overlay', '<video class="mulsulsan-bg" src="" playsinline loop></video>'); // [New] Mulsulsan Background (Unmuted for Audio)
-        create('random-dance-overlay', '<div class="rd-container rd-left"></div><div class="rd-container rd-right"></div>');
+        create('random-dance-overlay', '<div class="rd-container rd-left"></div><div class="rd-container rd-right"></div><div class="rd-bloom-layer"></div>');
     }
 
     _buildRegistry() {
