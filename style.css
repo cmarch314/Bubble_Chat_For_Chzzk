@@ -4381,3 +4381,37 @@ body {
   height: 100%;
   object-fit: cover;
 }
+
+/* ============================================================================
+   [New] Random Dance Effect
+   ============================================================================ */
+#random-dance-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--z-overlay-premium);
+  opacity: 0;
+  transition: opacity 0.5s, filter 1s ease-in-out;
+  pointer-events: none;
+  display: flex;
+}
+
+#random-dance-overlay.visible {
+  opacity: 1;
+}
+
+/* 뽀샤시 (Bloom) Effect Triggered by .rd-bloom class */
+#random-dance-overlay.rd-bloom {
+  filter: brightness(1.2) contrast(1.1) blur(3px);
+}
+
+.rd-container {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
