@@ -4351,3 +4351,33 @@ body {
     opacity: 0;
   }
 }
+
+/* ============================================================================
+   [New] Gazabu Effect (Fullscreen BG)
+   ============================================================================ */
+.gazabu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--z-overlay-premium);
+  opacity: 0;
+  transition: opacity 0.5s;
+  pointer-events: none;
+  overflow: hidden;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gazabu-overlay.visible {
+  opacity: 1;
+}
+
+.gazabu-bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

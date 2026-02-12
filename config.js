@@ -488,6 +488,10 @@ window.HIVE_SOUND_CONFIG = {
     "후달리냐": { "src": "후달리냐.mp3", "volume": 0.7 },
     "삿갓": { "src": "삿갓이요.mp3", "volume": 0.7 },
     "ㅆㅅㄲ": { "src": "ㅅㅅㄲ.mp3", "volume": 0.7 },
+    "찍으십쇼": { "src": "찍으십쇼.mp3", "volume": 0.7 },
+    "대공업무": { "src": "대공업무.mp3", "volume": 0.7 },
+    "답은콤푸": { "src": "답은콤푸.mp3", "volume": 0.7 },
+    "삼습만원": { "src": "삼습만원.mp3", "volume": 0.7 },
 
 
 
@@ -762,11 +766,7 @@ window.HIVE_SOUND_CONFIG = {
     "특개": { "src": "특개.mp3", "volume": 0.7 },
 
     // [Batch 6 Additions]
-    "찍으십쇼": { "src": "찍으십쇼.mp3", "volume": 0.7 },
     "가만느": { "src": "가만느.mp3", "volume": 0.7 },
-    "대공업무": { "src": "대공업무.mp3", "volume": 0.7 },
-    "답은콤푸": { "src": "답은콤푸.mp3", "volume": 0.7 },
-    "삼습만원": { "src": "삼습만원.mp3", "volume": 0.7 },
     "싸말섹": { "src": "싸말섹.mp3", "volume": 0.7 }
 };
 
