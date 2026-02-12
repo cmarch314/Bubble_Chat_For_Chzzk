@@ -2277,12 +2277,20 @@ class VisualDirector {
 
         return new Promise(resolve => {
             overlay.classList.add('visible');
+            overlay.classList.remove('rd-bloom'); // Reset bloom
+
             cycleVideos(); // Initial
             const interval = setInterval(cycleVideos, 6000);
 
+            // [New] Bloom effect (뽀샤시) start at 6s
+            const bloomTimeout = setTimeout(() => {
+                overlay.classList.add('rd-bloom');
+            }, 6000);
+
             setTimeout(() => {
                 clearInterval(interval);
-                overlay.classList.remove('visible');
+                clearTimeout(bloomTimeout);
+                overlay.classList.remove('visible', 'rd-bloom');
                 leftContainer.innerHTML = '';
                 rightContainer.innerHTML = '';
                 resolve();
@@ -2899,9 +2907,9 @@ setTimeout(() => {
     }
     // 2. Default Startup Effect (mulsulsan)
     else {
-        console.log(`🚀 [Startup] Default Effect: mulsulsan`);
-        window.visualDirector.trigger('mulsulsan', {
-            message: `✨ 시스템 시작: 물설산 이펙트`,
+        console.log(`🚀 [Startup] Default Effect: random_dance`);
+        window.visualDirector.trigger('random_dance', {
+            message: `✨ 시스템 시작: 랜덤 댄스 이펙트`,
             nickname: "System",
             isStreamer: true
         });

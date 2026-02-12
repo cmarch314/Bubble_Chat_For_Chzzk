@@ -1001,7 +1001,7 @@ window.VISUAL_CONFIG = {
     },
     random_dance: {
         soundKey: '랜덤댄스',
-        duration: 48000, // Matching the music length approx (48s usually for these clips)
+        duration: 18000,
         videoSize: '35rem',
         opacity: 0.9,
         positions: {
