@@ -1004,8 +1004,8 @@ window.VISUAL_CONFIG = {
         soundKey: '랜덤댄스',
         duration: 18000,
         cycleInterval: 6100,
-        videoWidth: '22.5rem',
-        videoHeight: '40rem',
+        videoWidth: '28rem',
+        videoHeight: '50rem',
         bloomOpacity: 0.5,
         videoBrightness: 1.03,
         vignetteOpacity: 0.6,
@@ -1013,8 +1013,8 @@ window.VISUAL_CONFIG = {
         filmContrast: 1.25,
         opacity: 0.9,
         positions: {
-            left: { x: '20%', y: '50%' },
-            right: { x: '80%', y: '50%' }
+            left: { x: '22%', y: '50%' },
+            right: { x: '78%', y: '50%' }
         },
         videoPool: [
             'rd_001.mp4', 'rd_002.mp4', 'rd_003.mp4', 'rd_004.mp4', 'rd_005.mp4', 'rd_006.mp4', 'rd_007.mp4', 'rd_008.mp4', 'rd_009.mp4', 'rd_010.mp4',
@@ -1026,7 +1026,8 @@ window.VISUAL_CONFIG = {
             'rd_061.mp4', 'rd_062.mp4', 'rd_063.mp4', 'rd_064.mp4', 'rd_065.mp4', 'rd_066.mp4', 'rd_067.mp4', 'rd_068.mp4', 'rd_069.mp4', 'rd_070.mp4',
             'rd_071.mp4', 'rd_072.mp4', 'rd_073.mp4', 'rd_074.mp4', 'rd_075.mp4', 'rd_076.mp4', 'rd_077.mp4', 'rd_078.mp4', 'rd_079.mp4', 'rd_080.mp4',
             'rd_081.mp4', 'rd_082.mp4', 'rd_083.mp4', 'rd_084.mp4', 'rd_085.mp4', 'rd_086.mp4', 'rd_087.mp4', 'rd_088.mp4', 'rd_089.mp4', 'rd_090.mp4',
-            'rd_091.mp4', 'rd_092.mp4', 'rd_093.mp4', 'rd_094.mp4', 'rd_095.mp4', 'rd_096.mp4', 'rd_097.mp4'
+            'rd_091.mp4', 'rd_092.mp4', 'rd_093.mp4', 'rd_094.mp4', 'rd_095.mp4', 'rd_096.mp4', 'rd_097.mp4', 'rd_098.mp4', 'rd_099.mp4', 'rd_100.mp4',
+            'rd_101.mp4', 'rd_102.mp4'
         ]
     }
 };
