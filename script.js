@@ -2216,7 +2216,7 @@ class VisualDirector {
 
         const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.random_dance) ? window.VISUAL_CONFIG.random_dance : {
             duration: 18000,
-            videoSize: '35rem',
+            videoWidth: '25rem',
             opacity: 0.9,
             positions: { left: { x: '15%', y: '50%' }, right: { x: '85%', y: '50%' } },
             videoPool: []
@@ -2229,8 +2229,10 @@ class VisualDirector {
         [leftContainer, rightContainer].forEach((cont, idx) => {
             const side = idx === 0 ? 'left' : 'right';
             const pos = conf.positions[side];
-            cont.style.width = conf.videoSize;
-            cont.style.height = conf.videoSize;
+            const width = conf.videoWidth || '25rem';
+            // Vertical Ratio (9:16) -> height = width * 16 / 9
+            cont.style.width = width;
+            cont.style.height = `calc(${width} * 16 / 9)`;
             cont.style.left = pos.x;
             cont.style.top = pos.y;
             cont.style.opacity = '0';
