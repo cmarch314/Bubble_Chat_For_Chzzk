@@ -2239,6 +2239,10 @@ class VisualDirector {
         const leftContainer = overlay.querySelector('.rd-left');
         const rightContainer = overlay.querySelector('.rd-right');
 
+        // [Fix] Explicitly clear containers at the start to prevent ghosting from previous runs Boris again
+        leftContainer.innerHTML = '';
+        rightContainer.innerHTML = '';
+
         // Apply shared styles
         [leftContainer, rightContainer].forEach((cont, idx) => {
             const side = idx === 0 ? 'left' : 'right';
@@ -2262,12 +2266,14 @@ class VisualDirector {
             video.autoplay = true;
             video.loop = true;
             video.muted = true;
+            video.preload = 'auto'; // Boris again
             video.style.width = '100%';
             video.style.height = '100%';
             video.style.objectFit = 'cover';
             video.style.borderRadius = '20px';
             video.style.boxShadow = '0 0 20px rgba(255,105,180,0.5)';
             container.appendChild(video);
+            video.load(); // Boris again
         };
 
         const cycleVideos = () => {
@@ -2305,9 +2311,13 @@ class VisualDirector {
                 clearInterval(interval);
                 clearTimeout(bloomTimeout);
                 overlay.classList.remove('visible', 'rd-bloom');
-                leftContainer.innerHTML = '';
-                rightContainer.innerHTML = '';
-                resolve();
+
+                // [Fix] Extra delay before resolve to ensure 0.3s fade-out is complete Boris again
+                setTimeout(() => {
+                    leftContainer.innerHTML = '';
+                    rightContainer.innerHTML = '';
+                    resolve();
+                }, 400);
             }, conf.duration);
         });
     }
