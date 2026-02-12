@@ -112,6 +112,7 @@ window.HIVE_SOUND_CONFIG = {
     "우쇼": { "src": "Usho.mp3", "volume": 0.7 },
     "발파": { "src": "ValstraxVoiceCover.mp3", "volume": 0.7 },
     "방종송": { "src": "방종송.mp3", "volume": 0.7 },
+    "랜덤댄스": { "src": "RandomDance.mp3", "volume": 0.7 },
     "해골": { "src": "skullmeme.mp3", "volume": 0.7 },
     "당고": { "src": "dango.mp4", "volume": 0.7 },
     "갓겜송": { "src": "갓겜합시다FULL.mp3", "volume": 0.4 },
@@ -997,6 +998,44 @@ window.VISUAL_CONFIG = {
         delayedEmojiPool: ["💩"], // 나중에 섞여서 내려올 이모지들
         delayedEmojiCount: 60, // 똥 폭풍 개체 수
         delayedEmojiDelay: 11000  // 똥 폭풍이 시작될 지연 시간 (밀리초, 11초)
+    },
+    random_dance: {
+        soundKey: '랜덤댄스',
+        duration: 48000, // Matching the music length approx (48s usually for these clips)
+        videoSize: '35rem',
+        opacity: 0.9,
+        positions: {
+            left: { x: '15%', y: '50%' },
+            right: { x: '85%', y: '50%' }
+        },
+        videoPool: [
+            'Olivia.mp4', 'RiseTwerk.mp4', 'SunbreakTwerk.mp4', 'aibo Twerk 2.mp4', 'aibo best1.mp4', 'aibo best2.mp4',
+            'aibo mushroom1.mp4', 'aibo mushroom2.mp4', 'aibo slow 1.mp4', 'aibo twerk 3.mp4', 'aibo twirk.mp4',
+            'aibo v2-1.mp4', 'aibo v2-2.mp4', 'aibo v2-7.mp4', 'aibo5.mp4',
+            'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (1).mp4', 'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (2).mp4',
+            'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (4).mp4', 'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (5).mp4',
+            'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (6).mp4', 'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea.mp4',
+            'grok-video-48b9321e-c37b-400c-8287-8d5ba83bfb92 (1).mp4', 'grok-video-48b9321e-c37b-400c-8287-8d5ba83bfb92.mp4',
+            'grok-video-51e6934a-e638-4d1a-a131-ef2ff8ec2ff3 (1).mp4', 'grok-video-51e6934a-e638-4d1a-a131-ef2ff8ec2ff3.mp4',
+            'grok-video-5a4744f0-dcd0-4263-a2b2-5af1f7a892a5 (1).mp4', 'grok-video-5a4744f0-dcd0-4263-a2b2-5af1f7a892a5.mp4',
+            'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (1).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (2) wink.mp4',
+            'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (2).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (3).mp4',
+            'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (4).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d.mp4',
+            'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (1).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (2).mp4',
+            'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (3).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (4).mp4',
+            'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (5).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (6).mp4',
+            'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9.mp4', 'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (1).mp4',
+            'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (2).mp4', 'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (3).mp4',
+            'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (4).mp4', 'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520.mp4',
+            'grok-video-7b6b8333-12ca-4cdb-aa13-0ac7b3afdd73 (1).mp4', 'grok-video-7b6b8333-12ca-4cdb-aa13-0ac7b3afdd73 (2).mp4',
+            'grok-video-7b6b8333-12ca-4cdb-aa13-0ac7b3afdd73 (3).mp4', 'grok-video-7b6b8333-12ca-4cdb-aa13-0ac7b3afdd73.mp4',
+            'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (1).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (2).mp4',
+            'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (3).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (4).mp4',
+            'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (7).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f.mp4',
+            'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (1).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (2).mp4',
+            'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (3).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (4).mp4',
+            'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692.mp4'
+        ]
     }
 };
 

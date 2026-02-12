@@ -1186,6 +1186,7 @@ class VisualDirector {
         create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
         create('gazabu-overlay', '<video class="gazabu-bg" src="" muted playsinline loop></video>'); // [Update] Video Background
         create('mulsulsan-overlay', '<video class="mulsulsan-bg" src="" playsinline loop></video>'); // [New] Mulsulsan Background (Unmuted for Audio)
+        create('random-dance-overlay', '<div class="rd-container rd-left"></div><div class="rd-container rd-right"></div>');
     }
 
     _buildRegistry() {
@@ -1201,7 +1202,8 @@ class VisualDirector {
             king: { soundKey: "몬창왕", execute: (ctx) => this._runKing(ctx) },
             godsong: { soundKey: "갓겜송", execute: (ctx) => this._runGod(ctx) },
             gazabu: { soundKey: "가자부송", execute: (ctx) => this._runGazabu(ctx) },
-            mulsulsan: { soundKey: "물설산", execute: (ctx) => this._runMulsulsan(ctx) }
+            mulsulsan: { soundKey: "물설산", execute: (ctx) => this._runMulsulsan(ctx) },
+            random_dance: { soundKey: "랜덤댄스", execute: (ctx) => this._runRandomDance(ctx) }
         };
     }
 
@@ -2208,6 +2210,86 @@ class VisualDirector {
         });
     }
 
+    _runRandomDance(context) {
+        const overlay = document.getElementById('random-dance-overlay');
+        if (!overlay) return Promise.resolve();
+
+        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.random_dance) ? window.VISUAL_CONFIG.random_dance : {
+            duration: 18000,
+            videoSize: '35rem',
+            opacity: 0.9,
+            positions: { left: { x: '15%', y: '50%' }, right: { x: '85%', y: '50%' } },
+            videoPool: []
+        };
+
+        const leftContainer = overlay.querySelector('.rd-left');
+        const rightContainer = overlay.querySelector('.rd-right');
+
+        // Apply shared styles
+        [leftContainer, rightContainer].forEach((cont, idx) => {
+            const side = idx === 0 ? 'left' : 'right';
+            const pos = conf.positions[side];
+            cont.style.width = conf.videoSize;
+            cont.style.height = conf.videoSize;
+            cont.style.left = pos.x;
+            cont.style.top = pos.y;
+            cont.style.opacity = '0';
+            cont.style.transition = 'opacity 0.5s ease-in-out';
+        });
+
+        const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+        const selectedVideos = shuffle([...conf.videoPool]).slice(0, 6);
+        let currentIndex = 0;
+
+        const spawnVideo = (container, videoName) => {
+            container.innerHTML = '';
+            const video = document.createElement('video');
+            video.src = `./Video/RandomDance/${videoName}`;
+            video.autoplay = true;
+            video.loop = true;
+            video.muted = true;
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.borderRadius = '20px';
+            video.style.boxShadow = '0 0 20px rgba(255,105,180,0.5)';
+            container.appendChild(video);
+        };
+
+        const cycleVideos = () => {
+            // Fade out
+            leftContainer.style.opacity = '0';
+            rightContainer.style.opacity = '0';
+
+            setTimeout(() => {
+                const vid1 = selectedVideos[currentIndex];
+                const vid2 = selectedVideos[(currentIndex + 1) % selectedVideos.length];
+                spawnVideo(leftContainer, vid1);
+                spawnVideo(rightContainer, vid2);
+
+                // Fade in
+                leftContainer.style.opacity = (conf.opacity || 0.9).toString();
+                rightContainer.style.opacity = (conf.opacity || 0.9).toString();
+
+                currentIndex = (currentIndex + 2) % selectedVideos.length;
+            }, 500);
+        };
+
+        return new Promise(resolve => {
+            overlay.classList.add('visible');
+            cycleVideos(); // Initial
+            const interval = setInterval(cycleVideos, 6000);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                overlay.classList.remove('visible');
+                leftContainer.innerHTML = '';
+                rightContainer.innerHTML = '';
+                resolve();
+            }, conf.duration);
+        });
+    }
+
     _genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context, conf) {
         const overlay = document.getElementById(overlayId); if (!overlay) return Promise.resolve();
         const parts = this._parseMessage(context.message, kw);
@@ -2578,6 +2660,7 @@ const _processMessageInternal = (msgData) => {
         if (key === 'bangjong' && !msgData.isStreamer) continue; // [New] !방종송 is streamer-only
         if (key === 'mulsulsan' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [Fix] !물설산 is streamer/donation only
         if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [New] !가자부송 is streamer/donation only
+        if (key === 'random_dance' && (!msgData.isStreamer && !msgData.isDonation)) continue; // [New] !랜덤댄스 is streamer/donation only
         const effect = visualMap[key];
         const soundKey = effect.soundKey; // e.g. "해골"
         // Check "!해골" or "!skull" (if mapped)
@@ -2814,9 +2897,9 @@ setTimeout(() => {
             isStreamer: true
         });
     }
-    // 2. Default Startup Effect (godsong) - Requested by User
+    // 2. Default Startup Effect (mulsulsan)
     else {
-        console.log(`🚀 [Startup] Default Effect: godsong`);
+        console.log(`🚀 [Startup] Default Effect: mulsulsan`);
         window.visualDirector.trigger('mulsulsan', {
             message: `✨ 시스템 시작: 물설산 이펙트`,
             nickname: "System",
