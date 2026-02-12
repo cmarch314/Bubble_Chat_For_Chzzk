@@ -1130,7 +1130,9 @@ class VisualDirector {
             }
 
             const activeSoundKey = overrideKey || effect.soundKey;
-            window.audioManager.playSound(window.soundHive[activeSoundKey], { force: context.isStreamer, type: 'visual' });
+            if (activeSoundKey) {
+                window.audioManager.playSound(window.soundHive[activeSoundKey], { force: context.isStreamer, type: 'visual' });
+            }
         }
 
         // 2. Visual
@@ -1183,7 +1185,7 @@ class VisualDirector {
         create('king-overlay', '<img class="king-image" src="" alt="King"><div class="king-snow-container"></div>');
         create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
         create('gazabu-overlay', '<video class="gazabu-bg" src="" muted playsinline loop></video>'); // [Update] Video Background
-        create('mulsulsan-overlay', '<video class="mulsulsan-bg" src="" muted playsinline loop></video>'); // [New] Mulsulsan Background
+        create('mulsulsan-overlay', '<video class="mulsulsan-bg" src="" playsinline loop></video>'); // [New] Mulsulsan Background (Unmuted for Audio)
     }
 
     _buildRegistry() {
@@ -2260,6 +2262,9 @@ class VisualDirector {
         if (bg) {
             bg.src = conf.backgroundPath;
             bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
+            // [Audio] Apply volume from visual audio settings if possible
+            const visualVol = (window.audioManager && window.audioManager.volumeConfig) ? window.audioManager.volumeConfig.visual : 1.0;
+            bg.volume = visualVol * (conf.videoVolume || 1.0);
             bg.play().catch(e => console.warn("Mulsulsan video play failed:", e));
         }
 

@@ -961,10 +961,10 @@ window.VISUAL_CONFIG = {
         opacity: 0.8            // [New] Opacity control (0.0 ~ 1.0)
     },
     mulsulsan: {
-        soundKey: '물설산송',
-        audioOverride: '물설산씨티풀버전틀어주세요',
+        soundKey: null,
+        audioOverride: null,
         backgroundPath: './Video/물설산씨티.mp4',
-        duration: 10000,
+        duration: 35200,
         opacity: 0.8
     },
 
