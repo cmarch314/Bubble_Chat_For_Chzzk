@@ -1186,7 +1186,7 @@ class VisualDirector {
         create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
         create('gazabu-overlay', '<video class="gazabu-bg" src="" muted playsinline loop></video>'); // [Update] Video Background
         create('mulsulsan-overlay', '<video class="mulsulsan-bg" src="" playsinline loop></video>'); // [New] Mulsulsan Background (Unmuted for Audio)
-        create('random-dance-overlay', '<div class="rd-container rd-left"></div><div class="rd-container rd-right"></div><div class="rd-bloom-layer"></div>');
+        create('random-dance-overlay', '<div class="rd-container rd-left"></div><div class="rd-container rd-right"></div><div class="rd-bloom-layer"></div><div class="rd-grain-layer film-grain"></div>');
     }
 
     _buildRegistry() {
@@ -2216,12 +2216,21 @@ class VisualDirector {
 
         const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.random_dance) ? window.VISUAL_CONFIG.random_dance : {
             duration: 18000,
-            videoWidth: '25rem',
+            videoWidth: '22rem',
+            videoHeight: '39rem',
             cycleInterval: 6000,
+            bloomOpacity: 0.5,
+            videoBrightness: 1.1,
+            grainOpacity: 0.3,
             opacity: 0.9,
             positions: { left: { x: '15%', y: '50%' }, right: { x: '85%', y: '50%' } },
             videoPool: []
         };
+
+        // Apply dynamic visual variables
+        overlay.style.setProperty('--rd-bloom-op', conf.bloomOpacity || 0.5);
+        overlay.style.setProperty('--rd-grain-op', conf.grainOpacity || 0.3);
+        overlay.style.setProperty('--rd-vid-bright', conf.videoBrightness || 1.1);
 
         const leftContainer = overlay.querySelector('.rd-left');
         const rightContainer = overlay.querySelector('.rd-right');
@@ -2230,10 +2239,8 @@ class VisualDirector {
         [leftContainer, rightContainer].forEach((cont, idx) => {
             const side = idx === 0 ? 'left' : 'right';
             const pos = conf.positions[side];
-            const width = conf.videoWidth || '25rem';
-            // Vertical Ratio (9:16) -> height = width * 16 / 9
-            cont.style.width = width;
-            cont.style.height = `calc(${width} * 16 / 9)`;
+            cont.style.width = conf.videoWidth || '22rem';
+            cont.style.height = conf.videoHeight || '39rem';
             cont.style.left = pos.x;
             cont.style.top = pos.y;
             cont.style.opacity = '0';

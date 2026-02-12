@@ -4418,13 +4418,23 @@ body {
   z-index: 5;
 }
 
+/* Film Grain Layer for Random Dance */
+.rd-grain-layer {
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  z-index: 6;
+}
+
 #random-dance-overlay.rd-bloom .rd-bloom-layer {
-  opacity: 0.5;
+  opacity: var(--rd-bloom-op, 0.5);
+}
+
+#random-dance-overlay.rd-bloom .rd-grain-layer {
+  opacity: var(--rd-grain-op, 0.3);
 }
 
 #random-dance-overlay.rd-bloom .rd-container {
-  /* Subtle brightness boost on the videos themselves to complement the layer */
-  filter: brightness(1.1) contrast(1.1);
+  filter: brightness(var(--rd-vid-bright, 1.1)) contrast(1.1);
 }
 
 .rd-container {

@@ -1002,8 +1002,12 @@ window.VISUAL_CONFIG = {
     random_dance: {
         soundKey: '랜덤댄스',
         duration: 18000,
-        cycleInterval: 6000,
-        videoWidth: '22rem', // Width adjusted for 9:16 ratio (e.g., 22rem width -> ~39rem height)
+        cycleInterval: 5830,
+        videoWidth: '22.5rem',
+        videoHeight: '40rem',
+        bloomOpacity: 0.5,
+        videoBrightness: 1.1,
+        grainOpacity: 0.3,
         opacity: 0.9,
         positions: {
             left: { x: '15%', y: '50%' },
