@@ -765,6 +765,10 @@ window.HIVE_SOUND_CONFIG = {
     "특개": { "src": "특개.mp3", "volume": 0.7 },
 
     // [Batch 6 Additions]
+    "돈이복사": { "src": "돈이복사.mp3", "volume": 0.7 },
+    "다음몬스터": { "src": "다음몬스터.mp3", "volume": 0.7 },
+    "돈내놔": { "src": "돈내놔.mp3", "volume": 0.7 },
+    "현기증": { "src": "현기증.mp3", "volume": 0.7 },
     "가만느": { "src": "가만느.mp3", "volume": 0.7 },
     "싸말섹": { "src": "싸말섹.mp3", "volume": 0.7 }
 };
