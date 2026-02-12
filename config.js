@@ -1017,31 +1017,16 @@ window.VISUAL_CONFIG = {
             right: { x: '80%', y: '50%' }
         },
         videoPool: [
-            'Olivia.mp4', 'RiseTwerk.mp4', 'SunbreakTwerk.mp4', 'aibo Twerk 2.mp4', 'aibo best1.mp4', 'aibo best2.mp4',
-            'aibo mushroom1.mp4', 'aibo mushroom2.mp4', 'aibo slow 1.mp4', 'aibo twerk 3.mp4', 'aibo twirk.mp4',
-            'aibo v2-1.mp4', 'aibo v2-2.mp4', 'aibo v2-7.mp4', 'aibo5.mp4',
-            'grok-video-094196fa-007c-4c27-b22b-7fd58dbac5b8 (1).mp4', 'grok-video-094196fa-007c-4c27-b22b-7fd58dbac5b8 (2).mp4', 'grok-video-094196fa-007c-4c27-b22b-7fd58dbac5b8.mp4',
-            'grok-video-14013ce1-2092-465b-a3c2-f49bb3d2737f (1).mp4', 'grok-video-14013ce1-2092-465b-a3c2-f49bb3d2737f (2).mp4', 'grok-video-14013ce1-2092-465b-a3c2-f49bb3d2737f.mp4',
-            'grok-video-26bd129c-0e22-4a80-89a8-add336a2de96.mp4',
-            'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (1).mp4', 'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (2).mp4', 'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (4).mp4',
-            'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (5).mp4', 'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea (6).mp4', 'grok-video-3512ddd3-ed5f-4120-bd41-2db17c29abea.mp4',
-            'grok-video-38595123-744f-41c8-b659-432421af0e31 (1).mp4', 'grok-video-38595123-744f-41c8-b659-432421af0e31 (2).mp4', 'grok-video-38595123-744f-41c8-b659-432421af0e31.mp4',
-            'grok-video-40471ceb-de48-4ace-998c-1a8db4b50b54 (1).mp4', 'grok-video-40471ceb-de48-4ace-998c-1a8db4b50b54.mp4',
-            'grok-video-48b9321e-c37b-400c-8287-8d5ba83bfb92 (1).mp4', 'grok-video-48b9321e-c37b-400c-8287-8d5ba83bfb92.mp4',
-            'grok-video-51e6934a-e638-4d1a-a131-ef2ff8ec2ff3 (1).mp4', 'grok-video-51e6934a-e638-4d1a-a131-ef2ff8ec2ff3.mp4',
-            'grok-video-56f23da4-1074-41ea-9d66-9b041eb40023 (1).mp4', 'grok-video-56f23da4-1074-41ea-9d66-9b041eb40023.mp4',
-            'grok-video-5a4744f0-dcd0-4263-a2b2-5af1f7a892a5 (1).mp4', 'grok-video-5a4744f0-dcd0-4263-a2b2-5af1f7a892a5 (2).mp4', 'grok-video-5a4744f0-dcd0-4263-a2b2-5af1f7a892a5 (3).mp4', 'grok-video-5a4744f0-dcd0-4263-a2b2-5af1f7a892a5 (4).mp4', 'grok-video-5a4744f0-dcd0-4263-a2b2-5af1f7a892a5.mp4',
-            'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (1).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (11).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (2) wink.mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (2).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (21).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (3).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (31).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d (4).mp4', 'grok-video-61af2cfa-7577-4ecb-b07c-9ecd748c114d.mp4',
-            'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (1).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (2).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (3).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (4).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (5).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9 (6).mp4', 'grok-video-63e5f2d3-c3c0-4908-a713-181a4ea9bec9.mp4',
-            'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (1).mp4', 'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (10).mp4', 'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (2).mp4', 'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (3).mp4', 'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520 (4).mp4', 'grok-video-6df7d2cd-b6f7-4511-9d12-d7c81ba01520.mp4',
-            'grok-video-7b6b8333-12ca-4cdb-aa13-0ac7b3afdd73 (1).mp4', 'grok-video-7b6b8333-12ca-4cdb-aa13-0ac7b3afdd73 (2).mp4', 'grok-video-7b6b8333-12ca-4cdb-aa13-0ac7b3afdd73 (3).mp4', 'grok-video-7b6b8333-12ca-4cdb-aa13-0ac7b3afdd73.mp4',
-            'grok-video-7e053e0a-1fa9-42e7-a8d1-564076e86896.mp4',
-            'grok-video-82bcb492-0a95-4fa9-a2bc-46f1df1b33c7 (1).mp4', 'grok-video-82bcb492-0a95-4fa9-a2bc-46f1df1b33c7 (2).mp4', 'grok-video-82bcb492-0a95-4fa9-a2bc-46f1df1b33c7.mp4',
-            'grok-video-99286450-aa9b-4c1b-86d0-cf6002d1369f (1).mp4', 'grok-video-99286450-aa9b-4c1b-86d0-cf6002d1369f.mp4',
-            'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (1).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (2).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (31).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (4).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (5).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (6).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (7).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f (8).mp4', 'grok-video-ad942c70-28af-4366-a9aa-307cdd5a500f.mp4',
-            'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (1).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (11).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (2).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (21).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (3).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (31).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692 (4).mp4', 'grok-video-ce9eb96a-d377-4ec6-aaf6-86270ec09692.mp4',
-            'grok-video-ceaccd9d-d568-4d20-8324-ad84e0267451 (1).mp4', 'grok-video-ceaccd9d-d568-4d20-8324-ad84e0267451.mp4',
-            'grok-video-ec77730d-5a8e-4ac8-877b-f176367f1abf (1).mp4', 'grok-video-ec77730d-5a8e-4ac8-877b-f176367f1abf.mp4'
+            'rd_001.mp4', 'rd_002.mp4', 'rd_003.mp4', 'rd_004.mp4', 'rd_005.mp4', 'rd_006.mp4', 'rd_007.mp4', 'rd_008.mp4', 'rd_009.mp4', 'rd_010.mp4',
+            'rd_011.mp4', 'rd_012.mp4', 'rd_013.mp4', 'rd_014.mp4', 'rd_015.mp4', 'rd_016.mp4', 'rd_017.mp4', 'rd_018.mp4', 'rd_019.mp4', 'rd_020.mp4',
+            'rd_021.mp4', 'rd_022.mp4', 'rd_023.mp4', 'rd_024.mp4', 'rd_025.mp4', 'rd_026.mp4', 'rd_027.mp4', 'rd_028.mp4', 'rd_029.mp4', 'rd_030.mp4',
+            'rd_031.mp4', 'rd_032.mp4', 'rd_033.mp4', 'rd_034.mp4', 'rd_035.mp4', 'rd_036.mp4', 'rd_037.mp4', 'rd_038.mp4', 'rd_039.mp4', 'rd_040.mp4',
+            'rd_041.mp4', 'rd_042.mp4', 'rd_043.mp4', 'rd_044.mp4', 'rd_045.mp4', 'rd_046.mp4', 'rd_047.mp4', 'rd_048.mp4', 'rd_049.mp4', 'rd_050.mp4',
+            'rd_051.mp4', 'rd_052.mp4', 'rd_053.mp4', 'rd_054.mp4', 'rd_055.mp4', 'rd_056.mp4', 'rd_057.mp4', 'rd_058.mp4', 'rd_059.mp4', 'rd_060.mp4',
+            'rd_061.mp4', 'rd_062.mp4', 'rd_063.mp4', 'rd_064.mp4', 'rd_065.mp4', 'rd_066.mp4', 'rd_067.mp4', 'rd_068.mp4', 'rd_069.mp4', 'rd_070.mp4',
+            'rd_071.mp4', 'rd_072.mp4', 'rd_073.mp4', 'rd_074.mp4', 'rd_075.mp4', 'rd_076.mp4', 'rd_077.mp4', 'rd_078.mp4', 'rd_079.mp4', 'rd_080.mp4',
+            'rd_081.mp4', 'rd_082.mp4', 'rd_083.mp4', 'rd_084.mp4', 'rd_085.mp4', 'rd_086.mp4', 'rd_087.mp4', 'rd_088.mp4', 'rd_089.mp4', 'rd_090.mp4',
+            'rd_091.mp4', 'rd_092.mp4', 'rd_093.mp4', 'rd_094.mp4', 'rd_095.mp4', 'rd_096.mp4', 'rd_097.mp4'
         ]
     }
 };
