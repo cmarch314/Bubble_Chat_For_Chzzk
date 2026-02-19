@@ -2449,12 +2449,28 @@ class SystemController {
         this.visual = visual;
         this.renderer = renderer;
         this.commands = {
-            '!소리끄기': { action: () => this.audio.setEnabled(false), msg: "🔇 사운드 효과가 꺼졌습니다." },
+            '!소리끄기': {
+                action: () => {
+                    this.audio.setEnabled(false);
+                    this.audio.playSound(window.soundHive['윈도우종료'], { force: true });
+                },
+                msg: "🔇 사운드 효과가 꺼졌습니다."
+            },
+            '!음소거': {
+                action: () => {
+                    this.audio.setEnabled(false);
+                    this.audio.playSound(window.soundHive['윈도우종료'], { force: true });
+                },
+                msg: "🔇 사운드 효과가 꺼졌습니다."
+            },
             '!소리켜기': { action: () => this.audio.setEnabled(true), msg: "🔊 사운드 효과가 켜졌습니다." },
             '!사운드': {
                 action: () => {
                     const next = !this.audio.enabled;
                     this.audio.setEnabled(next);
+                    if (!next) {
+                        this.audio.playSound(window.soundHive['윈도우종료'], { force: true });
+                    }
                     return next ? "🔊 사운드 효과가 켜졌습니다." : "🔇 사운드 효과가 꺼졌습니다.";
                 },
                 msg: ""
@@ -2476,6 +2492,7 @@ class SystemController {
                     this.audio.setEnabled(false);
                     this.visual.setEnabled(false);
                     this.visual.setAlertsEnabled(false);
+                    this.audio.playSound(window.soundHive['윈도우종료'], { force: true });
                 },
                 msg: "🔒 모든 효과가 꺼졌습니다."
             },

@@ -6,7 +6,7 @@ window.CHZZK_CHANNEL_ID = "057a9a03fea9b368eb0c76b9e95e1ae5"; // [Optional] Set 
 window.HIVE_VOLUME_CONFIG = {
     master: 1.0, // Default master volume (1.0 = 100%)
     visual: 1.0, // Multiplier for visual effects
-    sfx: 0.7     // Multiplier for standard sound effects
+    sfx: 0.6     // Multiplier for standard sound effects
 };
 
 
@@ -755,6 +755,7 @@ window.HIVE_SOUND_CONFIG = {
     "선브샀어안샀어": { "src": "선브샀어안샀어.mp3", "volume": 0.7 },
     "오오오오": { "src": "오오오오.mp3", "volume": 0.7 },
     "오오오오오": { "src": "오오오오오.mp3", "volume": 0.7 },
+    "윈도우종료": { "src": "Windows Shutdown.mp3", "volume": 0.7 },
 
     // [Batch 5 Additions]
     "그당몬": { "src": "그당몬.mp3", "volume": 0.7 },
