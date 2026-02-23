@@ -121,7 +121,7 @@ window.HIVE_SOUND_CONFIG = {
     "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.7 },
 
     // [Reactions & Memes]
-    "앙": { "src": "Ang.mp3", "volume": 0.7 },
+    "앙?": { "src": "Ang.mp3", "volume": 0.7 },
     "재밌다": { "src": "Fun.mp3", "volume": 0.7 },
     "당근": { "src": "Carrot.mp3", "volume": 0.7 },
     "알림": { "src": "Alarm.mp3", "volume": 0.7 },
@@ -156,7 +156,7 @@ window.HIVE_SOUND_CONFIG = {
     "아흣": { "src": "ah2.mp3", "volume": 0.7 },
     "아하앙": { "src": "ah3.mp3", "volume": 0.7 },
     "하으앙": { "src": "ah4.mp3", "volume": 0.7 },
-    "윽": { "src": "ast5.mp3", "volume": 0.7 },
+    "윽!": { "src": "ast5.mp3", "volume": 0.7 },
     "야스": { "src": "Yas.mp3", "volume": 0.7 },
     "두둥탁": { "src": "ddt.mp3", "volume": 0.7 },
     "짜잔": { "src": "tadah.mp3", "volume": 0.7 },
@@ -234,7 +234,7 @@ window.HIVE_SOUND_CONFIG = {
     ],
     "멈춰!": { "src": "Stop.mp3", "volume": 0.7 },
     "꺼져": { "src": "foff.mp3", "volume": 0.7 },
-    "뚝": { "src": "DDuk.mp3", "volume": 0.7 },
+    "뚝!": { "src": "DDuk.mp3", "volume": 0.7 },
     "쇼크": { "src": "shocked-sound-effect.mp3", "volume": 0.7 },
     "스트레스필요": { "src": "StressNeeds.mp3", "volume": 0.7 },
     "스트레스": [
@@ -248,6 +248,7 @@ window.HIVE_SOUND_CONFIG = {
     "어림 없": { "src": "NoWay.mp3", "volume": 0.7 },
     "어림없": { "src": "NoWay.mp3", "volume": 0.7 },
     "응 아니야": { "src": "K-Nope.mp3", "volume": 0.7 },
+    "응아니야": { "src": "K-Nope.mp3", "volume": 0.7 },
     "죽고 싶지 않": { "src": "Don'tWannaDie.mp3", "volume": 0.7 },
     "장비를 정지": { "src": "Half-Stop.mp3", "volume": 0.7 },
     "너무한": { "src": "TooHarsh.mp3", "volume": 0.7 },
@@ -258,14 +259,14 @@ window.HIVE_SOUND_CONFIG = {
     ],
 
     // [Situation / Alerts]
-    "하이": [
+    "하이!": [
         { "src": "Hi1.mp3", "volume": 0.7 },
         { "src": "Hi2.mp3", "volume": 0.7 },
         { "src": "Hi3.mp3", "volume": 0.7 }
     ],
     "안녕하세요": { "src": "Hello1.mp3", "volume": 0.7 },
     "헬로": { "src": "Hello2.mp3", "volume": 0.7 },
-    "바이": { "src": "Bye.mp3", "volume": 0.7 },
+    "바이!": { "src": "Bye.mp3", "volume": 0.7 },
     "안녕히": { "src": "FareWellEveryone.mp3", "volume": 0.7 },
     "카톡": { "src": "Katalk.mp3", "volume": 0.7 },
     "전화": { "src": "Call.mp3", "volume": 0.7 },
@@ -283,14 +284,14 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "늦기전에도망쳐.mp3", "volume": 0.7 },
         { "src": "어서도망쳐.mp3", "volume": 0.7 }
     ],
-    "튀어": { "src": "RUN.mp3", "volume": 0.7 },
-    "시작": { "src": "Begin.mp3", "volume": 0.7 },
-    "하겠습니다": { "src": "하겠습니다.mp3", "volume": 0.7 },
+    "튀어!": { "src": "RUN.mp3", "volume": 0.7 },
+    "시작!": { "src": "Begin.mp3", "volume": 0.7 },
+    "하겠습니다!": { "src": "하겠습니다.mp3", "volume": 0.7 },
     "가자!": { "src": "LetsGo.mp3", "volume": 0.7 },
     "결제": { "src": "applepay.mp3", "volume": 0.7 },
     "예상대로": { "src": "Predict.mp3", "volume": 0.7 },
     "배운다": { "src": "Learing.mp3", "volume": 0.6 },
-    "운동": { "src": "workouthard.mp3", "volume": 0.6 },
+    "운동많": { "src": "workouthard.mp3", "volume": 0.6 },
     "유격": { "src": "MohyungTower.mp3", "volume": 0.7 },
     "일어나": [
         { "src": "WakeUp1.mp3", "volume": 0.7 },
@@ -308,14 +309,14 @@ window.HIVE_SOUND_CONFIG = {
     "뭣?": { "src": "Huh.mp3", "volume": 0.7 },
     "ㅔ?": { "src": "Huh.mp3", "volume": 0.7 },
     "ㅖ?": { "src": "Huh.mp3", "volume": 0.7 },
-    "마인": { "src": "MineMine.mp3", "volume": 0.7 },
-    "제꺼": { "src": "NowMine.mp3", "volume": 0.7 },
+    "마인!": { "src": "MineMine.mp3", "volume": 0.7 },
+    "제꺼!": { "src": "NowMine.mp3", "volume": 0.7 },
     "마이!": [
         { "src": "MineMine.mp3", "volume": 0.7 }
     ],
     "마이쩡": { "src": "SoDelicious.mp3", "volume": 0.7 },
     "마이쪙": { "src": "SoDelicious.mp3", "volume": 0.7 },
-    "뭐지": { "src": "WhatIsIT.mp3", "volume": 0.7 },
+    "뭐지?": { "src": "WhatIsIT.mp3", "volume": 0.7 },
     "뭐야": { "src": "WhatIsThis.mp3", "volume": 0.7 },
 
     // [New Additions 2026-01-27]
@@ -323,7 +324,7 @@ window.HIVE_SOUND_CONFIG = {
     "남자답게": { "src": "Crysis_Be_A_Man.mp3", "volume": 0.7 },
     "못숨지": { "src": "Crysis_Cant_Hide.mp3", "volume": 0.7 },
     "찾을거야": { "src": "Crysis_Find.mp3", "volume": 0.7 },
-    "다이": { "src": "DieYouSOB.mp3", "volume": 0.7 },
+    "다이!": { "src": "DieYouSOB.mp3", "volume": 0.7 },
     "죽었어": { "src": "Crysis_death.mp3", "volume": 0.7 },
     "최고야": { "src": "AreYouBest.mp3", "volume": 0.7 },
     "하지마이": { "src": "Don'tDoIt.mp3", "volume": 0.7 },
@@ -331,8 +332,8 @@ window.HIVE_SOUND_CONFIG = {
     "꼼짝": { "src": "Frozen.mp3", "volume": 0.7 },
     "간드아": { "src": "Ganda.mp3", "volume": 0.7 },
     "하야이": { "src": "Hayay.mp3", "volume": 0.7 },
-    "헉": { "src": "Huk.mp3", "volume": 0.7 },
-    "흡": { "src": "Hup.mp3", "volume": 0.7 },
+    "헉!": { "src": "Huk.mp3", "volume": 0.7 },
+    "흡!": { "src": "Hup.mp3", "volume": 0.7 },
     "자기생각": { "src": "Life3.mp3", "volume": 0.7 },
     "그래서재미": { "src": "Life4.mp3", "volume": 0.7 },
     "인생이란": { "src": "Life_is.mp3", "volume": 0.7 },
@@ -343,9 +344,9 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "Okey1.mp3", "volume": 0.7 }
     ],
     "오네가이": { "src": "OnegaySimasu.mp3", "volume": 0.7 },
-    "헐떡": { "src": "Panting.mp3", "volume": 0.7 },
-    "꿀떡": { "src": "Swallow.mp3", "volume": 0.7 },
-    "섹": { "src": "Sax.mp3", "volume": 0.7 },
+    "헐떡헐떡": { "src": "Panting.mp3", "volume": 0.7 },
+    "꿀꺽": { "src": "Swallow.mp3", "volume": 0.7 },
+    "섹!": { "src": "Sax.mp3", "volume": 0.7 },
     "재밌잖아": { "src": "SoFun.mp3", "volume": 0.7 },
     "트리스트람": { "src": "Stay_awhile.mp3", "volume": 0.7 },
     "난재밌어": { "src": "ToMeIt'sSoFun.mp3", "volume": 0.7 },
@@ -400,7 +401,7 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "ShinZoSaSaGeO2.mp3", "volume": 0.7 },
         { "src": "ShinZoSaSaGeO3.mp3", "volume": 0.7 }
     ],
-    "앉아": [
+    "앉아!": [
         { "src": "SitDown.mp3", "volume": 0.5 },
         { "src": "SitDown2.mp3", "volume": 0.5 },
         { "src": "SitDown3.mp3", "volume": 0.7 },
@@ -408,11 +409,11 @@ window.HIVE_SOUND_CONFIG = {
     ],
     "무서워라": { "src": "SoScary.mp3", "volume": 0.7 },
     "선오브비치": { "src": "SonOfBitch.mp3", "volume": 0.7 },
-    "일어서": { "src": "StandUp.mp3", "volume": 0.7 },
-    "나가 뒤지기": { "src": "SunFlower-GetOut.mp3", "volume": 0.7 },
+    "일어서!": { "src": "StandUp.mp3", "volume": 0.7 },
+    "나가뒤지기": { "src": "SunFlower-GetOut.mp3", "volume": 0.7 },
     "오태식이": { "src": "SunFlower-OhMrOh.mp3", "volume": 0.7 },
     "고맙다": { "src": "SunFlower-Thanks.mp3", "volume": 0.7 },
-    "저 븅신": { "src": "SunFlower-ThatRetard.mp3", "volume": 0.7 },
+    "저븅신": { "src": "SunFlower-ThatRetard.mp3", "volume": 0.7 },
     "이건기회야": { "src": "SunFlower-ThisIsMyMoment.mp3", "volume": 0.7 },
     "재수없게울고": { "src": "SunFlower-WhosCrying.mp3", "volume": 0.7 },
     "돌아왔구나": { "src": "SunFlower-YouBack.mp3", "volume": 0.7 },
@@ -423,7 +424,7 @@ window.HIVE_SOUND_CONFIG = {
     "누구야": { "src": "WhoAreYou1.mp3", "volume": 0.7 },
     "누구인가": { "src": "WhoWasIt.mp3", "volume": 0.7 },
     "뭐야?": { "src": "WTFareYou.mp3", "volume": 0.7 },
-    "기침": { "src": "WhoJustCoughed.mp3", "volume": 0.7 },
+    "기침소리": { "src": "WhoJustCoughed.mp3", "volume": 0.7 },
     "와!센즈": [
         { "src": "WaSands1.mp3", "volume": 0.7 },
         { "src": "WaSands2.mp3", "volume": 0.7 },
@@ -458,7 +459,7 @@ window.HIVE_SOUND_CONFIG = {
     "사쿠라야?": { "src": "사쿠라야.mp3", "volume": 0.7 },
     "소리가달라": { "src": "소리가달라.mp3", "volume": 0.7 },
     "쏠수있어": { "src": "쏠수있어1.mp3", "volume": 0.7 },
-    "아예": { "src": "아예.mp3", "volume": 0.7 },
+    "아예~": { "src": "아예.mp3", "volume": 0.7 },
     "아주유명한": { "src": "아주유명한.mp3", "volume": 0.7 },
     "약을팔어": { "src": "약을팔어.mp3", "volume": 0.7 },
     "어데최씨": { "src": "어데최씨.mp3", "volume": 0.7 },
@@ -495,11 +496,11 @@ window.HIVE_SOUND_CONFIG = {
 
 
     // [CMC음성]
-    "존나몬창": { "src": "Johnna MC.mp3", "volume": 0.7 },
+    "존나몬창": { "src": "Johnna MC.mp3", "volume": 0.5 },
     "잉곳": { "src": "ingot.mp3", "volume": 0.7 },
     "잉기잇": { "src": "ingit.mp3", "volume": 0.7 },
     "네전태": { "src": "OKLS.mp3", "volume": 0.7 },
-    "끼야": { "src": "Screem.mp3", "volume": 0.7 },
+    "끼야악": { "src": "Screem.mp3", "volume": 0.7 },
     "데미지가": { "src": "weird.mp3", "volume": 0.7 },
     "이왜대발": { "src": "whydps.mp3", "volume": 0.7 },
     "알피엠": { "src": "5000알피엠.mp3", "volume": 0.7 },
@@ -709,31 +710,29 @@ window.HIVE_SOUND_CONFIG = {
     "타티": { "src": "타티.mp3", "volume": 0.7 },
     "호박고구마": { "src": "호박고구마.mp3", "volume": 0.7 },
     "틀딱": { "src": "틀딱.mp3", "volume": 0.7 },
-    "도전": { "src": "도전.mp3", "volume": 0.7 },
-    "성공": { "src": "성공.mp3", "volume": 0.7 },
-    "실패": { "src": "실패.mp3", "volume": 0.7 },
+    "도전!": { "src": "도전.mp3", "volume": 0.7 },
+    "성공!": { "src": "성공.mp3", "volume": 0.7 },
+    "실패!": { "src": "실패.mp3", "volume": 0.7 },
     "누나나죽어": [
         { "src": "누나나죽어1.mp3", "volume": 0.7 },
         { "src": "누나나죽어2.mp3", "volume": 0.7 }],
     "휘청": { "src": "휘청.mp3", "volume": 0.7 },
-
-    // [Batch 4 Additions]
     "거품": { "src": "거품거품.mp3", "volume": 0.7 },
     "내일출근": { "src": "난내일출근.mp3", "volume": 0.7 },
-    "다음": { "src": "다음1.mp3", "volume": 0.7 },
+    "다음!": { "src": "다음1.mp3", "volume": 0.7 },
     "무시하지마": { "src": "무시하지마.mp3", "volume": 0.7 },
     "부럽지": { "src": "부럽지.mp3", "volume": 0.7 },
     "소뻑크": { "src": "소뻑크.mp3", "volume": 0.7 },
-    "아니": { "src": "아니.mp3", "volume": 0.7 },
+    "아니?": { "src": "아니.mp3", "volume": 0.7 },
     //    "아들아": { "src": "아들아.mp3", "volume": 0.7 }, 비주얼 이팩트로 편입됨
     "여기사람": { "src": "여기사람있.mp3", "volume": 0.7 },
     "오호": { "src": "오호.mp3", "volume": 0.7 },
     "재미있는몬스터": { "src": "재미있는몬스터.mp3", "volume": 0.7 },
     "정말멋져": { "src": "정말멋져.mp3", "volume": 0.7 },
-    "샀어": { "src": "샀어.mp3", "volume": 0.7 },
-    "선브샀어": { "src": "선브샀어.mp3", "volume": 0.7 },
+    "샀어?": { "src": "샀어.mp3", "volume": 0.7 },
+    "선브샀어?": { "src": "선브샀어.mp3", "volume": 0.7 },
     "안산줄": { "src": "안산줄알았네.mp3", "volume": 0.7 },
-    "꼬리": [
+    "꼬리!": [
         { "src": "꼬리1.mp3", "volume": 0.7 },
         { "src": "꼬리2.mp3", "volume": 0.7 },
         { "src": "꼬리3.mp3", "volume": 0.7 }

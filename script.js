@@ -1100,7 +1100,8 @@ class VisualDirector {
         const { effect, context } = this.queue.shift();
 
         // 1. Sound (Using Audio Manager - Real-time enabled check)
-        const isSoundActive = window.audioManager ? (window.audioManager.enabled || context.isStreamer) : false;
+        // [User Request] Visual effect sounds should play even if SFX is muted (!음소거)
+        const isSoundActive = !!window.audioManager;
         if (isSoundActive && effect.soundKey && window.audioManager) {
             // [New] Support Audio Override (e.g. !가자부송 -> Play Full Version instead of short clips)
             // If audioOverride is present in config, use that key instead of soundKey for audio lookup
@@ -1108,34 +1109,10 @@ class VisualDirector {
                 ? window.VISUAL_CONFIG[effect.key].audioOverride
                 : effect.soundKey;
 
-            // However, effect object here comes from registry: { soundKey: "...", execute: ... }
-            // Registry doesn't have the config object directly. 
-            // We need to look up config by finding which config entry matches.
-            // Simplified approach: Registry key matches config key usually.
-            // Let's passed key in queue item? No, queue has { effect, context }.
-            // We need to know the 'key' (e.g. 'gazabu').
-            // Let's modify trigger to pass key or look it up.
-            // Actually, we can just look up based on soundKey if unique, but 'gazabu' config has 'audioOverride'.
-
-            // BETTER APPROACH:
-            // Just use the soundKey from registry.
-            // AND in config.js, set 'gazabu' soundKey to '가자부송' (which might map to nothing or short clip).
-            // BUT if we want override, we should handle it here.
-
-            // Let's try to find the config entry that corresponds to this effect
-            let overrideKey = null;
-            if (window.VISUAL_CONFIG) {
-                for (const [k, v] of Object.entries(window.VISUAL_CONFIG)) {
-                    if (v.soundKey === effect.soundKey && v.audioOverride) {
-                        overrideKey = v.audioOverride;
-                        break;
-                    }
-                }
-            }
-
-            const activeSoundKey = overrideKey || effect.soundKey;
+            const activeSoundKey = soundTargetKey;
             if (activeSoundKey) {
-                window.audioManager.playSound(window.soundHive[activeSoundKey], { force: context.isStreamer, type: 'visual' });
+                // Pass force: true to bypass general mute (!음소거)
+                window.audioManager.playSound(window.soundHive[activeSoundKey], { force: true, type: 'visual' });
             }
         }
 
@@ -1469,7 +1446,12 @@ class VisualDirector {
             }, conf.delayedEmojiDelay || 11000);
 
             overlay.classList.add('visible');
-            audio.play().catch(e => console.warn("King audio play failed:", e));
+            // [User Request] Use AudioManager to handle audio for !몬창왕 so it bypasses mute
+            if (window.audioManager) {
+                window.audioManager.playSound(conf.audioPath, { force: true, type: 'visual' });
+            } else {
+                audio.play().catch(e => console.warn("King audio play failed:", e));
+            }
 
             setTimeout(() => {
                 overlay.classList.remove('visible');
@@ -1477,6 +1459,9 @@ class VisualDirector {
                     audio.pause();
                     audio.currentTime = 0;
                 }
+                // No need to stop AudioManager sound manually here as it's fire-and-forget buffer usually,
+                // but for 23s sound it might overlap. However, playSound currently doesn't return stop handle.
+
                 setTimeout(() => {
                     if (snowContainer) snowContainer.innerHTML = '';
                 }, 1000);
@@ -1525,7 +1510,15 @@ class VisualDirector {
                 }
 
                 // Muted/Play handling
+                // [User Request] Use AudioManager if intended for audible audio in visual effects
+                // But for background video it's usually muted as requested.
                 video.play().catch(e => console.warn("God video play failed:", e));
+
+                if (window.audioManager) {
+                    window.audioManager.playSound(conf.audioPath, { force: true, type: 'visual' });
+                } else if (audio) {
+                    audio.play().catch(e => console.warn("God audio play failed:", e));
+                }
                 overlay.appendChild(video);
             }
 
