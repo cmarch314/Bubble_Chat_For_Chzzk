@@ -1,63 +1,78 @@
 ﻿// [Class 6] System Controller (Toggles)
 // ==========================================
 class SystemController {
-    constructor(audio, visual, renderer) {
-        this.audio = audio;
-        this.visual = visual;
-        this.renderer = renderer;
+    constructor(eventBus) {
+        this.eventBus = eventBus;
         this.commands = {
             '!소리끄기': {
                 action: () => {
-                    this.audio.setEnabled(false);
-                    this.audio.playSound(window.soundHive['윈도우종료'], { force: true });
+                    this.eventBus.emit('system:muteAudio');
                 },
                 msg: "🔇 사운드 효과가 꺼졌습니다."
             },
             '!음소거': {
                 action: () => {
-                    this.audio.setEnabled(false);
-                    this.audio.playSound(window.soundHive['윈도우종료'], { force: true });
+                    this.eventBus.emit('system:muteAudio');
                 },
                 msg: "🔇 사운드 효과가 꺼졌습니다."
             },
-            '!소리켜기': { action: () => this.audio.setEnabled(true), msg: "🔊 사운드 효과가 켜졌습니다." },
+            '!소리켜기': {
+                action: () => {
+                    this.eventBus.emit('system:unmuteAudio');
+                },
+                msg: "🔊 사운드 효과가 켜졌습니다."
+            },
             '!사운드': {
                 action: () => {
-                    const next = !this.audio.enabled;
-                    this.audio.setEnabled(next);
-                    if (!next) {
-                        this.audio.playSound(window.soundHive['윈도우종료'], { force: true });
-                    }
-                    return next ? "🔊 사운드 효과가 켜졌습니다." : "🔇 사운드 효과가 꺼졌습니다.";
+                    this.eventBus.emit('system:toggleAudio');
+                    return "🔊 사운드 상태가 전환되었습니다.";
                 },
                 msg: ""
             },
-            '!이펙트끄기': { action: () => this.visual.setEnabled(false), msg: "🚫 비주얼 이펙트가 꺼졌습니다." },
-            '!이펙트켜기': { action: () => this.visual.setEnabled(true), msg: "✨ 비주얼 이펙트가 켜졌습니다." },
+            '!이펙트끄기': {
+                action: () => {
+                    this.eventBus.emit('system:disableVisuals');
+                },
+                msg: "🚫 비주얼 이펙트가 꺼졌습니다."
+            },
+            '!이펙트켜기': {
+                action: () => {
+                    this.eventBus.emit('system:enableVisuals');
+                },
+                msg: "✨ 비주얼 이펙트가 켜졌습니다."
+            },
             '!비주얼': {
                 action: () => {
-                    const next = !this.visual.enabled;
-                    this.visual.setEnabled(next);
-                    return next ? "✨ 비주얼 이펙트가 켜졌습니다." : "🚫 비주얼 이펙트가 꺼졌습니다.";
+                    this.eventBus.emit('system:toggleVisuals');
+                    return "✨ 비주얼 이펙트 상태가 전환되었습니다.";
                 },
                 msg: ""
             },
-            '!알람끄기': { action: () => this.visual.setAlertsEnabled(false), msg: "🔔 알람(구독/후원) 이펙트가 꺼졌습니다." },
-            '!알람켜기': { action: () => this.visual.setAlertsEnabled(true), msg: "🔔 알람(구독/후원) 이펙트가 켜졌습니다." },
+            '!알람끄기': {
+                action: () => {
+                    this.eventBus.emit('system:disableAlerts');
+                },
+                msg: "🔔 알람(구독/후원) 이펙트가 꺼졌습니다."
+            },
+            '!알람켜기': {
+                action: () => {
+                    this.eventBus.emit('system:enableAlerts');
+                },
+                msg: "🔔 알람(구독/후원) 이펙트가 켜졌습니다."
+            },
             '!전체끄기': {
                 action: () => {
-                    this.audio.setEnabled(false);
-                    this.visual.setEnabled(false);
-                    this.visual.setAlertsEnabled(false);
-                    this.audio.playSound(window.soundHive['윈도우종료'], { force: true });
+                    this.eventBus.emit('system:muteAudio');
+                    this.eventBus.emit('system:disableVisuals');
+                    this.eventBus.emit('system:disableAlerts');
                 },
                 msg: "🔒 모든 효과가 꺼졌습니다."
             },
             '!전체켜기': {
                 action: () => {
-                    this.audio.setEnabled(true);
-                    this.visual.setEnabled(true);
-                    this.visual.setAlertsEnabled(true);
+                    this.eventBus.emit('system:unmuteAudio');
+                    this.eventBus.emit('system:enableVisuals');
+                    this.eventBus.emit('system:enableAlerts');
                 },
                 msg: "🔓 모든 효과가 켜졌습니다."
             },
@@ -77,10 +92,10 @@ class SystemController {
             '!볼륨평준화': {
                 action: (args) => {
                     const cmd = args[0];
-                    if (cmd === '켜기') return this.audio.updateConfig('all', true);
-                    if (cmd === '끄기') return this.audio.updateConfig('all', false);
-                    if (cmd === '도네') return this.audio.updateConfig('visual');
-                    if (cmd === '채팅') return this.audio.updateConfig('sfx');
+                    if (['켜기', '끄기', '도네', '채팅'].includes(cmd)) {
+                        this.eventBus.emit('system:updateConfig', cmd);
+                        return `🔊 볼륨 평준화 설정(${cmd})이 요청되었습니다.`;
+                    }
                     return "❓ 사용법: !볼륨평준화 [켜기/끄기/도네/채팅]";
                 },
                 msg: ""
@@ -108,27 +123,8 @@ class SystemController {
         if (!['sfx', 'visual', 'master'].includes(target)) return "🚫 대상은 sfx, visual, master 중 하나여야 합니다.";
         if (isNaN(value) || value < 0 || value > 2.0) return "🚫 값은 0.0 ~ 2.0 사이의 숫자여야 합니다.";
 
-        // Update AudioManager
-        if (this.audio && this.audio.volumeConfig) {
-            this.audio.updateVolumeConfig({ [target]: value });
-
-            // Persist to LocalStorage
-            try {
-                const current = JSON.parse(localStorage.getItem('HIVE_VOLUME_CONFIG') || "{}");
-                current[target] = value;
-                localStorage.setItem('HIVE_VOLUME_CONFIG', JSON.stringify(current));
-
-                // Update Global Config (for reference)
-                if (!window.HIVE_VOLUME_CONFIG) window.HIVE_VOLUME_CONFIG = {};
-                window.HIVE_VOLUME_CONFIG[target] = value;
-
-            } catch (e) {
-                console.error("Save Failed:", e);
-            }
-
-            return `🔊 [Sound] ${target.toUpperCase()} 볼륨이 ${value}로 설정되었습니다. (저장됨)`;
-        }
-        return "🚫 오디오 매니저를 찾을 수 없습니다.";
+        this.eventBus.emit('system:updateVolume', { [target]: value });
+        return `🔊 [Sound] ${target.toUpperCase()} 볼륨이 ${value}로 설정되었습니다. (저장됨)`;
     }
 
     handle(msgData) {
@@ -142,7 +138,9 @@ class SystemController {
         if (config) {
             const resultMsg = config.action(args);
             const confirmMsg = resultMsg || config.msg;
-            this.renderer.render({ ...msgData, message: confirmMsg });
+            if (confirmMsg) {
+                this.eventBus.emit('chat:render', { ...msgData, message: confirmMsg });
+            }
             return true;
         }
         return false;

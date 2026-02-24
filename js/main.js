@@ -1,21 +1,17 @@
 ﻿// [Execution & Init]
 // ==========================================
-const appConfig = new ConfigManager();
-const audioManager = new AudioManager();
-const chatRenderer = new ChatRenderer();
-const visualDirector = new VisualDirector(appConfig);
-const systemController = new SystemController(audioManager, visualDirector, chatRenderer);
+const eventBus = new EventBus();
 
-// 전역 참조 (디버깅 및 호환성용)
-window.audioManager = audioManager;
-window.visualDirector = visualDirector;
-window.systemController = systemController;
+const appConfig = new ConfigManager();
+const audioManager = new AudioManager(eventBus);
+const chatRenderer = new ChatRenderer(eventBus);
+const visualDirector = new VisualDirector(appConfig, eventBus);
+const systemController = new SystemController(eventBus);
 
 // 네트워크 연결 시작
 // [Global Refactor] Process Message Logic for portability (Real & Fake)
-// [Global Refactor] Process Message Logic for portability (Real & Fake)
-// 내부 처리 함수 (기존 로직)
-const _processMessageInternal = (msgData) => {
+// 내부 처리 함수를 Event Bus Listener로 변환
+eventBus.on('chat:process', (msgData) => {
     // 0. 스트리머 전용 제어 명령어 처리 (Refactored)
     if (systemController.handle(msgData)) return;
 
@@ -45,7 +41,7 @@ const _processMessageInternal = (msgData) => {
     // [Fix] Check if VisualDirector has a handler for this keyword
     // Iterate registry keys to find match at start of message
     let foundKeyword = null;
-    const visualMap = window.visualDirector.registry; // Access registry directly or via getter
+    const visualMap = visualDirector.registry; // Access registry directly or via getter
 
     // Check strict matches "!명령어"
     const lowerTrimmedMsg = updatedTrimmedMsg.toLowerCase();
@@ -106,28 +102,30 @@ const _processMessageInternal = (msgData) => {
         const t0 = performance.now();
         audioManager.checkAndPlay(msgData.message, msgData.isStreamer);
         if (msgData.isDonation) return;
-        try {
-            chatRenderer.render(msgData);
-        } catch (e) {
-            console.error("Renderer Error:", e);
-        }
+        eventBus.emit('chat:render', msgData);
+
         const t1 = performance.now();
         if ((t1 - t0) > 10) {
             console.warn(`[Slow Render] Took ${(t1 - t0).toFixed(2)}ms`);
         }
     }
-};
+});
 
 // 큐 인스턴스 생성
-const messageQueue = new MessageQueue(_processMessageInternal);
+const messageQueue = new MessageQueue(eventBus);
 
-// 외부 노출 진입점 (큐에 넣기만 함)
+// 외부 노출 진입점 (큐에 직접 넣기 - 레거시 호환용)
 window.processMessage = (msgData) => {
     messageQueue.enqueue(msgData);
 };
 
+// EventBus 리스너 등록: ChzzkGateway에서 받은 메시지를 처리 큐로 넘김
+eventBus.on('chat:received', (msgData) => {
+    messageQueue.enqueue(msgData);
+});
+
 // 네트워크 연결 시작
-const network = new ChzzkGateway(appConfig, window.processMessage);
+const network = new ChzzkGateway(appConfig, eventBus);
 
 // [Feature] Demo Mode (Triggered by !데모)
 let _demoInterval = null;
@@ -251,8 +249,8 @@ window.addEventListener('chzzk_connected', () => {
     console.log("Connection Established. Stopping Startup Sequences.");
 
     // [User Request] Restore SFX Volume to 1.0 after loading
-    if (window.audioManager) {
-        window.audioManager.updateVolumeConfig({ sfx: 1.0 });
+    if (audioManager) {
+        audioManager.updateVolumeConfig({ sfx: 1.0 });
         console.log("🔊 [System] Loading complete. SFX Volume restored to 1.0");
     }
 
@@ -269,8 +267,8 @@ window.addEventListener('chzzk_connected', () => {
     }
 
     // [New] Clear queued visual effects from startup
-    if (window.visualDirector) {
-        window.visualDirector.clearQueue();
+    if (visualDirector) {
+        visualDirector.clearQueue();
     }
 
     // [New] Hide Loading Screen
@@ -287,7 +285,7 @@ setTimeout(() => {
     // 1. URL Command (Highest Priority)
     if (appConfig.startupCommand) {
         console.log(`🚀 [Startup] URL Command Detected: ${appConfig.startupCommand}`);
-        window.visualDirector.trigger(appConfig.startupCommand, {
+        visualDirector.trigger(appConfig.startupCommand, {
             message: `✨ 시스템 시작: ${appConfig.startupCommand}`,
             nickname: "System",
             isStreamer: true
@@ -296,7 +294,7 @@ setTimeout(() => {
     // 2. Default Startup Effect (mulsulsan)
     else {
         console.log(`🚀 [Startup] Default Effect: random_dance`);
-        window.visualDirector.trigger('random_dance', {
+        visualDirector.trigger('random_dance', {
             message: `✨ 시스템 시작: 랜덤 댄스 이펙트`,
             nickname: "System",
             isStreamer: true

@@ -1,7 +1,8 @@
 ﻿// [Class 7] Message Queue Manager
 // ==========================================
 class MessageQueue {
-    constructor(processor) {
+    constructor(eventBus, processor = null) {
+        this.eventBus = eventBus;
         this.processor = processor;
         this.queue = [];
         this.isProcessing = false;
@@ -50,7 +51,9 @@ class MessageQueue {
         console.log(`[Queue] Proc: "${currentItem.data.message.substring(0, 10)}..." | Size: ${queueSize} | Delay: ${dynamicDelay}ms`);
 
         try {
-            this.processor(currentItem.data);
+            if (this.eventBus) {
+                this.eventBus.emit('chat:process', currentItem.data);
+            }
         } catch (e) {
             console.error("[Queue] Processor Error:", e);
         }

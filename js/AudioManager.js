@@ -6,7 +6,8 @@
 // * 기능: Config 설정을 받아 실시간으로 오디오를 평준화하거나 우회함
 // ==========================================
 class AudioManager {
-    constructor() {
+    constructor(eventBus) {
+        this.eventBus = eventBus;
         this.basePath = './SFX/';
         // [Performance] 오디오 버퍼 캐시 (중복 로딩 방지)
         this.bufferCache = new Map();
@@ -34,6 +35,39 @@ class AudioManager {
         // [User Request] Start with low SFX volume during loading
         this.volumeConfig.sfx = 0.1;
         this.updateConfigLegacy(window.__INITIAL_SOUND_CONFIG || {});
+
+        // Event Bus Listeners
+        if (this.eventBus) {
+            this.eventBus.on('audio:playSFX', (soundPath, options) => {
+                this.playSound(soundPath, options);
+            });
+            this.eventBus.on('audio:playVisualSound', (soundPath) => {
+                this.playSound(soundPath, { force: true, type: 'visual' });
+            });
+            this.eventBus.on('system:muteAudio', () => {
+                this.setEnabled(false);
+                this.playSound(this.soundHive['윈도우종료'], { force: true });
+            });
+            this.eventBus.on('system:unmuteAudio', () => {
+                this.setEnabled(true);
+            });
+            this.eventBus.on('system:toggleAudio', () => {
+                const next = !this.enabled;
+                this.setEnabled(next);
+                if (!next) {
+                    this.playSound(this.soundHive['윈도우종료'], { force: true });
+                }
+            });
+            this.eventBus.on('system:updateVolume', (config) => {
+                this.updateVolumeConfig(config);
+            });
+            this.eventBus.on('system:updateConfig', (key) => {
+                if (key === '켜기') this.updateConfig('all', true);
+                else if (key === '끄기') this.updateConfig('all', false);
+                else if (key === '도네') this.updateConfig('visual');
+                else if (key === '채팅') this.updateConfig('sfx');
+            });
+        }
     }
 
     _updateCompressorSettings() {
@@ -50,7 +84,6 @@ class AudioManager {
 
     setEnabled(enabled) {
         this.enabled = enabled;
-        if (typeof window.soundEnabled !== 'undefined') window.soundEnabled = enabled;
         if (this.audioCtx.state === 'suspended' && enabled) this.audioCtx.resume().catch(() => { });
     }
 
@@ -72,6 +105,18 @@ class AudioManager {
     updateVolumeConfig(config) {
         if (!config) return;
         this.volumeConfig = { ...this.volumeConfig, ...config };
+
+        // Persist to LocalStorage
+        try {
+            const current = JSON.parse(localStorage.getItem('HIVE_VOLUME_CONFIG') || "{}");
+            Object.assign(current, config);
+            localStorage.setItem('HIVE_VOLUME_CONFIG', JSON.stringify(current));
+
+            if (!window.HIVE_VOLUME_CONFIG) window.HIVE_VOLUME_CONFIG = {};
+            Object.assign(window.HIVE_VOLUME_CONFIG, config);
+        } catch (e) {
+            console.error("Save Failed:", e);
+        }
     }
 
     // [명령어] 설정 변경 메서드 (New)
@@ -162,7 +207,7 @@ class AudioManager {
         if (sequence.length > 0) {
             (async () => {
                 // 매번 재생 전 컴프레서 설정을 최신화 (실시간 반영)
-                if (window.audioManager) window.audioManager._updateCompressorSettings();
+                this._updateCompressorSettings();
                 for (let item of sequence.slice(0, 5)) { await this.playSound(item.sound, { force, type: 'sfx' }); }
             })();
         }

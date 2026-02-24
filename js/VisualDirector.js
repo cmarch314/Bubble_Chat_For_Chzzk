@@ -2,14 +2,23 @@
 // [Class 5] Visual Director (Effects Engine)
 // ==========================================
 class VisualDirector {
-    constructor(config) {
+    constructor(config, eventBus) {
         this.config = config;
+        this.eventBus = eventBus;
         this.queue = [];
         this.isLocked = false;
         this.enabled = false; // [Default] OFF (Manual trigger keywords)
         this.alertsEnabled = true; // [Default] ON (Sub/Donation Alerts)
         this._initOverlays();
         this.registry = this._buildRegistry();
+
+        if (this.eventBus) {
+            this.eventBus.on('system:disableVisuals', () => this.setEnabled(false));
+            this.eventBus.on('system:enableVisuals', () => this.setEnabled(true));
+            this.eventBus.on('system:toggleVisuals', () => this.setEnabled(!this.enabled));
+            this.eventBus.on('system:disableAlerts', () => this.setAlertsEnabled(false));
+            this.eventBus.on('system:enableAlerts', () => this.setAlertsEnabled(true));
+        }
     }
 
     setEnabled(enabled) { this.enabled = enabled; }
@@ -37,18 +46,14 @@ class VisualDirector {
 
         // 1. Sound (Using Audio Manager - Real-time enabled check)
         // [User Request] Visual effect sounds should play even if SFX is muted (!음소거)
-        const isSoundActive = !!window.audioManager;
-        if (isSoundActive && effect.soundKey && window.audioManager) {
-            // [New] Support Audio Override (e.g. !가자부송 -> Play Full Version instead of short clips)
-            // If audioOverride is present in config, use that key instead of soundKey for audio lookup
+        if (effect.soundKey) {
             const soundTargetKey = (window.VISUAL_CONFIG && window.VISUAL_CONFIG[effect.key] && window.VISUAL_CONFIG[effect.key].audioOverride)
                 ? window.VISUAL_CONFIG[effect.key].audioOverride
                 : effect.soundKey;
 
             const activeSoundKey = soundTargetKey;
             if (activeSoundKey) {
-                // Pass force: true to bypass general mute (!음소거)
-                window.audioManager.playSound(window.soundHive[activeSoundKey], { force: true, type: 'visual' });
+                this.eventBus.emit('audio:playVisualSound', window.soundHive[activeSoundKey]);
             }
         }
 
@@ -383,8 +388,8 @@ class VisualDirector {
 
             overlay.classList.add('visible');
             // [User Request] Use AudioManager to handle audio for !몬창왕 so it bypasses mute
-            if (window.audioManager) {
-                window.audioManager.playSound(conf.audioPath, { force: true, type: 'visual' });
+            if (this.eventBus) {
+                this.eventBus.emit('audio:playVisualSound', conf.audioPath);
             } else {
                 audio.play().catch(e => console.warn("King audio play failed:", e));
             }
@@ -450,8 +455,8 @@ class VisualDirector {
                 // But for background video it's usually muted as requested.
                 video.play().catch(e => console.warn("God video play failed:", e));
 
-                if (window.audioManager) {
-                    window.audioManager.playSound(conf.audioPath, { force: true, type: 'visual' });
+                if (this.eventBus) {
+                    this.eventBus.emit('audio:playVisualSound', conf.audioPath);
                 } else if (audio) {
                     audio.play().catch(e => console.warn("God audio play failed:", e));
                 }
@@ -1122,7 +1127,7 @@ class VisualDirector {
             bg.src = conf.backgroundPath;
             bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
             // [Audio] Apply volume from visual audio settings if possible
-            const visualVol = (window.audioManager && window.audioManager.volumeConfig) ? window.audioManager.volumeConfig.visual : 1.0;
+            const visualVol = (window.HIVE_VOLUME_CONFIG && window.HIVE_VOLUME_CONFIG.visual !== undefined) ? window.HIVE_VOLUME_CONFIG.visual : 1.0;
             bg.volume = visualVol * (conf.videoVolume || 1.0);
             bg.play().catch(e => console.warn("Mulsulsan video play failed:", e));
         }

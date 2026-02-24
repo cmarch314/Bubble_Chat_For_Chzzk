@@ -2,9 +2,10 @@
 // [Class 2] Chzzk Network Gateway
 // ==========================================
 class ChzzkGateway {
-    constructor(config, messageHandler) {
+    constructor(config, eventBus, legacyMessageHandler = null) {
         this.config = config;
-        this.onMessage = messageHandler;
+        this.eventBus = eventBus;
+        this.onMessage = legacyMessageHandler;
         this.ws = null;
         this.proxies = [
             "https://api.allorigins.win/get?url=", // Wrapper proxy (Excellent reliability)
@@ -149,57 +150,71 @@ class ChzzkGateway {
                     msgType: msgType
                 };
 
-                this.onMessage(messageData);
+                if (this.eventBus) {
+                    this.eventBus.emit('chat:received', messageData);
+                } else if (this.onMessage) {
+                    this.onMessage(messageData); // Fallback
+                }
             });
         }
     }
 
     async _fetchWithProxy(url) {
-        let errors = [];
+        // 1. 빠른 접속을 위해 주요 프록시 3개 동시 요청 (가장 먼저 응답오는 것 사용)
+        const fastProxies = [
+            this._fetchAllOrigins(url),
+            this._fetchStandardProxy("https://corsproxy.io/?", url),
+            this._fetchStandardProxy("https://api.codetabs.com/v1/proxy?quest=", url)
+        ];
 
-        // 1. Primary: AllOrigins (Most reliable for Chzzk APIs)
         try {
-            // Add cache buster to prevent stale error responses
-            const cacheBuster = `&_t=${Date.now()}`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}${cacheBuster}`;
-            const res = await fetch(proxyUrl);
-            if (res.ok) {
-                const wrapper = await res.json();
-                if (wrapper && wrapper.contents) {
-                    const data = JSON.parse(wrapper.contents);
-                    if (data && data.code !== undefined && data.code !== 200) throw new Error(`Chzzk ${data.code}`);
-                    return data;
+            return await Promise.any(fastProxies);
+        } catch (aggregateError) {
+            // 2. 메인 프록시들이 모두 실패하면 예비 프록시 순차 접근
+            const fallbackProxies = [
+                "https://thingproxy.freeboard.io/fetch/",
+                "https://api.cors.lol/?url=",
+                "https://cors-anywhere.herokuapp.com/"
+            ];
+
+            let lastError = null;
+            for (let proxy of fallbackProxies) {
+                try {
+                    return await this._fetchStandardProxy(proxy, url);
+                } catch (e) {
+                    lastError = e;
                 }
             }
-            errors.push("AllOrigins Failed");
-        } catch (e) {
-            errors.push(`AllOrigins: ${e.message.substring(0, 20)}`);
-        }
 
-        // 2. Secondary: Iterative Proxies
-        for (let proxy of this.proxies) {
-            if (proxy.includes("allorigins")) continue; // Skip if already tried
-            const fullUrl = proxy + encodeURIComponent(url);
+            // 3. 마지막 보루: 직접 요청 (CORS 제한이 풀려있을 경우를 대비)
             try {
-                const res = await fetch(fullUrl);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.code !== undefined && data.code !== 200) throw new Error(`Chzzk ${data.code}`);
-                    return data;
-                }
-                errors.push(`${proxy.split('/')[2]}: H${res.status}`);
-            } catch (e) {
-                errors.push(`${proxy.split('/')[2]}: ${e.message.substring(0, 15)}`);
-            }
+                const res = await fetch(url);
+                if (res.ok) return await res.json();
+            } catch (e) { }
+
+            throw new Error(`연결 실패 (모든 프록시 응답 없음)`);
         }
+    }
 
-        // 3. Final Fallback: Direct (May fail due to CORS)
-        try {
-            const res = await fetch(url);
-            if (res.ok) return await res.json();
-        } catch (e) { }
+    async _fetchAllOrigins(url) {
+        const cacheBuster = `&_t=${Date.now()}`;
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}${cacheBuster}`;
+        const res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error("AllOrigins HTTP Error");
+        const wrapper = await res.json();
+        if (!wrapper || !wrapper.contents) throw new Error("AllOrigins No Contents");
+        const data = JSON.parse(wrapper.contents);
+        if (data && data.code !== undefined && data.code !== 200) throw new Error(`Chzzk ${data.code}`);
+        return data;
+    }
 
-        throw new Error(`연결 실패 (${errors.join(' | ')})`);
+    async _fetchStandardProxy(proxyPrefix, url) {
+        const fullUrl = proxyPrefix + encodeURIComponent(url);
+        const res = await fetch(fullUrl);
+        if (!res.ok) throw new Error(`Proxy HTTP Error: ${res.status}`);
+        const data = await res.json();
+        if (data && data.code !== undefined && data.code !== 200) throw new Error(`Chzzk ${data.code}`);
+        return data;
     }
 
     _showLoader(msg, type) {

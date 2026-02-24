@@ -2,7 +2,8 @@
 // [Class 1] Config & State Manager
 // ==========================================
 class ConfigManager {
-    constructor() {
+    constructor(eventBus) {
+        this.eventBus = eventBus;
         const urlParams = new URLSearchParams(window.location.search);
         this.debugMode = urlParams.has('debug');
         this.loadHistory = urlParams.has('history');
@@ -91,7 +92,10 @@ class ConfigManager {
         switch (data.type) {
             case 'setSound':
                 soundEnabled = data.enabled;
-                if (window.audioManager) window.audioManager.setEnabled(data.enabled);
+                if (this.eventBus && data.enabled !== undefined) {
+                    if (data.enabled) this.eventBus.emit('system:unmuteAudio');
+                    else this.eventBus.emit('system:muteAudio');
+                }
                 this.log(`Sound: ${data.enabled}`);
                 break;
             case 'reload':
@@ -104,9 +108,14 @@ class ConfigManager {
                 }
                 break;
             case 'updateConfig':
-                if (window.audioManager) {
-                    if (data.soundConfig) window.audioManager.updateConfig(data.soundConfig);
-                    if (data.volumeConfig) window.audioManager.updateVolumeConfig(data.volumeConfig);
+                if (this.eventBus) {
+                    if (data.soundConfig) {
+                        // For legacy updateConfig - better emit a specific event if possible. Let's use system:updateVolume config for volume, but we might need a system:updateSoundConfig for raw config.
+                        this.eventBus.emit('system:reloadSoundConfig', data.soundConfig);
+                    }
+                    if (data.volumeConfig) {
+                        this.eventBus.emit('system:updateVolume', data.volumeConfig);
+                    }
                 }
                 if (data.visualConfig) window.visualConfig = data.visualConfig; // 레거시 호환
                 break;

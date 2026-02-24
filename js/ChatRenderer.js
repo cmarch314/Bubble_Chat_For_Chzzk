@@ -2,10 +2,21 @@
 // [Class 4] Chat Renderer (DOM & Animation)
 // ==========================================
 class ChatRenderer {
-    constructor() {
+    constructor(eventBus) {
+        this.eventBus = eventBus;
         this.container = document.getElementById('chat');
         this.boxPos = 0;
         this.activeBubbles = [];
+
+        if (this.eventBus) {
+            this.eventBus.on('chat:render', (data) => {
+                try {
+                    this.render(data);
+                } catch (e) {
+                    console.error("[ChatRenderer] Render Error:", e);
+                }
+            });
+        }
     }
 
     render(data) {
