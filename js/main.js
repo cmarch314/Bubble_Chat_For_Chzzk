@@ -4,10 +4,11 @@ const eventBus = new EventBus();
 
 const appConfig = new ConfigManager();
 const audioManager = new AudioManager(appConfig, eventBus);
+const preloader = new AssetPreloader(appConfig, audioManager);
 const chatRenderer = new ChatRenderer(eventBus);
 const visualDirector = new VisualDirector(appConfig, eventBus);
 const systemController = new SystemController(eventBus);
-const preloader = new AssetPreloader(appConfig, audioManager); // [New] Asset Preloader
+const debugController = new DebugController(appConfig, eventBus); // [New] Testing & Demo Handler
 
 // 네트워크 연결 시작
 // [Global Refactor] Process Message Logic for portability (Real & Fake)
@@ -128,123 +129,6 @@ eventBus.on('chat:received', (msgData) => {
 // 네트워크 연결 시작
 const network = new ChzzkGateway(appConfig, eventBus);
 
-// [Feature] Demo Mode (Triggered by !데모)
-let _demoInterval = null;
-let _demoTimeout = null;
-
-window.stopDemoSequence = () => {
-    if (_demoInterval) clearInterval(_demoInterval);
-    if (_demoTimeout) clearTimeout(_demoTimeout);
-    _demoInterval = null;
-    _demoTimeout = null;
-    console.log("🎬 Demo Sequence Stopped.");
-    window.processMessage({
-        message: "데모가 중단되었습니다.",
-        nickname: "System",
-        isStreamer: true,
-        type: 'chat'
-    });
-};
-
-window.runDemoSequence = (durationSeconds = 60) => {
-    // Ensure previous demo is stopped
-    if (_demoInterval || _demoTimeout) {
-        if (_demoInterval) clearInterval(_demoInterval);
-        if (_demoTimeout) clearTimeout(_demoTimeout);
-    }
-
-    const maxDuration = durationSeconds * 1000;
-    console.log(`🎬 Starting Demo Sequence (${durationSeconds}s)...`);
-    let demoCount = 0;
-    const intervalTime = 1500; // Fast pace
-    const names = appConfig.getRandomNames() || ["Anonymous", "트수", "시청자"];
-
-    _demoInterval = setInterval(() => {
-        if (!appConfig.getWelcomeMessages() || appConfig.getWelcomeMessages().length === 0) return;
-
-        // Random Message
-        const msg = appConfig.getWelcomeMessages()[Math.floor(Math.random() * appConfig.getWelcomeMessages().length)];
-        const name = names[Math.floor(Math.random() * names.length)];
-        const demoColors = ["#ff4444", "#44ff44", "#44bbff", "#ffff44", "#ff88ff", "#44ffff", "#ffa500", "#ffffff"];
-        const color = demoColors[Math.floor(Math.random() * demoColors.length)];
-
-        window.processMessage({
-            message: msg,
-            nickname: name,
-            color: color,
-            badges: [],
-            emojis: {},
-            isStreamer: true, // Force trigger effects
-            uid: 'demo_' + Math.random().toString(36).substr(2, 9),
-            type: 'chat',
-            isDonation: false,
-            isSubscription: false
-        });
-
-        demoCount++;
-    }, intervalTime);
-
-    // Stop after duration
-    _demoTimeout = setTimeout(() => {
-        clearInterval(_demoInterval);
-        _demoInterval = null;
-        _demoTimeout = null;
-        console.log("🎬 Demo Sequence Finished.");
-        window.processMessage({
-            message: "데모가 종료되었습니다.",
-            nickname: "System",
-            isStreamer: true,
-            type: 'chat'
-        });
-    }, maxDuration);
-};
-
-// [Feature] Startup Random Welcome Messages (Debug Mode Only)
-let welcomeInterval = null;
-
-if (appConfig.debugMode && appConfig.getWelcomeMessages() && appConfig.getWelcomeMessages().length > 0) {
-    const names = appConfig.getRandomNames() || ["Anonymous"];
-    console.log("Starting Welcome Message Loop (Debug Mode)...");
-
-    // Visual Effect Pool from Config
-    const visualKeys = appConfig.getVisualConfig() ? Object.keys(appConfig.getVisualConfig()) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼', '발파', '방종송'];
-
-    // [Fixed] Moved Startup Sequence outside to ensure URL commands work
-    // OLD Location - Removed
-
-
-    welcomeInterval = setInterval(() => {
-        // 10% Chance to FORCE a visual effect message if not already picked
-        let msg = appConfig.getWelcomeMessages()[Math.floor(Math.random() * appConfig.getWelcomeMessages().length)];
-        let isVisual = false;
-
-        // "비주얼 이팩트도 랜덤하게 띄워줘" - Explicitly inject visual command occasionally
-        if (!msg.startsWith('!') && Math.random() < 0.3) {
-            const randomVisual = visualKeys[Math.floor(Math.random() * visualKeys.length)];
-            // Prepend visual command to the message
-            msg = `!${randomVisual} ${msg}`;
-            isVisual = true;
-        }
-
-        const randomName = names[Math.floor(Math.random() * names.length)];
-        const randomUid = 'bot_' + Math.random().toString(36).substr(2, 9);
-
-        // Simulate incoming message
-        window.processMessage({
-            message: msg,
-            nickname: randomName,
-            color: null, // ChatRenderer's _resolveColor will now handle this with seed
-            badges: [],
-            emojis: {},
-            isStreamer: isVisual,
-            uid: randomUid,
-            type: 'chat',
-            isDonation: false,
-            isSubscription: false
-        });
-    }, 2000); // Slower interval (2s) to let effects play out
-}
-
 // Global Connection Handler (Always Active)
 window.addEventListener('chzzk_connected', () => {
     console.log("Connection Established. Stopping Startup Sequences.");
@@ -253,18 +137,6 @@ window.addEventListener('chzzk_connected', () => {
     if (audioManager) {
         audioManager.updateVolumeConfig({ sfx: 1.0 });
         console.log("🔊 [System] Loading complete. SFX Volume restored to 1.0");
-    }
-
-    // Stop Debug Sequences if running
-    if (welcomeInterval) {
-        clearInterval(welcomeInterval);
-        welcomeInterval = null;
-    }
-
-    if (window._stressTestInterval) {
-        clearInterval(window._stressTestInterval);
-        window._stressTestInterval = null;
-        console.log("🛑 Connection Established. Stopping Stress Test.");
     }
 
     // [New] Clear queued visual effects from startup
@@ -309,60 +181,7 @@ setTimeout(() => {
     }
 }, 1000); // 1 second after load
 
-// [Test] Queue Stress Test (Modified for Startup Backlog)
-// [Test] Queue Stress Test (Random Burst Mode)
-window.runQueueStressTest = () => {
-    console.warn("🚀 Starting Queue Stress Test (Random 0-3 msg/sec)...");
-    let msgId = 1;
-    let seconds = 0;
-
-    const sendBatch = (count, label) => {
-        console.log(`🔥 [Test] Sending Batch: ${label} (${count} msgs)`);
-        const messages = appConfig.getWelcomeMessages() || ["테스트 메시지"];
-        const names = appConfig.getRandomNames() || ["Tester"];
-
-        for (let i = 0; i < count; i++) {
-            const rawMsg = messages[Math.floor(Math.random() * messages.length)];
-            const randomName = names[Math.floor(Math.random() * names.length)];
-
-            window.processMessage({
-                message: rawMsg,
-                nickname: randomName,
-                isStreamer: false,
-                type: 'chat',
-                uid: 'test_' + msgId + '_' + i
-            });
-            msgId++;
-        }
-    };
-
-    // 1초마다 0~3개 랜덤 전송 (최대 20초)
-    window._stressTestInterval = setInterval(() => {
-        seconds++;
-        if (seconds > 20) {
-            clearInterval(window._stressTestInterval);
-            window._stressTestInterval = null;
-            console.warn("🚀 Stress Test Completed (20s Limit).");
-            return;
-        }
-
-        const randomCount = Math.floor(Math.random() * 4); // 0 ~ 3
-        if (randomCount > 0) {
-            sendBatch(randomCount, `Sec-${seconds}`);
-        } else {
-            console.log(`🔥 [Test] Sec-${seconds}: Skipping (0 msgs)`);
-        }
-
-    }, 1000);
-};
-
-// 즉시 실행 가능하도록 글로벌 등록 (필요시 콘솔에서 window.runQueueStressTest() 입력)
-
 // [New] Dynamic Status Merger
 // Detects legacy "치지직 채널 탐색중..." elements and merges them into the premium loader
 // 자동 시작
 network.connect();
-
-// [Auto-Run] Test Queue immediately to build backlog during connection
-setTimeout(() => window.runQueueStressTest(), 500);
-
