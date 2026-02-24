@@ -36,6 +36,74 @@
   <script src="./js/main.js" defer></script>
 
   <script src='https://twemoji.maxcdn.com/2/twemoji.min.js?2.3.0'></script>
+
+  <!-- [New] Visual Effect Templates -->
+  <template id="tmpl-skull-overlay">
+    <div class="skull-wrapper">
+      <div class="skull-emoji" data-text="☠️">☠️</div>
+    </div>
+    <div class="film-grain"></div>
+  </template>
+
+  <template id="tmpl-usho-overlay">
+    <div class="usho-flash"></div>
+    <div class="usho-container">
+      <div class="usho-scan-wrapper">
+        <img class="usho-gif-scan" src="./img/usho.gif">
+      </div>
+      <div class="usho-reveal-wrapper">
+        <div class="usho-reveal-content-wrapper">
+          <video class="usho-video-reveal" src="./img/usho.mp4" muted playsinline></video>
+          <div class="usho-rainbow-overlay"></div>
+        </div>
+      </div>
+      <!-- [New] Multi-Layer Background (Moved outside reveal-wrapper for visibility) -->
+      <div class="usho-background-layer">
+        <img class="usho-side-gif left" src="./img/usho4.gif">
+        <img class="usho-side-gif right" src="./img/usho2.gif">
+      </div>
+    </div>
+  </template>
+
+  <template id="tmpl-heart-overlay">
+    <div class="heart-emoji">❤️‍🩹</div>
+  </template>
+
+  <template id="tmpl-flashback-overlay"></template>
+
+  <template id="tmpl-bangjong-overlay">
+    <div class="bangjong-flame-border"></div>
+    <div class="bangjong-actors-container"></div>
+  </template>
+
+  <template id="tmpl-dango-overlay">
+    <video class="dango-video" muted playsinline></video>
+    <div class="dango-emoji-container"></div>
+  </template>
+
+  <template id="tmpl-king-overlay">
+    <img class="king-image" src="" alt="King">
+    <div class="king-snow-container"></div>
+  </template>
+
+  <template id="tmpl-god-overlay">
+    <img class="god-image" src="" alt="God">
+  </template>
+
+  <template id="tmpl-gazabu-overlay">
+    <video class="gazabu-bg" src="" muted playsinline loop></video>
+  </template>
+
+  <template id="tmpl-mulsulsan-overlay">
+    <video class="mulsulsan-bg" src="" playsinline loop></video>
+  </template>
+
+  <template id="tmpl-random-dance-overlay">
+    <div class="rd-container rd-left"></div>
+    <div class="rd-container rd-right"></div>
+    <div class="rd-bloom-layer"></div>
+    <div class="rd-vignette-layer"></div>
+  </template>
 </body>
 
 </html>

@@ -54,7 +54,7 @@ class VisualDirector {
 
             const activeSoundKey = soundTargetKey;
             if (activeSoundKey) {
-                this.eventBus.emit(\'audio:playVisualSound\', this.config.getSoundConfig()[activeSoundKey] || activeSoundKey);
+                this.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()[activeSoundKey] || activeSoundKey);
             }
         }
 
@@ -75,42 +75,27 @@ class VisualDirector {
     }
 
     _initOverlays() {
-        const create = (id, html) => {
+        const create = (id, templateId) => {
             if (document.getElementById(id)) return;
             const div = document.createElement('div'); div.id = id;
             div.className = 'fullscreen-overlay'; // Apply utility class
-            if (html) div.innerHTML = html;
+            if (templateId) {
+                const tmpl = document.getElementById(templateId);
+                if (tmpl) div.appendChild(tmpl.content.cloneNode(true));
+            }
             document.body.appendChild(div);
         };
-        create('skull-overlay', '<div class="skull-wrapper"><div class="skull-emoji" data-text="☠️">☠️</div></div><div class="film-grain"></div>');
-        create('usho-overlay', `
-            <div class="usho-flash"></div>
-            <div class="usho-container">
-                <div class="usho-scan-wrapper">
-                    <img class="usho-gif-scan" src="./img/usho.gif">
-                </div>
-                <div class="usho-reveal-wrapper">
-                    <div class="usho-reveal-content-wrapper">
-                        <video class="usho-video-reveal" src="./img/usho.mp4" muted playsinline></video>
-                        <div class="usho-rainbow-overlay"></div>
-                    </div>
-                </div>
-                <!-- [New] Multi-Layer Background (Moved outside reveal-wrapper for visibility) -->
-                <div class="usho-background-layer">
-                    <img class="usho-side-gif left" src="./img/usho4.gif">
-                    <img class="usho-side-gif right" src="./img/usho2.gif">
-                </div>
-            </div>
-        `);
-        create('heart-overlay', '<div class="heart-emoji">❤️‍🩹</div>');
-        create('flashback-overlay');
-        create('bangjong-overlay', '<div class="bangjong-flame-border"></div><div class="bangjong-actors-container"></div>');
-        create('dango-overlay', '<video class="dango-video" muted playsinline></video><div class="dango-emoji-container"></div>');
-        create('king-overlay', '<img class="king-image" src="" alt="King"><div class="king-snow-container"></div>');
-        create('god-overlay', '<img class="god-image" src="" alt="God">'); // [New] God Overlay
-        create('gazabu-overlay', '<video class="gazabu-bg" src="" muted playsinline loop></video>'); // [Update] Video Background
-        create('mulsulsan-overlay', '<video class="mulsulsan-bg" src="" playsinline loop></video>'); // [New] Mulsulsan Background (Unmuted for Audio)
-        create('random-dance-overlay', '<div class="rd-container rd-left"></div><div class="rd-container rd-right"></div><div class="rd-bloom-layer"></div><div class="rd-vignette-layer"></div>');
+        create('skull-overlay', 'tmpl-skull-overlay');
+        create('usho-overlay', 'tmpl-usho-overlay');
+        create('heart-overlay', 'tmpl-heart-overlay');
+        create('flashback-overlay'); // No template needed
+        create('bangjong-overlay', 'tmpl-bangjong-overlay');
+        create('dango-overlay', 'tmpl-dango-overlay');
+        create('king-overlay', 'tmpl-king-overlay');
+        create('god-overlay', 'tmpl-god-overlay');
+        create('gazabu-overlay', 'tmpl-gazabu-overlay');
+        create('mulsulsan-overlay', 'tmpl-mulsulsan-overlay');
+        create('random-dance-overlay', 'tmpl-random-dance-overlay');
     }
 
     _buildRegistry() {
