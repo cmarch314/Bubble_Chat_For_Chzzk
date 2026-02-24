@@ -7,7 +7,7 @@ class MessageQueue {
         this.queue = [];
         this.isProcessing = false;
         this.lastProcessTime = Date.now();
-        this.baseDelay = 300; // 0.3s (Requested Base)
+        this.baseDelay = 50; // 빠른 처리 (원래 300ms에서 단축)
     }
 
     enqueue(msgData) {
@@ -39,13 +39,13 @@ class MessageQueue {
         // 큐에 있는 메시지 수만큼 속도를 단순 비례로 높입니다.
         // 공식: 300ms base
         const queueSize = this.queue.length + 1;
-        let dynamicDelay = 300;
+        let dynamicDelay = 50;
 
-        // [Threshold-based Aggressive Algorithm]
+        // [Threshold-based Aggressive Algorithm - Faster]
         if (queueSize >= 5) dynamicDelay = 16;       // 60fps (폭주)
-        else if (queueSize >= 3) dynamicDelay = 60;  // Very Fast
-        else if (queueSize >= 2) dynamicDelay = 150; // Fast
-        else dynamicDelay = 300;                     // Normal (Relaxed)
+        else if (queueSize >= 3) dynamicDelay = 32;  // Very Fast
+        else if (queueSize >= 2) dynamicDelay = 50;  // Fast
+        else dynamicDelay = 80;                      // Normal (거의 즉시)
 
         // 콘솔에 큐 상태 로그 출력 (디버깅용)
         console.log(`[Queue] Proc: "${currentItem.data.message.substring(0, 10)}..." | Size: ${queueSize} | Delay: ${dynamicDelay}ms`);

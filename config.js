@@ -344,7 +344,7 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "Okey1.mp3", "volume": 0.7 }
     ],
     "오네가이": { "src": "OnegaySimasu.mp3", "volume": 0.7 },
-    "헐떡헐떡": { "src": "Panting.mp3", "volume": 0.7 },
+    "헐떡헐떡": { "src": "Panting.mp3", "volume": 0.5 },
     "꿀꺽": { "src": "Swallow.mp3", "volume": 0.7 },
     "섹!": { "src": "Sax.mp3", "volume": 0.7 },
     "재밌잖아": { "src": "SoFun.mp3", "volume": 0.7 },
