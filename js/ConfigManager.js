@@ -10,8 +10,16 @@ class ConfigManager {
         this.channelId = this._resolveChannelId();
         this.startupCommand = this._resolveStartupCommand(urlParams);
 
+        // --- 캡슐화된 내부 상태 (Encapsulated State) ---
+        this._soundConfig = {};
+        this._visualConfig = {};
+        this._volumeConfig = { master: 1.0, visual: 1.0, sfx: 1.0 };
+        this._welcomeMessages = [];
+        this._randomNames = [];
+        this._normalizerConfig = { enabled: true, visual: false, sfx: false };
+
         this._initBroadcastChannel();
-        this._loadLocalConfig();
+        this._loadAllConfigs(); // [NEW] 통합 로더
     }
 
     _resolveStartupCommand(params) {
@@ -122,27 +130,72 @@ class ConfigManager {
         }
     }
 
-    _loadLocalConfig() {
-        // config.js 혹은 로컬스토리지 로드
-        const defaultsSound = window.HIVE_SOUND_CONFIG || {};
+    _loadAllConfigs() {
+        // 1. config.js 에서 하드코딩된 전역 변수들(window.*)을 우선 안전하게 복사
+        if (window.HIVE_SOUND_CONFIG) this._soundConfig = { ...window.HIVE_SOUND_CONFIG };
+        if (window.VISUAL_CONFIG) this._visualConfig = { ...window.VISUAL_CONFIG };
+        if (window.HIVE_VISUAL_CONFIG) { // Legacy 호환 혹은 병합 병행
+            this._visualConfig = { ...this._visualConfig, ...window.HIVE_VISUAL_CONFIG };
+        }
+        if (window.HIVE_VOLUME_CONFIG) this._volumeConfig = { ...this._volumeConfig, ...window.HIVE_VOLUME_CONFIG };
+        if (window.WELCOME_MESSAGES) this._welcomeMessages = [...window.WELCOME_MESSAGES];
+        if (window.RANDOM_NAMES) this._randomNames = [...window.RANDOM_NAMES];
+        if (window.NORMALIZER_CONFIG) this._normalizerConfig = { ...this._normalizerConfig, ...window.NORMALIZER_CONFIG };
+
+        // 2. 로컬 스토리지 데이터로 덮어쓰기 (사용자 설정 우선)
         const savedSound = localStorage.getItem('HIVE_SOUND_CONFIG');
-        let activeSound = defaultsSound;
-
         if (savedSound) {
-            try { activeSound = { ...defaultsSound, ...JSON.parse(savedSound) }; } catch (e) { }
+            try { this._soundConfig = { ...this._soundConfig, ...JSON.parse(savedSound) }; } catch (e) { }
         }
 
-        const defaultsVolume = window.HIVE_VOLUME_CONFIG || { master: 1.0, visual: 1.0, sfx: 1.0 };
         const savedVolume = localStorage.getItem('HIVE_VOLUME_CONFIG');
-        let activeVolume = defaultsVolume;
-
         if (savedVolume) {
-            try { activeVolume = { ...defaultsVolume, ...JSON.parse(savedVolume) }; } catch (e) { }
+            try { this._volumeConfig = { ...this._volumeConfig, ...JSON.parse(savedVolume) }; } catch (e) { }
         }
 
-        // AudioManager가 생성된 후 설정 주입을 위해 전역에 잠시 저장
-        window.__INITIAL_SOUND_CONFIG = activeSound;
-        window.__INITIAL_VOLUME_CONFIG = activeVolume;
+        // 3. 전역 오염 방지: `config.js`를 통해 로드된 전역 객체 삭제 (캡슐화 완료)
+        // (단, config.js가 재생성/덮어쓰기 될 때를 고려해 `config.html` 로직이 있다면 주의 필요. 지금은 맵핑용이므로 은닉.)
+        try {
+            delete window.HIVE_SOUND_CONFIG;
+            delete window.VISUAL_CONFIG;
+            delete window.HIVE_VISUAL_CONFIG;
+            delete window.HIVE_VOLUME_CONFIG;
+            delete window.WELCOME_MESSAGES;
+            delete window.RANDOM_NAMES;
+            delete window.NORMALIZER_CONFIG;
+        } catch (e) {
+            console.warn("[ConfigManager] Could not delete global window variables.");
+        }
+
+        console.log("[ConfigManager] All configurations securely encapsulated.");
+    }
+
+    // ==========================================
+    // [Getter Methods] - 내부 설정을 안전하게 제공
+    // ==========================================
+    getSoundConfig() { return this._soundConfig; }
+    getVisualConfig() { return this._visualConfig; }
+    getVolumeConfig() { return this._volumeConfig; }
+    getWelcomeMessages() { return this._welcomeMessages; }
+    getRandomNames() { return this._randomNames; }
+    getNormalizerConfig() { return this._normalizerConfig; }
+
+    // ==========================================
+    // [Setter Methods] - 설정 변경 시 내부 객체와 로컬스토리지만 업데이트
+    // ==========================================
+    updateVolumeConfig(newConfig) {
+        this._volumeConfig = { ...this._volumeConfig, ...newConfig };
+        try {
+            localStorage.setItem('HIVE_VOLUME_CONFIG', JSON.stringify(this._volumeConfig));
+            console.log(`[Config] Volume updated:`, this._volumeConfig);
+        } catch (e) { console.error("Volume Save Failed"); }
+        return this._volumeConfig;
+    }
+
+    updateSoundConfig(newConfig) {
+        this._soundConfig = { ...this._soundConfig, ...newConfig };
+        // 필요시 저장소 업데이트 추가
+        return this._soundConfig;
     }
 
     log(msg) {

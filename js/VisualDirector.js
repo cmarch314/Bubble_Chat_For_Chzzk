@@ -47,13 +47,14 @@ class VisualDirector {
         // 1. Sound (Using Audio Manager - Real-time enabled check)
         // [User Request] Visual effect sounds should play even if SFX is muted (!음소거)
         if (effect.soundKey) {
-            const soundTargetKey = (window.VISUAL_CONFIG && window.VISUAL_CONFIG[effect.key] && window.VISUAL_CONFIG[effect.key].audioOverride)
-                ? window.VISUAL_CONFIG[effect.key].audioOverride
+            const vConf = this.config.getVisualConfig();
+            const soundTargetKey = (vConf && vConf[effect.key] && vConf[effect.key].audioOverride)
+                ? vConf[effect.key].audioOverride
                 : effect.soundKey;
 
             const activeSoundKey = soundTargetKey;
             if (activeSoundKey) {
-                this.eventBus.emit('audio:playVisualSound', window.soundHive[activeSoundKey]);
+                this.eventBus.emit(\'audio:playVisualSound\', this.config.getSoundConfig()[activeSoundKey] || activeSoundKey);
             }
         }
 
@@ -65,7 +66,8 @@ class VisualDirector {
         }
 
         // 3. Cooldown
-        const cooldown = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.common && window.VISUAL_CONFIG.common.cooldown) || 1000;
+        const vConfCommon = this.config.getVisualConfig();
+        const cooldown = (vConfCommon && vConfCommon.common && vConfCommon.common.cooldown) || 1000;
         await new Promise(r => setTimeout(r, cooldown));
 
         this.isLocked = false;
@@ -130,7 +132,7 @@ class VisualDirector {
     }
 
     _runSkull(context) {
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.skull) ? window.VISUAL_CONFIG.skull : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().skull) ? this.config.getVisualConfig().skull : {
             duration: 8000,
             floatingTextDuration: 4000
         };
@@ -141,7 +143,7 @@ class VisualDirector {
         const overlay = document.getElementById('usho-overlay');
         if (!overlay) return Promise.resolve();
 
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.usho) ? window.VISUAL_CONFIG.usho : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().usho) ? this.config.getVisualConfig().usho : {
             scanPhase: 7270,
             duration: 19000,
             gifPath: './img/usho.gif',
@@ -229,7 +231,7 @@ class VisualDirector {
         const overlay = document.getElementById('dango-overlay');
         if (!overlay) return Promise.resolve();
 
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.dango) ? window.VISUAL_CONFIG.dango : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().dango) ? this.config.getVisualConfig().dango : {
             duration: 19000,
             videoPath: './Video/Dango.mp4',
             emojiPool: ["🍡", "🍺", "🌀"],
@@ -298,7 +300,7 @@ class VisualDirector {
         const overlay = document.getElementById('king-overlay');
         if (!overlay) return Promise.resolve();
 
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.king) ? window.VISUAL_CONFIG.king : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().king) ? this.config.getVisualConfig().king : {
             duration: 23000,
             imagePath: './img/King_Of_MH.png',
             audioPath: './SFX/아들아.mp3',
@@ -417,7 +419,7 @@ class VisualDirector {
         if (!overlay) return Promise.resolve();
 
         // [Fix] Load config explicitly
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.godsong) ? window.VISUAL_CONFIG.godsong : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().godsong) ? this.config.getVisualConfig().godsong : {
             duration: 15000,
             audioPath: './SFX/갓겜합시다FULL.mp3',
             volume: 0.7,
@@ -558,7 +560,7 @@ class VisualDirector {
         const overlay = document.getElementById('heart-overlay');
         if (!flashback || !overlay) return Promise.resolve();
 
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.couple) ? window.VISUAL_CONFIG.couple : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().couple) ? this.config.getVisualConfig().couple : {
             duration: 21000,
             fontSize: '13rem',
             flashbackDuration: 11800
@@ -647,7 +649,7 @@ class VisualDirector {
 
 
     _runVergil(context) {
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.vergil) ? window.VISUAL_CONFIG.vergil : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().vergil) ? this.config.getVisualConfig().vergil : {
             duration: 19000,
             slashCount: 30,
             shardCount: 20,
@@ -709,7 +711,7 @@ class VisualDirector {
     }
 
     _runDolphin(context) {
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.dolphin) ? window.VISUAL_CONFIG.dolphin : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().dolphin) ? this.config.getVisualConfig().dolphin : {
             duration: 21000,
             creatureCount: 30,
             extraCount: 40,
@@ -804,7 +806,7 @@ class VisualDirector {
         if (msg) {
             setTimeout(() => {
                 const txt = document.createElement('div'); txt.className = 'dolphin-text';
-                txt.innerHTML = renderMessageWithEmotesHTML(this._wrapText(msg, (window.VISUAL_CONFIG?.common?.textWrapLimit || 200), "<br>"), context.emotes || {}, 2.0);
+                txt.innerHTML = renderMessageWithEmotesHTML(this._wrapText(msg, (this.config.getVisualConfig()?.common?.textWrapLimit || 200), "<br>"), context.emotes || {}, 2.0);
                 ov.appendChild(txt);
             }, conf.dolphinDelay);
         }
@@ -821,8 +823,8 @@ class VisualDirector {
 
     // [New] Valstrax Logic
     triggerValstrax(message) {
-        if (!window.VISUAL_CONFIG.valstrax) return Promise.resolve();
-        const conf = window.VISUAL_CONFIG.valstrax;
+        if (!this.config.getVisualConfig().valstrax) return Promise.resolve();
+        const conf = this.config.getVisualConfig().valstrax;
 
         return new Promise(resolve => {
             // 1. 오버레이 생성
@@ -848,7 +850,7 @@ class VisualDirector {
             overlay.appendChild(cloudsContainer);
 
             // 사운드 재생
-            if (window.AudioManager && conf.soundKey) window.AudioManager.playSFX(conf.soundKey);
+            if (this.eventBus && conf.soundKey) this.eventBus.playSFX(conf.soundKey);
 
             // 3. 5초: 제트기 (붉은 선 - 두 줄) & 제트운 (흰 선)
             setTimeout(() => {
@@ -981,7 +983,7 @@ class VisualDirector {
     }
 
     _runBangjong(context) {
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.bangjong) ? window.VISUAL_CONFIG.bangjong : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().bangjong) ? this.config.getVisualConfig().bangjong : {
             duration: 90000,
             teostraPath: './img/Teostra.png',
             lunastraPath: './img/Lunastra.png',
@@ -1080,7 +1082,7 @@ class VisualDirector {
     }
 
     _runGazabu(context) {
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.gazabu) ? window.VISUAL_CONFIG.gazabu : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().gazabu) ? this.config.getVisualConfig().gazabu : {
             duration: 8000,
             backgroundPath: './Video/가자부.mp4'
         };
@@ -1113,7 +1115,7 @@ class VisualDirector {
     }
 
     _runMulsulsan(context) {
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.mulsulsan) ? window.VISUAL_CONFIG.mulsulsan : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().mulsulsan) ? this.config.getVisualConfig().mulsulsan : {
             duration: 10000,
             backgroundPath: './Video/물설산씨티.mp4'
         };
@@ -1127,7 +1129,7 @@ class VisualDirector {
             bg.src = conf.backgroundPath;
             bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
             // [Audio] Apply volume from visual audio settings if possible
-            const visualVol = (window.HIVE_VOLUME_CONFIG && window.HIVE_VOLUME_CONFIG.visual !== undefined) ? window.HIVE_VOLUME_CONFIG.visual : 1.0;
+            const visualVol = (this.config.getVolumeConfig() && this.config.getVolumeConfig().visual !== undefined) ? this.config.getVolumeConfig().visual : 1.0;
             bg.volume = visualVol * (conf.videoVolume || 1.0);
             bg.play().catch(e => console.warn("Mulsulsan video play failed:", e));
         }
@@ -1152,7 +1154,7 @@ class VisualDirector {
         const overlay = document.getElementById('random-dance-overlay');
         if (!overlay) return Promise.resolve();
 
-        const conf = (window.VISUAL_CONFIG && window.VISUAL_CONFIG.random_dance) ? window.VISUAL_CONFIG.random_dance : {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().random_dance) ? this.config.getVisualConfig().random_dance : {
             duration: 18000,
             videoWidth: '22rem',
             videoHeight: '39rem',
@@ -1293,7 +1295,7 @@ class VisualDirector {
         setTimeout(() => {
             const el = document.createElement('div'); el.className = `visual-center-text ${styleClass}`;
             if (fontSize) el.style.fontSize = fontSize;
-            el.innerHTML = renderMessageWithEmotesHTML(this._wrapText(text, (window.VISUAL_CONFIG?.common?.textWrapLimit || 200)), emotes || {}, textScale);
+            el.innerHTML = renderMessageWithEmotesHTML(this._wrapText(text, (this.config.getVisualConfig()?.common?.textWrapLimit || 200)), emotes || {}, textScale);
             document.body.appendChild(el);
             el.style.animation = "hvn-skull-fadeIn 0.2s forwards";
             setTimeout(() => { el.style.animation = "hvn-skull-fadeOut 0.2s forwards"; setTimeout(() => el.remove(), 200); }, duration - 200);

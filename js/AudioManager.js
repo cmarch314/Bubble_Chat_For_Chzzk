@@ -6,7 +6,8 @@
 // * 기능: Config 설정을 받아 실시간으로 오디오를 평준화하거나 우회함
 // ==========================================
 class AudioManager {
-    constructor(eventBus) {
+    constructor(configManager, eventBus) {
+        this.configManager = configManager;
         this.eventBus = eventBus;
         this.basePath = './SFX/';
         // [Performance] 오디오 버퍼 캐시 (중복 로딩 방지)
@@ -31,10 +32,10 @@ class AudioManager {
         // [Core Settings]
         this.soundHive = {};
         this.enabled = true;
-        this.volumeConfig = window.__INITIAL_VOLUME_CONFIG || { master: 1.0, visual: 1.0, sfx: 1.0 };
+        this.volumeConfig = { ...this.configManager.getVolumeConfig() };
         // [User Request] Start with low SFX volume during loading
         this.volumeConfig.sfx = 0.1;
-        this.updateConfigLegacy(window.__INITIAL_SOUND_CONFIG || {});
+        this.updateConfigLegacy(this.configManager.getSoundConfig());
 
         // Event Bus Listeners
         if (this.eventBus) {
@@ -72,6 +73,7 @@ class AudioManager {
 
     _updateCompressorSettings() {
         if (!this.compressor) return;
+        // Use default settings if window.COMPRESSOR_SETTINGS is not set (it wasn't encapsulated but that's fine, we can keep it hardcoded for now or use defaults)
         const settings = window.COMPRESSOR_SETTINGS || {
             threshold: -15, knee: 0, ratio: 20, attack: 0, release: 0.1
         };
@@ -99,29 +101,21 @@ class AudioManager {
             if (Array.isArray(value)) this.soundHive[key] = value.map(processItem);
             else this.soundHive[key] = processItem(value);
         }
-        window.soundHive = this.soundHive;
     }
 
     updateVolumeConfig(config) {
         if (!config) return;
         this.volumeConfig = { ...this.volumeConfig, ...config };
 
-        // Persist to LocalStorage
-        try {
-            const current = JSON.parse(localStorage.getItem('HIVE_VOLUME_CONFIG') || "{}");
-            Object.assign(current, config);
-            localStorage.setItem('HIVE_VOLUME_CONFIG', JSON.stringify(current));
-
-            if (!window.HIVE_VOLUME_CONFIG) window.HIVE_VOLUME_CONFIG = {};
-            Object.assign(window.HIVE_VOLUME_CONFIG, config);
-        } catch (e) {
-            console.error("Save Failed:", e);
+        // ConfigManager에 업데이트 위임 (LocalStorage 저장 등 수행)
+        if (this.configManager) {
+            this.configManager.updateVolumeConfig(config);
         }
     }
 
     // [명령어] 설정 변경 메서드 (New)
     updateConfig(key, value) {
-        const conf = window.NORMALIZER_CONFIG;
+        const conf = this.configManager.getNormalizerConfig();
         if (!conf) return;
 
         let msg = "";
@@ -146,12 +140,12 @@ class AudioManager {
         const normOriginal = message.normalize('NFC').replace(/\s+/g, '');
 
         const visualKeys = new Set();
-        if (window.HIVE_VISUAL_CONFIG) {
-            Object.keys(window.HIVE_VISUAL_CONFIG).forEach(k => {
+        const vConf = this.configManager.getVisualConfig();
+        if (vConf) {
+            Object.keys(vConf).forEach(k => {
                 visualKeys.add(k.normalize('NFC').replace(/\s+/g, ''));
-                const val = window.HIVE_VISUAL_CONFIG[k];
+                const val = vConf[k];
                 if (val && val.soundKey) visualKeys.add(val.soundKey.normalize('NFC').replace(/\s+/g, ''));
-                // [New] Also exclude audioOverride keys from chat triggers so they don't double-play or play via chat
                 if (val && val.audioOverride) visualKeys.add(val.audioOverride.normalize('NFC').replace(/\s+/g, ''));
             });
         }
@@ -249,7 +243,7 @@ class AudioManager {
         if (!fileName) return;
 
         // [중복 방지] 시각 효과 사운드 중복 차단
-        const visualConf = window.HIVE_VISUAL_CONFIG || {};
+        const visualConf = this.configManager ? this.configManager.getVisualConfig() : {};
         const isVisualSound = Object.values(visualConf).some(vConf => {
             // Check both soundKey and audioOverride
             const checkKeys = [];
@@ -271,7 +265,7 @@ class AudioManager {
         if (!playPath.includes('/') && !playPath.includes('\\')) playPath = this.basePath + playPath;
 
         const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-        const normConfig = window.NORMALIZER_CONFIG || { enabled: true, visual: false, sfx: true };
+        const normConfig = this.configManager ? this.configManager.getNormalizerConfig() : { enabled: true, visual: false, sfx: true };
         const applyNormalizer = normConfig.enabled &&
             ((type === 'visual' && normConfig.visual) || (type === 'sfx' && normConfig.sfx));
 

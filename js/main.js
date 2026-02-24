@@ -3,7 +3,7 @@
 const eventBus = new EventBus();
 
 const appConfig = new ConfigManager();
-const audioManager = new AudioManager(eventBus);
+const audioManager = new AudioManager(appConfig, eventBus);
 const chatRenderer = new ChatRenderer(eventBus);
 const visualDirector = new VisualDirector(appConfig, eventBus);
 const systemController = new SystemController(eventBus);
@@ -156,13 +156,13 @@ window.runDemoSequence = (durationSeconds = 60) => {
     console.log(`🎬 Starting Demo Sequence (${durationSeconds}s)...`);
     let demoCount = 0;
     const intervalTime = 1500; // Fast pace
-    const names = window.RANDOM_NAMES || ["Anonymous", "트수", "시청자"];
+    const names = appConfig.getRandomNames() || ["Anonymous", "트수", "시청자"];
 
     _demoInterval = setInterval(() => {
-        if (!window.WELCOME_MESSAGES || window.WELCOME_MESSAGES.length === 0) return;
+        if (!appConfig.getWelcomeMessages() || appConfig.getWelcomeMessages().length === 0) return;
 
         // Random Message
-        const msg = window.WELCOME_MESSAGES[Math.floor(Math.random() * window.WELCOME_MESSAGES.length)];
+        const msg = appConfig.getWelcomeMessages()[Math.floor(Math.random() * appConfig.getWelcomeMessages().length)];
         const name = names[Math.floor(Math.random() * names.length)];
         const demoColors = ["#ff4444", "#44ff44", "#44bbff", "#ffff44", "#ff88ff", "#44ffff", "#ffa500", "#ffffff"];
         const color = demoColors[Math.floor(Math.random() * demoColors.length)];
@@ -201,12 +201,12 @@ window.runDemoSequence = (durationSeconds = 60) => {
 // [Feature] Startup Random Welcome Messages (Debug Mode Only)
 let welcomeInterval = null;
 
-if (appConfig.debugMode && window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.length > 0) {
-    const names = window.RANDOM_NAMES || ["Anonymous"];
+if (appConfig.debugMode && appConfig.getWelcomeMessages() && appConfig.getWelcomeMessages().length > 0) {
+    const names = appConfig.getRandomNames() || ["Anonymous"];
     console.log("Starting Welcome Message Loop (Debug Mode)...");
 
     // Visual Effect Pool from Config
-    const visualKeys = window.HIVE_VISUAL_CONFIG ? Object.keys(window.HIVE_VISUAL_CONFIG) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼', '발파', '방종송'];
+    const visualKeys = appConfig.getVisualConfig() ? Object.keys(appConfig.getVisualConfig()) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼', '발파', '방종송'];
 
     // [Fixed] Moved Startup Sequence outside to ensure URL commands work
     // OLD Location - Removed
@@ -214,7 +214,7 @@ if (appConfig.debugMode && window.WELCOME_MESSAGES && window.WELCOME_MESSAGES.le
 
     welcomeInterval = setInterval(() => {
         // 10% Chance to FORCE a visual effect message if not already picked
-        let msg = window.WELCOME_MESSAGES[Math.floor(Math.random() * window.WELCOME_MESSAGES.length)];
+        let msg = appConfig.getWelcomeMessages()[Math.floor(Math.random() * appConfig.getWelcomeMessages().length)];
         let isVisual = false;
 
         // "비주얼 이팩트도 랜덤하게 띄워줘" - Explicitly inject visual command occasionally
@@ -311,8 +311,8 @@ window.runQueueStressTest = () => {
 
     const sendBatch = (count, label) => {
         console.log(`🔥 [Test] Sending Batch: ${label} (${count} msgs)`);
-        const messages = window.WELCOME_MESSAGES || ["테스트 메시지"];
-        const names = window.RANDOM_NAMES || ["Tester"];
+        const messages = appConfig.getWelcomeMessages() || ["테스트 메시지"];
+        const names = appConfig.getRandomNames() || ["Tester"];
 
         for (let i = 0; i < count; i++) {
             const rawMsg = messages[Math.floor(Math.random() * messages.length)];
