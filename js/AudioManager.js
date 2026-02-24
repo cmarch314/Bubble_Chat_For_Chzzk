@@ -142,16 +142,17 @@ class AudioManager {
     // 소리만 재생 (채팅 트리거용 - Legacy Logic 유지)
     checkAndPlay(message, force = false) {
         if (!this.enabled && !force) return;
-        const normOriginal = message.normalize('NFC').trim();
+        // [User Request] 띄어쓰기 상관없이 발동되도록 공백 모두 제거
+        const normOriginal = message.normalize('NFC').replace(/\s+/g, '');
 
         const visualKeys = new Set();
         if (window.HIVE_VISUAL_CONFIG) {
             Object.keys(window.HIVE_VISUAL_CONFIG).forEach(k => {
-                visualKeys.add(k.normalize('NFC'));
+                visualKeys.add(k.normalize('NFC').replace(/\s+/g, ''));
                 const val = window.HIVE_VISUAL_CONFIG[k];
-                if (val && val.soundKey) visualKeys.add(val.soundKey.normalize('NFC'));
+                if (val && val.soundKey) visualKeys.add(val.soundKey.normalize('NFC').replace(/\s+/g, ''));
                 // [New] Also exclude audioOverride keys from chat triggers so they don't double-play or play via chat
-                if (val && val.audioOverride) visualKeys.add(val.audioOverride.normalize('NFC'));
+                if (val && val.audioOverride) visualKeys.add(val.audioOverride.normalize('NFC').replace(/\s+/g, ''));
             });
         }
 
@@ -159,7 +160,10 @@ class AudioManager {
 
         let allMatches = [];
         Object.keys(this.soundHive).forEach(keyword => {
-            const normKey = keyword.normalize('NFC');
+            const originalNormKey = keyword.normalize('NFC');
+            const normKey = originalNormKey.replace(/\s+/g, ''); // 키워드의 공백도 제거
+            if (normKey.length === 0) return; // 빈 키워드 방지
+
             const lowerKey = normKey.toLowerCase();
             if (visualKeys.has(normKey)) return;
 
@@ -170,7 +174,7 @@ class AudioManager {
                     endIndex: index + normKey.length,
                     length: normKey.length,
                     sound: this.soundHive[keyword],
-                    keyword: keyword
+                    keyword: originalNormKey // 원본 키워드 유지 (중복 방지용)
                 });
                 searchPos = index + 1;
             }
