@@ -6,7 +6,7 @@ window.CHZZK_CHANNEL_ID = "057a9a03fea9b368eb0c76b9e95e1ae5"; // [Optional] Set 
 window.HIVE_VOLUME_CONFIG = {
     master: 1.0, // Default master volume (1.0 = 100%)
     visual: 1.0, // Multiplier for visual effects
-    sfx: 0.6     // Multiplier for standard sound effects
+    sfx: 0.5     // Multiplier for standard sound effects
 };
 
 

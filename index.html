@@ -21,7 +21,18 @@
 
   <link rel="stylesheet" href="./style.css?v=20260201">
   <script src="./config.js?v=20260201"></script>
-  <script src="./script.js?v=20260201" defer></script>
+  <!-- [Refactor] Load separated modules -->
+  <script src="./js/utils.js" defer></script>
+  <script src="./js/ConfigManager.js" defer></script>
+  <script src="./js/ChzzkGateway.js" defer></script>
+  <script src="./js/AudioManager.js" defer></script>
+  <script src="./js/ChatRenderer.js" defer></script>
+  <script src="./js/VisualDirector.js" defer></script>
+  <script src="./js/SystemController.js" defer></script>
+  <script src="./js/MessageQueue.js" defer></script>
+  <!-- [Refactor] Main Application logic -->
+  <script src="./js/main.js" defer></script>
+
   <script src='https://twemoji.maxcdn.com/2/twemoji.min.js?2.3.0'></script>
 </body>
 
