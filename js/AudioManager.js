@@ -345,4 +345,46 @@ class AudioManager {
             }
         });
     }
+
+    // [New] Preloader 지원용 백그라운드 캐싱 메서드
+    preloadList(urls) {
+        if (!urls || urls.length === 0) return;
+        console.log(`[AudioManager] Preloading ${urls.length} audio files in background...`);
+
+        // requestIdleCallback 활용으로 부하 분산
+        const processAudio = (deadline) => {
+            while (urls.length > 0 && deadline.timeRemaining() > 0) {
+                const url = urls.pop();
+                if (!this.bufferCache.has(url)) {
+                    // Silently fetch and decode
+                    fetch(url)
+                        .then(response => {
+                            if (!response.ok) throw new Error("Fetch failed");
+                            return response.arrayBuffer();
+                        })
+                        .then(arrayBuffer => this.audioCtx.decodeAudioData(arrayBuffer))
+                        .then(audioBuffer => {
+                            this.bufferCache.set(url, audioBuffer);
+                        })
+                        .catch(e => {
+                            // Do nothing on preloader failure, fallback handles it at play time
+                        });
+                }
+            }
+
+            if (urls.length > 0) {
+                if (window.requestIdleCallback) {
+                    requestIdleCallback(processAudio);
+                } else {
+                    setTimeout(() => processAudio({ timeRemaining: () => 10 }), 50);
+                }
+            }
+        };
+
+        if (window.requestIdleCallback) {
+            requestIdleCallback(processAudio);
+        } else {
+            setTimeout(() => processAudio({ timeRemaining: () => 10 }), 50);
+        }
+    }
 }

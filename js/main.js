@@ -7,6 +7,7 @@ const audioManager = new AudioManager(appConfig, eventBus);
 const chatRenderer = new ChatRenderer(eventBus);
 const visualDirector = new VisualDirector(appConfig, eventBus);
 const systemController = new SystemController(eventBus);
+const preloader = new AssetPreloader(appConfig, audioManager); // [New] Asset Preloader
 
 // 네트워크 연결 시작
 // [Global Refactor] Process Message Logic for portability (Real & Fake)
@@ -276,6 +277,12 @@ window.addEventListener('chzzk_connected', () => {
     if (loader) {
         loader.classList.add('hidden');
         setTimeout(() => loader.remove(), 1000); // Remove from DOM after transition
+    }
+
+    // [New] Start Background Asset Caching
+    if (preloader) {
+        // 약간의 지연을 주어 렌더링 부하를 피해 캐싱 시작
+        setTimeout(() => preloader.start(), 2000);
     }
 
 }, { once: true });
