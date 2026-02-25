@@ -835,7 +835,6 @@ class VisualDirector {
             overlay.appendChild(cloudsContainer);
 
             // 사운드 재생
-            if (this.eventBus && conf.soundKey) this.eventBus.playSFX(conf.soundKey);
 
             // 3. 5초: 제트기 (붉은 선 - 두 줄) & 제트운 (흰 선)
             setTimeout(() => {
