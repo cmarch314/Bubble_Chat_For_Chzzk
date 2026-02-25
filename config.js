@@ -607,7 +607,7 @@ window.HIVE_SOUND_CONFIG = {
     "이거실화야": { "src": "이거실화야.mp3", "volume": 0.7 },
     "이걸왜유투브": { "src": "이걸왜유투브.mp3", "volume": 0.7 },
     "이걸왜유튜브": { "src": "이걸왜유투브.mp3", "volume": 0.7 },
-    "이놈": { "src": "이놈.mp3", "volume": 0.7 },
+    "이놈!": { "src": "이놈.mp3", "volume": 0.7 },
     "건랜서야": [{ "src": "이새낀건랜서.mp3", "volume": 0.7 },
     { "src": "이새낀건랜서2.mp3", "volume": 0.7 }],
     "이안에사람": { "src": "이안에사람2.mp3", "volume": 0.7 },
@@ -756,7 +756,7 @@ window.HIVE_SOUND_CONFIG = {
     "선브샀어안샀어": { "src": "선브샀어안샀어.mp3", "volume": 0.7 },
     "오오오오": { "src": "오오오오.mp3", "volume": 0.7 },
     "오오오오오": { "src": "오오오오오.mp3", "volume": 0.7 },
-    "윈도우종료": { "src": "Windows Shutdown.mp3", "volume": 0.7 },
+    "윈도우종료": { "src": "Windows Shutdown.mp3", "volume": 0.7 }, //스트리머 전용
     "그당몬": { "src": "그당몬.mp3", "volume": 0.7 },
     "변태야": { "src": "변태야.mp3", "volume": 0.7 },
     "비상": { "src": "비상1.mp3", "volume": 0.7 },
@@ -812,6 +812,7 @@ window.HIVE_SOUND_CONFIG = {
     "똥침": { "src": "똥침.mp3", "volume": 0.7 },
     "랫츠고": { "src": "랫츠고.mp3", "volume": 0.7 },
     "만족감을": { "src": "만족감을줬.mp3", "volume": 0.7 },
+    "망겜": { "src": "망겜.mp3", "volume": 0.7 },
     "멈춰": [
         { "src": "멈춰2.mp3", "volume": 0.7 },
         { "src": "멈춰3.mp3", "volume": 0.7 },
@@ -964,6 +965,7 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "풀버3.mp3", "volume": 0.7 },
     ],
     "풍악을울려라": { "src": "풍악을울려라.mp3", "volume": 0.8 },
+    "합시다~": { "src": "합시다~.mp3", "volume": 0.7 },
     "합격이요": { "src": "합격이요예.mp3", "volume": 0.7 },
     "호모나세상에": { "src": "호모나세상에.mp3", "volume": 0.7 },
     "호오": { "src": "호오.mp3", "volume": 0.7 },
