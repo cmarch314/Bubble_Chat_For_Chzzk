@@ -118,7 +118,7 @@ window.HIVE_SOUND_CONFIG = {
     "갓겜송": { "src": "갓겜합시다FULL.mp3", "volume": 0.4 },
 
     // [Songs / Full Version]
-    "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.7 },
+    "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.7 },// only for visual effect
 
     // [Reactions & Memes]
     "앙?": { "src": "Ang.mp3", "volume": 0.7 },
