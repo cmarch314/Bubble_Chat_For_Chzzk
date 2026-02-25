@@ -942,431 +942,433 @@ class VisualDirector {
                     <div class="cloud-layer cloud-1"></div>
                 `;
                 overlay.appendChild(bottomClouds);
-                // 7. 메시지 등장 (textAppearDelay 지점)
-                setTimeout(() => {
-                    let msg = message || "";
-                    msg = msg.replace(/!발파/i, '').trim();
+            }, conf.impactDelay);
 
-                    const msgBox = document.createElement('div');
-                    msgBox.className = 'valstrax-msg-box';
-                    msgBox.innerHTML = `<div>${msg}</div>`;
-                    overlay.appendChild(msgBox);
+            // 7. 메시지 등장 (textAppearDelay 지점)
+            setTimeout(() => {
+                let msg = message || "";
+                msg = msg.replace(/!발파/i, '').trim();
 
-                    // Fade In 효과
-                    requestAnimationFrame(() => msgBox.classList.add('visible'));
+                const msgBox = document.createElement('div');
+                msgBox.className = 'valstrax-msg-box';
+                msgBox.innerHTML = `<div>${msg}</div>`;
+                overlay.appendChild(msgBox);
 
-                }, conf.textAppearDelay);
+                // Fade In 효과
+                requestAnimationFrame(() => msgBox.classList.add('visible'));
 
-                // 7. 18초: 종료
-                setTimeout(() => {
-                    overlay.remove();
-                    resolve(); // Signal completion to the queue
-                }, conf.duration);
-            });
+            }, conf.textAppearDelay);
+
+            // 7. 18초: 종료
+            setTimeout(() => {
+                overlay.remove();
+                resolve(); // Signal completion to the queue
+            }, conf.duration);
+        });
+    }
+
+    _runBangjong(context) {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().bangjong) ? this.config.getVisualConfig().bangjong : {
+            duration: 90000,
+            teostraPath: './img/Teostra.png',
+            lunastraPath: './img/Lunastra.png',
+            characterCount: 8,
+            characterSize: '15rem'
+        };
+
+        const overlay = document.getElementById('bangjong-overlay');
+        if (!overlay) return Promise.resolve();
+
+        const container = overlay.querySelector('.bangjong-actors-container');
+        if (container) container.innerHTML = ''; // Clear previous actors
+
+        // Add text message if any
+        let msg = context.message || "";
+        msg = msg.replace(/!방종송/i, '').trim();
+        if (msg) {
+            const txt = document.createElement('div');
+            txt.className = 'bangjong-text';
+            txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {});
+            overlay.appendChild(txt);
+            setTimeout(() => { if (txt.parentNode) txt.remove(); }, conf.duration);
         }
 
-_runBangjong(context) {
-            const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().bangjong) ? this.config.getVisualConfig().bangjong : {
-                duration: 90000,
-                teostraPath: './img/Teostra.png',
-                lunastraPath: './img/Lunastra.png',
-                characterCount: 8,
-                characterSize: '15rem'
-            };
+        // Spawn characters (Teostra & Lunastra)
+        let isActive = true;
+        if (container) {
+            for (let i = 0; i < conf.characterCount; i++) {
+                const isTeostra = (i % 2 === 0);
+                const charPath = isTeostra ? conf.teostraPath : conf.lunastraPath;
 
-            const overlay = document.getElementById('bangjong-overlay');
-            if(!overlay) return Promise.resolve();
+                const actor = document.createElement('div');
+                actor.className = 'bangjong-actor';
+                actor.style.width = conf.characterSize;
 
-            const container = overlay.querySelector('.bangjong-actors-container');
-            if(container) container.innerHTML = ''; // Clear previous actors
+                // Initial random position (Narrowed range to keep on-screen)
+                const startX = Math.random() * 60 + 20;
+                const startY = Math.random() * 52 + 24;
+                actor.style.left = startX + '%';
+                actor.style.top = startY + '%';
 
-            // Add text message if any
-            let msg = context.message || "";
-            msg = msg.replace(/!방종송/i, '').trim();
-            if(msg) {
-                const txt = document.createElement('div');
-                txt.className = 'bangjong-text';
-                txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {});
-                overlay.appendChild(txt);
-                setTimeout(() => { if (txt.parentNode) txt.remove(); }, conf.duration);
+                const img = document.createElement('img');
+                img.src = charPath;
+                actor.appendChild(img);
+                container.appendChild(actor);
+
+                const hopDuration = 0.4 + Math.random() * 0.3;
+                const delay = Math.random() * -5;
+                img.style.animation = `hvn-bangjong-hop ${hopDuration}s ease-in-out infinite ${delay}s`;
+
+                // --- Puppy-like AI Movement ---
+                const movePuppy = () => {
+                    if (!isActive) return;
+
+                    const curX = parseFloat(actor.style.left);
+                    const destX = Math.random() * 60 + 20; // Narrowed: 20-80%
+                    const destY = Math.random() * 52 + 24; // Narrowed: 24-76%
+
+                    // Speed: ~10-20% per second
+                    const distance = Math.sqrt(Math.pow(destX - curX, 2));
+                    const duration = 1.5 + (distance / 15) + Math.random() * 2;
+
+                    // Direction Flip
+                    const movingRight = destX > curX;
+                    let flipped = isTeostra ? !movingRight : movingRight;
+                    actor.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+
+                    actor.style.transition = `left ${duration}s ease-in-out, top ${duration}s ease-in-out`;
+                    actor.style.left = destX + '%';
+                    actor.style.top = destY + '%';
+
+                    // Next move after reaching or pausing
+                    const totalWait = (duration * 1000) + (Math.random() > 0.7 ? 500 + Math.random() * 1500 : 0);
+                    setTimeout(movePuppy, totalWait);
+                };
+
+                // Start AI with a slight staggered delay
+                setTimeout(movePuppy, i * 300);
             }
+        }
 
-    // Spawn characters (Teostra & Lunastra)
-    let isActive = true;
-            if(container) {
-                for (let i = 0; i < conf.characterCount; i++) {
-                    const isTeostra = (i % 2 === 0);
-                    const charPath = isTeostra ? conf.teostraPath : conf.lunastraPath;
+        return new Promise(resolve => {
+            overlay.classList.add('visible');
+            setTimeout(() => {
+                isActive = false;
+                overlay.classList.remove('visible');
+                // Wait for fade out transition (0.5s in CSS) before clearing
+                setTimeout(() => {
+                    if (container) container.innerHTML = '';
+                    const txt = overlay.querySelector('.bangjong-text');
+                    if (txt) txt.remove();
+                    resolve();
+                }, 600);
+            }, conf.duration);
+        });
+    }
 
-                    const actor = document.createElement('div');
-                    actor.className = 'bangjong-actor';
-                    actor.style.width = conf.characterSize;
+    _runGazabu(context) {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().gazabu) ? this.config.getVisualConfig().gazabu : {
+            duration: 8000,
+            backgroundPath: './Video/가자부.mp4'
+        };
 
-                    // Initial random position (Narrowed range to keep on-screen)
-                    const startX = Math.random() * 60 + 20;
-                    const startY = Math.random() * 52 + 24;
-                    actor.style.left = startX + '%';
-                    actor.style.top = startY + '%';
+        const overlay = document.getElementById('gazabu-overlay');
+        if (!overlay) return Promise.resolve();
 
-                    const img = document.createElement('img');
-                    img.src = charPath;
-                    actor.appendChild(img);
-                    container.appendChild(actor);
+        // Set background video
+        const bg = overlay.querySelector('.gazabu-bg');
+        if (bg) {
+            bg.src = conf.backgroundPath;
+            bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
+            bg.play().catch(e => console.warn("Gazabu video play failed:", e));
+        }
 
-                    const hopDuration = 0.4 + Math.random() * 0.3;
-                    const delay = Math.random() * -5;
-                    img.style.animation = `hvn-bangjong-hop ${hopDuration}s ease-in-out infinite ${delay}s`;
+        return new Promise(resolve => {
+            overlay.classList.add('visible');
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    if (bg) {
+                        bg.pause();
+                        bg.currentTime = 0;
+                        bg.src = "";
+                    }
+                    resolve();
+                }, 600);
+            }, conf.duration);
+        });
+    }
 
-                    // --- Puppy-like AI Movement ---
-                    const movePuppy = () => {
-                        if (!isActive) return;
+    _runMulsulsan(context) {
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().mulsulsan) ? this.config.getVisualConfig().mulsulsan : {
+            duration: 10000,
+            backgroundPath: './Video/물설산씨티.mp4'
+        };
 
-                        const curX = parseFloat(actor.style.left);
-                        const destX = Math.random() * 60 + 20; // Narrowed: 20-80%
-                        const destY = Math.random() * 52 + 24; // Narrowed: 24-76%
+        const overlay = document.getElementById('mulsulsan-overlay');
+        if (!overlay) return Promise.resolve();
 
-                        // Speed: ~10-20% per second
-                        const distance = Math.sqrt(Math.pow(destX - curX, 2));
-                        const duration = 1.5 + (distance / 15) + Math.random() * 2;
+        // Set background video
+        const bg = overlay.querySelector('.mulsulsan-bg');
+        if (bg) {
+            bg.src = conf.backgroundPath;
+            bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
+            // [Audio] Apply volume from visual audio settings if possible
+            const visualVol = (this.config.getVolumeConfig() && this.config.getVolumeConfig().visual !== undefined) ? this.config.getVolumeConfig().visual : 1.0;
+            bg.volume = visualVol * (conf.videoVolume || 1.0);
+            bg.play().catch(e => console.warn("Mulsulsan video play failed:", e));
+        }
 
-                        // Direction Flip
-                        const movingRight = destX > curX;
-                        let flipped = isTeostra ? !movingRight : movingRight;
-                        actor.style.transform = flipped ? 'scaleX(-1)' : 'scaleX(1)';
+        return new Promise(resolve => {
+            overlay.classList.add('visible');
+            setTimeout(() => {
+                overlay.classList.remove('visible');
+                setTimeout(() => {
+                    if (bg) {
+                        bg.pause();
+                        bg.currentTime = 0;
+                        bg.src = "";
+                    }
+                    resolve();
+                }, 600);
+            }, conf.duration);
+        });
+    }
 
-                        actor.style.transition = `left ${duration}s ease-in-out, top ${duration}s ease-in-out`;
-                        actor.style.left = destX + '%';
-                        actor.style.top = destY + '%';
+    _runRandomDance(context) {
+        const overlay = document.getElementById('random-dance-overlay');
+        if (!overlay) return Promise.resolve();
 
-                        // Next move after reaching or pausing
-                        const totalWait = (duration * 1000) + (Math.random() > 0.7 ? 500 + Math.random() * 1500 : 0);
-                        setTimeout(movePuppy, totalWait);
-                    };
+        const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().random_dance) ? this.config.getVisualConfig().random_dance : {
+            duration: 18000,
+            videoWidth: '22rem',
+            videoHeight: '39rem',
+            cycleInterval: 6000,
+            bloomOpacity: 0.5,
+            videoBrightness: 1.1,
+            vignetteOpacity: 0.6,
+            sepiaIntensity: 0.15,
+            filmContrast: 1.25,
+            opacity: 0.9,
+            positions: { left: { x: '15%', y: '50%' }, right: { x: '85%', y: '50%' } },
+            videoPool: []
+        };
 
-                    // Start AI with a slight staggered delay
-                    setTimeout(movePuppy, i * 300);
-                }
-            }
+        // Apply cinematic visual variables
+        overlay.style.setProperty('--rd-bloom-op', conf.bloomOpacity || 0.5);
+        overlay.style.setProperty('--rd-vid-bright', conf.videoBrightness || 1.1);
+        overlay.style.setProperty('--rd-vignette-op', conf.vignetteOpacity || 0.6);
+        overlay.style.setProperty('--rd-sepia', conf.sepiaIntensity || 0.15);
+        overlay.style.setProperty('--rd-contrast', conf.filmContrast || 1.25);
 
-    return new Promise(resolve => {
+        const leftContainer = overlay.querySelector('.rd-left');
+        const rightContainer = overlay.querySelector('.rd-right');
+
+        // [Fix] Explicitly clear containers at the start to prevent ghosting from previous runs Boris again
+        leftContainer.innerHTML = '';
+        rightContainer.innerHTML = '';
+
+        // Apply shared styles
+        [leftContainer, rightContainer].forEach((cont, idx) => {
+            const side = idx === 0 ? 'left' : 'right';
+            const pos = conf.positions[side];
+            cont.style.width = conf.videoWidth || '22rem';
+            cont.style.height = conf.videoHeight || '39rem';
+            cont.style.left = pos.x;
+            cont.style.top = pos.y;
+            cont.style.opacity = '0';
+            cont.style.transition = 'opacity 0.3s ease-in-out, filter 0.3s ease-in-out';
+        });
+
+        const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+        const selectedVideos = shuffle([...conf.videoPool]).slice(0, 6);
+        let currentIndex = 0;
+
+        const spawnVideo = (container, videoName) => {
+            container.innerHTML = '';
+            const video = document.createElement('video');
+            video.src = `./Video/RandomDance/${videoName}`;
+            video.autoplay = true;
+            video.loop = true;
+            video.muted = true;
+            video.preload = 'auto'; // Boris again
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.borderRadius = '20px';
+            video.style.boxShadow = '0 0 20px rgba(255,105,180,0.5)';
+            container.appendChild(video);
+            video.load(); // Boris again
+        };
+
+        const cycleVideos = () => {
+            // Fade out
+            leftContainer.style.opacity = '0';
+            rightContainer.style.opacity = '0';
+
+            setTimeout(() => {
+                const vid1 = selectedVideos[currentIndex];
+                const vid2 = selectedVideos[(currentIndex + 1) % selectedVideos.length];
+                spawnVideo(leftContainer, vid1);
+                spawnVideo(rightContainer, vid2);
+
+                // Fade in
+                leftContainer.style.opacity = (conf.opacity || 0.9).toString();
+                rightContainer.style.opacity = (conf.opacity || 0.9).toString();
+
+                currentIndex = (currentIndex + 2) % selectedVideos.length;
+            }, 300);
+        };
+
+        return new Promise(resolve => {
+            overlay.classList.add('visible');
+            overlay.classList.remove('rd-bloom'); // Reset bloom
+
+            cycleVideos(); // Initial
+            const interval = setInterval(cycleVideos, conf.cycleInterval || 6000);
+
+            // [New] Bloom effect (뽀샤시) start at 6s
+            const bloomTimeout = setTimeout(() => {
+                overlay.classList.add('rd-bloom');
+            }, 6000);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                clearTimeout(bloomTimeout);
+                overlay.classList.remove('visible', 'rd-bloom');
+
+                // [Fix] Extra delay before resolve to ensure 0.3s fade-out is complete Boris again
+                setTimeout(() => {
+                    leftContainer.innerHTML = '';
+                    rightContainer.innerHTML = '';
+                    resolve();
+                }, 400);
+            }, conf.duration);
+        });
+    }
+
+    _genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context, conf) {
+        const overlay = document.getElementById(overlayId); if (!overlay) return Promise.resolve();
+        const parts = this._parseMessage(context.message, kw);
+        const floatTime = conf.floatingTextDuration || 4000;
+        const textScale = conf.textScale || 1.5;
+        this._showFloatingText(parts.rest, 0, floatTime - 500, styleClass, context.emotes, conf.fontSize, textScale);
+        this._showFloatingText(parts.last, floatTime - 400, 500, styleClass, context.emotes, conf.fontSize, textScale);
+        return new Promise(resolve => {
+            setTimeout(() => {
                 overlay.classList.add('visible');
-                setTimeout(() => {
-                    isActive = false;
-                    overlay.classList.remove('visible');
-                    // Wait for fade out transition (0.5s in CSS) before clearing
+                const emoji = overlay.querySelector('.' + emojiClass);
+                let active = true;
+                const glitch = () => {
+                    if (!active) return;
+                    void emoji.offsetWidth;
+                    emoji.classList.add('glitching');
+                    const delay = (conf.glitchMinDelay || 260) + Math.random() * ((conf.glitchMaxDelay || 780) - (conf.glitchMinDelay || 260));
                     setTimeout(() => {
-                        if (container) container.innerHTML = '';
-                        const txt = overlay.querySelector('.bangjong-text');
-                        if (txt) txt.remove();
-                        resolve();
-                    }, 600);
-                }, conf.duration);
-            });
-        }
-
-_runGazabu(context) {
-            const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().gazabu) ? this.config.getVisualConfig().gazabu : {
-                duration: 8000,
-                backgroundPath: './Video/가자부.mp4'
-            };
-
-            const overlay = document.getElementById('gazabu-overlay');
-            if(!overlay) return Promise.resolve();
-
-            // Set background video
-            const bg = overlay.querySelector('.gazabu-bg');
-            if(bg) {
-                bg.src = conf.backgroundPath;
-                bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
-                bg.play().catch(e => console.warn("Gazabu video play failed:", e));
-            }
-
-    return new Promise(resolve => {
-                overlay.classList.add('visible');
-                setTimeout(() => {
-                    overlay.classList.remove('visible');
-                    setTimeout(() => {
-                        if (bg) {
-                            bg.pause();
-                            bg.currentTime = 0;
-                            bg.src = "";
-                        }
-                        resolve();
-                    }, 600);
-                }, conf.duration);
-            });
-        }
-
-_runMulsulsan(context) {
-            const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().mulsulsan) ? this.config.getVisualConfig().mulsulsan : {
-                duration: 10000,
-                backgroundPath: './Video/물설산씨티.mp4'
-            };
-
-            const overlay = document.getElementById('mulsulsan-overlay');
-            if(!overlay) return Promise.resolve();
-
-            // Set background video
-            const bg = overlay.querySelector('.mulsulsan-bg');
-            if(bg) {
-                bg.src = conf.backgroundPath;
-                bg.style.opacity = (conf.opacity !== undefined) ? conf.opacity : 1.0;
-                // [Audio] Apply volume from visual audio settings if possible
-                const visualVol = (this.config.getVolumeConfig() && this.config.getVolumeConfig().visual !== undefined) ? this.config.getVolumeConfig().visual : 1.0;
-                bg.volume = visualVol * (conf.videoVolume || 1.0);
-                bg.play().catch(e => console.warn("Mulsulsan video play failed:", e));
-            }
-
-    return new Promise(resolve => {
-                overlay.classList.add('visible');
-                setTimeout(() => {
-                    overlay.classList.remove('visible');
-                    setTimeout(() => {
-                        if (bg) {
-                            bg.pause();
-                            bg.currentTime = 0;
-                            bg.src = "";
-                        }
-                        resolve();
-                    }, 600);
-                }, conf.duration);
-            });
-        }
-
-_runRandomDance(context) {
-            const overlay = document.getElementById('random-dance-overlay');
-            if(!overlay) return Promise.resolve();
-
-            const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().random_dance) ? this.config.getVisualConfig().random_dance : {
-                duration: 18000,
-                videoWidth: '22rem',
-                videoHeight: '39rem',
-                cycleInterval: 6000,
-                bloomOpacity: 0.5,
-                videoBrightness: 1.1,
-                vignetteOpacity: 0.6,
-                sepiaIntensity: 0.15,
-                filmContrast: 1.25,
-                opacity: 0.9,
-                positions: { left: { x: '15%', y: '50%' }, right: { x: '85%', y: '50%' } },
-                videoPool: []
-            };
-
-            // Apply cinematic visual variables
-            overlay.style.setProperty('--rd-bloom-op', conf.bloomOpacity || 0.5);
-            overlay.style.setProperty('--rd-vid-bright', conf.videoBrightness || 1.1);
-            overlay.style.setProperty('--rd-vignette-op', conf.vignetteOpacity || 0.6);
-            overlay.style.setProperty('--rd-sepia', conf.sepiaIntensity || 0.15);
-            overlay.style.setProperty('--rd-contrast', conf.filmContrast || 1.25);
-
-            const leftContainer = overlay.querySelector('.rd-left');
-            const rightContainer = overlay.querySelector('.rd-right');
-
-            // [Fix] Explicitly clear containers at the start to prevent ghosting from previous runs Boris again
-            leftContainer.innerHTML = '';
-            rightContainer.innerHTML = '';
-
-            // Apply shared styles
-            [leftContainer, rightContainer].forEach((cont, idx) => {
-                const side = idx === 0 ? 'left' : 'right';
-                const pos = conf.positions[side];
-                cont.style.width = conf.videoWidth || '22rem';
-                cont.style.height = conf.videoHeight || '39rem';
-                cont.style.left = pos.x;
-                cont.style.top = pos.y;
-                cont.style.opacity = '0';
-                cont.style.transition = 'opacity 0.3s ease-in-out, filter 0.3s ease-in-out';
-            });
-
-            const shuffle = (array) => array.sort(() => Math.random() - 0.5);
-            const selectedVideos = shuffle([...conf.videoPool]).slice(0, 6);
-            let currentIndex = 0;
-
-            const spawnVideo = (container, videoName) => {
-                container.innerHTML = '';
-                const video = document.createElement('video');
-                video.src = `./Video/RandomDance/${videoName}`;
-                video.autoplay = true;
-                video.loop = true;
-                video.muted = true;
-                video.preload = 'auto'; // Boris again
-                video.style.width = '100%';
-                video.style.height = '100%';
-                video.style.objectFit = 'cover';
-                video.style.borderRadius = '20px';
-                video.style.boxShadow = '0 0 20px rgba(255,105,180,0.5)';
-                container.appendChild(video);
-                video.load(); // Boris again
-            };
-
-            const cycleVideos = () => {
-                // Fade out
-                leftContainer.style.opacity = '0';
-                rightContainer.style.opacity = '0';
-
-                setTimeout(() => {
-                    const vid1 = selectedVideos[currentIndex];
-                    const vid2 = selectedVideos[(currentIndex + 1) % selectedVideos.length];
-                    spawnVideo(leftContainer, vid1);
-                    spawnVideo(rightContainer, vid2);
-
-                    // Fade in
-                    leftContainer.style.opacity = (conf.opacity || 0.9).toString();
-                    rightContainer.style.opacity = (conf.opacity || 0.9).toString();
-
-                    currentIndex = (currentIndex + 2) % selectedVideos.length;
-                }, 300);
-            };
-
-            return new Promise(resolve => {
-                overlay.classList.add('visible');
-                overlay.classList.remove('rd-bloom'); // Reset bloom
-
-                cycleVideos(); // Initial
-                const interval = setInterval(cycleVideos, conf.cycleInterval || 6000);
-
-                // [New] Bloom effect (뽀샤시) start at 6s
-                const bloomTimeout = setTimeout(() => {
-                    overlay.classList.add('rd-bloom');
-                }, 6000);
-
-                setTimeout(() => {
-                    clearInterval(interval);
-                    clearTimeout(bloomTimeout);
-                    overlay.classList.remove('visible', 'rd-bloom');
-
-                    // [Fix] Extra delay before resolve to ensure 0.3s fade-out is complete Boris again
-                    setTimeout(() => {
-                        leftContainer.innerHTML = '';
-                        rightContainer.innerHTML = '';
-                        resolve();
-                    }, 400);
-                }, conf.duration);
-            });
-        }
-
-_genericSkullLikeEffect(overlayId, kw, styleClass, emojiClass, context, conf) {
-            const overlay = document.getElementById(overlayId); if(!overlay) return Promise.resolve();
-            const parts = this._parseMessage(context.message, kw);
-            const floatTime = conf.floatingTextDuration || 4000;
-            const textScale = conf.textScale || 1.5;
-            this._showFloatingText(parts.rest, 0, floatTime - 500, styleClass, context.emotes, conf.fontSize, textScale);
-            this._showFloatingText(parts.last, floatTime - 400, 500, styleClass, context.emotes, conf.fontSize, textScale);
-            return new Promise(resolve => {
-                setTimeout(() => {
-                    overlay.classList.add('visible');
-                    const emoji = overlay.querySelector('.' + emojiClass);
-                    let active = true;
-                    const glitch = () => {
-                        if (!active) return;
-                        void emoji.offsetWidth;
-                        emoji.classList.add('glitching');
-                        const delay = (conf.glitchMinDelay || 260) + Math.random() * ((conf.glitchMaxDelay || 780) - (conf.glitchMinDelay || 260));
-                        setTimeout(() => {
-                            emoji.classList.remove('glitching');
-                            if (active) setTimeout(glitch, delay);
-                        }, 200);
-                    };
-                    glitch();
-                    setTimeout(() => { active = false; overlay.classList.remove('visible'); resolve(); }, conf.duration - floatTime);
-                }, floatTime);
-            });
-        }
+                        emoji.classList.remove('glitching');
+                        if (active) setTimeout(glitch, delay);
+                    }, 200);
+                };
+                glitch();
+                setTimeout(() => { active = false; overlay.classList.remove('visible'); resolve(); }, conf.duration - floatTime);
+            }, floatTime);
+        });
+    }
 
     _showFloatingText(text, delay, duration, styleClass, emotes, fontSize, textScale = 1.5) {
-            if(!text) return;
+        if (!text) return;
+        setTimeout(() => {
+            const el = document.createElement('div'); el.className = `visual-center-text ${styleClass}`;
+            if (fontSize) el.style.fontSize = fontSize;
+            el.innerHTML = renderMessageWithEmotesHTML(this._wrapText(text, (this.config.getVisualConfig()?.common?.textWrapLimit || 200)), emotes || {}, textScale);
+            document.body.appendChild(el);
+            el.style.animation = "hvn-skull-fadeIn 0.2s forwards";
             setTimeout(() => {
-                const el = document.createElement('div'); el.className = `visual-center-text ${styleClass}`;
-                if(fontSize) el.style.fontSize = fontSize;
-                el.innerHTML = renderMessageWithEmotesHTML(this._wrapText(text, (this.config.getVisualConfig()?.common?.textWrapLimit || 200)), emotes || {}, textScale);
-                document.body.appendChild(el);
-                el.style.animation = "hvn-skull-fadeIn 0.2s forwards";
-                setTimeout(() => {
-                    el.style.animation = "hvn-skull-fadeOut 0.2s forwards";
-                    setTimeout(() => el.remove(), 200);
-    }, duration - 200);
+                el.style.animation = "hvn-skull-fadeOut 0.2s forwards";
+                setTimeout(() => el.remove(), 200);
+            }, duration - 200);
         }, delay);
     }
 
-_parseMessage(msg, kw) {
-    let display = (msg || "").trim();
-    // Case-insensitive replace for the keyword safely
-    const lowerKw = kw.toLowerCase();
-    const lowerDisplay = display.toLowerCase();
-    const startIdx = lowerDisplay.indexOf(lowerKw);
+    _parseMessage(msg, kw) {
+        let display = (msg || "").trim();
+        // Case-insensitive replace for the keyword safely
+        const lowerKw = kw.toLowerCase();
+        const lowerDisplay = display.toLowerCase();
+        const startIdx = lowerDisplay.indexOf(lowerKw);
 
-    if (startIdx !== -1) {
-        display = (display.substring(0, startIdx) + display.substring(startIdx + kw.length)).trim();
+        if (startIdx !== -1) {
+            display = (display.substring(0, startIdx) + display.substring(startIdx + kw.length)).trim();
+        }
+        const words = display.split(/\s+/).filter(w => w.length > 0);
+        let last = "", rest = ""; if (words.length > 1) { last = words.pop(); rest = words.join(' '); } else if (words.length === 1) { last = words[0]; }
+        return { last, rest };
     }
-    const words = display.split(/\s+/).filter(w => w.length > 0);
-    let last = "", rest = ""; if (words.length > 1) { last = words.pop(); rest = words.join(' '); } else if (words.length === 1) { last = words[0]; }
-    return { last, rest };
-}
 
-_wrapText(text, limit = 20, separator = '<br>') {
-    const words = text.split(/\s+/).filter(w => w.length > 0); if (words.length === 0) return "";
-    let lines = [], cur = words[0];
-    for (let i = 1; i < words.length; i++) { if ((cur + " " + words[i]).length <= limit) cur += " " + words[i]; else { lines.push(cur); cur = words[i]; } }
-    if (cur) lines.push(cur); return lines.join(separator);
-}
+    _wrapText(text, limit = 20, separator = '<br>') {
+        const words = text.split(/\s+/).filter(w => w.length > 0); if (words.length === 0) return "";
+        let lines = [], cur = words[0];
+        for (let i = 1; i < words.length; i++) { if ((cur + " " + words[i]).length <= limit) cur += " " + words[i]; else { lines.push(cur); cur = words[i]; } }
+        if (cur) lines.push(cur); return lines.join(separator);
+    }
 
-_splitMessageIntoParts(msg, count) {
-    const words = msg.split(/\s+/).filter(w => w.length > 0);
-    let parts = new Array(count).fill("");
-    if (words.length === 0) return parts;
+    _splitMessageIntoParts(msg, count) {
+        const words = msg.split(/\s+/).filter(w => w.length > 0);
+        let parts = new Array(count).fill("");
+        if (words.length === 0) return parts;
 
-    // If only one word, put it at the very end (punchline)
-    if (words.length === 1) {
-        parts[count - 1] = words[0];
+        // If only one word, put it at the very end (punchline)
+        if (words.length === 1) {
+            parts[count - 1] = words[0];
+            return parts;
+        }
+
+        // Reserve last word for the last part
+        const last = words.pop();
+        parts[count - 1] = last;
+
+        const rem = words;
+        const remainingSlots = count - 1;
+
+        if (rem.length <= remainingSlots) {
+            // If fewer (or equal) words than slots, fill them sequentially.
+            // Empty slots remain empty (no duplication).
+            for (let i = 0; i < rem.length; i++) {
+                parts[i] = rem[i];
+            }
+        } else {
+            // Distribute remaining words across the remaining slots
+            let currentIndex = 0;
+            for (let i = 0; i < remainingSlots; i++) {
+                const slotsLeft = remainingSlots - i;
+                const wordsLeft = rem.length - currentIndex;
+                const take = Math.ceil(wordsLeft / slotsLeft);
+                parts[i] = rem.slice(currentIndex, currentIndex + take).join(' ');
+                currentIndex += take;
+            }
+        }
         return parts;
     }
 
-    // Reserve last word for the last part
-    const last = words.pop();
-    parts[count - 1] = last;
+    _spawnActor(parent, cls, emoji, opts) {
+        const el = document.createElement('div'); el.className = cls;
+        if (opts.styles && opts.styles.nametag) {
+            el.style.cssText = "display:flex; flex-direction:column; align-items:center; justify-content:flex-end; white-space:nowrap;";
 
-    const rem = words;
-    const remainingSlots = count - 1;
-
-    if (rem.length <= remainingSlots) {
-        // If fewer (or equal) words than slots, fill them sequentially.
-        // Empty slots remain empty (no duplication).
-        for (let i = 0; i < rem.length; i++) {
-            parts[i] = rem[i];
+            const userColor = opts.styles.nameColor || '#fff';
+            const nt = document.createElement('div'); nt.className = 'surfer-nametag';
+            nt.innerHTML = `<span class="user-name">${opts.styles.nametag}</span>`;
+            nt.style.setProperty('--user-color', userColor);
+            el.appendChild(nt);
         }
-    } else {
-        // Distribute remaining words across the remaining slots
-        let currentIndex = 0;
-        for (let i = 0; i < remainingSlots; i++) {
-            const slotsLeft = remainingSlots - i;
-            const wordsLeft = rem.length - currentIndex;
-            const take = Math.ceil(wordsLeft / slotsLeft);
-            parts[i] = rem.slice(currentIndex, currentIndex + take).join(' ');
-            currentIndex += take;
-        }
+        const inner = document.createElement('div'); inner.className = 'actor-emoji';
+        inner.innerHTML = emoji; inner.style.lineHeight = '1'; el.appendChild(inner);
+        if (window.twemoji) twemoji.parse(el);
+        el.style.animationDuration = opts.duration + 'ms';
+        if (opts.styles) Object.keys(opts.styles).forEach(key => { if (key.startsWith('--')) el.style.setProperty(key, opts.styles[key]); else if (key !== 'nametag' && key !== 'nameColor') el.style[key] = opts.styles[key]; });
+        parent.appendChild(el);
+        setTimeout(() => { if (el.parentNode) el.remove(); }, opts.duration + 2000);
+        return el;
     }
-    return parts;
-}
-
-_spawnActor(parent, cls, emoji, opts) {
-    const el = document.createElement('div'); el.className = cls;
-    if (opts.styles && opts.styles.nametag) {
-        el.style.cssText = "display:flex; flex-direction:column; align-items:center; justify-content:flex-end; white-space:nowrap;";
-
-        const userColor = opts.styles.nameColor || '#fff';
-        const nt = document.createElement('div'); nt.className = 'surfer-nametag';
-        nt.innerHTML = `<span class="user-name">${opts.styles.nametag}</span>`;
-        nt.style.setProperty('--user-color', userColor);
-        el.appendChild(nt);
-    }
-    const inner = document.createElement('div'); inner.className = 'actor-emoji';
-    inner.innerHTML = emoji; inner.style.lineHeight = '1'; el.appendChild(inner);
-    if (window.twemoji) twemoji.parse(el);
-    el.style.animationDuration = opts.duration + 'ms';
-    if (opts.styles) Object.keys(opts.styles).forEach(key => { if (key.startsWith('--')) el.style.setProperty(key, opts.styles[key]); else if (key !== 'nametag' && key !== 'nameColor') el.style[key] = opts.styles[key]; });
-    parent.appendChild(el);
-    setTimeout(() => { if (el.parentNode) el.remove(); }, opts.duration + 2000);
-    return el;
-}
 }
 
