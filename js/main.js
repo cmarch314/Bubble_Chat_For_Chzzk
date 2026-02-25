@@ -58,9 +58,17 @@ eventBus.on('chat:process', (msgData) => {
         const lowerSoundKey = soundKey.toLowerCase();
 
         // Check "!해골" or "!skull" (case-insensitive)
-        if (lowerTrimmedMsg.startsWith("!" + lowerSoundKey)) {
-            foundKeyword = key;
-            break;
+        const triggerKw = "!" + lowerSoundKey;
+        if (msgData.isDonation) {
+            if (lowerTrimmedMsg.includes(triggerKw)) {
+                foundKeyword = key;
+                break;
+            }
+        } else {
+            if (lowerTrimmedMsg.startsWith(triggerKw)) {
+                foundKeyword = key;
+                break;
+            }
         }
     }
 
