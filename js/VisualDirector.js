@@ -416,9 +416,9 @@ class VisualDirector {
         // Clear previous content
         overlay.innerHTML = '';
 
-        // Audio setup
-        let audio = new Audio(conf.audioPath);
-        audio.volume = conf.volume || 0.7;
+        // Audio setup (using AudioManager via eventBus only to prevent echo)
+        // let audio = new Audio(conf.audioPath);
+        // audio.volume = conf.volume || 0.7;
 
         return new Promise(resolve => {
             // 0. Setup Background Video
@@ -444,8 +444,6 @@ class VisualDirector {
 
                 if (this.eventBus) {
                     this.eventBus.emit('audio:playVisualSound', conf.audioPath);
-                } else if (audio) {
-                    audio.play().catch(e => console.warn("God audio play failed:", e));
                 }
                 overlay.appendChild(video);
             }
@@ -528,13 +526,10 @@ class VisualDirector {
             }
 
             overlay.classList.add('visible');
-            audio.play().catch(e => console.warn("God audio play failed:", e));
 
             // End effect
             setTimeout(() => {
                 overlay.classList.remove('visible');
-                audio.pause();
-                audio.currentTime = 0;
                 resolve();
             }, conf.duration);
         });
