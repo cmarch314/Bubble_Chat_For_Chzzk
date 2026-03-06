@@ -142,16 +142,8 @@ class ConfigManager {
         if (window.RANDOM_NAMES) this._randomNames = [...window.RANDOM_NAMES];
         if (window.NORMALIZER_CONFIG) this._normalizerConfig = { ...this._normalizerConfig, ...window.NORMALIZER_CONFIG };
 
-        // 2. 로컬 스토리지 데이터로 덮어쓰기 (사용자 설정 우선)
-        const savedSound = localStorage.getItem('HIVE_SOUND_CONFIG');
-        if (savedSound) {
-            try { this._soundConfig = { ...this._soundConfig, ...JSON.parse(savedSound) }; } catch (e) { }
-        }
-
-        const savedVolume = localStorage.getItem('HIVE_VOLUME_CONFIG');
-        if (savedVolume) {
-            try { this._volumeConfig = { ...this._volumeConfig, ...JSON.parse(savedVolume) }; } catch (e) { }
-        }
+        // 2. [Fix] 로컬 스토리지 덮어쓰기 제거.
+        // config.js 파일을 수정했는데 로컬스토리지에 저장된 예전 설정값(1.0)이 덮어씌워지는 문제를 방지합니다.
 
         // 3. 전역 오염 방지: `config.js`를 통해 로드된 전역 객체 삭제 (캡슐화 완료)
         // (단, config.js가 재생성/덮어쓰기 될 때를 고려해 `config.html` 로직이 있다면 주의 필요. 지금은 맵핑용이므로 은닉.)
@@ -186,9 +178,9 @@ class ConfigManager {
     updateVolumeConfig(newConfig) {
         this._volumeConfig = { ...this._volumeConfig, ...newConfig };
         try {
-            localStorage.setItem('HIVE_VOLUME_CONFIG', JSON.stringify(this._volumeConfig));
+            // [Fix] 로컬스토리지 저장을 중단하여 새로고침 시 무조건 config.js를 읽도록 수정
             console.log(`[Config] Volume updated:`, this._volumeConfig);
-        } catch (e) { console.error("Volume Save Failed"); }
+        } catch (e) { console.error("Volume save dummy Error"); }
         return this._volumeConfig;
     }
 

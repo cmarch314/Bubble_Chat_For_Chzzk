@@ -141,10 +141,9 @@ const network = new ChzzkGateway(appConfig, eventBus);
 window.addEventListener('chzzk_connected', () => {
     console.log("Connection Established. Stopping Startup Sequences.");
 
-    // [User Request] Restore SFX Volume to 1.0 after loading
+    // [Fix] Removed the hardcoded volume restoration to 1.0 here because it overwrites the user's config.js settings
     if (audioManager) {
-        audioManager.updateVolumeConfig({ sfx: 1.0 });
-        console.log("🔊 [System] Loading complete. SFX Volume restored to 1.0");
+        console.log("🔊 [System] Loading complete. SFX Volume remains as configured.");
     }
 
     // [New] Clear queued visual effects from startup

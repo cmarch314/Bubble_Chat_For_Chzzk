@@ -442,9 +442,7 @@ class VisualDirector {
                 // But for background video it's usually muted as requested.
                 video.play().catch(e => console.warn("God video play failed:", e));
 
-                if (this.eventBus) {
-                    this.eventBus.emit('audio:playVisualSound', conf.audioPath);
-                }
+                // [Fix] Removed redundant eventBus emit here because _processQueue already plays effect.soundKey
                 overlay.appendChild(video);
             }
 

@@ -13,6 +13,9 @@ class AudioManager {
         // [Performance] 오디오 버퍼 캐시 (중복 로딩 방지)
         this.bufferCache = new Map();
 
+        // [Volume Control] 현재 재생 중인 소리 추적
+        this.activeVoices = 0;
+
         // 1. 오디오 엔진 시동
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.audioCtx = new AudioContext();
@@ -33,8 +36,6 @@ class AudioManager {
         this.soundHive = {};
         this.enabled = true;
         this.volumeConfig = { ...this.configManager.getVolumeConfig() };
-        // [User Request] Start with low SFX volume during loading
-        this.volumeConfig.sfx = 0.1;
         this.updateConfigLegacy(this.configManager.getSoundConfig());
 
         // Event Bus Listeners
@@ -293,20 +294,27 @@ class AudioManager {
                     source.buffer = audioBuffer;
 
                     const preGainNode = this.audioCtx.createGain();
-                    preGainNode.gain.value = driveGain;
+
+                    // [Dynamic Volume Scaling] 소리가 겹칠수록 볼륨을 줄여서 컴프레서 폭발 방지
+                    this.activeVoices++;
+                    const voiceScale = Math.max(0.3, 1.0 - (this.activeVoices * 0.15)); // 1개=0.85, 2개=0.7... 최소 30% 유지
+                    const scaledDriveGain = driveGain * voiceScale;
+
+                    preGainNode.gain.value = scaledDriveGain;
 
                     source.connect(preGainNode);
 
                     if (applyNormalizer) {
                         preGainNode.connect(this.compressor);
-                        console.log(`[Staging] ON - Drive:${driveGain.toFixed(1)} -> Comp -> Ceiling:${outputCeiling.toFixed(1)}`);
+                        console.log(`[Staging] ON - Voices:${this.activeVoices} Drive:${scaledDriveGain.toFixed(1)} -> Comp -> Ceiling:${outputCeiling.toFixed(1)}`);
                     } else {
                         preGainNode.connect(this.masterGain);
-                        console.log(`[Staging] OFF - Drive:${driveGain.toFixed(1)} -> Ceiling:${outputCeiling.toFixed(1)}`);
+                        console.log(`[Staging] OFF - Voices:${this.activeVoices} Drive:${scaledDriveGain.toFixed(1)} -> Ceiling:${outputCeiling.toFixed(1)}`);
                     }
 
                     source.start(0);
                     source.onended = () => {
+                        this.activeVoices = Math.max(0, this.activeVoices - 1);
                         source.disconnect();
                         preGainNode.disconnect();
                         resolve();
