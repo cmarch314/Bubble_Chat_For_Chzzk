@@ -136,11 +136,11 @@ class DebugController {
             let msg = messages[Math.floor(Math.random() * messages.length)];
             let isVisual = false;
 
-            if (!msg.startsWith('!') && Math.random() < 0.3) {
-                const randomVisual = visualKeys[Math.floor(Math.random() * visualKeys.length)];
-                msg = `!${randomVisual} ${msg}`;
-                isVisual = true;
-            }
+            // if (!msg.startsWith('!') && Math.random() < 0.3) {
+            //     const randomVisual = visualKeys[Math.floor(Math.random() * visualKeys.length)];
+            //     msg = `!${randomVisual} ${msg}`;
+            //     isVisual = true;
+            // }
 
             const randomName = names[Math.floor(Math.random() * names.length)];
             const randomUid = 'bot_' + Math.random().toString(36).substr(2, 9);
