@@ -178,14 +178,14 @@ setTimeout(() => {
         });
     }
     // 2. Default Startup Effect (mulsulsan)
-    else {
+    /* else {
         console.log(`🚀 [Startup] Default Effect: random_dance`);
         visualDirector.trigger('random_dance', {
             message: `✨ 시스템 시작: 랜덤 댄스 이펙트`,
             nickname: "System",
             isStreamer: true
         });
-    }
+    } */
 }, 1000); // 1 second after load
 
 // [New] Dynamic Status Merger
