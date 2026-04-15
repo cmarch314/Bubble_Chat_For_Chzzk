@@ -411,29 +411,26 @@ window.HIVE_SOUND_CONFIG = {
     "찾을거야": { "src": "Crysis_Find.mp3", "volume": 0.7 },
     "최고야": { "src": "AreYouBest.mp3", "volume": 0.7 },
     "ㅋㅋㅋ": [
-        { "src": "ㅋㅋㅋ23.mp3", "volume": 0.7 },
-        { "src": "ㅋㅋㅋ24.mp3", "volume": 0.7 },
-        { "src": "하하하1.mp3", "volume": 0.7 },
-        { "src": "하하하11.mp3", "volume": 0.7 },
-        { "src": "하하하12.mp3", "volume": 0.7 },
-        { "src": "하하하13.mp3", "volume": 0.7 },
-        { "src": "하하하14.mp3", "volume": 0.7 },
-        { "src": "하하하2.mp3", "volume": 0.7 },
-        { "src": "하하하3.mp3", "volume": 0.7 },
-        { "src": "하하하4.mp3", "volume": 0.7 },
-        { "src": "하하하5.mp3", "volume": 0.7 },
-        { "src": "하하하8.mp3", "volume": 0.7 },
-        { "src": "하하하9.mp3", "volume": 0.7 },
-        { "src": "laugh.mp3", "volume": 0.7 },
-        { "src": "Laugh1.mp3", "volume": 0.7 },
-        { "src": "Laugh10.mp3", "volume": 0.7 },
-        { "src": "Laugh2.mp3", "volume": 0.7 },
-        { "src": "Laugh3.mp3", "volume": 0.7 },
-        { "src": "Laugh4.mp3", "volume": 0.7 },
-        { "src": "Laugh5.mp3", "volume": 0.7 },
-        { "src": "Laugh6.mp3", "volume": 0.7 },
-        { "src": "Laugh7.mp3", "volume": 0.7 },
-        { "src": "Laugh8.mp3", "volume": 0.7 }
+        { "src": "ㅋㅋㅋ1.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ2.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ3.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ4.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ5.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ6.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ7.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ8.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ9.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ10.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ11.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ12.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ13.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ14.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ15.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ17.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ18.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ19.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ20.mp3", "volume": 0.7 },
+        { "src": "ㅋㅋㅋ21.mp3", "volume": 0.7 }
     ],
     "카톡": { "src": "Katalk.mp3", "volume": 0.7 },
     "커플": { "src": "DieWithASmile.mp3", "volume": 0.7 },
@@ -472,6 +469,7 @@ window.HIVE_SOUND_CONFIG = {
     "혓바닥이": { "src": "혓바닥이.mp3", "volume": 0.7 },
     "호우": { "src": "SIU.mp3", "volume": 0.7 },
     "홋치": { "src": "whip.mp3", "volume": 0.7 },
+    "화가많": { "src": "화가많1.mp3", "volume": 0.7 },
     "확인들어": { "src": "확인들어가.mp3", "volume": 0.7 },
     "회전회오리": { "src": "Tornado.mp3", "volume": 0.7 },
     "후달리냐": { "src": "후달리냐.mp3", "volume": 0.7 },
@@ -1153,7 +1151,7 @@ window.HIVE_SOUND_CONFIG = {
         { "src": "DDT6.mp3", "volume": 0.7 }
     ],
     "RKO": { "src": "RKO.mp3", "volume": 0.7 }
-    };
+};
 
 // ==========================================
 // [3] 비주얼 이펙트 설정 (Visual Effect Config)
