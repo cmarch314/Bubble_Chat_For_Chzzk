@@ -826,11 +826,11 @@ class RacingEffect extends BaseEffect {
                     this.triggerItemEvent(r, updateCommentary);
                 }
 
-                // Random event trigger: 0.7% chance per tick (more than doubled frequency and action complexity!)
-                if (r.stunTicks === 0 && r.pos > 5 && r.pos < 90 && Math.random() < 0.007) {
+                // Random event trigger: 0.8% chance per tick (21 rich random events!)
+                if (r.stunTicks === 0 && r.pos > 5 && r.pos < 90 && Math.random() < 0.008) {
                     const eventRoll = Math.random();
-                    if (eventRoll < 0.09 && r.shieldTicks === 0) {
-                        // Slipped on banana!
+                    if (eventRoll < 0.05 && r.shieldTicks === 0) {
+                        // 1. Slipped on banana!
                         r.stunTicks = 25; 
                         r.rotate = 360;
                         r.scale = 0.9;
@@ -838,88 +838,157 @@ class RacingEffect extends BaseEffect {
                         r.statusTimer = 25;
                         this.playRaceSound('slip');
                         updateCommentary(`🎤 [중계진] 앗! ${r.name} 선수가 누군가 버린 바나나 껍질에 미끄러집니다!!!`);
-                    } else if (eventRoll < 0.18) {
-                        // Struck by lightning!
+                    } else if (eventRoll < 0.10) {
+                        // 2. Struck by lightning!
                         r.boost += 12.0;
                         r.scale = 1.35;
                         r.statusText = '⚡ 벼락 돌진!';
                         r.statusTimer = 20;
                         this.playRaceSound('lightning');
                         updateCommentary(`🎤 [중계진] 쿠르릉 쾅! ${r.name} 선수, 마른하늘에 날벼락을 맞고 초고속 돌진!!!`);
-                    } else if (eventRoll < 0.27 && r.shieldTicks === 0) {
-                        // Tripped!
+                    } else if (eventRoll < 0.15 && r.shieldTicks === 0) {
+                        // 3. Tripped!
                         r.stunTicks = 18; 
                         r.rotate = -90;
                         r.statusText = '🤕 엎어짐!';
                         r.statusTimer = 18;
                         this.playRaceSound('trip');
                         updateCommentary(`🎤 [중계진] 아이쿠! ${r.name} 선수, 턱에 걸려 꼴사납게 엎어집니다!`);
-                    } else if (eventRoll < 0.36) {
-                        // Exhausted / Sleepy!
+                    } else if (eventRoll < 0.20) {
+                        // 4. Exhausted / Sleepy!
                         r.stunTicks = 15;
                         r.scale = 0.8;
                         r.statusText = '💤 졸음 비틀';
                         r.statusTimer = 15;
                         this.playRaceSound('sleep');
                         updateCommentary(`🎤 [중계진] ${r.name} 선수, 밤샘 수렵으로 졸음 비틀 상태에 빠집니다!`);
-                    } else if (eventRoll < 0.45) {
-                        // Overdrive!
+                    } else if (eventRoll < 0.25) {
+                        // 5. Overdrive!
                         r.boost += 18.0;
                         r.statusText = '🔥 부스터 폭발!';
                         r.statusTimer = 25;
                         this.playRaceSound('overdrive');
                         updateCommentary(`🎤 [중계진] ${r.name} 선수, 엉덩이에 부스터 점화! 무서운 속도입니다!`);
-                    } else if (eventRoll < 0.54) {
-                        // Portal Teleport!
+                    } else if (eventRoll < 0.30) {
+                        // 6. Portal Teleport!
                         r.pos += 12.0;
                         r.statusText = '🌀 차원 관통!';
                         r.statusTimer = 20;
                         this.playRaceSound('portal');
                         updateCommentary(`🎤 [중계진] 공간 왜곡! ${r.name} 선수가 포탈을 타고 훌쩍 앞서나갑니다!`);
-                    } else if (eventRoll < 0.63) {
-                        // Wind Gust!
+                    } else if (eventRoll < 0.35) {
+                        // 7. Wind Gust!
                         r.boost += 9.0;
                         r.statusText = '🌪️ 순풍 탑승!';
                         r.statusTimer = 20;
                         this.playRaceSound('wind');
                         updateCommentary(`🎤 [중계진] 대기 흐름 가동! ${r.name} 선수, 순풍을 타고 매끄럽게 속도를 올립니다!`);
-                    } else if (eventRoll < 0.72 && r.shieldTicks === 0) {
-                        // Stumble/Dizzy!
+                    } else if (eventRoll < 0.40 && r.shieldTicks === 0) {
+                        // 8. Stumble/Dizzy!
                         r.stunTicks = 12;
                         r.rotate = 360;
                         r.statusText = '💫 어지러움!';
                         r.statusTimer = 15;
                         this.playRaceSound('dizzy');
                         updateCommentary(`🎤 [중계진] 아차차! ${r.name} 선수, 발이 꼬이며 제자리 360도 턴을 돕니다!`);
-                    } else if (eventRoll < 0.81) {
-                        // Gravity Inversion!
+                    } else if (eventRoll < 0.45) {
+                        // 9. Gravity Inversion!
                         r.boost += 14.0;
                         r.scale = 1.25;
                         r.statusText = '🎈 반중력 부상!';
                         r.statusTimer = 25;
                         this.playRaceSound('gravity');
                         updateCommentary(`🎤 [중계진] 중력 상실! ${r.name} 선수가 가볍게 떠오르며 트랙 마찰을 무시하고 질주합니다!`);
-                    } else if (eventRoll < 0.90) {
-                        // Rivalry / Fire in Eyes!
+                    } else if (eventRoll < 0.50) {
+                        // 10. Rivalry / Fire in Eyes!
                         r.boost += 20.0;
                         r.statusText = '🔥 승부욕 폭발!';
                         r.statusTimer = 20;
                         this.playRaceSound('fire');
                         updateCommentary(`🎤 [중계진] 눈빛 교환! ${r.name} 선수가 엄청난 열정을 내뿜으며 앞서나갑니다!`);
-                    } else if (r.shieldTicks === 0) {
-                        // Mud Puddle!
+                    } else if (eventRoll < 0.55 && r.shieldTicks === 0) {
+                        // 11. Mud Puddle!
                         r.stunTicks = 16;
                         r.statusText = '💩 진흙 함정!';
                         r.statusTimer = 16;
                         this.playRaceSound('mud');
                         updateCommentary(`🎤 [중계진] 앗! ${r.name} 선수가 질척이는 진흙 웅덩이에 빠져 버둥거립니다!`);
-                    } else {
-                        // Overdrive fallback
-                        r.boost += 12.0;
-                        r.statusText = '🔥 가속 질주!';
+                    } else if (eventRoll < 0.60 && r.shieldTicks === 0) {
+                        // 12. Hypnosis / Reverse Run!
+                        r.pos = Math.max(0, r.pos - 5.0);
+                        r.statusText = '🌀 최면 역주행!';
                         r.statusTimer = 15;
+                        this.playRaceSound('trip');
+                        updateCommentary(`🎤 [중계진] 이런! ${r.name} 선수가 최면에 걸려 잠시 역주행을 시도합니다!`);
+                    } else if (eventRoll < 0.65) {
+                        // 13. Gold Rush / Coin Shower!
+                        r.boost += 10.0;
+                        r.statusText = '🪙 황금 샤워!';
+                        r.statusTimer = 20;
+                        this.playRaceSound('carrot');
+                        updateCommentary(`🎤 [중계진] 보너스 타임! ${r.name} 선수가 트랙에 떨어진 금화를 주우며 전진합니다!`);
+                    } else if (eventRoll < 0.70 && r.shieldTicks === 0) {
+                        // 14. EMP Blast!
+                        r.stunTicks = 14;
+                        r.statusText = '🔌 EMP 타격!';
+                        r.statusTimer = 14;
+                        this.playRaceSound('missile');
+                        updateCommentary(`🎤 [중계진] 피잉! 전자기 펄스가 발생해 ${r.name} 선수의 전자 제어가 일시 정지됩니다!`);
+                    } else if (eventRoll < 0.75) {
+                        // 15. Adrenaline Rush!
+                        r.boost += 25.0;
+                        r.statusText = '⚡ 아드레날린!';
+                        r.statusTimer = 22;
                         this.playRaceSound('overdrive');
-                        updateCommentary(`🎤 [중계진] ${r.name} 선수, 노련하게 위기를 넘기며 속력을 올립니다!`);
+                        updateCommentary(`🎤 [중계진] 호르몬 폭발! ${r.name} 선수가 폭발적인 아드레날린 분출로 달리기 시작합니다!`);
+                    } else if (eventRoll < 0.80) {
+                        // 16. Tornado fling!
+                        r.pos += 15.0;
+                        r.stunTicks = 10;
+                        r.rotate = 720;
+                        r.statusText = '🌪️ 회오리 탑승!';
+                        r.statusTimer = 20;
+                        this.playRaceSound('wind');
+                        updateCommentary(`🎤 [중계진] 거센 토네이도! ${r.name} 선수가 회오리에 휘말려 앞으로 날아갔지만 비틀거립니다!`);
+                    } else if (eventRoll < 0.85) {
+                        // 17. Sneezing!
+                        r.pos += 6.0;
+                        r.rotate = 30;
+                        r.statusText = '🤧 재채기 뿜!';
+                        r.statusTimer = 15;
+                        this.playRaceSound('trip');
+                        updateCommentary(`🎤 [중계진] 에취! ${r.name} 선수가 강력한 재채기 추진력으로 앞으로 살짝 밀려납니다!`);
+                    } else if (eventRoll < 0.90) {
+                        // 18. Shadow Clone!
+                        r.boost += 13.0;
+                        r.statusText = '🥷 분신 분열!';
+                        r.statusTimer = 20;
+                        this.playRaceSound('ghost');
+                        updateCommentary(`🎤 [중계진] 인법 분신술! ${r.name} 선수가 잔상을 남기며 앞으로 빠르게 가속합니다!`);
+                    } else if (eventRoll < 0.95) {
+                        // 19. Giant Weight Stomp!
+                        r.stunTicks = 8;
+                        r.scale = 1.6;
+                        r.statusText = '🏋️ 무게 초과!';
+                        r.statusTimer = 20;
+                        this.playRaceSound('tackle');
+                        updateCommentary(`🎤 [중계진] 쿵! ${r.name} 선수가 대형화되며 엄청난 무게로 바닥을 찍고 비틀댑니다!`);
+                    } else if (r.shieldTicks === 0) {
+                        // 20. Panic run!
+                        r.boost += 15.0;
+                        r.rotate = 45;
+                        r.statusText = '😱 패닉 질주!';
+                        r.statusTimer = 20;
+                        this.playRaceSound('slip');
+                        updateCommentary(`🎤 [중계진] 깜짝이야! ${r.name} 선수가 갑자기 공포에 질려 비명을 지르며 뛰어갑니다!`);
+                    } else {
+                        // 21. Blessing of the Goddess!
+                        r.shieldTicks = 120;
+                        r.boost += 11.0;
+                        r.statusText = '😇 여신의 가호!';
+                        r.statusTimer = 25;
+                        this.playRaceSound('shield');
+                        updateCommentary(`🎤 [중계진] 성스러운 보호! ${r.name} 선수가 긴 시간 무적 가호를 얻고 안정적으로 스피드를 냅니다!`);
                     }
                 }
 
@@ -964,7 +1033,7 @@ class RacingEffect extends BaseEffect {
                 if (r.stunTicks === 0) {
                     baseSpeed = targetAvgSpeed * (0.55 + Math.random() * 0.90) * speedMultiplier;
                 } else {
-                    if (r.statusText.includes('바나나') || r.statusText.includes('어지러움') || r.statusText.includes('빙결') || r.statusText.includes('스퍼트')) {
+                    if (r.statusText.includes('바나나') || r.statusText.includes('어지러움') || r.statusText.includes('빙결') || r.statusText.includes('스퍼트') || r.statusText.includes('회오리') || r.statusText.includes('최면') || r.statusText.includes('패닉')) {
                         r.rotate = (r.rotate + 15) % 360;
                     }
                 }
@@ -1004,9 +1073,13 @@ class RacingEffect extends BaseEffect {
                     if (r.shieldTicks > 0) {
                         av.style.filter = 'drop-shadow(0 0 10px #00d2ff) brightness(1.2)';
                     }
-                    if (r.statusText.includes('유체 이탈') || r.statusText.includes('유령')) {
+                    if (r.statusText.includes('유체 이탈') || r.statusText.includes('유령') || r.statusText.includes('분열')) {
                         av.style.opacity = '0.45';
                         av.style.filter = 'drop-shadow(0 0 12px #d800ff) brightness(1.3)';
+                    }
+                    if (r.statusText.includes('최면')) {
+                        scale = -scale; // Flip horizontally
+                        av.style.filter = 'drop-shadow(0 0 12px #ff007c) hue-rotate(180deg)';
                     }
                     if (r.statusText.includes('빙결') || r.statusText.includes('꽁꽁')) {
                         av.style.filter = 'drop-shadow(0 0 12px #00e5ff) brightness(1.1) saturate(1.5)';
