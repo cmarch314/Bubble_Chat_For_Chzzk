@@ -1,4 +1,4 @@
-﻿/* ============================================================================
+/* ============================================================================
    TABLE OF CONTENTS
    ============================================================================
    1. GLOBAL SETTINGS (:root, body, reset, utility)
@@ -2740,7 +2740,7 @@ body {
   }
 
   25% {
-    bottom: 50vh;
+    bottom: var(--jh, 50vh);
   }
 
   50% {
@@ -2756,29 +2756,43 @@ body {
 
 @keyframes hvn-dolphin-surfer {
   0% {
-    left: 120vw;
-    transform: rotate(0deg);
+    left: 112vw;
+    transform: rotate(0deg) translateY(0vh) scale(1.0);
   }
 
-  20% {
-    transform: rotate(5deg) translateY(-20px);
+  15% {
+    left: 94vw;
+    transform: rotate(-18deg) translateY(-9vh) scale(1.15);
   }
 
-  40% {
-    transform: rotate(-5deg) translateY(20px);
+  30% {
+    left: 80vw;
+    transform: rotate(-8deg) translateY(-11vh) scale(1.18);
+  }
+
+  45% {
+    left: 58vw;
+    transform: rotate(26deg) translateY(8vh) scale(1.0);
   }
 
   60% {
-    transform: rotate(5deg) translateY(-20px);
+    left: 42vw;
+    transform: rotate(10deg) translateY(12vh) scale(0.95);
   }
 
-  80% {
-    transform: rotate(-5deg) translateY(20px);
+  75% {
+    left: 26vw;
+    transform: rotate(-20deg) translateY(-7vh) scale(1.12);
+  }
+
+  88% {
+    left: 10vw;
+    transform: rotate(18deg) translateY(4vh) scale(1.0);
   }
 
   100% {
-    left: -20vw;
-    transform: rotate(0deg);
+    left: -18vw;
+    transform: rotate(0deg) translateY(0vh) scale(0.9);
   }
 }
 
@@ -4454,3 +4468,78 @@ body {
   align-items: center;
   overflow: hidden;
 }
+
+/* ============================================================================
+   [New] Common Chat Games UI Styles
+   ============================================================================ */
+.game-overlay-container, .game-help-overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 80vh; /* Upper 80% of screen is guaranteed for games, leaving bottom 20% for chat */
+    z-index: 2147483640;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    font-family: 'CookieRun-Regular', sans-serif;
+    color: #fff;
+    box-sizing: border-box;
+}
+
+.game-racing-card, .game-raid-card {
+    background: rgba(20, 10, 42, 0.95);
+    border: 4px solid #00ffa3;
+    box-shadow: 0 0 50px rgba(0, 255, 163, 0.4), inset 0 0 25px rgba(0, 255, 163, 0.15);
+    border-radius: 35px;
+    padding: 40px 60px;
+    width: 1100px;
+    text-align: center;
+    backdrop-filter: blur(15px);
+    animation: game-slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    pointer-events: auto;
+    position: relative;
+    z-index: 2147483645;
+}
+
+.game-help-card {
+    background: rgba(20, 10, 42, 0.95);
+    border: 4px solid #00ffa3;
+    box-shadow: 0 0 50px rgba(0, 255, 163, 0.4), inset 0 0 25px rgba(0, 255, 163, 0.15);
+    border-radius: 35px;
+    padding: 50px;
+    width: 1100px;
+    text-align: left; /* Keep left alignment for list items */
+    backdrop-filter: blur(15px);
+    animation: game-slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    pointer-events: auto;
+    position: relative;
+    z-index: 2147483645;
+}
+
+.game-quiz-card {
+    background: rgba(20, 10, 42, 0.95);
+    border: 6px solid #00ffa3;
+    box-shadow: 0 0 60px rgba(0, 255, 163, 0.45), inset 0 0 30px rgba(0, 255, 163, 0.2);
+    border-radius: 42px;
+    padding: 50px 70px;
+    width: 1100px;
+    text-align: center;
+    backdrop-filter: blur(15px);
+    animation: game-slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    pointer-events: auto;
+    position: relative;
+    z-index: 2147483645;
+}
+
+@keyframes game-slide-up {
+    0% { transform: translateY(100px) scale(0.8); opacity: 0; }
+    100% { transform: translateY(0) scale(1.0); opacity: 1; }
+}
+
+@keyframes game-fade-out {
+    0% { transform: translateY(0) scale(1.0); opacity: 1; }
+    100% { transform: translateY(-50px) scale(0.8); opacity: 0; }
+}

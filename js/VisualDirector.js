@@ -10,6 +10,7 @@ class VisualDirector {
         this.isLocked = false;
         this.enabled = false; // [Default] OFF (Manual trigger keywords)
         this.alertsEnabled = true; // [Default] ON (Sub/Donation Alerts)
+        this.activeGame = null; // [New] Currently running chat game
         this._initOverlays();
         this.registry = this._buildRegistry();
 
@@ -113,7 +114,11 @@ class VisualDirector {
             godsong: { soundKey: "갓겜송", instance: new GodsongEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
             gazabu: { soundKey: "가자부송", instance: new GazabuEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
             mulsulsan: { soundKey: "물설산", instance: new MulsulsanEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            random_dance: { soundKey: "랜덤댄스", instance: new RandomDanceEffect(this), execute(ctx) { return this.instance.execute(ctx); } }
+            random_dance: { soundKey: "랜덤댄스", instance: new RandomDanceEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            sound_quiz: { soundKey: null, instance: new SoundQuizEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            racing: { soundKey: null, instance: new RacingEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            raid: { soundKey: null, instance: new RaidEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            game_help: { soundKey: null, instance: new GameHelpEffect(this), execute(ctx) { return this.instance.execute(ctx); } }
         };
     }
 

@@ -21,6 +21,39 @@ class MessageRouter {
 
         const updatedTrimmedMsg = msgData.message ? msgData.message.trim() : "";
 
+        // [New] 활성 미니게임 메시지 처리 (정답 제출/참여/공격)
+        if (this.visualDirector.activeGame) {
+            try {
+                if (this.visualDirector.activeGame.handleChat(msgData)) {
+                    return; // 게임 참여 채팅은 일반 말풍선이나 사운드로 중복 처리하지 않고 스킵
+                }
+            } catch (e) {
+                console.error("❌ activeGame.handleChat error:", e);
+            }
+        }
+
+        const lowerMsg = updatedTrimmedMsg.toLowerCase();
+        if (lowerMsg === '!게임') {
+            this.visualDirector.trigger('game_help', { message: updatedTrimmedMsg, nickname: msgData.nickname });
+            return;
+        }
+
+        // [New] 스트리머 전용 미니게임 기동 명령어 처리
+        if (msgData.isStreamer) {
+            if (lowerMsg.startsWith('!퀴즈')) {
+                this.visualDirector.trigger('sound_quiz', { message: updatedTrimmedMsg, nickname: msgData.nickname });
+                return;
+            }
+            if (lowerMsg.startsWith('!경마')) {
+                this.visualDirector.trigger('racing', { message: updatedTrimmedMsg, nickname: msgData.nickname });
+                return;
+            }
+            if (lowerMsg.startsWith('!레이드')) {
+                this.visualDirector.trigger('raid', { message: updatedTrimmedMsg, nickname: msgData.nickname });
+                return;
+            }
+        }
+
         // 0.5 특별 이벤트(구독) 처리
         if (msgData.isSubscription) {
             if (this.visualDirector.alertsEnabled || msgData.isStreamer) {
@@ -49,6 +82,7 @@ class MessageRouter {
             
             const effect = visualMap[key];
             const soundKey = effect.soundKey;
+            if (!soundKey) continue;
             const lowerSoundKey = soundKey.toLowerCase();
 
             // Check "!해골" or "!skull" (case-insensitive)
@@ -94,7 +128,13 @@ class MessageRouter {
             }
         } else {
             const t0 = performance.now();
-            this.audioManager.checkAndPlay(msgData.message, msgData.isStreamer);
+
+            // [퀴즈 중 사운드 차단] 퀴즈 진행 중에는 채팅 사운드 재생을 막아 퀴즈 음원과의 혼동을 방지
+            const quizActive = this.visualDirector.activeGame && this.visualDirector.activeGame.quizSilence;
+            if (!quizActive) {
+                this.audioManager.checkAndPlay(msgData.message, msgData.isStreamer);
+            }
+
             if (msgData.isDonation) return;
             
             this.eventBus.emit('chat:render', msgData);
@@ -104,5 +144,6 @@ class MessageRouter {
                 console.warn(`[Slow Render] Took ${(t1 - t0).toFixed(2)}ms`);
             }
         }
+
     }
 }

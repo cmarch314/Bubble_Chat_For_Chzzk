@@ -8,12 +8,11 @@ class ChzzkGateway {
         this.onMessage = legacyMessageHandler;
         this.ws = null;
         this.proxies = [
-            "https://api.allorigins.win/get?url=", // Wrapper proxy (Excellent reliability)
-            "https://corsproxy.io/?",
-            "https://api.codetabs.com/v1/proxy?quest=",
+            "https://api.allorigins.win/get?url=",
+            "https://api.cors.lol/?url=",
             "https://thingproxy.freeboard.io/fetch/",
-            "https://api.cors.lol/?url=", // New addition
-            "https://cors-anywhere.herokuapp.com/" // Fallback (often rate limited but worth a try)
+            "https://corsproxy.io/?",
+            "https://api.codetabs.com/v1/proxy?quest="
         ];
         this.attemptCount = 1;
     }
@@ -28,17 +27,55 @@ class ChzzkGateway {
                 throw new Error("채널 ID가 설정되지 않았습니다. config.js 혹은 URL 파라미터를 확인해주세요.");
             }
 
-            const statusData = await this._fetchWithProxy(
-                `https://api.chzzk.naver.com/polling/v2/channels/${this.config.channelId}/live-status`
-            );
-            if (!statusData || !statusData.content) throw new Error("채널 라이브 상태 정보를 가져올 수 없습니다.");
-            const { chatChannelId } = statusData.content;
+            const cacheKey = `chzzk_chat_channel_id_${this.config.channelId}`;
+            let chatChannelId = null;
+
+            try {
+                chatChannelId = localStorage.getItem(cacheKey);
+            } catch (storageError) {
+                this.config.log(`LocalStorage read failed: ${storageError.message}`);
+            }
+
+            if (chatChannelId) {
+                this.config.log(`Using cached chatChannelId: ${chatChannelId}`);
+            } else {
+                this.config.log(`Fetching live-status to get chatChannelId`);
+                const statusData = await this._fetchWithProxy(
+                    `https://api.chzzk.naver.com/polling/v2/channels/${this.config.channelId}/live-status`
+                );
+                if (!statusData || !statusData.content || !statusData.content.chatChannelId) {
+                    throw new Error("채널 라이브 상태 정보를 가져올 수 없습니다.");
+                }
+                chatChannelId = statusData.content.chatChannelId;
+
+                try {
+                    localStorage.setItem(cacheKey, chatChannelId);
+                } catch (storageError) {
+                    this.config.log(`LocalStorage write failed: ${storageError.message}`);
+                }
+            }
 
             this._showLoader(`채팅 서버 접근 권한 요청 중... [${id}] (${this.attemptCount}번째 시도)`, "loading");
-            const tokenData = await this._fetchWithProxy(
-                `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING`
-            );
-            if (!tokenData || !tokenData.content) throw new Error("채팅 토큰 정보를 가져올 수 없습니다.");
+            
+            let tokenData = null;
+            try {
+                tokenData = await this._fetchWithProxy(
+                    `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING`
+                );
+            } catch (tokenError) {
+                // If token request fails, clear cache and retry
+                try {
+                    localStorage.removeItem(cacheKey);
+                } catch (storageError) {}
+                throw new Error(`채팅 토큰 획득 실패 (캐시 초기화됨): ${tokenError.message}`);
+            }
+
+            if (!tokenData || !tokenData.content || !tokenData.content.accessToken) {
+                try {
+                    localStorage.removeItem(cacheKey);
+                } catch (storageError) {}
+                throw new Error("채팅 토큰 정보가 올바르지 않습니다. (캐시 초기화됨)");
+            }
             const accessToken = tokenData.content.accessToken;
 
             this._connectSocket(chatChannelId, accessToken);
@@ -159,61 +196,75 @@ class ChzzkGateway {
         }
     }
 
+    _prepareUrl(url) {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}_t=${Date.now()}`;
+    }
+
     async _fetchWithProxy(url) {
-        // 1. 빠른 접속을 위해 주요 프록시 3개 동시 요청 (가장 먼저 응답오는 것 사용)
+        // AllOrigins and CORS.lol run in parallel (fast proxies)
         const fastProxies = [
             this._fetchAllOrigins(url),
-            this._fetchStandardProxy("https://corsproxy.io/?", url),
-            this._fetchStandardProxy("https://api.codetabs.com/v1/proxy?quest=", url)
+            this._fetchStandardProxy("https://api.cors.lol/?url=", url)
         ];
 
         try {
             return await Promise.any(fastProxies);
         } catch (aggregateError) {
-            // 2. 메인 프록시들이 모두 실패하면 예비 프록시 순차 접근
+            // Fallbacks run sequentially
             const fallbackProxies = [
                 "https://thingproxy.freeboard.io/fetch/",
-                "https://api.cors.lol/?url=",
-                "https://cors-anywhere.herokuapp.com/"
+                "https://corsproxy.io/?",
+                "https://api.codetabs.com/v1/proxy?quest="
             ];
 
-            let lastError = null;
             for (let proxy of fallbackProxies) {
                 try {
                     return await this._fetchStandardProxy(proxy, url);
                 } catch (e) {
-                    lastError = e;
+                    this.config.log(`Fallback proxy ${proxy} failed: ${e.message}`);
                 }
             }
 
-            // 3. 마지막 보루: 직접 요청 (CORS 제한이 풀려있을 경우를 대비)
+            // Last resort: direct fetch (in case CORS restrictions are relaxed or running locally/extension)
             try {
-                const res = await fetch(url);
-                if (res.ok) return await res.json();
-            } catch (e) { }
+                const targetUrl = this._prepareUrl(url);
+                const res = await fetch(targetUrl);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.code === 200 && data.content) {
+                        return data;
+                    }
+                }
+            } catch (e) {}
 
             throw new Error(`연결 실패 (모든 프록시 응답 없음)`);
         }
     }
 
     async _fetchAllOrigins(url) {
-        const cacheBuster = `&_t=${Date.now()}`;
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}${cacheBuster}`;
+        const targetUrl = this._prepareUrl(url);
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
         const res = await fetch(proxyUrl);
         if (!res.ok) throw new Error("AllOrigins HTTP Error");
         const wrapper = await res.json();
         if (!wrapper || !wrapper.contents) throw new Error("AllOrigins No Contents");
         const data = JSON.parse(wrapper.contents);
-        if (data && data.code !== undefined && data.code !== 200) throw new Error(`Chzzk ${data.code}`);
+        if (!data || data.code !== 200 || !data.content) {
+            throw new Error(`AllOrigins Chzzk Invalid Response (code: ${data ? data.code : 'unknown'})`);
+        }
         return data;
     }
 
     async _fetchStandardProxy(proxyPrefix, url) {
-        const fullUrl = proxyPrefix + encodeURIComponent(url);
+        const targetUrl = this._prepareUrl(url);
+        const fullUrl = proxyPrefix + encodeURIComponent(targetUrl);
         const res = await fetch(fullUrl);
         if (!res.ok) throw new Error(`Proxy HTTP Error: ${res.status}`);
         const data = await res.json();
-        if (data && data.code !== undefined && data.code !== 200) throw new Error(`Chzzk ${data.code}`);
+        if (!data || data.code !== 200 || !data.content) {
+            throw new Error(`Proxy Chzzk Invalid Response (code: ${data ? data.code : 'unknown'})`);
+        }
         return data;
     }
 

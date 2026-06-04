@@ -1,7 +1,16 @@
 // ==========================================
-// [Global Variables] 기본 전역 변수
+// [Global Twemoji CDN Fix] MaxCDN is dead, route all twemoji requests to jsDelivr
 // ==========================================
-// (데드 코드 및 전역 변수 오염 방지를 위해 인스턴스 캡슐화로 이전 완료)
+if (window.twemoji) {
+    const originalParse = twemoji.parse;
+    twemoji.parse = function(what, options) {
+        options = options || {};
+        if (!options.base) {
+            options.base = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/';
+        }
+        return originalParse.call(twemoji, what, options);
+    };
+}
 
 function renderMessageWithEmotesHTML(message, emotes, scale = 1) {
     // Legacy helper for VisualDirector

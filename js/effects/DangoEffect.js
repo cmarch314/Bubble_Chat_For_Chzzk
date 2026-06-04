@@ -23,10 +23,12 @@ class DangoEffect extends BaseEffect {
 
             overlay.classList.add('visible');
             if (video) {
-                if (conf.videoPath && !video.src.includes(conf.videoPath)) video.src = conf.videoPath;
-                video.currentTime = 0;
                 video.muted = false;
-                video.volume = 1.0; // Let Web Audio gain staging manage volume
+                video.volume = 1.0;
+                if (conf.videoPath && !video.src.includes(conf.videoPath.replace(/^\.\//, ''))) {
+                    video.src = conf.videoPath;
+                }
+                video.currentTime = 0;
 
                 video.style.width = conf.videoWidth || '100vw';
                 video.style.height = conf.videoHeight || '100vh';
