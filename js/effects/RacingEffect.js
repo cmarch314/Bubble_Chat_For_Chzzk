@@ -441,7 +441,7 @@ class RacingEffect extends BaseEffect {
                     </div>`).join('')}
                 </div>
                 
-                <div class="game-timer">남은 배팅 시간: 15초</div>
+                <div class="game-timer">남은 배팅 시간: 29초</div>
                 <div class="game-participants-count">선수 번호(1~4)를 쳐서 신속하게 배팅하세요!</div>
             </div>
         `;
@@ -461,8 +461,24 @@ class RacingEffect extends BaseEffect {
             }
         };
 
-        let timeLeft = 15;
+        let timeLeft = 29;
         const timerEl = container.querySelector('.game-timer');
+
+        if (this.bettingBgm) {
+            const onBettingMetadata = () => {
+                if (this.bettingBgm.duration && this.bettingBgm.duration > 1) {
+                    timeLeft = Math.round(this.bettingBgm.duration);
+                    if (timerEl) {
+                        timerEl.textContent = `남은 배팅 시간: ${timeLeft}초`;
+                    }
+                }
+            };
+            if (this.bettingBgm.readyState >= 1) {
+                onBettingMetadata();
+            } else {
+                this.bettingBgm.addEventListener('loadedmetadata', onBettingMetadata);
+            }
+        }
 
         return new Promise(resolve => {
             this.resolveGame = resolve;
