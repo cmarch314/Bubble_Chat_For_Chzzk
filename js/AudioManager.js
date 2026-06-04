@@ -38,6 +38,10 @@ class AudioManager {
         this.volumeConfig = { ...this.configManager.getVolumeConfig() };
         this.updateConfigLegacy(this.configManager.getSoundConfig());
 
+        // [Visual Audio Tracking]
+        this.visualAudioPaths = new Set();
+        this._buildVisualAudioPaths();
+
         // Event Bus Listeners
         if (this.eventBus) {
             this.eventBus.on('audio:playSFX', (soundPath, options) => {
@@ -69,6 +73,69 @@ class AudioManager {
                 else if (key === '도네') this.updateConfig('visual');
                 else if (key === '채팅') this.updateConfig('sfx');
             });
+        }
+    }
+
+    _buildVisualAudioPaths() {
+        const vConf = this.configManager.getVisualConfig();
+        const sConf = this.configManager.getSoundConfig();
+        if (!vConf || !sConf) return;
+
+        Object.values(vConf).forEach(effect => {
+            const addKey = (key) => {
+                const mapped = sConf[key];
+                if (!mapped) return;
+                const getSrc = (item) => (typeof item === 'object' ? item.src : item) || "";
+                
+                const processPath = (src) => {
+                    if (!src) return;
+                    const path = src.includes('/') || src.includes('\\') ? src : `${this.basePath}${src}`;
+                    this.visualAudioPaths.add(path);
+                };
+
+                if (Array.isArray(mapped)) {
+                    mapped.forEach(item => processPath(getSrc(item)));
+                } else {
+                    processPath(getSrc(mapped));
+                }
+            };
+
+            if (effect.soundKey) addKey(effect.soundKey);
+            if (effect.audioOverride) addKey(effect.audioOverride);
+        });
+    }
+
+    connectMediaElement(mediaElement, type = 'visual') {
+        if (!mediaElement) return;
+        if (mediaElement.__webAudioConnected) return;
+        mediaElement.__webAudioConnected = true;
+
+        try {
+            const sourceNode = this.audioCtx.createMediaElementSource(mediaElement);
+            const preGainNode = this.audioCtx.createGain();
+            
+            const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
+            const typeMultiplier = (type === 'visual') ? volConfig.visual : volConfig.sfx;
+            preGainNode.gain.value = typeMultiplier;
+
+            sourceNode.connect(preGainNode);
+
+            const normConfig = this.configManager ? this.configManager.getNormalizerConfig() : { enabled: true, visual: false, sfx: true };
+            const applyNormalizer = normConfig.enabled &&
+                ((type === 'visual' && normConfig.visual) || (type === 'sfx' && normConfig.sfx));
+
+            if (applyNormalizer) {
+                // Apply Pre-amp boost for normalizer
+                const boost = 2.5; 
+                preGainNode.gain.value = typeMultiplier * boost;
+                preGainNode.connect(this.compressor);
+                console.log(`[MediaStaging] ON - Media Element Connected. Drive:${(typeMultiplier * boost).toFixed(1)} -> Comp -> Master`);
+            } else {
+                preGainNode.connect(this.masterGain);
+                console.log(`[MediaStaging] OFF - Media Element Connected. Drive:${typeMultiplier.toFixed(1)} -> Master`);
+            }
+        } catch (e) {
+            console.warn("[AudioManager] Failed to connect media element:", e);
         }
     }
 
@@ -225,8 +292,7 @@ class AudioManager {
         }
 
         // 1. 상태 체크
-        const isActuallyEnabled = (typeof window.soundEnabled !== 'undefined') ? window.soundEnabled : this.enabled;
-        if (!isActuallyEnabled && !force) return;
+        if (!this.enabled && !force) return;
         if (this.audioCtx.state === 'suspended') this.audioCtx.resume().catch(() => { });
 
         // 2. 입력값 정규화 (배열/객체 지원)
@@ -305,8 +371,10 @@ class AudioManager {
                     source.connect(preGainNode);
 
                     if (applyNormalizer) {
+                        const boost = 2.5; // Normalizer Pre-amp boost
+                        preGainNode.gain.value = scaledDriveGain * boost;
                         preGainNode.connect(this.compressor);
-                        console.log(`[Staging] ON - Voices:${this.activeVoices} Drive:${scaledDriveGain.toFixed(1)} -> Comp -> Ceiling:${outputCeiling.toFixed(1)}`);
+                        console.log(`[Staging] ON - Voices:${this.activeVoices} Drive:${(scaledDriveGain * boost).toFixed(1)} -> Comp -> Ceiling:${outputCeiling.toFixed(1)}`);
                     } else {
                         preGainNode.connect(this.masterGain);
                         console.log(`[Staging] OFF - Voices:${this.activeVoices} Drive:${scaledDriveGain.toFixed(1)} -> Ceiling:${outputCeiling.toFixed(1)}`);
@@ -335,6 +403,16 @@ class AudioManager {
                         .then(audioBuffer => {
                             // Cache the decoded buffer
                             this.bufferCache.set(playPath, audioBuffer);
+                            // Cache eviction limit (Max 80, skip visual audio)
+                            if (this.bufferCache.size > 80) {
+                                for (const key of this.bufferCache.keys()) {
+                                    if (!this.visualAudioPaths.has(key)) {
+                                        this.bufferCache.delete(key);
+                                        console.log(`[AudioManager] Evicted chat SFX from cache: ${key}`);
+                                        break;
+                                    }
+                                }
+                            }
                             playBuffer(audioBuffer);
                         })
                         .catch(e => {
@@ -357,12 +435,15 @@ class AudioManager {
     // [New] Preloader 지원용 백그라운드 캐싱 메서드
     preloadList(urls) {
         if (!urls || urls.length === 0) return;
-        console.log(`[AudioManager] Preloading ${urls.length} audio files in background...`);
+        
+        // Filter to only preload visual/alert audio paths (Tier 1)
+        const toPreload = urls.filter(url => this.visualAudioPaths.has(url));
+        console.log(`[AudioManager] Preloading ${toPreload.length} visual/alert audio files (Lazy loading ${urls.length - toPreload.length} chat SFX in background)...`);
 
         // requestIdleCallback 활용으로 부하 분산
         const processAudio = (deadline) => {
-            while (urls.length > 0 && deadline.timeRemaining() > 0) {
-                const url = urls.pop();
+            while (toPreload.length > 0 && deadline.timeRemaining() > 0) {
+                const url = toPreload.pop();
                 if (!this.bufferCache.has(url)) {
                     // Silently fetch and decode
                     fetch(url)
@@ -380,7 +461,7 @@ class AudioManager {
                 }
             }
 
-            if (urls.length > 0) {
+            if (toPreload.length > 0) {
                 if (window.requestIdleCallback) {
                     requestIdleCallback(processAudio);
                 } else {

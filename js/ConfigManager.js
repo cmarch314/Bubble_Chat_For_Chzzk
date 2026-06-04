@@ -99,7 +99,6 @@ class ConfigManager {
     _handleCommand(data) {
         switch (data.type) {
             case 'setSound':
-                soundEnabled = data.enabled;
                 if (this.eventBus && data.enabled !== undefined) {
                     if (data.enabled) this.eventBus.emit('system:unmuteAudio');
                     else this.eventBus.emit('system:muteAudio');

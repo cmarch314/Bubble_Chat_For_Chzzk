@@ -1,17 +1,7 @@
-﻿// ==========================================
+// ==========================================
 // [Global Variables] 기본 전역 변수
 // ==========================================
-const idElement = document.getElementById('id');
-const chatEle = document.getElementById('chat');
-let boxPos = 0;
-const mainArray = [];
-let soundEnabled = true;
-const promptQue = [];
-let visualConfig = {};
-let soundHive = {};
-
-// [Refactor] Twitch -> Chzzk 변수명 변경
-const chzzkBadgeCache = { data: { global: {} } };
+// (데드 코드 및 전역 변수 오염 방지를 위해 인스턴스 캡슐화로 이전 완료)
 
 function renderMessageWithEmotesHTML(message, emotes, scale = 1) {
     // Legacy helper for VisualDirector
