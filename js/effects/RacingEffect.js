@@ -1303,6 +1303,15 @@ class RacingEffect extends BaseEffect {
         this.isActive = false;
         this.director.activeGame = null;
 
+        if (this.raceBgm) {
+            try {
+                this.raceBgm.pause();
+                this.raceBgm.src = '';
+                this.raceBgm.load();
+            } catch (e) {}
+            this.raceBgm = null;
+        }
+
         const winner = this.racers[winnerId];
 
         // Find winning betters
