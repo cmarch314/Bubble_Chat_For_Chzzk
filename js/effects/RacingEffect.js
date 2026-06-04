@@ -320,7 +320,7 @@ class RacingEffect extends BaseEffect {
             trip: ['아이보', '이런씨벌', '이런시벌탱', '아아아아', '아악!'],
             sleep: ['잠들어라', '귀찮아귀찮아', '근무시간'],
             lightning: ['부끝', '기가맥', '알피엠', '이요옷', '용의항문'],
-            overdrive: ['간드아', '가즈아', '나이사', '오예', '오올', '카와붕가', '용못참'],
+            overdrive: ['가즈아', '나이사', '오예', '오올', '카와붕가', '용못참'],
             missile: ['공습경보', 'RKO', 'DDT', '격추', '응너개못해'],
             carrot: ['당근', '옴뇸뇸', '야무지게먹어', '존맛탱'],
             ginseng: ['대박', '대빵', '기가맥', '아주강력해', '역시!'],
@@ -349,7 +349,7 @@ class RacingEffect extends BaseEffect {
             this.bettingBgm = new Audio('BGM/SportBGM.mp3');
             this.bettingBgm.loop = true;
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.bettingBgm.volume = volConfig.master * volConfig.visual * 0.7;
+            this.bettingBgm.volume = volConfig.master * volConfig.visual * 0.49;
             this.bettingBgm.play().catch(e => console.warn("Betting BGM playback blocked:", e));
         } catch (e) {
             console.warn("Failed to initialize Betting BGM:", e);
@@ -555,7 +555,7 @@ class RacingEffect extends BaseEffect {
         try {
             this.raceBgm = new Audio('BGM/William Tell.mp3');
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.raceBgm.volume = volConfig.master * volConfig.visual * 0.8;
+            this.raceBgm.volume = volConfig.master * volConfig.visual * 0.56;
             this.raceBgm.play().catch(e => console.warn("Race BGM playback blocked:", e));
         } catch (e) {
             console.warn("Failed to load racing BGM:", e);
