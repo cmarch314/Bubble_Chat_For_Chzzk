@@ -355,7 +355,7 @@ class RacingEffect extends BaseEffect {
         // [New] Betting Phase Background BGM Play
         try {
             this.bettingBgm = new Audio('BGM/SportBGM.mp3');
-            this.bettingBgm.loop = true;
+            this.bettingBgm.loop = false;
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
             this.bettingBgm.volume = volConfig.master * volConfig.visual * 0.49;
             this.bettingBgm.play().catch(e => console.warn("Betting BGM playback blocked:", e));
@@ -496,7 +496,11 @@ class RacingEffect extends BaseEffect {
                     clearInterval(this.bettingTimer);
                     this.bettingTimer = null;
                     if (this.bettingBgm) {
-                        try { this.bettingBgm.pause(); } catch(e){}
+                        try {
+                            this.bettingBgm.pause();
+                            this.bettingBgm.src = '';
+                            this.bettingBgm.load();
+                        } catch(e){}
                         this.bettingBgm = null;
                     }
                     container.remove();
@@ -555,11 +559,19 @@ class RacingEffect extends BaseEffect {
             this.bettingTimer = null;
         }
         if (this.bettingBgm) {
-            try { this.bettingBgm.pause(); } catch(e){}
+            try {
+                this.bettingBgm.pause();
+                this.bettingBgm.src = '';
+                this.bettingBgm.load();
+            } catch(e){}
             this.bettingBgm = null;
         }
         if (this.raceBgm) {
-            try { this.raceBgm.pause(); } catch(e){}
+            try {
+                this.raceBgm.pause();
+                this.raceBgm.src = '';
+                this.raceBgm.load();
+            } catch(e){}
             this.raceBgm = null;
         }
         const overlay = document.querySelector('.game-overlay-container');
