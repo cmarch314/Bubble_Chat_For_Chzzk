@@ -1161,7 +1161,7 @@ class RacingEffect extends BaseEffect {
                 // Calculate move speed based on targetAvgSpeed
                 let baseSpeed = 0;
                 if (r.stunTicks === 0) {
-                    baseSpeed = targetAvgSpeed * (0.55 + Math.random() * 0.90) * speedMultiplier;
+                    baseSpeed = targetAvgSpeed * (0.35 + Math.random() * 0.50) * speedMultiplier;
                 } else {
                     if (r.statusText.includes('바나나') || r.statusText.includes('어지러움') || r.statusText.includes('빙결') || r.statusText.includes('스퍼트') || r.statusText.includes('회오리') || r.statusText.includes('최면') || r.statusText.includes('패닉')) {
                         r.rotate = (r.rotate + 15) % 360;
@@ -1197,6 +1197,12 @@ class RacingEffect extends BaseEffect {
                 r.boost = Math.max(0, r.boost - boostDecay); // consume boost
 
                 r.pos += currentMove;
+
+                // [하드 캡] BGM 재생 진행도가 90% 미만일 때 말이 결승선(100)을 조기 완주하지 않도록 최대 위치를 93%로 제한
+                if (targetPosRatio < 0.90) {
+                    r.pos = Math.min(93, r.pos);
+                }
+
                 const visualLeft = Math.min(finishX, 80 + (r.pos / 100) * (finishX - 80));
 
                 const wrapper = track.querySelector(`#wrapper-${r.id}`);
@@ -1447,19 +1453,34 @@ class RacingEffect extends BaseEffect {
 
         if (this.raceBgm) {
             const bgm = this.raceBgm;
-            const stopBgm = () => {
-                try {
-                    bgm.pause();
-                    bgm.volume = 0;
-                    bgm.muted = true;
-                    bgm.src = '';
-                    bgm.load();
-                } catch (e) {}
+            const startVolume = bgm.volume;
+            const steps = 20;
+            const stepTime = 100; // 100ms
+            const volStep = startVolume / steps;
+
+            const fadeOutAndStop = () => {
+                let currentStep = 0;
+                const fadeInterval = setInterval(() => {
+                    currentStep++;
+                    if (bgm && bgm.volume > volStep) {
+                        bgm.volume = Math.max(0, bgm.volume - volStep);
+                    } else {
+                        clearInterval(fadeInterval);
+                        try {
+                            bgm.pause();
+                            bgm.volume = 0;
+                            bgm.muted = true;
+                            bgm.src = '';
+                            bgm.load();
+                        } catch (e) {}
+                    }
+                }, stepTime);
             };
+
             if (this.raceBgmPlayPromise) {
-                this.raceBgmPlayPromise.then(stopBgm).catch(stopBgm);
+                this.raceBgmPlayPromise.then(fadeOutAndStop).catch(fadeOutAndStop);
             } else {
-                stopBgm();
+                fadeOutAndStop();
             }
             this.raceBgm = null;
             this.raceBgmPlayPromise = null;
