@@ -331,7 +331,7 @@ class RacingEffect extends BaseEffect {
             shield: ['네전태', '가드만', '자제하시오', '안맞지', '무적', '가드', '철벽', '도킹 시도', '방어!', '네전태로 다'],
             banana_trap: ['똥침', '퇴엣', '지랄도풍년', '바나나트랩', '어딜', '낚였어', '함정이다!', '함정 이다!'],
             tackle: ['발차기!', 'RKO', 'DDT', '팅!', '몸싸움', '밀치기', '비켜비켜', '저리비켜', '발차기'],
-            win: ['대박', '풍악을울려라', '아주마음에듭니다', '굉장히만족', '오홍홍좋아요', '우마꾸데끼루', '풍악을', '만족해?', '따라란~', '최고야!', '갓겜 인정', '우승!', '풍악을울려라~'],
+            win: ['대박', '풍악을울려라', '아주마음에듭니다', '굉장히만족', '오홍홍좋아요', '우마꾸데끼루', '만족해?', '따라란', '나이스', '나이사', '성공!'],
             portal: ['어디야', '신기하네', '이상한데수', '차원이동', '왜자르지않'],
             wind: ['바람', '태풍', '날아가', '하야이', '날아간다'],
             dizzy: ['어질어질', '비틀비틀', '어라라', '이대구빡이', '정신차려'],
@@ -401,7 +401,7 @@ class RacingEffect extends BaseEffect {
             this.bettingBgm = new Audio('BGM/SportBGM.mp3');
             this.bettingBgm.loop = false;
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.bettingBgm.volume = volConfig.master * volConfig.visual * 0.49;
+            this.bettingBgm.volume = volConfig.master * volConfig.visual * 0.39;
             this.bettingBgmPlayPromise = this.bettingBgm.play().catch(e => console.warn("Betting BGM playback blocked:", e));
         } catch (e) {
             console.warn("Failed to initialize Betting BGM:", e);
@@ -709,7 +709,7 @@ class RacingEffect extends BaseEffect {
             this.raceBgm = new Audio('BGM/William Tell.mp3');
             this.raceBgm.loop = false; // 루프 방지 설정 명시화
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.raceBgm.volume = volConfig.master * volConfig.visual * 0.56;
+            this.raceBgm.volume = volConfig.master * volConfig.visual * 0.45;
             this.raceBgmPlayPromise = this.raceBgm.play().catch(e => console.warn("Race BGM playback blocked:", e));
         } catch (e) {
             console.warn("Failed to load racing BGM:", e);
