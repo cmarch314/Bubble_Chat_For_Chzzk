@@ -92,6 +92,10 @@ class RacingEffect extends BaseEffect {
         this.bets = {}; // { nickname: { index, color } }
         this.racers = [];
         this.resolveGame = null;
+        this.bettingBgm = null;
+        this.bettingBgmPlayPromise = null;
+        this.raceBgm = null;
+        this.raceBgmPlayPromise = null;
         this._injectStyles();
     }
 
@@ -352,13 +356,53 @@ class RacingEffect extends BaseEffect {
         this.phase = 'betting';
         this.bets = {};
 
+        // 안전 장치: 기존 재생 중인 BGM 완전 정리
+        if (this.bettingBgm) {
+            const bgm = this.bettingBgm;
+            const stopBgm = () => {
+                try {
+                    bgm.pause();
+                    bgm.volume = 0;
+                    bgm.muted = true;
+                    bgm.src = '';
+                    bgm.load();
+                } catch(e){}
+            };
+            if (this.bettingBgmPlayPromise) {
+                this.bettingBgmPlayPromise.then(stopBgm).catch(stopBgm);
+            } else {
+                stopBgm();
+            }
+            this.bettingBgm = null;
+            this.bettingBgmPlayPromise = null;
+        }
+        if (this.raceBgm) {
+            const bgm = this.raceBgm;
+            const stopBgm = () => {
+                try {
+                    bgm.pause();
+                    bgm.volume = 0;
+                    bgm.muted = true;
+                    bgm.src = '';
+                    bgm.load();
+                } catch(e){}
+            };
+            if (this.raceBgmPlayPromise) {
+                this.raceBgmPlayPromise.then(stopBgm).catch(stopBgm);
+            } else {
+                stopBgm();
+            }
+            this.raceBgm = null;
+            this.raceBgmPlayPromise = null;
+        }
+
         // [New] Betting Phase Background BGM Play
         try {
             this.bettingBgm = new Audio('BGM/SportBGM.mp3');
             this.bettingBgm.loop = false;
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
             this.bettingBgm.volume = volConfig.master * volConfig.visual * 0.49;
-            this.bettingBgm.play().catch(e => console.warn("Betting BGM playback blocked:", e));
+            this.bettingBgmPlayPromise = this.bettingBgm.play().catch(e => console.warn("Betting BGM playback blocked:", e));
         } catch (e) {
             console.warn("Failed to initialize Betting BGM:", e);
         }
@@ -496,12 +540,23 @@ class RacingEffect extends BaseEffect {
                     clearInterval(this.bettingTimer);
                     this.bettingTimer = null;
                     if (this.bettingBgm) {
-                        try {
-                            this.bettingBgm.pause();
-                            this.bettingBgm.src = '';
-                            this.bettingBgm.load();
-                        } catch(e){}
+                        const bgm = this.bettingBgm;
+                        const stopBgm = () => {
+                            try {
+                                bgm.pause();
+                                bgm.volume = 0;
+                                bgm.muted = true;
+                                bgm.src = '';
+                                bgm.load();
+                            } catch(e){}
+                        };
+                        if (this.bettingBgmPlayPromise) {
+                            this.bettingBgmPlayPromise.then(stopBgm).catch(stopBgm);
+                        } else {
+                            stopBgm();
+                        }
                         this.bettingBgm = null;
+                        this.bettingBgmPlayPromise = null;
                     }
                     container.remove();
                     this.startRace(resolve);
@@ -559,20 +614,42 @@ class RacingEffect extends BaseEffect {
             this.bettingTimer = null;
         }
         if (this.bettingBgm) {
-            try {
-                this.bettingBgm.pause();
-                this.bettingBgm.src = '';
-                this.bettingBgm.load();
-            } catch(e){}
+            const bgm = this.bettingBgm;
+            const stopBgm = () => {
+                try {
+                    bgm.pause();
+                    bgm.volume = 0;
+                    bgm.muted = true;
+                    bgm.src = '';
+                    bgm.load();
+                } catch(e){}
+            };
+            if (this.bettingBgmPlayPromise) {
+                this.bettingBgmPlayPromise.then(stopBgm).catch(stopBgm);
+            } else {
+                stopBgm();
+            }
             this.bettingBgm = null;
+            this.bettingBgmPlayPromise = null;
         }
         if (this.raceBgm) {
-            try {
-                this.raceBgm.pause();
-                this.raceBgm.src = '';
-                this.raceBgm.load();
-            } catch(e){}
+            const bgm = this.raceBgm;
+            const stopBgm = () => {
+                try {
+                    bgm.pause();
+                    bgm.volume = 0;
+                    bgm.muted = true;
+                    bgm.src = '';
+                    bgm.load();
+                } catch(e){}
+            };
+            if (this.raceBgmPlayPromise) {
+                this.raceBgmPlayPromise.then(stopBgm).catch(stopBgm);
+            } else {
+                stopBgm();
+            }
             this.raceBgm = null;
+            this.raceBgmPlayPromise = null;
         }
         const overlay = document.querySelector('.game-overlay-container');
         if (overlay) overlay.remove();
@@ -587,12 +664,53 @@ class RacingEffect extends BaseEffect {
     startRace(resolve) {
         this.phase = 'racing';
         
+        // 안전 장치: 혹시라도 남아있을 기존 BGM 완전 정리
+        if (this.bettingBgm) {
+            const bgm = this.bettingBgm;
+            const stopBgm = () => {
+                try {
+                    bgm.pause();
+                    bgm.volume = 0;
+                    bgm.muted = true;
+                    bgm.src = '';
+                    bgm.load();
+                } catch(e){}
+            };
+            if (this.bettingBgmPlayPromise) {
+                this.bettingBgmPlayPromise.then(stopBgm).catch(stopBgm);
+            } else {
+                stopBgm();
+            }
+            this.bettingBgm = null;
+            this.bettingBgmPlayPromise = null;
+        }
+        if (this.raceBgm) {
+            const bgm = this.raceBgm;
+            const stopBgm = () => {
+                try {
+                    bgm.pause();
+                    bgm.volume = 0;
+                    bgm.muted = true;
+                    bgm.src = '';
+                    bgm.load();
+                } catch(e){}
+            };
+            if (this.raceBgmPlayPromise) {
+                this.raceBgmPlayPromise.then(stopBgm).catch(stopBgm);
+            } else {
+                stopBgm();
+            }
+            this.raceBgm = null;
+            this.raceBgmPlayPromise = null;
+        }
+
         // 1. 질주 배경 BGM 로딩 및 재생 (소개 페이즈부터 시작)
         try {
             this.raceBgm = new Audio('BGM/William Tell.mp3');
+            this.raceBgm.loop = false; // 루프 방지 설정 명시화
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
             this.raceBgm.volume = volConfig.master * volConfig.visual * 0.56;
-            this.raceBgm.play().catch(e => console.warn("Race BGM playback blocked:", e));
+            this.raceBgmPlayPromise = this.raceBgm.play().catch(e => console.warn("Race BGM playback blocked:", e));
         } catch (e) {
             console.warn("Failed to load racing BGM:", e);
         }
@@ -1050,8 +1168,32 @@ class RacingEffect extends BaseEffect {
                     }
                 }
 
+                // 동적 러버밴드(Rubber-banding) 보정: BGM 재생률과 말의 위치 싱크 맞추기
+                const elapsedSec = ticks * 0.06; // 1틱 = 60ms = 0.06초
+                // BGM 시간 기준 위치 비율 목표치 (최대 0.95까지 유도 후 막판 스퍼트)
+                const targetPosRatio = Math.min(0.95, elapsedSec / runDuration);
+                const currentPosRatio = r.pos / 100;
+                const diff = targetPosRatio - currentPosRatio;
+                
+                let minFactor = 0.15;
+                if (r.statusText && (r.statusText.includes('돌진') || r.statusText.includes('부스터') || r.statusText.includes('당근') || r.statusText.includes('산삼') || r.statusText.includes('아드레날린') || r.statusText.includes('가속') || r.statusText.includes('순풍') || r.statusText.includes('스퍼트'))) {
+                    minFactor = 0.6; // 버프 질주 중일 때는 감속 제약을 완화
+                }
+                
+                let rubberBandFactor = 1.0;
+                if (diff > 0) {
+                    rubberBandFactor = 1.0 + (diff * 2.2); // 뒤처진 상태: 가속 유도 (최대 약 3배 속도)
+                } else {
+                    rubberBandFactor = Math.max(minFactor, 1.0 + (diff * 2.5)); // 너무 앞서간 상태: 감속 제어
+                }
+
+                // 남은 시간이 4초 미만인 피니시 구간에서는 감속 제약을 풀고 피니시 골인 가속
+                if (duration - currentTime < 4.0 && duration > 5) {
+                    rubberBandFactor = Math.max(rubberBandFactor, 1.3); // 감속 제약 해제 및 최소 1.3배 가속 유지
+                }
+
                 const boostDecay = r.boost * 0.15;
-                const currentMove = baseSpeed + boostDecay;
+                const currentMove = (baseSpeed + boostDecay) * rubberBandFactor;
                 r.boost = Math.max(0, r.boost - boostDecay); // consume boost
 
                 r.pos += currentMove;
@@ -1304,12 +1446,23 @@ class RacingEffect extends BaseEffect {
         this.director.activeGame = null;
 
         if (this.raceBgm) {
-            try {
-                this.raceBgm.pause();
-                this.raceBgm.src = '';
-                this.raceBgm.load();
-            } catch (e) {}
+            const bgm = this.raceBgm;
+            const stopBgm = () => {
+                try {
+                    bgm.pause();
+                    bgm.volume = 0;
+                    bgm.muted = true;
+                    bgm.src = '';
+                    bgm.load();
+                } catch (e) {}
+            };
+            if (this.raceBgmPlayPromise) {
+                this.raceBgmPlayPromise.then(stopBgm).catch(stopBgm);
+            } else {
+                stopBgm();
+            }
             this.raceBgm = null;
+            this.raceBgmPlayPromise = null;
         }
 
         const winner = this.racers[winnerId];
