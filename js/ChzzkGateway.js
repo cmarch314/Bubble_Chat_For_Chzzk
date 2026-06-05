@@ -202,6 +202,19 @@ class ChzzkGateway {
         return `${url}${separator}_t=${Date.now()}`;
     }
 
+    async _fetchWithTimeout(url, options = {}, timeoutMs = 4000) {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            const response = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(id);
+            return response;
+        } catch (error) {
+            clearTimeout(id);
+            throw error;
+        }
+    }
+
     async _fetchWithProxy(url) {
         // Prepare target URL once to share across all requests
         const targetUrl = this._prepareUrl(url);
@@ -233,7 +246,7 @@ class ChzzkGateway {
 
             // Last resort: direct fetch (in case CORS restrictions are relaxed or running locally/extension)
             try {
-                const res = await fetch(targetUrl);
+                const res = await this._fetchWithTimeout(targetUrl);
                 if (res.ok) {
                     const data = await res.json();
                     if (data && data.code === 200 && data.content) {
@@ -249,7 +262,7 @@ class ChzzkGateway {
     async _fetchAllOrigins(targetUrl) {
         // targetUrl has already been prepared with timestamp cache-buster
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-        const res = await fetch(proxyUrl);
+        const res = await this._fetchWithTimeout(proxyUrl);
         if (!res.ok) throw new Error("AllOrigins HTTP Error");
         const wrapper = await res.json();
         if (!wrapper || !wrapper.contents) throw new Error("AllOrigins No Contents");
@@ -263,7 +276,7 @@ class ChzzkGateway {
     async _fetchStandardProxy(proxyPrefix, targetUrl, encode = true) {
         // targetUrl has already been prepared with timestamp cache-buster
         const fullUrl = proxyPrefix + (encode ? encodeURIComponent(targetUrl) : targetUrl);
-        const res = await fetch(fullUrl);
+        const res = await this._fetchWithTimeout(fullUrl);
         if (!res.ok) throw new Error(`Proxy HTTP Error: ${res.status}`);
         const data = await res.json();
         if (!data || data.code !== 200 || !data.content) {
