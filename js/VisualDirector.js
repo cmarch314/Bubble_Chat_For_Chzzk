@@ -238,7 +238,17 @@ class VisualDirector {
         }
         const inner = document.createElement('div'); inner.className = 'actor-emoji';
         inner.innerHTML = emoji; inner.style.lineHeight = '1'; el.appendChild(inner);
-        if (window.twemoji) twemoji.parse(el);
+        if (window.twemoji) {
+            twemoji.parse(el);
+            // Ensure generated twemoji images have inline-block display and correct size
+            const images = el.querySelectorAll('img.emoji');
+            images.forEach(img => {
+                img.style.width = '1em';
+                img.style.height = '1em';
+                img.style.display = 'inline-block';
+                img.style.verticalAlign = 'middle';
+            });
+        }
         el.style.animationDuration = opts.duration + 'ms';
         if (opts.styles) Object.keys(opts.styles).forEach(key => { if (key.startsWith('--')) el.style.setProperty(key, opts.styles[key]); else if (key !== 'nametag' && key !== 'nameColor') el.style[key] = opts.styles[key]; });
         parent.appendChild(el);

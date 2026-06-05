@@ -4,9 +4,25 @@
 if (window.twemoji) {
     const originalParse = twemoji.parse;
     twemoji.parse = function(what, options) {
-        options = options || {};
-        if (!options.base) {
-            options.base = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/';
+        if (typeof options === 'function') {
+            const originalCallback = options;
+            options = {
+                base: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/',
+                folder: '72x72',
+                ext: '.png',
+                callback: originalCallback
+            };
+        } else {
+            options = options || {};
+            if (!options.base) {
+                options.base = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/';
+            }
+            if (!options.folder && !options.size) {
+                options.folder = '72x72';
+            }
+            if (!options.ext) {
+                options.ext = '.png';
+            }
         }
         return originalParse.call(twemoji, what, options);
     };

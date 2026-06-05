@@ -2659,10 +2659,12 @@ body {
   animation: hvn-dolphin-rise var(--duration, 5s) linear forwards;
 }
 
+/* [Fix] Add flex-shrink: 0 to prevent size collapse inside flex container (e.g. surfer-actor) */
 .actor-emoji {
   display: inline-block;
   line-height: 1;
   font-family: var(--font-emoji) !important;
+  flex-shrink: 0;
 }
 
 .actor-emoji img {
