@@ -4557,4 +4557,218 @@ body {
     margin: 0 0.15em;
     transform: translateY(-0.08em); /* Micro alignment adjustment */
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) brightness(1.3);
-}
+}
+
+/* ==========================================
+   Monster Hunter Hunt Mini-game (토벌 미니게임)
+   ========================================== */
+.game-hunt-card {
+    background: rgba(18, 14, 10, 0.96);
+    border: 4px solid #ffaa00;
+    box-shadow: 0 0 60px rgba(255, 170, 0, 0.35), inset 0 0 30px rgba(255, 170, 0, 0.15);
+    border-radius: 40px;
+    padding: 35px 50px;
+    width: 1150px;
+    text-align: center;
+    backdrop-filter: blur(15px);
+    animation: game-slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    pointer-events: auto;
+    position: relative;
+    z-index: 2147483645;
+    font-family: 'CookieRun-Regular', sans-serif;
+    color: #fff;
+}
+
+.game-hunt-monster-showcase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(255, 170, 0, 0.2);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+}
+
+.game-hunt-monster-img {
+    width: 130px;
+    height: 130px;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
+    animation: monster-idle 3s ease-in-out infinite alternate;
+    transition: transform 0.1s ease;
+}
+
+@keyframes monster-idle {
+    0% { transform: translateY(0) scale(1.0); }
+    100% { transform: translateY(-8px) scale(1.03); }
+}
+
+.game-hunt-monster-name {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #ffaa00;
+    margin-top: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.game-hunt-weapons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.game-hunt-weapon-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 15px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.game-hunt-weapon-card.active {
+    border-color: #ffaa00;
+    background: rgba(255, 170, 0, 0.08);
+    box-shadow: 0 0 15px rgba(255, 170, 0, 0.2);
+}
+
+.game-hunt-weapon-card.dead {
+    filter: grayscale(1) opacity(0.3);
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 0, 0, 0.2);
+    transform: translateY(5px);
+}
+
+.game-hunt-weapon-img {
+    width: 75px;
+    height: 75px;
+    margin: 0 auto 10px;
+    display: block;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) brightness(1.2);
+}
+
+.game-hunt-weapon-name {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #eee;
+}
+
+.game-hunt-hp-wrapper {
+    width: 100%;
+    height: 16px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.game-hunt-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    width: 100%;
+    transition: width 0.3s ease-out;
+}
+
+.game-hunt-hp-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.game-hunt-log-panel {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1.5px solid rgba(255, 170, 0, 0.2);
+    border-radius: 15px;
+    padding: 12px 20px;
+    height: 100px;
+    overflow-y: hidden;
+    text-align: left;
+    font-family: monospace;
+    font-size: 0.95rem;
+    color: #ddd;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.game-hunt-log-line {
+    margin: 3px 0;
+    line-height: 1.3;
+    animation: log-fade-in 0.2s ease-out;
+}
+
+@keyframes log-fade-in {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.game-hunt-cart-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2147483647;
+}
+
+.game-hunt-cart-sprite {
+    position: absolute;
+    width: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: cart-ride 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.game-hunt-cart-sprite img {
+    width: 80px;
+    height: auto;
+}
+
+.game-hunt-cart-fainter {
+    font-size: 2.2rem;
+    transform: rotate(-90deg) translate(-10px, -20px);
+    margin-bottom: -15px;
+    filter: grayscale(0.5);
+}
+
+@keyframes cart-ride {
+    0% { left: -150px; top: 60%; opacity: 0; transform: rotate(5deg); }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { left: 105%; top: 40%; opacity: 0; transform: rotate(-5deg); }
+}
+
+.game-hunt-status-tag {
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.game-hunt-status-tag.active {
+    background: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+}
+
+.game-hunt-status-tag.fainted {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+}
+

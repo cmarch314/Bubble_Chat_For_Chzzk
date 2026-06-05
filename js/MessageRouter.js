@@ -52,6 +52,10 @@ class MessageRouter {
                 this.visualDirector.trigger('raid', { message: updatedTrimmedMsg, nickname: msgData.nickname });
                 return;
             }
+            if (lowerMsg.startsWith('!토벌') || lowerMsg.startsWith('!수렵')) {
+                this.visualDirector.trigger('hunt', { message: updatedTrimmedMsg, nickname: msgData.nickname });
+                return;
+            }
         }
 
         // 0.5 특별 이벤트(구독) 처리

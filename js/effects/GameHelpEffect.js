@@ -103,6 +103,16 @@ class GameHelpEffect extends BaseEffect {
                     </div>
                 </div>
 
+                <div class="game-help-item">
+                    <div class="game-help-name">
+                        <span>🦖 몬스터 수렵 배틀</span>
+                        <span class="game-help-cmd">!토벌</span>
+                    </div>
+                    <div class="game-help-desc">
+                        무작위 4개의 무기가 몬스터와 대결합니다. 투표 시간 동안 생존할 무기 번호(1~4)를 쳐서 투표하고, 전투 종료 시 최후의 1인 무기가 10초간의 최후 결전을 버텨내면 수렵에 성공하여 투표한 시청자가 승리합니다. (시작: 스트리머 전용)
+                    </div>
+                </div>
+
                 <div class="game-help-footer">
                     정답 및 기동 명령어는 대소문자나 띄어쓰기를 구분하지 않습니다!
                 </div>

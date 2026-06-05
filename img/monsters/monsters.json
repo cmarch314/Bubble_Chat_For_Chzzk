@@ -1,0 +1,584 @@
+[
+    {
+        "id": "ancient_leshen",
+        "nameEN": "Ancient Leshen",
+        "nameKO": "고대 레셴",
+        "filename": "ancient_leshen.png"
+    },
+    {
+        "id": "anjanath",
+        "nameEN": "Anjanath",
+        "nameKO": "안쟈나프",
+        "filename": "anjanath.png"
+    },
+    {
+        "id": "apceros",
+        "nameEN": "Apceros",
+        "nameKO": "아프케로스",
+        "filename": "apceros.png"
+    },
+    {
+        "id": "aptonoth",
+        "nameEN": "Aptonoth",
+        "nameKO": "아프토노스",
+        "filename": "aptonoth.png"
+    },
+    {
+        "id": "azure_rathalos",
+        "nameEN": "Azure Rathalos",
+        "nameKO": "리오레우스 아종",
+        "filename": "azure_rathalos.png"
+    },
+    {
+        "id": "barnos",
+        "nameEN": "Barnos",
+        "nameKO": "바르노스",
+        "filename": "barnos.png"
+    },
+    {
+        "id": "barroth",
+        "nameEN": "Barroth",
+        "nameKO": "볼보로스",
+        "filename": "barroth.png"
+    },
+    {
+        "id": "bazelgeuse",
+        "nameEN": "Bazelgeuse",
+        "nameKO": "바젤기우스",
+        "filename": "bazelgeuse.png"
+    },
+    {
+        "id": "behemoth",
+        "nameEN": "Behemoth",
+        "nameKO": "베히모스",
+        "filename": "behemoth.png"
+    },
+    {
+        "id": "black_diablos",
+        "nameEN": "Black Diablos",
+        "nameKO": "디아블로스 아종",
+        "filename": "black_diablos.png"
+    },
+    {
+        "id": "deviljho",
+        "nameEN": "Deviljho",
+        "nameKO": "이블조",
+        "filename": "deviljho.png"
+    },
+    {
+        "id": "diablos",
+        "nameEN": "Diablos",
+        "nameKO": "디아블로스",
+        "filename": "diablos.png"
+    },
+    {
+        "id": "dodogama",
+        "nameEN": "Dodogama",
+        "nameKO": "도도가마",
+        "filename": "dodogama.png"
+    },
+    {
+        "id": "felyne",
+        "nameEN": "Felyne",
+        "nameKO": "동반자 아이루",
+        "filename": "felyne.png"
+    },
+    {
+        "id": "gajalaka",
+        "nameEN": "Gajalaka",
+        "nameKO": "가자부",
+        "filename": "gajalaka.png"
+    },
+    {
+        "id": "gajau",
+        "nameEN": "Gajau",
+        "nameKO": "가쟈우",
+        "filename": "gajau.png"
+    },
+    {
+        "id": "gastodon",
+        "nameEN": "Gastodon",
+        "nameKO": "가스토돈",
+        "filename": "gastodon.png"
+    },
+    {
+        "id": "girros",
+        "nameEN": "Girros",
+        "nameKO": "기루오스",
+        "filename": "girros.png"
+    },
+    {
+        "id": "great_girros",
+        "nameEN": "Great Girros",
+        "nameKO": "도스기루오스",
+        "filename": "great_girros.png"
+    },
+    {
+        "id": "great_jagras",
+        "nameEN": "Great Jagras",
+        "nameKO": "도스쟈그라스",
+        "filename": "great_jagras.png"
+    },
+    {
+        "id": "grimalkyne",
+        "nameEN": "Grimalkyne",
+        "nameKO": "테토루",
+        "filename": "grimalkyne.png"
+    },
+    {
+        "id": "hornetaur",
+        "nameEN": "Hornetaur",
+        "nameKO": "호네타우르",
+        "filename": "hornetaur.png"
+    },
+    {
+        "id": "jagras",
+        "nameEN": "Jagras",
+        "nameKO": "쟈그라스",
+        "filename": "jagras.png"
+    },
+    {
+        "id": "jyuratodus",
+        "nameEN": "Jyuratodus",
+        "nameKO": "쥬라도도스",
+        "filename": "jyuratodus.png"
+    },
+    {
+        "id": "kelbi",
+        "nameEN": "Kelbi",
+        "nameKO": "켈비",
+        "filename": "kelbi.png"
+    },
+    {
+        "id": "kestodon_female",
+        "nameEN": "Kestodon Female",
+        "nameKO": "케스토돈 (암컷)",
+        "filename": "kestodon_female.png"
+    },
+    {
+        "id": "kestodon",
+        "nameEN": "Kestodon",
+        "nameKO": "케스토돈",
+        "filename": "kestodon.png"
+    },
+    {
+        "id": "kirin",
+        "nameEN": "Kirin",
+        "nameKO": "키린",
+        "filename": "kirin.png"
+    },
+    {
+        "id": "kulu-ya-ku",
+        "nameEN": "Kulu-Ya-Ku",
+        "nameKO": "쿠루루야쿠",
+        "filename": "kulu-ya-ku.png"
+    },
+    {
+        "id": "kulve_taroth",
+        "nameEN": "Kulve Taroth",
+        "nameKO": "맘-타로트",
+        "filename": "kulve_taroth.png"
+    },
+    {
+        "id": "kushala_daora",
+        "nameEN": "Kushala Daora",
+        "nameKO": "크샬다오라",
+        "filename": "kushala_daora.png"
+    },
+    {
+        "id": "lavasioth",
+        "nameEN": "Lavasioth",
+        "nameKO": "볼가노스",
+        "filename": "lavasioth.png"
+    },
+    {
+        "id": "legiana",
+        "nameEN": "Legiana",
+        "nameKO": "레이기에나",
+        "filename": "legiana.png"
+    },
+    {
+        "id": "leshen",
+        "nameEN": "Leshen",
+        "nameKO": "레셴",
+        "filename": "leshen.png"
+    },
+    {
+        "id": "lunastra",
+        "nameEN": "Lunastra",
+        "nameKO": "나나-테스카토리",
+        "filename": "lunastra.png"
+    },
+    {
+        "id": "mernos",
+        "nameEN": "Mernos",
+        "nameKO": "메르노스",
+        "filename": "mernos.png"
+    },
+    {
+        "id": "mosswine",
+        "nameEN": "Mosswine",
+        "nameKO": "모스",
+        "filename": "mosswine.png"
+    },
+    {
+        "id": "nergigante",
+        "nameEN": "Nergigante",
+        "nameKO": "네르기간테",
+        "filename": "nergigante.png"
+    },
+    {
+        "id": "noios",
+        "nameEN": "Noios",
+        "nameKO": "노이오스",
+        "filename": "noios.png"
+    },
+    {
+        "id": "odogaron",
+        "nameEN": "Odogaron",
+        "nameKO": "오도가론",
+        "filename": "odogaron.png"
+    },
+    {
+        "id": "paolumu",
+        "nameEN": "Paolumu",
+        "nameKO": "파오우르무",
+        "filename": "paolumu.png"
+    },
+    {
+        "id": "pink_rathian",
+        "nameEN": "Pink Rathian",
+        "nameKO": "리오레이아 아종",
+        "filename": "pink_rathian.png"
+    },
+    {
+        "id": "pukei-pukei",
+        "nameEN": "Pukei-Pukei",
+        "nameKO": "푸케푸케",
+        "filename": "pukei-pukei.png"
+    },
+    {
+        "id": "radobaan",
+        "nameEN": "Radobaan",
+        "nameKO": "라도발킨",
+        "filename": "radobaan.png"
+    },
+    {
+        "id": "raphinos",
+        "nameEN": "Raphinos",
+        "nameKO": "라피노스",
+        "filename": "raphinos.png"
+    },
+    {
+        "id": "rathalos",
+        "nameEN": "Rathalos",
+        "nameKO": "리오레우스",
+        "filename": "rathalos.png"
+    },
+    {
+        "id": "rathian",
+        "nameEN": "Rathian",
+        "nameKO": "리오레이아",
+        "filename": "rathian.png"
+    },
+    {
+        "id": "shamos",
+        "nameEN": "Shamos",
+        "nameKO": "샤모스",
+        "filename": "shamos.png"
+    },
+    {
+        "id": "teostra",
+        "nameEN": "Teostra",
+        "nameKO": "테오 테스카토르",
+        "filename": "teostra.png"
+    },
+    {
+        "id": "tobi-kadachi",
+        "nameEN": "Tobi-Kadachi",
+        "nameKO": "토비카가치",
+        "filename": "tobi-kadachi.png"
+    },
+    {
+        "id": "tzitzi-ya-ku",
+        "nameEN": "Tzitzi-Ya-Ku",
+        "nameKO": "치치야쿠",
+        "filename": "tzitzi-ya-ku.png"
+    },
+    {
+        "id": "unknown_monster",
+        "nameEN": "Unknown Monster",
+        "nameKO": "Unknown Monster",
+        "filename": "unknown_monster.png"
+    },
+    {
+        "id": "uragaan",
+        "nameEN": "Uragaan",
+        "nameKO": "우라간킨",
+        "filename": "uragaan.png"
+    },
+    {
+        "id": "vaal_hazak",
+        "nameEN": "Vaal Hazak",
+        "nameKO": "발하자크",
+        "filename": "vaal_hazak.png"
+    },
+    {
+        "id": "vespoid",
+        "nameEN": "Vespoid",
+        "nameKO": "랑고스타",
+        "filename": "vespoid.png"
+    },
+    {
+        "id": "xeno'jiiva",
+        "nameEN": "Xeno'jiiva",
+        "nameKO": "제노-지바",
+        "filename": "xeno'jiiva.png"
+    },
+    {
+        "id": "zorah_magdaros",
+        "nameEN": "Zorah Magdaros",
+        "nameKO": "조라-마그다라오스",
+        "filename": "zorah_magdaros.png"
+    },
+    {
+        "id": "acidic_glavenus",
+        "nameEN": "Acidic Glavenus",
+        "nameKO": "유황 결정 디노발드",
+        "filename": "acidic_glavenus.png"
+    },
+    {
+        "id": "alatreon",
+        "nameEN": "Alatreon",
+        "nameKO": "알바트리온",
+        "filename": "alatreon.png"
+    },
+    {
+        "id": "anteka",
+        "nameEN": "Anteka",
+        "nameKO": "안테카",
+        "filename": "anteka.png"
+    },
+    {
+        "id": "banbaro",
+        "nameEN": "Banbaro",
+        "nameKO": "버프바로",
+        "filename": "banbaro.png"
+    },
+    {
+        "id": "barioth",
+        "nameEN": "Barioth",
+        "nameKO": "베리오로스",
+        "filename": "barioth.png"
+    },
+    {
+        "id": "beotodus",
+        "nameEN": "Beotodus",
+        "nameKO": "브란토도스",
+        "filename": "beotodus.png"
+    },
+    {
+        "id": "blackveil_vaal_hazak",
+        "nameEN": "Blackveil Vaal Hazak",
+        "nameKO": "죽음을 두른 발하자크",
+        "filename": "blackveil_vaal_hazak.png"
+    },
+    {
+        "id": "boaboa",
+        "nameEN": "Boaboa",
+        "nameKO": "보아보아",
+        "filename": "boaboa.png"
+    },
+    {
+        "id": "brachydios",
+        "nameEN": "Brachydios",
+        "nameKO": "브라키디오스",
+        "filename": "brachydios.png"
+    },
+    {
+        "id": "brute_tigrex",
+        "nameEN": "Brute Tigrex",
+        "nameKO": "흑굉룡 티가렉스",
+        "filename": "brute_tigrex.png"
+    },
+    {
+        "id": "coral_pukei-pukei",
+        "nameEN": "Coral Pukei-Pukei",
+        "nameKO": "수요조 푸케푸케",
+        "filename": "coral_pukei-pukei.png"
+    },
+    {
+        "id": "cortos",
+        "nameEN": "Cortos",
+        "nameKO": "코르토스",
+        "filename": "cortos.png"
+    },
+    {
+        "id": "ebony_odogaron",
+        "nameEN": "Ebony Odogaron",
+        "nameKO": "흉조 오도가론",
+        "filename": "ebony_odogaron.png"
+    },
+    {
+        "id": "fatalis",
+        "nameEN": "Fatalis",
+        "nameKO": "밀라보레아스",
+        "filename": "fatalis.png"
+    },
+    {
+        "id": "frostfang_barioth",
+        "nameEN": "Frostfang Barioth",
+        "nameKO": "서리칼날 품은 베리오로스",
+        "filename": "frostfang_barioth.png"
+    },
+    {
+        "id": "fulgur_anjanath",
+        "nameEN": "Fulgur Anjanath",
+        "nameKO": "Fulgur Anjanath",
+        "filename": "fulgur_anjanath.png"
+    },
+    {
+        "id": "furious_rajang",
+        "nameEN": "Furious Rajang",
+        "nameKO": "격앙 라잔",
+        "filename": "furious_rajang.png"
+    },
+    {
+        "id": "glavenus",
+        "nameEN": "Glavenus",
+        "nameKO": "디노발드",
+        "filename": "glavenus.png"
+    },
+    {
+        "id": "gold_rathian",
+        "nameEN": "Gold Rathian",
+        "nameKO": "리오레이아 희소종",
+        "filename": "gold_rathian.png"
+    },
+    {
+        "id": "namielle",
+        "nameEN": "Namielle",
+        "nameKO": "네로미에르",
+        "filename": "namielle.png"
+    },
+    {
+        "id": "nargacuga",
+        "nameEN": "Nargacuga",
+        "nameKO": "나르가쿠르가",
+        "filename": "nargacuga.png"
+    },
+    {
+        "id": "nightshade_paolumu",
+        "nameEN": "Nightshade Paolumu",
+        "nameKO": "부면룡 파오우르무",
+        "filename": "nightshade_paolumu.png"
+    },
+    {
+        "id": "popo",
+        "nameEN": "Popo",
+        "nameKO": "포포",
+        "filename": "popo.png"
+    },
+    {
+        "id": "raging_brachydios",
+        "nameEN": "Raging Brachydios",
+        "nameKO": "임계 브라키디오스",
+        "filename": "raging_brachydios.png"
+    },
+    {
+        "id": "rajang",
+        "nameEN": "Rajang",
+        "nameKO": "라잔",
+        "filename": "rajang.png"
+    },
+    {
+        "id": "ruiner_nergigante",
+        "nameEN": "Ruiner Nergigante",
+        "nameKO": "모두를 멸하는 네르기간테",
+        "filename": "ruiner_nergigante.png"
+    },
+    {
+        "id": "safi'jiiva",
+        "nameEN": "Safi'jiiva",
+        "nameKO": "무페토-지바",
+        "filename": "safi'jiiva.png"
+    },
+    {
+        "id": "savage_deviljho",
+        "nameEN": "Savage Deviljho",
+        "nameKO": "미친 야생의 이블조",
+        "filename": "savage_deviljho.png"
+    },
+    {
+        "id": "scarred_yian_garuga",
+        "nameEN": "Scarred Yian Garuga",
+        "nameKO": "상처입은 얀가루가",
+        "filename": "scarred_yian_garuga.png"
+    },
+    {
+        "id": "seething_bazelgeuse",
+        "nameEN": "Seething Bazelgeuse",
+        "nameKO": "홍련의 솟구치는 바젤기우스",
+        "filename": "seething_bazelgeuse.png"
+    },
+    {
+        "id": "shara_ishvalda",
+        "nameEN": "Shara Ishvalda",
+        "nameKO": "안-이슈왈다",
+        "filename": "shara_ishvalda.png"
+    },
+    {
+        "id": "shrieking_legiana",
+        "nameEN": "Shrieking Legiana",
+        "nameKO": "얼려 찌르는 레이기에나",
+        "filename": "shrieking_legiana.png"
+    },
+    {
+        "id": "silver_rathalos",
+        "nameEN": "Silver Rathalos",
+        "nameKO": "리오레우스 희소종",
+        "filename": "silver_rathalos.png"
+    },
+    {
+        "id": "stygian_zinogre",
+        "nameEN": "Stygian Zinogre",
+        "nameKO": "옥랑룡 진오우거 아종",
+        "filename": "stygian_zinogre.png"
+    },
+    {
+        "id": "tigrex",
+        "nameEN": "Tigrex",
+        "nameKO": "티가렉스",
+        "filename": "tigrex.png"
+    },
+    {
+        "id": "velkhana",
+        "nameEN": "Velkhana",
+        "nameKO": "벨카나",
+        "filename": "velkhana.png"
+    },
+    {
+        "id": "viper_tobi-kadachi",
+        "nameEN": "Viper Tobi-Kadachi",
+        "nameKO": "비독룡 토비카가치",
+        "filename": "viper_tobi-kadachi.png"
+    },
+    {
+        "id": "wulg",
+        "nameEN": "Wulg",
+        "nameKO": "울그",
+        "filename": "wulg.png"
+    },
+    {
+        "id": "yian_garuga",
+        "nameEN": "Yian Garuga",
+        "nameKO": "얀가루가",
+        "filename": "yian_garuga.png"
+    },
+    {
+        "id": "zinogre",
+        "nameEN": "Zinogre",
+        "nameKO": "진오우거",
+        "filename": "zinogre.png"
+    }
+]

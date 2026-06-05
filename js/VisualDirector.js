@@ -118,6 +118,7 @@ class VisualDirector {
             sound_quiz: { soundKey: null, instance: new SoundQuizEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
             racing: { soundKey: null, instance: new RacingEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
             raid: { soundKey: null, instance: new RaidEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            hunt: { soundKey: null, instance: new HuntEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
             game_help: { soundKey: null, instance: new GameHelpEffect(this), execute(ctx) { return this.instance.execute(ctx); } }
         };
     }
