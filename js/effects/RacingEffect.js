@@ -598,7 +598,7 @@ class RacingEffect extends BaseEffect {
             else if (msg.includes('4') || msg.includes('🏇') || msg.includes('질풍마')) boostIndex = 3;
 
             if (boostIndex !== -1) {
-                this.racers[boostIndex].boost += 4.5; // add boost
+                this.racers[boostIndex].boost += 1.5; // add boost
                 this.spawnBoostParticle(boostIndex);
                 return true;
             }
@@ -979,7 +979,7 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] 앗! ${r.name} 선수가 누군가 버린 바나나 껍질에 미끄러집니다!!!`);
                     } else if (eventRoll < 0.10) {
                         // 2. Struck by lightning!
-                        r.boost += 12.0;
+                        r.boost += 4.0;
                         r.scale = 1.35;
                         r.statusText = '⚡ 벼락 돌진!';
                         r.statusTimer = 20;
@@ -1003,21 +1003,21 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] ${r.name} 선수, 밤샘 수렵으로 졸음 비틀 상태에 빠집니다!`);
                     } else if (eventRoll < 0.25) {
                         // 5. Overdrive!
-                        r.boost += 18.0;
+                        r.boost += 6.0;
                         r.statusText = '🔥 부스터 폭발!';
                         r.statusTimer = 25;
                         this.playRaceSound('overdrive');
                         updateCommentary(`🎤 [중계진] ${r.name} 선수, 엉덩이에 부스터 점화! 무서운 속도입니다!`);
                     } else if (eventRoll < 0.30) {
                         // 6. Portal Teleport!
-                        r.pos += 12.0;
+                        r.pos += 4.0;
                         r.statusText = '🌀 차원 관통!';
                         r.statusTimer = 20;
                         this.playRaceSound('portal');
                         updateCommentary(`🎤 [중계진] 공간 왜곡! ${r.name} 선수가 포탈을 타고 훌쩍 앞서나갑니다!`);
                     } else if (eventRoll < 0.35) {
                         // 7. Wind Gust!
-                        r.boost += 9.0;
+                        r.boost += 3.0;
                         r.statusText = '🌪️ 순풍 탑승!';
                         r.statusTimer = 20;
                         this.playRaceSound('wind');
@@ -1032,7 +1032,7 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] 아차차! ${r.name} 선수, 발이 꼬이며 제자리 360도 턴을 돕니다!`);
                     } else if (eventRoll < 0.45) {
                         // 9. Gravity Inversion!
-                        r.boost += 14.0;
+                        r.boost += 4.6;
                         r.scale = 1.25;
                         r.statusText = '🎈 반중력 부상!';
                         r.statusTimer = 25;
@@ -1040,7 +1040,7 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] 중력 상실! ${r.name} 선수가 가볍게 떠오르며 트랙 마찰을 무시하고 질주합니다!`);
                     } else if (eventRoll < 0.50) {
                         // 10. Rivalry / Fire in Eyes!
-                        r.boost += 20.0;
+                        r.boost += 6.6;
                         r.statusText = '🔥 승부욕 폭발!';
                         r.statusTimer = 20;
                         this.playRaceSound('fire');
@@ -1061,7 +1061,7 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] 이런! ${r.name} 선수가 최면에 걸려 잠시 역주행을 시도합니다!`);
                     } else if (eventRoll < 0.65) {
                         // 13. Gold Rush / Coin Shower!
-                        r.boost += 10.0;
+                        r.boost += 3.3;
                         r.statusText = '🪙 황금 샤워!';
                         r.statusTimer = 20;
                         this.playRaceSound('carrot');
@@ -1075,14 +1075,14 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] 피잉! 전자기 펄스가 발생해 ${r.name} 선수의 전자 제어가 일시 정지됩니다!`);
                     } else if (eventRoll < 0.75) {
                         // 15. Adrenaline Rush!
-                        r.boost += 25.0;
+                        r.boost += 8.3;
                         r.statusText = '⚡ 아드레날린!';
                         r.statusTimer = 22;
                         this.playRaceSound('overdrive');
                         updateCommentary(`🎤 [중계진] 호르몬 폭발! ${r.name} 선수가 폭발적인 아드레날린 분출로 달리기 시작합니다!`);
                     } else if (eventRoll < 0.80) {
                         // 16. Tornado fling!
-                        r.pos += 15.0;
+                        r.pos += 5.0;
                         r.stunTicks = 10;
                         r.rotate = 720;
                         r.statusText = '🌪️ 회오리 탑승!';
@@ -1091,7 +1091,7 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] 거센 토네이도! ${r.name} 선수가 회오리에 휘말려 앞으로 날아갔지만 비틀거립니다!`);
                     } else if (eventRoll < 0.85) {
                         // 17. Sneezing!
-                        r.pos += 6.0;
+                        r.pos += 2.0;
                         r.rotate = 30;
                         r.statusText = '🤧 재채기 뿜!';
                         r.statusTimer = 15;
@@ -1099,7 +1099,7 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] 에취! ${r.name} 선수가 강력한 재채기 추진력으로 앞으로 살짝 밀려납니다!`);
                     } else if (eventRoll < 0.90) {
                         // 18. Shadow Clone!
-                        r.boost += 13.0;
+                        r.boost += 4.3;
                         r.statusText = '🥷 분신 분열!';
                         r.statusTimer = 20;
                         this.playRaceSound('ghost');
@@ -1114,7 +1114,7 @@ class RacingEffect extends BaseEffect {
                         updateCommentary(`🎤 [중계진] 쿵! ${r.name} 선수가 대형화되며 엄청난 무게로 바닥을 찍고 비틀댑니다!`);
                     } else if (r.shieldTicks === 0) {
                         // 20. Panic run!
-                        r.boost += 15.0;
+                        r.boost += 5.0;
                         r.rotate = 45;
                         r.statusText = '😱 패닉 질주!';
                         r.statusTimer = 20;
@@ -1123,7 +1123,7 @@ class RacingEffect extends BaseEffect {
                     } else {
                         // 21. Blessing of the Goddess!
                         r.shieldTicks = 120;
-                        r.boost += 11.0;
+                        r.boost += 3.6;
                         r.statusText = '😇 여신의 가호!';
                         r.statusTimer = 25;
                         this.playRaceSound('shield');
@@ -1143,7 +1143,7 @@ class RacingEffect extends BaseEffect {
                             this.playRaceSound('shield');
                             updateCommentary(`🎤 [중계진] ${r.name}가 밀쳐보려 했으나 ${target.name}의 방어막에 튕겨나갑니다!`);
                         } else {
-                            r.boost += 4.0;
+                            r.boost += 1.3;
                             r.statusText = '💢 몸싸움 승리!';
                             r.statusTimer = 15;
   
@@ -1354,7 +1354,7 @@ class RacingEffect extends BaseEffect {
             // 🧲 Magnet
             const leader = [...this.racers].sort((a, b) => b.pos - a.pos)[0];
             if (leader && leader.id !== r.id && (!leader.eventCooldownTicks || leader.eventCooldownTicks === 0)) {
-                const stealAmount = 6;
+                const stealAmount = 2;
                 leader.pos = Math.max(0, leader.pos - stealAmount);
                 leader.eventCooldownTicks = 50;
                 r.pos += stealAmount;
@@ -1363,7 +1363,7 @@ class RacingEffect extends BaseEffect {
                 this.playRaceSound('overdrive');
                 updateCommentary(`🎤 [중계진] 자석 발동! ${r.name} 선수가 선두 ${leader.name}의 에너지를 뺏어 질주합니다!`);
             } else {
-                r.boost += 8.0;
+                r.boost += 2.6;
                 r.statusText = '🥕 당근 충전!';
                 r.statusTimer = 15;
                 this.playRaceSound('carrot');
@@ -1371,7 +1371,7 @@ class RacingEffect extends BaseEffect {
             }
         } else if (itemRoll < 0.30) {
             // 🥕 Ginseng Booster
-            r.boost += 16.0;
+            r.boost += 5.3;
             r.statusText = '🥕 산삼 버프!';
             r.statusTimer = 20;
             this.playRaceSound('ginseng');
@@ -1404,7 +1404,7 @@ class RacingEffect extends BaseEffect {
                     updateCommentary(`🎤 [중계진] 함정 카드! ${r.name} 선수가 던진 바나나를 뒤따르던 ${behind.name}가 밟았습니다!`);
                 }
             } else {
-                r.boost += 6.0;
+                r.boost += 2.0;
                 r.statusText = '🔥 가속 점화!';
                 r.statusTimer = 15;
                 this.playRaceSound('overdrive');
@@ -1421,7 +1421,7 @@ class RacingEffect extends BaseEffect {
                 this.playRaceSound('freeze');
                 updateCommentary(`🎤 [중계진] 아이스 빔! ${r.name} 선수가 냉동 광선을 쏘아 ${target.name} 선수를 얼려버립니다!`);
             } else {
-                r.boost += 7.0;
+                r.boost += 2.3;
                 r.statusText = '🔥 얼음 돌파!';
                 r.statusTimer = 15;
                 this.playRaceSound('overdrive');
@@ -1430,7 +1430,7 @@ class RacingEffect extends BaseEffect {
         } else if (itemRoll < 0.70) {
             // 😈 Devil's Deal
             r.stunTicks = 8;
-            r.boost += 35.0;
+            r.boost += 11.6;
             r.statusText = '😈 악마의 스퍼트!';
             r.statusTimer = 30;
             this.playRaceSound('devil');
@@ -1459,7 +1459,7 @@ class RacingEffect extends BaseEffect {
             updateCommentary(`🎤 [중계진] 시간 지연! ${r.name} 선수가 시공간을 비틀어 경쟁자들의 시계를 늦춰버립니다!`);
         } else {
             // 🌟 Golden Carrot
-            r.boost += 22.0;
+            r.boost += 7.3;
             r.scale = 1.5;
             r.statusText = '🌟 황금 당근!';
             r.statusTimer = 25;
