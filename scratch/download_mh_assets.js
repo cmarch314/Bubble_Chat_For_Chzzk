@@ -30,7 +30,7 @@ const sfxDownloads = [
     },
     {
         name: 'mh_sharpen.mp3',
-        query: 'Monster Hunter World - Whetstone Sharpening Sound Effect'
+        query: 'Monster Hunter Whetstone Sound Effect'
     },
     {
         name: 'mh_reload.mp3',
@@ -46,7 +46,7 @@ const sfxDownloads = [
     },
     {
         name: 'mh_aibo.mp3',
-        query: 'Monster Hunter World - Handler Aibo Voice (Aibo!)'
+        query: 'MHW Aibo sound'
     },
     {
         name: 'mh_dust.mp3',
@@ -54,7 +54,7 @@ const sfxDownloads = [
     },
     {
         name: 'mh_hit.mp3',
-        query: 'Monster Hunter World - Weapon Hit Damage Sound Effect'
+        query: 'Monster Hunter World Hit SFX'
     },
     {
         name: 'mh_stun.mp3',
@@ -62,7 +62,7 @@ const sfxDownloads = [
     }
 ];
 
-function downloadYtdlp(query, destDir, destFileName, force = false) {
+function downloadYtdlp(query, destDir, destFileName, force = false, isSfx = false) {
     const destPath = path.join(destDir, destFileName);
     if (force && fs.existsSync(destPath)) {
         try {
@@ -80,7 +80,9 @@ function downloadYtdlp(query, destDir, destFileName, force = false) {
     console.log(`📥 Downloading "${destFileName}" using yt-dlp...`);
     
     // yt-dlp command to search and download audio as mp3
-    const command = `yt-dlp "ytsearch1:${cleanQuery}" -x --audio-format mp3 -o "${destPath.replace(/\.mp3$/, '')}.%(ext)s"`;
+    // If it is SFX, apply match-filter to query only short clips less than 15 seconds
+    const durationFilter = isSfx ? '--match-filter "duration < 15"' : '';
+    const command = `yt-dlp "ytsearch25:${cleanQuery}" ${durationFilter} -x --audio-format mp3 -o "${destPath.replace(/\.mp3$/, '')}.%(ext)s"`;
     
     try {
         execSync(command, { stdio: 'inherit' });
@@ -110,14 +112,33 @@ function downloadYtdlp(query, destDir, destFileName, force = false) {
 async function main() {
     console.log('🎵 Starting Monster Hunter Generations Ultimate Asset Downloads via yt-dlp...');
     
+    // Purge abnormally large SFX files (> 1MB) before downloading
+    if (fs.existsSync(sfxDir)) {
+        const files = fs.readdirSync(sfxDir);
+        for (const file of files) {
+            if (file.startsWith('mh_') && file.endsWith('.mp3')) {
+                const filePath = path.join(sfxDir, file);
+                const stats = fs.statSync(filePath);
+                if (stats.size > 1024 * 1024) { // 1MB
+                    console.log(`⚠️ Detected abnormally large SFX file: ${file} (${(stats.size / 1024 / 1024).toFixed(2)} MB). Deleting for purification...`);
+                    try {
+                        fs.unlinkSync(filePath);
+                    } catch(e) {
+                        console.error(`Failed to delete ${file}:`, e);
+                    }
+                }
+            }
+        }
+    }
+
     console.log('\n--- Downloading BGMs ---');
     for (const bgm of bgmDownloads) {
-        downloadYtdlp(bgm.query, bgmDir, bgm.name);
+        downloadYtdlp(bgm.query, bgmDir, bgm.name, false, false);
     }
 
     console.log('\n--- Downloading SFXs ---');
     for (const sfx of sfxDownloads) {
-        downloadYtdlp(sfx.query, sfxDir, sfx.name, true);
+        downloadYtdlp(sfx.query, sfxDir, sfx.name, true, true);
     }
     
     console.log('\n🎉 Asset downloads complete!');

@@ -15,6 +15,8 @@ class HuntEffect extends BaseEffect {
         this.battleBgm = null;
         this.lobbyBgmPromise = null;
         this.battleBgmPromise = null;
+        this.winBgm = null;
+        this.winBgmPromise = null;
 
         // Configuration
         this.SHOW_MONSTER_HP = true; // Toggle monster HP display
@@ -1029,10 +1031,10 @@ class HuntEffect extends BaseEffect {
         // Play End BGM/SFX
         if (isVictory) {
             try {
-                const winBgm = new Audio('BGM/MHW_Quest_Clear.mp3');
+                this.winBgm = new Audio('BGM/MHW_Quest_Clear.mp3');
                 const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-                winBgm.volume = volConfig.master * volConfig.visual * 0.45;
-                winBgm.play().catch(() => {
+                this.winBgm.volume = volConfig.master * volConfig.visual * 0.45;
+                this.winBgmPromise = this.winBgm.play().catch(() => {
                     this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['우승!'] || '우승!');
                 });
             } catch (e) {
@@ -1084,17 +1086,18 @@ class HuntEffect extends BaseEffect {
             `;
         }
 
-        // Remove container after 8 seconds
+        // Remove container after 15 seconds
         setTimeout(() => {
             container.style.animation = "game-fade-out 0.5s ease-in forwards";
             setTimeout(() => {
                 container.remove();
+                this.stopBgms();
                 if (this.resolveGame) {
                     this.resolveGame();
                     this.resolveGame = null;
                 }
             }, 500);
-        }, 8000);
+        }, 15000);
     }
 
     forceStopGame() {
@@ -1139,10 +1142,13 @@ class HuntEffect extends BaseEffect {
         };
         stop(this.lobbyBgm, this.lobbyBgmPromise);
         stop(this.battleBgm, this.battleBgmPromise);
+        stop(this.winBgm, this.winBgmPromise);
         this.lobbyBgm = null;
         this.lobbyBgmPromise = null;
         this.battleBgm = null;
         this.battleBgmPromise = null;
+        this.winBgm = null;
+        this.winBgmPromise = null;
     }
 
     showSkillBubble(parentEl, skillName) {
