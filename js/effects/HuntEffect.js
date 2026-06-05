@@ -186,7 +186,19 @@ class HuntEffect extends BaseEffect {
 
         // Play Lobby BGM
         try {
-            this.lobbyBgm = new Audio('BGM/MHW_Lobby.mp3');
+            const lobbyBgms = [
+                'BGM/MHW_Lobby.mp3',
+                'BGM/MH_Kokoto.mp3',
+                'BGM/MH_Pokke.mp3',
+                'BGM/MH_Yukumo.mp3',
+                'BGM/MH_Bherna.mp3',
+                'BGM/MH_ValHabar.mp3',
+                'BGM/MHWI_Seliana.mp3',
+                'BGM/MHR_Kamura.mp3',
+                'BGM/MHRS_Elgado.mp3'
+            ];
+            const selectedLobby = lobbyBgms[Math.floor(Math.random() * lobbyBgms.length)];
+            this.lobbyBgm = new Audio(selectedLobby);
             this.lobbyBgm.loop = true;
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
             this.lobbyBgm.volume = volConfig.master * volConfig.visual * 0.45;
@@ -690,10 +702,16 @@ class HuntEffect extends BaseEffect {
             if (this.monsterAtb >= 100) {
                 this.monsterAtb = 0;
                 
-                // Select random alive target to hit
+                // Select random alive targets to hit (1 to 4 targets)
                 const targetable = this.selectedWeapons.filter(w => w.status === 'alive');
                 if (targetable.length > 0) {
-                    const target = targetable[Math.floor(Math.random() * targetable.length)];
+                    // Randomly decide how many targets to hit (1 to 4, capped at targetable.length)
+                    const maxTargets = Math.min(4, targetable.length);
+                    const numTargets = Math.floor(Math.random() * maxTargets) + 1;
+                    
+                    // Shuffle targetable and select the first numTargets
+                    const shuffledTargets = [...targetable].sort(() => Math.random() - 0.5);
+                    const targetsToHit = shuffledTargets.slice(0, numTargets);
                     
                     // Choose attack name
                     const list = this.MONSTER_ATTACKS[this.selectedMonster.id] || this.MONSTER_ATTACKS.default;
@@ -708,95 +726,97 @@ class HuntEffect extends BaseEffect {
                     if (this.monsterState === 'enraged') dmgMod = 1.5;
                     else if (this.monsterState === 'exhausted') dmgMod = 0.5;
 
-                    let baseDmg = Math.floor(target.maxHp * 0.45); // 45% of hunter's max HP
-                    let damage = Math.floor(baseDmg * dmgMod);
+                    targetsToHit.forEach(target => {
+                        let baseDmg = Math.floor(target.maxHp * 0.45); // 45% of hunter's max HP
+                        let damage = Math.floor(baseDmg * dmgMod);
 
-                    // Shield / Dodge roll check
-                    const defendRoll = Math.random();
-                    let isGuard = false;
-                    let isDodge = false;
+                        // Shield / Dodge roll check
+                        const defendRoll = Math.random();
+                        let isGuard = false;
+                        let isDodge = false;
 
-                    // HBG has shield too!
-                    const hasShield = target.type === 'shield' || target.id === 'heavy_bowgun';
+                        // HBG has shield too!
+                        const hasShield = target.type === 'shield' || target.id === 'heavy_bowgun';
 
-                    if (hasShield && defendRoll < 0.45) {
-                        damage = Math.max(1, Math.floor(damage * 0.15)); // Guard blocks 85%
-                        isGuard = true;
-                    } else if (!hasShield && defendRoll < 0.35) {
-                        damage = 0; // Dodge evades 100%
-                        isDodge = true;
-                    }
+                        if (hasShield && defendRoll < 0.45) {
+                            damage = Math.max(1, Math.floor(damage * 0.15)); // Guard blocks 85%
+                            isGuard = true;
+                        } else if (!hasShield && defendRoll < 0.35) {
+                            damage = 0; // Dodge evades 100%
+                            isDodge = true;
+                        }
 
-                    if (damage > 0) {
-                        // Moxie check
-                        if (target.hp - damage <= 0 && target.hasMoxie && Math.random() < 0.75) {
-                            target.hp = 1;
-                            target.hasMoxie = false;
-                            addLog(`🔥 [근성 발휘!] ${target.name}이(가) ${this.selectedMonster.nameKO}의 치명타를 입고 근성으로 1 HP 생존했습니다!`, '#ffaa00');
-                            this.playMHAsset('mh_guard.mp3', '보이스콜');
-                            shakeWeapon(target.index, '#00ffa3');
-                        } else {
-                            target.hp = Math.max(0, target.hp - damage);
-                            if (isGuard) {
-                                addLog(`🛡️ [방패 가드] ${target.name}이(가) 몬스터의 [${attackName}]을 방어했습니다! (-${damage} HP)`, '#00ffff');
-                                this.playMHAsset('mh_guard.mp3', '팅!1');
-                                shakeWeapon(target.index, '#00ffff');
+                        if (damage > 0) {
+                            // Moxie check
+                            if (target.hp - damage <= 0 && target.hasMoxie && Math.random() < 0.75) {
+                                target.hp = 1;
+                                target.hasMoxie = false;
+                                addLog(`🔥 [근성 발휘!] ${target.name}이(가) ${this.selectedMonster.nameKO}의 치명타를 입고 근성으로 1 HP 생존했습니다!`, '#ffaa00');
+                                this.playMHAsset('mh_guard.mp3', '보이스콜');
+                                shakeWeapon(target.index, '#00ffa3');
                             } else {
-                                addLog(`💥 [공격] ${this.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 피해! (-${damage} HP)`, '#ff5555');
-                                this.playMHAsset('mh_hit.mp3', '꺄악'); // play high quality hit sound
-                                shakeMonster();
-                                shakeWeapon(target.index);
+                                target.hp = Math.max(0, target.hp - damage);
+                                if (isGuard) {
+                                    addLog(`🛡️ [방패 가드] ${target.name}이(가) 몬스터의 [${attackName}]을 방어했습니다! (-${damage} HP)`, '#00ffff');
+                                    this.playMHAsset('mh_guard.mp3', '팅!1');
+                                    shakeWeapon(target.index, '#00ffff');
+                                } else {
+                                    addLog(`💥 [공격] ${this.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 피해! (-${damage} HP)`, '#ff5555');
+                                    this.playMHAsset('mh_hit.mp3', '꺄악'); // play high quality hit sound
+                                    shakeMonster();
+                                    shakeWeapon(target.index);
 
-                                // Stun check (15% chance on raw damage if still alive)
-                                if (target.hp > 0 && Math.random() < 0.15) {
-                                    target.status = 'stunned';
-                                    const weaponCard = card.querySelector(`#fight-card-${target.index}`);
-                                    if (weaponCard) {
-                                        weaponCard.classList.add('stunned');
+                                    // Stun check (15% chance on raw damage if still alive)
+                                    if (target.hp > 0 && Math.random() < 0.15) {
+                                        target.status = 'stunned';
+                                        const weaponCard = card.querySelector(`#fight-card-${target.index}`);
+                                        if (weaponCard) {
+                                            weaponCard.classList.add('stunned');
+                                        }
+                                        const tag = card.querySelector(`#status-tag-${target.index}`);
+                                        if (tag) {
+                                            tag.textContent = '기절 상태';
+                                            tag.className = 'game-hunt-status-tag stunned';
+                                        }
+                                        addLog(`🌀 [기절] ${target.name}이(가) 큰 충격으로 기절했습니다! 다음 턴 행동 불가!`, '#e58e26');
+                                        shakeWeapon(target.index, '#e58e26');
                                     }
-                                    const tag = card.querySelector(`#status-tag-${target.index}`);
-                                    if (tag) {
-                                        tag.textContent = '기절 상태';
-                                        tag.className = 'game-hunt-status-tag stunned';
-                                    }
-                                    addLog(`🌀 [기절] ${target.name}이(가) 큰 충격으로 기절했습니다! 다음 턴 행동 불가!`, '#e58e26');
-                                    shakeWeapon(target.index, '#e58e26');
                                 }
                             }
-                        }
-                    } else {
-                        // Evaded
-                        addLog(`💨 [구르기 회피] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 구르기로 피했습니다!`, '#2eff7b');
-                        this.playMHAsset('mh_dodge.mp3', '윽!');
-                        shakeWeapon(target.index, '#2eff7b');
-                    }
-
-                    // Sharpness/Ammo loss on hit
-                    if (damage > 0 && !isDodge) {
-                        if (target.type === 'ranged') {
-                            target.ammo = Math.max(0, target.ammo - 1);
                         } else {
-                            target.sharpness = Math.max(0, target.sharpness - 8);
+                            // Evaded
+                            addLog(`💨 [구르기 회피] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 구르기로 피했습니다!`, '#2eff7b');
+                            this.playMHAsset('mh_dodge.mp3', '윽!');
+                            shakeWeapon(target.index, '#2eff7b');
                         }
-                    }
 
-                    this.updateHpUI(card, target);
-
-                    // Death / Cart check
-                    if (target.hp <= 0) {
-                        target.status = 'dead';
-                        this.cartCount++;
-                        updateCartBoard();
-                        this.triggerCartAnimation(target);
-
-                        if (this.cartCount >= 3) {
-                            addLog(`☠️ [퀘스트 실패] 3회 수레를 타서 퀘스트 전멸 실패했습니다!`, '#ff0055');
-                        } else {
-                            target.respawnTimer = 5; // 5 seconds respawn time
-                            addLog(`🚨 [수레행] ${target.name}이(가) 쓰러졌습니다! 5초 후 부활합니다. (현재 수레: ${this.cartCount}/3)`, '#ff3b30');
-                            this.playMHAsset('mh_cart.mp3', '안돼');
+                        // Sharpness/Ammo loss on hit
+                        if (damage > 0 && !isDodge) {
+                            if (target.type === 'ranged') {
+                                target.ammo = Math.max(0, target.ammo - 1);
+                            } else {
+                                target.sharpness = Math.max(0, target.sharpness - 8);
+                            }
                         }
-                    }
+
+                        this.updateHpUI(card, target);
+
+                        // Death / Cart check
+                        if (target.hp <= 0) {
+                            target.status = 'dead';
+                            this.cartCount++;
+                            updateCartBoard();
+                            this.triggerCartAnimation(target);
+
+                            if (this.cartCount >= 3) {
+                                addLog(`☠️ [퀘스트 실패] 3회 수레를 타서 퀘스트 전멸 실패했습니다!`, '#ff0055');
+                            } else {
+                                target.respawnTimer = 5; // 5 seconds respawn time
+                                addLog(`🚨 [수레행] ${target.name}이(가) 쓰러졌습니다! 5초 후 부활합니다. (현재 수레: ${this.cartCount}/3)`, '#ff3b30');
+                                this.playMHAsset('mh_cart.mp3', '안돼');
+                            }
+                        }
+                    });
                 }
             }
 
@@ -1024,7 +1044,16 @@ class HuntEffect extends BaseEffect {
         // Play End BGM/SFX
         if (isVictory) {
             try {
-                this.winBgm = new Audio('BGM/MHW_Quest_Clear.mp3');
+                const successBgms = [
+                    'BGM/MHW_Quest_Clear.mp3',
+                    'BGM/MH_Quest_Clear_Kokoto.mp3',
+                    'BGM/MH_Quest_Clear_Pokke.mp3',
+                    'BGM/MH_Quest_Clear_Yukumo.mp3',
+                    'BGM/MH_Quest_Clear_MH4.mp3',
+                    'BGM/MHR_Quest_Clear_Kamura.mp3'
+                ];
+                const selectedClear = successBgms[Math.floor(Math.random() * successBgms.length)];
+                this.winBgm = new Audio(selectedClear);
                 const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
                 this.winBgm.volume = volConfig.master * volConfig.visual * 0.45;
                 this.winBgmPromise = this.winBgm.play().catch(() => {
@@ -1034,7 +1063,22 @@ class HuntEffect extends BaseEffect {
                 this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['우승!'] || '우승!');
             }
         } else {
-            this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['안돼'] || '안돼');
+            try {
+                const failBgms = [
+                    'BGM/MH_Quest_Fail_Classic.mp3',
+                    'BGM/MHW_Quest_Fail.mp3',
+                    'BGM/MHR_Quest_Fail.mp3'
+                ];
+                const selectedFail = failBgms[Math.floor(Math.random() * failBgms.length)];
+                this.winBgm = new Audio(selectedFail);
+                const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
+                this.winBgm.volume = volConfig.master * volConfig.visual * 0.45;
+                this.winBgmPromise = this.winBgm.play().catch(() => {
+                    this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['안돼'] || '안돼');
+                });
+            } catch (e) {
+                this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['안돼'] || '안돼');
+            }
         }
 
         // Determine winners

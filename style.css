@@ -4627,7 +4627,7 @@ body {
     padding: 15px;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .game-hunt-weapon-card.active {

@@ -12,6 +12,70 @@ const bgmDownloads = [
     {
         name: 'MHGU_Arena.mp3',
         query: 'Monster Hunter Generations Ultimate - Arena Theme'
+    },
+    {
+        name: 'MH_Kokoto.mp3',
+        query: 'Monster Hunter Kokoto Village Theme'
+    },
+    {
+        name: 'MH_Pokke.mp3',
+        query: 'Monster Hunter Pokke Village Theme'
+    },
+    {
+        name: 'MH_Yukumo.mp3',
+        query: 'Monster Hunter Yukumo Village Theme'
+    },
+    {
+        name: 'MH_Bherna.mp3',
+        query: 'Monster Hunter Bherna Village Theme'
+    },
+    {
+        name: 'MH_ValHabar.mp3',
+        query: 'Monster Hunter 4 Val Habar Theme'
+    },
+    {
+        name: 'MHWI_Seliana.mp3',
+        query: 'Monster Hunter World Iceborne Seliana Theme'
+    },
+    {
+        name: 'MHR_Kamura.mp3',
+        query: 'Monster Hunter Rise Kamura Village Theme'
+    },
+    {
+        name: 'MHRS_Elgado.mp3',
+        query: 'Monster Hunter Rise Sunbreak Elgado Outpost Theme'
+    },
+    {
+        name: 'MH_Quest_Clear_Kokoto.mp3',
+        query: 'Monster Hunter Kokoto Quest Clear Theme'
+    },
+    {
+        name: 'MH_Quest_Clear_Pokke.mp3',
+        query: 'Monster Hunter Portable 2nd Quest Clear Theme'
+    },
+    {
+        name: 'MH_Quest_Clear_Yukumo.mp3',
+        query: 'Monster Hunter Portable 3rd Quest Clear Theme'
+    },
+    {
+        name: 'MH_Quest_Clear_MH4.mp3',
+        query: 'Monster Hunter 4 Quest Clear Theme'
+    },
+    {
+        name: 'MHR_Quest_Clear_Kamura.mp3',
+        query: 'Monster Hunter Rise Quest Clear Theme'
+    },
+    {
+        name: 'MH_Quest_Fail_Classic.mp3',
+        query: 'Monster Hunter Portable 2nd Quest Failed Theme'
+    },
+    {
+        name: 'MHW_Quest_Fail.mp3',
+        query: 'Monster Hunter World Quest Failed Theme'
+    },
+    {
+        name: 'MHR_Quest_Fail.mp3',
+        query: 'Monster Hunter Rise Quest Failed Theme'
     }
 ];
 
