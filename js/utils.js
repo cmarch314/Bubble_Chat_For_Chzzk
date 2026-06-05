@@ -1,31 +1,51 @@
 // ==========================================
 // [Global Twemoji CDN Fix] MaxCDN is dead, route all twemoji requests to jsDelivr
 // ==========================================
-if (window.twemoji) {
-    const originalParse = twemoji.parse;
-    twemoji.parse = function(what, options) {
-        if (typeof options === 'function') {
-            const originalCallback = options;
-            options = {
-                base: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/',
-                folder: '72x72',
-                ext: '.png',
-                callback: originalCallback
-            };
-        } else {
-            options = options || {};
-            if (!options.base) {
-                options.base = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/';
+function setupTwemojiOverride() {
+    if (window.twemoji && !window.twemoji._isOverridden) {
+        const originalParse = twemoji.parse;
+        twemoji.parse = function(what, options) {
+            if (typeof options === 'function') {
+                const originalCallback = options;
+                options = {
+                    base: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/',
+                    folder: '72x72',
+                    ext: '.png',
+                    callback: originalCallback
+                };
+            } else {
+                options = options || {};
+                if (!options.base) {
+                    options.base = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/';
+                }
+                if (!options.folder && !options.size) {
+                    options.folder = '72x72';
+                }
+                if (!options.ext) {
+                    options.ext = '.png';
+                }
             }
-            if (!options.folder && !options.size) {
-                options.folder = '72x72';
-            }
-            if (!options.ext) {
-                options.ext = '.png';
-            }
+            return originalParse.call(twemoji, what, options);
+        };
+        window.twemoji._isOverridden = true;
+        return true;
+    }
+    return false;
+}
+
+// 1. 즉시 실행 시도
+if (!setupTwemojiOverride()) {
+    // 2. 실패 시 주기적 폴링 및 로드 이벤트 가드
+    const twemojiInterval = setInterval(() => {
+        if (setupTwemojiOverride()) {
+            clearInterval(twemojiInterval);
         }
-        return originalParse.call(twemoji, what, options);
-    };
+    }, 50);
+
+    window.addEventListener('load', () => {
+        setupTwemojiOverride();
+        clearInterval(twemojiInterval);
+    });
 }
 
 function renderMessageWithEmotesHTML(message, emotes, scale = 1) {

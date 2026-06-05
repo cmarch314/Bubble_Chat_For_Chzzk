@@ -241,7 +241,7 @@ class VisualDirector {
         if (window.twemoji) {
             twemoji.parse(el);
             // Ensure generated twemoji images have inline-block display and correct size
-            const images = el.querySelectorAll('img.emoji');
+            const images = el.querySelectorAll('img');
             images.forEach(img => {
                 img.style.width = '1em';
                 img.style.height = '1em';
