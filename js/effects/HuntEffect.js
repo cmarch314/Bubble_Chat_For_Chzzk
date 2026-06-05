@@ -17,20 +17,20 @@ class HuntEffect extends BaseEffect {
         this.battleBgmPromise = null;
 
         this.WEAPONS = [
-            { id: 'great_sword', name: '대검', filename: 'great_sword.svg' },
-            { id: 'long_sword', name: '태도', filename: 'long_sword.svg' },
-            { id: 'sword_shield', name: '한손검', filename: 'sword_shield.svg' },
-            { id: 'dual_blades', name: '쌍검', filename: 'dual_blades.svg' },
-            { id: 'hammer', name: '해머', filename: 'hammer.svg' },
-            { id: 'hunting_horn', name: '수렵피리', filename: 'hunting_horn.svg' },
-            { id: 'lance', name: '랜스', filename: 'lance.svg' },
-            { id: 'gunlance', name: '건랜스', filename: 'gunlance.svg' },
-            { id: 'switch_axe', name: '슬래시액스', filename: 'switch_axe.svg' },
-            { id: 'charge_blade', name: '차지액스', filename: 'charge_blade.svg' },
-            { id: 'insect_glaive', name: '조충곤', filename: 'insect_glaive.svg' },
-            { id: 'light_bowgun', name: '라이트보건', filename: 'light_bowgun.svg' },
-            { id: 'heavy_bowgun', name: '헤비보건', filename: 'heavy_bowgun.svg' },
-            { id: 'bow', name: '활', filename: 'bow.svg' }
+            { id: 'great_sword', name: '대검', filename: 'great_sword.svg', type: 'shield' },
+            { id: 'long_sword', name: '태도', filename: 'long_sword.svg', type: 'melee' },
+            { id: 'sword_shield', name: '한손검', filename: 'sword_shield.svg', type: 'shield' },
+            { id: 'dual_blades', name: '쌍검', filename: 'dual_blades.svg', type: 'melee' },
+            { id: 'hammer', name: '해머', filename: 'hammer.svg', type: 'melee' },
+            { id: 'hunting_horn', name: '수렵피리', filename: 'hunting_horn.svg', type: 'melee' },
+            { id: 'lance', name: '랜스', filename: 'lance.svg', type: 'shield' },
+            { id: 'gunlance', name: '건랜스', filename: 'gunlance.svg', type: 'shield' },
+            { id: 'switch_axe', name: '슬래시액스', filename: 'switch_axe.svg', type: 'melee' },
+            { id: 'charge_blade', name: '차지액스', filename: 'charge_blade.svg', type: 'shield' },
+            { id: 'insect_glaive', name: '조충곤', filename: 'insect_glaive.svg', type: 'melee' },
+            { id: 'light_bowgun', name: '라이트보건', filename: 'light_bowgun.svg', type: 'ranged' },
+            { id: 'heavy_bowgun', name: '헤비보건', filename: 'heavy_bowgun.svg', type: 'ranged' },
+            { id: 'bow', name: '활', filename: 'bow.svg', type: 'ranged' }
         ];
 
         this.fallbackMonsters = [
@@ -69,25 +69,26 @@ class HuntEffect extends BaseEffect {
         // Randomly select monster
         this.selectedMonster = monsters[Math.floor(Math.random() * monsters.length)];
         
-        // Randomly select 4 weapons
+        // Randomly select 4 weapons and initialize attributes
         const shuffledWeapons = [...this.WEAPONS].sort(() => Math.random() - 0.5);
         this.selectedWeapons = shuffledWeapons.slice(0, 4).map((w, index) => ({
             ...w,
             index,
             hp: 100,
             maxHp: 100,
-            status: 'alive' // 'alive', 'dead'
+            status: 'alive', // 'alive', 'dead', 'stunned'
+            sharpness: 100,  // only for melee/shield
+            ammo: 5,        // only for ranged
+            hasMoxie: true  // Moxie safety net (1 time per weapon)
         }));
 
         // Play Lobby BGM
         try {
-            // Check if MHW BGM exists, fallback to SportBGM
             this.lobbyBgm = new Audio('BGM/MHW_Lobby.mp3');
             this.lobbyBgm.loop = true;
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
             this.lobbyBgm.volume = volConfig.master * volConfig.visual * 0.45;
             this.lobbyBgmPromise = this.lobbyBgm.play().catch(() => {
-                // fallback BGM
                 this.lobbyBgm.src = 'BGM/SportBGM.mp3';
                 this.lobbyBgmPromise = this.lobbyBgm.play().catch(err => console.warn("Lobby BGM failed to play:", err));
             });
@@ -187,19 +188,52 @@ class HuntEffect extends BaseEffect {
         return false;
     }
 
+    // Helper to play custom asset sound, fallbacks to CMC commands if load fails
+    playMHAsset(fileName, fallbackKey) {
+        const sfxPath = `SFX/${fileName}`;
+        const audio = new Audio(sfxPath);
+        const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
+        audio.volume = volConfig.master * volConfig.sfx * 0.75;
+        
+        audio.play().catch(() => {
+            if (fallbackKey) {
+                this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()[fallbackKey] || fallbackKey);
+            }
+        });
+    }
+
+    // Match monster specific BGM or fallback to Proof of a Hero
+    getMonsterBgm(monsterName) {
+        const name = (monsterName || "").toLowerCase();
+        if (name.includes('진오우거') || name.includes('zinogre')) return 'BGM/MHW_Zinogre.mp3';
+        if (name.includes('벨카나') || name.includes('velkhana')) return 'BGM/MHW_Velkhana.mp3';
+        if (name.includes('네르기간테') || name.includes('nergigante')) return 'BGM/MHW_Nergigante.mp3';
+        if (name.includes('이블조') || name.includes('deviljho')) return 'BGM/MHW_Deviljho.mp3';
+        if (name.includes('티가렉스') || name.includes('tigrex')) return 'BGM/MHW_Tigrex.mp3';
+        if (name.includes('나르가') || name.includes('nargacuga')) return 'BGM/MHW_Nargacuga.mp3';
+        if (name.includes('디노발드') || name.includes('glavenus')) return 'BGM/MHW_Glavenus.mp3';
+        if (name.includes('브라키') || name.includes('brachydios')) return 'BGM/MHW_Brachydios.mp3';
+        return 'BGM/MHW_Proof_of_a_Hero.mp3';
+    }
+
     startFight(container) {
         this.phase = 'fighting';
         this.stopBgms();
 
+        const bgmSrc = this.getMonsterBgm(this.selectedMonster.nameKO);
+
         // Play Battle BGM
         try {
-            this.battleBgm = new Audio('BGM/MHW_Proof_of_a_Hero.mp3');
+            this.battleBgm = new Audio(bgmSrc);
             this.battleBgm.loop = true;
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
             this.battleBgm.volume = volConfig.master * volConfig.visual * 0.45;
             this.battleBgmPromise = this.battleBgm.play().catch(() => {
-                this.battleBgm.src = 'BGM/William Tell.mp3';
-                this.battleBgmPromise = this.battleBgm.play().catch(err => console.warn("Battle BGM failed to play:", err));
+                this.battleBgm.src = 'BGM/MHW_Proof_of_a_Hero.mp3';
+                this.battleBgmPromise = this.battleBgm.play().catch(err => {
+                    this.battleBgm.src = 'BGM/William Tell.mp3';
+                    this.battleBgmPromise = this.battleBgm.play().catch(e => console.warn("Battle BGM failed:", e));
+                });
             });
         } catch (e) {
             console.warn("Audio error:", e);
@@ -246,9 +280,10 @@ class HuntEffect extends BaseEffect {
             line.style.color = color;
             line.textContent = text;
             logPanel.appendChild(line);
-            if (logPanel.children.length > 4) {
+            if (logPanel.children.length > 5) {
                 logPanel.removeChild(logPanel.firstChild);
             }
+            logPanel.scrollTop = logPanel.scrollHeight;
         };
 
         // Shake monster showcase on hit
@@ -261,11 +296,11 @@ class HuntEffect extends BaseEffect {
         };
 
         // Weapon hit animation
-        const shakeWeapon = (idx) => {
+        const shakeWeapon = (idx, color = '#ff3b30') => {
             const weaponCard = card.querySelector(`#fight-card-${idx}`);
             if (weaponCard) {
                 weaponCard.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px) scale(0.95)`;
-                weaponCard.style.borderColor = '#ff3b30';
+                weaponCard.style.borderColor = color;
                 setTimeout(() => {
                     weaponCard.style.transform = '';
                     weaponCard.style.borderColor = '';
@@ -273,7 +308,6 @@ class HuntEffect extends BaseEffect {
             }
         };
 
-        // Action simulation tick
         const monsterAttacks = [
             "포효를 내지르며 덮쳤습니다", "꼬리 휘두르기를 시전했습니다", "돌진 공격을 가했습니다", 
             "브레스를 뿜어 휩쓸었습니다", "공중에서 강습 타격을 날렸습니다", "강력한 몸통 박치기를 시전했습니다"
@@ -281,16 +315,14 @@ class HuntEffect extends BaseEffect {
         const weaponHeals = [
             "비약을 마셨습니다", "그레이트 회복약을 꿀꺽 마셨습니다", "생명의 가루를 뿌려 회복했습니다"
         ];
-        const statusAilments = [
-            "포효에 기절했습니다", "독 기운에 취해 비틀거립니다", "빙결 상태가 되어 속도가 느려집니다"
-        ];
 
         this.climaxPhaseStarted = false;
+        let isFirstTick = true;
 
         this.fightInterval = setInterval(() => {
-            if (this.climaxPhaseStarted) return; // Climax timer handles the climax
+            if (this.climaxPhaseStarted) return; 
 
-            const aliveWeapons = this.selectedWeapons.filter(w => w.status === 'alive');
+            const aliveWeapons = this.selectedWeapons.filter(w => w.status !== 'dead');
             if (aliveWeapons.length === 0) {
                 this.endGame(container, false);
                 return;
@@ -303,51 +335,177 @@ class HuntEffect extends BaseEffect {
                 return;
             }
 
-            // Simulation event probability
+            // 1. Initial Monster Roar or random mid-battle Roar
+            const isRoarTick = isFirstTick || (Math.random() < 0.08);
+            if (isRoarTick) {
+                isFirstTick = false;
+                addLog(`📢 [포효] ${this.selectedMonster.nameKO}이(가) 강력한 포효를 내지릅니다! 모든 무기가 1틱간 기절합니다!`, '#ffaa00');
+                this.playMHAsset('mh_roar.ogg', '쇼크');
+                shakeMonster();
+                
+                aliveWeapons.forEach(w => {
+                    w.status = 'stunned';
+                    const tag = card.querySelector(`#status-tag-${w.index}`);
+                    if (tag) {
+                        tag.textContent = '기절 상태';
+                        tag.className = 'game-hunt-status-tag';
+                        tag.style.background = '#e58e26';
+                    }
+                    shakeWeapon(w.index, '#e58e26');
+                });
+                return;
+            }
+
+            // 2. Select active weapon to take action
             const target = aliveWeapons[Math.floor(Math.random() * aliveWeapons.length)];
+
+            // Handle stunned recovery
+            if (target.status === 'stunned') {
+                target.status = 'alive';
+                const tag = card.querySelector(`#status-tag-${target.index}`);
+                if (tag) {
+                    tag.textContent = '전투 중';
+                    tag.className = 'game-hunt-status-tag active';
+                    tag.style.background = '';
+                }
+                addLog(`🌀 ${target.name}이(가) 기절에서 깨어났습니다!`, '#eee');
+                return;
+            }
+
             const eventType = Math.random();
 
-            if (eventType < 0.55) {
-                // Monster Attacks
-                const damage = 18 + Math.floor(Math.random() * 20);
-                target.hp = Math.max(0, target.hp - damage);
+            if (eventType < 0.50) {
+                // Monster Attacks active weapon
+                let damage = 10 + Math.floor(Math.random() * 13); // lower basic damage
                 
-                const attackDesc = monsterAttacks[Math.floor(Math.random() * monsterAttacks.length)];
-                addLog(`💥 [피해] ${this.selectedMonster.nameKO}이(가) ${target.name}에게 ${attackDesc}! (-${damage} HP)`, '#ff5555');
-                
-                this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['꺄악'] || '꺄악');
-                shakeMonster();
-                shakeWeapon(target.index);
+                // Defensive mechanics
+                const defendRoll = Math.random();
+                let defendText = "";
+                let isDodge = false;
+                let isGuard = false;
+
+                if (target.type === 'shield' && defendRoll < 0.40) {
+                    // Guard triggered
+                    damage = Math.max(1, Math.floor(damage * 0.20));
+                    isGuard = true;
+                    defendText = `🛡️ [방패 가드] ${target.name}이(가) 공격을 막아 피해를 대폭 줄였습니다!`;
+                } else if (target.type !== 'shield' && defendRoll < 0.30) {
+                    // Dodge triggered
+                    damage = 0;
+                    isDodge = true;
+                    defendText = `💨 [구르기 회피] ${target.name}이(가) 구르기로 몬스터의 공격을 완벽히 피했습니다!`;
+                }
+
+                if (damage > 0) {
+                    // Critical hit moxie check
+                    if (target.hp - damage <= 0 && target.hasMoxie && Math.random() < 0.70) { // 70% probability if has moxie
+                        target.hp = 1;
+                        target.hasMoxie = false;
+                        
+                        addLog(`🔥 [근성 발휘!] ${target.name}이(가) 치명타를 입고 근성으로 버텨냈습니다! (1 HP!)`, '#ffaa00');
+                        this.playMHAsset('mh_guard.ogg', '보이스콜'); // fallback sound
+                        shakeWeapon(target.index, '#00ffa3');
+                    } else {
+                        target.hp = Math.max(0, target.hp - damage);
+                        const attackDesc = monsterAttacks[Math.floor(Math.random() * monsterAttacks.length)];
+                        
+                        if (isGuard) {
+                            addLog(`${defendText} (-${damage} HP)`, '#00ffff');
+                            this.playMHAsset('mh_guard.ogg', '팅!1');
+                            shakeWeapon(target.index, '#00ffff');
+                        } else {
+                            addLog(`💥 [피해] ${this.selectedMonster.nameKO}이(가) ${target.name}에게 ${attackDesc}! (-${damage} HP)`, '#ff5555');
+                            this.playMHAsset('mh_hit.ogg', '꺄악'); // fallback scream
+                            shakeMonster();
+                            shakeWeapon(target.index);
+                        }
+                    }
+                } else {
+                    // Dodged completely
+                    addLog(defendText, '#2eff7b');
+                    this.playMHAsset('mh_dodge.ogg', '윽!');
+                    shakeWeapon(target.index, '#2eff7b');
+                }
+
+                // Consume sharpness or ammo on monster attack interaction
+                if (damage > 0 && !isDodge) {
+                    if (target.type === 'ranged') {
+                        target.ammo = Math.max(0, target.ammo - 1);
+                    } else {
+                        target.sharpness = Math.max(0, target.sharpness - 10);
+                    }
+                }
+
                 this.updateHpUI(card, target);
 
                 if (target.hp <= 0) {
                     target.status = 'dead';
                     this.triggerCartAnimation(target);
-                    addLog(`🚨 [수레] ${target.name}의 체력이 다해 수레에 실려갑니다!`, '#ff0055');
-                    this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['안돼'] || '안돼');
+                    addLog(`🚨 [수레행] ${target.name}의 체력이 다해 수레에 실려갑니다!`, '#ff0055');
+                    this.playMHAsset('mh_cart.ogg', '안돼');
                 }
             } else if (eventType < 0.82) {
-                // Weapon Heals (only if damaged)
+                // Weapon Action: Heals or Reloads/Sharpens
+                
+                // Ranged Reload condition
+                if (target.type === 'ranged' && target.ammo <= 0) {
+                    target.ammo = 5;
+                    addLog(`🔄 [재장전] ${target.name}이(가) 탄환을 장전합니다!`, '#00a8ff');
+                    this.playMHAsset('mh_reload.ogg', '수류탄'); // reload sound
+                    shakeWeapon(target.index, '#00a8ff');
+                    return;
+                }
+
+                // Melee Sharpen condition
+                if (target.type !== 'ranged' && target.sharpness <= 30) {
+                    target.sharpness = 100;
+                    addLog(`✨ [숫돌질] ${target.name}이(가) 숫돌로 무기를 갈아 예리도를 복구합니다!`, '#ffaa00');
+                    this.playMHAsset('mh_sharpen.ogg', '예쁜칼');
+                    shakeWeapon(target.index, '#ffaa00');
+                    return;
+                }
+
+                // Normal Heal (if damaged)
                 if (target.hp < target.maxHp) {
-                    const heal = 15 + Math.floor(Math.random() * 15);
+                    const heal = 20 + Math.floor(Math.random() * 16); // higher heal amount
                     target.hp = Math.min(target.maxHp, target.hp + heal);
                     const healDesc = weaponHeals[Math.floor(Math.random() * weaponHeals.length)];
                     addLog(`💚 [회복] ${target.name}이(가) ${healDesc}! (+${heal} HP)`, '#2eff7b');
                     
-                    this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['대박'] || '대박');
+                    this.playMHAsset('mh_potion.ogg', '대박');
                     this.updateHpUI(card, target);
                 } else {
                     // Counterattack
-                    addLog(`⚔️ [반격] ${target.name}이(가) 몬스터의 약점을 노려 강력한 반격을 가했습니다!`, '#ffaa00');
+                    let dmgFactor = 1.0;
+                    if (target.type !== 'ranged' && target.sharpness <= 30) {
+                        dmgFactor = 0.5; // low sharpness debuff
+                    }
+
+                    if (dmgFactor === 0.5) {
+                        addLog(`⚔️ [반격] ${target.name}이(가) 무딘 칼날로 몬스터를 베었으나 예리도가 낮아 데미지가 반감되었습니다!`, '#e58e26');
+                    } else {
+                        addLog(`⚔️ [반격] ${target.name}이(가) 몬스터의 약점을 공격해 큰 피해를 가했습니다!`, '#ffaa00');
+                    }
+                    
                     this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['발차기'] || '발차기');
                     shakeMonster();
+
+                    // Consume sharpness/ammo on attack
+                    if (target.type === 'ranged') {
+                        target.ammo = Math.max(0, target.ammo - 1);
+                    } else {
+                        target.sharpness = Math.max(0, target.sharpness - 10);
+                    }
                 }
             } else {
-                // Status Ailment
-                const ailmentDesc = statusAilments[Math.floor(Math.random() * statusAilments.length)];
-                addLog(`🌀 [상태이상] ${target.name}이(가) ${ailmentDesc}!`, '#e58e26');
-                this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['쇼크'] || '쇼크');
-                shakeWeapon(target.index);
+                // Buff / Battle Event
+                if (target.type === 'ranged') {
+                    addLog(`🎯 [집중] ${target.name}이(가) 조준을 정렬하며 다음 타격을 대기합니다.`, '#00ffaa');
+                } else {
+                    addLog(`🛡️ [클러치 클로] ${target.name}이(가) 몬스터에게 클러치 클로를 탑승해 상처를 냅니다!`, '#e58e26');
+                }
+                this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['쏠수있어'] || '쏠수있어');
+                shakeMonster();
             }
 
         }, 1000);
@@ -390,18 +548,52 @@ class HuntEffect extends BaseEffect {
 
             timerLabel.textContent = `🔥 최후의 결전! ${this.climaxTimeLeft}초 버티기!`;
 
-            // Climax damage tick
-            const dmg = 8 + Math.floor(Math.random() * 12);
-            survivor.hp = Math.max(0, survivor.hp - dmg);
-            
-            addLog(`💥 [폭주 공격] ${this.selectedMonster.nameKO}의 난동! ${survivor.name}이(가) 버티며 피해를 입습니다! (-${dmg} HP)`, '#ff3b30');
-            this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['꺄악'] || '꺄악');
-            
+            // Climax tick defensive roll
+            let dmg = 6 + Math.floor(Math.random() * 8); // lower climax damage
+            const defendRoll = Math.random();
+            let isGuard = false;
+            let isDodge = false;
+
+            if (survivor.type === 'shield' && defendRoll < 0.40) {
+                dmg = Math.max(1, Math.floor(dmg * 0.20));
+                isGuard = true;
+            } else if (survivor.type !== 'shield' && defendRoll < 0.30) {
+                dmg = 0;
+                isDodge = true;
+            }
+
+            if (dmg > 0) {
+                // Moxie check in climax
+                if (survivor.hp - dmg <= 0 && survivor.hasMoxie) {
+                    survivor.hp = 1;
+                    survivor.hasMoxie = false;
+                    addLog(`🔥 [근성 발휘!] ${survivor.name}이(가) 폭주 데미지를 입었으나 근성으로 생존했습니다!`, '#ffaa00');
+                    this.playMHAsset('mh_guard.ogg', '보이스콜');
+                    shakeWeapon(survivor.index, '#00ffa3');
+                } else {
+                    survivor.hp = Math.max(0, survivor.hp - dmg);
+                    if (isGuard) {
+                        addLog(`🛡️ [방패 가드] ${survivor.name}이(가) 폭주 공격을 가드합니다! (-${dmg} HP)`, '#00ffff');
+                        this.playMHAsset('mh_guard.ogg', '팅!1');
+                        shakeWeapon(survivor.index, '#00ffff');
+                    } else {
+                        addLog(`💥 [폭주 공격] ${this.selectedMonster.nameKO}의 대폭주! ${survivor.name}이(가) 큰 피해를 받습니다! (-${dmg} HP)`, '#ff3b30');
+                        this.playMHAsset('mh_hit.ogg', '꺄악');
+                        shakeMonster();
+                        shakeWeapon(survivor.index);
+                    }
+                }
+            } else {
+                addLog(`💨 [구르기 회피] ${survivor.name}이(가) 폭주 타격을 회피했습니다!`, '#2eff7b');
+                this.playMHAsset('mh_dodge.ogg', '윽!');
+                shakeWeapon(survivor.index, '#2eff7b');
+            }
+
             this.updateHpUI(card, survivor);
             this.shakeClimaxMonster(card);
             
             const weaponCard = card.querySelector(`#fight-card-${survivor.index}`);
-            if (weaponCard) {
+            if (weaponCard && survivor.hp > 0) {
                 weaponCard.style.transform = `scale(1.05) translate(${(Math.random() - 0.5) * 20}px, ${(Math.random() - 0.5) * 20}px)`;
                 setTimeout(() => weaponCard.style.transform = 'scale(1.05)', 100);
             }
@@ -409,8 +601,8 @@ class HuntEffect extends BaseEffect {
             if (survivor.hp <= 0) {
                 survivor.status = 'dead';
                 this.triggerCartAnimation(survivor);
-                addLog(`🚨 [수레] ${survivor.name}이(가) 끝내 쓰러졌습니다!`, '#ff0055');
-                this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['안돼'] || '안돼');
+                addLog(`🚨 [수레행] ${survivor.name}이(가) 끝까지 버티지 못하고 쓰러졌습니다!`, '#ff0055');
+                this.playMHAsset('mh_cart.ogg', '안돼');
             }
 
         }, 1000);
@@ -437,6 +629,7 @@ class HuntEffect extends BaseEffect {
             if (tag) {
                 tag.textContent = '수레행';
                 tag.className = 'game-hunt-status-tag fainted';
+                tag.style.background = '#ff0055';
             }
             if (wcard) {
                 wcard.classList.add('dead');
