@@ -511,7 +511,7 @@ class HuntEffect extends BaseEffect {
                             w.ammo = 5;
                             w.atb = 0;
                             w.comboIndex = 0;
-                            this.playMHAsset('mh_aibo.mp3', '보이스콜'); // play "Aibo!" SFX
+                            this.playMHAsset('mh_aibo.mp3', '아이보'); // play "Aibo!" SFX
                             addLog(`✨ [부활] ${w.name}이(가) "아이보!" 소리와 함께 전장에 재참여하였습니다!`, '#00ffa3');
                             this.updateHpUI(card, w);
                             shakeWeapon(w.index, '#00ffa3');
@@ -552,7 +552,7 @@ class HuntEffect extends BaseEffect {
                         if (monsterImg) {
                             monsterImg.classList.add('enraged');
                         }
-                        this.playMHAsset('mh_roar.mp3', '공습경보');
+                        this.playMHAsset('mh_roar.mp3', '몬소리');
                         addLog(`🔥 [분노] ${this.selectedMonster.nameKO}이(가) 노성을 지르며 격노합니다! (공격력 1.5배, 속도 1.5배)`, '#ff3b30');
                         shakeMonster();
                     } else if (this.monsterState === 'exhausted') {
@@ -570,7 +570,7 @@ class HuntEffect extends BaseEffect {
                         if (monsterImg) {
                             monsterImg.classList.remove('enraged');
                         }
-                        this.playMHAsset('mh_cart.mp3', '운동많'); // soft tired sound fallback
+                        this.playMHAsset('mh_cart.mp3', '아이고~'); // soft tired sound fallback
                         addLog(`🤤 [탈진] ${this.selectedMonster.nameKO}이(가) 스태미나 고갈로 비틀거립니다! (속도 0.5배, 공격력 0.5배)`, '#00a8ff');
                         shakeMonster();
                     } else {
@@ -752,7 +752,7 @@ class HuntEffect extends BaseEffect {
                                 target.hp = 1;
                                 target.hasMoxie = false;
                                 addLog(`🔥 [근성 발휘!] ${target.name}이(가) ${this.selectedMonster.nameKO}의 치명타를 입고 근성으로 1 HP 생존했습니다!`, '#ffaa00');
-                                this.playMHAsset('mh_guard.mp3', '보이스콜');
+                                this.playMHAsset('mh_guard.mp3', '오살았어');
                                 shakeWeapon(target.index, '#00ffa3');
                             } else {
                                 target.hp = Math.max(0, target.hp - damage);
@@ -846,7 +846,7 @@ class HuntEffect extends BaseEffect {
                         const members = this.selectedWeapons.filter(member => member.status === 'alive');
                         members.forEach(m => m.hp = Math.min(m.maxHp, m.hp + 30));
                         addLog(`💚 [치유의 가루] ${w.name}이(가) 생명의 가루를 흩뿌려 파티원 전원의 체력을 회복합니다! (+30 HP)`, '#2eff7b');
-                        this.playMHAsset('mh_dust.mp3', '대박');
+                        this.playMHAsset('mh_dust.mp3', '짜잔');
                         this.selectedWeapons.forEach(m => this.updateHpUI(card, m));
                         shakeWeapon(w.index, '#2eff7b');
                         continue;
@@ -857,7 +857,7 @@ class HuntEffect extends BaseEffect {
                         const heal = 25 + Math.floor(Math.random() * 16); // 25~40
                         w.hp = Math.min(w.maxHp, w.hp + heal);
                         addLog(`💚 [회복] ${w.name}이(가) 비약을 복용하여 상처를 치유합니다! (+${heal} HP)`, '#2eff7b');
-                        this.playMHAsset('mh_potion.mp3', '대박');
+                        this.playMHAsset('mh_potion.mp3', '꿀꺽');
                         this.updateHpUI(card, w);
                         shakeWeapon(w.index, '#2eff7b');
                         continue;
@@ -867,7 +867,7 @@ class HuntEffect extends BaseEffect {
                     if (w.type === 'ranged' && w.ammo <= 0) {
                         w.ammo = 5;
                         addLog(`🔄 [재장전] ${w.name}이(가) 탄창을 갈고 재장전을 실행합니다.`, '#00a8ff');
-                        this.playMHAsset('mh_reload.mp3', '수류탄');
+                        this.playMHAsset('mh_reload.mp3', '팅!');
                         shakeWeapon(w.index, '#00a8ff');
                         continue;
                     }
@@ -940,7 +940,7 @@ class HuntEffect extends BaseEffect {
                                     monsterImg.classList.add('stunned_monster');
                                 }
 
-                                this.playMHAsset('mh_stun.mp3', '보이스콜');
+                                this.playMHAsset('mh_stun.mp3', '격추');
                                 addLog(`💫 [기절] ${this.selectedMonster.nameKO}이(가) ${w.name}의 강한 타격을 머리에 입고 기절했습니다! (6초간 무력화)`, '#e58e26');
                             } else {
                                 addLog(`💫 [기절 누적] ${w.name}의 타격으로 몬스터 기절 수치 누적! (${this.monsterStunAccum} / ${this.monsterStunThreshold})`, '#aaaaaa');
