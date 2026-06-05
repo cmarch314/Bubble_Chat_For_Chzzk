@@ -8,11 +8,12 @@ class ChzzkGateway {
         this.onMessage = legacyMessageHandler;
         this.ws = null;
         this.proxies = [
-            "https://api.allorigins.win/get?url=",
-            "https://api.cors.lol/?url=",
-            "https://thingproxy.freeboard.io/fetch/",
-            "https://corsproxy.io/?",
-            "https://api.codetabs.com/v1/proxy?quest="
+            { prefix: "https://api.allorigins.win/get?url=", encode: true },
+            { prefix: "https://api.cors.lol/?url=", encode: true },
+            { prefix: "https://proxy.corsfix.com/", encode: false },
+            { prefix: "https://thingproxy.freeboard.io/fetch/", encode: false },
+            { prefix: "https://corsproxy.io/?", encode: true },
+            { prefix: "https://api.codetabs.com/v1/proxy?quest=", encode: true }
         ];
         this.attemptCount = 1;
     }
@@ -202,10 +203,14 @@ class ChzzkGateway {
     }
 
     async _fetchWithProxy(url) {
-        // AllOrigins and CORS.lol run in parallel (fast proxies)
+        // Prepare target URL once to share across all requests
+        const targetUrl = this._prepareUrl(url);
+
+        // Fast proxies run in parallel (including the new Corsfix proxy)
         const fastProxies = [
-            this._fetchAllOrigins(url),
-            this._fetchStandardProxy("https://api.cors.lol/?url=", url)
+            this._fetchAllOrigins(targetUrl),
+            this._fetchStandardProxy("https://api.cors.lol/?url=", targetUrl, true),
+            this._fetchStandardProxy("https://proxy.corsfix.com/", targetUrl, false)
         ];
 
         try {
@@ -213,22 +218,21 @@ class ChzzkGateway {
         } catch (aggregateError) {
             // Fallbacks run sequentially
             const fallbackProxies = [
-                "https://thingproxy.freeboard.io/fetch/",
-                "https://corsproxy.io/?",
-                "https://api.codetabs.com/v1/proxy?quest="
+                { prefix: "https://thingproxy.freeboard.io/fetch/", encode: false },
+                { prefix: "https://corsproxy.io/?", encode: true },
+                { prefix: "https://api.codetabs.com/v1/proxy?quest=", encode: true }
             ];
 
             for (let proxy of fallbackProxies) {
                 try {
-                    return await this._fetchStandardProxy(proxy, url);
+                    return await this._fetchStandardProxy(proxy.prefix, targetUrl, proxy.encode);
                 } catch (e) {
-                    this.config.log(`Fallback proxy ${proxy} failed: ${e.message}`);
+                    this.config.log(`Fallback proxy ${proxy.prefix} failed: ${e.message}`);
                 }
             }
 
             // Last resort: direct fetch (in case CORS restrictions are relaxed or running locally/extension)
             try {
-                const targetUrl = this._prepareUrl(url);
                 const res = await fetch(targetUrl);
                 if (res.ok) {
                     const data = await res.json();
@@ -242,8 +246,8 @@ class ChzzkGateway {
         }
     }
 
-    async _fetchAllOrigins(url) {
-        const targetUrl = this._prepareUrl(url);
+    async _fetchAllOrigins(targetUrl) {
+        // targetUrl has already been prepared with timestamp cache-buster
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
         const res = await fetch(proxyUrl);
         if (!res.ok) throw new Error("AllOrigins HTTP Error");
@@ -256,9 +260,9 @@ class ChzzkGateway {
         return data;
     }
 
-    async _fetchStandardProxy(proxyPrefix, url) {
-        const targetUrl = this._prepareUrl(url);
-        const fullUrl = proxyPrefix + encodeURIComponent(targetUrl);
+    async _fetchStandardProxy(proxyPrefix, targetUrl, encode = true) {
+        // targetUrl has already been prepared with timestamp cache-buster
+        const fullUrl = proxyPrefix + (encode ? encodeURIComponent(targetUrl) : targetUrl);
         const res = await fetch(fullUrl);
         if (!res.ok) throw new Error(`Proxy HTTP Error: ${res.status}`);
         const data = await res.json();
