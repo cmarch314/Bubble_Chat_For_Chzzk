@@ -48,6 +48,44 @@ if (!setupTwemojiOverride()) {
     });
 }
 
+const WEAPON_MAP = {
+    '대검': 'great_sword.svg',
+    '태도': 'long_sword.svg',
+    '한손검': 'sword_shield.svg',
+    '쌍검': 'dual_blades.svg',
+    '해머': 'hammer.svg',
+    '수렵피리': 'hunting_horn.svg',
+    '피리': 'hunting_horn.svg',
+    '랜스': 'lance.svg',
+    '건랜스': 'gunlance.svg',
+    '슬래시액스': 'switch_axe.svg',
+    '슬액': 'switch_axe.svg',
+    '차지액스': 'charge_blade.svg',
+    '차액': 'charge_blade.svg',
+    '조충곤': 'insect_glaive.svg',
+    '라이트보건': 'light_bowgun.svg',
+    '라보': 'light_bowgun.svg',
+    '헤비보건': 'heavy_bowgun.svg',
+    '헤보': 'heavy_bowgun.svg',
+    '활': 'bow.svg'
+};
+const WEAPON_KEYWORDS = Object.keys(WEAPON_MAP).sort((a, b) => b.length - a.length);
+const WEAPON_REGEX = new RegExp(`(${WEAPON_KEYWORDS.join('|')})`, 'g');
+
+function replaceWeaponNamesWithIcons(message) {
+    if (!message) return message;
+    const parts = message.split(/(<[^>]+>)/g);
+    for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+            parts[i] = parts[i].replace(WEAPON_REGEX, (match) => {
+                const filename = WEAPON_MAP[match];
+                return `<img src="./img/weapons/${filename}" class="weapon-icon" alt="${match}" />`;
+            });
+        }
+    }
+    return parts.join('');
+}
+
 function renderMessageWithEmotesHTML(message, emotes, scale = 1) {
     // Legacy helper for VisualDirector
     let content = message;
@@ -67,6 +105,7 @@ function renderMessageWithEmotesHTML(message, emotes, scale = 1) {
         });
     }
 
+    let result = content;
     if (window.twemoji) {
         const temp = document.createElement('div');
         temp.innerHTML = content;
@@ -78,9 +117,11 @@ function renderMessageWithEmotesHTML(message, emotes, scale = 1) {
             img.style.verticalAlign = 'middle';
             img.style.display = 'inline-block';
         });
-        return temp.innerHTML;
+        result = temp.innerHTML;
     }
-    return content;
+    
+    // Apply weapon icon replacements
+    return replaceWeaponNamesWithIcons(result);
 }
 
 // [Utility] Plette Stackable Color Blending
