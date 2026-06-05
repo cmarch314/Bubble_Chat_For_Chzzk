@@ -470,7 +470,8 @@ class RacingEffect extends BaseEffect {
             stunTicks: 0, shieldTicks: 0,
             scale: 1, rotate: 0,
             statusText: '', statusTimer: 0,
-            hasItem1: false, hasItem2: false
+            hasItem1: false, hasItem2: false,
+            eventCooldownTicks: 0
         }));
 
         // Create Betting UI Card (Center of screen)
@@ -944,20 +945,28 @@ class RacingEffect extends BaseEffect {
                     }
                 }
 
+                // Decrement event cooldown ticks
+                if (r.eventCooldownTicks > 0) {
+                    r.eventCooldownTicks--;
+                }
+
                 // Item check 1 (At 35% distance)
-                if (r.pos >= 35 && !r.hasItem1) {
+                if (r.pos >= 35 && !r.hasItem1 && (!r.eventCooldownTicks || r.eventCooldownTicks === 0)) {
                     r.hasItem1 = true;
+                    r.eventCooldownTicks = 50; // 3 seconds cooldown
                     this.triggerItemEvent(r, updateCommentary);
                 }
 
                 // Item check 2 (At 70% distance)
-                if (r.pos >= 70 && !r.hasItem2) {
+                if (r.pos >= 70 && !r.hasItem2 && (!r.eventCooldownTicks || r.eventCooldownTicks === 0)) {
                     r.hasItem2 = true;
+                    r.eventCooldownTicks = 50; // 3 seconds cooldown
                     this.triggerItemEvent(r, updateCommentary);
                 }
 
                 // Random event trigger: 0.8% chance per tick (21 rich random events!)
-                if (r.stunTicks === 0 && r.pos > 5 && r.pos < 90 && Math.random() < 0.008) {
+                if (r.stunTicks === 0 && r.pos > 5 && r.pos < 90 && (!r.eventCooldownTicks || r.eventCooldownTicks === 0) && Math.random() < 0.008) {
+                    r.eventCooldownTicks = 50; // 3 seconds cooldown
                     const eventRoll = Math.random();
                     if (eventRoll < 0.05 && r.shieldTicks === 0) {
                         // 1. Slipped on banana!
@@ -1123,9 +1132,11 @@ class RacingEffect extends BaseEffect {
                 }
 
                 // Interaction check: tackle/push a nearby opponent (0.25% chance per tick)
-                if (r.stunTicks === 0 && r.pos > 10 && r.pos < 85 && Math.random() < 0.0025) {
-                    const target = this.racers.find(o => o.id !== r.id && Math.abs(o.pos - r.pos) < 6 && o.stunTicks === 0);
+                if (r.stunTicks === 0 && r.pos > 10 && r.pos < 85 && (!r.eventCooldownTicks || r.eventCooldownTicks === 0) && Math.random() < 0.0025) {
+                    const target = this.racers.find(o => o.id !== r.id && Math.abs(o.pos - r.pos) < 6 && o.stunTicks === 0 && (!o.eventCooldownTicks || o.eventCooldownTicks === 0));
                     if (target) {
+                        r.eventCooldownTicks = 50; // Set cooldown for attacker
+                        target.eventCooldownTicks = 50; // Set cooldown for target
                         if (target.shieldTicks > 0) {
                             target.statusText = '🛡️ 공격 방어!';
                             target.statusTimer = 15;
@@ -1135,7 +1146,7 @@ class RacingEffect extends BaseEffect {
                             r.boost += 4.0;
                             r.statusText = '💢 몸싸움 승리!';
                             r.statusTimer = 15;
- 
+  
                             target.pos = Math.max(0, target.pos - 5);
                             target.stunTicks = 10;
                             target.rotate = 15;
@@ -1193,14 +1204,20 @@ class RacingEffect extends BaseEffect {
                 }
 
                 const boostDecay = r.boost * 0.15;
-                const currentMove = (baseSpeed + boostDecay) * rubberBandFactor;
+                let currentMove = (baseSpeed + boostDecay) * rubberBandFactor;
                 r.boost = Math.max(0, r.boost - boostDecay); // consume boost
+
+                // BGM 재생 진행도가 90% 미만인데 말이 결승선 근처(92% 이상)에 진입했다면,
+                // 완전히 멈추지 않고 아주 미세하게 전진(꼬물거림) 하도록 속도를 0.015 ~ 0.035 범위로 극소화
+                if (targetPosRatio < 0.90 && r.pos >= 92) {
+                    currentMove = 0.015 + Math.random() * 0.02;
+                }
 
                 r.pos += currentMove;
 
-                // [하드 캡] BGM 재생 진행도가 90% 미만일 때 말이 결승선(100)을 조기 완주하지 않도록 최대 위치를 93%로 제한
+                // BGM 진행도가 90% 미만일 때는 어떠한 경우에도 골인하지 않도록 96.5%에서 이동을 제한하며 꼬물거리게 처리
                 if (targetPosRatio < 0.90) {
-                    r.pos = Math.min(93, r.pos);
+                    r.pos = Math.min(96.5, r.pos);
                 }
 
                 const visualLeft = Math.min(finishX, 80 + (r.pos / 100) * (finishX - 80));
@@ -1310,7 +1327,8 @@ class RacingEffect extends BaseEffect {
         if (itemRoll < 0.10) {
             // 🚀 Guided missile
             const leader = [...this.racers].sort((a, b) => b.pos - a.pos)[0];
-            if (leader && leader.id !== r.id) {
+            if (leader && leader.id !== r.id && (!leader.eventCooldownTicks || leader.eventCooldownTicks === 0)) {
+                leader.eventCooldownTicks = 50;
                 if (leader.shieldTicks > 0) {
                     leader.statusText = '🛡️ 방어 성공!';
                     leader.statusTimer = 15;
@@ -1335,9 +1353,10 @@ class RacingEffect extends BaseEffect {
         } else if (itemRoll < 0.20) {
             // 🧲 Magnet
             const leader = [...this.racers].sort((a, b) => b.pos - a.pos)[0];
-            if (leader && leader.id !== r.id) {
+            if (leader && leader.id !== r.id && (!leader.eventCooldownTicks || leader.eventCooldownTicks === 0)) {
                 const stealAmount = 6;
                 leader.pos = Math.max(0, leader.pos - stealAmount);
+                leader.eventCooldownTicks = 50;
                 r.pos += stealAmount;
                 r.statusText = '🧲 속도 흡수!';
                 r.statusTimer = 15;
@@ -1369,7 +1388,8 @@ class RacingEffect extends BaseEffect {
             const sorted = [...this.racers].sort((a, b) => b.pos - a.pos);
             const myIndex = sorted.findIndex(o => o.id === r.id);
             const behind = sorted[myIndex + 1];
-            if (behind) {
+            if (behind && (!behind.eventCooldownTicks || behind.eventCooldownTicks === 0)) {
+                behind.eventCooldownTicks = 50;
                 if (behind.shieldTicks > 0) {
                     behind.statusText = '🛡️ 방어 성공!';
                     behind.statusTimer = 15;
@@ -1392,11 +1412,12 @@ class RacingEffect extends BaseEffect {
             }
         } else if (itemRoll < 0.60) {
             // ❄️ Ice Beam (Freezes a random opponent)
-            const target = this.racers.find(o => o.id !== r.id && o.stunTicks === 0);
+            const target = this.racers.find(o => o.id !== r.id && o.stunTicks === 0 && (!o.eventCooldownTicks || o.eventCooldownTicks === 0));
             if (target) {
                 target.stunTicks = 30;
                 target.statusText = '❄️ 꽁꽁 빙결!';
                 target.statusTimer = 30;
+                target.eventCooldownTicks = 50;
                 this.playRaceSound('freeze');
                 updateCommentary(`🎤 [중계진] 아이스 빔! ${r.name} 선수가 냉동 광선을 쏘아 ${target.name} 선수를 얼려버립니다!`);
             } else {
@@ -1425,10 +1446,11 @@ class RacingEffect extends BaseEffect {
         } else if (itemRoll < 0.90) {
             // ⏳ Time Warp
             this.racers.forEach(o => {
-                if (o.id !== r.id) {
+                if (o.id !== r.id && (!o.eventCooldownTicks || o.eventCooldownTicks === 0)) {
                     o.pos = Math.max(0, o.pos - 4);
                     o.statusText = '⏳ 시간 감속!';
                     o.statusTimer = 15;
+                    o.eventCooldownTicks = 50;
                 }
             });
             r.statusText = '⏳ 시간 왜곡!';
@@ -1445,7 +1467,6 @@ class RacingEffect extends BaseEffect {
             updateCommentary(`🎤 [중계진] 잭팟! ${r.name} 선수, 반짝이는 황금 당근을 먹고 거대화되어 돌진합니다!`);
         }
     }
-
     endRace(track, winnerId, resolve) {
         this.phase = 'ended';
         this.isActive = false;
