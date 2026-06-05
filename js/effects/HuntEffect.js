@@ -57,9 +57,10 @@ class HuntEffect extends BaseEffect {
         // Monster Hunter Wilds Combo Sequences Map
         this.COMBO_LIST = {
             great_sword: [
-                { name: "세로베기", dmg: 150, sharp: -5 },
-                { name: "모아베기", dmg: 280, sharp: -8 },
-                { name: "참 모아베기", dmg: 650, sharp: -15, special: "💥 [역경직] 파괴적인 참 모아베기가 몬스터에게 작렬합니다!" }
+                { name: "세로베기", dmg: 150, sharp: -5, stun: 0 },
+                { name: "태클", dmg: 80, sharp: -2, stun: 70, special: "🛡️ [태클] 몬스터의 공격 기세를 태클로 받아내며 어깨로 대가리를 가격합니다!" },
+                { name: "모아베기", dmg: 280, sharp: -8, stun: 10 },
+                { name: "참 모아베기", dmg: 650, sharp: -15, stun: 0, special: "💥 [역경직] 파괴적인 참 모아베기가 몬스터에게 작렬합니다!" }
             ],
             long_sword: [
                 { name: "세로베기", dmg: 100, sharp: -3 },
@@ -68,11 +69,11 @@ class HuntEffect extends BaseEffect {
                 { name: "기인투구깨기", dmg: 480, sharp: -12, special: "⚡ [연타] 붉은 기인 게이지를 격발시켜 투구깨기 찌르기를 먹였습니다!" }
             ],
             sword_shield: [
-                { name: "베어넘기기", dmg: 70, sharp: -2 },
-                { name: "저스트 러시 I", dmg: 120, sharp: -3 },
-                { name: "저스트 러시 II", dmg: 160, sharp: -3 },
-                { name: "저스트 러시 III", dmg: 220, sharp: -4 },
-                { name: "폴배시 (방패강습)", dmg: 380, sharp: -8 }
+                { name: "베어넘기기", dmg: 70, sharp: -2, stun: 0 },
+                { name: "방패치기", dmg: 60, sharp: 0, stun: 60, special: "🛡️ [방패타격] 방패 모서리로 몬스터의 정수리를 강하게 들이받습니다!" },
+                { name: "저스트 러시 I", dmg: 120, sharp: -3, stun: 0 },
+                { name: "저스트 러시 II", dmg: 160, sharp: -3, stun: 0 },
+                { name: "폴배시 (방패강습)", dmg: 380, sharp: -8, stun: 90 }
             ],
             dual_blades: [
                 { name: "귀인화 진입", dmg: 60, sharp: -2, special: "👹 [귀인화] 안개를 뿜어내며 기동성과 파괴력을 극대화합니다!" },
@@ -80,15 +81,15 @@ class HuntEffect extends BaseEffect {
                 { name: "귀인 난무", dmg: 460, sharp: -16, special: "🌀 [난무] 제자리에서 몬스터의 약점을 잘게 썰어 대량의 출혈을 냅니다!" }
             ],
             hammer: [
-                { name: "힘모으기", dmg: 50, sharp: -2, special: "🔨 [차지] 해머에 묵직한 힘을 모아 다음 타격을 강화합니다." },
-                { name: "3차지 내려치기", dmg: 310, sharp: -5 },
-                { name: "쿵쿵쿵 (연타)", dmg: 200, sharp: -4 },
-                { name: "해머 대가리 홈런!", dmg: 550, sharp: -10, special: "💥 [홈런] 기가 막힌 어퍼 스윙으로 몬스터의 턱관절을 가격했습니다!" }
+                { name: "힘모으기", dmg: 50, sharp: -2, special: "🔨 [차지] 해머에 묵직한 힘을 모아 다음 타격을 강화합니다.", stun: 0 },
+                { name: "쿵쿵쿵 (연타)", dmg: 200, sharp: -4, stun: 40 },
+                { name: "3차지 내려치기", dmg: 310, sharp: -5, stun: 80 },
+                { name: "해머 대가리 홈런!", dmg: 550, sharp: -10, stun: 150, special: "💥 [홈런] 기가 막힌 어퍼 스윙으로 몬스터의 턱관절을 가격했습니다!" }
             ],
             hunting_horn: [
-                { name: "음표 공격 I (적)", dmg: 90, sharp: -3, special: "🎵 [자가강화] 신나는 연주로 파티원 전원의 이동 속도를 증가시킵니다." },
-                { name: "향음타", dmg: 170, sharp: -4 },
-                { name: "삼중 연주 (공격력 UP)", dmg: 380, sharp: -8, special: "🎺 [공대UP] 공격력 대폭 상승 연주 버프를 아군 전체에 적용합니다!" }
+                { name: "음표 공격 I (적)", dmg: 90, sharp: -3, stun: 20, special: "🎵 [자가강화] 신나는 연주로 파티원 전원의 이동 속도를 증가시킵니다." },
+                { name: "향음타", dmg: 170, sharp: -4, stun: 45 },
+                { name: "삼중 연주 (공격력 UP)", dmg: 380, sharp: -8, stun: 80, special: "🎺 [공대UP] 공격력 대폭 상승 연주 버프를 아군 전체에 적용합니다!" }
             ],
             lance: [
                 { name: "중단찌르기", dmg: 100, sharp: -3 },
@@ -118,7 +119,7 @@ class HuntEffect extends BaseEffect {
             ],
             light_bowgun: [
                 { name: "일반탄 사격", dmg: 100, ammo: -1 },
-                { name: "기폭용탄 설치", dmg: 180, ammo: -1, special: "💣 [기폭용탄] 아군 탄환 공격에 유도 감응하여 기폭되는 유탄 지뢰를 놓습니다." },
+                { name: "기폭용탄 설치", dmg: 180, ammo: -1, special: "💣 [기폭용탄] 아군 탄환 공격에 유도 감응하여 기폭되는 유탄 지뢰를놓습니다." },
                 { name: "속사 (일반탄)", dmg: 340, ammo: -2 }
             ],
             heavy_bowgun: [
@@ -345,6 +346,9 @@ class HuntEffect extends BaseEffect {
         this.monsterSpeed = 2.2;
         this.monsterState = 'normal'; // 'normal', 'enraged', 'exhausted'
         this.battleTime = 0;
+        this.monsterStunAccum = 0;
+        this.monsterStunThreshold = 300;
+        this.monsterStunDuration = 0;
 
         // Build UI with Top Monster HP Bar, ATB Gauges and Cart board
         const card = container.querySelector('.game-hunt-card');
@@ -597,8 +601,68 @@ class HuntEffect extends BaseEffect {
                 return;
             }
 
-            // Accumulate Monster ATB
-            this.monsterAtb = Math.min(100, this.monsterAtb + this.monsterSpeed);
+            // Accumulate Monster ATB (Pause if stunned)
+            if (this.monsterStunDuration > 0) {
+                this.monsterStunDuration--;
+                if (this.monsterStunDuration <= 0) {
+                    // Stun recovery!
+                    const statusLbl = card.querySelector('#monster-status-label');
+                    const monsterTitle = card.querySelector('#fight-monster-title');
+                    const monsterImg = card.querySelector('#fight-monster-img');
+
+                    if (monsterImg) {
+                        monsterImg.classList.remove('stunned_monster');
+                    }
+
+                    // Restore state visually based on battleTime loop state
+                    const loopTime = this.battleTime % 240;
+                    let restoreState = 'normal';
+                    if (loopTime >= 60 && loopTime < 120) restoreState = 'enraged';
+                    else if (loopTime >= 180 && loopTime < 240) restoreState = 'exhausted';
+
+                    this.monsterState = restoreState;
+                    this.monsterSpeed = restoreState === 'enraged' ? 3.3 : (restoreState === 'exhausted' ? 1.1 : 2.2);
+
+                    if (statusLbl) {
+                        if (restoreState === 'enraged') {
+                            statusLbl.textContent = '분노 상태';
+                            statusLbl.style.color = '#ff3b30';
+                            statusLbl.style.borderColor = '#ff3b30';
+                            statusLbl.style.background = 'rgba(255,59,48,0.1)';
+                        } else if (restoreState === 'exhausted') {
+                            statusLbl.textContent = '탈진 상태';
+                            statusLbl.style.color = '#00a8ff';
+                            statusLbl.style.borderColor = '#00a8ff';
+                            statusLbl.style.background = 'rgba(0,168,255,0.1)';
+                        } else {
+                            statusLbl.textContent = '일반 상태';
+                            statusLbl.style.color = '#00ffaa';
+                            statusLbl.style.borderColor = '#00ffaa';
+                            statusLbl.style.background = 'rgba(0,255,170,0.08)';
+                        }
+                    }
+
+                    if (monsterTitle) {
+                        if (restoreState === 'enraged') {
+                            monsterTitle.textContent = `😡 분노한 ${this.selectedMonster.nameKO} 😡`;
+                            monsterTitle.style.color = '#ff3b30';
+                            if (monsterImg) monsterImg.classList.add('enraged');
+                        } else if (restoreState === 'exhausted') {
+                            monsterTitle.textContent = `🤤 탈진한 ${this.selectedMonster.nameKO} 🤤`;
+                            monsterTitle.style.color = '#00a8ff';
+                        } else {
+                            monsterTitle.textContent = this.selectedMonster.nameKO;
+                            monsterTitle.style.color = '#ffaa00';
+                        }
+                    }
+
+                    this.monsterStunAccum = 0;
+                    this.monsterStunThreshold = Math.floor(this.monsterStunThreshold * 1.5);
+                    addLog(`📢 ${this.selectedMonster.nameKO}이(가) 기절에서 깨어나 정신을 가다듬습니다. (기절 내성치 상승: ${this.monsterStunThreshold})`, '#00ffa3');
+                }
+            } else {
+                this.monsterAtb = Math.min(100, this.monsterAtb + this.monsterSpeed);
+            }
             const monsterAtbFill = card.querySelector('#monster-atb-fill');
             if (monsterAtbFill) monsterAtbFill.style.width = `${this.monsterAtb}%`;
 
@@ -821,6 +885,40 @@ class HuntEffect extends BaseEffect {
                         const monsterHpText = card.querySelector('#monster-hp-text');
                         if (monsterHpFill) monsterHpFill.style.width = `${(this.monsterHp / this.monsterMaxHp) * 100}%`;
                         if (monsterHpText) monsterHpText.textContent = `${this.monsterHp} / ${this.monsterMaxHp}`;
+
+                        // Stun accumulation
+                        if (currentCombo.stun && currentCombo.stun > 0 && this.monsterHp > 0) {
+                            this.monsterStunAccum += currentCombo.stun;
+                            
+                            if (this.monsterStunAccum >= this.monsterStunThreshold && this.monsterStunDuration <= 0) {
+                                this.monsterStunDuration = 60; // 6 seconds (60 ticks of 100ms)
+                                this.monsterState = 'stunned';
+                                
+                                const statusLbl = card.querySelector('#monster-status-label');
+                                const monsterTitle = card.querySelector('#fight-monster-title');
+                                const monsterImg = card.querySelector('#fight-monster-img');
+
+                                if (statusLbl) {
+                                    statusLbl.textContent = '기절 상태';
+                                    statusLbl.style.color = '#e58e26';
+                                    statusLbl.style.borderColor = '#e58e26';
+                                    statusLbl.style.background = 'rgba(229,142,38,0.1)';
+                                }
+                                if (monsterTitle) {
+                                    monsterTitle.textContent = `💫 기절한 ${this.selectedMonster.nameKO} 💫`;
+                                    monsterTitle.style.color = '#e58e26';
+                                }
+                                if (monsterImg) {
+                                    monsterImg.classList.remove('enraged');
+                                    monsterImg.classList.add('stunned_monster');
+                                }
+
+                                this.playMHAsset('mh_stun.mp3', '보이스콜');
+                                addLog(`💫 [기절] ${this.selectedMonster.nameKO}이(가) ${w.name}의 강한 타격을 머리에 입고 기절했습니다! (6초간 무력화)`, '#e58e26');
+                            } else {
+                                addLog(`💫 [기절 누적] ${w.name}의 타격으로 몬스터 기절 수치 누적! (${this.monsterStunAccum} / ${this.monsterStunThreshold})`, '#aaaaaa');
+                            }
+                        }
 
                         // Logging
                         if (currentCombo.special) {

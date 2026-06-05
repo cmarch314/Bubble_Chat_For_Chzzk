@@ -55,6 +55,10 @@ const sfxDownloads = [
     {
         name: 'mh_hit.mp3',
         query: 'Monster Hunter hit sound effect'
+    },
+    {
+        name: 'mh_stun.mp3',
+        query: 'Monster Hunter dizzy stars stun sound effect'
     }
 ];
 

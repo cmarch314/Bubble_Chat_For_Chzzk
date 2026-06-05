@@ -4813,4 +4813,23 @@ body {
     box-shadow: 0 0 15px rgba(229, 142, 38, 0.3);
 }
 
+/* 몬스터 기절 연출: 노란 오라 및 빠른 흔들림 */
+@keyframes monster-stun-shake {
+    0% { transform: translate(0, 0) rotate(0deg); filter: drop-shadow(0 0 10px rgba(229, 142, 38, 0.5)) grayscale(0.1); }
+    10% { transform: translate(-3px, 1px) rotate(-1deg); }
+    20% { transform: translate(2px, -1px) rotate(1deg); }
+    30% { transform: translate(-1px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -2px) rotate(-1deg); }
+    50% { transform: translate(-2px, 1px) rotate(1deg); }
+    60% { transform: translate(2px, 2px) rotate(0deg); }
+    70% { transform: translate(-1px, -1px) rotate(-1deg); }
+    80% { transform: translate(1px, 1px) rotate(1deg); }
+    90% { transform: translate(-2px, -2px) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); filter: drop-shadow(0 0 25px rgba(229, 142, 38, 0.95)) grayscale(0.1); }
+}
+
+.game-hunt-monster-img.stunned_monster {
+    animation: monster-stun-shake 0.6s ease-in-out infinite !important;
+}
+
 
