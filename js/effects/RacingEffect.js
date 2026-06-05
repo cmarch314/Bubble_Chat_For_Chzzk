@@ -1297,7 +1297,18 @@ class RacingEffect extends BaseEffect {
 
             if (finished) {
                 clearInterval(interval);
-                this.endRace(track, winnerId, resolve);
+                this.phase = 'ended'; // 채팅 부스트 중단
+
+                // 골인 즉시 우승 효과음 재생
+                this.playRaceSound('win');
+
+                const winner = this.racers[winnerId];
+                updateCommentary(`🎤 [중계진] 🏁 골인!!! ${winner.emoji} ${winner.name} 선수가 가장 먼저 결승선을 통과하며 우승을 차지합니다!!!`);
+
+                // 3.5초(3500ms) 동안 최종 주행 라인을 보여준 후 결과창으로 전환
+                setTimeout(() => {
+                    this.endRace(track, winnerId, resolve);
+                }, 3500);
             }
         }, 60); // 60ms tick rate
     }
@@ -1517,8 +1528,7 @@ class RacingEffect extends BaseEffect {
             }
         });
 
-        // Play sound
-        this.playRaceSound('win');
+        // Play sound (already played at the finish line)
 
         track.innerHTML = parseEmojisToImages(`
             <div class="game-title" style="font-size:4.0rem; text-align:center; color:#00ffa3;">🏆 레이스 종료! 🏆</div>
