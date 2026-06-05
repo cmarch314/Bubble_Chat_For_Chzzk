@@ -4771,4 +4771,46 @@ body {
     background: rgba(231, 76, 60, 0.2);
     color: #e74c3c;
 }
+
+/* 2차 고도화 추가 스타일 */
+.game-hunt-monster-hp-container {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.game-hunt-monster-hp-wrapper {
+    box-shadow: 0 0 10px rgba(255, 59, 48, 0.2);
+}
+
+.game-hunt-atb-fill {
+    transition: width 0.1s linear;
+}
+
+/* 분노 상태 연출: 붉은 아우라 */
+@keyframes enraged-glow {
+    0% { filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.6)) brightness(1.2); }
+    100% { filter: drop-shadow(0 0 25px rgba(255, 0, 0, 0.95)) brightness(1.4); }
+}
+
+.game-hunt-monster-img.enraged {
+    animation: monster-idle 3s ease-in-out infinite alternate, enraged-glow 0.8s ease-in-out infinite alternate !important;
+}
+
+/* 기절 상태 쉐이크 */
+@keyframes stun-shake {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    20% { transform: translate(-2px, 2px) rotate(-1deg); }
+    40% { transform: translate(-2px, -2px) rotate(1deg); }
+    60% { transform: translate(2px, 2px) rotate(0deg); }
+    80% { transform: translate(2px, -2px) rotate(-1deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.game-hunt-weapon-card.stunned {
+    border-color: #e58e26 !important;
+    background: rgba(229, 142, 38, 0.08) !important;
+    animation: stun-shake 0.5s ease-in-out infinite !important;
+    box-shadow: 0 0 15px rgba(229, 142, 38, 0.3);
+}
+
 
