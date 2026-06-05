@@ -4832,4 +4832,44 @@ body {
     animation: monster-stun-shake 0.6s ease-in-out infinite !important;
 }
 
+/* 스킬 말풍선 스타일 */
+.skill-bubble {
+    position: absolute;
+    bottom: 110%; /* 카드 위쪽으로 띄움 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 20, 20, 0.92);
+    color: #ffaa00;
+    border: 1px solid #ffaa00;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: 'Inter', 'Outfit', sans-serif;
+    font-weight: bold;
+    white-space: nowrap;
+    z-index: 100;
+    box-shadow: 0 0 12px rgba(255, 170, 0, 0.5);
+    animation: bubble-fade-in 0.2s ease-out forwards;
+}
+
+.skill-bubble::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(20, 20, 20, 0.92);
+}
+
+@keyframes bubble-fade-in {
+    0% { opacity: 0; transform: translate(-50%, 10px); }
+    100% { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes bubble-fade-out {
+    0% { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -10px); }
+}
+
 

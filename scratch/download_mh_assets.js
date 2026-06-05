@@ -18,52 +18,58 @@ const bgmDownloads = [
 const sfxDownloads = [
     {
         name: 'mh_potion.mp3',
-        query: 'Monster Hunter Potion Use sound effect'
+        query: 'Monster Hunter World - Potion Drinking Sound Effect'
     },
     {
         name: 'mh_dodge.mp3',
-        query: 'Monster Hunter Dodge Roll sound effect'
+        query: 'Monster Hunter World - Dodge Roll Sound Effect'
     },
     {
         name: 'mh_guard.mp3',
-        query: 'Monster Hunter Shield Block sound effect'
+        query: 'Monster Hunter World - Shield Block Sound Effect'
     },
     {
         name: 'mh_sharpen.mp3',
-        query: 'Monster Hunter Whetstone sound effect'
+        query: 'Monster Hunter World - Whetstone Sharpening Sound Effect'
     },
     {
         name: 'mh_reload.mp3',
-        query: 'Monster Hunter Bowgun Reload sound effect'
+        query: 'Monster Hunter World - Bowgun Reload Sound Effect'
     },
     {
         name: 'mh_cart.mp3',
-        query: 'Monster Hunter Cart sound effect'
+        query: 'Monster Hunter World - Carted Faint Sound Effect'
     },
     {
         name: 'mh_roar.mp3',
-        query: 'Monster Hunter Rathalos Roar sound effect'
+        query: 'Monster Hunter World - Rathalos Roar Sound Effect'
     },
     {
         name: 'mh_aibo.mp3',
-        query: 'Monster Hunter World Handler Aibo voice line'
+        query: 'Monster Hunter World - Handler Aibo Voice (Aibo!)'
     },
     {
         name: 'mh_dust.mp3',
-        query: 'Monster Hunter Lifepowder sound effect'
+        query: 'Monster Hunter World - Lifepowder Item Use Sound Effect'
     },
     {
         name: 'mh_hit.mp3',
-        query: 'Monster Hunter hit sound effect'
+        query: 'Monster Hunter World - Weapon Hit Damage Sound Effect'
     },
     {
         name: 'mh_stun.mp3',
-        query: 'Monster Hunter dizzy stars stun sound effect'
+        query: 'Monster Hunter - dizzy stars stun Sound Effect'
     }
 ];
 
-function downloadYtdlp(query, destDir, destFileName) {
+function downloadYtdlp(query, destDir, destFileName, force = false) {
     const destPath = path.join(destDir, destFileName);
+    if (force && fs.existsSync(destPath)) {
+        try {
+            fs.unlinkSync(destPath);
+            console.log(`🗑️ Deleted existing file for fresh download: ${destFileName}`);
+        } catch(e){}
+    }
     if (fs.existsSync(destPath) && fs.statSync(destPath).size > 0) {
         console.log(`⏭️ Skipping ${destFileName} (already exists)`);
         return true;
@@ -111,7 +117,7 @@ async function main() {
 
     console.log('\n--- Downloading SFXs ---');
     for (const sfx of sfxDownloads) {
-        downloadYtdlp(sfx.query, sfxDir, sfx.name);
+        downloadYtdlp(sfx.query, sfxDir, sfx.name, true);
     }
     
     console.log('\n🎉 Asset downloads complete!');

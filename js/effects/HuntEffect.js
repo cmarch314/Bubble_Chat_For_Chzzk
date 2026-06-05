@@ -136,6 +136,10 @@ class HuntEffect extends BaseEffect {
     }
 
     async execute(context) {
+        if (this.isActive) {
+            console.warn("Monster hunt game is already active. Ignoring double trigger.");
+            return;
+        }
         this.director.activeGame = this;
         this.isActive = true;
         this.phase = 'voting';
@@ -343,7 +347,7 @@ class HuntEffect extends BaseEffect {
         this.monsterHp = 12000;
         this.monsterMaxHp = 12000;
         this.monsterAtb = 0;
-        this.monsterSpeed = 2.2;
+        this.monsterSpeed = 4.4;
         this.monsterState = 'normal'; // 'normal', 'enraged', 'exhausted'
         this.battleTime = 0;
         this.monsterStunAccum = 0;
@@ -527,7 +531,7 @@ class HuntEffect extends BaseEffect {
                     const monsterImg = card.querySelector('#fight-monster-img');
 
                     if (this.monsterState === 'enraged') {
-                        this.monsterSpeed = 3.3; // 1.5x speed
+                        this.monsterSpeed = 6.6; // 1.5x speed (doubled)
                         if (statusLbl) {
                             statusLbl.textContent = '분노 상태';
                             statusLbl.style.color = '#ff3b30';
@@ -545,7 +549,7 @@ class HuntEffect extends BaseEffect {
                         addLog(`🔥 [분노] ${this.selectedMonster.nameKO}이(가) 노성을 지르며 격노합니다! (공격력 1.5배, 속도 1.5배)`, '#ff3b30');
                         shakeMonster();
                     } else if (this.monsterState === 'exhausted') {
-                        this.monsterSpeed = 1.1; // 0.5x speed
+                        this.monsterSpeed = 2.2; // 0.5x speed (doubled)
                         if (statusLbl) {
                             statusLbl.textContent = '탈진 상태';
                             statusLbl.style.color = '#00a8ff';
@@ -564,7 +568,7 @@ class HuntEffect extends BaseEffect {
                         shakeMonster();
                     } else {
                         // normal
-                        this.monsterSpeed = 2.2;
+                        this.monsterSpeed = 4.4; // doubled
                         if (statusLbl) {
                             statusLbl.textContent = '일반 상태';
                             statusLbl.style.color = '#00ffaa';
@@ -699,6 +703,10 @@ class HuntEffect extends BaseEffect {
                     // Choose attack name
                     const list = this.MONSTER_ATTACKS[this.selectedMonster.id] || this.MONSTER_ATTACKS.default;
                     const attackName = list[Math.floor(Math.random() * list.length)];
+
+                    // Show skill bubble above monster
+                    const monsterShowcase = card.querySelector('#monster-showcase-panel');
+                    this.showSkillBubble(monsterShowcase, attackName);
 
                     // Damage calculation (rage modifier)
                     let dmgMod = 1.0;
@@ -885,6 +893,10 @@ class HuntEffect extends BaseEffect {
                         const monsterHpText = card.querySelector('#monster-hp-text');
                         if (monsterHpFill) monsterHpFill.style.width = `${(this.monsterHp / this.monsterMaxHp) * 100}%`;
                         if (monsterHpText) monsterHpText.textContent = `${this.monsterHp} / ${this.monsterMaxHp}`;
+
+                        // Show skill bubble above weapon card
+                        const weaponCard = card.querySelector(`#fight-card-${w.index}`);
+                        this.showSkillBubble(weaponCard, currentCombo.name);
 
                         // Stun accumulation
                         if (currentCombo.stun && currentCombo.stun > 0 && this.monsterHp > 0) {
@@ -1131,5 +1143,33 @@ class HuntEffect extends BaseEffect {
         this.lobbyBgmPromise = null;
         this.battleBgm = null;
         this.battleBgmPromise = null;
+    }
+
+    showSkillBubble(parentEl, skillName) {
+        if (!parentEl) return;
+        
+        // Remove existing bubble if any
+        const existing = parentEl.querySelector('.skill-bubble');
+        if (existing) {
+            existing.remove();
+        }
+
+        const bubble = document.createElement('div');
+        bubble.className = 'skill-bubble';
+        bubble.textContent = skillName;
+        
+        parentEl.appendChild(bubble);
+
+        // Remove after 3 seconds with fadeout effect
+        setTimeout(() => {
+            if (bubble.parentNode) {
+                bubble.style.animation = 'bubble-fade-out 0.25s ease-in forwards';
+                setTimeout(() => {
+                    if (bubble.parentNode) {
+                        bubble.remove();
+                    }
+                }, 250);
+            }
+        }, 2750);
     }
 }
