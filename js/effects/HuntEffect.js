@@ -291,16 +291,9 @@ class HuntEffect extends BaseEffect {
     }
 
     playMHAsset(fileName, fallbackKey) {
-        const sfxPath = `SFX/${fileName}`;
-        const audio = new Audio(sfxPath);
-        const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-        audio.volume = volConfig.master * volConfig.sfx * 0.75;
-        
-        audio.play().catch(() => {
-            if (fallbackKey) {
-                this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()[fallbackKey] || fallbackKey);
-            }
-        });
+        if (fallbackKey) {
+            this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()[fallbackKey] || fallbackKey);
+        }
     }
 
     getMonsterBgm(monsterName) {
@@ -715,7 +708,7 @@ class HuntEffect extends BaseEffect {
                     if (this.monsterState === 'enraged') dmgMod = 1.5;
                     else if (this.monsterState === 'exhausted') dmgMod = 0.5;
 
-                    let baseDmg = 10 + Math.floor(Math.random() * 11); // base 10~20
+                    let baseDmg = Math.floor(target.maxHp * 0.45); // 45% of hunter's max HP
                     let damage = Math.floor(baseDmg * dmgMod);
 
                     // Shield / Dodge roll check

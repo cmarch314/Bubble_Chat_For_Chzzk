@@ -15,52 +15,7 @@ const bgmDownloads = [
     }
 ];
 
-const sfxDownloads = [
-    {
-        name: 'mh_potion.mp3',
-        query: 'Monster Hunter World - Potion Drinking Sound Effect'
-    },
-    {
-        name: 'mh_dodge.mp3',
-        query: 'Monster Hunter World - Dodge Roll Sound Effect'
-    },
-    {
-        name: 'mh_guard.mp3',
-        query: 'Monster Hunter World - Shield Block Sound Effect'
-    },
-    {
-        name: 'mh_sharpen.mp3',
-        query: 'Monster Hunter Whetstone Sound Effect'
-    },
-    {
-        name: 'mh_reload.mp3',
-        query: 'Monster Hunter World - Bowgun Reload Sound Effect'
-    },
-    {
-        name: 'mh_cart.mp3',
-        query: 'Monster Hunter World - Carted Faint Sound Effect'
-    },
-    {
-        name: 'mh_roar.mp3',
-        query: 'Monster Hunter World - Rathalos Roar Sound Effect'
-    },
-    {
-        name: 'mh_aibo.mp3',
-        query: 'MHW Aibo sound'
-    },
-    {
-        name: 'mh_dust.mp3',
-        query: 'Monster Hunter World - Lifepowder Item Use Sound Effect'
-    },
-    {
-        name: 'mh_hit.mp3',
-        query: 'Monster Hunter World Hit SFX'
-    },
-    {
-        name: 'mh_stun.mp3',
-        query: 'Monster Hunter - dizzy stars stun Sound Effect'
-    }
-];
+const sfxDownloads = [];
 
 function downloadYtdlp(query, destDir, destFileName, force = false, isSfx = false) {
     const destPath = path.join(destDir, destFileName);
