@@ -39,7 +39,7 @@ class MessageRouter {
         }
 
         // [New] 스트리머 전용 미니게임 기동 명령어 처리
-        if (msgData.isStreamer) {
+        if (msgData.isStreamer || this.config.debugMode) {
             if (lowerMsg.startsWith('!퀴즈')) {
                 this.visualDirector.trigger('sound_quiz', { message: updatedTrimmedMsg, nickname: msgData.nickname });
                 return;

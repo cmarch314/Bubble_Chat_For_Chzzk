@@ -176,7 +176,7 @@ class ChzzkGateway {
                     color: colorCode,
                     badges: profile.activityBadges || [],
                     emojis: extra.emojis || {},
-                    isStreamer: profile.userRoleCode === 'streamer',
+                    isStreamer: profile.userRoleCode === 'streamer' || profile.userIdHash === this.config.channelId,
                     uid: profile.userIdHash,
                     type: 'chat',
 
