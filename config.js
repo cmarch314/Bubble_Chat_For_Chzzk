@@ -1107,6 +1107,10 @@ window.HIVE_SOUND_CONFIG = {
     "타격음_타격": { "src": "mh_blunt_hit.mp3", "volume": 0.7 },
     "가드성공": { "src": "mh_guard.mp3", "volume": 0.7 },
     "재장전": { "src": "mh_reload.mp3", "volume": 0.7 },
+    "윽!": { "src": "mh_slash_hit.mp3", "volume": 0.7 },
+    "으악!": { "src": "mh_blunt_hit.mp3", "volume": 0.7 },
+    "아야!": { "src": "mh_blunt_hit.mp3", "volume": 0.7 },
+    "회피": { "src": "mh_reload.mp3", "volume": 0.7 },
     "편견을버리자": { "src": "편견을버리자.mp3", "volume": 0.7 },
     "풀버": [
         { "src": "풀버.mp3", "volume": 0.7 },
