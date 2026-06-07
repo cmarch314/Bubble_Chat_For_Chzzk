@@ -1335,6 +1335,7 @@ class HuntEffect extends BaseEffect {
                         const defendRoll = Math.random();
                         let isGuard = false;
                         let isDodge = false;
+                        let isForesightSlash = false;
 
                         // HBG has shield too!
                         const hasShield = target.type === 'shield' || target.id === 'heavy_bowgun';
@@ -1350,7 +1351,12 @@ class HuntEffect extends BaseEffect {
                             dodgeProb = 0.35;
                         }
 
-                        if (hasShield && defendRoll < guardProb) {
+                        if (target.id === 'long_sword' && defendRoll < 0.75) {
+                            damage = 0;
+                            isDodge = true;
+                            isForesightSlash = true;
+                            target.spiritLevel = Math.min(3, (target.spiritLevel || 0) + 1);
+                        } else if (hasShield && defendRoll < guardProb) {
                             damage = Math.max(1, Math.floor(damage * 0.08)); // Guard blocks 92%
                             isGuard = true;
                         } else if (!hasShield && defendRoll < dodgeProb) {
@@ -1460,9 +1466,17 @@ class HuntEffect extends BaseEffect {
                             }
                         } else {
                             // Evaded
-                            addLog(`🌀 [회피] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 구르기로 회피했습니다!`, '#2eff7b');
-                            this.playMHAsset('mh_dodge.mp3', '회피');
-                            shakeWeapon(target.index, '#2eff7b');
+                            if (isForesightSlash) {
+                                addLog(`⚡ [간파베기] ${target.name}이(가) 간파베기로 공격을 흘려내며 기인 게이지가 상승했습니다! (현재 레벨: ${target.spiritLevel}/3)`, '#ffaa00');
+                                this.playMHAsset('mh_guard.mp3', '가드성공');
+                                this.showSkillBubble(card.querySelector(`#fight-card-${target.index}`), "간파베기!");
+                                restoreBorder(target.index);
+                                shakeWeapon(target.index, '#ffaa00');
+                            } else {
+                                addLog(`🌀 [회피] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 구르기로 회피했습니다!`, '#2eff7b');
+                                this.playMHAsset('mh_dodge.mp3', '회피');
+                                shakeWeapon(target.index, '#2eff7b');
+                            }
 
                             // Trigger spin roll animation on weapon image
                             const img = card.querySelector(`#fight-card-${target.index} .game-hunt-weapon-img`);
@@ -1765,6 +1779,19 @@ class HuntEffect extends BaseEffect {
                                 if (redDot) redDot.style.color = w.extractBuffs.red ? '#ff3b30' : '#444';
                                 if (whiteDot) whiteDot.style.color = w.extractBuffs.white ? '#ffffff' : '#444';
                                 if (orangeDot) orangeDot.style.color = w.extractBuffs.orange ? '#ff9500' : '#444';
+                            }
+                        }
+
+                        // 태도: 기인베기 II 콤보 시 spiritLevel 증가 (최대 3)
+                        if (w.id === 'long_sword') {
+                            if (currentCombo.name === '기인베기 II') {
+                                w.spiritLevel = Math.min(3, (w.spiritLevel || 0) + 1);
+                                addLog(`✨ [기인 연계] ${w.hunterName}이(가) 기인베기 II를 성공시켜 기인 게이지 레벨이 상승했습니다! (현재 레벨: ${w.spiritLevel}/3)`, '#ffaa00');
+                                restoreBorder(w.index);
+                            } else if (currentCombo.name === '기인투구깨기') {
+                                w.spiritLevel = Math.max(0, (w.spiritLevel || 0) - 1);
+                                addLog(`💥 [기인투구깨기] ${w.hunterName}이(가) 공중에서 내리치며 기인투구깨기를 시전했습니다! 기인 게이지 레벨 1 소모! (현재 레벨: ${w.spiritLevel}/3)`, '#e74c3c');
+                                restoreBorder(w.index);
                             }
                         }
 
