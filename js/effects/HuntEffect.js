@@ -154,9 +154,12 @@ class HuntEffect extends BaseEffect {
             this.consecutiveQueue = [this.selectedMonster];
         }
         
-        const shuffledWeapons = [...this.WEAPONS].sort(() => Math.random() - 0.5);
+        const selected = [];
+        for (let i = 0; i < 4; i++) {
+            selected.push(this.WEAPONS[Math.floor(Math.random() * this.WEAPONS.length)]);
+        }
         const personalities = ['offensive', 'offensive', 'normal', 'normal', 'defensive', 'veteran', 'support', 'newbie'];
-        this.selectedWeapons = shuffledWeapons.slice(0, 4).map((w, index) => {
+        this.selectedWeapons = selected.map((w, index) => {
             const initialSpeedGroup = w.id === 'charge_blade' ? 'very_fast' : w.speedGroup;
             const personality = personalities[Math.floor(Math.random() * personalities.length)];
             return {
