@@ -791,6 +791,29 @@ class HuntRenderer {
             }
         }
     }
+
+    spawnVictoryEmoji(idx, emoji) {
+        if (!this.card) return;
+        const targetEl = this.card.querySelector(`#fight-card-${idx}`);
+        if (!targetEl) return;
+
+        const emojiEl = document.createElement('div');
+        emojiEl.className = 'victory-emoji-bubble';
+        emojiEl.textContent = emoji;
+        targetEl.appendChild(emojiEl);
+
+        // Animate up and fade out
+        setTimeout(() => {
+            emojiEl.style.opacity = '1';
+            emojiEl.style.transform = 'translate(-50%, -60px) scale(1.3)';
+        }, 50);
+
+        setTimeout(() => {
+            emojiEl.style.opacity = '0';
+            emojiEl.style.transform = 'translate(-50%, -90px) scale(1.0)';
+            setTimeout(() => emojiEl.remove(), 400);
+        }, 1800);
+    }
 }
 
 if (typeof module !== 'undefined' && module.exports) {

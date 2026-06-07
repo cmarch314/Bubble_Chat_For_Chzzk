@@ -487,17 +487,68 @@ class HuntEffect extends BaseEffect {
                 `;
             }
             
-            const winnerCard = card.querySelector(`#fight-card-${winner.index}`);
-            if (winnerCard) {
-                winnerCard.classList.remove('large-hit-anim', 'small-hit-anim');
-                void winnerCard.offsetWidth;
-                winnerCard.classList.add('victory-jump');
-                const tag = card.querySelector(`#status-tag-${winner.index}`);
-                if (tag) {
-                    tag.textContent = '🏆 MVP 🏆';
-                    tag.className = 'game-hunt-status-tag active';
+            this.selectedWeapons.forEach(w => {
+                const weaponCard = card.querySelector(`#fight-card-${w.index}`);
+                if (!weaponCard) return;
+
+                if (w.hp > 0) {
+                    const tag = card.querySelector(`#status-tag-${w.index}`);
+                    
+                    let emojis = [];
+                    let statusText = '';
+                    
+                    if (w.personality === 'veteran') {
+                        emojis = ['😎', '🏆', '🍺', '👍'];
+                        statusText = '😎 갈무리 생략';
+                    } else if (w.personality === 'support') {
+                        emojis = ['🎒', '💚', '🥰', '🌱'];
+                        statusText = '🎒 갈무리중... (약초)';
+                    } else if (w.personality === 'newbie') {
+                        emojis = ['🐣', '🤩', '🎉', '🍖'];
+                        statusText = '🐣 갈무리중... (신남!)';
+                    } else if (w.personality === 'offensive') {
+                        emojis = ['🗡️', '💥', '🦖', '😼'];
+                        statusText = '🗡️ 갈무리중... (발톱)';
+                    } else if (w.personality === 'defensive') {
+                        emojis = ['🛡️', '😌', '🍻', '🥩'];
+                        statusText = '🍖 갈무리중... (고기)';
+                    } else {
+                        emojis = ['⚖️', '🙂', '👍', '🍖'];
+                        statusText = '⚖️ 갈무리중...';
+                    }
+
+                    if (w.index === winner.index) {
+                        statusText = '🏆 MVP 🏆';
+                        weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
+                        void weaponCard.offsetWidth;
+                        weaponCard.classList.add('victory-jump');
+                    } else {
+                        weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
+                        void weaponCard.offsetWidth;
+                        weaponCard.classList.add('victory-bounce');
+                    }
+
+                    if (tag) {
+                        tag.textContent = statusText;
+                        tag.className = 'game-hunt-status-tag active';
+                    }
+
+                    emojis.forEach((emoji, idx) => {
+                        setTimeout(() => {
+                            this.renderer.spawnVictoryEmoji(w.index, emoji);
+                        }, idx * 600);
+                    });
+                } else {
+                    weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
+                    void weaponCard.offsetWidth;
+                    weaponCard.style.transform = 'rotate(180deg)';
+                    const tag = card.querySelector(`#status-tag-${w.index}`);
+                    if (tag) {
+                        tag.textContent = '💀 기절 (수레)';
+                        tag.className = 'game-hunt-status-tag fainted';
+                    }
                 }
-            }
+            });
         } else {
             if (topPanel) {
                 topPanel.innerHTML = `

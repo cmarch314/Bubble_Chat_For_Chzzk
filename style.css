@@ -5303,4 +5303,34 @@ body {
     right: calc(50% - 95px);
 }
 
+@keyframes victory-jump {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-30px) scale(1.05); }
+}
+.victory-jump {
+    animation: victory-jump 0.6s ease-in-out infinite;
+}
+
+@keyframes victory-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+.victory-bounce {
+    animation: victory-bounce 0.8s ease-in-out infinite;
+}
+
+.victory-emoji-bubble {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -20px) scale(0.5);
+    opacity: 0;
+    font-size: 2.5rem;
+    pointer-events: none;
+    z-index: 150;
+    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+
+
 
