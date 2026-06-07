@@ -91,7 +91,7 @@ class HuntRenderer {
                             <div class="game-hunt-weapon-card" id="hunt-opt-${w.index}" style="position: relative;">
                                 <div style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); border: 2px solid #ffaa00; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; color: #ffaa00; box-shadow: 0 0 8px rgba(255, 170, 0, 0.4); z-index: 5;">${w.index + 1}</div>
                                 <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" />
-                                <div class="game-hunt-weapon-name" style="font-size:1.6rem;font-weight:bold;color:#ffaa00;">${w.name}</div>
+                                <div class="game-hunt-weapon-name" style="font-size:1.6rem;font-weight:bold;color:#ffaa00;">HUNTER ${w.index + 1}</div>
                                 <div style="font-size:1.15rem;font-weight:bold;background:${p.bg};border:1.5px solid ${p.border};border-radius:8px;padding:6px 12px;margin-top:10px;margin-bottom:12px;color:${p.color};box-shadow: 0 0 10px ${p.bg};">${p.label}</div>
                                 <div class="bet-count" style="font-size:1.05rem;color:#aaa;font-weight:bold;">0명 신청</div>
                             </div>`;
