@@ -94,18 +94,45 @@ class HuntEffect extends BaseEffect {
         let targetMonsterName = null;
         let consecutiveCount = 1;
 
+        let chosenWeaponIds = [];
+
         if (context && context.message) {
             const trimmed = context.message.trim();
             const match = trimmed.match(/^!(수렵|토벌)\s*([1-9]|10)(?![0-9])/);
             if (match) {
                 consecutiveCount = parseInt(match[2], 10);
-            } else {
-                const parts = trimmed.split(/\s+/);
-                if (parts.length > 1) {
-                    targetMonsterName = parts.slice(1).join(" ");
+            }
+
+            const cleanedMsg = trimmed.replace(/^!(수렵|토벌)\s*/, "").trim();
+            const tokens = cleanedMsg.split(/\s+/);
+            const WEAPON_CHAR_MAP = {
+                '대': 'great_sword', '태': 'long_sword', '한': 'sword_shield', '쌍': 'dual_blades',
+                '해': 'hammer', '피': 'hunting_horn', '건': 'gunlance', '랜': 'lance',
+                '슬': 'switch_axe', '차': 'charge_blade', '충': 'insect_glaive', '활': 'bow',
+                '라': 'light_bowgun', '헤': 'heavy_bowgun'
+            };
+            const weaponChars = Object.keys(WEAPON_CHAR_MAP);
+            const monsterNameTokens = [];
+
+            for (const token of tokens) {
+                const isConsecutiveToken = /^[1-9]$|^10$|^[1-9]마리$|^10마리$/.test(token);
+                if (isConsecutiveToken) continue;
+
+                const isWeaponToken = token.length > 0 && token.split("").every(char => weaponChars.includes(char));
+                if (isWeaponToken) {
+                    token.split("").forEach(char => {
+                        chosenWeaponIds.push(WEAPON_CHAR_MAP[char]);
+                    });
+                } else {
+                    monsterNameTokens.push(token);
                 }
             }
+
+            if (monsterNameTokens.length > 0) {
+                targetMonsterName = monsterNameTokens.join(" ");
+            }
         }
+        this.chosenWeaponIds = chosenWeaponIds; // Store in instance temporarily for use in weapon selection
 
         this.consecutiveTotal = consecutiveCount;
         this.currentConsecutiveIndex = 0;
@@ -155,9 +182,17 @@ class HuntEffect extends BaseEffect {
         }
         
         const selected = [];
-        for (let i = 0; i < 4; i++) {
+        const chosen = this.chosenWeaponIds || [];
+        for (let i = 0; i < Math.min(4, chosen.length); i++) {
+            const foundWeapon = this.WEAPONS.find(w => w.id === chosen[i]);
+            if (foundWeapon) {
+                selected.push({ ...foundWeapon });
+            }
+        }
+        while (selected.length < 4) {
             selected.push(this.WEAPONS[Math.floor(Math.random() * this.WEAPONS.length)]);
         }
+        delete this.chosenWeaponIds; // clean up
         const personalities = ['offensive', 'offensive', 'normal', 'normal', 'defensive', 'veteran', 'support', 'newbie'];
         this.selectedWeapons = selected.map((w, index) => {
             const initialSpeedGroup = w.id === 'charge_blade' ? 'very_fast' : w.speedGroup;
