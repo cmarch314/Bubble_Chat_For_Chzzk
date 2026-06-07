@@ -447,7 +447,7 @@ class HuntEngine {
                         attackResults.push({ index: target.index, result: 'guard' });
                     } else {
                         this.addLog(`💥 [피격] ${this.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 큰 타격! (-${damage} HP)`, '#ff5555');
-                        this.playSFX('mh_hit.mp3', ['윽!', '으악!', '아야!'][Math.floor(Math.random() * 3)]);
+                        // this.playSFX('mh_hit.mp3', ['윽!', '으악!', '아야!'][Math.floor(Math.random() * 3)]);
                         this.shakeMonster();
                         this.shakeWeapon(target.index);
                         this.triggerHitAnimation(target.index, damage);

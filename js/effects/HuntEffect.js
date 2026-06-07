@@ -320,12 +320,6 @@ class HuntEffect extends BaseEffect {
     }
 
     addCombatLog(text, color) {
-        this.director.eventBus.emit('chat:render', {
-            nickname: '시스템',
-            message: text,
-            color: color || '#ffaa00',
-            isSystem: true
-        });
         console.log(`[HUNT] ${text}`);
     }
 
