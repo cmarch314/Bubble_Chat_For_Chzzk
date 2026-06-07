@@ -1979,6 +1979,9 @@ class HuntEffect extends BaseEffect {
                     source.connect(gainNode);
                     gainNode.connect(ctx.destination);
 
+                    if (ctx.state === 'suspended') {
+                        ctx.resume();
+                    }
                     audio.play().catch(e => console.warn(`Failed to play amplified audio: ${filePath}`, e));
 
                     if (durationLimitMs) {
