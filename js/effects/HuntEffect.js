@@ -276,6 +276,9 @@ class HuntEffect extends BaseEffect {
                     this.audioManager.playMonsterRoar(monster);
                 },
                 onTriggerMonsterCharge: () => this.renderer.triggerMonsterCharge(),
+                onTriggerMonsterAttack: (type, emoji, targets) => {
+                    this.renderer.triggerMonsterAttack(type, emoji, targets);
+                },
                 onTriggerGuardShake: (idx) => {
                     if (this.renderer.card) {
                         const weaponCard = this.renderer.card.querySelector(`#fight-card-${idx}`);

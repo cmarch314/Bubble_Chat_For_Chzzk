@@ -425,6 +425,149 @@ class HuntRenderer {
         }
     }
 
+    triggerMonsterAttack(type, emoji, targets) {
+        if (!this.card || !targets || targets.length === 0) return;
+
+        const monsterImg = this.card.querySelector('#fight-monster-img');
+        const showcase = this.card.querySelector('#monster-showcase-panel');
+        if (!monsterImg || !showcase) return;
+
+        const firstTarget = targets[0];
+        const targetCard = this.card.querySelector(`#fight-card-${firstTarget.index}`);
+        if (!targetCard) return;
+
+        const containerRect = this.card.getBoundingClientRect();
+        const monsterRect = monsterImg.getBoundingClientRect();
+
+        const monsterCenter = {
+            x: monsterRect.left + monsterRect.width / 2,
+            y: monsterRect.top + monsterRect.height / 2
+        };
+
+        if (type === 'physical' || type === 'hybrid') {
+            const cardRect = targetCard.getBoundingClientRect();
+            const cardCenter = {
+                x: cardRect.left + cardRect.width / 2,
+                y: cardRect.top + cardRect.height / 2
+            };
+
+            const dx = cardCenter.x - monsterCenter.x;
+            const dy = cardCenter.y - monsterCenter.y;
+
+            if (type === 'physical') {
+                monsterImg.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                monsterImg.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
+
+                setTimeout(() => {
+                    monsterImg.style.transition = 'transform 0.3s ease-in-out';
+                    monsterImg.style.transform = '';
+                    setTimeout(() => {
+                        monsterImg.style.transition = '';
+                    }, 300);
+                }, 200);
+            } else if (type === 'hybrid') {
+                const leftEmoji = document.createElement('div');
+                leftEmoji.className = 'monster-hybrid-emoji-left';
+                leftEmoji.textContent = emoji;
+
+                const rightEmoji = document.createElement('div');
+                rightEmoji.className = 'monster-hybrid-emoji-right';
+                rightEmoji.textContent = emoji;
+
+                showcase.appendChild(leftEmoji);
+                showcase.appendChild(rightEmoji);
+
+                void leftEmoji.offsetWidth;
+
+                monsterImg.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                leftEmoji.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                rightEmoji.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+                monsterImg.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
+                leftEmoji.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
+                rightEmoji.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
+
+                setTimeout(() => {
+                    monsterImg.style.transition = 'transform 0.3s ease-in-out';
+                    monsterImg.style.transform = '';
+
+                    leftEmoji.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-out';
+                    rightEmoji.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-out';
+                    leftEmoji.style.transform = `translate(${dx}px, ${dy}px) scale(0)`;
+                    rightEmoji.style.transform = `translate(${dx}px, ${dy}px) scale(0)`;
+                    leftEmoji.style.opacity = '0';
+                    rightEmoji.style.opacity = '0';
+
+                    setTimeout(() => {
+                        monsterImg.style.transition = '';
+                        leftEmoji.remove();
+                        rightEmoji.remove();
+                    }, 300);
+                }, 200);
+            }
+        } else if (type === 'elemental') {
+            targets.forEach(t => {
+                const curTargetCard = this.card.querySelector(`#fight-card-${t.index}`);
+                if (!curTargetCard) return;
+
+                const cardRect = curTargetCard.getBoundingClientRect();
+                const cardCenter = {
+                    x: cardRect.left + cardRect.width / 2,
+                    y: cardRect.top + cardRect.height / 2
+                };
+
+                const startX = monsterCenter.x - containerRect.left;
+                const startY = monsterCenter.y - containerRect.top;
+                const destX = cardCenter.x - containerRect.left;
+                const destY = cardCenter.y - containerRect.top;
+
+                const proj = document.createElement('div');
+                proj.className = 'elemental-projectile';
+                proj.style.left = `${startX}px`;
+                proj.style.top = `${startY}px`;
+                proj.textContent = emoji;
+                this.card.appendChild(proj);
+
+                void proj.offsetWidth;
+
+                proj.style.transition = 'left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease';
+
+                const isDodge = (t.result === 'dodge');
+
+                if (isDodge) {
+                    const extendFactor = 1.5;
+                    const passX = startX + (destX - startX) * extendFactor;
+                    const passY = startY + (destY - startY) * extendFactor;
+
+                    proj.style.left = `${passX}px`;
+                    proj.style.top = `${passY}px`;
+                    proj.style.opacity = '0';
+
+                    setTimeout(() => {
+                        proj.remove();
+                    }, 400);
+                } else {
+                    proj.style.left = `${destX}px`;
+                    proj.style.top = `${destY}px`;
+
+                    setTimeout(() => {
+                        proj.remove();
+
+                        const burnEl = document.createElement('div');
+                        burnEl.className = 'elemental-burn';
+                        burnEl.textContent = emoji;
+                        curTargetCard.appendChild(burnEl);
+
+                        setTimeout(() => {
+                            burnEl.style.opacity = '0';
+                            setTimeout(() => burnEl.remove(), 500);
+                        }, 1500);
+                    }, 400);
+                }
+            });
+        }
+    }
+
     triggerHitAnimation(idx, w, damage) {
         if (!this.card) return;
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
@@ -621,6 +764,31 @@ class HuntRenderer {
         if (showcase) {
             showcase.style.transform = `translate(${(Math.random() - 0.5) * 20}px, ${(Math.random() - 0.5) * 20}px)`;
             setTimeout(() => showcase.style.transform = '', 100);
+        }
+    }
+
+    triggerRoarStun(idx, isStunned) {
+        if (!this.card) return;
+        const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
+        const tag = this.card.querySelector(`#status-tag-${idx}`);
+        if (isStunned) {
+            if (weaponCard) {
+                weaponCard.style.transform = 'rotate(30deg)';
+                weaponCard.classList.add('roar-stunned');
+            }
+            if (tag) {
+                tag.textContent = '🙉 귀막기 경직';
+                tag.className = 'game-hunt-status-tag stunned';
+            }
+        } else {
+            if (weaponCard) {
+                weaponCard.style.transform = '';
+                weaponCard.classList.remove('roar-stunned');
+            }
+            if (tag) {
+                tag.textContent = '';
+                tag.className = 'game-hunt-status-tag active';
+            }
         }
     }
 }
