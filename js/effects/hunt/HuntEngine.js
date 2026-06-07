@@ -537,6 +537,13 @@ class HuntEngine {
         return { type, emoji };
     }
 
+    getPreviousMonsterMaterial(monsterName) {
+        const name = monsterName || "몬스터";
+        const materials = ["비늘", "갑각", "발톱", "꼬리", "날개", "꼬리뼈"];
+        const randomMat = materials[Math.floor(Math.random() * materials.length)];
+        return `${name}의 ${randomMat}`;
+    }
+
     triggerHitAnimation(idx, damage) {
         if (this.callbacks.onTriggerHitAnimation) this.callbacks.onTriggerHitAnimation(idx, damage);
     }
@@ -664,8 +671,17 @@ class HuntEngine {
 
         // Newbie miss chance (15%)
         if (w.personality === 'newbie' && Math.random() < 0.15) {
-            this.addLog(`😅 [실수] ${w.name}이(가) 공격 타이밍을 놓쳤습니다!`, '#aaa');
-            this.shakeWeapon(w.index, '#aaa');
+            if (this.consecutiveTotal > 1 && this.currentConsecutiveIndex > 0 && Math.random() < 0.6) {
+                const prevMonster = this.consecutiveQueue[this.currentConsecutiveIndex - 1];
+                const prevMonsterName = prevMonster ? prevMonster.nameKO : "이전 몬스터";
+                const material = this.getPreviousMonsterMaterial(prevMonsterName);
+                this.addLog(`😅 [몬린이 딴짓] ${w.name}이(가) 전투 도중 이전 토벌 대상인 [${prevMonsterName}]의 사체로 달려가 갈무리를 시도합니다! (획득: ${material})`, '#ffaa00');
+                this.showSkillBubble(w.index, "갈무리 시도중...🏃");
+                this.shakeWeapon(w.index, '#ffaa00');
+            } else {
+                this.addLog(`😅 [실수] ${w.name}이(가) 공격 타이밍을 놓쳤습니다!`, '#aaa');
+                this.shakeWeapon(w.index, '#aaa');
+            }
             return;
         }
 

@@ -442,6 +442,7 @@ class HuntEffect extends BaseEffect {
 
         // Apply new values to existing engine
         this.engine.selectedMonster = this.selectedMonster;
+        this.engine.currentConsecutiveIndex = this.currentConsecutiveIndex;
         this.engine.monsterTier = this.monsterTier;
         this.engine.monsterHp = baseHp;
         this.engine.monsterMaxHp = baseHp;
