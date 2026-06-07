@@ -1114,7 +1114,7 @@ class HuntEffect extends BaseEffect {
 
                     const tag = card.querySelector(`#status-tag-${w.index}`);
                     if (tag && w.status === 'alive') {
-                        tag.textContent = `대기 (${Math.floor(w.atb)}%)`;
+                        tag.textContent = '';
                     }
                 }
             });
@@ -1366,7 +1366,7 @@ class HuntEffect extends BaseEffect {
                                                     target.status = 'alive';
                                                     const currentTag = card.querySelector(`#status-tag-${target.index}`);
                                                     if (currentTag) {
-                                                        currentTag.textContent = `대기 (${Math.floor(target.atb)}%)`;
+                                                        currentTag.textContent = '';
                                                         currentTag.className = 'game-hunt-status-tag active';
                                                     }
                                                 }
@@ -1390,7 +1390,7 @@ class HuntEffect extends BaseEffect {
                                                     target.status = 'alive';
                                                     const currentTag = card.querySelector(`#status-tag-${target.index}`);
                                                     if (currentTag) {
-                                                        currentTag.textContent = `대기 (${Math.floor(target.atb)}%)`;
+                                                        currentTag.textContent = '';
                                                         currentTag.className = 'game-hunt-status-tag active';
                                                     }
                                                 }
@@ -1483,7 +1483,7 @@ class HuntEffect extends BaseEffect {
                         }
                         const tag = card.querySelector(`#status-tag-${w.index}`);
                         if (tag) {
-                            tag.textContent = `대기 (0%)`;
+                            tag.textContent = '';
                             tag.className = 'game-hunt-status-tag active';
                         }
                         addLog(`🌀 ${w.name}이(가) 기절 충격에서 깨어나며 턴을 소비했습니다.`, '#eee');
@@ -2076,7 +2076,7 @@ class HuntEffect extends BaseEffect {
                     tag.className = 'game-hunt-status-tag stunned';
                     tag.style.background = '#e58e26';
                 } else {
-                    tag.textContent = `대기 (${Math.floor(weapon.atb)}%)`;
+                    tag.textContent = '';
                     tag.className = 'game-hunt-status-tag active';
                     tag.style.background = '';
                 }
