@@ -323,6 +323,66 @@ class HuntEffect extends BaseEffect {
         console.log(`[HUNT] ${text}`);
     }
 
+    getMonsterMaterialName(monsterName, personality) {
+        const name = monsterName || "몬스터";
+        let rare = "역린";
+        let scale = "비늘";
+        let shell = "갑각";
+        let claw = "발톱";
+        let tail = "꼬리";
+
+        if (name.includes("리오레우스") || name.includes("레우스") || name.includes("리오레이아") || name.includes("레이아")) {
+            rare = "화룡의 홍옥";
+            scale = "화룡의 비늘";
+            shell = "화룡의 갑각";
+            claw = "화룡의 발톱";
+            tail = "화룡의 꼬리";
+        } else if (name.includes("진오우거")) {
+            rare = "뇌랑룡의 보옥";
+            scale = "뇌랑룡의 갑각";
+            shell = "뇌랑룡의 대전모피";
+            claw = "뇌랑룡의 발톱";
+            tail = "뇌랑룡의 꼬리";
+        } else if (name.includes("벨카나")) {
+            rare = "빙룡의 보옥";
+            scale = "빙룡의 비늘";
+            shell = "빙룡의 얼음갑각";
+            claw = "빙룡의 발톱";
+            tail = "빙룡의 꼬리";
+        } else if (name.includes("네르기간테")) {
+            rare = "멸진룡의 보옥";
+            scale = "멸진룡의 재생가시";
+            shell = "멸진룡의 견갑각";
+            claw = "멸진룡의 첨예뿔";
+            tail = "멸진룡의 대꼬리";
+        } else if (name.includes("라잔")) {
+            rare = "금사자의 투기모피";
+            scale = "금사자의 검은털";
+            shell = "금사자의 송곳니";
+            claw = "금사자의 예리한 발톱";
+            tail = "금사자의 꼬리";
+        } else {
+            rare = `${name} 보옥`;
+            scale = `${name} 비늘`;
+            shell = `${name} 갑각`;
+            claw = `${name} 발톱`;
+            tail = `${name} 꼬리`;
+        }
+
+        if (personality === 'newbie') {
+            return Math.random() < 0.2 ? rare : scale;
+        } else if (personality === 'offensive') {
+            return Math.random() < 0.25 ? rare : claw;
+        } else if (personality === 'defensive') {
+            return shell;
+        } else if (personality === 'support') {
+            const items = ['그레이트 회복약', '생명의 가루', '비약', '귀인약'];
+            return items[Math.floor(Math.random() * items.length)];
+        } else {
+            return Math.random() < 0.15 ? rare : tail;
+        }
+    }
+
     triggerCartAnimation(weapon) {
         const container = document.createElement('div');
         container.className = 'game-hunt-cart-container';
@@ -502,7 +562,7 @@ class HuntEffect extends BaseEffect {
                         statusText = '😎 갈무리 생략';
                     } else if (w.personality === 'support') {
                         emojis = ['🎒', '💚', '🥰', '🌱'];
-                        statusText = '🎒 갈무리중... (약초)';
+                        statusText = '🌱 채집중... (약초)';
                     } else if (w.personality === 'newbie') {
                         emojis = ['🐣', '🤩', '🎉', '🍖'];
                         statusText = '🐣 갈무리중... (신남!)';
@@ -518,7 +578,13 @@ class HuntEffect extends BaseEffect {
                     }
 
                     if (w.index === winner.index) {
-                        statusText = '🏆 MVP 🏆';
+                        if (w.personality === 'veteran') {
+                            statusText = '🏆 MVP (갈무리 생략)';
+                        } else if (w.personality === 'support') {
+                            statusText = '🏆 MVP (채집중...)';
+                        } else {
+                            statusText = '🏆 MVP (갈무리중...)';
+                        }
                         weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
                         void weaponCard.offsetWidth;
                         weaponCard.classList.add('victory-jump');
@@ -538,6 +604,23 @@ class HuntEffect extends BaseEffect {
                             this.renderer.spawnVictoryEmoji(w.index, emoji);
                         }, idx * 600);
                     });
+
+                    // After 3 seconds, show carved/gathered material
+                    setTimeout(() => {
+                        const newTag = card.querySelector(`#status-tag-${w.index}`);
+                        if (newTag) {
+                            if (w.personality === 'veteran') {
+                                newTag.textContent = '😎 커피 한 잔의 여유';
+                            } else {
+                                const material = this.getMonsterMaterialName(this.selectedMonster.nameKO, w.personality);
+                                if (w.index === winner.index) {
+                                    newTag.textContent = `🏆 MVP (획득: ${material})`;
+                                } else {
+                                    newTag.textContent = `💎 획득: ${material}`;
+                                }
+                            }
+                        }
+                    }, 3000);
                 } else {
                     weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
                     void weaponCard.offsetWidth;
