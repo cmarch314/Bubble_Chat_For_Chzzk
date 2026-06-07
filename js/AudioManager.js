@@ -308,6 +308,13 @@ class AudioManager {
         }
         if (!fileName) return;
 
+        // [파일명 검증 가드] 음원 확장자가 포함되지 않은 텍스트형 키워드는 무시하여 404 에러 및 브라우저 디코딩 클릭 노이즈 예방
+        const hasAudioExtension = /\.(mp3|wav|ogg|m4a|aac|webm|flac)$/i.test(fileName);
+        const isUrl = fileName.startsWith('http://') || fileName.startsWith('https://');
+        if (!hasAudioExtension && !isUrl) {
+            return;
+        }
+
         // [중복 방지] 시각 효과 사운드 중복 차단
         const visualConf = this.configManager ? this.configManager.getVisualConfig() : {};
         const isVisualSound = Object.values(visualConf).some(vConf => {
