@@ -78,21 +78,21 @@ class HuntRenderer {
                 <div class="game-hunt-weapons-grid">
                     ${(() => {
                         const pMap = {
-                            veteran:   { label: "베테랑",  bg: "rgba(255,200,0,0.2)",   border: "#ffc800", color: "#ffc800" },
-                            support:   { label: "서포터",  bg: "rgba(0,220,100,0.2)",   border: "#00dc64", color: "#00dc64" },
-                            newbie:    { label: "몬린이",  bg: "rgba(100,200,255,0.2)", border: "#64c8ff", color: "#64c8ff" },
-                            offensive: { label: "공격형",  bg: "rgba(255,60,60,0.2)",   border: "#ff3c3c", color: "#ff3c3c" },
-                            defensive: { label: "수비형",  bg: "rgba(80,140,255,0.2)",  border: "#508cff", color: "#508cff" },
-                            normal:    { label: "밸런스",  bg: "rgba(160,160,160,0.2)", border: "#aaa",    color: "#aaa"    },
+                            veteran:   { label: "🏆 베테랑",  bg: "rgba(255,200,0,0.18)",   border: "#ffc800", color: "#ffc800" },
+                            support:   { label: "💚 서포터",  bg: "rgba(0,220,100,0.18)",   border: "#00dc64", color: "#00dc64" },
+                            newbie:    { label: "🐣 몬린이",  bg: "rgba(100,200,255,0.18)", border: "#64c8ff", color: "#64c8ff" },
+                            offensive: { label: "💥 공격형",  bg: "rgba(255,60,60,0.18)",   border: "#ff3c3c", color: "#ff3c3c" },
+                            defensive: { label: "🛡️ 수비형",  bg: "rgba(80,140,255,0.18)",  border: "#508cff", color: "#508cff" },
+                            normal:    { label: "⚖️ 밸런스",  bg: "rgba(160,160,160,0.18)", border: "#aaa",    color: "#aaa"    },
                         };
                         return selectedWeapons.map(w => {
                             const p = pMap[w.personality] || pMap.normal;
                             return `
-                            <div class="game-hunt-weapon-card" id="hunt-opt-${w.index}">
+                            <div class="game-hunt-weapon-card" id="hunt-opt-${w.index}" style="position: relative;">
+                                <div style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); border: 2px solid #ffaa00; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; color: #ffaa00; box-shadow: 0 0 8px rgba(255, 170, 0, 0.4); z-index: 5;">${w.index + 1}</div>
                                 <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" />
                                 <div class="game-hunt-weapon-name" style="font-size:1.6rem;font-weight:bold;color:#ffaa00;">${w.name}</div>
-                                <div style="font-size:0.82rem;font-weight:bold;background:${p.bg};border:1px solid ${p.border};border-radius:6px;padding:2px 8px;margin-top:4px;margin-bottom:6px;color:${p.color};">${p.label}</div>
-                                <div style="font-size:0.9rem;color:#fff;font-weight:bold;background:rgba(0,170,255,0.25);border:1px solid rgba(0,170,255,0.4);border-radius:6px;padding:3px 0;margin-top:2px;margin-bottom:8px;">참가 번호: ${w.index + 1}</div>
+                                <div style="font-size:1.15rem;font-weight:bold;background:${p.bg};border:1.5px solid ${p.border};border-radius:8px;padding:6px 12px;margin-top:10px;margin-bottom:12px;color:${p.color};box-shadow: 0 0 10px ${p.bg};">${p.label}</div>
                                 <div class="bet-count" style="font-size:1.05rem;color:#aaa;font-weight:bold;">0명 신청</div>
                             </div>`;
                         }).join("");
