@@ -5078,4 +5078,157 @@ body {
     100% { opacity: 0; transform: translate(-50%, -10px); }
 }
 
-
+
+
+/* ==========================================================================
+   Long Sword Spirit Levels, Weapon Modes & Attack Animations
+   ========================================================================== */
+
+/* Long Sword Spirit Level Borders */
+.ls-spirit-1 {
+    border-color: #ffffff !important;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7) !important;
+}
+.ls-spirit-2 {
+    border-color: #f1c40f !important;
+    box-shadow: 0 0 20px rgba(241, 196, 15, 0.8) !important;
+}
+.ls-spirit-3 {
+    border-color: #e74c3c !important;
+    box-shadow: 0 0 25px rgba(231, 76, 60, 0.95) !important;
+    animation: ls-spirit-3-pulse 1s infinite alternate;
+}
+@keyframes ls-spirit-3-pulse {
+    0% { box-shadow: 0 0 15px rgba(231, 76, 60, 0.6); }
+    100% { box-shadow: 0 0 30px rgba(231, 76, 60, 1); }
+}
+
+/* Dual Blades Demon Mode */
+.db-demon-mode {
+    border-color: #e74c3c !important;
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.9) !important;
+    animation: db-demon-pulse 0.8s infinite alternate;
+}
+@keyframes db-demon-pulse {
+    0% { filter: saturate(1) brightness(1); }
+    100% { filter: saturate(1.5) brightness(1.2); }
+}
+
+/* Charge Blade Shield Charged */
+.cb-shield-charged {
+    border-color: #e67e22 !important;
+    box-shadow: 0 0 20px rgba(230, 126, 34, 0.8) !important;
+}
+
+/* Insect Glaive Triple Up */
+.ig-3-extracts {
+    border-color: #2ecc71 !important;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.8) !important;
+}
+
+/* Weapon Attack Animations */
+.attack-melee-anim {
+    animation: melee-slash 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes melee-slash {
+    0% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-40px) rotate(-10deg) scale(1.05); }
+    100% { transform: translateY(0) rotate(0deg); }
+}
+
+.attack-hammer-kkt {
+    animation: hammer-kkt-anim 1.2s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes hammer-kkt-anim {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    20% { transform: translateY(-30px) rotate(-5deg); }
+    35% { transform: translateY(0) rotate(5deg); }
+    50% { transform: translateY(-30px) rotate(-5deg); }
+    65% { transform: translateY(0) rotate(5deg); }
+    80% { transform: translateY(-50px) rotate(-15deg); }
+    90% { transform: translateY(10px) rotate(10deg); }
+}
+
+.attack-hammer-keep-sway {
+    animation: hammer-sway-anim 0.45s ease-in-out forwards;
+}
+@keyframes hammer-sway-anim {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    30% { transform: translateX(-40px) rotate(-5deg) scale(1.02); }
+    70% { transform: translateX(40px) rotate(5deg) scale(1.02); }
+}
+
+.attack-hammer-charge2 {
+    animation: hammer-upper-anim 0.65s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes hammer-upper-anim {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    30% { transform: translateY(20px) rotate(5deg) scale(0.95); }
+    60% { transform: translateY(-70px) rotate(-20deg) scale(1.1); }
+}
+
+.attack-hammer-charge3 {
+    animation: hammer-smash-anim 0.9s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes hammer-smash-anim {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    40% { transform: translateY(-40px) rotate(-10deg) scale(1.05); }
+    70% { transform: translateY(30px) rotate(15deg) scale(1.15); }
+}
+
+.attack-hammer-tornado {
+    animation: hammer-tornado-anim 1.6s linear forwards;
+}
+@keyframes hammer-tornado-anim {
+    0% { transform: rotate(0) scale(1); }
+    20% { transform: rotate(360deg) scale(1.1); }
+    40% { transform: rotate(720deg) scale(1.1); }
+    60% { transform: rotate(1080deg) scale(1.1); }
+    80% { transform: rotate(1440deg) scale(1.1); }
+    100% { transform: rotate(1800deg) scale(1); }
+}
+
+.attack-hammer-anim {
+    animation: hammer-hit 0.4s ease-out forwards;
+}
+@keyframes hammer-hit {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    40% { transform: translateY(-30px) rotate(-8deg); }
+    70% { transform: translateY(15px) rotate(8deg); }
+}
+
+.attack-gs-charge1 {
+    animation: gs-charge1-anim 0.8s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes gs-charge1-anim {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(15px) scale(0.95); filter: brightness(1.2); }
+    75% { transform: translateY(-60px) scale(1.1); }
+}
+
+.attack-gs-charge2 {
+    animation: gs-charge2-anim 1.0s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes gs-charge2-anim {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(20px) scale(0.9) filter(brightness(1.4)); }
+    75% { transform: translateY(-80px) scale(1.15); }
+}
+
+.attack-gs-charge3 {
+    animation: gs-charge3-anim 1.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes gs-charge3-anim {
+    0%, 100% { transform: translateY(0) scale(1); }
+    60% { transform: translateY(30px) scale(0.85); filter: brightness(1.6) drop-shadow(0 0 15px rgba(255,170,0,0.8)); }
+    80% { transform: translateY(-110px) scale(1.25); }
+}
+
+.attack-bowgun-anim {
+    animation: bowgun-recoil 0.6s ease-out forwards;
+}
+@keyframes bowgun-recoil {
+    0%, 100% { transform: translateY(0); }
+    15% { transform: translateY(20px) scale(0.97); }
+    40% { transform: translateY(-5px); }
+}
