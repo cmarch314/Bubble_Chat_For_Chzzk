@@ -204,19 +204,17 @@ class HuntRenderer {
                         👤 ${w.hunterName}
                     </div>
                     
-                    <div id="personality-tag-${w.index}" style="font-size:0.85rem; color:#aaa; margin-top:2px; margin-bottom:8px; display:flex; justify-content:center; gap:8px;">
-                        <span style="color: #ffaa00; font-weight: bold;">${w.name}</span>
-                        <span>|</span>
-                        <span>성향: ${
-                            w.personality === 'offensive' ? '💥 공격형' : 
-                            w.personality === 'defensive' ? '🛡️ 수비형' : 
-                            w.personality === 'veteran' ? '🏆 베테랑' : 
-                            w.personality === 'support' ? '💚 서포터' : 
-                            w.personality === 'newbie' ? '🐣 몬린이' : 
-                            '⚖️ 밸런스형'
+                    <div id="personality-tag-${w.index}" style="font-size:1.15rem; color:#aaa; margin-top:2px; margin-bottom:8px; display:flex; justify-content:center; gap:10px; align-items:center; font-weight:bold;">
+                        <span>${
+                            w.personality === 'offensive' ? '💥' : 
+                            w.personality === 'defensive' ? '🛡️' : 
+                            w.personality === 'veteran' ? '🏆' : 
+                            w.personality === 'support' ? '💚' : 
+                            w.personality === 'newbie' ? '🐣' : 
+                            '⚖️'
                         }</span>
-                        <span>|</span>
-                        <span id="potion-count-${w.index}">🧪 포션 ${w.potions}/10</span>
+                        <span style="opacity:0.3;">|</span>
+                        <span id="potion-count-${w.index}">🧪 ${w.potions}</span>
                     </div>
                     
                     <!-- HP Bar -->
@@ -230,7 +228,7 @@ class HuntRenderer {
                         <div class="game-hunt-atb-fill" id="atb-fill-${w.index}" style="width: 0%; height:100%; background:#00a8ff; transition: width 0.1s linear;"></div>
                     </div>
 
-                    <div class="game-hunt-status-tag active" id="status-tag-${w.index}">전투 대기</div>
+                    <div class="game-hunt-status-tag active" id="status-tag-${w.index}">⚔️</div>
                 </div>`).join('')}
             </div>
         `;
@@ -312,7 +310,7 @@ class HuntRenderer {
     updatePotionCountUI(idx, count) {
         if (!this.card) return;
         const el = this.card.querySelector(`#potion-count-${idx}`);
-        if (el) el.textContent = `🧪 포션 ${count}/10`;
+        if (el) el.textContent = `🧪 ${count}`;
     }
 
     updateOverheatUI(idx, duration) {
@@ -579,7 +577,7 @@ class HuntRenderer {
 
                 const tag = this.card.querySelector(`#status-tag-${idx}`);
                 if (tag) {
-                    tag.textContent = '다운!';
+                    tag.textContent = '🥴';
                     tag.className = 'game-hunt-status-tag fainted';
                 }
 
@@ -588,7 +586,7 @@ class HuntRenderer {
                     if (w.status === 'alive' && w.hp > 0) {
                         const currentTag = this.card.querySelector(`#status-tag-${idx}`);
                         if (currentTag) {
-                            currentTag.textContent = '';
+                            currentTag.textContent = '⚔️';
                             currentTag.className = 'game-hunt-status-tag active';
                         }
                     }
@@ -600,7 +598,7 @@ class HuntRenderer {
 
                 const tag = this.card.querySelector(`#status-tag-${idx}`);
                 if (tag) {
-                    tag.textContent = '넘어짐';
+                    tag.textContent = '💫';
                     tag.className = 'game-hunt-status-tag stunned';
                 }
 
@@ -609,7 +607,7 @@ class HuntRenderer {
                     if (w.status === 'alive' && w.hp > 0) {
                         const currentTag = this.card.querySelector(`#status-tag-${idx}`);
                         if (currentTag) {
-                            currentTag.textContent = '';
+                            currentTag.textContent = '⚔️';
                             currentTag.className = 'game-hunt-status-tag active';
                         }
                     }
@@ -636,13 +634,13 @@ class HuntRenderer {
         if (isStunned) {
             if (weaponCard) weaponCard.classList.add('stunned');
             if (tag) {
-                tag.textContent = '기절 상태';
+                tag.textContent = '🌀';
                 tag.className = 'game-hunt-status-tag stunned';
             }
         } else {
             if (weaponCard) weaponCard.classList.remove('stunned');
             if (tag) {
-                tag.textContent = '';
+                tag.textContent = '⚔️';
                 tag.className = 'game-hunt-status-tag active';
             }
         }
@@ -652,7 +650,7 @@ class HuntRenderer {
         if (!this.card) return;
         const tag = this.card.querySelector(`#status-tag-${idx}`);
         if (tag) {
-            tag.textContent = `부활대기 (${timerVal}s)`;
+            tag.textContent = `💀 ${timerVal}s`;
             tag.className = 'game-hunt-status-tag fainted';
         }
     }
@@ -777,7 +775,7 @@ class HuntRenderer {
                 weaponCard.classList.add('roar-stunned');
             }
             if (tag) {
-                tag.textContent = '🙉 귀막기 경직';
+                tag.textContent = '🙉';
                 tag.className = 'game-hunt-status-tag stunned';
             }
         } else {
@@ -786,7 +784,7 @@ class HuntRenderer {
                 weaponCard.classList.remove('roar-stunned');
             }
             if (tag) {
-                tag.textContent = '';
+                tag.textContent = '⚔️';
                 tag.className = 'game-hunt-status-tag active';
             }
         }
