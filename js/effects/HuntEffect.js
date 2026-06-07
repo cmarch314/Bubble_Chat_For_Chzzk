@@ -80,7 +80,8 @@ class HuntEffect extends BaseEffect {
             dual_blades: [
                 { name: "귀인화 진입", dmg: 60, sharp: -2, special: "👹 [귀인화] 안개를 뿜어내며 기동성과 파괴력을 극대화합니다!" },
                 { name: "귀인돌진연참", dmg: 150, sharp: -6 },
-                { name: "귀인 난무", dmg: 460, sharp: -16, special: "🌀 [난무] 제자리에서 몬스터의 약점을 잘게 썰어 대량의 출혈을 냅니다!" }
+                { name: "귀인 난무", dmg: 460, sharp: -16, special: "🌀 [난무] 제자리에서 몬스터의 약점을 잘게 썰어 대량의 출혈을 냅니다!" },
+                { name: "공중 회전 난무 (리와이베기)", dmg: 520, sharp: -18, special: "💫 [리와이베기] 공중으로 도약, 몬스터 위에서 고속 회전 난무를 퍼붓습니다!" }
             ],
             hammer: [
                 { name: "쿵 쿵 따", dmg: 260, sharp: -6, stun: 50 },
@@ -96,10 +97,12 @@ class HuntEffect extends BaseEffect {
             ],
             charge_blade: [
                 { name: "검 모아 2단베기", dmg: 130, sharp: -4, nextSpeed: "very_fast" },
-                { name: "고압속성베기 (방패강화)", dmg: 200, sharp: -4, nextSpeed: "very_fast" },
+                { name: "방패치기", dmg: 90, sharp: 0, stun: 30, nextSpeed: "very_fast" },
+                { name: "병충전", dmg: 0, sharp: 0, nextSpeed: "very_fast", special: "⚡ [병충전] 검 격침 게이지를 병에 주입하여 phial을 모두 충전합니다! (병 5개 충전)" },
                 { name: "변형 (검→도끼)", dmg: 150, sharp: -5, special: "⚙️ [속성변형] 검과 방패를 합체하여 거대한 도끼 모드로 변형합니다!", nextSpeed: "slow" },
-                { name: "도끼 속성해방베기 I", dmg: 250, sharp: -6, nextSpeed: "slow" },
-                { name: "초고출력 속성해방베기", dmg: 650, sharp: -15, special: "⚡ [초고출력] 초거대 검으로 지면을 내리치며 대자연의 전격을 방출합니다!", nextSpeed: "very_fast" },
+                { name: "도끼 속성해방베기 I", dmg: 220, sharp: -6, nextSpeed: "slow" },
+                { name: "고출력 속성해방베기", dmg: 350, sharp: -8, nextSpeed: "slow", special: "⚡ [고출력] 축적된 에너지를 해방하여 몬스터에게 강한 충격파를 방출합니다!" },
+                { name: "초고출력 속성해방베기", dmg: 400, sharp: -15, special: "💥 [초고출력] 병 전량을 일시에 격발해 지면을 내리치며 대자연의 전격을 방출합니다!", nextSpeed: "slow" },
                 { name: "변형 (도끼→검)", dmg: 120, sharp: -3, special: "⚙️ [속성변형] 도끼를 분리하여 가벼운 검과 방패의 검 모드로 변형합니다!", nextSpeed: "very_fast" }
             ],
             lance: [
@@ -110,8 +113,9 @@ class HuntEffect extends BaseEffect {
             ],
             gunlance: [
                 { name: "수평찌르기", dmg: 90, sharp: -3 },
-                { name: "포격 (방어무시)", dmg: 160, sharp: -6, special: "🔥 [포격] 포격과 강습을 거쳐 화력 폭발을 냅니다." },
-                { name: "풀버스트", dmg: 480, sharp: -18, special: "💥 [풀버스트] 장전된 잔탄을 일시에 격발해 대규모 화력 폭발을 냅니다!" }
+                { name: "포격 (방어무시)", dmg: 160, sharp: -6, special: "🔥 [포격] 포신 내 탄약 화염으로 육질을 무시하는 충격파를 입힙니다." },
+                { name: "풀버스트", dmg: 480, sharp: -18, special: "💥 [풀버스트] 장전된 잔탄을 일시에 격발해 대규모 화력 폭발을 냅니다!" },
+                { name: "용격포", dmg: 680, sharp: -25, special: "💥 [용격포] 전탄 압축 화염을 격발하여 대재앙의 열량을 방출합니다! (30초간 과열)" }
             ],
             switch_axe: [
                 { name: "도끼 세로베기", dmg: 120, sharp: -4 },
@@ -258,7 +262,13 @@ class HuntEffect extends BaseEffect {
                 respawnTimer: 0,
                 personality: personality,
                 potions: 10,
-                lifepowders: 1    // 팀 힐 아이템 (라이프파우더)
+                lifepowders: 1,       // 팀 힐 아이템 (라이프파우더)
+                spiritLevel: 0,       // 태도 전용: 기인 게이지 레벨 (0~3)
+                demonModeDuration: 0, // 쌍검 전용: 귀인화 지속시간 (초)
+                phials: 5,            // 차지액스 전용: 병 개수 (0~5)
+                overheatDuration: 0,  // 건랜스 전용: 오버히트 남은 시간 (초)
+                extractBuffs: { red: 0, white: 0, orange: 0 }, // 조충곤 전용: 진액 상태
+                extractDuration: 0    // 조충곤 전용: 3색 버프 지속시간 (초)
             };
         });
 
@@ -644,7 +654,28 @@ class HuntEffect extends BaseEffect {
             <div class="game-hunt-weapons-grid">
                 ${this.selectedWeapons.map(w => `
                 <div class="game-hunt-weapon-card" id="fight-card-${w.index}" style="position:relative; transition: transform 0.15s ease, border-color 0.15s ease;">
-                    <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" />
+                    <div class="game-hunt-weapon-img-container" style="position: relative; width: 95px; height: 95px; margin: 0 auto 12px;">
+                        <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" style="margin: 0;" />
+                        ${w.id === 'gunlance' ? `
+                            <div class="gunlance-overheat-overlay" id="overheat-overlay-${w.index}" style="position: absolute; top: 0; left: 0; width: 95px; height: 95px; background: linear-gradient(180deg, #ff3b30 0%, #ff9500 100%); mask-image: url('img/weapons/gunlance.svg'); -webkit-mask-image: url('img/weapons/gunlance.svg'); mask-size: 95px 95px; -webkit-mask-size: 95px 95px; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-position: center; -webkit-mask-position: center; pointer-events: none; transition: clip-path 0.3s ease; clip-path: inset(${w.overheatDuration ? (30 - w.overheatDuration) / 30 * 100 : 100}% 0 0 0);"></div>
+                        ` : ''}
+                        ${w.id === 'charge_blade' ? `
+                            <div class="cb-phial-dots" id="cb-phials-${w.index}" style="position: absolute; bottom: 0; right: 0; display: flex; gap: 2px; background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 4px; pointer-events: none;">
+                                ${Array.from({length: 5}).map((_, i) => `
+                                    <span class="cb-dot" style="font-size: 0.8rem; color: #ffffff; line-height: 1; transition: opacity 0.2s;">
+                                        ${i < (w.phials !== undefined ? w.phials : 5) ? '●' : '○'}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                        ${w.id === 'insect_glaive' ? `
+                            <div class="ig-extracts" id="ig-extracts-${w.index}" style="position: absolute; bottom: 0; right: 0; display: flex; gap: 4px; background: rgba(0,0,0,0.6); padding: 2px 4px; border-radius: 4px; pointer-events: none;">
+                                <span class="ig-dot red" style="font-size: 0.8rem; color: ${w.extractBuffs && w.extractBuffs.red ? '#ff3b30' : '#444'}; line-height: 1;">●</span>
+                                <span class="ig-dot white" style="font-size: 0.8rem; color: ${w.extractBuffs && w.extractBuffs.white ? '#ffffff' : '#444'}; line-height: 1;">●</span>
+                                <span class="ig-dot orange" style="font-size: 0.8rem; color: ${w.extractBuffs && w.extractBuffs.orange ? '#ff9500' : '#444'}; line-height: 1;">●</span>
+                            </div>
+                        ` : ''}
+                    </div>
                     <div class="game-hunt-weapon-name" style="font-size: 2.1rem; font-weight: bold; color:${w.hunterColor || '#ffaa00'}; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; margin-bottom: 4px;">
                         👤 ${w.hunterName}
                     </div>
@@ -652,7 +683,14 @@ class HuntEffect extends BaseEffect {
                     <div id="personality-tag-${w.index}" style="font-size:0.85rem; color:#aaa; margin-top:2px; margin-bottom:8px; display:flex; justify-content:center; gap:8px;">
                         <span style="color: #ffaa00; font-weight: bold;">${w.name}</span>
                         <span>|</span>
-                        <span>성향: ${w.personality === 'offensive' ? '💥 공격형' : w.personality === 'defensive' ? '🛡️ 수비형' : '⚖️ 밸런스형'}</span>
+                        <span>성향: ${
+                            w.personality === 'offensive' ? '💥 공격형' : 
+                            w.personality === 'defensive' ? '🛡️ 수비형' : 
+                            w.personality === 'veteran' ? '🏆 베테랑' : 
+                            w.personality === 'support' ? '💚 서포터' : 
+                            w.personality === 'newbie' ? '🐣 몬린이' : 
+                            '⚖️ 밸런스형'
+                        }</span>
                         <span>|</span>
                         <span id="potion-count-${w.index}">🧪 포션 ${w.potions}/10</span>
                     </div>
@@ -685,15 +723,51 @@ class HuntEffect extends BaseEffect {
             }
         };
 
-        const shakeWeapon = (idx, borderClr = '#ff3b30') => {
+        const restoreBorder = (wIndex) => {
+            const w = this.selectedWeapons[wIndex];
+            if (!w) return;
+            const weaponCard = card.querySelector(`#fight-card-${w.index}`);
+            if (weaponCard) {
+                // Remove all spirit level classes, demon mode, shield charge, extracts, and inline overrides
+                weaponCard.classList.remove('ls-spirit-1', 'ls-spirit-2', 'ls-spirit-3', 'db-demon-mode', 'cb-shield-charged', 'ig-3-extracts');
+                weaponCard.style.borderColor = '';
+                weaponCard.style.boxShadow = '';
+
+                if (w.id === 'long_sword' && w.spiritLevel > 0) {
+                    weaponCard.classList.add(`ls-spirit-${w.spiritLevel}`);
+                }
+                if (w.id === 'dual_blades' && w.demonModeDuration > 0) {
+                    weaponCard.classList.add('db-demon-mode');
+                }
+                if (w.id === 'charge_blade' && w.phials > 0) {
+                    weaponCard.classList.add('cb-shield-charged'); // or cb style
+                }
+                if (w.id === 'insect_glaive' && w.extractDuration > 0) {
+                    weaponCard.classList.add('ig-3-extracts');
+                }
+            }
+        };
+
+        const shakeWeapon = (idx, borderClr = '#ff3b30', isAttack = false) => {
             const weaponCard = card.querySelector(`#fight-card-${idx}`);
             if (weaponCard) {
-                weaponCard.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px) scale(0.95)`;
-                weaponCard.style.borderColor = borderClr;
-                setTimeout(() => {
-                    weaponCard.style.transform = '';
-                    weaponCard.style.borderColor = '';
-                }, 150);
+                if (isAttack) {
+                    weaponCard.style.zIndex = "10";
+                    weaponCard.style.transform = "translateY(-60px) scale(1.1)";
+                    weaponCard.style.borderColor = borderClr;
+                    setTimeout(() => {
+                        weaponCard.style.transform = '';
+                        restoreBorder(idx);
+                        weaponCard.style.zIndex = "";
+                    }, 200);
+                } else {
+                    weaponCard.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px) scale(0.95)`;
+                    weaponCard.style.borderColor = borderClr;
+                    setTimeout(() => {
+                        weaponCard.style.transform = '';
+                        restoreBorder(idx);
+                    }, 150);
+                }
             }
         };
 
@@ -747,10 +821,56 @@ class HuntEffect extends BaseEffect {
                             w.ammo = 5;
                             w.atb = 0;
                             w.comboIndex = 0;
+                            w.spiritLevel = 0;
+                            w.demonModeDuration = 0;
+                            w.phials = 5;
+                            w.overheatDuration = 0;
+                            w.extractBuffs = { red: 0, white: 0, orange: 0 };
+                            w.extractDuration = 0;
+                            restoreBorder(w.index);
+
                             this.playMHAsset('mh_aibo.mp3', '아이보'); // play "Aibo!" SFX
                             addLog(`✨ [부활] ${w.name}이(가) "아이보!" 소리와 함께 전장에 재참여하였습니다!`, '#00ffa3');
                             this.updateHpUI(card, w);
                             shakeWeapon(w.index, '#00ffa3');
+                        }
+                    }
+                });
+
+                // Ticking down buffs/overheats
+                this.selectedWeapons.forEach(w => {
+                    if (w.status === 'alive') {
+                        // 1. Dual Blades Demon Mode duration decrement
+                        if (w.id === 'dual_blades' && w.demonModeDuration && w.demonModeDuration > 0) {
+                            w.demonModeDuration--;
+                            if (w.demonModeDuration === 0) {
+                                addLog(`👹 [귀인화 해제] ${w.hunterName}의 귀인화 상태가 해제되었습니다.`, '#aaa');
+                                restoreBorder(w.index);
+                            }
+                        }
+
+                        // 2. Gunlance Overheat duration decrement
+                        if (w.id === 'gunlance' && w.overheatDuration && w.overheatDuration > 0) {
+                            w.overheatDuration--;
+                            const weaponCard = card.querySelector(`#fight-card-${w.index}`);
+                            const overlay = weaponCard ? weaponCard.querySelector(`#overheat-overlay-${w.index}`) : null;
+                            if (overlay) {
+                                let pct = ((30 - w.overheatDuration) / 30) * 100;
+                                overlay.style.clipPath = `inset(${pct}% 0 0 0)`;
+                            }
+                            if (w.overheatDuration === 0) {
+                                addLog(`🔥 [오버히트 해제] ${w.hunterName}의 건랜스 용격포 열기가 완전히 식어 오버히트가 해제되었습니다!`, '#00a8ff');
+                            }
+                        }
+
+                        // 3. Insect Glaive tripleUp buff duration decrement
+                        if (w.id === 'insect_glaive' && w.extractDuration && w.extractDuration > 0) {
+                            w.extractDuration--;
+                            if (w.extractDuration === 0) {
+                                w.extractBuffs = { red: 0, white: 0, orange: 0 };
+                                addLog(`🐝 [진액 버프 해제] ${w.hunterName}의 3색 진액 효과가 소멸되었습니다.`, '#aaa');
+                                restoreBorder(w.index);
+                            }
                         }
                     }
                 });
@@ -978,10 +1098,14 @@ class HuntEffect extends BaseEffect {
             // Accumulate Weapon ATBs (Pause if knocked_down or dead)
             this.selectedWeapons.forEach(w => {
                 if (w.status === 'alive' || w.status === 'stunned') {
-                    let fillRate = 1.0; // default normal
-                    if (w.speedGroup === 'very_fast') fillRate = 1.5;
-                    else if (w.speedGroup === 'fast') fillRate = 1.25;
-                    else if (w.speedGroup === 'slow') fillRate = 0.8;
+                    let fillRate = 1.0; // default normal (halved from 2.0)
+                    if (w.speedGroup === 'very_fast') fillRate = 2.0; // halved from 4.0
+                    else if (w.speedGroup === 'fast') fillRate = 1.5;  // halved from 3.0
+                    else if (w.speedGroup === 'slow') fillRate = 0.65; // halved from 1.3
+                    // 귀인화 중 쌍검 ATB +20% 보정
+                    if (w.id === 'dual_blades' && w.demonModeDuration && w.demonModeDuration > 0) {
+                        fillRate *= 1.2;
+                    }
 
                     w.atb = Math.min(100, w.atb + fillRate);
                     const fill = card.querySelector(`#atb-fill-${w.index}`);
@@ -1170,10 +1294,21 @@ class HuntEffect extends BaseEffect {
                         // HBG has shield too!
                         const hasShield = target.type === 'shield' || target.id === 'heavy_bowgun';
 
-                        if (hasShield && defendRoll < 0.85) {
+                        // 성향별 회피/가드 확률 적용
+                        let guardProb = 0.85;
+                        let dodgeProb = 0.75;
+                        if (target.personality === 'veteran') {
+                            guardProb = 0.90;
+                            dodgeProb = 0.90;
+                        } else if (target.personality === 'newbie') {
+                            guardProb = 0.45;
+                            dodgeProb = 0.35;
+                        }
+
+                        if (hasShield && defendRoll < guardProb) {
                             damage = Math.max(1, Math.floor(damage * 0.08)); // Guard blocks 92%
                             isGuard = true;
-                        } else if (!hasShield && defendRoll < 0.75) {
+                        } else if (!hasShield && defendRoll < dodgeProb) {
                             damage = 0; // Dodge evades 100%
                             isDodge = true;
                         }
@@ -1308,6 +1443,14 @@ class HuntEffect extends BaseEffect {
                         // Death / Cart check
                         if (target.hp <= 0) {
                             target.status = 'dead';
+                            target.spiritLevel = 0;
+                            target.demonModeDuration = 0;
+                            target.phials = 5;
+                            target.overheatDuration = 0;
+                            target.extractBuffs = { red: 0, white: 0, orange: 0 };
+                            target.extractDuration = 0;
+                            restoreBorder(target.index);
+
                             this.cartCount++;
                             updateCartBoard();
                             this.triggerCartAnimation(target);
@@ -1433,6 +1576,10 @@ class HuntEffect extends BaseEffect {
                     if (this.monsterState === 'knocked_down' && combos.length > 0) {
                         let maxDmgCombo = combos[0];
                         for (let i = 1; i < combos.length; i++) {
+                            // 태도: 기인투구깨기는 spiritLevel 2 이상일 때만 선택
+                            if (combos[i].name === '기인투구깨기') {
+                                if (w.id === 'long_sword' && (w.spiritLevel || 0) < 2) continue;
+                            }
                             if (combos[i].dmg > maxDmgCombo.dmg) {
                                 maxDmgCombo = combos[i];
                             }
@@ -1442,10 +1589,140 @@ class HuntEffect extends BaseEffect {
                             isKnockdownAttack = true;
                         }
                     }
+
+                    // 쌍검: 귀인화 중에 index 0(귀인화 진입)에 오면 건너뜀
+                    if (w.id === 'dual_blades' && w.comboIndex === 0 && w.demonModeDuration > 0) {
+                        w.comboIndex = 1;
+                        currentCombo = combos[1] || currentCombo;
+                    }
+
+                    // 태도: 기인투구깨기는 spiritLevel 3 이상일 때만 진행
+                    if (w.id === 'long_sword' && w.comboIndex === 3 && (w.spiritLevel || 0) < 3) {
+                        w.comboIndex = 0;
+                        currentCombo = combos[0];
+                    }
+
+                    // 건랜스: 오버히트 중에 용격포 콤보 진입 시 수평찌르기로 강제 리다이렉트
+                    if (w.id === 'gunlance' && w.comboIndex === 3) {
+                        if (w.overheatDuration && w.overheatDuration > 0) {
+                            w.comboIndex = 0;
+                            currentCombo = combos[0];
+                        }
+                    }
                     
                     if (currentCombo) {
                         let damage = currentCombo.dmg;
-                        
+
+                        // 태도: 기인 레벨에 따른 데미지 배수
+                        if (w.id === 'long_sword') {
+                            const spiritMults = { 0: 1.0, 1: 1.05, 2: 1.10, 3: 1.20 };
+                            const mult = spiritMults[w.spiritLevel || 0] || 1.0;
+                            damage = Math.floor(damage * mult);
+                        }
+
+                        // 쌍검: 귀인화 중 데미지 1.2배
+                        if (w.id === 'dual_blades' && w.demonModeDuration > 0) {
+                            damage = Math.floor(damage * 1.2);
+                        }
+
+                        // 차지액스: 병(phial) 충전 및 해방 로직
+                        if (w.id === 'charge_blade') {
+                            if (currentCombo.name === '병충전') {
+                                w.phials = 5;
+                                addLog(`⚡ [병충전] ${w.hunterName}이(가) 검 에너지를 병에 주입하여 병 5개를 완전히 장전했습니다!`, '#00a8ff');
+                                this.playMHAsset('mh_reload.mp3', '재장전');
+                            } else if (currentCombo.name === '도끼 속성해방베기 I') {
+                                if ((w.phials || 0) > 0) {
+                                    w.phials--;
+                                    damage += 70;
+                                    addLog(`⚡ [병소모] 도끼 속성해방베기 I! 병 1개를 소비하여 속성 추타를 가합니다! (남은 병: ${w.phials}/5)`, '#ffaa00');
+                                }
+                            } else if (currentCombo.name === '고출력 속성해방베기') {
+                                if ((w.phials || 0) > 0) {
+                                    w.phials--;
+                                    damage += 100;
+                                    addLog(`⚡ [병소모] 고출력 속성해방베기! 병 1개를 소비하여 속성 충격파가 추가 폭발합니다! (남은 병: ${w.phials}/5)`, '#ffaa00');
+                                }
+                            } else if (currentCombo.name === '초고출력 속성해방베기') {
+                                const phialsUsed = w.phials || 0;
+                                w.phials = 0;
+                                damage += phialsUsed * 120;
+                                addLog(`💥 [초고출력] 초고출력 속성해방베기! 병 ${phialsUsed}개를 한꺼번에 해방하여 전천후 대폭발을 일으킵니다! (데미지 +${phialsUsed * 120})`, '#ff3333');
+                                this.playMHAsset('mh_heavy_hit.mp3', '팅!');
+                            }
+
+                            // Update phial dots UI
+                            const weaponCard = card.querySelector(`#fight-card-${w.index}`);
+                            const cbPhials = weaponCard ? weaponCard.querySelector(`#cb-phials-${w.index}`) : null;
+                            if (cbPhials) {
+                                const dots = cbPhials.querySelectorAll('.cb-dot');
+                                dots.forEach((dot, idx) => {
+                                    dot.textContent = idx < (w.phials || 0) ? '●' : '○';
+                                });
+                            }
+                        }
+
+                        // 건랜스: 용격포 시전 시 오버히트 30초 활성화
+                        if (w.id === 'gunlance' && currentCombo.name === '용격포') {
+                            w.overheatDuration = 30;
+                            addLog(`🔥 [용격포] ${w.hunterName}이(가) 용격포를 격발했습니다! 대량의 열기로 인해 30초간 오버히트 상태가 됩니다!`, '#ff5500');
+                            this.playMHAsset('mh_reload.mp3', '재장전');
+                            const weaponCard = card.querySelector(`#fight-card-${w.index}`);
+                            const overlay = weaponCard ? weaponCard.querySelector(`#overheat-overlay-${w.index}`) : null;
+                            if (overlay) {
+                                overlay.style.clipPath = 'inset(0% 0 0 0)'; // fill full red
+                            }
+                        }
+
+                        // 조충곤: 진액 추출 및 트리플업 버프 로직
+                        if (w.id === 'insect_glaive') {
+                            if (currentCombo.name === '진액 추출') {
+                                // 획득하지 않은 색상 순서대로 획득 (빨강 -> 하양 -> 주황)
+                                let colorAcquired = "";
+                                if (!w.extractBuffs.red) {
+                                    w.extractBuffs.red = 1;
+                                    colorAcquired = "빨강";
+                                } else if (!w.extractBuffs.white) {
+                                    w.extractBuffs.white = 1;
+                                    colorAcquired = "하양";
+                                } else if (!w.extractBuffs.orange) {
+                                    w.extractBuffs.orange = 1;
+                                    colorAcquired = "주황";
+                                }
+
+                                if (colorAcquired) {
+                                    addLog(`🐝 [진액 획득] ${w.hunterName}이(가) ${colorAcquired} 진액을 획득했습니다!`, '#e0ffa3');
+                                    this.playMHAudioFile('Unified_SFX/MH - Item Found.mp3');
+                                }
+
+                                // 3색 버프 완성 여부 체크
+                                if (w.extractBuffs.red && w.extractBuffs.white && w.extractBuffs.orange && (!w.extractDuration || w.extractDuration === 0)) {
+                                    w.extractDuration = 20; // 20초간 버프
+                                    addLog(`🐝 [진액 트리플업] ${w.hunterName}이(가) 3색 진액을 모두 획득하여 20초간 공격력이 30% 증가합니다!`, '#ffaa00');
+                                    this.playMHAsset('mh_reload.mp3', '재장전');
+                                    restoreBorder(w.index);
+                                }
+                            }
+
+                            // 버프 적용 시 데미지 1.3배
+                            if (w.extractDuration && w.extractDuration > 0) {
+                                damage = Math.floor(damage * 1.3);
+                            }
+
+                            // UI 갱신
+                            const weaponCard = card.querySelector(`#fight-card-${w.index}`);
+                            const igExtracts = weaponCard ? weaponCard.querySelector(`#ig-extracts-${w.index}`) : null;
+                            if (igExtracts) {
+                                const redDot = igExtracts.querySelector('.red');
+                                const whiteDot = igExtracts.querySelector('.white');
+                                const orangeDot = igExtracts.querySelector('.orange');
+
+                                if (redDot) redDot.style.color = w.extractBuffs.red ? '#ff3b30' : '#444';
+                                if (whiteDot) whiteDot.style.color = w.extractBuffs.white ? '#ffffff' : '#444';
+                                if (orangeDot) orangeDot.style.color = w.extractBuffs.orange ? '#ff9500' : '#444';
+                            }
+                        }
+
                         // Sharpness debuff check
                         let isDull = false;
                         if (w.type !== 'ranged' && w.sharpness <= 30) {
@@ -2154,5 +2431,76 @@ class HuntEffect extends BaseEffect {
                 }, 250);
             }
         }, 2750);
+    }
+
+    getMonsterTier(monster) {
+        if (!monster) return 'large';
+        const id = (monster.id || "").toLowerCase();
+        
+        // 1. Small Monster IDs
+        const smallIds = [
+            'aptonoth', 'apceros', 'gajau', 'gastodon', 'girros', 'jagras', 
+            'kestodon', 'kestodon_female', 'mernos', 'noios', 'barnos', 
+            'cortos', 'raphinos', 'shamos', 'wulg', 'anteka', 'kelbi', 
+            'popo', 'felyne', 'gajalaka', 'grimalkyne', 'boaboa', 
+            'mosswine', 'vespoid', 'hornetaur'
+        ];
+        if (smallIds.includes(id)) {
+            return 'small';
+        }
+
+        // 2. Medium Monster IDs
+        const mediumIds = [
+            'great_jagras', 'great_girros', 'kulu-ya-ku', 'tzitzi-ya-ku', 
+            'dodogama', 'pukei-pukei', 'coral_pukei-pukei', 'royal_ludroth'
+        ];
+        if (mediumIds.includes(id)) {
+            return 'medium';
+        }
+
+        // 3. Elder Dragons / Epic Bosses IDs
+        const elderIds = [
+            'ancient_leshen', 'alatreon', 'amatsu', 'behemoth', 'blackveil_vaal_hazak',
+            'crimson_glow_valstrax', 'fatalis', 'furious_rajang', 'kirin', 
+            'kulve_taroth', 'kushala_daora', 'lunastra', 'malzeno', 'namielle', 
+            'nergigante', 'primordial_malzeno', 'ruiner_nergigante', 'safi_jiiva', 
+            'shara_ishvalda', 'teostra', 'vaal_hazak', 'valstrax', 'velkhana', 
+            'xeno_jiiva', 'shagaru_magala', 'akantor', 'ukanlos', 'nakarkos', 
+            'lao_shan_lung', 'yamatsukami'
+        ];
+        if (elderIds.includes(id)) {
+            return 'elder';
+        }
+
+        // 4. Fallback is Large Wyverns
+        return 'large';
+    }
+
+    triggerMonsterKnockdown(card, type) {
+        this.monsterState = 'knocked_down';
+        this.monsterKnockdownDuration = 70; // 7 seconds
+        this.monsterStunDuration = 0;
+
+        const statusLbl = card.querySelector('#monster-status-label');
+        const monsterTitle = card.querySelector('#fight-monster-title');
+        const monsterImg = card.querySelector('#fight-monster-img');
+
+        if (statusLbl) {
+            statusLbl.textContent = type === 'pitfall' ? '구멍함정 상태' : '낙석 다운';
+            statusLbl.style.color = '#ff9500';
+            statusLbl.style.borderColor = '#ff9500';
+            statusLbl.style.background = 'rgba(255,149,0,0.1)';
+        }
+        if (monsterTitle) {
+            monsterTitle.textContent = `🌀 쓰러진 ${this.selectedMonster.nameKO} 🌀`;
+            monsterTitle.style.color = '#ff9500';
+        }
+        if (monsterImg) {
+            monsterImg.classList.remove('enraged');
+            monsterImg.classList.remove('stunned_monster');
+            monsterImg.classList.add('monster-knockdown-anim');
+        }
+
+        this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['대경직'] || '대경직');
     }
 }
