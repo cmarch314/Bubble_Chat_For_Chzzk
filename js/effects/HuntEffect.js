@@ -749,18 +749,62 @@ class HuntEffect extends BaseEffect {
             }
         };
 
-        const shakeWeapon = (idx, borderClr = '#ff3b30', isAttack = false) => {
+                const shakeWeapon = (idx, borderClr = '#ff3b30', isAttack = false, moveName = null) => {
             const weaponCard = card.querySelector(`#fight-card-${idx}`);
             if (weaponCard) {
                 if (isAttack) {
-                    weaponCard.style.zIndex = "10";
-                    weaponCard.style.transform = "translateY(-60px) scale(1.1)";
+                    const w = this.selectedWeapons[idx];
+                    let animClass = 'attack-melee-anim';
+                    let animDuration = 250;
+
+                    if (w) {
+                        if (w.id === 'hammer') {
+                            if (moveName === '쿵 쿵 따') {
+                                animClass = 'attack-hammer-kkt';
+                                animDuration = 1200;
+                            } else if (moveName === '키프 스웨이') {
+                                animClass = 'attack-hammer-keep-sway';
+                                animDuration = 450;
+                            } else if (moveName === '2차지 어퍼!') {
+                                animClass = 'attack-hammer-charge2';
+                                animDuration = 650;
+                            } else if (moveName === '3차지 내려치기') {
+                                animClass = 'attack-hammer-charge3';
+                                animDuration = 900;
+                            } else if (moveName === '회전 회오리!!!') {
+                                animClass = 'attack-hammer-tornado';
+                                animDuration = 1600;
+                            } else {
+                                animClass = 'attack-hammer-anim';
+                                animDuration = 400;
+                            }
+                        } else if (w.id === 'great_sword') {
+                            if (moveName === '모아베기') {
+                                animClass = 'attack-gs-charge1';
+                                animDuration = 800;
+                            } else if (moveName === '강모아베기') {
+                                animClass = 'attack-gs-charge2';
+                                animDuration = 1000;
+                            } else if (moveName === '참모아베기') {
+                                animClass = 'attack-gs-charge3';
+                                animDuration = 1300;
+                            }
+                        } else if (w.id === 'light_bowgun' || w.id === 'heavy_bowgun') {
+                            animClass = 'attack-bowgun-anim';
+                            animDuration = 600;
+                        }
+                    }
+
+                    weaponCard.classList.remove('attack-melee-anim', 'attack-hammer-kkt', 'attack-hammer-keep-sway', 'attack-hammer-charge2', 'attack-hammer-charge3', 'attack-hammer-tornado', 'attack-hammer-anim', 'attack-gs-charge1', 'attack-gs-charge2', 'attack-gs-charge3', 'attack-bowgun-anim');
+                    void weaponCard.offsetWidth; // trigger reflow
+                    weaponCard.classList.add(animClass);
                     weaponCard.style.borderColor = borderClr;
+                    weaponCard.style.zIndex = "10";
                     setTimeout(() => {
-                        weaponCard.style.transform = '';
+                        weaponCard.classList.remove(animClass);
                         restoreBorder(idx);
                         weaponCard.style.zIndex = "";
-                    }, 200);
+                    }, animDuration);
                 } else {
                     weaponCard.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px) scale(0.95)`;
                     weaponCard.style.borderColor = borderClr;
@@ -770,7 +814,7 @@ class HuntEffect extends BaseEffect {
                     }, 150);
                 }
             }
-        };
+        };;
 
         const updateCartBoard = () => {
             const el = card.querySelector('#cart-counter-board');
@@ -1876,7 +1920,7 @@ class HuntEffect extends BaseEffect {
                         this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()[soundKey] || soundKey);
 
                         shakeMonster();
-                        shakeWeapon(w.index, '#ff9500');
+                        shakeWeapon(w.index, '#ff9500', true, currentCombo.name);
 
                         // Advance combo index (except during knockdown)
                         if (!isKnockdownAttack) {
