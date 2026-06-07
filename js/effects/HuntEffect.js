@@ -464,6 +464,7 @@ class HuntEffect extends BaseEffect {
         if (name.includes('라잔') || name.includes('rajang')) return 'BGM/William Tell.mp3';
         if (name.includes('요츠미와두') || name.includes('tetranadon')) return 'BGM/MHGU_Arena.mp3';
         if (name.includes('발파루크') || name.includes('valstrax')) return 'BGM/MHGU_Valstrax.mp3';
+        if (name.includes('테오') || name.includes('teostra') || name.includes('나나') || name.includes('lunastra')) return 'BGM/MHW_Teostra.mp3';
 
         // Map Areas
         // Ancient Forest
