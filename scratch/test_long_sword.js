@@ -63,6 +63,42 @@ global.HuntRenderer = class HuntRenderer {
     shakeMonster() {}
 };
 
+global.HuntAudioManager = class HuntAudioManager {
+    constructor() {
+        this.lobbyBgm = null;
+        this.battleBgm = null;
+        this.winBgm = null;
+    }
+    getMonsterBgm() { return ''; }
+    playMonsterRoar() {}
+    playMHAsset() {}
+    playMHAudioFile() {}
+    stopBgms() {}
+};
+
+global.HuntInitializer = class HuntInitializer {
+    constructor() {
+        this.WEAPONS = [
+            { id: 'long_sword', name: '태도', filename: 'long_sword.svg', type: 'melee', speedGroup: 'fast' }
+        ];
+        this.fallbackMonsters = [
+            { id: 'rathalos', nameKO: '리오레우스' }
+        ];
+        this.MONSTER_ATTACKS = {};
+        this.COMBO_LIST = {};
+    }
+    parseCommand() {
+        return {
+            consecutiveTotal: 1,
+            selectedMonster: { id: 'rathalos', nameKO: '리오레우스' },
+            consecutiveQueue: [],
+            chosenWeaponIds: []
+        };
+    }
+    buildSelectedWeapons() { return []; }
+    getMonsterTier() { return 'large'; }
+};
+
 const huntEffectPath = path.join(__dirname, '../js/effects/HuntEffect.js');
 const code = fs.readFileSync(huntEffectPath, 'utf8');
 
