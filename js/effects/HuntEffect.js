@@ -538,6 +538,7 @@ class HuntEffect extends BaseEffect {
                     this.triggerCartAnimation(w);
                 },
                 onTriggerStunUI: (idx, isStunned) => this.renderer.triggerStunUI(idx, isStunned),
+                onTriggerRoarStun: (idx, isStunned) => this.renderer.triggerRoarStun(idx, isStunned),
                 onTriggerMonsterKnockdownAnim: () => this.renderer.triggerMonsterKnockdownAnim(),
                 onGameEnd: (victory, winner) => this.endGame(container, victory, winner),
                 onNextConsecutive: () => this.spawnNextConsecutiveMonster(container)
