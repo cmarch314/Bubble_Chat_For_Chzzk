@@ -1018,11 +1018,11 @@ class HuntEffect extends BaseEffect {
 
                     if (monsterTitle) {
                         if (restoreState === 'enraged') {
-                            monsterTitle.textContent = `?�� 분노??${this.selectedMonster.nameKO} ?��`;
+                            monsterTitle.textContent = `😡 분노한 ${this.selectedMonster.nameKO} 😡`;
                             monsterTitle.style.color = '#ff3b30';
                             if (monsterImg) monsterImg.classList.add('enraged');
                         } else if (restoreState === 'exhausted') {
-                            monsterTitle.textContent = `?�� ?�진??${this.selectedMonster.nameKO} ?��`;
+                            monsterTitle.textContent = `🤤 탈진한 ${this.selectedMonster.nameKO} 🤤`;
                             monsterTitle.style.color = '#00a8ff';
                         } else {
                             monsterTitle.textContent = this.selectedMonster.nameKO;
@@ -1030,7 +1030,7 @@ class HuntEffect extends BaseEffect {
                         }
                     }
 
-                    addLog(`?�� ${this.selectedMonster.nameKO}??가) ?�경직?�서 깨어??비�?거리�??�어??��??`, '#00ffa3');
+                    addLog(`📢 ${this.selectedMonster.nameKO}이(가) 기절에서 깨어나 정신을 가다듬습니다. (기절 내성치 상승: ${this.monsterStunThreshold})`, '#00ffa3');
                 }
             } else if (this.monsterStunDuration > 0) {
                 this.monsterStunDuration--;
@@ -1200,7 +1200,7 @@ class HuntEffect extends BaseEffect {
                                         statusLbl.style.background = 'rgba(229,142,38,0.1)';
                                     }
                                     if (monsterTitle) {
-                                        monsterTitle.textContent = `?�� 기절??${this.selectedMonster.nameKO} ?��`;
+                                        monsterTitle.textContent = `💫 기절한 ${this.selectedMonster.nameKO} 💫`;
                                         monsterTitle.style.color = '#e58e26';
                                     }
                                     if (monsterImg) {
@@ -1208,7 +1208,7 @@ class HuntEffect extends BaseEffect {
                                         monsterImg.classList.add('stunned_monster');
                                     }
                                     this.playMHAsset('mh_stun.mp3', '격추');
-                                    addLog(`?�� [기절] ${this.selectedMonster.nameKO}??가) ${target.name}??강한 ?�격을 머리???�고 기절?�습?�다! (6초간 무력??`, '#e58e26');
+                                addLog(`💫 [기절] ${this.selectedMonster.nameKO}이(가) ${target.name}의 강한 타격을 머리에 입고 기절했습니다! (6초간 무력화)`, '#e58e26');
                                 }
                             }
 
@@ -1260,7 +1260,7 @@ class HuntEffect extends BaseEffect {
                                 }
 
                                 this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['?�경짧'] || '?�경짧');
-                                addLog(`?�� [?�경직!] ${this.selectedMonster.nameKO}??가) ??충격?�로 ?�경직??걸려 ?�러졌습?�다! (7초간 무력??`, '#ff9500');
+                                addLog(`💤 [대경직] ${this.selectedMonster.nameKO}이(가) 큰 충격으로 대경직에 걸려 쓰러졌습니다! (7초간 무력화)`, '#ff9500');
                             }
 
                             // Advance combo stage
@@ -1270,10 +1270,10 @@ class HuntEffect extends BaseEffect {
                             // UI Updates
                             this.updateHpUI(card, target);
                             const weaponCard = card.querySelector(`#fight-card-${target.index}`);
-                            this.showSkillBubble(weaponCard, `?���??�클! (${stageNameBefore} ??${stageNameAfter})`);
+                            this.showSkillBubble(weaponCard, `🛡️ 태클! (${stageNameBefore} ➡️ ${stageNameAfter})`);
 
                             // Sound and visual impact
-                            const soundKey = ["?�스??", "�?", "??"][Math.floor(Math.random() * 3)];
+                            const soundKey = ["타격음_베기", "타격음_타격", "타격음_무겁"][Math.floor(Math.random() * 3)];
                             this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()[soundKey] || soundKey);
 
                             if (weaponCard) {
@@ -1283,7 +1283,7 @@ class HuntEffect extends BaseEffect {
                                 setTimeout(() => weaponCard.classList.remove('guard-shake-anim'), 300);
                             }
 
-                            addLog(`?���?[?�클 카운?? ${target.name}??가) ?�클�?공격??맞받?�쳐 ?�해�?50% ?�감?�고 ?�음 모으�??�계�?진입?�니?? (-${damage} HP, 반사 ?�해: -${counterDmg} HP, 기절�? +${counterStun})`, '#ff9500');
+                            addLog(`🛡️ [태클 카운터] ${target.name}이(가) 태클로 공격을 맞받아쳐 피해를 50% 경감하고 다음 모으기 연계로 진입합니다! (-${damage} HP, 반사 피해: -${counterDmg} HP, 기절치 +${counterStun})`, '#ff9500');
                             return; // Bypass normal hit/evade logic
                         }
 
@@ -1460,7 +1460,7 @@ class HuntEffect extends BaseEffect {
                                 addLog(`☠️ [퀘스트 실패] 3회 수레를 타서 퀘스트 전멸 실패했습니다!`, '#ff0055');
                             } else {
                                 target.respawnTimer = 5; // 5 seconds respawn time
-                                addLog(`?�� [?�레?? ${target.name}??가) ?�러졌습?�다! 5�???부?�합?�다. (?�재 ?�레: ${this.cartCount}/3)`, '#ff3b30');
+                                addLog(`🚨 [수레행] ${target.name}이(가) 쓰러졌습니다! 5초 후 부활합니다. (현재 수레: ${this.cartCount}/3)`, '#ff3b30');
                                 this.playMHAsset('mh_cart.mp3', '?�돼');
                                 this.playMHAudioFile('Unified_SFX/Player Fainted.mp3', 3500);
                             }
@@ -1563,7 +1563,7 @@ class HuntEffect extends BaseEffect {
                     // V. Melee Sharpness check
                     if (w.type !== 'ranged' && w.sharpness <= 30) {
                         w.sharpness = 100;
-                        addLog(`??[?�돌�? ${w.name}??가) 구석?�서 ?�돌??갈아 ?�리?��? ?�복?�니??`, '#ffaa00');
+                        addLog(`✨ [숫돌질] ${w.name}이(가) 구석에서 숫돌을 갈아 예리도를 회복합니다!`, '#ffaa00');
                         this.playMHAudioFile('Unified_SFX/MH - Combine Item.mp3');
                         shakeWeapon(w.index, '#ffaa00');
                         continue;
@@ -1793,7 +1793,7 @@ class HuntEffect extends BaseEffect {
                             }
 
                             this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['?�경짧'] || '?�경짧');
-                            addLog(`?�� [?�경직!] ${this.selectedMonster.nameKO}??가) ??충격?�로 ?�경직??걸려 ?�러졌습?�다! (7초간 무력??`, '#ff9500');
+                                addLog(`💤 [대경직] ${this.selectedMonster.nameKO}이(가) 큰 충격으로 대경직에 걸려 쓰러졌습니다! (7초간 무력화)`, '#ff9500');
                         }
 
                         // Show skill bubble above weapon card
@@ -1834,7 +1834,7 @@ class HuntEffect extends BaseEffect {
                                     statusLbl.style.background = 'rgba(229,142,38,0.1)';
                                 }
                                 if (monsterTitle) {
-                                    monsterTitle.textContent = `💫 기절한 ${this.selectedMonster.nameKO} 💫`;
+                                        monsterTitle.textContent = `💫 기절한 ${this.selectedMonster.nameKO} 💫`;
                                     monsterTitle.style.color = '#e58e26';
                                 }
                                 if (monsterImg) {
@@ -1843,7 +1843,7 @@ class HuntEffect extends BaseEffect {
                                 }
 
                                 this.playMHAsset('mh_stun.mp3', '격추');
-                                addLog(`💫 [기절] ${this.selectedMonster.nameKO}이(가) ${w.name}의 강한 타격을 머리에 입고 기절했습니다! (6초간 무력화)`, '#e58e26');
+                                addLog(`💫 [기절] ${this.selectedMonster.nameKO}이(가) ${target.name}의 강한 타격을 머리에 입고 기절했습니다! (6초간 무력화)`, '#e58e26');
                             } else {
                                 addLog(`💫 [기절 누적] ${w.name}의 타격으로 몬스터 기절 수치 누적! (${this.monsterStunAccum} / ${this.monsterStunThreshold})`, '#aaaaaa');
                             }
@@ -1851,17 +1851,17 @@ class HuntEffect extends BaseEffect {
 
                         // Logging
                         if (isKnockdownAttack) {
-                            addLog(`?�� [?�경직 찬스!] ${w.name}??가) 최강 기술 [${currentCombo.name}] ?�전! (-${damage} HP)`, '#ff9500');
+                            addLog(`✨ [대경직 찬스!] ${w.name}이(가) 최강 기술 [${currentCombo.name}] 시전! (-${damage} HP)`, '#ff9500');
                         } else if (currentCombo.special) {
                             addLog(`?�️ [?�계-${w.comboIndex+1}] ${w.name}: ${currentCombo.name}! ${currentCombo.special} (-${damage} HP)`, '#ffaa00');
                         } else if (isDull) {
-                            addLog(`?�️ [무딘 �? ${w.name}??가) ?�리???�모 ?�태�?공격??가???�해가 반감?�었?�니?? (-${damage} HP)`, '#aaaaaa');
+                            addLog(`⚔️ [무딘 벰] ${w.name}이(가) 예리도 소모 상태로 공격을 가해 피해가 반감되었습니다! (-${damage} HP)`, '#aaaaaa');
                         } else {
-                            addLog(`?�️ [?�계-${w.comboIndex+1}] ${w.name}??[${currentCombo.name}] ?�전! 몬스?��? ?��? (-${damage} HP)`, '#eee');
+                            addLog(`⚔️ [연계-${w.comboIndex+1}] ${w.name}의 [${currentCombo.name}] 시전! 몬스터를 타격! (-${damage} HP)`, '#eee');
                         }
 
                         // Play Combo-Specific Sound or default hit sound
-                        let soundKey = '??1';
+                        let soundKey = '타격음_베기';
                         if (currentCombo.soundKey) {
                             if (Array.isArray(currentCombo.soundKey)) {
                                 soundKey = currentCombo.soundKey[Math.floor(Math.random() * currentCombo.soundKey.length)];
@@ -1869,9 +1869,9 @@ class HuntEffect extends BaseEffect {
                                 soundKey = currentCombo.soundKey;
                             }
                         } else if (currentCombo.stun && currentCombo.stun > 0) {
-                            soundKey = '??2';
+                            soundKey = '타격음_타격';
                         } else if (currentCombo.dmg > 300) {
-                            soundKey = '??3';
+                            soundKey = '타격음_무겁';
                         }
                         this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()[soundKey] || soundKey);
 
@@ -1961,7 +1961,7 @@ class HuntEffect extends BaseEffect {
     }
 
     triggerGatheringEvent(card, w, addLog, shakeWeapon) {
-        addLog(`?�� [채집 ?�작] ${w.name}??가) 주�? ?��????�쳐 채집???�도?�니??..`, '#a8ff00');
+        addLog(`🌿 [채집 시작] ${w.name}이(가) 주변 수풀을 헤치며 채집을 시도합니다..`, '#a8ff00');
         this.playMHAudioFile('Unified_SFX/Gathering Location.mp3');
         
         const weaponCard = card.querySelector(`#fight-card-${w.index}`);
@@ -1977,7 +1977,7 @@ class HuntEffect extends BaseEffect {
                 const heal = 25;
                 w.hp = Math.min(w.maxHp, w.hp + heal);
                 this.playMHAudioFile('Unified_SFX/MH - Item Found.mp3');
-                addLog(`?�� [채집 ?�공] ${w.name}??가) [?�초?� 벌�?]??발견??체력???�복?�니?? (+${heal} HP)`, '#2eff7b');
+                addLog(`🌿 [채집 성공] ${w.name}이(가) [약초와 벌꿀]을 발견해 체력을 회복합니다! (+${heal} HP)`, '#2eff7b');
                 this.showSkillBubble(weaponCard, "?�� ?�초 채집!");
                 this.updateHpUI(card, w);
                 shakeWeapon(w.index, '#2eff7b');
@@ -1987,8 +1987,8 @@ class HuntEffect extends BaseEffect {
                 const members = this.selectedWeapons.filter(member => member.status === 'alive');
                 members.forEach(m => m.hp = Math.min(m.maxHp, m.hp + heal));
                 this.playMHAudioFile('Unified_SFX/MH - Item Found (rare).mp3');
-                addLog(`?�� [채집-?��?] ${w.name}??가) [?�명??가�?�??�어 ?�뿌?�습?�다! ?�군 ?�체 ?�복! (+${heal} HP)`, '#00ffaa');
-                this.showSkillBubble(weaponCard, "?�� 가�??�득!");
+                addLog(`🌿 [채집-성공] ${w.name}이(가) [생명의 가루]를 얻어 흩뿌립니다! 아군 전체 회복! (+${heal} HP)`, '#00ffaa');
+                this.showSkillBubble(weaponCard, "🌿 가루 획득!");
                 this.selectedWeapons.forEach(m => this.updateHpUI(card, m));
                 shakeWeapon(w.index, '#00ffaa');
             } else {
@@ -1996,8 +1996,8 @@ class HuntEffect extends BaseEffect {
                 w.maxHp = Math.min(150, w.maxHp + 10);
                 w.hp = w.maxHp;
                 this.playMHAudioFile('Unified_SFX/MH - Item Found (rarest).mp3');
-                addLog(`?�� [채집-?�설] ${w.name}??가) 고�? ?�적?�서 [비약]??찾아 복용?�습?�다! 최�? 체력 증�? �??�전 ?�복! (+10 Max HP, ?�치)`, '#ffaa00');
-                this.showSkillBubble(weaponCard, "?�� 비약 발견!");
+                addLog(`🌿 [채집-전설] ${w.name}이(가) 고대 유적에서 [비약]을 찾아 복용했습니다! 최대 체력 증가 및 완전 회복! (+10 Max HP, 완치)`, '#ffaa00');
+                this.showSkillBubble(weaponCard, "🌿 비약 발견!");
                 this.updateHpUI(card, w);
                 shakeWeapon(w.index, '#ffaa00');
             }
@@ -2005,7 +2005,7 @@ class HuntEffect extends BaseEffect {
     }
 
     triggerCookingEvent(card, w, addLog, shakeWeapon) {
-        addLog(`?�� [고기 굽기] ${w.name}??가) 불판??벌이�??�고기�? 굽기 ?�작?�니?? (BGM ?�생)`, '#ff5500');
+        addLog(`🍖 [고기 굽기] ${w.name}이(가) 불판을 벌이고 생고기를 굽기 시작합니다! (BGM 재생)`, '#ff5500');
         this.playMHAudioFile('Unified_SFX/MH - Cooking.mp3');
         
         const weaponCard = card.querySelector(`#fight-card-${w.index}`);
@@ -2024,8 +2024,8 @@ class HuntEffect extends BaseEffect {
                     this.playMHAudioFile('Unified_SFX/MH - Looks Tasty.mp3');
                     w.hp = Math.min(w.maxHp, w.hp + 50);
                     w.atb = 100; // instant turn back
-                    addLog(`?�� [고기 굽기-?�?�공] ${w.name}??가) ???��? 고기�?구웠?�니?? "?�리가 ?�주 ??구워졌습?�다!" (+50 HP, ATB 즉시 ?�충)`, '#2eff7b');
-                    this.showSkillBubble(weaponCard, "?�� ???��? 고기!");
+                    addLog(`🍖 [고기 굽기-대성공] ${w.name}이(가) 잘 익은 고기를 구웠습니다! "고기가 아주 잘 구워졌습니다!" (+50 HP, ATB 즉시 완충)`, '#2eff7b');
+                    this.showSkillBubble(weaponCard, "🍖 잘 익은 고기!");
                     this.updateHpUI(card, w);
                     shakeWeapon(w.index, '#2eff7b');
                 }, 1000);
@@ -2033,7 +2033,7 @@ class HuntEffect extends BaseEffect {
                 // Rare
                 this.playMHAudioFile('Unified_SFX/MH - Rare Steak.mp3');
                 w.hp = Math.min(w.maxHp, w.hp + 20);
-                addLog(`?�� [고기 굽기-?�익?? ${w.name}??가) ??구워 ?�익?� 고기가 ?�었?�니?? (+20 HP)`, '#ffaa00');
+                addLog(`🍖 [고기 굽기-설익음] ${w.name}이(가) 덜 익은 고기를 구웠습니다! (+20 HP)`, '#ffaa00');
                 this.showSkillBubble(weaponCard, "?�� ?�익?� 고기!");
                 this.updateHpUI(card, w);
                 shakeWeapon(w.index, '#ffaa00');
@@ -2041,8 +2041,8 @@ class HuntEffect extends BaseEffect {
                 // Burned
                 this.playMHAudioFile('Unified_SFX/MH - Burned.mp3');
                 w.hp = Math.max(1, w.hp - 10);
-                addLog(`?�� [고기 굽기-?�패] ${w.name}??가) ?�무 ?�래 구워 ??고기�?만들??먹었?�니?? (-10 HP)`, '#ff3b30');
-                this.showSkillBubble(weaponCard, "?? ??고기...");
+                addLog(`🍖 [고기 굽기-실패] ${w.name}이(가) 너무 오래 구워 탄 고기를 만들어 먹었습니다. (-10 HP)`, '#ff3b30');
+                this.showSkillBubble(weaponCard, "🍖 탄 고기...");
                 this.updateHpUI(card, w);
                 shakeWeapon(w.index, '#ff3b30');
             }
@@ -2124,11 +2124,11 @@ class HuntEffect extends BaseEffect {
             });
             console.log(`[HUNT] ${text}`);
         };
-        addLog(`?�� [?�벌 ?�료] ${prevName}??가) ?�벽?�게 ?�벌?�습?�다!`, '#00ffa3');
-        addLog(`?�� [?�?�속 ?�렵 ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] ${this.selectedMonster.nameKO}??가) 출현?�습?�다!`, '#ffaa00');
+        addLog(`🎉 [토벌 완료] ${prevName}을(가) 완벽하게 토벌했습니다!`, '#00ffa3');
+        addLog(`🐉 [대연속 수렵 ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] ${this.selectedMonster.nameKO}이(가) 출현했습니다!`, '#ffaa00');
 
         // Play SFX (Roar or start sound)
-        this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['가??'] || '가??');
+        this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['가자!'] || '가자!');
 
         // Determine monster tier & stats
         this.monsterTier = this.getMonsterTier(this.selectedMonster);
@@ -2274,10 +2274,10 @@ class HuntEffect extends BaseEffect {
             if (topPanel) {
                 topPanel.innerHTML = `
                     <div class="game-title" style="font-size:3.5rem; color:#00ffa3; font-weight:bold; text-shadow:0 0 20px rgba(0,255,163,0.5); margin-bottom:20px;">
-                        ?�� ?�스???�리?? ?�렵 ?�공! ?��
+                        🎉 퀘스트 클리어! 수렵 성공! 🎉
                     </div>
                     <div style="font-size:2.2rem; color:#fff; margin-bottom: 25px;">
-                        마�?막까지 ?�존??<span style="color:${winner.hunterColor || '#ffaa00'}; font-weight:bold;">?�� ${winner.hunterName}</span>??가) ${this.selectedMonster.nameKO} ?�렵???�공?�습?�다!
+                        마지막까지 생존한 <span style="color:${winner.hunterColor || '#ffaa00'}; font-weight:bold;">🏆 ${winner.hunterName}</span>이(가) ${this.selectedMonster.nameKO} 수렵에 성공했습니다!
                     </div>
                 `;
             }
@@ -2290,7 +2290,7 @@ class HuntEffect extends BaseEffect {
                 winnerCard.classList.add('victory-jump');
                 const tag = card.querySelector(`#status-tag-${winner.index}`);
                 if (tag) {
-                    tag.textContent = '?�� MVP ?��';
+                                        tag.textContent = '🏆 MVP 🏆';
                     tag.className = 'game-hunt-status-tag active';
                 }
             }
@@ -2299,12 +2299,12 @@ class HuntEffect extends BaseEffect {
                 // Quest failed banner
                 topPanel.innerHTML = `
                     <div class="game-title" style="font-size:3.5rem; color:#ff3b30; font-weight:bold; text-shadow:0 0 20px rgba(255,59,48,0.5); margin-bottom:20px;">
-                        ?�️ ?�스???�패 (3?�레 ?�멸) ?�️
+                        ☠️ 퀘스트 실패 (3수레 전멸) ☠️
                     </div>
                     <div style="font-size:2.2rem; color:#fff; margin-bottom:20px;">
-                        3번의 ?�레 ?�승 ?�적?�로 ?�렵 ?�스?��? 강제 종료?�었?�니??
+                        3번의 수레 탑승 누적으로 수렵 퀘스트가 강제 종료되었습니다.
                     </div>
-                    <div style="font-size:1.5rem; color:#aaa; margin-bottom:10px;">${this.selectedMonster.nameKO}?�(?? ?�처?�성?��? ?�어 ?�유???�났?�니??</div>
+                    <div style="font-size:1.5rem; color:#aaa; margin-bottom:10px;">${this.selectedMonster.nameKO}은(는) 상처투성이가 되어 유유히 떠났습니다.</div>
                 `;
             }
 
