@@ -355,6 +355,8 @@ class HuntEngine {
         if (this.monsterState === 'enraged') dmgMod = 1.5;
         else if (this.monsterState === 'exhausted') dmgMod = 0.5;
 
+        const attackResults = [];
+
         targetsToHit.forEach(target => {
             let baseDmg = Math.floor(target.maxHp * 0.45);
             let damage = Math.floor(baseDmg * dmgMod * (this.monsterDamageMod || 1.0));
@@ -389,6 +391,7 @@ class HuntEngine {
                 this.updateHpUI(target);
                 this.shakeWeapon(target.index, '#ff9500');
                 if (this.callbacks.onTriggerGuardShake) this.callbacks.onTriggerGuardShake(target.index);
+                attackResults.push({ index: target.index, result: 'tackle' });
                 return;
             }
 
@@ -433,6 +436,7 @@ class HuntEngine {
                     this.addLog(`🔥 [근성 발휘!] ${target.name}이(가) ${this.selectedMonster.nameKO}의 치명타를 입고 근성으로 1 HP 생존했습니다!`, '#ffaa00');
                     this.playSFX('mh_guard.mp3', '오살았어');
                     this.shakeWeapon(target.index, '#00ffa3');
+                    attackResults.push({ index: target.index, result: 'hit' });
                 } else {
                     target.hp = Math.max(0, target.hp - damage);
                     if (isGuard) {
@@ -440,12 +444,14 @@ class HuntEngine {
                         this.playSFX('mh_guard.mp3', '가드성공');
                         this.shakeWeapon(target.index, '#00ffff');
                         if (this.callbacks.onTriggerGuardShake) this.callbacks.onTriggerGuardShake(target.index);
+                        attackResults.push({ index: target.index, result: 'guard' });
                     } else {
                         this.addLog(`💥 [피격] ${this.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 큰 타격! (-${damage} HP)`, '#ff5555');
                         this.playSFX('mh_hit.mp3', ['윽!', '으악!', '아야!'][Math.floor(Math.random() * 3)]);
                         this.shakeMonster();
                         this.shakeWeapon(target.index);
                         this.triggerHitAnimation(target.index, damage);
+                        attackResults.push({ index: target.index, result: 'hit' });
                     }
                 }
             } else {
@@ -461,6 +467,7 @@ class HuntEngine {
                     this.shakeWeapon(target.index, '#2eff7b');
                 }
                 if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(target.index);
+                attackResults.push({ index: target.index, result: 'dodge' });
             }
 
             // Sharpness/Ammo penalty on hit
@@ -495,6 +502,39 @@ class HuntEngine {
                 }
             }
         });
+
+        // Trigger dynamic monster attack animation
+        const { type: attackType, emoji } = this.getMonsterAttackType(attackName);
+        if (this.callbacks.onTriggerMonsterAttack) {
+            this.callbacks.onTriggerMonsterAttack(attackType, emoji, attackResults);
+        }
+    }
+
+    getMonsterAttackType(attackName) {
+        let type = 'physical';
+        let emoji = '💥';
+
+        if (attackName.includes('브레스') || attackName.includes('화염구') || attackName.includes('번개벼락') || attackName.includes('포효') || attackName.includes('절대영도') || attackName.includes('파편 발사') || attackName.includes('위협')) {
+            type = 'elemental';
+        } else if (attackName.includes('독조강습') || attackName.includes('지중 급습') || attackName.includes('파멸의 일격') || attackName.includes('전뇌 펀치') || attackName.includes('등 찍기') || attackName.includes('빙벽 생성') || attackName.includes('얼음칼 찌르기')) {
+            type = 'hybrid';
+        }
+
+        if (attackName.includes('화염') || attackName.includes('화룡') || attackName.includes('화염구')) {
+            emoji = '🔥';
+        } else if (attackName.includes('번개') || attackName.includes('뇌랑룡') || attackName.includes('전뇌') || attackName.includes('벼락')) {
+            emoji = '⚡';
+        } else if (attackName.includes('얼음') || attackName.includes('빙룡') || attackName.includes('빙벽') || attackName.includes('절대영도')) {
+            emoji = '❄️';
+        } else if (attackName.includes('독조') || attackName.includes('독')) {
+            emoji = '🟣';
+        } else if (attackName.includes('포효') || attackName.includes('위협') || attackName.includes('🔊')) {
+            emoji = '🔊';
+        } else if (attackName.includes('지중') || attackName.includes('가시') || attackName.includes('🪨')) {
+            emoji = '🪨';
+        }
+
+        return { type, emoji };
     }
 
     triggerHitAnimation(idx, damage) {
