@@ -4483,8 +4483,9 @@ body {
     z-index: 2147483640;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    padding-top: 4vh;
     pointer-events: none;
     font-family: 'CookieRun-Regular', sans-serif;
     color: #fff;
@@ -4521,6 +4522,24 @@ body {
     z-index: 2147483645;
 }
 
+/* 퀴즈 전용 컨테이너 (수렵 UI와 별도로 중앙 정렬) */
+.game-quiz-overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 80vh;
+    z-index: 2147483640;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    font-family: 'CookieRun-Regular', sans-serif;
+    color: #fff;
+    box-sizing: border-box;
+}
+
 .game-quiz-card {
     background: rgba(20, 10, 42, 0.95);
     border: 6px solid #00ffa3;
@@ -4547,6 +4566,79 @@ body {
 }
 
 /* ==========================================
+   공통 게임 UI 텍스트 스타일
+   ========================================== */
+.game-title {
+    font-size: 3.2rem;
+    font-weight: bold;
+    color: #00ffa3;
+    margin-bottom: 18px;
+    text-shadow: 0 0 20px rgba(0, 255, 163, 0.5);
+    letter-spacing: 1px;
+}
+
+.game-subtitle {
+    font-size: 1.7rem;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.game-status {
+    font-size: 2.0rem;
+    color: #eee;
+    margin: 14px 0;
+}
+
+.game-timer {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #ffcc00;
+    margin: 12px 0;
+    text-shadow: 0 0 10px rgba(255, 204, 0, 0.4);
+}
+
+.game-participants-count {
+    font-size: 1.5rem;
+    color: #aaa;
+    margin-top: 14px;
+}
+
+.game-winner-announce {
+    font-size: 3.2rem;
+    font-weight: bold;
+    color: #00ffa3;
+    margin: 20px 0;
+    text-shadow: 0 0 20px rgba(0, 255, 163, 0.6);
+}
+
+/* 퀴즈 전용 */
+.game-quiz-leaderboard {
+    font-size: 1.3rem;
+    color: #aaa;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.leaderboard-item {
+    background: rgba(0, 255, 163, 0.08);
+    border: 1px solid rgba(0, 255, 163, 0.2);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 1.2rem;
+    color: #ccc;
+}
+
+.game-quiz-hint {
+    font-size: 1.6rem;
+    color: #aaa;
+    margin: 10px 0;
+    min-height: 2.4rem;
+}
+
+/* ==========================================
    Monster Hunter Weapon Icons (몬스터 헌터 무기 아이콘)
    ========================================== */
 .weapon-icon {
@@ -4560,14 +4652,14 @@ body {
 }
 
 /* ==========================================
-   Monster Hunter Hunt Mini-game (토벌 미니게임)
+   Monster Hunter Hunt Mini-game (?�벌 미니게임)
    ========================================== */
 .game-hunt-card {
-    background: rgba(18, 14, 10, 0.96);
-    border: 4px solid #ffaa00;
-    box-shadow: 0 0 60px rgba(255, 170, 0, 0.35), inset 0 0 30px rgba(255, 170, 0, 0.15);
-    border-radius: 40px;
-    padding: 35px 50px;
+    background: linear-gradient(135deg, #18130f 0%, #0d0a08 100%);
+    border: 6px double #c5a059;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), inset 0 0 40px rgba(0, 0, 0, 0.85), 0 0 0 2px #534120;
+    border-radius: 28px;
+    padding: 35px 50px 35px 50px;
     width: 1150px;
     text-align: center;
     backdrop-filter: blur(15px);
@@ -4579,23 +4671,65 @@ body {
     color: #fff;
 }
 
+/* Inner fine border */
+.game-hunt-card::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 1px solid rgba(197, 160, 89, 0.22);
+    border-radius: 20px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Corner metal brackets */
+.game-hunt-card::after {
+    content: '';
+    position: absolute;
+    top: -9px;
+    left: -9px;
+    right: -9px;
+    bottom: -9px;
+    pointer-events: none;
+    background: 
+        /* Top Left */
+        linear-gradient(to right, #c5a059 5px, transparent 5px) 0 0,
+        linear-gradient(to bottom, #c5a059 5px, transparent 5px) 0 0,
+        /* Top Right */
+        linear-gradient(to left, #c5a059 5px, transparent 5px) 100% 0,
+        linear-gradient(to bottom, #c5a059 5px, transparent 5px) 100% 0,
+        /* Bottom Left */
+        linear-gradient(to right, #c5a059 5px, transparent 5px) 0 100%,
+        linear-gradient(to top, #c5a059 5px, transparent 5px) 0 100%,
+        /* Bottom Right */
+        linear-gradient(to left, #c5a059 5px, transparent 5px) 100% 100%,
+        linear-gradient(to top, #c5a059 5px, transparent 5px) 100% 100%;
+    background-size: 30px 30px;
+    background-repeat: no-repeat;
+    z-index: 10;
+}
+
 .game-hunt-monster-showcase {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     margin: 20px 0;
-    background: rgba(255, 255, 255, 0.03);
-    border: 2px solid rgba(255, 170, 0, 0.2);
-    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid #5d4817;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+    border-radius: 16px;
     padding: 20px;
     position: relative;
 }
 
 .game-hunt-monster-img {
-    width: 130px;
-    height: 130px;
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.6));
+    width: 165px;
+    height: 165px;
+    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.7));
     animation: monster-idle 3s ease-in-out infinite alternate;
     transition: transform 0.1s ease;
 }
@@ -4606,7 +4740,7 @@ body {
 }
 
 .game-hunt-monster-name {
-    font-size: 2.2rem;
+    font-size: 2.3rem;
     font-weight: bold;
     color: #ffaa00;
     margin-top: 10px;
@@ -4616,24 +4750,25 @@ body {
 .game-hunt-weapons-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin: 25px 0;
+    gap: 24px;
+    margin: 30px 0 0 0;
 }
 
 .game-hunt-weapon-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(20, 16, 12, 0.85);
+    border: 2px solid #5d4817;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
     border-radius: 20px;
-    padding: 15px;
+    padding: 22px;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     overflow: visible;
 }
 
 .game-hunt-weapon-card.active {
-    border-color: #ffaa00;
-    background: rgba(255, 170, 0, 0.08);
-    box-shadow: 0 0 15px rgba(255, 170, 0, 0.2);
+    border-color: #c5a059;
+    background: rgba(197, 160, 89, 0.12);
+    box-shadow: 0 0 15px rgba(197, 160, 89, 0.25), inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .game-hunt-weapon-card.dead {
@@ -4644,15 +4779,15 @@ body {
 }
 
 .game-hunt-weapon-img {
-    width: 75px;
-    height: 75px;
-    margin: 0 auto 10px;
+    width: 95px;
+    height: 95px;
+    margin: 0 auto 12px;
     display: block;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) brightness(1.2);
 }
 
 .game-hunt-weapon-name {
-    font-size: 1.3rem;
+    font-size: 1.50rem;
     font-weight: bold;
     margin-bottom: 8px;
     color: #eee;
@@ -4832,23 +4967,94 @@ body {
     animation: monster-stun-shake 0.6s ease-in-out infinite !important;
 }
 
-/* 스킬 말풍선 스타일 */
+/* ?�킬 말풍???��???*/
+/* 구르�??�피 ?�니메이??(무기 ?��?지 ?�바???�전) */
+@keyframes weapon-roll {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.roll-anim {
+    animation: weapon-roll 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* 가???�들�??�니메이??(무기 카드 ?�들�? */
+@keyframes guard-shake {
+    0%, 100% { transform: translate(0, 0); }
+    15% { transform: translate(-8px, -4px); }
+    30% { transform: translate(8px, 4px); }
+    45% { transform: translate(-6px, 2px); }
+    60% { transform: translate(6px, -2px); }
+    75% { transform: translate(-3px, 1px); }
+    90% { transform: translate(3px, -1px); }
+}
+.guard-shake-anim {
+    animation: guard-shake 0.3s ease-in-out !important;
+}
+
+/* ???�격 ?�니메이??(?�겨?��? ?�바??구르�?2�????�자�? */
+@keyframes weapon-large-hit {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        filter: brightness(1);
+    }
+    15% {
+        transform: translateY(140px) rotate(-900deg);
+        filter: brightness(0.6) sepia(0.5) hue-rotate(-50deg);
+    }
+    85% {
+        transform: translateY(140px) rotate(-900deg);
+        filter: brightness(0.6) sepia(0.5) hue-rotate(-50deg);
+    }
+    100% {
+        transform: translateY(0) rotate(0deg);
+        filter: brightness(1);
+    }
+}
+.large-hit-anim {
+    animation: weapon-large-hit 2.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+    z-index: 1000 !important;
+}
+
+/* ?��? ?�격 ?�니메이??(?�짝 밀리며 180???�집???�어�? */
+@keyframes weapon-small-hit {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        filter: brightness(1);
+    }
+    20% {
+        transform: translateY(50px) rotate(-180deg);
+        filter: brightness(0.7);
+    }
+    75% {
+        transform: translateY(50px) rotate(-180deg);
+        filter: brightness(0.7);
+    }
+    100% {
+        transform: translateY(0) rotate(0deg);
+        filter: brightness(1);
+    }
+}
+.small-hit-anim {
+    animation: weapon-small-hit 1.0s ease-in-out forwards !important;
+    z-index: 500 !important;
+}
+
 .skill-bubble {
     position: absolute;
-    bottom: 110%; /* 카드 위쪽으로 띄움 */
+    bottom: 110%; /* 카드 ?�쪽?�로 ?��? */
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(20, 20, 20, 0.92);
+    background: rgba(20, 20, 20, 0.95);
     color: #ffaa00;
-    border: 1px solid #ffaa00;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    border: 1.5px solid #ffaa00;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 1.9rem;
     font-family: 'Inter', 'Outfit', sans-serif;
     font-weight: bold;
     white-space: nowrap;
     z-index: 100;
-    box-shadow: 0 0 12px rgba(255, 170, 0, 0.5);
+    box-shadow: 0 0 16px rgba(255, 170, 0, 0.6);
     animation: bubble-fade-in 0.2s ease-out forwards;
 }
 
@@ -4858,8 +5064,8 @@ body {
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: rgba(20, 20, 20, 0.92);
+    border: 8px solid transparent;
+    border-top-color: rgba(20, 20, 20, 0.95);
 }
 
 @keyframes bubble-fade-in {

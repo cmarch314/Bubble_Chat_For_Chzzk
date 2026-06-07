@@ -6,126 +6,6 @@ class SoundQuizEffect extends BaseEffect {
         this.winner = null;
         this.scores = {};
         this.forceStopped = false;
-        this._injectStyles();
-    }
-
-    _injectStyles() {
-        if (document.getElementById('game-common-styles')) return;
-        const style = document.createElement('style');
-        style.id = 'game-common-styles';
-        style.innerHTML = `
-            .game-title {
-                font-size: 2.2rem;
-                font-weight: 900;
-                background: linear-gradient(90deg, #00ffa3, #00d2ff);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                margin-bottom: 8px;
-                text-shadow: 0 0 10px rgba(0, 255, 163, 0.2);
-            }
-            .game-subtitle {
-                font-size: 1.2rem;
-                color: #ccc;
-                margin-bottom: 20px;
-            }
-            .game-status {
-                font-size: 1.4rem;
-                color: #00d2ff;
-                margin: 15px 0;
-            }
-            .game-quiz-hint {
-                font-size: 1.5rem;
-                color: #ffb703;
-                font-weight: bold;
-                letter-spacing: 2px;
-                margin: 10px 0;
-            }
-            .game-timer {
-                font-size: 1.4rem;
-                color: #ff3b30;
-                font-weight: bold;
-                margin-top: 15px;
-                animation: game-pulse 1s infinite alternate;
-            }
-            @keyframes game-pulse {
-                0% { transform: scale(1.0); text-shadow: 0 0 5px rgba(255, 59, 48, 0.5); }
-                100% { transform: scale(1.05); text-shadow: 0 0 15px rgba(255, 59, 48, 0.8); }
-            }
-            .game-participants-count {
-                font-size: 1rem;
-                color: #888;
-                margin-top: 10px;
-            }
-            .game-winner-announce {
-                font-size: 1.8rem;
-                color: #fff;
-                font-weight: bold;
-                animation: game-scale-winner 0.5s ease-out forwards;
-            }
-            @keyframes game-scale-winner {
-                0% { transform: scale(0.5); }
-                100% { transform: scale(1.1); }
-            }
-            /* Quiz-specific 1.5x scaling overrides */
-            .game-quiz-card .game-title {
-                font-size: 4.5rem !important;
-                margin-bottom: 15px;
-                text-shadow: 0 0 20px rgba(0, 255, 163, 0.3);
-            }
-            .game-quiz-card .game-subtitle {
-                font-size: 2.4rem !important;
-                margin-bottom: 40px;
-            }
-            .game-quiz-card .game-status {
-                font-size: 2.8rem !important;
-                margin: 30px 0;
-            }
-            .game-quiz-card .game-quiz-hint {
-                font-size: 3.2rem !important;
-                letter-spacing: 4px;
-                margin: 20px 0;
-            }
-            .game-quiz-card .game-timer {
-                font-size: 2.8rem !important;
-                margin-top: 30px;
-            }
-            .game-quiz-card .game-participants-count {
-                font-size: 2.0rem !important;
-                margin-top: 20px;
-            }
-            .game-quiz-card .game-winner-announce {
-                font-size: 3.8rem !important;
-            }
-            .game-quiz-leaderboard {
-                background: rgba(255, 255, 255, 0.08);
-                border: 2px solid rgba(0, 255, 163, 0.3);
-                border-radius: 15px;
-                padding: 12px 24px;
-                font-size: 2.0rem;
-                color: #ffb703;
-                font-weight: bold;
-                margin-bottom: 35px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 20px;
-                flex-wrap: wrap;
-                z-index: 10;
-                backdrop-filter: blur(5px);
-            }
-            .game-quiz-leaderboard .leaderboard-item {
-                background: rgba(0, 255, 163, 0.1);
-                border-radius: 8px;
-                padding: 4px 12px;
-                color: #fff;
-                font-size: 1.8rem;
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                border: 1px solid rgba(0, 255, 163, 0.2);
-            }
-        `;
-        document.head.appendChild(style);
     }
 
     _getLeaderboardHTML() {
@@ -210,7 +90,7 @@ class SoundQuizEffect extends BaseEffect {
 
         // Create overlay container
         const container = document.createElement('div');
-        container.className = 'game-overlay-container';
+        container.className = 'game-quiz-overlay-container';
         document.body.appendChild(container);
 
         return new Promise(async (resolve) => {
