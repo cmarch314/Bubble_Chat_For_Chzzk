@@ -3846,7 +3846,7 @@ window.HIVE_SOUND_CONFIG = {
         "src": "Chzzk_Signatures/츄릅츄릅.mp3",
         "volume": 0.7
     },
-    "츠지모토상오하이오": {
+    "츠지오하": {
         "src": "Chzzk_Signatures/츠지모토상오하이오.mp3",
         "volume": 0.7
     },
@@ -3870,7 +3870,7 @@ window.HIVE_SOUND_CONFIG = {
         "src": "Chzzk_Signatures/키엔반죠.mp3",
         "volume": 0.7
     },
-    "키요츠케테": {
+    "조심해": {
         "src": "Chzzk_Signatures/키요츠케테.mp3",
         "volume": 0.7
     },
