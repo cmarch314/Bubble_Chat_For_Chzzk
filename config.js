@@ -1500,7 +1500,7 @@ window.HIVE_SOUND_CONFIG = {
         "src": "Chzzk_Signatures/좋은날이있.mp3",
         "volume": 0.7
     },
-    "죽고 싶지 않": {
+    "죽고싶지않아": {
         "src": "Chzzk_Signatures/Don'tWannaDie.mp3",
         "volume": 0.7
     },
@@ -3846,7 +3846,7 @@ window.HIVE_SOUND_CONFIG = {
         "src": "Chzzk_Signatures/츄릅츄릅.mp3",
         "volume": 0.7
     },
-    "츠지모토상오하": {
+    "츠지모토상오하이오": {
         "src": "Chzzk_Signatures/츠지모토상오하이오.mp3",
         "volume": 0.7
     },
@@ -3870,7 +3870,7 @@ window.HIVE_SOUND_CONFIG = {
         "src": "Chzzk_Signatures/키엔반죠.mp3",
         "volume": 0.7
     },
-    "너무 어려우니까 조심해!": {
+    "키요츠케테": {
         "src": "Chzzk_Signatures/키요츠케테.mp3",
         "volume": 0.7
     },
