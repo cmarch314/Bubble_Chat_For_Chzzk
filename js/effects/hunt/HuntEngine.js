@@ -44,8 +44,8 @@ class HuntEngine {
         if (this.callbacks.onPlayAudioFile) this.callbacks.onPlayAudioFile(subPath, durationLimitMs, volumeMultiplier);
     }
 
-    shakeWeapon(idx, borderClr, isAttack, moveName) {
-        if (this.callbacks.onShakeWeapon) this.callbacks.onShakeWeapon(idx, borderClr, isAttack, moveName);
+    shakeWeapon(idx, borderClr, isAttack, moveName, isDodge = false) {
+        if (this.callbacks.onShakeWeapon) this.callbacks.onShakeWeapon(idx, borderClr, isAttack, moveName, isDodge);
     }
 
     shakeMonster() {
@@ -102,6 +102,10 @@ class HuntEngine {
 
     showSkillBubble(idxOrMonster, text) {
         if (this.callbacks.onShowSkillBubble) this.callbacks.onShowSkillBubble(idxOrMonster, text);
+    }
+
+    spawnEmojiBubble(idx, emoji) {
+        if (this.callbacks.onSpawnEmojiBubble) this.callbacks.onSpawnEmojiBubble(idx, emoji);
     }
 
     triggerMonsterRoar(monster) {
@@ -166,9 +170,20 @@ class HuntEngine {
             }
         });
 
-        // Buff / Overheat counters
+        // Buff / Overheat / Hit stun counters
         this.selectedWeapons.forEach(w => {
-            if (w.status === 'alive') {
+            if (w.status === 'alive' || w.status === 'stunned') {
+                if (w.hitDuration && w.hitDuration > 0) {
+                    w.hitDuration--;
+                }
+                if (w.status === 'stunned' && w.stunDuration && w.stunDuration > 0) {
+                    w.stunDuration--;
+                    if (w.stunDuration === 0) {
+                        w.status = 'alive';
+                        this.addLog(`✨ [기절 회복] ${w.name}이(가) 정신을 차렸습니다!`, '#eee');
+                        if (this.callbacks.onTriggerStunUI) this.callbacks.onTriggerStunUI(w.index, false);
+                    }
+                }
                 if (w.id === 'dual_blades' && w.demonModeDuration && w.demonModeDuration > 0) {
                     w.demonModeDuration--;
                     if (w.demonModeDuration === 0) {
@@ -194,14 +209,14 @@ class HuntEngine {
             }
         });
 
-        // Monster State Loop (1-minute loop: normal -> enraged -> normal -> exhausted)
-        const loopTime = this.battleTime % 240;
+        // Monster State Loop (90-second loop per state: normal -> enraged -> normal -> exhausted)
+        const loopTime = this.battleTime % 3600;
         let nextState = 'normal';
-        if (loopTime >= 60 && loopTime < 120) {
+        if (loopTime >= 900 && loopTime < 1800) {
             nextState = 'enraged';
-        } else if (loopTime >= 120 && loopTime < 180) {
+        } else if (loopTime >= 1800 && loopTime < 2700) {
             nextState = 'normal';
-        } else if (loopTime >= 180 && loopTime < 240) {
+        } else if (loopTime >= 2700 && loopTime < 3600) {
             nextState = 'exhausted';
         }
 
@@ -249,10 +264,10 @@ class HuntEngine {
             this.monsterKnockdownDuration--;
             if (this.monsterKnockdownDuration <= 0) {
                 // Recovery from knockdown
-                const loopTime = this.battleTime % 240;
+                const loopTime = this.battleTime % 3600;
                 let restoreState = 'normal';
-                if (loopTime >= 60 && loopTime < 120) restoreState = 'enraged';
-                else if (loopTime >= 180 && loopTime < 240) restoreState = 'exhausted';
+                if (loopTime >= 900 && loopTime < 1800) restoreState = 'enraged';
+                else if (loopTime >= 2700 && loopTime < 3600) restoreState = 'exhausted';
 
                 this.monsterState = restoreState;
                 this.monsterSpeed = restoreState === 'enraged' ? 3.3 : (restoreState === 'exhausted' ? 1.1 : 2.2);
@@ -272,10 +287,10 @@ class HuntEngine {
             this.monsterStunDuration--;
             if (this.monsterStunDuration <= 0) {
                 // Recovery from stun
-                const loopTime = this.battleTime % 240;
+                const loopTime = this.battleTime % 3600;
                 let restoreState = 'normal';
-                if (loopTime >= 60 && loopTime < 120) restoreState = 'enraged';
-                else if (loopTime >= 180 && loopTime < 240) restoreState = 'exhausted';
+                if (loopTime >= 900 && loopTime < 1800) restoreState = 'enraged';
+                else if (loopTime >= 2700 && loopTime < 3600) restoreState = 'exhausted';
 
                 this.monsterState = restoreState;
                 this.monsterSpeed = restoreState === 'enraged' ? 3.3 : (restoreState === 'exhausted' ? 1.1 : 2.2);
@@ -303,7 +318,7 @@ class HuntEngine {
 
         // Hunter ATB
         this.selectedWeapons.forEach(w => {
-            if ((w.status === 'alive' || w.status === 'stunned') && !w.roarStunned) {
+            if ((w.status === 'alive' || w.status === 'stunned') && !w.roarStunned && (!w.hitDuration || w.hitDuration <= 0)) {
                 let fillRate = 1.0;
                 if (w.speedGroup === 'very_fast') fillRate = 2.0;
                 else if (w.speedGroup === 'fast') fillRate = 1.5;
@@ -312,9 +327,15 @@ class HuntEngine {
                 if (w.id === 'dual_blades' && w.demonModeDuration && w.demonModeDuration > 0) {
                     fillRate *= 1.2;
                 }
+                if (w.id === 'insect_glaive') {
+                    const hasTripleUp = w.extractDuration && w.extractDuration > 0;
+                    if (!hasTripleUp) {
+                        fillRate *= 2.0;
+                    }
+                }
                 w.atb = Math.min(100, w.atb + fillRate);
-                this.updateWeaponAtbUI(w.index, w.atb);
             }
+            this.updateWeaponAtbUI(w.index, w.atb);
         });
 
         // Execute Turns
@@ -378,9 +399,11 @@ class HuntEngine {
                     if (this.monsterStunAccum >= this.monsterStunThreshold && this.monsterStunDuration <= 0) {
                         this.monsterStunDuration = 60;
                         this.monsterState = 'stunned';
+                        this.monsterAtb = 0;
+                        this.updateMonsterAtbUI(0);
                         this.updateMonsterStateUI('기절 상태', `💫 기절한 ${this.selectedMonster.nameKO} 💫`, { color: '#e58e26', bg: 'rgba(229,142,38,0.1)' });
-                        this.playSFX('mh_stun.mp3', '격추');
-                        this.addLog(`💫 [기절] ${this.selectedMonster.nameKO}이(가) ${target.name}의 강한 타격을 머리에 입고 기절했습니다! (6초간 무력화)`, '#e58e26');
+                        // this.playSFX('mh_stun.mp3', '격추');
+                        this.addLog(`💫 [기절] ${this.selectedMonster.nameKO}이(가) ${target.name}의 강한 타격을 머리에 입고 기절했습니다! 행동 게이지가 초기화되며 6초간 무력화됩니다.`, '#e58e26');
                     }
                 }
 
@@ -401,9 +424,10 @@ class HuntEngine {
             let isDodge = false;
             let isForesightSlash = false;
 
-            const hasShield = target.type === 'shield' || target.id === 'heavy_bowgun';
-            let guardProb = 0.85;
-            let dodgeProb = 0.75;
+            const isStunned = target.status === 'stunned';
+            const hasShield = !isStunned && (target.type === 'shield' || target.id === 'heavy_bowgun');
+            let guardProb = isStunned ? 0 : 0.85;
+            let dodgeProb = isStunned ? 0 : 0.75;
 
             // Personality-based dodge modifiers
             if (target.personality === 'veteran') {
@@ -415,7 +439,7 @@ class HuntEngine {
             }
 
             // Long Sword Foresight Slash (75%)
-            if (target.id === 'long_sword' && defendRoll < 0.75) {
+            if (!isStunned && target.id === 'long_sword' && defendRoll < 0.75) {
                 damage = 0;
                 isDodge = true;
                 isForesightSlash = true;
@@ -433,7 +457,9 @@ class HuntEngine {
                 if (target.hp - damage <= 0 && target.hasMoxie && Math.random() < 0.75) {
                     target.hp = 1;
                     target.hasMoxie = false;
-                    this.addLog(`🔥 [근성 발휘!] ${target.name}이(가) ${this.selectedMonster.nameKO}의 치명타를 입고 근성으로 1 HP 생존했습니다!`, '#ffaa00');
+                    target.atb = 0;
+                    this.updateWeaponAtbUI(target.index, 0);
+                    this.addLog(`🔥 [근성 발휘!] ${target.name}이(가) ${this.selectedMonster.nameKO}의 치명타를 입고 근성으로 1 HP 생존했습니다! (행동 게이지 초기화)`, '#c98534');
                     this.playSFX('mh_guard.mp3', '오살았어');
                     this.shakeWeapon(target.index, '#00ffa3');
                     attackResults.push({ index: target.index, result: 'hit' });
@@ -446,7 +472,14 @@ class HuntEngine {
                         if (this.callbacks.onTriggerGuardShake) this.callbacks.onTriggerGuardShake(target.index);
                         attackResults.push({ index: target.index, result: 'guard' });
                     } else {
-                        this.addLog(`💥 [피격] ${this.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 큰 타격! (-${damage} HP)`, '#ff5555');
+                        target.atb = 0;
+                        this.updateWeaponAtbUI(target.index, 0);
+                        if (damage >= 30) {
+                            target.hitDuration = 25; // 2.5 seconds
+                        } else {
+                            target.hitDuration = 10; // 1.0 second
+                        }
+                        this.addLog(`💥 [피격] ${this.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 큰 타격! (-${damage} HP, 행동 게이지 초기화)`, '#ff5555');
                         // this.playSFX('mh_hit.mp3', ['윽!', '으악!', '아야!'][Math.floor(Math.random() * 3)]);
                         this.shakeMonster();
                         this.shakeWeapon(target.index);
@@ -456,15 +489,15 @@ class HuntEngine {
                 }
             } else {
                 if (isForesightSlash) {
-                    this.addLog(`⚡ [간파베기] ${target.name}이(가) 간파베기로 공격을 흘려내며 기인 게이지가 상승했습니다! (현재 레벨: ${target.spiritLevel}/3)`, '#ffaa00');
+                    this.addLog(`⚡ [간파베기] ${target.name}이(가) 간파베기로 공격을 흘려내며 기인 게이지가 상승했습니다! (현재 레벨: ${target.spiritLevel}/3)`, '#c98534');
                     this.playSFX('mh_guard.mp3', '가드성공');
                     this.showSkillBubble(target.index, "간파베기!");
                     this.restoreBorder(target.index);
-                    this.shakeWeapon(target.index, '#ffaa00');
+                    this.shakeWeapon(target.index, '#c98534');
                 } else {
                     this.addLog(`🌀 [회피] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 구르기로 회피했습니다!`, '#2eff7b');
                     this.playSFX('mh_dodge.mp3', '회피');
-                    this.shakeWeapon(target.index, '#2eff7b');
+                    this.shakeWeapon(target.index, '#2eff7b', false, null, true);
                 }
                 if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(target.index);
                 attackResults.push({ index: target.index, result: 'dodge' });
@@ -488,15 +521,25 @@ class HuntEngine {
                 this.cartCount++;
                 this.updateCartUI(this.cartCount);
                 this.addLog(`🚨 [수레행] ${target.name}이(가) 쓰러졌습니다! 5초 후 부활합니다. (현재 수레: ${this.cartCount}/3)`, '#ff3b30');
-                this.playAudioFile('Unified_SFX/Player Fainted.mp3', 3500);
+                
+                // 40% 확률로 사망 사운드 대신 "아이보!" 사운드 재생
+                if (Math.random() < 0.40) {
+                    this.playSFX('mh_aibo.mp3', '아이보');
+                } else {
+                    this.playAudioFile('Unified_SFX/Player Fainted.mp3', 3500);
+                }
+
                 if (this.callbacks.onTriggerDeathTag) this.callbacks.onTriggerDeathTag(target.index);
                 target.cartTimer = 50; // 5.0 seconds
             } else {
                 // Stun check (15% chance on raw damage)
                 if (target.status === 'alive' && Math.random() < 0.15) {
                     target.status = 'stunned';
-                    this.addLog(`🌀 [기절] ${target.name}이(가) 큰 충격으로 기절했습니다! 다음 턴 행동 불가!`, '#e58e26');
-                    this.playSFX('mh_stun.mp3', '격추');
+                    target.stunDuration = 50;
+                    target.atb = 0;
+                    this.updateWeaponAtbUI(target.index, 0);
+                    this.addLog(`🌀 [기절] ${target.name}이(가) 큰 충격으로 기절했습니다! 행동 게이지가 초기화되며 다음 턴 행동이 불가합니다!`, '#e58e26');
+                    // this.playSFX('mh_stun.mp3', '격추');
                     this.shakeWeapon(target.index, '#e58e26');
                     if (this.callbacks.onTriggerStunUI) this.callbacks.onTriggerStunUI(target.index, true);
                 }
@@ -506,7 +549,7 @@ class HuntEngine {
         // Trigger dynamic monster attack animation
         const { type: attackType, emoji } = this.getMonsterAttackType(attackName);
         if (this.callbacks.onTriggerMonsterAttack) {
-            this.callbacks.onTriggerMonsterAttack(attackType, emoji, attackResults);
+            this.callbacks.onTriggerMonsterAttack(attackType, emoji, attackResults, attackName);
         }
     }
 
@@ -574,16 +617,22 @@ class HuntEngine {
             this.monsterKnockdownDuration = 70;
             this.monsterStunDuration = 0;
             this.monsterState = 'knocked_down';
+            this.monsterAtb = 0;
+            this.updateMonsterAtbUI(0);
             this.updateMonsterStateUI('대경직 상태', `💤 대경직에 쓰러진 ${this.selectedMonster.nameKO} 💤`, { color: '#ff9500', bg: 'rgba(255,149,0,0.1)' });
             
             if (this.callbacks.onTriggerMonsterKnockdownAnim) this.callbacks.onTriggerMonsterKnockdownAnim();
             
-            this.playSFX('mh_stun.mp3', '격추');
-            this.addLog(`💤 [대경직] ${this.selectedMonster.nameKO}이(가) 큰 충격으로 대경직에 걸려 쓰러졌습니다! (7초간 무력화)`, '#ff9500');
+            // this.playSFX('mh_stun.mp3', '격추');
+            this.addLog(`💤 [대경직] ${this.selectedMonster.nameKO}이(가) 큰 충격으로 대경직에 걸려 쓰러졌습니다! 행동 게이지가 초기화되며 7초간 무력화됩니다.`, '#ff9500');
         }
     }
 
     executeHunterTurn(w) {
+        if (w.hitDuration && w.hitDuration > 0) {
+            w.atb = 0;
+            return;
+        }
         w.atb = 0;
 
         // Recovery from stun state
@@ -633,12 +682,14 @@ class HuntEngine {
                 w.trapsUsed = (w.trapsUsed || 0) + 1;
                 this.monsterKnockdownDuration = 40;
                 this.monsterState = 'knocked_down';
+                this.monsterAtb = 0;
+                this.updateMonsterAtbUI(0);
                 this.updateMonsterStateUI('구멍함정 상태', `🕸️ 함정에 빠진 ${this.selectedMonster.nameKO} 🕸`, { color: '#ff9500', bg: 'rgba(255,149,0,0.1)' });
                 
                 if (this.callbacks.onTriggerMonsterKnockdownAnim) this.callbacks.onTriggerMonsterKnockdownAnim();
 
-                this.addLog(`🕸️ [함정 설치] ${w.hunterName}이(가) 구멍함정으로 몬스터를 구속했습니다! (4초간 무력화)`, '#e0ffa3');
-                this.playSFX('mh_stun.mp3', '격추');
+                this.addLog(`🕸️ [함정 설치] ${w.hunterName}이(가) 구멍함정으로 몬스터를 구속했습니다! 행동 게이지가 초기화되며 4초간 무력화됩니다.`, '#e0ffa3');
+                // this.playSFX('mh_stun.mp3', '격추');
                 this.shakeWeapon(w.index, '#e0ffa3');
                 return;
             }
@@ -647,13 +698,15 @@ class HuntEngine {
                 w.stonesUsed = (w.stonesUsed || 0) + 1;
                 this.monsterKnockdownDuration = 70;
                 this.monsterState = 'knocked_down';
+                this.monsterAtb = 0;
+                this.updateMonsterAtbUI(0);
                 this.updateMonsterStateUI('낙석 대경직', `💤 낙석에 깔린 ${this.selectedMonster.nameKO} 💤`, { color: '#ff9500', bg: 'rgba(255,149,0,0.1)' });
                 
                 if (this.callbacks.onTriggerMonsterKnockdownAnim) this.callbacks.onTriggerMonsterKnockdownAnim();
 
-                this.addLog(`💥 [낙석격동] ${w.hunterName}이(가) 지형 낙석을 맞춰 몬스터에게 대경직을 유발했습니다! (7초간 무력화)`, '#ffaa00');
-                this.playSFX('mh_stun.mp3', '격추');
-                this.shakeWeapon(w.index, '#ffaa00');
+                this.addLog(`💥 [낙석격동] ${w.hunterName}이(가) 지형 낙석을 맞춰 몬스터에게 대경직을 유발했습니다! 행동 게이지가 초기화되며 7초간 무력화됩니다.`, '#c98534');
+                // this.playSFX('mh_stun.mp3', '격추');
+                this.shakeWeapon(w.index, '#c98534');
                 return;
             }
 
@@ -661,10 +714,12 @@ class HuntEngine {
             if ((!w.lifepowders || w.lifepowders === 0) && Math.random() < 0.4) {
                 w.lifepowders = 1;
                 w.atb = 60;
+                w.isGathering = true;
                 this.addLog(`🌿 [채집] ${w.name}이(가) 허브를 채집해 라이프파우더 1개를 보충했습니다!`, '#aaffaa');
                 this.playAudioFile('Unified_SFX/MH - Item Found (rare).mp3');
-                this.showSkillBubble(w.index, `🌿 채집 완료`);
+                this.spawnEmojiBubble(w.index, `🌿`);
                 this.shakeWeapon(w.index, '#aaffaa');
+                setTimeout(() => { w.isGathering = false; }, 2500);
                 return;
             }
         }
@@ -675,9 +730,11 @@ class HuntEngine {
                 const prevMonster = this.consecutiveQueue[this.currentConsecutiveIndex - 1];
                 const prevMonsterName = prevMonster ? prevMonster.nameKO : "이전 몬스터";
                 const material = this.getPreviousMonsterMaterial(prevMonsterName);
-                this.addLog(`😅 [몬린이 딴짓] ${w.name}이(가) 전투 도중 이전 토벌 대상인 [${prevMonsterName}]의 사체로 달려가 갈무리를 시도합니다! (획득: ${material})`, '#ffaa00');
-                this.showSkillBubble(w.index, "갈무리 시도중...🏃");
-                this.shakeWeapon(w.index, '#ffaa00');
+                w.isGathering = true;
+                this.addLog(`😅 [몬린이 딴짓] ${w.name}이(가) 전투 도중 이전 토벌 대상인 [${prevMonsterName}]의 사체로 달려가 갈무리를 시도합니다! (획득: ${material})`, '#c98534');
+                this.spawnEmojiBubble(w.index, `🏃`);
+                this.shakeWeapon(w.index, '#c98534');
+                setTimeout(() => { w.isGathering = false; }, 2500);
             } else {
                 this.addLog(`😅 [실수] ${w.name}이(가) 공격 타이밍을 놓쳤습니다!`, '#aaa');
                 this.shakeWeapon(w.index, '#aaa');
@@ -711,9 +768,9 @@ class HuntEngine {
         // Melee sharpening
         if (w.type !== 'ranged' && w.sharpness <= 30) {
             w.sharpness = 100;
-            this.addLog(`✨ [숫돌질] ${w.name}이(가) 구석에서 숫돌을 갈아 예리도를 회복합니다!`, '#ffaa00');
+            this.addLog(`✨ [숫돌질] ${w.name}이(가) 구석에서 숫돌을 갈아 예리도를 회복합니다!`, '#c98534');
             this.playAudioFile('Unified_SFX/MH - Combine Item.mp3');
-            this.shakeWeapon(w.index, '#ffaa00');
+            this.shakeWeapon(w.index, '#c98534');
             return;
         }
 
@@ -727,6 +784,11 @@ class HuntEngine {
             for (let i = 1; i < combos.length; i++) {
                 if (combos[i].name === '기인투구깨기') {
                     if (w.id === 'long_sword' && (w.spiritLevel || 0) < 2) continue;
+                }
+                // Insect Glaive cannot use high damage combo without tripleUp buff active
+                if (w.id === 'insect_glaive') {
+                    const hasTripleUp = w.extractDuration && w.extractDuration > 0;
+                    if (!hasTripleUp && combos[i].name !== '진액 추출') continue;
                 }
                 if (combos[i].dmg > maxDmgCombo.dmg) {
                     maxDmgCombo = combos[i];
@@ -758,6 +820,21 @@ class HuntEngine {
             }
         }
 
+        // Insect Glaive extracts restriction (No attack combos without 3-extract tripleUp active)
+        if (w.id === 'insect_glaive') {
+            const hasTripleUp = w.extractDuration && w.extractDuration > 0;
+            if (!hasTripleUp) {
+                w.comboIndex = 0;
+                currentCombo = combos[0];
+                isKnockdownAttack = false;
+            } else {
+                if (w.comboIndex === 0) {
+                    w.comboIndex = 1;
+                }
+                currentCombo = combos[w.comboIndex];
+            }
+        }
+
         if (currentCombo) {
             let damage = currentCombo.dmg;
 
@@ -782,14 +859,14 @@ class HuntEngine {
                     if ((w.phials || 0) > 0) {
                         w.phials--;
                         damage += 70;
-                        this.addLog(`⚡ [병소모] 도끼 속성해방베기 I! 병 1개를 소비하여 속성 추타를 가합니다! (남은 병: ${w.phials}/5)`, '#ffaa00');
+                        this.addLog(`⚡ [병소모] 도끼 속성해방베기 I! 병 1개를 소비하여 속성 추타를 가합니다! (남은 병: ${w.phials}/5)`, '#c98534');
                         this.updatePhialsUI(w.index, w.phials);
                     }
                 } else if (currentCombo.name === '고출력 속성해방베기') {
                     if ((w.phials || 0) > 0) {
                         w.phials--;
                         damage += 100;
-                        this.addLog(`⚡ [병소모] 고출력 속성해방베기! 병 1개를 소비하여 속성 충격파가 추가 폭발합니다! (남은 병: ${w.phials}/5)`, '#ffaa00');
+                        this.addLog(`⚡ [병소모] 고출력 속성해방베기! 병 1개를 소비하여 속성 충격파가 추가 폭발합니다! (남은 병: ${w.phials}/5)`, '#c98534');
                         this.updatePhialsUI(w.index, w.phials);
                     }
                 } else if (currentCombo.name === '초고출력 속성해방베기') {
@@ -827,13 +904,13 @@ class HuntEngine {
 
                     if (colorAcquired) {
                         this.addLog(`🐝 [진액 획득] ${w.hunterName}이(가) ${colorAcquired} 진액을 획득했습니다!`, '#e0ffa3');
-                        this.playAudioFile('Unified_SFX/MH - Item Found.mp3');
+                        this.playAudioFile('Unified_SFX/MH - Combine Item.mp3');
                     }
                     this.updateExtractsUI(w.index, w.extractBuffs);
 
                     if (w.extractBuffs.red && w.extractBuffs.white && w.extractBuffs.orange && (!w.extractDuration || w.extractDuration === 0)) {
-                        w.extractDuration = 20;
-                        this.addLog(`🐝 [진액 트리플업] ${w.hunterName}이(가) 3색 진액을 모두 획득하여 20초간 공격력이 30% 증가합니다!`, '#ffaa00');
+                        w.extractDuration = 900;
+                        this.addLog(`🐝 [진액 트리플업] ${w.hunterName}이(가) 3색 진액을 모두 획득하여 90초간 공격력이 30% 증가합니다!`, '#c98534');
                         this.playSFX('mh_reload.mp3', '재장전');
                         this.restoreBorder(w.index);
                     }
@@ -856,7 +933,7 @@ class HuntEngine {
             if (w.id === 'long_sword') {
                 if (currentCombo.name === '기인베기 II') {
                     w.spiritLevel = Math.min(3, (w.spiritLevel || 0) + 1);
-                    this.addLog(`✨ [기인 연계] ${w.hunterName}이(가) 기인베기 II를 성공시켜 기인 게이지 레벨이 상승했습니다! (현재 레벨: ${w.spiritLevel}/3)`, '#ffaa00');
+                    this.addLog(`✨ [기인 연계] ${w.hunterName}이(가) 기인베기 II를 성공시켜 기인 게이지 레벨이 상승했습니다! (현재 레벨: ${w.spiritLevel}/3)`, '#c98534');
                     this.restoreBorder(w.index);
                 } else if (currentCombo.name === '기인투구깨기') {
                     w.spiritLevel = Math.max(0, (w.spiritLevel || 0) - 1);
@@ -892,14 +969,16 @@ class HuntEngine {
 
             // Hit sound triggers
             let soundKey = '';
-            if (currentCombo.soundKey) {
+            if (currentCombo.name && (currentCombo.name.includes('회전 회오리') || currentCombo.name.includes('회전회오리'))) {
+                soundKey = '회전회오리';
+            } else if (currentCombo.soundKey) {
                 if (Array.isArray(currentCombo.soundKey)) {
                     soundKey = currentCombo.soundKey[Math.floor(Math.random() * currentCombo.soundKey.length)];
                 } else {
                     soundKey = currentCombo.soundKey;
                 }
             } else if (currentCombo.stun && currentCombo.stun > 0) {
-                soundKey = '타격음_타격';
+                soundKey = '타격음_베기';
             } else if (currentCombo.dmg > 300) {
                 soundKey = '타격음_무겁';
             } else {
@@ -914,6 +993,9 @@ class HuntEngine {
             } else {
                 this.addLog(`⚔️ [연계-${w.comboIndex+1}] ${w.name}의 [${currentCombo.name}] 시전! 몬스터를 타격! (-${damage} HP)`, '#eee');
             }
+
+            // [Fix] Trigger hunter skill speech bubble
+            this.showSkillBubble(w.index, currentCombo.name);
 
             this.shakeMonster();
             this.shakeWeapon(w.index, '#ff9500', true, currentCombo.name);
@@ -940,7 +1022,7 @@ class HuntEngine {
 
         if (isEncounter) {
             this.playAudioFile('Unified_SFX/Encounter.mp3');
-            this.addLog(`🔊 [조우 포효] ${this.selectedMonster.nameKO}이(가) 침입자를 발견하고 강력한 포효를 지릅니다!`, '#ffaa00');
+            this.addLog(`🔊 [조우 포효] ${this.selectedMonster.nameKO}이(가) 침입자를 발견하고 강력한 포효를 지릅니다!`, '#c98534');
         } else {
             this.playAudioFile('Unified_SFX/Encounter.mp3');
             this.addLog(`😡 [분노 포효] 격노한 ${this.selectedMonster.nameKO}이(가) 대지진 포효를 내뿜으며 격렬하게 소리칩니다!`, '#ff3b30');
@@ -978,29 +1060,30 @@ class HuntEngine {
             }
 
             if (isForesightSlash) {
-                this.addLog(`⚡ [간파베기] ${w.name}이(가) 몬스터의 포효를 간파하고 기인 게이지를 쌓았습니다!`, '#ffaa00');
+                this.addLog(`⚡ [간파베기] ${w.name}이(가) 몬스터의 포효를 간파하고 기인 게이지를 쌓았습니다!`, '#c98534');
                 this.playSFX('mh_guard.mp3', '가드성공');
-                this.showSkillBubble(w.index, "간파베기 (포효)!");
-                this.shakeWeapon(w.index, '#ffaa00');
+                this.showSkillBubble(w.index, "간파베기!");
+                this.shakeWeapon(w.index, '#c98534');
                 if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(w.index);
             } else if (isGuard) {
                 this.addLog(`🛡️ [방패 가드] ${w.name}이(가) 포효를 방패로 막아내며 흔들림 없이 버팁니다!`, '#00ffff');
                 this.playSFX('mh_guard.mp3', '가드성공');
-                this.showSkillBubble(w.index, "가드 (포효)!");
+                this.showSkillBubble(w.index, "가드!");
                 this.shakeWeapon(w.index, '#00ffff');
                 if (this.callbacks.onTriggerGuardShake) this.callbacks.onTriggerGuardShake(w.index);
             } else if (isDodge) {
                 this.addLog(`🌀 [프레임 회피] ${w.name}이(가) 구르기 무적 시간으로 포효의 음파를 피해냈습니다!`, '#2eff7b');
                 this.playSFX('mh_dodge.mp3', '회피');
-                this.showSkillBubble(w.index, "회피 (포효)!");
-                this.shakeWeapon(w.index, '#2eff7b');
+                this.showSkillBubble(w.index, "회피!");
+                this.shakeWeapon(w.index, '#2eff7b', false, null, true);
                 if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(w.index);
             } else {
                 // 대처 실패: 귀막기 경직 45틱 (4.5초)
                 w.roarStunned = true;
                 w.roarStunDuration = 45;
-                w.atb = Math.max(0, w.atb - 20); // 경직에 의한 ATB 패널티
-                this.addLog(`🙉 [귀막기 경직] ${w.name}이(가) 포효를 피하지 못해 귀를 막고 괴로워합니다! (4.5초 행동 불가)`, '#ff3b30');
+                w.atb = 0;
+                this.updateWeaponAtbUI(w.index, 0);
+                this.addLog(`🙉 [귀막기 경직] ${w.name}이(가) 포효를 피하지 못해 귀를 막고 괴로워합니다! 행동 게이지가 초기화되며 4.5초간 행동 불능이 됩니다.`, '#ff3b30');
                 if (this.callbacks.onTriggerRoarStun) this.callbacks.onTriggerRoarStun(w.index, true);
             }
         });

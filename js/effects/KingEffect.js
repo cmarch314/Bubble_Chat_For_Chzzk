@@ -10,7 +10,7 @@ class KingEffect extends BaseEffect {
         const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().king) ? this.config.getVisualConfig().king : {
             duration: 23000,
             imagePath: './img/King_Of_MH.png',
-            audioPath: './SFX/아들아.mp3',
+            audioPath: './SFX/Chzzk_Signatures/아들아.mp3',
             volume: 0.7,
             emojiPool: ["❄️", "🧊", "⭐"],
             delayedEmojiPool: ["💩", "🧻", "🤮"],

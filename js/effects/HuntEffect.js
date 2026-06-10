@@ -8,6 +8,7 @@ class HuntEffect extends BaseEffect {
         this.selectedMonster = null; // random monster
         this.gameTimer = null;
         this.fightInterval = null;
+        this.victoryEmojiTimeouts = [];
         this.resolveGame = null;
 
         // Configuration
@@ -17,6 +18,16 @@ class HuntEffect extends BaseEffect {
         this.audioManager = new HuntAudioManager(director, this.config);
         this.initializer = new HuntInitializer();
         this.engine = null;
+
+        // Static emoji mapping for victory emotions (purely emotion/gesture based, no items)
+        this.victoryEmojiMap = {
+            veteran: ['😎', '👍', '😄', '✌️', '💪'],
+            support: ['🥰', '💚', '😍', '😊', '🥳'],
+            newbie: ['🤩', '😂', '🥳', '🙌', '💛'],
+            offensive: ['😼', '😈', '😎', '🔥', '✊'],
+            defensive: ['😌', '👍', '😊', '👌', '🧡'],
+            normal: ['🙂', '👍', '😄', '👏', '❤️']
+        };
     }
 
     async execute(context) {
@@ -50,6 +61,7 @@ class HuntEffect extends BaseEffect {
         }
 
         const msgText = context ? context.message : "";
+        this.monsters = monsters;
         const parsed = this.initializer.parseCommand(msgText, monsters);
 
         this.consecutiveTotal = parsed.consecutiveTotal;
@@ -85,11 +97,17 @@ class HuntEffect extends BaseEffect {
             console.warn("Audio error:", e);
         }
 
-        let voteTitle = "⚔️ 몬스터 수렵 모집! ⚔️";
-        let voteSubtitle = "함께 수렵할 헌터 번호(1~4)를 채팅창에 치세요!";
+        const currentTier = this.initializer.getMonsterTier(this.selectedMonster);
+        const isElder = (currentTier === 'elder');
+        let voteTitle = isElder ? "⚔️ 고룡 토벌 모집! ⚔️" : "⚔️ 몬스터 수렵 모집! ⚔️";
+        let voteSubtitle = isElder ? "함께 토벌할 헌터 번호(1~4)를 채팅창에 치세요!" : "함께 수렵할 헌터 번호(1~4)를 채팅창에 치세요!";
         if (this.consecutiveTotal > 1) {
-            voteTitle = `⚔️ 연속 수렵 모집! (1/${this.consecutiveTotal}) ⚔️`;
-            voteSubtitle = `${this.consecutiveTotal}마리 연속 수렵! 함께 참가할 번호(1~4)를 채팅창에 치세요!`;
+            voteTitle = isElder 
+                ? `⚔️ 연속 토벌 모집! (1/${this.consecutiveTotal}) ⚔️` 
+                : `⚔️ 연속 수렵 모집! (1/${this.consecutiveTotal}) ⚔️`;
+            voteSubtitle = isElder 
+                ? `${this.consecutiveTotal}마리 연속 토벌! 함께 참가할 번호(1~4)를 채팅창에 치세요!` 
+                : `${this.consecutiveTotal}마리 연속 수렵! 함께 참가할 번호(1~4)를 채팅창에 치세요!`;
         }
 
         this.renderer.renderLobby({
@@ -123,22 +141,118 @@ class HuntEffect extends BaseEffect {
         if (!this.isActive) return false;
         const msg = (msgData.message || "").trim();
 
-        if (msgData.isStreamer && (msg === '!토벌 중단' || msg === '!중단')) {
+        if (msgData.isStreamer && (msg === '!토벌 중단' || msg === '!중단' || msg === '!수렵 중단' || msg === '!토벌중단' || msg === '!수렵중단')) {
             this.forceStopGame();
             return true;
         }
 
         if (this.phase === 'voting') {
-            let index = -1;
-            if (msg === '1' || msg === '!1') index = 0;
-            else if (msg === '2' || msg === '!2') index = 1;
-            else if (msg === '3' || msg === '!3') index = 2;
-            else if (msg === '4' || msg === '!4') index = 3;
+            // Mapping for Weapons and Personalities
+            const PERSONALITY_MAP = {
+                '공격적': 'offensive', '공격': 'offensive', '극공': 'offensive',
+                '수비적': 'defensive', '수비': 'defensive', '방어적': 'defensive', '방어': 'defensive',
+                '베테랑': 'veteran', '숙련자': 'veteran', '고수': 'veteran',
+                '서포터': 'support', '서포트': 'support', '지원': 'support',
+                '뉴비': 'newbie', '초보': 'newbie', '몬린이': 'newbie',
+                '밸런스': 'normal', '평범': 'normal', '일반': 'normal', '평범한': 'normal', '노멀': 'normal', '밸런': 'normal'
+            };
 
-            if (index !== -1) {
-                this.bets[msgData.nickname] = { index, color: msgData.color || '#ffffff' };
+            const WEAPON_NAME_MAP = {
+                '대검': 'great_sword',
+                '태도': 'long_sword',
+                '한손검': 'sword_shield', '손검': 'sword_shield',
+                '쌍검': 'dual_blades', '쌍도': 'dual_blades',
+                '해머': 'hammer', '망치': 'hammer',
+                '수렵피리': 'hunting_horn', '피리': 'hunting_horn',
+                '랜스': 'lance',
+                '건랜스': 'gunlance', '건랜': 'gunlance',
+                '슬래시액스': 'switch_axe', '슬액': 'switch_axe',
+                '차지액스': 'charge_blade', '차액': 'charge_blade',
+                '조충곤': 'insect_glaive', '충곤': 'insect_glaive',
+                '라이트보건': 'light_bowgun', '라보': 'light_bowgun',
+                '헤비보건': 'heavy_bowgun', '헤보': 'heavy_bowgun',
+                '활': 'bow'
+            };
+
+            // Remove "참가" prefix if exists
+            const cleaned = msg.replace(/^참가\s+/, '').trim();
+            // Regex to capture "1", "!1", "1 해머", "1 공격적", "1 해머 공격적"
+            const match = cleaned.match(/^!?([1-4])(?:\s+(.+))?$/);
+
+            if (match) {
+                const index = parseInt(match[1], 10) - 1;
+                const remain = match[2] ? match[2].trim() : '';
+
+                let chosenWeaponId = null;
+                let chosenPersonality = null;
+
+                if (remain) {
+                    const tokens = remain.split(/\s+/);
+                    for (const token of tokens) {
+                        if (WEAPON_NAME_MAP[token]) {
+                            chosenWeaponId = WEAPON_NAME_MAP[token];
+                        } else if (PERSONALITY_MAP[token]) {
+                            chosenPersonality = PERSONALITY_MAP[token];
+                        }
+                    }
+                }
+
+                // Subscriber check helper
+                let isSub = msgData.isSubscriber || msgData.isSubscription || false;
+                if (!isSub && msgData.badges && Array.isArray(msgData.badges)) {
+                    isSub = msgData.badges.some(badge => {
+                        const id = (badge.badgeId || "").toLowerCase();
+                        return id.includes("subscription") || id.includes("subscriber") || id.includes("sub");
+                    });
+                }
+
+                this.bets[msgData.nickname] = {
+                    index,
+                    color: msgData.color || '#ffffff',
+                    isSubscriber: isSub,
+                    weaponId: chosenWeaponId,
+                    personality: chosenPersonality
+                };
+
                 this.renderer.updateBettingUI(this.bets);
+
+                // 스폰 이모지 및 참가 말풍선
+                const chosenWeaponObj = chosenWeaponId ? this.initializer.WEAPONS.find(wp => wp.id === chosenWeaponId) : null;
+                const chosenWeaponName = chosenWeaponObj ? chosenWeaponObj.name : '';
+                const pMap = {
+                    offensive: '💥 공격적',
+                    defensive: '🛡️ 수비적',
+                    support: '💚 서포터',
+                    newbie: '🐣 몬린이',
+                    veteran: '🏆 베테랑',
+                    normal: '⚖️ 밸런스'
+                };
+                const chosenPersName = chosenPersonality ? (pMap[chosenPersonality] || '⚖️ 밸런스') : '';
+
+                let feedbackMsg = `참가 신청!`;
+                if (chosenWeaponName && chosenPersName) {
+                    feedbackMsg = `⚔️ ${chosenWeaponName} (${chosenPersName})`;
+                } else if (chosenWeaponName) {
+                    feedbackMsg = `⚔️ ${chosenWeaponName}`;
+                } else if (chosenPersName) {
+                    feedbackMsg = `${chosenPersName}`;
+                }
+
+                this.renderer.spawnLobbyNotification(index, msgData.nickname, feedbackMsg, isSub);
                 return true;
+            }
+
+            // If the user is already registered in this.bets, display their chat above their card
+            const bet = this.bets[msgData.nickname];
+            if (bet !== undefined && msg) {
+                this.renderer.spawnCombatChatBubble(bet.index, msg);
+                return false;
+            }
+        } else if (this.phase === 'fighting' || this.phase === 'ended') {
+            const hunter = this.selectedWeapons.find(w => w.hunterName === msgData.nickname);
+            if (hunter && msg) {
+                this.renderer.spawnCombatChatBubble(hunter.index, msg);
+                return false;
             }
         }
         return false;
@@ -146,18 +260,84 @@ class HuntEffect extends BaseEffect {
 
     startFight(container) {
         this.phase = 'fighting';
+
+        // Handle Unknown Monster random reveal upon hunt start
+        const realMonsters = (this.monsters || []).filter(m => m.id !== 'unknown_monster');
+        if (realMonsters.length > 0) {
+            if (this.selectedMonster && this.selectedMonster.id === 'unknown_monster') {
+                const randomMonster = realMonsters[Math.floor(Math.random() * realMonsters.length)];
+                this.selectedMonster = randomMonster;
+            }
+            if (this.consecutiveQueue && this.consecutiveQueue.length > 0) {
+                this.consecutiveQueue = this.consecutiveQueue.map(m => {
+                    if (m.id === 'unknown_monster') {
+                        return realMonsters[Math.floor(Math.random() * realMonsters.length)];
+                    }
+                    return m;
+                });
+            }
+        }
+
         this.audioManager.stopBgms();
         this.renderer.setContainer(container);
 
         this.selectedWeapons.forEach(w => {
             const voters = Object.entries(this.bets)
                 .filter(([nick, bet]) => bet.index === w.index)
-                .map(([nick, bet]) => ({ nickname: nick, color: bet.color }));
+                .map(([nick, bet]) => ({
+                    nickname: nick,
+                    color: bet.color,
+                    isSubscriber: bet.isSubscriber,
+                    weaponId: bet.weaponId,
+                    personality: bet.personality
+                }));
 
             if (voters.length > 0) {
-                const chosen = voters[Math.floor(Math.random() * voters.length)];
+                // Prioritize subscribers
+                const subs = voters.filter(v => v.isSubscriber);
+                const chosen = subs.length > 0
+                    ? subs[Math.floor(Math.random() * subs.length)]
+                    : voters[Math.floor(Math.random() * voters.length)];
+
                 w.hunterName = chosen.nickname;
                 w.hunterColor = chosen.color;
+
+                // Handle weapon override if they selected a specific weapon
+                if (chosen.weaponId) {
+                    const matchedWeapon = this.initializer.WEAPONS.find(wp => wp.id === chosen.weaponId);
+                    if (matchedWeapon) {
+                        const prevIndex = w.index;
+                        const initialSpeedGroup = matchedWeapon.id === 'charge_blade' ? 'very_fast' : matchedWeapon.speedGroup;
+                        
+                        Object.assign(w, {
+                            ...matchedWeapon,
+                            speedGroup: initialSpeedGroup,
+                            index: prevIndex,
+                            hp: 100,
+                            maxHp: 100,
+                            status: 'alive',
+                            sharpness: 100,
+                            ammo: 5,
+                            hasMoxie: true,
+                            atb: 0,
+                            comboIndex: 0,
+                            respawnTimer: 0,
+                            potions: 10,
+                            lifepowders: 1,
+                            spiritLevel: 0,
+                            demonModeDuration: 0,
+                            phials: 5,
+                            overheatDuration: 0,
+                            extractBuffs: { red: 0, white: 0, orange: 0 },
+                            extractDuration: 0
+                        });
+                    }
+                }
+
+                // Handle personality override if they selected a specific personality
+                if (chosen.personality) {
+                    w.personality = chosen.personality;
+                }
             } else {
                 w.hunterName = `HUNTER ${w.index + 1}`;
                 w.hunterColor = "#cccccc";
@@ -213,8 +393,9 @@ class HuntEffect extends BaseEffect {
 
         this.cartCount = 0;
 
+        const actionLabel = this.monsterTier === 'elder' ? '토벌' : '수렵';
         const hpLabelText = this.consecutiveTotal > 1 
-            ? `👾 [연속 수렵 ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`
+            ? `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`
             : `👾 [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
 
         this.renderer.renderFight({
@@ -247,9 +428,9 @@ class HuntEffect extends BaseEffect {
                 onLog: (text, color) => this.addCombatLog(text, color),
                 onPlaySFX: (fileName, fallbackKey) => this.audioManager.playMHAsset(fileName, fallbackKey),
                 onPlayAudioFile: (subPath, durationLimitMs, volumeMultiplier) => this.audioManager.playMHAudioFile(subPath, durationLimitMs, volumeMultiplier),
-                onShakeWeapon: (idx, borderClr, isAttack, moveName) => {
+                onShakeWeapon: (idx, borderClr, isAttack, moveName, isDodge = false) => {
                     const w = this.selectedWeapons[idx];
-                    this.renderer.shakeWeapon(idx, w, borderClr, isAttack, moveName);
+                    this.renderer.shakeWeapon(idx, w, borderClr, isAttack, moveName, isDodge);
                 },
                 onShakeMonster: () => this.renderer.shakeMonster(),
                 onRestoreBorder: (idx) => {
@@ -258,7 +439,10 @@ class HuntEffect extends BaseEffect {
                 },
                 onUpdateHpUI: (w) => this.renderer.updateHpUI(w),
                 onUpdateMonsterHpUI: (hp, maxHp) => this.renderer.updateMonsterHpUI(hp, maxHp),
-                onUpdateWeaponAtbUI: (idx, atb) => this.renderer.updateWeaponAtbUI(idx, atb),
+                onUpdateWeaponAtbUI: (idx, atb) => {
+                    const w = this.selectedWeapons[idx];
+                    this.renderer.updateWeaponAtbUI(idx, atb, w);
+                },
                 onUpdateMonsterAtbUI: (atb) => this.renderer.updateMonsterAtbUI(atb),
                 onUpdateMonsterStateUI: (stateName, title, colorInfo) => this.renderer.updateMonsterStateUI(stateName, title, colorInfo),
                 onUpdatePotionCountUI: (idx, count) => this.renderer.updatePotionCountUI(idx, count),
@@ -271,13 +455,14 @@ class HuntEffect extends BaseEffect {
                 },
                 onUpdateTimerUI: (timeSec) => this.renderer.updateTimerUI(timeSec),
                 onShowSkillBubble: (idxOrMonster, text) => this.renderer.showSkillBubble(idxOrMonster, text),
+                onSpawnEmojiBubble: (idx, emoji) => this.renderer.spawnVictoryEmoji(idx, emoji),
                 onTriggerMonsterRoar: (monster) => {
                     this.renderer.triggerMonsterRoar();
                     this.audioManager.playMonsterRoar(monster);
                 },
                 onTriggerMonsterCharge: () => this.renderer.triggerMonsterCharge(),
-                onTriggerMonsterAttack: (type, emoji, targets) => {
-                    this.renderer.triggerMonsterAttack(type, emoji, targets);
+                onTriggerMonsterAttack: (type, emoji, targets, attackName) => {
+                    this.renderer.triggerMonsterAttack(type, emoji, targets, attackName);
                 },
                 onTriggerGuardShake: (idx) => {
                     if (this.renderer.card) {
@@ -401,13 +586,28 @@ class HuntEffect extends BaseEffect {
         setTimeout(() => container.remove(), 4000);
     }
 
+    clearAllTimers() {
+        if (this.gameTimer) { clearInterval(this.gameTimer); this.gameTimer = null; }
+        if (this.fightInterval) { clearInterval(this.fightInterval); this.fightInterval = null; }
+        if (this.victoryEmojiTimeouts && this.victoryEmojiTimeouts.length > 0) {
+            this.victoryEmojiTimeouts.forEach(t => clearTimeout(t));
+            this.victoryEmojiTimeouts = [];
+        }
+    }
+
     spawnNextConsecutiveMonster(container) {
+        this.clearAllTimers();
+        const prevTier = this.initializer.getMonsterTier(this.selectedMonster);
+        const prevAction = prevTier === 'elder' ? '토벌' : '수렵';
         const prevName = this.selectedMonster.nameKO;
         this.currentConsecutiveIndex++;
         this.selectedMonster = this.consecutiveQueue[this.currentConsecutiveIndex];
         
-        this.addCombatLog(`🎉 [토벌 완료] ${prevName}을(가) 완벽하게 토벌했습니다!`, '#00ffa3');
-        this.addCombatLog(`🐉 [대연속 수렵 ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] ${this.selectedMonster.nameKO}이(가) 출현했습니다!`, '#ffaa00');
+        const nextTier = this.initializer.getMonsterTier(this.selectedMonster);
+        const nextAction = nextTier === 'elder' ? '토벌' : '수렵';
+
+        this.addCombatLog(`🎉 [${prevAction} 완료] ${prevName}을(가) 완벽하게 ${prevAction}했습니다!`, '#00ffa3');
+        this.addCombatLog(`🐉 [대연속 ${nextAction} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] ${this.selectedMonster.nameKO}이(가) 출현했습니다!`, '#c98534');
 
         // Play start SFX
         this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['가자!'] || '가자!');
@@ -437,7 +637,7 @@ class HuntEffect extends BaseEffect {
             baseStunThreshold = 500;
             this.monsterDamageMod = 1.4;
             this.monsterAtbSpeedMod = 1.5;
-            this.tierLabel = "대형 몬스터";
+            this.tierLabel = "고룡종";
         }
 
         // Apply new values to existing engine
@@ -472,7 +672,8 @@ class HuntEffect extends BaseEffect {
         }
 
         // Re-render Fighting UI header/monster showcase
-        const hpLabelText = `👾 [연속 수렵 ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
+        const actionLabel = this.monsterTier === 'elder' ? '토벌' : '수렵';
+        const hpLabelText = `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
         this.renderer.renderFight({
             hpLabelText,
             selectedMonster: this.selectedMonster,
@@ -489,8 +690,7 @@ class HuntEffect extends BaseEffect {
         this.phase = 'ended';
         this.director.activeGame = null;
 
-        if (this.gameTimer) { clearInterval(this.gameTimer); this.gameTimer = null; }
-        if (this.fightInterval) { clearInterval(this.fightInterval); this.fightInterval = null; }
+        this.clearAllTimers();
 
         this.audioManager.stopBgms();
 
@@ -537,91 +737,164 @@ class HuntEffect extends BaseEffect {
         const topPanel = card.querySelector('#game-hunt-top-panel');
         
         if (isVictory && winner) {
+            const showcase = card.querySelector('#monster-showcase-panel');
+            if (showcase) {
+                showcase.style.display = 'none';
+            }
             if (topPanel) {
                 topPanel.innerHTML = `
-                    <div class="game-title" style="font-size:3.5rem; color:#00ffa3; font-weight:bold; text-shadow:0 0 20px rgba(0,255,163,0.5); margin-bottom:20px;">
-                        🎉 퀘스트 클리어! 수렵 성공! 🎉
-                    </div>
-                    <div style="font-size:2.2rem; color:#fff; margin-bottom: 25px;">
-                        마지막까지 생존한 <span style="color:${winner.hunterColor || '#ffaa00'}; font-weight:bold;">🏆 ${winner.hunterName}</span>이(가) ${this.selectedMonster.nameKO} 수렵에 성공했습니다!
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        width: 100%;
+                        margin: 35px 0 35px;
+                        box-sizing: border-box;
+                    ">
+                        <div class="quest-stamp-container quest-complete-stamp">
+                            <svg class="quest-svg-border" viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Plaque Backplate -->
+                                <path d="M 45 20 L 555 20 C 560 20, 565 25, 565 30 L 565 120 C 565 125, 560 130, 555 130 L 45 130 C 40 130, 35 125, 35 120 L 35 30 C 35 25, 40 20, 45 20 Z" fill="currentColor" fill-opacity="0.05" />
+                                
+                                <!-- Left/Right Plaque Caps -->
+                                <line x1="45" y1="35" x2="45" y2="115" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.3" />
+                                <line x1="555" y1="35" x2="555" y2="115" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.3" />
+
+                                <!-- TOP BORDER (y=30) -->
+                                <!-- Left: Diamond sliced with X -->
+                                <path d="M 65 18 L 77 30 L 65 42 L 53 30 Z" fill="none" stroke="currentColor" stroke-width="2" />
+                                <path d="M 53 30 L 77 30 M 65 18 L 65 42 M 59 24 L 71 36 M 71 24 L 59 36" stroke="currentColor" stroke-width="1.2" />
+                                
+                                <!-- Double lines -->
+                                <path d="M 85 27 L 265 27 M 85 33 L 265 33" stroke="currentColor" stroke-width="2" />
+                                
+                                <!-- Center: Claw -->
+                                <path d="M 300 18 C 304 22, 306 28, 301 42 C 297 28, 296 22, 300 18 Z" fill="currentColor" />
+                                <path d="M 288 20 C 291 23, 290 29, 283 39 C 283 29, 285 23, 288 20 Z" fill="currentColor" />
+                                <path d="M 312 20 C 309 23, 310 29, 317 39 C 317 29, 315 23, 312 20 Z" fill="currentColor" />
+                                
+                                <!-- Double lines -->
+                                <path d="M 335 27 L 515 27 M 335 33 L 515 33" stroke="currentColor" stroke-width="2" />
+                                
+                                <!-- Right: Diamond sliced with X -->
+                                <path d="M 535 18 L 547 30 L 535 42 L 523 30 Z" fill="none" stroke="currentColor" stroke-width="2" />
+                                <path d="M 523 30 L 547 30 M 535 18 L 535 42 M 529 24 L 541 36 M 541 24 L 529 36" stroke="currentColor" stroke-width="1.2" />
+
+
+                                <!-- BOTTOM BORDER (y=120) -->
+                                <!-- Left: Diamond sliced with X -->
+                                <path d="M 65 108 L 77 120 L 65 132 L 53 120 Z" fill="none" stroke="currentColor" stroke-width="2" />
+                                <path d="M 53 120 L 77 120 M 65 108 L 65 132 M 59 114 L 71 126 M 71 114 L 59 126" stroke="currentColor" stroke-width="1.2" />
+                                
+                                <!-- Double lines -->
+                                <path d="M 85 117 L 265 117 M 85 123 L 265 123" stroke="currentColor" stroke-width="2" />
+                                
+                                <!-- Center: Claw (mirrored vertically to point up) -->
+                                <path d="M 300 132 C 304 128, 306 122, 301 108 C 297 122, 296 128, 300 132 Z" fill="currentColor" />
+                                <path d="M 288 130 C 291 127, 290 121, 283 111 C 283 121, 285 127, 288 130 Z" fill="currentColor" />
+                                <path d="M 312 130 C 309 127, 310 121, 317 111 C 317 121, 315 127, 312 130 Z" fill="currentColor" />
+                                
+                                <!-- Double lines -->
+                                <path d="M 335 117 L 515 117 M 335 123 L 515 123" stroke="currentColor" stroke-width="2" />
+                                
+                                <!-- Right: Diamond sliced with X -->
+                                <path d="M 535 108 L 547 120 L 535 132 L 523 120 Z" fill="none" stroke="currentColor" stroke-width="2" />
+                                <path d="M 523 120 L 547 120 M 535 108 L 535 132 M 529 114 L 541 126 M 541 114 L 529 126" stroke="currentColor" stroke-width="1.2" />
+                            </svg>
+                            <div class="quest-gothic-text">QUEST COMPLETE</div>
+                        </div>
                     </div>
                 `;
             }
+
+            const playCarveSound = (materialName) => {
+                if (materialName.includes('홍옥') || materialName.includes('보옥') || materialName.includes('투기모피') || materialName.includes('대꼬리') || materialName.includes('재생가시')) {
+                    this.audioManager.playMHAudioFile('Unified_SFX/MH - Item Found (rarest).mp3', null, 0.5);
+                } else if (materialName.includes('그레이트') || materialName.includes('비약') || materialName.includes('귀인약') || materialName.includes('가루')) {
+                    this.audioManager.playMHAudioFile('Unified_SFX/MH - Item Found (rare).mp3', null, 0.5);
+                } else {
+                    this.audioManager.playMHAudioFile('Unified_SFX/MH - Item Found.mp3', null, 0.5);
+                }
+            };
             
-            this.selectedWeapons.forEach(w => {
+            // 기절한 헌터들은 기절 상태 유지, 생존자들은 3회 갈무리 슥슥 시작
+            this.victoryEmojiTimeouts = [];
+            this.selectedWeapons.forEach((w, i) => {
                 const weaponCard = card.querySelector(`#fight-card-${w.index}`);
                 if (!weaponCard) return;
 
                 if (w.hp > 0) {
+                    w.isCarving = true; // 갈무리(채집) 상태 활성화
                     const tag = card.querySelector(`#status-tag-${w.index}`);
                     
-                    let emojis = [];
-                    let statusText = '';
-                    
-                    if (w.personality === 'veteran') {
-                        emojis = ['😎', '🏆', '🍺', '👍'];
-                        statusText = '😎 갈무리 생략';
-                    } else if (w.personality === 'support') {
-                        emojis = ['🎒', '💚', '🥰', '🌱'];
-                        statusText = '🌱 채집중... (약초)';
-                    } else if (w.personality === 'newbie') {
-                        emojis = ['🐣', '🤩', '🎉', '🍖'];
-                        statusText = '🐣 갈무리중... (신남!)';
-                    } else if (w.personality === 'offensive') {
-                        emojis = ['🗡️', '💥', '🦖', '😼'];
-                        statusText = '🗡️ 갈무리중... (발톱)';
-                    } else if (w.personality === 'defensive') {
-                        emojis = ['🛡️', '😌', '🍻', '🥩'];
-                        statusText = '🍖 갈무리중... (고기)';
-                    } else {
-                        emojis = ['⚖️', '🙂', '👍', '🍖'];
-                        statusText = '⚖️ 갈무리중...';
-                    }
-
                     if (w.index === winner.index) {
-                        if (w.personality === 'veteran') {
-                            statusText = '🏆 MVP (갈무리 생략)';
-                        } else if (w.personality === 'support') {
-                            statusText = '🏆 MVP (채집중...)';
-                        } else {
-                            statusText = '🏆 MVP (갈무리중...)';
-                        }
                         weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
                         void weaponCard.offsetWidth;
                         weaponCard.classList.add('victory-jump');
+                        if (tag) {
+                            tag.textContent = '🏆 MVP 🏆';
+                            tag.className = 'game-hunt-status-tag active';
+                        }
                     } else {
                         weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
                         void weaponCard.offsetWidth;
                         weaponCard.classList.add('victory-bounce');
-                    }
-
-                    if (tag) {
-                        tag.textContent = statusText;
-                        tag.className = 'game-hunt-status-tag active';
-                    }
-
-                    emojis.forEach((emoji, idx) => {
-                        setTimeout(() => {
-                            this.renderer.spawnVictoryEmoji(w.index, emoji);
-                        }, idx * 600);
-                    });
-
-                    // After 3 seconds, show carved/gathered material
-                    setTimeout(() => {
-                        const newTag = card.querySelector(`#status-tag-${w.index}`);
-                        if (newTag) {
-                            if (w.personality === 'veteran') {
-                                newTag.textContent = '😎 커피 한 잔의 여유';
-                            } else {
-                                const material = this.getMonsterMaterialName(this.selectedMonster.nameKO, w.personality);
-                                if (w.index === winner.index) {
-                                    newTag.textContent = `🏆 MVP (획득: ${material})`;
-                                } else {
-                                    newTag.textContent = `💎 획득: ${material}`;
-                                }
-                            }
+                        if (tag) {
+                            tag.textContent = '⚔️ 생존';
+                            tag.className = 'game-hunt-status-tag active';
                         }
-                    }, 3000);
+                    }
+
+                    // Stagger delay based on hunter index in selectedWeapons array (0, 1.2s, 2.4s, 3.6s)
+                    const staggerDelay = i * 1200;
+
+                    const material1 = this.getMonsterMaterialName(this.selectedMonster.nameKO, w.personality);
+                    const material2 = this.getMonsterMaterialName(this.selectedMonster.nameKO, w.personality);
+                    const material3 = this.getMonsterMaterialName(this.selectedMonster.nameKO, w.personality);
+
+                    // 1차 갈무리 (staggerDelay): 둥근 감정표현 버블로 칼질 이모지 띄우기
+                    const t1 = setTimeout(() => {
+                        if (this.phase === 'ended' && w.hp > 0) {
+                            this.renderer.spawnVictoryEmoji(w.index, '🔪');
+                        }
+                    }, staggerDelay);
+                    this.victoryEmojiTimeouts.push(t1);
+
+                    // 2차 갈무리 (staggerDelay + 2000): 칼질 이모지 버블 팝 & 1차 소재 사운드 & 소재 메시지 박스 표현
+                    const t2 = setTimeout(() => {
+                        if (this.phase === 'ended' && w.hp > 0) {
+                            this.renderer.spawnVictoryEmoji(w.index, '🔪');
+                            playCarveSound(material1);
+                            this.renderer.spawnMaterialBox(w.index, material1);
+                            this.addCombatLog(`🍖 [갈무리] ${w.hunterName}이(가) [${material1}]을(를) 획득했습니다.`);
+                        }
+                    }, staggerDelay + 2000);
+                    this.victoryEmojiTimeouts.push(t2);
+
+                    // 3차 갈무리 (staggerDelay + 4000): 칼질 이모지 버블 팝 & 2차 소재 사운드 & 소재 메시지 박스 표현
+                    const t3 = setTimeout(() => {
+                        if (this.phase === 'ended' && w.hp > 0) {
+                            this.renderer.spawnVictoryEmoji(w.index, '🔪');
+                            playCarveSound(material2);
+                            this.renderer.spawnMaterialBox(w.index, material2);
+                            this.addCombatLog(`🍖 [갈무리] ${w.hunterName}이(가) [${material2}]을(를) 획득했습니다.`);
+                        }
+                    }, staggerDelay + 4000);
+                    this.victoryEmojiTimeouts.push(t3);
+
+                    // 갈무리 완료 (staggerDelay + 6000): 갈무리 상태 해제 & 3차 소재 사운드 & 획득 완료 이모지 버블 & 소재 메시지 박스 표현
+                    const t4 = setTimeout(() => {
+                        if (this.phase === 'ended' && w.hp > 0) {
+                            w.isCarving = false; // 갈무리 완수! 감정표현 차단 해제!
+                            playCarveSound(material3);
+                            this.renderer.spawnMaterialBox(w.index, material3);
+                            this.addCombatLog(`🍖 [갈무리] ${w.hunterName}이(가) [${material3}]을(를) 획득했습니다.`);
+                            this.renderer.spawnVictoryEmoji(w.index, '💎');
+                        }
+                    }, staggerDelay + 6000);
+                    this.victoryEmojiTimeouts.push(t4);
+
                 } else {
                     weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
                     void weaponCard.offsetWidth;
@@ -633,19 +906,119 @@ class HuntEffect extends BaseEffect {
                     }
                 }
             });
+
+            // 생존자 Victory 감정표현 루프 시작 (각 헌터마다 4~6초 주기로 반복)
+            const livingHunters = this.selectedWeapons.filter(w => w.hp > 0);
+            if (livingHunters.length > 0) {
+                livingHunters.forEach((hunter, idx) => {
+                    const originalIdx = this.selectedWeapons.findIndex(w => w.index === hunter.index);
+                    const staggerDelay = originalIdx >= 0 ? originalIdx * 1200 : idx * 1200;
+
+                    const runHunterEmojiLoop = () => {
+                        if (this.phase !== 'ended') return;
+                        
+                        // 채집(갈무리) 중에는 감정표현 금지!
+                        if (hunter.isCarving || hunter.isGathering) {
+                            const delay = 1000; // 1초 뒤에 다시 시도
+                            const timeoutId = setTimeout(runHunterEmojiLoop, delay);
+                            this.victoryEmojiTimeouts.push(timeoutId);
+                            return;
+                        }
+
+                        const personality = hunter.personality || 'normal';
+                        const pool = this.victoryEmojiMap[personality] || this.victoryEmojiMap.normal;
+                        const randomEmoji = pool[Math.floor(Math.random() * pool.length)];
+
+                        this.renderer.spawnVictoryEmoji(hunter.index, randomEmoji);
+
+                        const delay = 4000 + Math.random() * 2000;
+                        const timeoutId = setTimeout(runHunterEmojiLoop, delay);
+                        this.victoryEmojiTimeouts.push(timeoutId);
+                    };
+
+                    // 갈무리가 6초 동안 수행되므로, 최초 Stagger 지연을 staggerDelay + 6.5s ~ 8.5s로 주어 갈무리 직후부터 감정표현 루프가 돌게 만듭니다!
+                    const initialDelay = staggerDelay + 6500 + Math.random() * 2000;
+                    const initialTimeoutId = setTimeout(runHunterEmojiLoop, initialDelay);
+                    this.victoryEmojiTimeouts.push(initialTimeoutId);
+                });
+            }
         } else {
+            const showcase = card.querySelector('#monster-showcase-panel');
+            if (showcase) {
+                showcase.style.display = 'none';
+            }
             if (topPanel) {
+                const actionLabel = this.monsterTier === 'elder' ? '토벌' : '수렵';
                 topPanel.innerHTML = `
-                    <div class="game-title" style="font-size:3.5rem; color:#ff3b30; font-weight:bold; text-shadow:0 0 20px rgba(255,59,48,0.5); margin-bottom:20px;">
-                        ☠️ 퀘스트 실패 (3수레 전멸) ☠️
+                    <div style="
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        width: 100%;
+                        margin: 35px 0 35px;
+                        box-sizing: border-box;
+                    ">
+                        <div class="quest-stamp-container quest-failed-stamp">
+                            <svg class="quest-svg-border" viewBox="0 0 600 150" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Plaque Backplate -->
+                                <path d="M 45 20 L 555 20 C 560 20, 565 25, 565 30 L 565 120 C 565 125, 560 130, 555 130 L 45 130 C 40 130, 35 125, 35 120 L 35 30 C 35 25, 40 20, 45 20 Z" fill="currentColor" fill-opacity="0.05" />
+                                
+                                <!-- Left/Right Plaque Caps -->
+                                <line x1="45" y1="35" x2="45" y2="115" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.3" />
+                                <line x1="555" y1="35" x2="555" y2="115" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.3" />
+
+                                <!-- TOP BORDER (y=30) -->
+                                <!-- Left: Diamond sliced with X -->
+                                <path d="M 65 18 L 77 30 L 65 42 L 53 30 Z" fill="none" stroke="currentColor" stroke-width="2" />
+                                <path d="M 53 30 L 77 30 M 65 18 L 65 42 M 59 24 L 71 36 M 71 24 L 59 36" stroke="currentColor" stroke-width="1.2" />
+                                
+                                <!-- Double lines -->
+                                <path d="M 85 27 L 265 27 M 85 33 L 265 33" stroke="currentColor" stroke-width="2" />
+                                
+                                <!-- Center: Claw -->
+                                <path d="M 300 18 C 304 22, 306 28, 301 42 C 297 28, 296 22, 300 18 Z" fill="currentColor" />
+                                <path d="M 288 20 C 291 23, 290 29, 283 39 C 283 29, 285 23, 288 20 Z" fill="currentColor" />
+                                <path d="M 312 20 C 309 23, 310 29, 317 39 C 317 29, 315 23, 312 20 Z" fill="currentColor" />
+                                
+                                <!-- Double lines -->
+                                <path d="M 335 27 L 515 27 M 335 33 L 515 33" stroke="currentColor" stroke-width="2" />
+                                
+                                <!-- Right: Diamond sliced with X -->
+                                <path d="M 535 18 L 547 30 L 535 42 L 523 30 Z" fill="none" stroke="currentColor" stroke-width="2" />
+                                <path d="M 523 30 L 547 30 M 535 18 L 535 42 M 529 24 L 541 36 M 541 24 L 529 36" stroke="currentColor" stroke-width="1.2" />
+
+
+                                <!-- BOTTOM BORDER (y=120) -->
+                                <!-- Left: Diamond sliced with X -->
+                                <path d="M 65 108 L 77 120 L 65 132 L 53 120 Z" fill="none" stroke="currentColor" stroke-width="2" />
+                                <path d="M 53 120 L 77 120 M 65 108 L 65 132 M 59 114 L 71 126 M 71 114 L 59 126" stroke="currentColor" stroke-width="1.2" />
+                                
+                                <!-- Double lines -->
+                                <path d="M 85 117 L 265 117 M 85 123 L 265 123" stroke="currentColor" stroke-width="2" />
+                                
+                                <!-- Center: Claw (mirrored vertically to point up) -->
+                                <path d="M 300 132 C 304 128, 306 122, 301 108 C 297 122, 296 128, 300 132 Z" fill="currentColor" />
+                                <path d="M 288 130 C 291 127, 290 121, 283 111 C 283 121, 285 127, 288 130 Z" fill="currentColor" />
+                                <path d="M 312 130 C 309 127, 310 121, 317 111 C 317 121, 315 127, 312 130 Z" fill="currentColor" />
+                                
+                                <!-- Double lines -->
+                                <path d="M 335 117 L 515 117 M 335 123 L 515 123" stroke="currentColor" stroke-width="2" />
+                                
+                                <!-- Right: Diamond sliced with X -->
+                                <path d="M 535 108 L 547 120 L 535 132 L 523 120 Z" fill="none" stroke="currentColor" stroke-width="2" />
+                                <path d="M 523 120 L 547 120 M 535 108 L 535 132 M 529 114 L 541 126 M 541 114 L 529 126" stroke="currentColor" stroke-width="1.2" />
+                            </svg>
+                            <div class="quest-gothic-text">QUEST FAILED</div>
+                        </div>
+                        <div style="font-size:1.4rem; color:#ccc; margin-top: 4px; text-align: center; line-height: 1.4;">
+                            3번의 수레 탑승 누적으로 ${actionLabel} 퀘스트에 실패했습니다.<br>
+                            <span style="font-size:1.25rem; color:#888;">${this.selectedMonster.nameKO}은(는) 유유히 떠났습니다.</span>
+                        </div>
                     </div>
-                    <div style="font-size:2.2rem; color:#fff; margin-bottom:20px;">
-                        3번의 수레 탑승 누적으로 수렵 퀘스트가 강제 종료되었습니다.
-                    </div>
-                    <div style="font-size:1.5rem; color:#aaa; margin-bottom:10px;">${this.selectedMonster.nameKO}은(는) 상처투성이가 되어 유유히 떠났습니다.</div>
                 `;
             }
-
+ 
             this.selectedWeapons.forEach(w => {
                 const weaponCard = card.querySelector(`#fight-card-${w.index}`);
                 if (weaponCard) {
@@ -666,6 +1039,7 @@ class HuntEffect extends BaseEffect {
                     } else {
                         weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
                         void weaponCard.offsetWidth;
+                        weaponCard.classList.add('dead');
                         weaponCard.style.transform = 'rotate(180deg)';
                         const tag = card.querySelector(`#status-tag-${w.index}`);
                         if (tag) {
@@ -676,7 +1050,7 @@ class HuntEffect extends BaseEffect {
                 }
             });
         }
-
+ 
         setTimeout(() => {
             container.style.animation = "game-fade-out 0.5s ease-in forwards";
             setTimeout(() => {
@@ -687,7 +1061,7 @@ class HuntEffect extends BaseEffect {
                     this.resolveGame = null;
                 }
             }, 500);
-        }, 15000);
+        }, 30000);
     }
 
     forceStopGame() {
@@ -695,8 +1069,7 @@ class HuntEffect extends BaseEffect {
         this.phase = 'ended';
         this.director.activeGame = null;
 
-        if (this.gameTimer) { clearInterval(this.gameTimer); this.gameTimer = null; }
-        if (this.fightInterval) { clearInterval(this.fightInterval); this.fightInterval = null; }
+        this.clearAllTimers();
 
         this.audioManager.stopBgms();
         this.renderer.removeContainer();

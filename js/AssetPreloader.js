@@ -45,7 +45,13 @@ class AssetPreloader {
                 const processItem = (obj) => {
                     const src = (typeof obj === 'object') ? obj.src : obj;
                     if (src) {
-                        const path = src.includes('/') || src.includes('\\') ? src : `./SFX/${src}`;
+                        let path = src;
+                        if (!src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('blob:')) {
+                            const cleanSrc = src.replace(/^\.\//, '');
+                            if (!cleanSrc.startsWith('SFX/') && !cleanSrc.startsWith('BGM/') && !cleanSrc.startsWith('MonsterHunter_Soundtracks/')) {
+                                path = `./SFX/${src}`;
+                            }
+                        }
                         rawAudioUrls.add(path);
                     }
                 };

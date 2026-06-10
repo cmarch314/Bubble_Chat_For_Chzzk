@@ -14,6 +14,7 @@ class HuntAudioManager {
     getMonsterBgm(monsterName) {
         const name = (monsterName || "").toLowerCase();
         if (name.includes('진오우거') || name.includes('zinogre')) return 'BGM/MHW_Zinogre.mp3';
+        if (name.includes('타마미츠네') || name.includes('mizutsune')) return 'BGM/MHR_Mizutsune.mp3';
         if (name.includes('벨카나') || name.includes('velkhana')) return 'BGM/MHW_Velkhana.mp3';
         if (name.includes('네르기간테') || name.includes('nergigante')) return 'BGM/MHW_Nergigante.mp3';
         if (name.includes('이블조') || name.includes('deviljho')) return 'BGM/MHW_Deviljho.mp3';
@@ -76,27 +77,78 @@ class HuntAudioManager {
 
     playMonsterRoar(monster) {
         if (!monster) return;
-        let id = monster.id.toLowerCase();
         
-        if (id.includes('zinogre')) id = 'zinogre';
-        else if (id.includes('tigrex')) id = 'tigrex';
-        else if (id.includes('nargacuga')) id = 'nargacuga';
-        else if (id.includes('rathalos') || id.includes('rathian')) id = 'rathalos';
-        else if (id.includes('deviljho')) id = 'deviljho';
-        else if (id.includes('diablos')) id = 'diablos';
-        else if (id.includes('nergigante')) id = 'nergigante';
-        else if (id.includes('velkhana')) id = 'velkhana';
-        else if (id.includes('bazelgeuse')) id = 'bazelgeuse';
-        else if (id.includes('alatreon')) id = 'alatreon';
-        else if (id.includes('fatalis')) id = 'fatalis';
-        else if (id.includes('amatsu')) id = 'amatsu';
-        else if (id.includes('valstrax')) id = 'valstrax';
-        else if (id.includes('rajang')) id = 'rajang';
-        else if (id.includes('brachydios')) id = 'brachydios';
-        else if (id.includes('glavenus')) id = 'glavenus';
+        // 1. ID Normalization (lowercase and replace hyphens/apostrophes with underscores)
+        const cleanId = monster.id.toLowerCase().replace(/[-']/g, '_');
+        
+        // 2. Subspecies and Variant Routing Dictionary
+        const routingMap = {
+            // Rathalos Family
+            'azure_rathalos': 'rathalos',
+            'silver_rathalos': 'rathalos',
+            
+            // Rathian Family (now correctly routes to rathian roar, not rathalos!)
+            'rathian': 'rathian',
+            'pink_rathian': 'rathian',
+            'gold_rathian': 'rathian',
+            
+            // Diablos Family
+            'black_diablos': 'diablos',
+            
+            // Zinogre Family
+            'stygian_zinogre': 'zinogre',
+            
+            // Nergigante Family
+            'ruiner_nergigante': 'nergigante',
+            
+            // Deviljho Family
+            'savage_deviljho': 'deviljho',
+            
+            // Brachydios Family
+            'raging_brachydios': 'brachydios',
+            
+            // Glavenus Family
+            'acidic_glavenus': 'glavenus',
+            
+            // Rajang Family
+            'furious_rajang': 'rajang',
+            
+            // Bazelgeuse Family
+            'seething_bazelgeuse': 'bazelgeuse',
+            
+            // Barioth Family
+            'frostfang_barioth': 'barioth',
+            
+            // Legiana Family
+            'shrieking_legiana': 'legiana',
+            
+            // Valstrax Family
+            'crimson_glow_valstrax': 'valstrax',
+            
+            // Malzeno Family
+            'primordial_malzeno': 'malzeno',
+            
+            // Yian Garuga Family
+            'scarred_yian_garuga': 'yian_garuga',
+            
+            // Anjanath Family
+            'fulgur_anjanath': 'anjanath',
+            
+            // Paolumu Family
+            'nightshade_paolumu': 'paolumu',
+            
+            // Tobi-Kadachi Family
+            'viper_tobi_kadachi': 'tobi_kadachi',
+            
+            // Pukei-Pukei Family
+            'coral_pukei_pukei': 'pukei_pukei'
+        };
+        
+        // Determine final filename ID
+        const finalId = routingMap[cleanId] || cleanId;
 
-        const dedicatedPath = `SFX/roar_${id}.mp3`;
-        const defaultPath = `SFX/roar_default.mp3`;
+        const dedicatedPath = `SFX/MonsterHunter_Roars/roar_${finalId}.mp3`;
+        const defaultPath = `SFX/MonsterHunter_Roars/roar_default.mp3`;
         const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
         const volume = Math.min(1.0, Math.max(0, volConfig.master * volConfig.sfx * 0.7));
 
@@ -112,8 +164,21 @@ class HuntAudioManager {
     }
 
     playMHAsset(fileName, fallbackKey) {
+        // Blacklist hit/damage sound effects to completely silence them as requested
+        const blacklist = ['mh_blunt_hit.mp3', 'mh_heavy_hit.mp3', 'mh_slash_hit.mp3'];
+        if (fileName && blacklist.some(f => fileName.toLowerCase().endsWith(f) || fileName.toLowerCase() === f)) {
+            console.log(`[Audio Blacklist] Blocked playing asset: ${fileName}`);
+            return;
+        }
+
         const soundConfig = this.config.getSoundConfig();
         if (fallbackKey && soundConfig[fallbackKey]) {
+            // Also check if fallbackKey resolves to one of the blacklisted files
+            const fallbackSrc = (soundConfig[fallbackKey].src || "").toLowerCase();
+            if (blacklist.some(f => fallbackSrc.endsWith(f) || fallbackSrc === f)) {
+                console.log(`[Audio Blacklist] Blocked fallback key: ${fallbackKey} (${fallbackSrc})`);
+                return;
+            }
             this.director.eventBus.emit('audio:playVisualSound', soundConfig[fallbackKey]);
             return;
         }
@@ -126,6 +191,13 @@ class HuntAudioManager {
     }
 
     playMHAudioFile(subPath, durationLimitMs = null, volumeMultiplier = 1.0) {
+        // Blacklist hit/damage sound effects to completely silence them as requested
+        const blacklist = ['mh_blunt_hit.mp3', 'mh_heavy_hit.mp3', 'mh_slash_hit.mp3'];
+        if (subPath && blacklist.some(f => subPath.toLowerCase().includes(f))) {
+            console.log(`[Audio Blacklist] Blocked playing audio file: ${subPath}`);
+            return;
+        }
+        
         const filePath = `MonsterHunter_Soundtracks/${subPath}`;
         try {
             const audio = new Audio(filePath);

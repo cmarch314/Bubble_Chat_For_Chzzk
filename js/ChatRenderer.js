@@ -23,10 +23,10 @@ class ChatRenderer {
         const { message, nickname, color, badges, emojis, type, uid } = data;
         const emotes = emojis || {}; // Map emojis to emotes for compatibility
         const originalMessage = message;
-        const normOriginal = originalMessage.normalize('NFC').trim();
+        const normOriginal = originalMessage ? originalMessage.normalize('NFC').trim() : "";
 
         // !명령어 제거 및 정리
-        let displayMessage = message.replace(/(^|\s)![\S]+/g, "").replace(/\s+/g, " ").trim();
+        let displayMessage = message ? message.replace(/(^|\s)![\S]+/g, "").replace(/\s+/g, " ").trim() : "";
 
         // DOM 요소 생성
         const elements = this._createBubbleElements();
@@ -57,36 +57,150 @@ class ChatRenderer {
             });
         }
 
-        // 특수 효과 필터 (채팅 내용 기반)
-        this._applyTextFilters(originalMessage, elements, userColor);
+        // [New] Check for CMC video commands starting with @
+        const CMC_FILES = window.HIVE_CMC_FILES || [];
 
-        // 이모티콘 처리 및 메시지 삽입
-        // [Fix] 이모티콘 처리 (Using Helper)
-        const safeMsg = displayMessage.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
-        messageEle.innerHTML = renderMessageWithEmotesHTML(safeMsg, emotes);
+        const findBestMatch = (term) => {
+            term = term.toLowerCase().trim();
+            // 1. Exact match
+            let match = CMC_FILES.find(f => f.toLowerCase() === term);
+            if (match) return match;
+            // 2. Starts with / Ends with / Includes
+            match = CMC_FILES.find(f => f.toLowerCase().startsWith(term));
+            if (match) return match;
+            match = CMC_FILES.find(f => term.startsWith(f.toLowerCase()));
+            if (match) return match;
+            match = CMC_FILES.find(f => f.toLowerCase().includes(term));
+            if (match) return match;
+            match = CMC_FILES.find(f => term.includes(f.toLowerCase()));
+            if (match) return match;
+            // 3. Common substring of length >= 2
+            match = CMC_FILES.find(f => {
+                const fLower = f.toLowerCase();
+                for (let len = Math.min(fLower.length, term.length); len >= 2; len--) {
+                    for (let i = 0; i <= fLower.length - len; i++) {
+                        const sub = fLower.substring(i, i + len);
+                        if (term.includes(sub)) return true;
+                    }
+                }
+                return false;
+            });
+            return match || null;
+        };
 
-        // Ensure Twemoji is applied
-        if (window.twemoji) {
-            try { twemoji.parse(messageEle); } catch (e) { }
+        const videoQueue = [];
+        if (originalMessage) {
+            const tokens = originalMessage.trim().split(/\s+/);
+            for (const token of tokens) {
+                if (token.startsWith('@') && token.length > 1) {
+                    const term = token.substring(1);
+                    const matchedFile = findBestMatch(term);
+                    if (matchedFile) {
+                        videoQueue.push(matchedFile);
+                        if (videoQueue.length >= 5) break;
+                    }
+                }
+            }
         }
 
-        // 메시지 길이 기반 스타일 조정
-        if (displayMessage.length <= 5) {
-            messageEle.style.fontSize = (2.6 - displayMessage.length / 3) + "em";
-            messageEle.style.textAlign = "center";
-            chatBox.style.left = (this.boxPos % 100) + Math.random() * 5 % 10 + "%";
-        } else {
-            this.boxPos = this.boxPos % 100;
-            chatBox.style.left = this.boxPos + "%";
-        }
-
-        // 애니메이션 적용 (나락, 흔들기 등)
         let usesSlot = true;
         let timeout = 10000;
-        const animResult = this._applyAnimations(normOriginal, displayMessage, elements);
 
-        if (animResult.usesSlot === false) usesSlot = false;
-        if (animResult.timeout) timeout = animResult.timeout;
+        if (videoQueue.length > 0) {
+            // Override max-height limits to prevent video from clipping
+            chatBox.style.maxHeight = 'none';
+            elements.chatLine.style.maxHeight = 'none';
+            chatLineInner.style.overflow = 'hidden'; // Rounded corner clips for video
+
+            // Adjust message element style for video
+            messageEle.style.display = 'block';
+            messageEle.style.webkitLineClamp = 'none';
+            messageEle.style.lineClamp = 'none';
+            messageEle.style.webkitBoxOrient = 'horizontal';
+            messageEle.style.overflow = 'visible';
+            messageEle.style.textOverflow = 'clip';
+            messageEle.style.padding = '0'; // flush edge-to-edge inside the borders
+
+            const video = document.createElement('video');
+            video.style.width = '100%';
+            video.style.display = 'block';
+            video.style.borderRadius = '0 0 16px 16px'; // match bottom corners of chat bubble
+            video.style.marginTop = '4px';
+            video.playsInline = true;
+
+            // Clear standard text timeout
+            timeout = null;
+
+            // Safety net: force remove after a timeout based on video count
+            let safetyTimeout = setTimeout(() => {
+                if (chatBox.parentElement) {
+                    chatBox.classList.remove('visible');
+                    setTimeout(() => chatBox.remove(), 1000);
+                }
+            }, Math.max(30000, videoQueue.length * 15000));
+
+            let currentIdx = 0;
+            const playNext = () => {
+                if (currentIdx >= videoQueue.length) {
+                    clearTimeout(safetyTimeout);
+                    if (chatBox.parentElement) {
+                        chatBox.classList.remove('visible');
+                        setTimeout(() => chatBox.remove(), 1000);
+                    }
+                    return;
+                }
+
+                const fileName = videoQueue[currentIdx];
+                video.src = `AI CMC/${encodeURIComponent(fileName)}.mp4`;
+                video.play().catch(e => {
+                    console.error("CMC video play failed, skipping:", e);
+                    currentIdx++;
+                    playNext();
+                });
+                currentIdx++;
+            };
+
+            video.addEventListener('ended', playNext);
+            video.addEventListener('error', (e) => {
+                console.error("CMC video error, skipping:", e);
+                currentIdx++;
+                playNext();
+            });
+
+            messageEle.appendChild(video);
+            playNext();
+
+            // Set left positioning
+            this.boxPos = this.boxPos % 100;
+            chatBox.style.left = this.boxPos + "%";
+        } else {
+            // 특수 효과 필터 (채팅 내용 기반)
+            this._applyTextFilters(originalMessage, elements, userColor);
+
+            // 이모티콘 처리 및 메시지 삽입
+            const safeMsg = displayMessage.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+            messageEle.innerHTML = renderMessageWithEmotesHTML(safeMsg, emotes);
+
+            // Ensure Twemoji is applied
+            if (window.twemoji) {
+                try { twemoji.parse(messageEle); } catch (e) { }
+            }
+
+            // 메시지 길이 기반 스타일 조정
+            if (displayMessage.length <= 5) {
+                messageEle.style.fontSize = (2.6 - displayMessage.length / 3) + "em";
+                messageEle.style.textAlign = "center";
+                chatBox.style.left = (this.boxPos % 100) + Math.random() * 5 % 10 + "%";
+            } else {
+                this.boxPos = this.boxPos % 100;
+                chatBox.style.left = this.boxPos + "%";
+            }
+
+            // 애니메이션 적용 (나락, 흔들기 등)
+            const animResult = this._applyAnimations(normOriginal, displayMessage, elements);
+            if (animResult.usesSlot === false) usesSlot = false;
+            if (animResult.timeout) timeout = animResult.timeout;
+        }
 
         // 슬롯 관리 (화면 겹침 방지)
         if (usesSlot) {

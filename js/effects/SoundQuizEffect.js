@@ -72,18 +72,23 @@ class SoundQuizEffect extends BaseEffect {
             if (val && val.audioOverride) visualSoundKeys.add(val.audioOverride.normalize('NFC').replace(/\s+/g, '').toLowerCase());
         });
 
-        const keys = Object.keys(soundConf || {});
-        const eligibleKeys = keys.filter(k => {
-            const norm = this._normalize(k);
-            if (norm.length < 2) return false;
-            if (k.includes('풀버전') || k.includes('송') || k.includes('댄스')) return false;
-            
-            // Exclude keys associated with visual effects
-            const cleanKey = k.normalize('NFC').replace(/\s+/g, '').toLowerCase();
-            if (visualSoundKeys.has(cleanKey)) return false;
+        const CMC_FILES = window.HIVE_CMC_FILES || [];
 
-            return true;
-        });
+        const keys = Object.keys(soundConf || {});
+        const eligibleKeys = [
+            ...keys.filter(k => {
+                const norm = this._normalize(k);
+                if (norm.length < 2) return false;
+                if (k.includes('풀버전') || k.includes('송') || k.includes('댄스')) return false;
+                
+                // Exclude keys associated with visual effects
+                const cleanKey = k.normalize('NFC').replace(/\s+/g, '').toLowerCase();
+                if (visualSoundKeys.has(cleanKey)) return false;
+
+                return true;
+            }),
+            ...CMC_FILES
+        ];
 
         // Keep track of asked questions in this session
         const askedKeys = [];
@@ -112,34 +117,76 @@ class SoundQuizEffect extends BaseEffect {
 
                 console.log(`🎮 [SoundQuiz] Round ${currentRound}/${totalRounds} Started. Word: ${this.correctAnswer}`);
 
-                container.innerHTML = `
-                    <div class="game-quiz-card">
-                        ${this._getLeaderboardHTML()}
-                        <div class="game-title">🎵 사운드 퀴즈! (${currentRound} / ${totalRounds})</div>
-                        <div class="game-subtitle">재생되는 효과음의 키워드를 맞추세요!</div>
-                        <div class="game-status">🎧 소리 재생 중...</div>
-                        <div class="game-quiz-hint">힌트 글자수: ${this.correctAnswer.length}글자</div>
-                        <div class="game-timer">남은 시간: 30초</div>
-                        <div class="game-participants-count">정답을 아시는 분은 채팅을 쳐주세요! (2번 반복 재생)</div>
-                    </div>
-                `;
+                const isCmc = CMC_FILES.includes(this.correctAnswer);
 
-                const soundObj = soundConf[this.correctAnswer];
+                if (isCmc) {
+                    container.innerHTML = `
+                        <div class="game-quiz-card">
+                            ${this._getLeaderboardHTML()}
+                            <div class="game-title">🎬 비디오 퀴즈! (${currentRound} / ${totalRounds})</div>
+                            <div class="game-subtitle">재생되는 영상의 키워드를 맞추세요!</div>
+                            <div class="game-status" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                <span>🎬 영상 재생 중...</span>
+                                <video id="quiz-video" src="AI CMC/${encodeURIComponent(this.correctAnswer)}.mp4" style="width: 100%; max-width: 600px; border-radius: 16px; border: 4px solid #00ffa3; box-shadow: 0 4px 30px rgba(0,255,163,0.3);" playsinline></video>
+                            </div>
+                            <div class="game-quiz-hint">힌트 글자수: ${this.correctAnswer.length}글자</div>
+                            <div class="game-timer">남은 시간: 30초</div>
+                            <div class="game-participants-count">정답을 아시는 분은 채팅을 쳐주세요! (2번 반복 재생)</div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="game-quiz-card">
+                            ${this._getLeaderboardHTML()}
+                            <div class="game-title">🎵 사운드 퀴즈! (${currentRound} / ${totalRounds})</div>
+                            <div class="game-subtitle">재생되는 효과음의 키워드를 맞추세요!</div>
+                            <div class="game-status">🎧 소리 재생 중...</div>
+                            <div class="game-quiz-hint">힌트 글자수: ${this.correctAnswer.length}글자</div>
+                            <div class="game-timer">남은 시간: 30초</div>
+                            <div class="game-participants-count">정답을 아시는 분은 채팅을 쳐주세요! (2번 반복 재생)</div>
+                        </div>
+                    `;
+                }
+
                 let playActive = true;
 
-                // Play loop
-                const playQuizSound = async () => {
-                    if (!this.isActive || !playActive || this.forceStopped) return;
-                    await this.audioManager.playSound(soundObj || this.correctAnswer, { force: true, type: 'visual' });
-                    
-                    if (!this.isActive || !playActive || this.forceStopped) return;
-                    await new Promise(r => setTimeout(r, 2000));
-                    
-                    if (!this.isActive || !playActive || this.forceStopped) return;
-                    this.audioManager.playSound(soundObj || this.correctAnswer, { force: true, type: 'visual' });
-                };
-                
-                playQuizSound();
+                if (isCmc) {
+                    const videoEl = container.querySelector('#quiz-video');
+                    const playQuizVideo = async () => {
+                        if (!this.isActive || !playActive || this.forceStopped || !videoEl) return;
+                        videoEl.currentTime = 0;
+                        try {
+                            await videoEl.play();
+                        } catch (e) {
+                            console.warn("Quiz video play failed:", e);
+                        }
+                        
+                        if (!this.isActive || !playActive || this.forceStopped) return;
+                        await new Promise(r => setTimeout(r, 6000));
+                        
+                        if (!this.isActive || !playActive || this.forceStopped || !videoEl) return;
+                        videoEl.currentTime = 0;
+                        try {
+                            await videoEl.play();
+                        } catch (e) {
+                            console.warn("Quiz video play failed:", e);
+                        }
+                    };
+                    playQuizVideo();
+                } else {
+                    const soundObj = soundConf[this.correctAnswer];
+                    const playQuizSound = async () => {
+                        if (!this.isActive || !playActive || this.forceStopped) return;
+                        await this.audioManager.playSound(soundObj || this.correctAnswer, { force: true, type: 'visual' });
+                        
+                        if (!this.isActive || !playActive || this.forceStopped) return;
+                        await new Promise(r => setTimeout(r, 2000));
+                        
+                        if (!this.isActive || !playActive || this.forceStopped) return;
+                        await this.audioManager.playSound(soundObj || this.correctAnswer, { force: true, type: 'visual' });
+                    };
+                    playQuizSound();
+                }
 
                 // Timer
                 let timeLeft = 30;

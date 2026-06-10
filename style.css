@@ -4485,7 +4485,7 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding-top: 4vh;
+    padding-top: 1vh;
     pointer-events: none;
     font-family: 'CookieRun-Regular', sans-serif;
     color: #fff;
@@ -4652,23 +4652,35 @@ body {
 }
 
 /* ==========================================
-   Monster Hunter Hunt Mini-game (?�벌 미니게임)
+   Monster Hunter Hunt Mini-game (수렵 미니게임)
    ========================================== */
 .game-hunt-card {
-    background: linear-gradient(135deg, #18130f 0%, #0d0a08 100%);
-    border: 6px double #c5a059;
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), inset 0 0 40px rgba(0, 0, 0, 0.85), 0 0 0 2px #534120;
+    /* Parchment Scroll Paper theme: Deep vintage beige background with multi-layered spots, stains, and subtle fiber texture */
+    background-color: #d1b88a;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(95, 55, 20, 0.25) 0%, transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(115, 70, 30, 0.28) 0%, transparent 50%),
+        radial-gradient(circle at 40% 85%, rgba(80, 45, 15, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 85% 15%, rgba(130, 85, 45, 0.25) 0%, transparent 40%),
+        linear-gradient(135deg, rgba(225, 205, 168, 0.75) 0%, rgba(180, 153, 112, 0.88) 100%),
+        repeating-linear-gradient(45deg, rgba(80, 50, 20, 0.03) 0px, rgba(80, 50, 20, 0.03) 2px, transparent 2px, transparent 4px),
+        repeating-linear-gradient(-45deg, rgba(80, 50, 20, 0.03) 0px, rgba(80, 50, 20, 0.03) 2px, transparent 2px, transparent 4px);
+    border: 7px double #8b5a2b;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 0 30px rgba(139, 90, 43, 0.25), 0 0 0 2px #5d3f1a;
     border-radius: 28px;
-    padding: 35px 50px 35px 50px;
+    padding: 30px 45px 30px 45px;
     width: 1150px;
     text-align: center;
     backdrop-filter: blur(15px);
-    animation: game-slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     pointer-events: auto;
     position: relative;
     z-index: 2147483645;
     font-family: 'CookieRun-Regular', sans-serif;
-    color: #fff;
+    color: #2c1b10;
+}
+
+.game-hunt-card.entry-anim {
+    animation: game-slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* Inner fine border */
@@ -4717,18 +4729,18 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    margin: 20px 0;
+    margin: 30px 0;
     background: rgba(0, 0, 0, 0.4);
     border: 2px solid #5d4817;
     box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
     border-radius: 16px;
-    padding: 20px;
+    padding: 30px 20px;
     position: relative;
 }
 
 .game-hunt-monster-img {
-    width: 165px;
-    height: 165px;
+    width: 200px;
+    height: 200px;
     filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.7));
     animation: monster-idle 3s ease-in-out infinite alternate;
     transition: transform 0.1s ease;
@@ -4740,9 +4752,9 @@ body {
 }
 
 .game-hunt-monster-name {
-    font-size: 2.3rem;
+    font-size: 2.8rem;
     font-weight: bold;
-    color: #ffaa00;
+    color: #9c5c1f;
     margin-top: 10px;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
@@ -4750,8 +4762,8 @@ body {
 .game-hunt-weapons-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-    margin: 30px 0 0 0;
+    gap: 28px;
+    margin: 25px 0 0 0;
 }
 
 .game-hunt-weapon-card {
@@ -4759,7 +4771,7 @@ body {
     border: 2px solid #5d4817;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
     border-radius: 20px;
-    padding: 22px;
+    padding: 22px 18px;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     position: relative;
     overflow: visible;
@@ -4769,42 +4781,45 @@ body {
     --attack-x: 160px;
     --attack-y: -180px;
     --attack-rot: 18deg;
+    --bow-base-rot: calc(180deg - var(--attack-rot));
 }
 #fight-card-1 {
     --attack-x: 50px;
     --attack-y: -190px;
     --attack-rot: 6deg;
+    --bow-base-rot: calc(180deg - var(--attack-rot));
 }
 #fight-card-2 {
     --attack-x: -50px;
     --attack-y: -190px;
     --attack-rot: -6deg;
+    --bow-base-rot: var(--attack-rot);
 }
 #fight-card-3 {
     --attack-x: -160px;
     --attack-y: -180px;
     --attack-rot: -18deg;
+    --bow-base-rot: var(--attack-rot);
 }
 
 .game-hunt-weapon-card.active {
     border-color: #c5a059;
-    background: rgba(197, 160, 89, 0.12);
     box-shadow: 0 0 15px rgba(197, 160, 89, 0.25), inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .game-hunt-weapon-card.dead {
     filter: grayscale(1) opacity(0.3);
-    background: rgba(0, 0, 0, 0.4);
     border-color: rgba(255, 0, 0, 0.2);
     transform: translateY(5px);
 }
 
 .game-hunt-weapon-img {
-    width: 95px;
-    height: 95px;
-    margin: 0 auto 12px;
+    width: 115px;
+    height: 115px;
+    margin: 0 auto 16px;
     display: block;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) brightness(1.2);
+    transition: transform 0.4s cubic-bezier(0.3, 1.2, 0.5, 1), filter 0.4s ease;
 }
 
 .game-hunt-weapon-name {
@@ -4816,10 +4831,10 @@ body {
 
 .game-hunt-hp-wrapper {
     width: 100%;
-    height: 16px;
+    height: 20px;
     background: rgba(0, 0, 0, 0.5);
     border: 1.5px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     position: relative;
     margin-bottom: 5px;
@@ -4845,7 +4860,7 @@ body {
 
 .game-hunt-log-panel {
     background: rgba(0, 0, 0, 0.4);
-    border: 1.5px solid rgba(255, 170, 0, 0.2);
+    border: 1.5px solid rgba(201, 133, 52, 0.2);
     border-radius: 15px;
     padding: 12px 20px;
     height: 100px;
@@ -4872,17 +4887,18 @@ body {
 }
 
 .game-hunt-cart-container {
-    position: absolute;
-    top: 0;
+    position: fixed;
+    bottom: 10px;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 160px;
     pointer-events: none;
     z-index: 2147483647;
 }
 
 .game-hunt-cart-sprite {
     position: absolute;
+    bottom: 10px;
     width: 120px;
     display: flex;
     flex-direction: column;
@@ -4891,8 +4907,8 @@ body {
 }
 
 .game-hunt-cart-sprite img {
-    width: 80px;
-    height: auto;
+    width: 55px;
+    height: 55px;
 }
 
 .game-hunt-cart-fainter {
@@ -4903,29 +4919,37 @@ body {
 }
 
 @keyframes cart-ride {
-    0% { left: -150px; top: 60%; opacity: 0; transform: rotate(5deg); }
+    0% { left: -150px; opacity: 0; transform: rotate(5deg); }
     15% { opacity: 1; }
     85% { opacity: 1; }
-    100% { left: 105%; top: 40%; opacity: 0; transform: rotate(-5deg); }
+    100% { left: 105%; opacity: 0; transform: rotate(-5deg); }
 }
 
 .game-hunt-status-tag {
-    font-size: 0.85rem;
-    padding: 2px 8px;
-    border-radius: 6px;
+    font-size: 1.25rem;
+    padding: 4px 12px;
+    border-radius: 14px;
     font-weight: bold;
+    white-space: nowrap;
+    z-index: 5;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.2);
     display: inline-block;
-    margin-top: 4px;
 }
 
 .game-hunt-status-tag.active {
-    background: rgba(46, 204, 113, 0.2);
-    color: #2ecc71;
+    background: rgba(39, 174, 96, 0.9);
+    color: #ffffff;
 }
 
 .game-hunt-status-tag.fainted {
-    background: rgba(231, 76, 60, 0.2);
-    color: #e74c3c;
+    background: rgba(192, 41, 43, 0.9);
+    color: #ffffff;
+}
+
+.game-hunt-status-tag.stunned {
+    background: rgba(211, 84, 0, 0.9);
+    color: #ffffff;
 }
 
 /* 2차 고도화 추가 스타일 */
@@ -4964,7 +4988,6 @@ body {
 
 .game-hunt-weapon-card.stunned {
     border-color: #e58e26 !important;
-    background: rgba(229, 142, 38, 0.08) !important;
     animation: stun-shake 0.5s ease-in-out infinite !important;
     box-shadow: 0 0 15px rgba(229, 142, 38, 0.3);
 }
@@ -4988,17 +5011,30 @@ body {
     animation: monster-stun-shake 0.6s ease-in-out infinite !important;
 }
 
-/* ?�킬 말풍???��???*/
-/* 구르�??�피 ?�니메이??(무기 ?��?지 ?�바???�전) */
+/* 구르기 회피 애니메이션 (스쿼시/스트레치가 적용된 공중제비 구르기) */
 @keyframes weapon-roll {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% { 
+        transform: translateY(0) rotate(0deg) scale(1); 
+    }
+    20% { 
+        transform: translateY(18px) rotate(-45deg) scale(0.88, 0.72); /* 깊숙이 웅크리기 */
+    }
+    50% { 
+        transform: translateY(-25px) rotate(-180deg) scale(1.08, 1.18); /* 높이 뛰며 회전 */
+    }
+    80% { 
+        transform: translateY(6px) rotate(-320deg) scale(1.04, 0.84); /* 착지 찌부러짐 */
+    }
+    100% { 
+        transform: translateY(0) rotate(-360deg) scale(1); /* 복귀 */
+    }
 }
 .roll-anim {
-    animation: weapon-roll 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+    animation: weapon-roll 0.6s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    transform-origin: center bottom;
 }
 
-/* 가???�들�??�니메이??(무기 카드 ?�들�? */
+/* 가???들??니메이??(무기 카드 ?들? */
 @keyframes guard-shake {
     0%, 100% { transform: translate(0, 0); }
     15% { transform: translate(-8px, -4px); }
@@ -5012,7 +5048,30 @@ body {
     animation: guard-shake 0.3s ease-in-out !important;
 }
 
-/* ???�격 ?�니메이??(?�겨?��? ?�바??구르�?2�????�자�? */
+/* Card shake keyframes for hit feedback */
+@keyframes card-large-shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-6px, 4px) rotate(-2deg); }
+    20% { transform: translate(5px, -4px) rotate(2deg); }
+    30% { transform: translate(-5px, -2px) rotate(-1deg); }
+    40% { transform: translate(4px, 2px) rotate(1deg); }
+    50% { transform: translate(-3px, 3px) rotate(-1deg); }
+    60% { transform: translate(3px, -2px) rotate(0deg); }
+    70% { transform: translate(-2px, 2px) rotate(1deg); }
+    80% { transform: translate(2px, 1px) rotate(0deg); }
+    90% { transform: translate(-1px, -1px) rotate(0deg); }
+}
+
+@keyframes card-small-shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    15% { transform: translate(-3px, 2px) rotate(-1deg); }
+    30% { transform: translate(3px, -2px) rotate(1deg); }
+    45% { transform: translate(-2px, -1px) rotate(0deg); }
+    60% { transform: translate(2px, 2px) rotate(0deg); }
+    75% { transform: translate(-1px, 1px) rotate(0deg); }
+    90% { transform: translate(1px, -1px) rotate(0deg); }
+}
+
 @keyframes weapon-large-hit {
     0% {
         transform: translateY(0) rotate(0deg);
@@ -5031,12 +5090,7 @@ body {
         filter: brightness(1);
     }
 }
-.large-hit-anim {
-    animation: weapon-large-hit 2.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
-    z-index: 1000 !important;
-}
 
-/* ?��? ?�격 ?�니메이??(?�짝 밀리며 180???�집???�어�? */
 @keyframes weapon-small-hit {
     0% {
         transform: translateY(0) rotate(0deg);
@@ -5066,8 +5120,8 @@ body {
     left: 50%;
     transform: translateX(-50%);
     background: rgba(20, 20, 20, 0.95);
-    color: #ffaa00;
-    border: 1.5px solid #ffaa00;
+    color: #c98534;
+    border: 1.5px solid #c98534;
     padding: 10px 20px;
     border-radius: 12px;
     font-size: 1.9rem;
@@ -5075,7 +5129,7 @@ body {
     font-weight: bold;
     white-space: nowrap;
     z-index: 100;
-    box-shadow: 0 0 16px rgba(255, 170, 0, 0.6);
+    box-shadow: 0 0 16px rgba(201, 133, 52, 0.6);
     animation: bubble-fade-in 0.2s ease-out forwards;
 }
 
@@ -5105,23 +5159,23 @@ body {
    Long Sword Spirit Levels, Weapon Modes & Attack Animations
    ========================================================================== */
 
-/* Long Sword Spirit Level Borders */
-.ls-spirit-1 {
-    border-color: #ffffff !important;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.7) !important;
+/* Long Sword Spirit Levels - Weapon Icon Direct Filters (No Container Rings) */
+.game-hunt-weapon-img.ls-spirit-img-1 {
+    filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(255, 255, 255, 0.95)) !important;
 }
-.ls-spirit-2 {
-    border-color: #f1c40f !important;
-    box-shadow: 0 0 20px rgba(241, 196, 15, 0.8) !important;
+.game-hunt-weapon-img.ls-spirit-img-2 {
+    filter: sepia(1) saturate(20) hue-rotate(15deg) brightness(1.35) drop-shadow(0 0 10px rgba(241, 196, 15, 0.95)) !important;
 }
-.ls-spirit-3 {
-    border-color: #e74c3c !important;
-    box-shadow: 0 0 25px rgba(231, 76, 60, 0.95) !important;
-    animation: ls-spirit-3-pulse 1s infinite alternate;
+.game-hunt-weapon-img.ls-spirit-img-3 {
+    animation: ls-spirit-img-pulse-3 0.8s infinite alternate !important;
 }
-@keyframes ls-spirit-3-pulse {
-    0% { box-shadow: 0 0 15px rgba(231, 76, 60, 0.6); }
-    100% { box-shadow: 0 0 30px rgba(231, 76, 60, 1); }
+@keyframes ls-spirit-img-pulse-3 {
+    0% {
+        filter: sepia(1) saturate(20) hue-rotate(325deg) brightness(1.1) drop-shadow(0 0 6px rgba(231, 76, 60, 0.7)) !important;
+    }
+    100% {
+        filter: sepia(1) saturate(25) hue-rotate(325deg) brightness(1.45) drop-shadow(0 0 18px rgba(231, 76, 60, 1)) !important;
+    }
 }
 
 /* Dual Blades Demon Mode */
@@ -5135,10 +5189,71 @@ body {
     100% { filter: saturate(1.5) brightness(1.2); }
 }
 
-/* Charge Blade Shield Charged */
-.cb-shield-charged {
-    border-color: #e67e22 !important;
-    box-shadow: 0 0 20px rgba(230, 126, 34, 0.8) !important;
+.db-demon-mode .game-hunt-weapon-img {
+    transform: scaleY(-1); /* Flip vertically upside down to feel like reverse-grip */
+    filter: sepia(1) saturate(25) hue-rotate(325deg) brightness(1.2) drop-shadow(0 0 10px rgba(231, 76, 60, 0.8)) !important;
+    animation: db-demon-img-pulse 0.8s infinite alternate;
+}
+
+@keyframes db-demon-img-pulse {
+    0% {
+        filter: sepia(1) saturate(20) hue-rotate(325deg) brightness(1.1) drop-shadow(0 0 6px rgba(231, 76, 60, 0.7)) !important;
+    }
+    100% {
+        filter: sepia(1) saturate(25) hue-rotate(325deg) brightness(1.45) drop-shadow(0 0 15px rgba(231, 76, 60, 1)) !important;
+    }
+}
+
+.db-demon-mode .game-hunt-weapon-img.w-anim-db {
+    animation: w-db-dance-demon 0.45s ease-in-out forwards;
+}
+
+@keyframes w-db-dance-demon {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scaleY(-1) scaleX(1);
+        filter: sepia(1) saturate(20) hue-rotate(325deg) brightness(1.1) drop-shadow(0 0 6px rgba(231, 76, 60, 0.7)) !important;
+    }
+    20% {
+        transform: translate(calc(var(--attack-x) * 0.3), calc(var(--attack-y) * 0.3)) rotate(360deg) scaleY(-1) scaleX(1.1);
+        filter: sepia(1) saturate(22) hue-rotate(325deg) brightness(1.2) drop-shadow(0 0 8px rgba(231, 76, 60, 0.8)) !important;
+    }
+    40% {
+        transform: translate(calc(var(--attack-x) * 0.7), calc(var(--attack-y) * 0.7)) rotate(720deg) scaleY(-1) scaleX(1.2);
+        filter: sepia(1) saturate(24) hue-rotate(325deg) brightness(1.3) drop-shadow(0 0 10px rgba(231, 76, 60, 0.9)) !important;
+    }
+    65% {
+        transform: translate(calc(var(--attack-x) * 1.1), calc(var(--attack-y) * 1.1)) rotate(1080deg) scaleY(-1) scaleX(1.3);
+        filter: sepia(1) saturate(25) hue-rotate(325deg) brightness(1.4) drop-shadow(0 0 12px rgba(231, 76, 60, 1.0)) !important;
+    }
+    85% {
+        transform: translate(calc(var(--attack-x) * 0.4), calc(var(--attack-y) * 0.4)) rotate(1080deg) scaleY(-1) scaleX(1.1);
+        filter: sepia(1) saturate(22) hue-rotate(325deg) brightness(1.2) drop-shadow(0 0 8px rgba(231, 76, 60, 0.8)) !important;
+    }
+    100% {
+        transform: translate(0, 0) rotate(1440deg) scaleY(-1) scaleX(1);
+        filter: sepia(1) saturate(20) hue-rotate(325deg) brightness(1.1) drop-shadow(0 0 6px rgba(231, 76, 60, 0.7)) !important;
+    }
+}
+
+/* Charge Blade Shield Charged - Disabled as requested: image color changes instead */
+.cb-shield-charged {}
+
+.game-hunt-weapon-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 115px;
+    height: 115px;
+    mask-size: 115px 115px;
+    -webkit-mask-size: 115px 115px;
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-position: center;
+    pointer-events: none;
+    transition: opacity 0.3s ease, background-color 0.3s ease, clip-path 0.3s ease;
+    opacity: 0;
+    z-index: 1;
 }
 
 /* Insect Glaive Triple Up */
@@ -5241,7 +5356,7 @@ body {
 }
 @keyframes gs-charge3-anim {
     0%, 100% { transform: translate(0, 0) scale(1); }
-    60% { transform: translate(calc(var(--attack-x, 0px) * -0.15), calc(var(--attack-y, -110px) * -0.15 + 30px)) scale(0.85); filter: brightness(1.6) drop-shadow(0 0 15px rgba(255,170,0,0.8)); }
+    60% { transform: translate(calc(var(--attack-x, 0px) * -0.15), calc(var(--attack-y, -110px) * -0.15 + 30px)) scale(0.85); filter: brightness(1.6) drop-shadow(0 0 15px rgba(201, 133, 52,0.8)); }
     80% { transform: translate(var(--attack-x, 0px), var(--attack-y, -110px)) rotate(var(--attack-rot, 0deg)) scale(1.25); }
 }
 
@@ -5249,9 +5364,25 @@ body {
     animation: bowgun-recoil 0.6s ease-out forwards;
 }
 @keyframes bowgun-recoil {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    15% { transform: translate(calc(var(--attack-x, 0px) * -0.1), calc(var(--attack-y, -20px) * -0.15 + 20px)) scale(0.97) rotate(calc(var(--attack-rot, 0deg) * 0.8)); }
-    40% { transform: translate(calc(var(--attack-x, 0px) * 0.05), calc(var(--attack-y, -5px) * 0.05)) rotate(calc(var(--attack-rot, 0deg) * 0.3)); }
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    12% {
+        /* Aim towards monster: rotate and lean forward slightly */
+        transform: translate(calc(var(--attack-x, 0px) * 0.08), calc(var(--attack-y, -110px) * 0.08)) rotate(var(--attack-rot, 0deg));
+    }
+    25% {
+        /* Shoot and recoil: slide backwards while maintaining rotation towards monster */
+        transform: translate(calc(var(--attack-x, 0px) * -0.25), calc(var(--attack-y, -110px) * -0.25)) rotate(var(--attack-rot, 0deg));
+    }
+    60% {
+        /* Start recovery: slide halfway back */
+        transform: translate(calc(var(--attack-x, 0px) * -0.08), calc(var(--attack-y, -110px) * -0.08)) rotate(calc(var(--attack-rot, 0deg) * 0.4));
+    }
+    100% {
+        /* Return to idle */
+        transform: translate(0, 0) rotate(0deg);
+    }
 }
 
 /* ==========================================================================
@@ -5321,16 +5452,751 @@ body {
 
 .victory-emoji-bubble {
     position: absolute;
-    top: 0;
+    top: 35px;
     left: 50%;
-    transform: translate(-50%, -20px) scale(0.5);
+    transform: translate(-50%, -50%) scale(0.5);
     opacity: 0;
-    font-size: 2.5rem;
+    font-size: 5.5rem;
     pointer-events: none;
     z-index: 150;
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
 }
 
+/* 몬헌 스타일 퀘스트 클리어 스탬프 콰쾅 연출 */
+@keyframes stamp-press {
+    0% {
+        transform: scale(4) rotate(-15deg);
+        opacity: 0;
+        filter: brightness(3) blur(6px) drop-shadow(0 0 30px rgba(255, 60, 0, 1));
+    }
+    80% {
+        transform: scale(0.92) rotate(2deg);
+        opacity: 0.95;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+        filter: brightness(1.1) drop-shadow(0 0 20px rgba(255, 80, 0, 0.95));
+    }
+}
+.quest-clear-stamp {
+    will-change: transform, opacity;
+}
+
+/* Custom Monster Attack Animations */
+@keyframes monster-tailspin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.15); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+.monster-tailspin-anim {
+    animation: monster-tailspin 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+}
+
+@keyframes roar-vibrate {
+    0% { transform: translate(0, 0) scale(1.05); }
+    10% { transform: translate(-5px, 5px) scale(1.08); }
+    20% { transform: translate(5px, -5px) scale(1.08); }
+    30% { transform: translate(-5px, -5px) scale(1.08); }
+    40% { transform: translate(5px, 5px) scale(1.08); }
+    50% { transform: translate(-5px, 5px) scale(1.08); }
+    60% { transform: translate(5px, -5px) scale(1.08); }
+    70% { transform: translate(-5px, -5px) scale(1.08); }
+    80% { transform: translate(5px, 5px) scale(1.05); }
+    90% { transform: translate(-2px, 2px) scale(1.03); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+.monster-roar-vibrate {
+    animation: roar-vibrate 1.2s ease-in-out forwards !important;
+}
+
+@keyframes speaker-grow-shake-fade {
+    0% {
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+    }
+    15% {
+        transform: translate(-50%, -50%) scale(2.8);
+        opacity: 0.95;
+        filter: drop-shadow(0 0 20px #c98534);
+    }
+    20% { transform: translate(-53%, -47%) scale(2.8); opacity: 0.95; }
+    35% { transform: translate(-47%, -53%) scale(2.9); opacity: 0.95; }
+    50% { transform: translate(-52%, -48%) scale(2.8); opacity: 0.95; }
+    65% { transform: translate(-48%, -52%) scale(2.9); opacity: 0.95; }
+    80% { transform: translate(-50%, -50%) scale(2.8); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+}
+.roar-speaker-emoji {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 5rem;
+    pointer-events: none;
+    z-index: 500;
+    animation: speaker-grow-shake-fade 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes monster-charge-slide {
+    0% { transform: translateY(0) scale(1); }
+    15% { transform: translateY(-25px) scale(0.95); }
+    35% { transform: translateY(120px) scale(1.3); filter: brightness(1.2) drop-shadow(0 15px 25px rgba(255,100,0,0.5)); }
+    75% { transform: translateY(120px) scale(1.3); }
+    100% { transform: translateY(0) scale(1); }
+}
+.monster-charge-slide {
+    animation: monster-charge-slide 0.75s cubic-bezier(0.25, 0.8, 0.25, 1) forwards !important;
+    z-index: 100 !important;
+}
+
+/* Monster Health Bar Center Text & Glow */
+.monster-hp-center-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: bold;
+    color: #9c5c1f;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.95), -1px -1px 3px rgba(0, 0, 0, 0.95), 0px 0px 8px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    z-index: 10;
+    transition: color 0.3s ease;
+}
+
+/* Card Heavy Shake Animation */
+@keyframes card-heavy-shake {
+    0% { transform: translate(0, 0); }
+    10% { transform: translate(-8px, 6px) rotate(-0.5deg); }
+    20% { transform: translate(7px, -7px) rotate(0.5deg); }
+    30% { transform: translate(-6px, -5px) rotate(-0.5deg); }
+    40% { transform: translate(5px, 6px) rotate(0.5deg); }
+    50% { transform: translate(-7px, 5px) rotate(-0.5deg); }
+    60% { transform: translate(6px, -6px) rotate(0.5deg); }
+    70% { transform: translate(-5px, 4px) rotate(0deg); }
+    80% { transform: translate(4px, 4px) rotate(0.5deg); }
+    90% { transform: translate(-2px, 2px) rotate(0deg); }
+    100% { transform: translate(0, 0); }
+}
+.card-heavy-shake-anim {
+    animation: card-heavy-shake 0.45s ease-out forwards !important;
+}
+
+/* Charge Dust Particles */
+.charge-dust-particle {
+    position: absolute;
+    font-size: 2.2rem;
+    pointer-events: none;
+    z-index: 20;
+    animation: charge-dust-fade 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes charge-dust-fade {
+    0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+    20% { opacity: 0.85; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(1.6); opacity: 0; }
+}
+
+/* Tailspin Slash Particle */
+.tailspin-slash-particle {
+    position: absolute;
+    font-size: 6rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    pointer-events: none;
+    z-index: 25;
+    animation: tailspin-slash-anim 0.6s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+}
+@keyframes tailspin-slash-anim {
+    0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.6); opacity: 0; }
+    15% { opacity: 0.95; filter: drop-shadow(0 0 15px rgba(201, 133, 52,0.6)); }
+    100% { transform: translate(-50%, -50%) rotate(360deg) scale(2.6); opacity: 0; }
+}
+
+/* Roar Sound Wave Rings */
+.roar-wave-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 4px double rgba(201, 133, 52, 0.75);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    pointer-events: none;
+    z-index: 15;
+    box-shadow: 0 0 15px rgba(201, 133, 52, 0.4), inset 0 0 15px rgba(201, 133, 52, 0.4);
+    animation: roar-wave-expand 0.9s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+}
+@keyframes roar-wave-expand {
+    0% { width: 40px; height: 40px; opacity: 0; border-color: rgba(201, 133, 52, 0.9); }
+    15% { opacity: 0.85; }
+    100% { width: 480px; height: 480px; opacity: 0; border-color: rgba(255, 85, 0, 0); }
+}
+
+/* Hunter vibration during roar */
+@keyframes hunter-roar-vibrate {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-3px, 2px) rotate(-1deg); }
+    20% { transform: translate(3px, -2px) rotate(1deg); }
+    30% { transform: translate(-3px, -2px) rotate(-1deg); }
+    40% { transform: translate(3px, 2px) rotate(1deg); }
+    50% { transform: translate(-2px, 2px) rotate(-0.5deg); }
+    60% { transform: translate(2px, -2px) rotate(0.5deg); }
+    70% { transform: translate(-2px, -2px) rotate(-0.5deg); }
+    80% { transform: translate(2px, 2px) rotate(0.5deg); }
+    90% { transform: translate(-1px, 1px) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+.hunter-roar-shake-anim {
+    animation: hunter-roar-vibrate 0.15s linear infinite !important;
+}
+
+/* 14 Custom Weapon Attack Animations (Only moves the weapon image icon) */
+.w-anim-gs {
+    animation: w-gs-smash 0.9s cubic-bezier(0.3, 0.8, 0.3, 1.1) forwards;
+}
+@keyframes w-gs-smash {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    35% { transform: translate(calc(var(--attack-x) * -0.25), calc(var(--attack-y) * -0.2 + 35px)) scale(0.85) rotate(-75deg); }
+    65% { transform: translate(calc(var(--attack-x) * 1.15), calc(var(--attack-y) * 1.15)) rotate(110deg) scale(1.35); filter: brightness(1.3) drop-shadow(0 0 15px rgba(255, 100, 0, 0.7)); }
+    85% { transform: translate(calc(var(--attack-x) * 1.05), calc(var(--attack-y) * 1.05)) rotate(115deg) scale(1.25); }
+}
+
+.w-anim-ls {
+    animation: w-ls-slash 0.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes w-ls-slash {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    30% { transform: translate(calc(var(--attack-x) * -0.25), calc(var(--attack-y) * -0.1 + 10px)) rotate(-60deg) scale(0.85); }
+    60% { transform: translate(calc(var(--attack-x) * 1.15), calc(var(--attack-y) * 1.15)) rotate(540deg) scale(1.3) skewX(-15deg); filter: brightness(1.3); }
+    80% { transform: translate(calc(var(--attack-x) * 0.5), calc(var(--attack-y) * 0.5)) rotate(560deg) scale(1.1); }
+    100% { transform: translate(0, 0) rotate(720deg) scale(1); }
+}
+
+.w-anim-db {
+    animation: w-db-dance 0.45s ease-in-out forwards;
+}
+@keyframes w-db-dance {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    20% { transform: translate(calc(var(--attack-x) * 0.3), calc(var(--attack-y) * 0.3)) rotate(360deg) scale(1.1); }
+    40% { transform: translate(calc(var(--attack-x) * 0.7), calc(var(--attack-y) * 0.7)) rotate(720deg) scale(1.2); }
+    65% { transform: translate(calc(var(--attack-x) * 1.1), calc(var(--attack-y) * 1.1)) rotate(1080deg) scale(1.3) filter(brightness(1.3)); }
+    85% { transform: translate(calc(var(--attack-x) * 0.4), calc(var(--attack-y) * 0.4)) rotate(1080deg) scale(1.1); }
+    100% { transform: translate(0, 0) rotate(1440deg) scale(1); }
+}
+
+.w-anim-sns {
+    animation: w-sns-bash 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+}
+@keyframes w-sns-bash {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    25% { transform: translate(calc(var(--attack-x) * -0.35), calc(var(--attack-y) * -0.2 + 15px)) rotate(-45deg) scale(0.9); }
+    55% { transform: translate(calc(var(--attack-x) * 0.5), calc(var(--attack-y) * 0.5)) rotate(180deg) scale(1.1); }
+    75% { transform: translate(calc(var(--attack-x) * 1.1), calc(var(--attack-y) * 1.1)) rotate(540deg) scale(1.25); filter: brightness(1.2); }
+    100% { transform: translate(0, 0) rotate(720deg) scale(1); }
+}
+
+.w-anim-hm {
+    animation: w-hm-spin-smash 0.85s cubic-bezier(0.2, 0.8, 0.2, 1.05) forwards;
+}
+@keyframes w-hm-spin-smash {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    30% { transform: translate(calc(var(--attack-x) * 0.2), calc(var(--attack-y) * 0.2)) rotate(360deg); }
+    60% { transform: translate(calc(var(--attack-x) * 0.4), calc(var(--attack-y) * 0.4)) rotate(720deg) scale(0.9); }
+    80% { transform: translate(calc(var(--attack-x) * 1.05), calc(var(--attack-y) * 1.05)) rotate(735deg) scale(1.25); }
+}
+
+.w-anim-hh {
+    animation: w-hh-swing 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes w-hh-swing {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    35% { transform: translate(calc(var(--attack-x) * 0.5 - 20px), calc(var(--attack-y) * 0.5 + 20px)) rotate(-25deg); }
+    65% { transform: translate(calc(var(--attack-x) * 0.95), calc(var(--attack-y) * 0.95)) rotate(15deg) scale(1.1); }
+}
+
+.w-anim-lc {
+    animation: w-lc-thrust 0.55s ease-out forwards;
+}
+@keyframes w-lc-thrust {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(calc(var(--attack-x) * 0.55), calc(var(--attack-y) * 0.55)); }
+    35% { transform: translate(0, 0); }
+    50% { transform: translate(calc(var(--attack-x) * 0.75), calc(var(--attack-y) * 0.75)); }
+    65% { transform: translate(0, 0); }
+    80% { transform: translate(calc(var(--attack-x) * 0.95), calc(var(--attack-y) * 0.95)) scale(1.1); }
+}
+
+.w-anim-gl {
+    animation: w-gl-blast 0.65s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes w-gl-blast {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    35% { transform: translate(calc(var(--attack-x) * 0.75), calc(var(--attack-y) * 0.75)) rotate(5deg) scale(1.1); }
+    45% { transform: translate(calc(var(--attack-x) * 0.6), calc(var(--attack-y) * 0.6)) rotate(-8deg) scale(1.05); }
+    70% { transform: translate(calc(var(--attack-x) * 0.78), calc(var(--attack-y) * 0.78)) rotate(2deg); }
+}
+
+.w-anim-sa {
+    animation: w-sa-morph 0.6s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+@keyframes w-sa-morph {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    25% { transform: translate(calc(var(--attack-x) * -0.3), calc(var(--attack-y) * -0.2)) rotate(-50deg) scale(0.85); }
+    60% { transform: translate(calc(var(--attack-x) * 1.15), calc(var(--attack-y) * 1.15)) rotate(540deg) scale(1.3) skewY(10deg); filter: brightness(1.3); }
+    80% { transform: translate(calc(var(--attack-x) * 0.5), calc(var(--attack-y) * 0.5)) rotate(560deg) scale(1.1); }
+    100% { transform: translate(0, 0) rotate(720deg) scale(1); }
+}
+
+.w-anim-cb {
+    animation: w-cb-aed 0.75s cubic-bezier(0.3, 0.8, 0.3, 1) forwards;
+}
+@keyframes w-cb-aed {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    30% { transform: translate(calc(var(--attack-x) * -0.25), calc(var(--attack-y) * -0.2 + 20px)) rotate(-60deg) scale(0.85); }
+    65% { transform: translate(calc(var(--attack-x) * 1.2), calc(var(--attack-y) * 1.2)) rotate(720deg) scale(1.35); filter: brightness(1.4) drop-shadow(0 0 25px #ff5500); }
+    85% { transform: translate(calc(var(--attack-x) * 0.6), calc(var(--attack-y) * 0.6)) rotate(740deg) scale(1.15); }
+    100% { transform: translate(0, 0) rotate(1080deg) scale(1); }
+}
+
+.w-anim-ig {
+    animation: w-ig-copter 0.65s linear forwards;
+}
+@keyframes w-ig-copter {
+    0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    30% { transform: translate(calc(var(--attack-x) * 0.4), calc(var(--attack-y) * 0.4 - 20px)) rotate(360deg) scale(1.1); }
+    60% { transform: translate(calc(var(--attack-x) * 0.85), calc(var(--attack-y) * 0.85 - 40px)) rotate(720deg) scale(1.2); }
+    80% { transform: translate(calc(var(--attack-x) * 1.15), calc(var(--attack-y) * 1.15)) rotate(1080deg) scale(1.3) filter(brightness(1.25)); }
+    100% { transform: translate(0, 0) rotate(1440deg) scale(1); }
+}
+
+.w-anim-lbg {
+    animation: w-lbg-shoot 0.5s ease-out forwards;
+}
+@keyframes w-lbg-shoot {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(0, 0) rotate(var(--attack-rot)); }
+    20% { transform: translate(calc(var(--attack-x) * -0.1), calc(var(--attack-y) * -0.1)) rotate(calc(var(--attack-rot) * 0.7)) scale(0.96); }
+    30% { transform: translate(0, 0) rotate(var(--attack-rot)) scale(1.02); }
+    40% { transform: translate(calc(var(--attack-x) * -0.1), calc(var(--attack-y) * -0.1)) rotate(calc(var(--attack-rot) * 0.7)) scale(0.96); }
+    50% { transform: translate(0, 0) rotate(var(--attack-rot)) scale(1.02); }
+    60% { transform: translate(calc(var(--attack-x) * -0.15), calc(var(--attack-y) * -0.15)) rotate(calc(var(--attack-rot) * 0.5)) scale(0.94); }
+    85% { transform: translate(0, 0) rotate(calc(var(--attack-rot) * 0.3)); }
+}
+
+.w-anim-hbg {
+    animation: w-hbg-shoot 0.7s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+@keyframes w-hbg-shoot {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    15% { transform: translate(0, 0) rotate(var(--attack-rot)); }
+    30% { transform: translate(calc(var(--attack-x) * -0.35), calc(var(--attack-y) * -0.35)) rotate(calc(var(--attack-rot) * 0.4)) scale(0.9); }
+    65% { transform: translate(calc(var(--attack-x) * -0.1), calc(var(--attack-y) * -0.1)) rotate(calc(var(--attack-rot) * 0.6)) scale(0.95); }
+    85% { transform: translate(0, 0) rotate(calc(var(--attack-rot) * 0.3)); }
+}
+
+.w-anim-bow {
+    animation: w-bow-shoot 0.65s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes w-bow-shoot {
+    0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    10% { transform: translate(0, 0) rotate(var(--bow-base-rot)) scale(1.0); }
+    60% { transform: translate(calc(var(--attack-x) * -0.05), calc(var(--attack-y) * -0.05)) rotate(var(--bow-base-rot)) scaleX(1.25) scaleY(0.95); }
+    70% { transform: translate(calc(var(--attack-x) * -0.08), calc(var(--attack-y) * -0.08)) rotate(var(--bow-base-rot)) scaleX(1.3) scaleY(0.9); }
+    73% { transform: translate(calc(var(--attack-x) * -0.15), calc(var(--attack-y) * -0.15)) rotate(var(--bow-base-rot)) scaleX(0.85) scaleY(1.15); }
+    85% { transform: translate(calc(var(--attack-x) * -0.02), calc(var(--attack-y) * -0.02)) rotate(calc(var(--bow-base-rot) * 0.5)) scale(1.0); }
+}
+
+.roar-stun-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 50%;
+    z-index: 10;
+    pointer-events: none;
+    animation: roar-ear-block-pulse 0.6s infinite alternate ease-in-out;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+@keyframes roar-ear-block-pulse {
+    0% { transform: scale(0.9); }
+    100% { transform: scale(1.25); }
+}
+
+/* ==========================================
+   Quest Fail Cry & Despair Effect (실패 시 절망/눈물 효과)
+   ========================================== */
+.game-hunt-weapon-card.crying-hunter {
+    animation: crying-shake 1.5s infinite ease-in-out !important;
+    border-color: #7f1d1d !important;
+    background: rgba(127, 29, 29, 0.08) !important;
+    box-shadow: 0 0 15px rgba(127, 29, 29, 0.3) !important;
+}
+
+@keyframes crying-shake {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: translateY(-3px) rotate(-1deg); }
+    20%, 40%, 60%, 80% { transform: translateY(1px) rotate(1deg); }
+}
+
+.tear-drops {
+    position: absolute;
+    top: 35%;
+    left: 0;
+    width: 100%;
+    height: 65%;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.tear {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #00d2ff;
+    border-radius: 0 50% 50% 50%;
+    opacity: 0.85;
+    box-shadow: 0 0 8px rgba(0, 210, 255, 0.6);
+}
+
+.tear-left {
+    left: 20%;
+    transform: rotate(45deg);
+    animation: tear-fall-left 1.2s infinite ease-in;
+}
+
+.tear-right {
+    right: 20%;
+    transform: rotate(45deg);
+    animation: tear-fall-right 1.4s infinite ease-in;
+}
+
+@keyframes tear-fall-left {
+    0% {
+        top: 0%;
+        opacity: 0;
+        transform: rotate(45deg) scale(0.5);
+    }
+    15% {
+        opacity: 0.95;
+        transform: rotate(45deg) scale(1);
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        top: 75%;
+        opacity: 0;
+        transform: rotate(45deg) scale(0.6);
+    }
+}
+
+@keyframes tear-fall-right {
+    0% {
+        top: 0%;
+        opacity: 0;
+        transform: rotate(45deg) scale(0.5);
+    }
+    15% {
+        opacity: 0.95;
+        transform: rotate(45deg) scale(1);
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        top: 75%;
+        opacity: 0;
+        transform: rotate(45deg) scale(0.6);
+    }
+}
+
+/* ==========================================
+   Lobby Registration Notification Effect (준비창 참가 알림 피드백)
+   ========================================== */
+.lobby-bubble {
+    position: absolute;
+    bottom: 95%;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: rgba(15, 10, 5, 0.95);
+    border: 1.5px solid #9c5c1f;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 12px;
+    white-space: nowrap;
+    z-index: 100;
+    opacity: 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6), inset 0 0 10px rgba(204, 109, 0, 0.1);
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
+    pointer-events: none;
+}
+
+.lobby-bubble::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #9c5c1f;
+}
+
+.lobby-bubble.subscriber {
+    border-color: #00ffaa;
+    box-shadow: 0 0 15px rgba(0, 255, 170, 0.35), inset 0 0 10px rgba(0, 255, 170, 0.15);
+}
+
+.lobby-bubble.subscriber::after {
+    border-top-color: #00ffaa;
+}
+
+.lobby-particle {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    font-size: 1.8rem;
+    pointer-events: none;
+    z-index: 90;
+    opacity: 0;
+    animation: lobby-particle-fade 1.1s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes lobby-particle-fade {
+    0% {
+        transform: translate(0, 0) scale(0.5);
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+        transform: translate(calc(var(--dx) * 0.2), calc(var(--dy) * 0.2)) scale(1.3);
+    }
+    100% {
+        transform: translate(var(--dx), var(--dy)) scale(0.9);
+        opacity: 0;
+    }
+}
+
+/* ==========================================
+   Monster Hunter Quest End Stamp Effect (퀘스트 종료 도장 효과)
+   ========================================== */
+.quest-stamp-container {
+    position: relative;
+    display: inline-block;
+    margin: 10px 0 15px;
+    box-sizing: border-box;
+    padding: 0;
+    animation: quest-stamp-impact 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards;
+    transform-origin: center center;
+    overflow: visible;
+    transform: rotate(-4deg);
+}
+
+.quest-complete-stamp {
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.quest-failed-stamp {
+    background: none;
+    border: none;
+    box-shadow: none;
+}
+
+.quest-svg-border {
+    width: 380px;
+    height: auto;
+    display: block;
+    overflow: visible;
+}
+
+.quest-complete-stamp .quest-svg-border {
+    color: #ff3b30;
+    filter: drop-shadow(0px 0px 5px rgba(255, 59, 48, 0.45));
+}
+
+.quest-failed-stamp .quest-svg-border {
+    color: #ff5252;
+    filter: drop-shadow(0px 0px 5px rgba(255, 82, 82, 0.45));
+}
+
+.quest-gothic-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Nanum Gothic', system-ui, sans-serif;
+    font-weight: 900;
+    font-size: 2.4rem;
+    letter-spacing: 3px;
+    white-space: nowrap;
+    pointer-events: none;
+    display: inline-block;
+}
+
+.quest-complete-stamp .quest-gothic-text {
+    background: linear-gradient(to bottom, #ff8a80 0%, #ff3b30 45%, #7f0000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0px 0px 10px rgba(255, 59, 48, 0.95)) drop-shadow(0px 0px 3px rgba(0,0,0,0.85));
+}
+
+.quest-failed-stamp .quest-gothic-text {
+    background: linear-gradient(to bottom, #ff8a80 0%, #ff5252 45%, #7f0000 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0px 0px 10px rgba(213, 0, 0, 0.95)) drop-shadow(0px 0px 3px rgba(0,0,0,0.85));
+}
+
+@keyframes quest-stamp-impact {
+    0% {
+        transform: scale(7) rotate(-25deg);
+        opacity: 0;
+        filter: brightness(3) blur(4px);
+    }
+    40% {
+        opacity: 1;
+    }
+    60% {
+        transform: scale(1.84) rotate(-6deg);
+        filter: brightness(1.2) blur(0);
+    }
+    75% {
+        transform: scale(2.16) rotate(-3deg);
+    }
+    90% {
+        transform: scale(1.94) rotate(-5deg);
+    }
+    100% {
+        transform: scale(2) rotate(-4deg);
+    }
+}
+
+/* ==========================================
+   Lobby Preparation Speech Bubble (말풍선)
+   ========================================== */
+.lobby-prep-bubble {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-5px);
+    background: #fdf5e6; /* warm beige/cream paper */
+    border: 4px solid #8b5a2b;
+    border-radius: 24px;
+    padding: 12px 28px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #4e342e;
+    white-space: nowrap;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18), inset 0 0 8px rgba(139,90,43,0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 100;
+    pointer-events: none;
+}
+
+.lobby-prep-bubble.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-25px);
+}
+
+/* Speech bubble arrow pointing down */
+.lobby-prep-bubble::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 12px;
+    border-style: solid;
+    border-color: #fdf5e6 transparent transparent transparent;
+    z-index: 2;
+}
+
+.lobby-prep-bubble::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 16px;
+    border-style: solid;
+    border-color: #8b5a2b transparent transparent transparent;
+    z-index: 1;
+}
+
+/* ==========================================
+   Combat Chat Bubble (전투 중 시청자 채팅 말풍선)
+   ========================================== */
+.combat-chat-bubble {
+    position: absolute;
+    bottom: 105%;
+    left: 50%;
+    transform: translateX(-50%) translateY(5px);
+    background: #fdf5e6; /* warm beige/cream paper */
+    border: 3px solid #8b5a2b;
+    border-radius: 16px;
+    padding: 8px 16px;
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #4e342e;
+    white-space: normal;
+    word-break: break-word;
+    max-width: 200px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), inset 0 0 4px rgba(139,90,43,0.15);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 100;
+    pointer-events: none;
+}
+
+.combat-chat-bubble.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-15px);
+}
+
+/* Speech bubble arrow pointing down */
+.combat-chat-bubble::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: #fdf5e6 transparent transparent transparent;
+    z-index: 2;
+}
+
+.combat-chat-bubble::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 11px;
+    border-style: solid;
+    border-color: #8b5a2b transparent transparent transparent;
+    z-index: 1;
+}
 
 

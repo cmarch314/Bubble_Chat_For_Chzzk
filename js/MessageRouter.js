@@ -56,6 +56,10 @@ class MessageRouter {
                 this.visualDirector.trigger('hunt', { message: updatedTrimmedMsg, nickname: msgData.nickname });
                 return;
             }
+            if (lowerMsg === '!커맨드') {
+                this.visualDirector.trigger('commands_scroll', { message: updatedTrimmedMsg, nickname: msgData.nickname });
+                return;
+            }
         }
 
         // 0.5 특별 이벤트(구독) 처리

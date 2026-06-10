@@ -76,6 +76,18 @@ class AudioManager {
         }
     }
 
+    resolveAudioPath(src) {
+        if (!src) return src;
+        if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('blob:')) {
+            return src;
+        }
+        const cleanSrc = src.replace(/^\.\//, '');
+        if (cleanSrc.startsWith('SFX/') || cleanSrc.startsWith('BGM/') || cleanSrc.startsWith('MonsterHunter_Soundtracks/')) {
+            return src;
+        }
+        return this.basePath + src;
+    }
+
     _buildVisualAudioPaths() {
         const vConf = this.configManager.getVisualConfig();
         const sConf = this.configManager.getSoundConfig();
@@ -89,7 +101,7 @@ class AudioManager {
                 
                 const processPath = (src) => {
                     if (!src) return;
-                    const path = src.includes('/') || src.includes('\\') ? src : `${this.basePath}${src}`;
+                    const path = this.resolveAudioPath(src);
                     this.visualAudioPaths.add(path);
                 };
 
@@ -161,8 +173,13 @@ class AudioManager {
     updateConfigLegacy(config) {
         this.soundHive = {};
         const processItem = (item) => {
-            if (typeof item === 'string') return `SFX/${item}`;
-            else if (typeof item === 'object' && item !== null && item.src) return { ...item, src: `SFX/${item.src}` };
+            const prependSfx = (src) => {
+                if (!src) return src;
+                if (src.startsWith('SFX/') || src.startsWith('./SFX/')) return src;
+                return `SFX/${src}`;
+            };
+            if (typeof item === 'string') return prependSfx(item);
+            else if (typeof item === 'object' && item !== null && item.src) return { ...item, src: prependSfx(item.src) };
             return item;
         };
         for (const [key, value] of Object.entries(config)) {
@@ -334,8 +351,7 @@ class AudioManager {
         if (type === 'sfx' && isVisualSound) return;
 
         // 3. 경로 및 설정 로드
-        let playPath = fileName;
-        if (!playPath.includes('/') && !playPath.includes('\\')) playPath = this.basePath + playPath;
+        let playPath = this.resolveAudioPath(fileName);
 
         const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
         const normConfig = this.configManager ? this.configManager.getNormalizerConfig() : { enabled: true, visual: false, sfx: true };

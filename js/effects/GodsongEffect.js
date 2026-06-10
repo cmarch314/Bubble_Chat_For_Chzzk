@@ -9,7 +9,7 @@ class GodsongEffect extends BaseEffect {
 
         const conf = (this.config.getVisualConfig() && this.config.getVisualConfig().godsong) ? this.config.getVisualConfig().godsong : {
             duration: 15000,
-            audioPath: './SFX/갓겜합시다FULL.mp3',
+            audioPath: './SFX/Chzzk_Signatures/갓겜합시다FULL.mp3',
             volume: 0.7,
             images: [
                 { src: './img/GodGame1.png', width: '30%', top: '30%', slide: 'left', transform: 'scaleX(-1)' }

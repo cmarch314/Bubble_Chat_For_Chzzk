@@ -345,6 +345,28 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
+        /* SFX Explorer Tabs */
+        .tab-btn {
+            background-color: #333;
+            color: #ccc;
+            border: 1px solid #444;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            background-color: #444;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .tab-btn.active {
+            background-color: #2196F3 !important;
+            color: white !important;
+            border-color: #2196F3 !important;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+        .sound-card {
+            background: #252525;
+            border: 1px solid #333;
+            transition: all 0.2s;
         }
     </style>
     <script src="config.js?v=2"></script>
@@ -505,8 +527,39 @@
             </div>
         </div>
 
-        <div id="status">INIT: Ready to configure...</div>
-    </div>
+            <!-- Bottom Section: SFX Catalog Explorer (Full Width) -->
+            <div class="config-section" style="grid-column: span 2; margin-top: 20px;">
+                <div class="config-header">
+                    <span>📁 SFX Library Explorer</span>
+                    <span style="font-size: 0.85rem; font-weight: normal; color: #888;">클릭하여 미리듣고 간편하게 단축어로 등록하세요.</span>
+                </div>
+                
+                <!-- Category Tabs -->
+                <div class="explorer-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="switchCategory('MonsterHunter_Roars')" class="tab-btn active" id="tab-MonsterHunter_Roars" style="padding: 10px 20px; font-size: 0.95rem; cursor: pointer; border-radius: 8px;">🐉 Monster Roars (<span id="count-roars">0</span>)</button>
+                    <button onclick="switchCategory('MonsterHunter_Hunters')" class="tab-btn" id="tab-MonsterHunter_Hunters" style="padding: 10px 20px; font-size: 0.95rem; background-color: #333; cursor: pointer; border-radius: 8px;">⚔️ Hunter Action (<span id="count-hunters">0</span>)</button>
+                    <button onclick="switchCategory('Chzzk_Signatures')" class="tab-btn" id="tab-Chzzk_Signatures" style="padding: 10px 20px; font-size: 0.95rem; background-color: #333; cursor: pointer; border-radius: 8px;">💬 Chat Signatures (<span id="count-signatures">0</span>)</button>
+                </div>
+
+                <!-- Search Bar -->
+                <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+                    <input type="text" id="explorerSearch" placeholder="Search sounds by filename..." oninput="filterExplorer()" style="margin-bottom: 0; flex-grow: 1; padding: 14px; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 10px;">
+                    <button onclick="clearSearch()" class="secondary" style="padding: 12px 20px; flex-shrink: 0; font-weight: normal; font-size: 0.9rem; border-radius: 10px; margin: 0; width: auto;">Clear</button>
+                </div>
+
+                <!-- Grid Display -->
+                <div id="explorerGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; max-height: 450px; overflow-y: auto; padding: 12px; border: 1px solid #333; border-radius: 12px; background: #1a1a1a;">
+                    <!-- Dynamically populated -->
+                </div>
+                
+                <!-- Load More Container -->
+                <div id="loadMoreContainer" style="text-align: center; margin-top: 15px; display: none;">
+                    <button id="loadMoreBtn" onclick="loadMoreExplorer()" class="secondary" style="padding: 10px 24px; font-size: 0.9rem; width: auto; font-weight: normal; border-radius: 8px; margin: 0;">Load More Sounds...</button>
+                </div>
+            </div>
+
+            <div id="status">INIT: Ready to configure...</div>
+        </div>
 
     <script>
         const bc = new BroadcastChannel('bubble_chat_control');
@@ -995,6 +1048,172 @@ window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
         searchInput.onkeypress = (e) => e.key === 'Enter' && searchChannel();
         document.getElementById('soundToggle').onchange = (e) => sendCommand('setSound', { enabled: e.target.checked });
         function sendCommand(type, payload = {}) { bc.postMessage({ type, ...payload, timestamp: Date.now() }); }
+        // --- SFX Library Explorer Logic ---
+        let sfxCatalog = {
+            MonsterHunter_Roars: [],
+            MonsterHunter_Hunters: [],
+            Chzzk_Signatures: []
+        };
+        let currentCategory = 'MonsterHunter_Roars';
+        let explorerFilteredList = [];
+        let explorerLoadedCount = 30;
+
+        async function initExplorer() {
+            try {
+                const res = await fetch('SFX/sfx_catalog.json');
+                if (res.ok) {
+                    sfxCatalog = await res.json();
+                    
+                    // Update category counts
+                    document.getElementById('count-roars').innerText = sfxCatalog.MonsterHunter_Roars.length;
+                    document.getElementById('count-hunters').innerText = sfxCatalog.MonsterHunter_Hunters.length;
+                    document.getElementById('count-signatures').innerText = sfxCatalog.Chzzk_Signatures.length;
+                    
+                    filterExplorer();
+                } else {
+                    console.error("Failed to load SFX catalog.");
+                    document.getElementById('explorerGrid').innerHTML = '<div style="color: #ff5252; padding: 20px;">Failed to load SFX catalog. Make sure SFX/sfx_catalog.json exists.</div>';
+                }
+            } catch(e) {
+                console.error("Error initializing explorer:", e);
+                document.getElementById('explorerGrid').innerHTML = '<div style="color: #ff5252; padding: 20px;">Error loading catalog.</div>';
+            }
+        }
+
+        function switchCategory(category) {
+            currentCategory = category;
+            
+            // Toggle active class on tab buttons
+            ['MonsterHunter_Roars', 'MonsterHunter_Hunters', 'Chzzk_Signatures'].forEach(cat => {
+                const btn = document.getElementById('tab-' + cat);
+                if (cat === category) {
+                    btn.classList.add('active');
+                    btn.style.backgroundColor = ''; // Use active class background
+                } else {
+                    btn.classList.remove('active');
+                    btn.style.backgroundColor = '#333';
+                }
+            });
+            
+            document.getElementById('explorerSearch').value = '';
+            filterExplorer();
+        }
+
+        function filterExplorer() {
+            const query = document.getElementById('explorerSearch').value.trim().toLowerCase();
+            const list = sfxCatalog[currentCategory] || [];
+            
+            if (query) {
+                explorerFilteredList = list.filter(filename => filename.toLowerCase().includes(query));
+            } else {
+                explorerFilteredList = [...list];
+            }
+            
+            explorerLoadedCount = 30;
+            renderExplorerGrid();
+        }
+
+        function clearSearch() {
+            document.getElementById('explorerSearch').value = '';
+            filterExplorer();
+        }
+
+        function renderExplorerGrid() {
+            const grid = document.getElementById('explorerGrid');
+            grid.innerHTML = '';
+            
+            const toRender = explorerFilteredList.slice(0, explorerLoadedCount);
+            
+            if (toRender.length === 0) {
+                grid.innerHTML = '<div style="color: #aaa; padding: 20px; grid-column: span 3; text-align: center;">No matching sound effects found.</div>';
+                document.getElementById('loadMoreContainer').style.display = 'none';
+                return;
+            }
+            
+            toRender.forEach(filename => {
+                const card = document.createElement('div');
+                card.className = 'sound-card';
+                card.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 12px 15px; border-radius: 10px; border: 1px solid #333; transition: all 0.2s;';
+                
+                // Truncate clean display name
+                let displayName = filename;
+                if (filename.length > 25) {
+                    displayName = filename.substring(0, 22) + '...';
+                }
+                
+                card.innerHTML = `
+                    <div style="display: flex; flex-direction: column; overflow: hidden; margin-right: 10px; flex-grow: 1;">
+                        <span style="font-size: 0.95rem; font-weight: 600; color: #fff;" title="${filename}">${displayName}</span>
+                        <span style="font-size: 0.8rem; color: #888;">${currentCategory === 'MonsterHunter_Roars' ? 'Monster Roar' : currentCategory === 'MonsterHunter_Hunters' ? 'Hunter Action' : 'Chat Signature'}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                        <button onclick="playExplorerAudio('${currentCategory}/${filename}')" class="secondary" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; width: auto; font-weight: normal; margin: 0;">▶</button>
+                        <button onclick="assignExplorerSound('${currentCategory}/${filename}')" class="action-btn" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; background-color: #2196F3; cursor: pointer; width: auto; font-weight: normal; margin: 0;">Assign</button>
+                    </div>
+                `;
+                
+                // Add hover style effect via class
+                card.addEventListener('mouseenter', () => {
+                    card.style.borderColor = '#2196F3';
+                    card.style.background = '#2b2b2b';
+                    card.style.transform = 'translateY(-2px)';
+                    card.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.borderColor = '#333';
+                    card.style.background = '#252525';
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = 'none';
+                });
+                
+                grid.appendChild(card);
+            });
+            
+            // Check if there are more items to load
+            if (explorerFilteredList.length > explorerLoadedCount) {
+                document.getElementById('loadMoreContainer').style.display = 'block';
+            } else {
+                document.getElementById('loadMoreContainer').style.display = 'none';
+            }
+        }
+
+        function loadMoreExplorer() {
+            explorerLoadedCount += 30;
+            renderExplorerGrid();
+        }
+
+        function playExplorerAudio(relativePath) {
+            const audio = new Audio("SFX/" + relativePath);
+            const sfxVol = parseFloat(document.getElementById('volSfx').value);
+            const masterVol = parseFloat(document.getElementById('volMaster').value);
+            audio.volume = sfxVol * masterVol;
+            audio.play().catch(e => console.error("Explorer play error:", e));
+        }
+
+        function assignExplorerSound(relativePath) {
+            // Assign file relative path directly to register form
+            currentlyPickedFile = relativePath;
+            document.getElementById('selectedFileName').innerText = relativePath;
+            
+            // Highlight keyword input field
+            const keyInput = document.getElementById('soundKey');
+            keyInput.focus();
+            
+            // Auto suggest a keyword if it is in Chzzk_Signatures (strip subfolder and extension)
+            if (relativePath.startsWith('Chzzk_Signatures/')) {
+                const rawName = relativePath.split('/').pop().replace(/\.(mp3|wav|ogg|m4a|aac)$/i, '');
+                // Remove numbers from end (e.g. ㅋㅋㅋ1 -> ㅋㅋㅋ)
+                const suggestedKey = rawName.replace(/\d+$/, '');
+                keyInput.value = suggestedKey;
+            } else {
+                keyInput.value = '';
+            }
+            
+            statusDiv.innerHTML = `<span style="color:#2196F3;">Assigned sound to form. Please adjust the Keyword and click Register.</span>`;
+        }
+
+        // Initialize explorer on load
+        setTimeout(initExplorer, 500);
     </script>
 </body>
 
