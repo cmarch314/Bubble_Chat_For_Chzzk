@@ -1,4 +1,4 @@
-﻿// [Class 7] Message Queue Manager
+// [Class 7] Message Queue Manager
 // ==========================================
 class MessageQueue {
     constructor(eventBus, processor = null) {

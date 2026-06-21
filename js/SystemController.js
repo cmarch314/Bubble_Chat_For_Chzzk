@@ -1,4 +1,4 @@
-﻿// [Class 6] System Controller (Toggles)
+// [Class 6] System Controller (Toggles)
 // ==========================================
 class SystemController {
     constructor(eventBus) {

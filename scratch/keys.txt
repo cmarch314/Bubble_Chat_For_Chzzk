@@ -1,4 +1,4 @@
-﻿    "???": { "src": "mystery.mp3", "volume": 0.7 },
+    "???": { "src": "mystery.mp3", "volume": 0.7 },
     "가자!": { "src": "LetsGo.mp3", "volume": 0.7 },
     "가자부풀버전틀어주세요": { "src": "가자부 FULL.mp3", "volume": 0.7 },// only for visual effect,
     "가지고싶다": { "src": "가지고싶다.mp3", "volume": 0.7 },

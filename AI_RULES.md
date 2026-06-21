@@ -197,3 +197,22 @@ d:/BubbleChat/
 ├── AI_RULES.md             ← 이 파일
 └── audio_guidelines.md     ← 사운드 가이드라인
 ```
+
+---
+
+## 📌 10. 반응형 비디오 명령어(CMC) 관리 규칙
+
+- `AI CMC` 폴더에 새로운 비디오 클립(.mp4)을 추가하거나 삭제할 경우, **반드시 `config.js`의 `window.HIVE_CMC_FILES` 배열에 파일명(확장자 제외)을 추가/삭제해야 합니다.**
+- 개별 JS 파일(예: `ChatRenderer.js`, `SoundQuizEffect.js`, `CommandsScrollEffect.js` 등)에 하드코딩된 비디오 파일명 배열을 선언하지 마십시오. 항상 `window.HIVE_CMC_FILES`를 사용하여 동적으로 가져와야 합니다.
+- 이 규칙을 통해 시청자의 `@` 반응형 비디오 재생, 사운드/비디오 퀴즈 및 `!커맨드` 리스트 스크롤 기능의 키워드가 일괄적이고 동기화된 상태로 자동 유지 관리됩니다.
+
+---
+
+## 📌 11. Strict UTF-8 Encoding Without BOM (인코딩 표준 규칙)
+
+- **모든 텍스트/코드/문서 파일(특히 `.md`, `.js`, `.html`, `.css`, `.json`)은 반드시 UTF-8 (BOM 없음) 인코딩으로 작성 및 저장되어야 합니다.**
+- 윈도우 환경에서 시스템 기본 인코딩인 CP949나 EUC-KR로 파일을 저장하여 GitHub 등에서 한글이 중국어 한자(Mojibake/깨짐 현상)로 보이는 일이 없도록 하십시오.
+- 문서나 설정을 자동 생성/수정하는 스크립트(Python, Node.js 등)를 작성하거나 실행할 때:
+  - 파일 열기 시 항상 `encoding='utf-8'`을 명시적으로 사용하십시오 (예: `open(file, 'w', encoding='utf-8')`).
+  - 윈도우 파이썬의 경우 표준 입출력 및 파일 인코딩이 깨지지 않도록 `PYTHONUTF8=1` 환경 변수를 사용하거나 파이썬 호출 시 `-X utf8` 플래그를 사용하십시오.
+
