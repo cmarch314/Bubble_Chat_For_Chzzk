@@ -483,6 +483,9 @@ class HuntEngine {
                 else if (w.speedGroup === 'fast') fillRate = 1.5;
                 else if (w.speedGroup === 'slow') fillRate = 0.65;
                 
+                // Increase all hunters' speed by 15%
+                fillRate *= 1.15;
+                
                 if (w.id === 'dual_blades' && w.demonModeDuration && w.demonModeDuration > 0) {
                     fillRate *= 1.2;
                 }
