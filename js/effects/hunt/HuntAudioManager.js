@@ -204,7 +204,7 @@ class HuntAudioManager {
             const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
             const baseVolume = volConfig.master * volConfig.sfx * 0.75 * volumeMultiplier;
 
-            if (volumeMultiplier > 1.0) {
+            if (volumeMultiplier > 1.0 && window.location.protocol !== 'file:') {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (AudioContext) {
                     const ctx = new AudioContext();
