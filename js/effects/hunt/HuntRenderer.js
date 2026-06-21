@@ -1114,45 +1114,25 @@ class HuntRenderer {
             const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
             if (weaponImg) {
                 if (w) {
-                    // Get exact rect of original weapon image BEFORE rotating card to spawn the cart animation locally
-                    const rect = weaponImg.getBoundingClientRect();
-                    
-                    // Add dead class and rotate card 180 degrees
+                    // Add dead class to card and deactivate weapon image filter
                     weaponCard.classList.add('dead');
-                    weaponCard.style.transform = 'rotate(180deg)';
+                    weaponImg.style.transition = 'filter 0.3s ease';
+                    weaponImg.style.filter = 'grayscale(0.5)';
                     
-                    // Animate the original weapon image itself using rotated coordinates
-                    weaponImg.style.transition = 'none';
-                    weaponImg.style.filter = 'grayscale(0.6) brightness(0.8) drop-shadow(0 4px 8px rgba(0,0,0,0.4))';
-                    weaponImg.style.animation = 'cart-weapon-slide-out 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
+                    // Animate the weapon card itself down-left
+                    weaponCard.style.transition = 'none';
+                    weaponCard.style.animation = 'cart-card-slide-out 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
                     
-                    // Create private local cart element at exact position (without the duplicate weapon image)
-                    const cart = document.createElement('div');
-                    cart.className = 'game-hunt-cart-local';
-                    cart.style.position = 'fixed';
-                    cart.style.top = `${rect.top}px`;
-                    cart.style.left = `${rect.left}px`;
-                    cart.style.width = `${rect.width}px`;
-                    cart.style.height = `${rect.height}px`;
-                    cart.style.zIndex = '2147483647';
-                    cart.style.pointerEvents = 'none';
-                    
-                    // Content of local cart: ONLY the cart emoji and name label (NO duplicate weapon image)
-                    cart.innerHTML = `
-                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                            <div style="font-size: 2.8rem; margin-top: 10px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">🛒</div>
-                            <div style="font-size: 0.8rem; font-weight: bold; background: rgba(20, 10, 10, 0.9); color: #ff3b30; border: 1.2px solid #ff3b30; padding: 1px 6px; border-radius: 4px; margin-top: 2px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                                ${w.name} 수레행
-                            </div>
+                    // Create and append the faint cart overlay inside the weapon card
+                    const cartOverlay = document.createElement('div');
+                    cartOverlay.className = 'faint-cart-overlay';
+                    cartOverlay.innerHTML = `
+                        <div style="font-size: 3.5rem; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">🛒</div>
+                        <div style="font-size: 0.85rem; font-weight: bold; background: rgba(20, 10, 10, 0.95); color: #ff3b30; border: 1.2px solid #ff3b30; padding: 2px 8px; border-radius: 4px; margin-top: 4px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                            ${w.name} 수레행
                         </div>
                     `;
-                    
-                    document.body.appendChild(cart);
-                    cart.style.animation = 'cart-local-slide-out 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
-                    
-                    setTimeout(() => {
-                        cart.remove();
-                    }, 3500);
+                    weaponCard.appendChild(cartOverlay);
                 } else {
                     weaponImg.style.transition = 'opacity 0.2s ease-out';
                     weaponImg.style.opacity = '0';
@@ -1175,11 +1155,17 @@ class HuntRenderer {
         if (!this.card || !w) return;
         const weaponCard = this.card.querySelector(`#fight-card-${w.index}`);
         if (weaponCard) {
-            // Remove all custom classes from card
+            // Remove all custom classes and animations from card
             weaponCard.classList.remove('dead', 'ls-spirit-1', 'ls-spirit-2', 'ls-spirit-3', 'db-demon-mode', 'cb-shield-charged', 'ig-3-extracts');
+            weaponCard.style.animation = 'none';
             weaponCard.style.transform = '';
             weaponCard.style.borderColor = '';
             weaponCard.style.boxShadow = '';
+            
+            const cartOverlay = weaponCard.querySelector('.faint-cart-overlay');
+            if (cartOverlay) {
+                cartOverlay.remove();
+            }
 
             // Handle Weapon Image Overlays
             const spiritOverlay = this.card.querySelector(`#spirit-overlay-${w.index}`);
