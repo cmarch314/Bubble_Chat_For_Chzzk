@@ -9,6 +9,10 @@ window.HIVE_VOLUME_CONFIG = {
     "sfx": 0.55
 };
 
+window.HIVE_HUNT_CONFIG = {
+    "hunterSpeedMultiplier": 1.15
+};
+
 // [Startup Configuration]
 window.RANDOM_NAMES = [
     "섹시한누나",

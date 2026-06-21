@@ -425,6 +425,7 @@ class HuntEffect extends BaseEffect {
             MONSTER_ATTACKS: this.initializer.MONSTER_ATTACKS,
             COMBO_LIST: this.initializer.COMBO_LIST,
             SHOW_MONSTER_HP: this.SHOW_MONSTER_HP,
+            hunterSpeedMultiplier: this.config.getHuntConfig()?.hunterSpeedMultiplier !== undefined ? this.config.getHuntConfig().hunterSpeedMultiplier : 1.15,
             callbacks: {
                 onLog: (text, color) => this.addCombatLog(text, color),
                 onPlaySFX: (fileName, fallbackKey) => this.audioManager.playMHAsset(fileName, fallbackKey),

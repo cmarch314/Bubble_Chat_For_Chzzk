@@ -30,6 +30,7 @@ class HuntEngine {
         this.MONSTER_ATTACKS = config.MONSTER_ATTACKS;
         this.COMBO_LIST = config.COMBO_LIST;
         this.SHOW_MONSTER_HP = config.SHOW_MONSTER_HP;
+        this.hunterSpeedMultiplier = config.hunterSpeedMultiplier !== undefined ? config.hunterSpeedMultiplier : 1.15;
 
         // Valstrax Custom States
         if (this.selectedMonster.id.includes('valstrax')) {
@@ -483,8 +484,8 @@ class HuntEngine {
                 else if (w.speedGroup === 'fast') fillRate = 1.5;
                 else if (w.speedGroup === 'slow') fillRate = 0.65;
                 
-                // Increase all hunters' speed by 15%
-                fillRate *= 1.15;
+                // Apply hunter speed multiplier from config
+                fillRate *= this.hunterSpeedMultiplier;
                 
                 if (w.id === 'dual_blades' && w.demonModeDuration && w.demonModeDuration > 0) {
                     fillRate *= 1.2;

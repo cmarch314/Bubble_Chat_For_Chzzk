@@ -17,6 +17,7 @@ class ConfigManager {
         this._welcomeMessages = [];
         this._randomNames = [];
         this._normalizerConfig = { enabled: true, visual: false, sfx: false };
+        this._huntConfig = { hunterSpeedMultiplier: 1.15 };
 
         this._initBroadcastChannel();
         this._loadAllConfigs(); // [NEW] 통합 로더
@@ -140,6 +141,7 @@ class ConfigManager {
         if (window.WELCOME_MESSAGES) this._welcomeMessages = [...window.WELCOME_MESSAGES];
         if (window.RANDOM_NAMES) this._randomNames = [...window.RANDOM_NAMES];
         if (window.NORMALIZER_CONFIG) this._normalizerConfig = { ...this._normalizerConfig, ...window.NORMALIZER_CONFIG };
+        if (window.HIVE_HUNT_CONFIG) this._huntConfig = { ...this._huntConfig, ...window.HIVE_HUNT_CONFIG };
 
         this._excludedSfx = Array.isArray(window.HIVE_EXCLUDED_SFX) ? [...window.HIVE_EXCLUDED_SFX] : [];
         this._sfxRenames = (typeof window.HIVE_SFX_RENAMES === 'object' && window.HIVE_SFX_RENAMES !== null) ? { ...window.HIVE_SFX_RENAMES } : {};
@@ -157,6 +159,7 @@ class ConfigManager {
             delete window.WELCOME_MESSAGES;
             delete window.RANDOM_NAMES;
             delete window.NORMALIZER_CONFIG;
+            delete window.HIVE_HUNT_CONFIG;
             delete window.HIVE_EXCLUDED_SFX;
             delete window.HIVE_SFX_RENAMES;
         } catch (e) {
@@ -177,6 +180,7 @@ class ConfigManager {
     getNormalizerConfig() { return this._normalizerConfig; }
     getExcludedSfx() { return this._excludedSfx; }
     getSfxRenames() { return this._sfxRenames; }
+    getHuntConfig() { return this._huntConfig; }
 
     // ==========================================
     // [Setter Methods] - 설정 변경 시 내부 객체와 로컬스토리지만 업데이트
