@@ -168,7 +168,8 @@ class HuntInitializer {
                 lifepowders: 1,
                 spiritLevel: 0,
                 demonModeDuration: 0,
-                phials: 5,
+                phials: w.id === 'charge_blade' ? 0 : 5,
+                shieldChargeDuration: 0,
                 overheatDuration: 0,
                 extractBuffs: { red: 0, white: 0, orange: 0 },
                 extractDuration: 0

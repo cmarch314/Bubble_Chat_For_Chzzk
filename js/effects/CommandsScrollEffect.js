@@ -2,6 +2,12 @@ class CommandsScrollEffect extends BaseEffect {
     constructor(director) {
         super(director);
         this._injectStyles();
+        this.isActive = false;
+        this.resolveFn = null;
+        this.container = null;
+        this.rollTimeout = null;
+        this.fadeTimeout = null;
+        this.previousActiveGame = null;
     }
 
     _injectStyles() {
@@ -85,8 +91,9 @@ class CommandsScrollEffect extends BaseEffect {
             }
             .commands-grid {
                 display: grid;
-                grid-template-columns: repeat(8, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
                 gap: 15px;
+                width: 100%;
             }
             .command-item {
                 font-size: 1.5rem;
@@ -96,9 +103,7 @@ class CommandsScrollEffect extends BaseEffect {
                 padding: 10px 16px;
                 text-align: center;
                 color: #eee;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                word-break: break-all;
                 border: 1.5px solid rgba(255, 255, 255, 0.05);
                 box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             }
@@ -107,6 +112,10 @@ class CommandsScrollEffect extends BaseEffect {
     }
 
     async execute(context) {
+        this.isActive = true;
+        this.previousActiveGame = this.director.activeGame;
+        this.director.activeGame = this;
+
         // 1. Gather keys
         const soundConf = this.config.getSoundConfig() || {};
         const soundKeys = Object.keys(soundConf).sort();
@@ -116,6 +125,7 @@ class CommandsScrollEffect extends BaseEffect {
 
         // 2. Create container
         const container = document.createElement('div');
+        this.container = container;
         container.className = 'commands-scroll-overlay';
         
         container.innerHTML = `
@@ -127,7 +137,7 @@ class CommandsScrollEffect extends BaseEffect {
                     <div class="commands-section">
                         <div class="commands-section-title">🎬 VIDEO COMMANDS (${videoKeys.length})</div>
                         <div class="commands-grid">
-                            ${videoKeys.map(k => `<div class="command-item">@${k}</div>`).join('')}
+                            ${videoKeys.map(k => `<div class="command-item">#${k}</div>`).join('')}
                         </div>
                     </div>
 
@@ -151,6 +161,7 @@ class CommandsScrollEffect extends BaseEffect {
         
         // Wait for next frame to measure height
         await new Promise(r => requestAnimationFrame(r));
+        if (!this.isActive) return;
         const wrapperHeight = wrapper.offsetHeight;
         
         // Let's scroll at a speed of around 60 pixels per second
@@ -159,18 +170,64 @@ class CommandsScrollEffect extends BaseEffect {
 
         // Fade in
         requestAnimationFrame(() => {
-            container.classList.add('visible');
+            if (this.isActive) container.classList.add('visible');
         });
 
         // Promise resolves when the animation finishes
         return new Promise(resolve => {
-            setTimeout(() => {
+            this.resolveFn = resolve;
+            
+            this.rollTimeout = setTimeout(() => {
+                if (!this.isActive) return;
                 container.classList.remove('visible');
-                setTimeout(() => {
-                    container.remove();
-                    resolve();
+                this.fadeTimeout = setTimeout(() => {
+                    this.cleanup();
                 }, 500);
             }, durationSec * 1000);
         });
+    }
+
+    cleanup() {
+        this.isActive = false;
+        if (this.director.activeGame === this) {
+            this.director.activeGame = this.previousActiveGame;
+        }
+        this.previousActiveGame = null;
+        if (this.rollTimeout) clearTimeout(this.rollTimeout);
+        if (this.fadeTimeout) clearTimeout(this.fadeTimeout);
+        if (this.container) {
+            this.container.remove();
+            this.container = null;
+        }
+        if (this.resolveFn) {
+            const resolve = this.resolveFn;
+            this.resolveFn = null;
+            resolve();
+        }
+    }
+
+    stopEffect() {
+        if (!this.isActive) return;
+        
+        if (this.container) {
+            this.container.classList.remove('visible');
+        }
+        
+        if (this.rollTimeout) clearTimeout(this.rollTimeout);
+        if (this.fadeTimeout) clearTimeout(this.fadeTimeout);
+        
+        this.fadeTimeout = setTimeout(() => {
+            this.cleanup();
+        }, 500);
+    }
+
+    handleChat(msgData) {
+        if (!this.isActive) return false;
+        const msg = (msgData.message || "").trim();
+        if (msgData.isStreamer && (msg === '!중단' || msg === '!커맨드 중단')) {
+            this.stopEffect();
+            return true;
+        }
+        return false;
     }
 }

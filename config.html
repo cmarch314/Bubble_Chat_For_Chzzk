@@ -5,9 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BubbleChat Config</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212;
             color: #ffffff;
             display: flex;
@@ -25,19 +28,20 @@
             padding: 2.5rem;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 1100px;
+            width: 1300px;
             max-width: 95vw;
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 40px;
-            align-items: start;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
         }
 
         h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
             grid-column: span 2;
             margin: 0 0 2rem 0;
             text-align: center;
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             background: linear-gradient(135deg, #4CAF50, #2196F3);
             -webkit-background-clip: text;
             background-clip: text;
@@ -60,18 +64,19 @@
         }
 
         .config-header {
+            font-family: 'Outfit', sans-serif;
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
             color: #fff;
-            font-weight: bold;
-            font-size: 1.2rem;
+            font-weight: 700;
+            font-size: 1.35rem;
             letter-spacing: -0.5px;
         }
 
         .config-list {
-            max-height: 350px;
+            max-height: 550px;
             overflow-y: auto;
             border: 1px solid #333;
             border-radius: 10px;
@@ -370,142 +375,19 @@
         }
     </style>
     <script src="config.js?v=2"></script>
+    <script src="SFX/sfx_catalog.js"></script>
 </head>
 
 <body>
     <div class="container">
         <h1>BubbleChat Config</h1>
 
-        <!-- Left Column: Mapping Management -->
-        <div class="config-column">
-            <!-- Sound Effects Section -->
-            <div class="config-section">
-                <div class="config-header">
-                    <span>🔊 Sound Effects Mapping</span>
-                    <button onclick="resetDefaults('sound')" class="secondary"
-                        style="width:auto; padding:6px 14px; font-size:0.85rem;">Reset All</button>
-                </div>
-
-                <!-- Registered List -->
-                <div id="soundList" class="config-list"></div>
-
-                <!-- Add Form -->
-                <div class="add-form" style="border-top: 1px solid #333; padding-top: 20px;">
-                    <div style="font-size: 0.9rem; color: #888; font-weight: bold; margin-bottom: 5px;">ADD NEW SOUND
-                    </div>
-                    <input type="text" id="soundKey" placeholder="Shortcut Keyword (e.g. ㅋㅋㅋ)">
-
-                    <div style="display: flex; gap: 12px; align-items: center;">
-                        <button onclick="document.getElementById('soundPicker').click()" class="secondary"
-                            style="width: auto; flex-shrink: 0; padding: 14px; margin:0;">
-                            📁 Select File
-                        </button>
-                        <input type="file" id="soundPicker" accept="audio/*,video/*" style="display: none;">
-                        <div id="selectedFileName"
-                            style="flex-grow: 1; font-size: 0.95rem; color: #4CAF50; background: #1a1a1a; padding: 14px; border: 1px solid #333; border-radius: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font-family: monospace;">
-                            No file selected
-                        </div>
-                    </div>
-
-                    <!-- Volume Slider -->
-                    <button onclick="addSound()" class="action-btn" style="padding: 16px;">REGISTER SOUND
-                        SHORTCUT</button>
-                    <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
-                        <button onclick="previewSound()" class="secondary" style="padding: 6px 12px; font-size: 0.8rem;"
-                            title="Test selected file">▶ Test File</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Visual Effects Section -->
-            <div class="config-section">
-                <div class="config-header">
-                    <span>✨ Visual Effects Mapping</span>
-                    <button onclick="resetDefaults('visual')" class="secondary"
-                        style="width:auto; padding:6px 14px; font-size:0.85rem;">Reset All</button>
-                </div>
-                <div id="visualList" class="config-list"></div>
-                <div class="add-form" style="border-top: 1px solid #333; padding-top: 20px;">
-                    <div style="font-size: 0.9rem; color: #888; font-weight: bold; margin-bottom: 5px;">ADD NEW VISUAL
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <input type="text" id="visualKey" placeholder="Keyword (e.g. 해골)">
-                        <select id="visualType">
-                            <option value="skull">Skull Effect (☠️)</option>
-                            <option value="heart">Heart Effect (❤️)</option>
-                        </select>
-                    </div>
-                    <button onclick="addVisual()" class="action-btn">REGISTER VISUAL SHORTCUT</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column: Settings & Controls -->
-        <div class="config-column">
-            <!-- Global Volume Settings (New) -->
-            <div class="config-section">
-                <div class="config-header">🔊 Global Volume Controls</div>
-
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <!-- Master Volume -->
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-weight: bold; color: #4CAF50;">Master Volume</span>
-                            <span id="volMasterDisplay" style="font-family: monospace;">100%</span>
-                        </div>
-                        <input type="range" id="volMaster" min="0" max="1" step="0.01" value="1"
-                            style="width: 100%; cursor: pointer;">
-                    </div>
-
-                    <!-- Visual Volume -->
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-weight: bold; color: #2196F3;">Visual Effects</span>
-                            <span id="volVisualDisplay" style="font-family: monospace;">100%</span>
-                        </div>
-                        <input type="range" id="volVisual" min="0" max="1" step="0.01" value="1"
-                            style="width: 100%; cursor: pointer;">
-                    </div>
-
-                    <!-- SFX Volume -->
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-weight: bold; color: #FF9800;">Sound Effects (Chat)</span>
-                            <span id="volSfxDisplay" style="font-family: monospace;">100%</span>
-                        </div>
-                        <input type="range" id="volSfx" min="0" max="1" step="0.01" value="1"
-                            style="width: 100%; cursor: pointer;">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Channel Profile Section -->
-            <div class="config-section">
-                <div class="config-header">👤 Channel Settings</div>
-                <div class="current-channel-card">
-                    <img id="currentIcon" src="https://ssl.pstatic.net/static/nng/glive/icon/streamer.png">
-                    <div class="channel-info-text">
-                        <div class="label">LIVE CONNECTED</div>
-                        <div id="currentName" class="name">Not Set</div>
-                        <div id="currentIdVisible" class="id">---</div>
-                        <div id="currentIdDisplay" style="display:none;"></div>
-                    </div>
-                </div>
-                <!-- ... existing search ... -->
-                <div class="add-form">
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="searchInput" placeholder="Search Chzzk Streamer..."
-                            style="margin-bottom:0;">
-                        <button id="searchBtn" class="action-btn" style="width: 80px; padding:0;">LINK</button>
-                    </div>
-                    <div id="resultArea"></div>
-                </div>
-            </div>
-
-            <!-- Broadcast Settings Toggle -->
-            <div class="config-section">
-                <div class="config-header">🕹️ Global Toggles</div>
-                <div class="control-group">
+        <!-- Upper Section: 2x2 Grid of Small Panels -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px;">
+            <!-- Col 1, Row 1: Global Toggles -->
+            <div class="config-section" style="display: flex; flex-direction: column; justify-content: center;">
+                <div class="config-header" style="margin-bottom: 15px;">🕹️ Global Toggles</div>
+                <div class="control-group" style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 500;">Master Sound Output</span>
                     <label class="switch">
                         <input type="checkbox" id="soundToggle" checked>
@@ -514,41 +396,158 @@
                 </div>
             </div>
 
-            <!-- Permanence Section -->
-            <!-- Permanence Section -->
-            <div class="config-section">
-                <div class="config-header">💾 설정 변경사항 저장하기 (config.js)</div>
-                <p style="font-size: 0.85rem; color: #888; line-height: 1.5; margin-bottom: 15px;">
+            <!-- Col 2, Row 1: Save Config -->
+            <div class="config-section" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="config-header" style="margin-bottom: 10px;">💾 설정 변경사항 저장하기 (config.js)</div>
+                <p style="font-size: 0.85rem; color: #aaa; line-height: 1.5; margin: 0 0 15px 0;">
                     변경한 내용을 영구적으로 적용하려면, 아래 버튼을 눌러 생성된 코드를 복사한 뒤 <b>config.js</b> 파일을 덮어써 저장해주세요.
                 </p>
-                <button onclick="exportConfig()" class="secondary" style="width:100%; letter-spacing: 1px;">저장하기 (덮어쓰기
-                    필수)</button>
+                <button onclick="exportConfig()" class="secondary" style="width:100%; letter-spacing: 1px; margin: 0; padding: 12px; height: auto;">저장하기 (덮어쓰기 필수)</button>
                 <textarea id="configExport" style="display:none;" readonly></textarea>
+            </div>
+
+            <!-- Col 1, Row 2: Channel Settings -->
+            <div class="config-section" style="display: flex; flex-direction: column; justify-content: space-between; gap: 15px;">
+                <div>
+                    <div class="config-header" style="margin-bottom: 10px;">👤 Channel Settings</div>
+                    <div class="current-channel-card" style="margin-top: 5px;">
+                        <img id="currentIcon" src="https://ssl.pstatic.net/static/nng/glive/icon/streamer.png">
+                        <div class="channel-info-text">
+                            <div class="label">LIVE CONNECTED</div>
+                            <div id="currentName" class="name">Not Set</div>
+                            <div id="currentIdVisible" class="id">---</div>
+                            <div id="currentIdDisplay" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="add-form" style="margin-top: auto;">
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="searchInput" placeholder="Search Chzzk Streamer..." style="margin-bottom:0;">
+                        <button id="searchBtn" class="action-btn" style="width: 80px; padding:0; height: 50px;">LINK</button>
+                    </div>
+                    <div id="resultArea" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+
+            <!-- Col 2, Row 2: Global Volume Controls -->
+            <div class="config-section">
+                <div class="config-header" style="margin-bottom: 15px;">🔊 Global Volume Controls</div>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Master Volume -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: bold; color: #4CAF50; font-size: 0.9rem;">Master Volume</span>
+                            <span id="volMasterDisplay" style="font-family: monospace; font-size: 0.9rem;">100%</span>
+                        </div>
+                        <input type="range" id="volMaster" min="0" max="1" step="0.01" value="1" style="width: 100%; cursor: pointer; margin: 0;">
+                    </div>
+
+                    <!-- Visual Volume -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: bold; color: #2196F3; font-size: 0.9rem;">Visual Effects</span>
+                            <span id="volVisualDisplay" style="font-family: monospace; font-size: 0.9rem;">100%</span>
+                        </div>
+                        <input type="range" id="volVisual" min="0" max="1" step="0.01" value="1" style="width: 100%; cursor: pointer; margin: 0;">
+                    </div>
+
+                    <!-- SFX Volume -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: bold; color: #FF9800; font-size: 0.9rem;">Sound Effects (Chat)</span>
+                            <span id="volSfxDisplay" style="font-family: monospace; font-size: 0.9rem;">100%</span>
+                        </div>
+                        <input type="range" id="volSfx" min="0" max="1" step="0.01" value="1" style="width: 100%; cursor: pointer; margin: 0;">
+                    </div>
+                </div>
             </div>
         </div>
 
-            <!-- Bottom Section: SFX Catalog Explorer (Full Width) -->
-            <div class="config-section" style="grid-column: span 2; margin-top: 20px;">
+        <!-- Middle Section: 1x2 Grid of Large Mapping Panels -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 10px;">
+            <!-- Sound Effects Section -->
+            <div class="config-section">
+                <div class="config-header">
+                    <span>🔊 Sound Effects Mapping</span>
+                    <button onclick="resetDefaults('sound')" class="secondary" style="width:auto; padding:6px 14px; font-size:0.85rem; margin:0;">Reset All</button>
+                </div>
+                <div id="soundList" class="config-list"></div>
+                <div class="add-form" style="border-top: 1px solid #333; padding-top: 20px;">
+                    <div style="font-size: 0.9rem; color: #888; font-weight: bold; margin-bottom: 5px;">ADD NEW SOUND</div>
+                    <input type="text" id="soundKey" placeholder="Shortcut Keyword (e.g. ㅋㅋㅋ)">
+                    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 15px;">
+                        <button onclick="document.getElementById('soundPicker').click()" class="secondary" style="width: auto; flex-shrink: 0; padding: 14px; margin:0;">📁 Select File</button>
+                        <input type="file" id="soundPicker" accept="audio/*,video/*" style="display: none;">
+                        <div id="selectedFileName" style="flex-grow: 1; font-size: 0.95rem; color: #4CAF50; background: #1a1a1a; padding: 14px; border: 1px solid #333; border-radius: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; font-family: monospace;">No file selected</div>
+                    </div>
+                    <button onclick="addSound()" class="action-btn" style="padding: 16px; margin:0; width: 100%;">REGISTER SOUND SHORTCUT</button>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 5px;">
+                        <button onclick="previewSound()" class="secondary" style="padding: 6px 12px; font-size: 0.8rem; margin:0; width:auto;" title="Test selected file">▶ Test File</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Effects Section -->
+            <div class="config-section">
+                <div class="config-header">
+                    <span>✨ Visual Effects Mapping</span>
+                    <button onclick="resetDefaults('visual')" class="secondary" style="width:auto; padding:6px 14px; font-size:0.85rem; margin:0;">Reset All</button>
+                </div>
+                <div id="visualList" class="config-list"></div>
+                <div class="add-form" style="border-top: 1px solid #333; padding-top: 20px;">
+                    <div style="font-size: 0.9rem; color: #888; font-weight: bold; margin-bottom: 5px;">ADD NEW VISUAL</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                        <input type="text" id="visualKey" placeholder="Keyword (e.g. 해골)" style="margin:0;">
+                        <select id="visualType" style="margin:0;">
+                            <option value="skull">Skull Effect (☠️)</option>
+                            <option value="heart">Heart Effect (❤️)</option>
+                        </select>
+                    </div>
+                    <button onclick="addVisual()" class="action-btn" style="padding: 16px; margin:0; width: 100%;">REGISTER VISUAL SHORTCUT</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: SFX Catalog Explorer (Full Width) -->
+        <div class="config-section" style="margin-top: 10px;">
                 <div class="config-header">
                     <span>📁 SFX Library Explorer</span>
                     <span style="font-size: 0.85rem; font-weight: normal; color: #888;">클릭하여 미리듣고 간편하게 단축어로 등록하세요.</span>
                 </div>
                 
                 <!-- Category Tabs -->
-                <div class="explorer-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap;">
-                    <button onclick="switchCategory('MonsterHunter_Roars')" class="tab-btn active" id="tab-MonsterHunter_Roars" style="padding: 10px 20px; font-size: 0.95rem; cursor: pointer; border-radius: 8px;">🐉 Monster Roars (<span id="count-roars">0</span>)</button>
-                    <button onclick="switchCategory('MonsterHunter_Hunters')" class="tab-btn" id="tab-MonsterHunter_Hunters" style="padding: 10px 20px; font-size: 0.95rem; background-color: #333; cursor: pointer; border-radius: 8px;">⚔️ Hunter Action (<span id="count-hunters">0</span>)</button>
-                    <button onclick="switchCategory('Chzzk_Signatures')" class="tab-btn" id="tab-Chzzk_Signatures" style="padding: 10px 20px; font-size: 0.95rem; background-color: #333; cursor: pointer; border-radius: 8px;">💬 Chat Signatures (<span id="count-signatures">0</span>)</button>
+                <div class="explorer-tabs" id="explorerTabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; flex-wrap: wrap;">
+                    <!-- Dynamically populated -->
                 </div>
 
                 <!-- Search Bar -->
-                <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
                     <input type="text" id="explorerSearch" placeholder="Search sounds by filename..." oninput="filterExplorer()" style="margin-bottom: 0; flex-grow: 1; padding: 14px; background: #1a1a1a; border: 1px solid #444; color: white; border-radius: 10px;">
-                    <button onclick="clearSearch()" class="secondary" style="padding: 12px 20px; flex-shrink: 0; font-weight: normal; font-size: 0.9rem; border-radius: 10px; margin: 0; width: auto;">Clear</button>
+                    <button onclick="clearSearch()" class="secondary" style="padding: 12px 20px; flex-shrink: 0; font-weight: normal; font-size: 0.9rem; border-radius: 10px; margin: 0; width: auto; height: 50px;">Clear</button>
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #aaa; flex-shrink: 0; cursor: pointer; user-select: none; margin-left: 10px;">
+                        <input type="checkbox" id="showExcludedCheckbox" onchange="filterExplorer()" style="cursor: pointer; width: 16px; height: 16px; margin: 0;">
+                        제외된 파일 표시 (<span id="excludedCountLabel">0</span>)
+                    </label>
+                </div>
+
+                <!-- Pending Operations Panel (Initially hidden) -->
+                <div id="deleteQueuePanel" style="display: none; background: #201a1a; border: 1px solid #ff5252; padding: 15px; border-radius: 12px; margin-bottom: 20px; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.2rem;">💾</span>
+                        <div>
+                            <div style="font-weight: bold; color: #ff8a80;">하드디스크 정리 대기열 (<span id="deleteQueueCount">0</span>)</div>
+                            <div style="font-size: 0.8rem; color: #ffcdd2;">배치 파일 실행 없이 [설정 내보내기(config.js)]만 해도 제외 및 이름 변경이 가상으로 완벽 적용됩니다. 디스크 용량을 비우거나 실제 파일명을 변경하고 싶을 때만 이 배치 파일을 다운로드해 실행해 주세요. (선택사항)</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="copyDeleteCommand()" class="secondary" style="border-color: #ff8a80; color: #ff8a80; padding: 10px 16px; font-size: 0.85rem; border-radius: 8px; width: auto; margin: 0; cursor: pointer;">📋 삭제 명령어 복사</button>
+                        <button onclick="downloadDeleteBat()" class="action-btn" style="background-color: #ff5252; color: white; padding: 10px 16px; font-size: 0.85rem; border-radius: 8px; width: auto; margin: 0; cursor: pointer; font-weight: bold;">⚡ 디스크 삭제 배치(.bat) 다운로드</button>
+                        <button onclick="clearDeleteQueue()" class="secondary" style="padding: 10px 16px; font-size: 0.85rem; border-radius: 8px; width: auto; margin: 0; border-color: #555; cursor: pointer;">대기열 비우기</button>
+                    </div>
                 </div>
 
                 <!-- Grid Display -->
-                <div id="explorerGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; max-height: 450px; overflow-y: auto; padding: 12px; border: 1px solid #333; border-radius: 12px; background: #1a1a1a;">
+                <div id="explorerGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; padding: 12px; border: 1px solid #333; border-radius: 12px; background: #1a1a1a;">
                     <!-- Dynamically populated -->
                 </div>
                 
@@ -706,6 +705,77 @@
             volumeConfig = { ...fileVolume, ...localVolume };
         }
 
+        let localExcluded = JSON.parse(localStorage.getItem('HIVE_EXCLUDED_SFX')) || [];
+        let fileExcluded = window.HIVE_EXCLUDED_SFX || [];
+        let excludedSfx = [...new Set([...fileExcluded, ...localExcluded])];
+
+        let localRenames = JSON.parse(localStorage.getItem('HIVE_SFX_RENAMES')) || {};
+        let fileRenames = window.HIVE_SFX_RENAMES || {};
+        let sfxRenames = { ...fileRenames, ...localRenames };
+        let renameQueue = [];
+        function syncRenameQueue() {
+            renameQueue = Object.entries(sfxRenames).map(([virt, phys]) => ({
+                oldPath: phys,
+                newPath: virt
+            }));
+        }
+        syncRenameQueue();
+
+        function resolvePhysicalPath(path) {
+            if (!path) return path;
+            let clean = path.replace(/^\.\//, '');
+            let hasSfxPrefix = false;
+            if (clean.startsWith('SFX/')) {
+                clean = clean.substring(4);
+                hasSfxPrefix = true;
+            }
+            if (sfxRenames[clean]) {
+                const phys = sfxRenames[clean];
+                return hasSfxPrefix ? 'SFX/' + phys : phys;
+            }
+            return path;
+        }
+
+        // Clean up stale virtual renames and exclusions that are already physically applied on disk
+        function sanitizeVirtualMappings() {
+            let changed = false;
+            
+            // 1. Sanitize renames
+            for (let virt in sfxRenames) {
+                const phys = sfxRenames[virt];
+                const virtCat = virt.split('/')[0];
+                const virtFile = virt.split('/').slice(1).join('/');
+                const physCat = phys.split('/')[0];
+                const physFile = phys.split('/').slice(1).join('/');
+                
+                const physExists = sfxCatalog[physCat] && sfxCatalog[physCat].includes(physFile);
+                const virtExists = sfxCatalog[virtCat] && sfxCatalog[virtCat].includes(virtFile);
+                
+                if (!physExists && virtExists) {
+                    delete sfxRenames[virt];
+                    changed = true;
+                }
+            }
+            
+            // 2. Sanitize exclusions
+            const initialLength = excludedSfx.length;
+            excludedSfx = excludedSfx.filter(p => {
+                const parts = p.split('/');
+                const cat = parts[0];
+                const file = parts.slice(1).join('/');
+                const exists = sfxCatalog[cat] && sfxCatalog[cat].includes(file);
+                return exists;
+            });
+            
+            if (excludedSfx.length !== initialLength) {
+                changed = true;
+            }
+            
+            if (changed) {
+                saveConfigs();
+            }
+        }
+
         // Initialize Vol Sliders
         (function initVolumeUI() {
             const setUI = (id, val, dispId) => {
@@ -770,7 +840,7 @@
                         itemDiv.innerHTML = `
                             <div style="display:flex; align-items:center; gap:10px; flex-grow:1; min-width: 200px;">
                                 <span style="min-width:60px;"><b>${key}</b> <span style="font-size:0.8rem; color:#888;">#${idx + 1}</span></span>
-                                <span style="color:#aaa; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px;" title="${itemSrc}">${itemSrc}</span>
+                                <span style="color:#aaa; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:350px;" title="${itemSrc}">${itemSrc}</span>
                             </div>
                             
                             <div style="display:flex; align-items:center; gap:8px;">
@@ -807,7 +877,7 @@
                     div.innerHTML = `
                         <div style="display:flex; align-items:center; gap:10px; flex-grow:1; min-width: 200px;">
                             <span style="min-width:60px;"><b>${k}</b></span>
-                            <span style="color:#aaa; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:150px;" title="${src}">${src}</span>
+                            <span style="color:#aaa; font-size:0.9rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:350px;" title="${src}">${src}</span>
                         </div>
                         
                         <div style="display:flex; align-items:center; gap:8px;">
@@ -831,7 +901,13 @@
             Object.entries(visualConfig).forEach(([key, val]) => {
                 const div = document.createElement('div');
                 div.className = 'config-item';
-                div.innerHTML = `<span><b>${key}</b> : ${val}</span><button class="delete-btn" onclick="deleteVisual('${key}')">Del</button>`;
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px; flex-grow:1;">
+                        <span><b>${key}</b></span>
+                        <span style="color:#aaa; font-size:0.9rem;">${val}</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteVisual('${key}')">Del</button>
+                `;
                 vList.appendChild(div);
             });
         }
@@ -875,7 +951,8 @@
             }
 
             if (!src.startsWith("blob:") && !src.startsWith("http")) {
-                src = "SFX/" + src;
+                const physicalPath = resolvePhysicalPath(src);
+                src = physicalPath.startsWith("SFX/") ? physicalPath : "SFX/" + physicalPath;
             }
 
             const audio = new Audio(src);
@@ -940,6 +1017,8 @@
             localStorage.setItem('HIVE_SOUND_CONFIG', JSON.stringify(soundConfig));
             localStorage.setItem('HIVE_VISUAL_CONFIG', JSON.stringify(visualConfig));
             localStorage.setItem('HIVE_VOLUME_CONFIG', JSON.stringify(volumeConfig));
+            localStorage.setItem('HIVE_EXCLUDED_SFX', JSON.stringify(excludedSfx));
+            localStorage.setItem('HIVE_SFX_RENAMES', JSON.stringify(sfxRenames));
             renderLists();
             sendCommand('updateConfig', { soundConfig, visualConfig, volumeConfig });
         }
@@ -980,7 +1059,11 @@ window.WELCOME_MESSAGES = ${JSON.stringify(welcomeMessages, null, 4)};
 
 window.HIVE_SOUND_CONFIG = ${JSON.stringify(soundConfig, null, 4)};
 
-window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
+window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};
+
+window.HIVE_EXCLUDED_SFX = ${JSON.stringify(excludedSfx, null, 4)};
+
+window.HIVE_SFX_RENAMES = ${JSON.stringify(sfxRenames, null, 4)};`;
 
             const blob = new Blob([code], { type: 'text/javascript' });
             const url = URL.createObjectURL(blob);
@@ -1049,49 +1132,88 @@ window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
         document.getElementById('soundToggle').onchange = (e) => sendCommand('setSound', { enabled: e.target.checked });
         function sendCommand(type, payload = {}) { bc.postMessage({ type, ...payload, timestamp: Date.now() }); }
         // --- SFX Library Explorer Logic ---
-        let sfxCatalog = {
-            MonsterHunter_Roars: [],
-            MonsterHunter_Hunters: [],
-            Chzzk_Signatures: []
-        };
-        let currentCategory = 'MonsterHunter_Roars';
+        let sfxCatalog = {};
+        let currentCategory = '';
         let explorerFilteredList = [];
         let explorerLoadedCount = 30;
 
         async function initExplorer() {
             try {
-                const res = await fetch('SFX/sfx_catalog.json');
-                if (res.ok) {
-                    sfxCatalog = await res.json();
-                    
-                    // Update category counts
-                    document.getElementById('count-roars').innerText = sfxCatalog.MonsterHunter_Roars.length;
-                    document.getElementById('count-hunters').innerText = sfxCatalog.MonsterHunter_Hunters.length;
-                    document.getElementById('count-signatures').innerText = sfxCatalog.Chzzk_Signatures.length;
-                    
+                if (window.SFX_CATALOG) {
+                    sfxCatalog = window.SFX_CATALOG;
+                } else {
+                    const res = await fetch('SFX/sfx_catalog.json');
+                    if (res.ok) {
+                        sfxCatalog = await res.json();
+                    } else {
+                        throw new Error("Failed to load catalog via fetch");
+                    }
+                }
+                
+                sanitizeVirtualMappings();
+                syncRenameQueue();
+                updateDeleteQueueUI();
+                
+                const categories = Object.keys(sfxCatalog);
+                if (categories.length > 0) {
+                    currentCategory = categories[0];
+                    renderTabs();
                     filterExplorer();
                 } else {
-                    console.error("Failed to load SFX catalog.");
-                    document.getElementById('explorerGrid').innerHTML = '<div style="color: #ff5252; padding: 20px;">Failed to load SFX catalog. Make sure SFX/sfx_catalog.json exists.</div>';
+                    document.getElementById('explorerGrid').innerHTML = '<div style="color: #aaa; padding: 20px; text-align: center;">No categories found in catalog.</div>';
                 }
             } catch(e) {
                 console.error("Error initializing explorer:", e);
-                document.getElementById('explorerGrid').innerHTML = '<div style="color: #ff5252; padding: 20px;">Error loading catalog.</div>';
+                document.getElementById('explorerGrid').innerHTML = '<div style="color: #ff5252; padding: 20px;">Error loading catalog. Please run "node scripts/generate_sfx_catalog.js" to create the catalog.</div>';
             }
+        }
+
+        function renderTabs() {
+            const tabsContainer = document.getElementById('explorerTabs');
+            tabsContainer.innerHTML = '';
+            
+            // Map folder names to friendly names and emojis for aesthetics
+            const categoryMeta = {
+                'MonsterHunter_Roars': { label: 'Monster Roars', emoji: '🐉' },
+                'MonsterHunter_Hunters': { label: 'Hunter Action', emoji: '⚔️' },
+                'MonsterHunter_Extracted_SFX': { label: 'MH Extracted SFX', emoji: '🍖' },
+                'Chzzk_Signatures': { label: 'Chat Signatures', emoji: '💬' }
+            };
+
+            Object.keys(sfxCatalog).forEach(cat => {
+                const count = sfxCatalog[cat].length;
+                const meta = categoryMeta[cat] || { label: cat.replace(/_/g, ' '), emoji: '🎵' };
+                
+                const btn = document.createElement('button');
+                btn.className = `tab-btn ${cat === currentCategory ? 'active' : ''}`;
+                btn.id = `tab-${cat}`;
+                btn.onclick = () => switchCategory(cat);
+                btn.style.cssText = `padding: 10px 20px; font-size: 0.95rem; cursor: pointer; border-radius: 8px; margin: 0; border: none; transition: all 0.2s;`;
+                if (cat !== currentCategory) {
+                    btn.style.backgroundColor = '#333';
+                    btn.style.color = '#ccc';
+                }
+                
+                btn.innerHTML = `${meta.emoji} ${meta.label} (<span id="count-${cat}">${count}</span>)`;
+                tabsContainer.appendChild(btn);
+            });
         }
 
         function switchCategory(category) {
             currentCategory = category;
             
-            // Toggle active class on tab buttons
-            ['MonsterHunter_Roars', 'MonsterHunter_Hunters', 'Chzzk_Signatures'].forEach(cat => {
+            // Toggle active class on tab buttons dynamically
+            Object.keys(sfxCatalog).forEach(cat => {
                 const btn = document.getElementById('tab-' + cat);
+                if (!btn) return;
                 if (cat === category) {
                     btn.classList.add('active');
                     btn.style.backgroundColor = ''; // Use active class background
+                    btn.style.color = '';
                 } else {
                     btn.classList.remove('active');
                     btn.style.backgroundColor = '#333';
+                    btn.style.color = '#ccc';
                 }
             });
             
@@ -1101,10 +1223,26 @@ window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
 
         function filterExplorer() {
             const query = document.getElementById('explorerSearch').value.trim().toLowerCase();
-            const list = sfxCatalog[currentCategory] || [];
+            const showExcluded = document.getElementById('showExcludedCheckbox').checked;
+            
+            let list = sfxCatalog[currentCategory] || [];
+            
+            // Update excluded count label for the current category
+            const currentCatExcludes = excludedSfx.filter(p => p.startsWith(currentCategory + '/'));
+            document.getElementById('excludedCountLabel').innerText = currentCatExcludes.length;
+            
+            // Filter by exclusion list
+            if (!showExcluded) {
+                list = list.filter(filename => !excludedSfx.includes(`${currentCategory}/${filename}`));
+            }
             
             if (query) {
-                explorerFilteredList = list.filter(filename => filename.toLowerCase().includes(query));
+                explorerFilteredList = list.filter(filename => {
+                    const physicalPath = `${currentCategory}/${filename}`;
+                    const virtualPath = Object.keys(sfxRenames).find(virt => sfxRenames[virt] === physicalPath) || physicalPath;
+                    const displayName = virtualPath.split('/').pop();
+                    return displayName.toLowerCase().includes(query) || filename.toLowerCase().includes(query);
+                });
             } else {
                 explorerFilteredList = [...list];
             }
@@ -1130,10 +1268,30 @@ window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
                 return;
             }
             
+            const typeLabelMeta = {
+                'MonsterHunter_Roars': 'Monster Roar',
+                'MonsterHunter_Hunters': 'Hunter Action',
+                'MonsterHunter_Extracted_SFX': 'MH Extracted',
+                'Chzzk_Signatures': 'Chat Signature'
+            };
+            const displayType = typeLabelMeta[currentCategory] || currentCategory.replace(/_/g, ' ');
+            
             toRender.forEach(filename => {
+                const relativePath = `${currentCategory}/${filename}`;
+                const isExcluded = excludedSfx.includes(relativePath);
+                const pendingRename = renameQueue.find(r => r.oldPath === relativePath);
+                
                 const card = document.createElement('div');
                 card.className = 'sound-card';
-                card.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 12px 15px; border-radius: 10px; border: 1px solid #333; transition: all 0.2s;';
+                
+                let borderStyle = 'border: 1px solid #333;';
+                if (isExcluded) {
+                    borderStyle = 'border: 1px solid #ff5252;';
+                } else if (pendingRename) {
+                    borderStyle = 'border: 1px solid #ffeb3b;';
+                }
+                
+                card.style.cssText = `display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 12px 15px; border-radius: 10px; ${borderStyle} transition: all 0.2s;`;
                 
                 // Truncate clean display name
                 let displayName = filename;
@@ -1141,26 +1299,53 @@ window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
                     displayName = filename.substring(0, 22) + '...';
                 }
                 
+                let titleHtml = `<span style="font-size: 0.95rem; font-weight: 600; color: #fff;" title="${filename}">${displayName}</span>`;
+                if (isExcluded) {
+                    titleHtml = `
+                        <span style="font-size: 0.95rem; font-weight: 600; color: #ff8a80; text-decoration: line-through;" title="${filename} (목록에서 제외됨)">
+                            ${displayName} (제외됨)
+                        </span>
+                    `;
+                } else if (pendingRename) {
+                    const newFilename = pendingRename.newPath.split('/').pop();
+                    let truncatedNewName = newFilename;
+                    if (newFilename.length > 22) {
+                        truncatedNewName = newFilename.substring(0, 19) + '...';
+                    }
+                    titleHtml = `
+                        <span style="font-size: 0.95rem; font-weight: 600; color: #ffeb3b; display: flex; flex-direction: column;" title="${filename} ➔ ${newFilename}">
+                            <span style="text-decoration: line-through; color: #888; font-size: 0.8rem;">${displayName}</span>
+                            <span>➔ ${truncatedNewName}</span>
+                        </span>
+                    `;
+                }
+                
+                const trashBtnStyle = isExcluded
+                    ? 'border-color: #ff5252; background-color: #ff5252; color: white;'
+                    : 'border-color: #ff5252; color: #ff5252;';
+                
                 card.innerHTML = `
                     <div style="display: flex; flex-direction: column; overflow: hidden; margin-right: 10px; flex-grow: 1;">
-                        <span style="font-size: 0.95rem; font-weight: 600; color: #fff;" title="${filename}">${displayName}</span>
-                        <span style="font-size: 0.8rem; color: #888;">${currentCategory === 'MonsterHunter_Roars' ? 'Monster Roar' : currentCategory === 'MonsterHunter_Hunters' ? 'Hunter Action' : 'Chat Signature'}</span>
+                        ${titleHtml}
+                        <span style="font-size: 0.8rem; color: #888;">${displayType}</span>
                     </div>
-                    <div style="display: flex; gap: 8px; flex-shrink: 0;">
-                        <button onclick="playExplorerAudio('${currentCategory}/${filename}')" class="secondary" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; width: auto; font-weight: normal; margin: 0;">▶</button>
-                        <button onclick="assignExplorerSound('${currentCategory}/${filename}')" class="action-btn" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; background-color: #2196F3; cursor: pointer; width: auto; font-weight: normal; margin: 0;">Assign</button>
+                    <div style="display: flex; gap: 8px; flex-shrink: 0; align-items: center;">
+                        <button onclick="playExplorerAudio('${relativePath}')" class="secondary" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; cursor: pointer; width: auto; font-weight: normal; margin: 0;" title="미리듣기" ${isExcluded ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>▶</button>
+                        <button onclick="assignExplorerSound('${relativePath}')" class="action-btn" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; background-color: #2196F3; cursor: pointer; width: auto; font-weight: normal; margin: 0;" title="단축어 지정" ${isExcluded ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>Assign</button>
+                        <button onclick="renameSfxFile('${relativePath}', this)" class="secondary" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; border-color: #ffeb3b; color: #ffeb3b; cursor: pointer; width: auto; font-weight: normal; margin: 0;" title="이름 변경" ${isExcluded ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>✏️</button>
+                        <button onclick="toggleExcludeSfx('${relativePath}', this)" class="secondary" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; ${trashBtnStyle} cursor: pointer; width: auto; font-weight: normal; margin: 0;" title="${isExcluded ? '제외 취소(목록 복구)' : '목록에서 제외'}">🗑️</button>
                     </div>
                 `;
                 
                 // Add hover style effect via class
                 card.addEventListener('mouseenter', () => {
-                    card.style.borderColor = '#2196F3';
+                    card.style.borderColor = isExcluded ? '#ff5252' : (pendingRename ? '#ffeb3b' : '#2196F3');
                     card.style.background = '#2b2b2b';
                     card.style.transform = 'translateY(-2px)';
                     card.style.boxShadow = '0 4px 10px rgba(0,0,0,0.3)';
                 });
                 card.addEventListener('mouseleave', () => {
-                    card.style.borderColor = '#333';
+                    card.style.borderColor = isExcluded ? '#ff5252' : (pendingRename ? '#ffeb3b' : '#333');
                     card.style.background = '#252525';
                     card.style.transform = 'translateY(0)';
                     card.style.boxShadow = 'none';
@@ -1183,7 +1368,8 @@ window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
         }
 
         function playExplorerAudio(relativePath) {
-            const audio = new Audio("SFX/" + relativePath);
+            const physicalPath = resolvePhysicalPath(relativePath);
+            const audio = new Audio(physicalPath.startsWith("SFX/") ? physicalPath : "SFX/" + physicalPath);
             const sfxVol = parseFloat(document.getElementById('volSfx').value);
             const masterVol = parseFloat(document.getElementById('volMaster').value);
             audio.volume = sfxVol * masterVol;
@@ -1191,25 +1377,210 @@ window.HIVE_VISUAL_CONFIG = ${JSON.stringify(visualConfig, null, 4)};`;
         }
 
         function assignExplorerSound(relativePath) {
+            // Check if there is a pending rename for this path
+            const pendingRename = renameQueue.find(r => r.oldPath === relativePath);
+            const pathForForm = pendingRename ? pendingRename.newPath : relativePath;
+
             // Assign file relative path directly to register form
-            currentlyPickedFile = relativePath;
-            document.getElementById('selectedFileName').innerText = relativePath;
+            currentlyPickedFile = pathForForm;
+            document.getElementById('selectedFileName').innerText = pathForForm;
             
             // Highlight keyword input field
             const keyInput = document.getElementById('soundKey');
             keyInput.focus();
             
-            // Auto suggest a keyword if it is in Chzzk_Signatures (strip subfolder and extension)
-            if (relativePath.startsWith('Chzzk_Signatures/')) {
-                const rawName = relativePath.split('/').pop().replace(/\.(mp3|wav|ogg|m4a|aac)$/i, '');
-                // Remove numbers from end (e.g. ㅋㅋㅋ1 -> ㅋㅋㅋ)
-                const suggestedKey = rawName.replace(/\d+$/, '');
-                keyInput.value = suggestedKey;
-            } else {
-                keyInput.value = '';
-            }
+            // Auto suggest a keyword based on destination filename (strip subfolder and extension)
+            const rawName = pathForForm.split('/').pop().replace(/\.(mp3|wav|ogg|m4a|aac)$/i, '');
+            // Remove numbers from end (e.g. ㅋㅋㅋ1 -> ㅋㅋㅋ)
+            const suggestedKey = rawName.replace(/\d+$/, '');
+            keyInput.value = suggestedKey;
             
             statusDiv.innerHTML = `<span style="color:#2196F3;">Assigned sound to form. Please adjust the Keyword and click Register.</span>`;
+        }
+
+        // --- Exclusion & Rename Queue Logic ---
+
+        function toggleExcludeSfx(relativePath, btnEl) {
+            // Remove from rename queue/map if it was there
+            const keyToDelete = Object.keys(sfxRenames).find(k => sfxRenames[k] === relativePath);
+            if (keyToDelete) delete sfxRenames[keyToDelete];
+            syncRenameQueue();
+            
+            const index = excludedSfx.indexOf(relativePath);
+            if (index !== -1) {
+                excludedSfx.splice(index, 1);
+            } else {
+                excludedSfx.push(relativePath);
+            }
+            
+            saveConfigs();
+            filterExplorer();
+            updateDeleteQueueUI();
+        }
+
+        function renameSfxFile(relativePath, btnEl) {
+            const parts = relativePath.split('/');
+            const category = parts[0];
+            const originalFilename = parts[1];
+            
+            const extIndex = originalFilename.lastIndexOf('.');
+            const nameWithoutExt = extIndex !== -1 ? originalFilename.substring(0, extIndex) : originalFilename;
+            const ext = extIndex !== -1 ? originalFilename.substring(extIndex) : '';
+            
+            const currentRename = renameQueue.find(r => r.oldPath === relativePath);
+            const currentNameVal = currentRename ? currentRename.newPath.split('/').pop().replace(/\.[^/.]+$/, "") : nameWithoutExt;
+
+            const newName = prompt(`새로운 파일명을 입력하세요 (확장자 ${ext} 자동 유지):`, currentNameVal);
+            if (newName === null) return; // Cancelled
+            
+            const trimmedNewName = newName.trim();
+            if (!trimmedNewName) {
+                alert("올바른 파일명을 입력해주세요.");
+                return;
+            }
+            
+            if (/[\\/:*?"<>|]/.test(trimmedNewName)) {
+                alert("파일명에 사용할 수 없는 특수문자(\\ / : * ? \" < > |)가 포함되어 있습니다.");
+                return;
+            }
+            
+            const newFilename = trimmedNewName + ext;
+            const newRelativePath = `${category}/${newFilename}`;
+            
+            if (newRelativePath === relativePath) {
+                // Restore original if new name equals original
+                const keyToDelete = Object.keys(sfxRenames).find(k => sfxRenames[k] === relativePath);
+                if (keyToDelete) delete sfxRenames[keyToDelete];
+            } else {
+                // Delete old mapping if exists
+                const keyToDelete = Object.keys(sfxRenames).find(k => sfxRenames[k] === relativePath);
+                if (keyToDelete) delete sfxRenames[keyToDelete];
+                
+                sfxRenames[newRelativePath] = relativePath;
+            }
+            
+            syncRenameQueue();
+            saveConfigs();
+            updateDeleteQueueUI();
+            renderExplorerGrid();
+        }
+
+        function updateDeleteQueueUI() {
+            const panel = document.getElementById('deleteQueuePanel');
+            const countEl = document.getElementById('deleteQueueCount');
+            const totalOps = excludedSfx.length + renameQueue.length;
+            
+            if (totalOps > 0) {
+                panel.style.display = 'flex';
+                countEl.innerHTML = `🗑️ 제외된 파일(디스크 삭제가능): <b>${excludedSfx.length}</b>개 / ✏️ 이름 변경 대기: <b>${renameQueue.length}</b>개`;
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        function clearDeleteQueue() {
+            if (confirm("가상 이름 변경 예약을 모두 초기화하고 원본 이름으로 되돌리시겠습니까?\n(제외된 파일 목록은 그대로 보존됩니다.)")) {
+                sfxRenames = {};
+                syncRenameQueue();
+                saveConfigs();
+                renderExplorerGrid();
+                updateDeleteQueueUI();
+            }
+        }
+
+        function copyDeleteCommand() {
+            const totalOps = excludedSfx.length + renameQueue.length;
+            if (totalOps === 0) return;
+            
+            let cmdParts = [];
+            
+            if (excludedSfx.length > 0) {
+                const deletePaths = excludedSfx.map(p => `SFX/${p}`);
+                cmdParts.push(`${JSON.stringify(deletePaths)}.forEach(f => fs.existsSync(f) && fs.unlinkSync(f));`);
+            }
+            
+            if (renameQueue.length > 0) {
+                renameQueue.forEach(op => {
+                    cmdParts.push(`fs.existsSync('SFX/${op.oldPath}') && fs.renameSync('SFX/${op.oldPath}', 'SFX/${op.newPath}');`);
+                });
+            }
+            
+            // Clean up excludedSfx list after deletion
+            if (excludedSfx.length > 0) {
+                cmdParts.push(`console.log('Clearing web exclusion list...');`);
+            }
+            
+            const cmd = `node -e "const fs=require('fs'); ${cmdParts.join(' ')} console.log('Successfully applied file operations.'); require('./scripts/generate_sfx_catalog.js');"`;
+            
+            navigator.clipboard.writeText(cmd).then(() => {
+                alert("이름 변경 및 디스크 완전 삭제 명령어가 클립보드에 복사되었습니다!\n\n터미널(Terminal/PowerShell)에 붙여넣고 엔터를 치면 즉시 적용됩니다.");
+            }).catch(err => {
+                console.error("Clipboard copy failed:", err);
+                alert("명령어 복사에 실패했습니다. 개발자 도구 콘솔에서 복사해주세요.");
+            });
+        }
+
+        function downloadDeleteBat() {
+            const totalOps = excludedSfx.length + renameQueue.length;
+            if (totalOps === 0) return;
+            
+            let lines = [
+                "@echo off",
+                "chcp 65001 > nul",
+                "echo ==========================================",
+                "echo  BubbleChat SFX Batch File Operations",
+                "echo ==========================================",
+                "echo Processing operations...",
+                ""
+            ];
+            
+            if (excludedSfx.length > 0) {
+                lines.push("echo Deleting excluded files from disk...");
+                excludedSfx.forEach(p => {
+                    const winPath = `SFX\\${p.replace(/\//g, '\\')}`;
+                    lines.push(`if exist "${winPath}" (`);
+                    lines.push(`  del /f /q "${winPath}"`);
+                    lines.push(`  echo Deleted: ${winPath}`);
+                    lines.push(`)`);
+                });
+                lines.push("");
+            }
+            
+            if (renameQueue.length > 0) {
+                lines.push("echo Renaming files...");
+                renameQueue.forEach(op => {
+                    const oldWinPath = `SFX\\${op.oldPath.replace(/\//g, '\\')}`;
+                    const newWinPath = `SFX\\${op.newPath.replace(/\//g, '\\')}`;
+                    lines.push(`if exist "${oldWinPath}" (`);
+                    lines.push(`  move /y "${oldWinPath}" "${newWinPath}"`);
+                    lines.push(`  echo Renamed: ${oldWinPath} to ${newWinPath}`);
+                    lines.push(`)`);
+                });
+                lines.push("");
+            }
+            
+            lines.push("echo.");
+            lines.push("echo Rebuilding catalog...");
+            lines.push("node scripts/generate_sfx_catalog.js");
+            lines.push("echo.");
+            lines.push("echo Operations complete. This script will now self-destruct.");
+            lines.push("pause");
+            lines.push(`del "%~f0"`);
+            
+            const content = lines.join("\r\n");
+            const blob = new Blob([content], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'apply_sfx_changes.bat';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            statusDiv.innerHTML = `<span style="color:#ffd54f; font-weight:bold;">apply_sfx_changes.bat 다운로드 완료! 프로젝트 루트 폴더에서 실행해주세요.</span>`;
+            alert("apply_sfx_changes.bat 파일이 다운로드되었습니다!\n\n해당 파일을 BubbleChat 프로젝트 루트 폴더에 옮긴 뒤, 더블 클릭하여 실행해 주세요. 실행 후 파일은 자동으로 삭제됩니다.");
         }
 
         // Initialize explorer on load

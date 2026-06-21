@@ -2,8 +2,9 @@
 // [Class 4] Chat Renderer (DOM & Animation)
 // ==========================================
 class ChatRenderer {
-    constructor(eventBus) {
+    constructor(eventBus, audioManager = null) {
         this.eventBus = eventBus;
+        this.audioManager = audioManager;
         this.container = document.getElementById('chat');
         this.boxPos = 0;
         this.activeBubbles = [];
@@ -57,56 +58,42 @@ class ChatRenderer {
             });
         }
 
-        // [New] Check for CMC video commands starting with @
-        const CMC_FILES = window.HIVE_CMC_FILES || [];
-
-        const findBestMatch = (term) => {
-            term = term.toLowerCase().trim();
-            // 1. Exact match
-            let match = CMC_FILES.find(f => f.toLowerCase() === term);
-            if (match) return match;
-            // 2. Starts with / Ends with / Includes
-            match = CMC_FILES.find(f => f.toLowerCase().startsWith(term));
-            if (match) return match;
-            match = CMC_FILES.find(f => term.startsWith(f.toLowerCase()));
-            if (match) return match;
-            match = CMC_FILES.find(f => f.toLowerCase().includes(term));
-            if (match) return match;
-            match = CMC_FILES.find(f => term.includes(f.toLowerCase()));
-            if (match) return match;
-            // 3. Common substring of length >= 2
-            match = CMC_FILES.find(f => {
-                const fLower = f.toLowerCase();
-                for (let len = Math.min(fLower.length, term.length); len >= 2; len--) {
-                    for (let i = 0; i <= fLower.length - len; i++) {
-                        const sub = fLower.substring(i, i + len);
-                        if (term.includes(sub)) return true;
-                    }
-                }
-                return false;
-            });
-            return match || null;
-        };
-
-        const videoQueue = [];
-        if (originalMessage) {
-            const tokens = originalMessage.trim().split(/\s+/);
-            for (const token of tokens) {
-                if (token.startsWith('@') && token.length > 1) {
-                    const term = token.substring(1);
-                    const matchedFile = findBestMatch(term);
-                    if (matchedFile) {
-                        videoQueue.push(matchedFile);
-                        if (videoQueue.length >= 5) break;
-                    }
-                }
-            }
-        }
+        // [New] Check for CMC video commands starting with #
+        const videoQueue = typeof findCMCVideosInMessage === 'function' ? findCMCVideosInMessage(originalMessage) : [];
 
         let usesSlot = true;
         let timeout = 10000;
 
         if (videoQueue.length > 0) {
+            // Build the unified queue of video commands and SFX keywords in the exact order they appear
+            const sfxMatches = (this.audioManager && typeof this.audioManager.getSFXSequence === 'function')
+                ? this.audioManager.getSFXSequence(originalMessage)
+                : [];
+            
+            const sfxList = sfxMatches.map(match => {
+                const originalIndex = typeof mapIndexSpaceRemovedToOriginal === 'function'
+                    ? mapIndexSpaceRemovedToOriginal(match.startIndex, originalMessage)
+                    : match.startIndex;
+                return {
+                    type: 'audio',
+                    sound: match.sound,
+                    startIndex: originalIndex
+                };
+            });
+
+            // Filter out any SFX matches that are actually part of a video command token (e.g. "오호" inside "#오호")
+            const filteredSfxList = sfxList.filter(sfx => {
+                return !videoQueue.some(vid => {
+                    return sfx.startIndex >= vid.startIndex && sfx.startIndex < vid.startIndex + vid.length;
+                });
+            });
+
+            const unifiedQueue = [...videoQueue, ...filteredSfxList];
+            unifiedQueue.sort((a, b) => a.startIndex - b.startIndex);
+
+            // Track active video count
+            window._activeVideoCount = (window._activeVideoCount || 0) + 1;
+
             // Override max-height limits to prevent video from clipping
             chatBox.style.maxHeight = 'none';
             elements.chatLine.style.maxHeight = 'none';
@@ -128,43 +115,115 @@ class ChatRenderer {
             video.style.marginTop = '4px';
             video.playsInline = true;
 
+            // Apply volume configuration to native video element
+            const volConfig = window.HIVE_VOLUME_CONFIG || { master: 1.0, visual: 1.0 };
+            const masterVol = typeof volConfig.master === 'number' ? volConfig.master : 1.0;
+            const visualVol = typeof volConfig.visual === 'number' ? volConfig.visual : 1.0;
+            video.volume = Math.min(1.0, Math.max(0, masterVol * visualVol));
+
             // Clear standard text timeout
             timeout = null;
 
-            // Safety net: force remove after a timeout based on video count
-            let safetyTimeout = setTimeout(() => {
+            let hasCleanedUp = false;
+            const cleanupVideoBubble = () => {
+                if (hasCleanedUp) return;
+                hasCleanedUp = true;
+                clearTimeout(safetyTimeout);
+
+                // Decrement active video count
+                window._activeVideoCount = Math.max(0, (window._activeVideoCount || 0) - 1);
+
+                // If no more videos are playing, trigger event to process queue
+                if (window._activeVideoCount === 0) {
+                    if (this.eventBus) {
+                        this.eventBus.emit('chat:videoFinished');
+                    }
+                }
+
                 if (chatBox.parentElement) {
                     chatBox.classList.remove('visible');
                     setTimeout(() => chatBox.remove(), 1000);
                 }
-            }, Math.max(30000, videoQueue.length * 15000));
+            };
 
+            // Safety net: force remove after a timeout based on video count
+            let safetyTimeout = setTimeout(() => {
+                cleanupVideoBubble();
+            }, Math.max(30000, unifiedQueue.length * 15000));
+
+            let hasTriggeredNext = false;
             let currentIdx = 0;
-            const playNext = () => {
-                if (currentIdx >= videoQueue.length) {
-                    clearTimeout(safetyTimeout);
-                    if (chatBox.parentElement) {
-                        chatBox.classList.remove('visible');
-                        setTimeout(() => chatBox.remove(), 1000);
-                    }
+            const playNext = async () => {
+                if (currentIdx >= unifiedQueue.length) {
+                    cleanupVideoBubble();
                     return;
                 }
 
-                const fileName = videoQueue[currentIdx];
-                video.src = `AI CMC/${encodeURIComponent(fileName)}.mp4`;
-                video.play().catch(e => {
-                    console.error("CMC video play failed, skipping:", e);
-                    currentIdx++;
-                    playNext();
-                });
+                hasTriggeredNext = false;
+                const item = unifiedQueue[currentIdx];
                 currentIdx++;
+
+                // Stop and unload previous video to prevent race conditions and overlapping audio
+                try {
+                    video.pause();
+                    video.removeAttribute('src');
+                    video.load();
+                } catch (e) {}
+
+                if (item.type === 'video') {
+                    video.style.display = 'block';
+                    video.src = `AI CMC/${encodeURIComponent(item.name)}.mp4`;
+                    video.play().catch(e => {
+                        console.error("CMC video play failed, skipping:", e);
+                        if (!hasTriggeredNext) {
+                            hasTriggeredNext = true;
+                            playNext();
+                        }
+                    });
+                } else if (item.type === 'audio') {
+                    // Hide video player so we don't see a frozen frame
+                    video.style.display = 'none';
+
+                    if (this.audioManager) {
+                        try {
+                            if (typeof this.audioManager._updateCompressorSettings === 'function') {
+                                this.audioManager._updateCompressorSettings();
+                            }
+                            await this.audioManager.playSound(item.sound, { force: true, type: 'sfx' });
+                        } catch (e) {
+                            console.error("AudioManager.playSound failed, skipping:", e);
+                        }
+                    }
+
+                    if (!hasTriggeredNext) {
+                        hasTriggeredNext = true;
+                        playNext();
+                    }
+                }
             };
 
-            video.addEventListener('ended', playNext);
+            video.addEventListener('ended', () => {
+                if (!hasTriggeredNext) {
+                    hasTriggeredNext = true;
+                    playNext();
+                }
+            });
+
+            video.addEventListener('timeupdate', () => {
+                if (!hasTriggeredNext && video.duration && video.duration > 0.5) {
+                    if (video.currentTime >= video.duration - 0.5) {
+                        hasTriggeredNext = true;
+                        playNext();
+                    }
+                }
+            });
+
             video.addEventListener('error', (e) => {
                 console.error("CMC video error, skipping:", e);
-                currentIdx++;
-                playNext();
+                if (!hasTriggeredNext) {
+                    hasTriggeredNext = true;
+                    playNext();
+                }
             });
 
             messageEle.appendChild(video);

@@ -62,19 +62,19 @@ class HuntRenderer {
         let monsterShowcaseHTML = '';
         if (consecutiveTotal > 1) {
             monsterShowcaseHTML = `
-                <div class="game-hunt-monster-showcase" style="margin-bottom: 6px; background: transparent; border: none; box-shadow: none; padding: 0;">
-                    <div style="display:flex; justify-content:center; gap:15px; align-items:center; width: 100%;">
+                <div class="game-hunt-monster-showcase" style="margin-bottom: 16px; background: transparent; border: none; box-shadow: none; padding: 0;">
+                    <div style="display:flex; justify-content:center; gap:25px; align-items:center; width: 100%;">
                         ${consecutiveQueue.map((m, idx) => {
                             const isCurrent = idx === currentConsecutiveIndex;
-                            const borderStyle = isCurrent ? '3px solid #c98534' : '2px dashed #444';
+                            const borderStyle = isCurrent ? '4px solid #c98534' : '2px dashed #444';
                             const shadowStyle = isCurrent ? '0 0 20px rgba(201, 133, 52,0.5)' : 'none';
                             const opacityStyle = isCurrent ? '1.0' : '0.5';
                             return `
-                            <div style="display:flex; flex-direction:column; align-items:center; position:relative; width: 80px; opacity: ${opacityStyle};">
-                                <img class="game-hunt-monster-img" src="img/monsters/${m.filename}" onerror="this.src='img/monsters/rathalos.png';" style="width:70px; height:70px; border-radius:12px; border:${borderStyle}; box-shadow:${shadowStyle}; background:rgba(0,0,0,0.6);" />
-                                <div style="font-size:0.9rem; font-weight:bold; color:${isCurrent ? '#c98534' : '#888'}; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:85px;">${m.nameKO}</div>
+                            <div style="display:flex; flex-direction:column; align-items:center; position:relative; width: 125px; opacity: ${opacityStyle};">
+                                <img class="game-hunt-monster-img" src="img/monsters/${m.filename}" onerror="this.src='img/monsters/rathalos.png';" style="width:115px; height:115px; border-radius:18px; border:${borderStyle}; box-shadow:${shadowStyle}; background:rgba(0,0,0,0.6);" />
+                                <div style="font-size:1.15rem; font-weight:bold; color:${isCurrent ? '#c98534' : '#888'}; margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:125px;">${m.nameKO}</div>
                             </div>
-                            ${idx < consecutiveQueue.length - 1 ? '<div style="font-size:1.5rem; color:#c98534; font-weight:bold; opacity:0.3; margin: 0 2px;">→</div>' : ''}
+                            ${idx < consecutiveQueue.length - 1 ? '<div style="font-size:2.2rem; color:#c98534; font-weight:bold; opacity:0.3; margin: 0 6px;">→</div>' : ''}
                             `;
                         }).join('')}
                     </div>
@@ -82,8 +82,8 @@ class HuntRenderer {
             `;
         } else {
             monsterShowcaseHTML = `
-                <div class="game-hunt-monster-showcase" style="margin-bottom: 4px; background: transparent; border: none; box-shadow: none; padding: 0;">
-                    <img class="game-hunt-monster-img" src="img/monsters/${selectedMonster.filename}" onerror="this.src='img/monsters/rathalos.png';" style="width: 180px; height: 180px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8)); transition: transform 0.3s ease;" />
+                <div class="game-hunt-monster-showcase" style="margin-bottom: 16px; background: transparent; border: none; box-shadow: none; padding: 0;">
+                    <img class="game-hunt-monster-img" src="img/monsters/${selectedMonster.filename}" onerror="this.src='img/monsters/rathalos.png';" style="width: 260px; height: 260px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8)); transition: transform 0.3s ease;" />
                 </div>
             `;
         }
@@ -112,29 +112,29 @@ class HuntRenderer {
                         return selectedWeapons.map(w => {
                             const p = pMap[w.personality] || pMap.normal;
                             return `
-                            <div class="game-hunt-weapon-card" id="hunt-opt-${w.index}" style="position: relative; padding: 18px; padding-bottom: 12px;">
+                            <div class="game-hunt-weapon-card" id="hunt-opt-${w.index}" style="position: relative; padding: 24px 20px 18px;">
                                 <div class="lobby-prep-bubble" id="prep-bubble-${w.index}">🍳 식사 버프 준비 중...</div>
                                 <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); border: 2.5px solid #c98534; border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; font-weight: bold; color: #c98534; box-shadow: 0 0 8px rgba(201, 133, 52, 0.4); z-index: 5;">${w.index + 1}</div>
-                                <div class="game-hunt-weapon-img-container" style="position: relative; width: 80px; height: 80px; margin: 0 auto 10px;">
-                                    <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" style="margin: 0; width: 80px; height: 80px;" />
+                                <div class="game-hunt-weapon-img-container" style="position: relative; width: 95px; height: 95px; margin: 0 auto 12px;">
+                                    <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" style="margin: 0; width: 95px; height: 95px;" />
                                 </div>
-                                <div class="game-hunt-weapon-name" style="font-size:1.55rem;font-weight:bold;color:#c98534;margin-bottom:4px;">HUNTER ${w.index + 1}</div>
-                                <div style="font-size:1.25rem;font-weight:bold;background:${p.bg};border:1.5px solid ${p.border};border-radius:8px;padding:4px 10px;margin-bottom:8px;color:${p.color};box-shadow: 0 0 10px ${p.bg};">${p.label}</div>
-                                <div class="bet-count" style="font-size:1.15rem;color:#aaa;font-weight:bold;">0명 신청</div>
-                                <div class="bet-names-list" style="font-size: 0.95rem; color: #aaa; margin-top: 4px; min-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; margin-left: auto; margin-right: auto;"></div>
+                                <div class="game-hunt-weapon-name" style="font-size:1.7rem;font-weight:bold;color:#c98534;margin-bottom:4px;">HUNTER ${w.index + 1}</div>
+                                <div style="font-size:1.35rem;font-weight:bold;background:${p.bg};border:1.5px solid ${p.border};border-radius:8px;padding:4px 10px;margin-bottom:8px;color:${p.color};box-shadow: 0 0 10px ${p.bg};">${p.label}</div>
+                                <div class="bet-count" style="font-size:1.25rem;color:#aaa;font-weight:bold;">0명 신청</div>
+                                <div class="bet-names-list" style="font-size: 1.05rem; color: #aaa; margin-top: 4px; min-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; margin-left: auto; margin-right: auto;"></div>
                             </div>`;
                         }).join("");
                     })()} 
                 </div>
 
                 <!-- Hunting Preparation Guide Message -->
-                <div style="background: rgba(78, 52, 46, 0.06); border: 1.5px solid rgba(139,90,43,0.25); border-radius: 12px; padding: 4px 12px; margin: 6px auto 4px; max-width: 920px; text-align: center; box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <div style="font-size: 0.95rem; color: #4e342e; font-weight: bold;">
-                        💬 참전 커맨드 ➜ <span style="color: #00ffaa;">👑 구독자:</span> <span style="color: #ffffff; background: rgba(78,52,46,0.9); padding: 2px 6px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; border: 1px solid #4e342e;">[번호] [무기] [성향]</span> (예: 1 해머 공격적) <span style="margin: 0 8px; opacity: 0.4;">|</span> <span style="color: #aaa;">👤 일반 시청자:</span> <span style="color: #ffffff; background: rgba(78,52,46,0.9); padding: 2px 6px; border-radius: 6px; font-family: monospace; font-size: 0.9rem; border: 1px solid #4e342e;">[번호]</span> (예: 1)
+                <div style="background: rgba(78, 52, 46, 0.06); border: 1.5px solid rgba(139,90,43,0.25); border-radius: 12px; padding: 6px 16px; margin: 14px auto 10px; max-width: 1000px; text-align: center; box-sizing: border-box; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.05rem; color: #4e342e; font-weight: bold;">
+                        💬 참전 커맨드 ➜ <span style="color: #00ffaa;">👑 구독자:</span> <span style="color: #ffffff; background: rgba(78,52,46,0.9); padding: 2px 6px; border-radius: 6px; font-family: monospace; font-size: 1.0rem; border: 1px solid #4e342e;">[번호] [무기] [성향]</span> (예: 1 해머 공격적) <span style="margin: 0 8px; opacity: 0.4;">|</span> <span style="color: #aaa;">👤 일반 시청자:</span> <span style="color: #ffffff; background: rgba(78,52,46,0.9); padding: 2px 6px; border-radius: 6px; font-family: monospace; font-size: 1.0rem; border: 1px solid #4e342e;">[번호]</span> (예: 1)
                     </div>
                 </div>
 
-                <div class="game-timer" style="font-size:1.4rem; font-weight:bold; color:#8b5a2b; margin-top:6px; text-shadow:0 0 10px rgba(139,90,43,0.15);">⏳ 30초</div>
+                <div class="game-timer" style="font-size:1.6rem; font-weight:bold; color:#8b5a2b; margin-top:14px; text-shadow:0 0 10px rgba(139,90,43,0.15);">⏳ 30초</div>
             </div>
         `;
 
@@ -420,7 +420,7 @@ class HuntRenderer {
             <!-- 4 Weapons Grid (Bottom) -->
             <div class="game-hunt-weapons-grid">
                 ${selectedWeapons.map(w => `
-                <div class="game-hunt-weapon-card" id="fight-card-${w.index}" style="position:relative; transition: transform 0.15s ease, border-color 0.15s ease;">
+                <div class="game-hunt-weapon-card ${w.status === 'dead' ? 'dead' : ''}" id="fight-card-${w.index}" style="position:relative; transition: transform 0.15s ease, border-color 0.15s ease; ${w.status === 'dead' ? 'transform: rotate(180deg);' : ''}">
                     <div class="game-hunt-weapon-img-container" style="position: relative; width: 115px; height: 115px; margin: 0 auto 16px;">
                         <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" style="margin: 0;" />
                         ${w.id === 'gunlance' ? `
@@ -449,9 +449,11 @@ class HuntRenderer {
                             </div>
                         ` : ''}
                     </div>
-
-                    <div style="display: flex; justify-content: center; align-items: center; height: 34px; margin-bottom: 6px;">
-                        <div class="game-hunt-status-tag active" id="status-tag-${w.index}">⚔️</div>
+ 
+                    <div class="game-hunt-status-tag-container" style="position: absolute; right: calc(50% + 68px); top: 92px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: flex-end; z-index: 5;">
+                        <div class="${w.status === 'dead' ? 'game-hunt-status-tag fainted' : (w.status === 'stunned' ? 'game-hunt-status-tag active stunned' : 'game-hunt-status-tag active')}" id="status-tag-${w.index}">
+                            ${w.status === 'dead' ? `💀 ${w.cartTimer !== undefined ? Math.ceil(w.cartTimer / 10) : 5}s` : (w.status === 'stunned' ? '🌀 기절' : '⚔️')}
+                        </div>
                     </div>
                     
                     <div class="atb-circular-container" style="position: absolute; left: calc(50% + 68px); top: 92px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 5;">
@@ -465,8 +467,8 @@ class HuntRenderer {
                     
                     <!-- HP Bar -->
                     <div class="game-hunt-hp-wrapper" style="margin-top: 10px; margin-bottom: 8px;">
-                        <div class="game-hunt-hp-fill" id="hp-fill-${w.index}" style="width: 100%; background:#2eff7b;"></div>
-                        <div class="game-hunt-hp-text" id="hp-text-${w.index}">100 / 100</div>
+                        <div class="game-hunt-hp-fill" id="hp-fill-${w.index}" style="width: ${(w.hp / w.maxHp) * 100}%; background: ${(w.hp / w.maxHp) * 100 > 50 ? '#2eff7b' : ((w.hp / w.maxHp) * 100 > 20 ? '#ff9500' : '#ff3b30')};"></div>
+                        <div class="game-hunt-hp-text" id="hp-text-${w.index}">${w.hp} / ${w.maxHp}</div>
                     </div>
  
                     <div id="personality-tag-${w.index}" style="font-size:1.35rem; color:#aaa; margin-top:4px; margin-bottom:12px; display:flex; justify-content:center; gap:12px; align-items:center; font-weight:bold;">
@@ -578,6 +580,18 @@ class HuntRenderer {
                 monsterImg.classList.add('stunned_monster');
             } else {
                 monsterImg.classList.remove('stunned_monster');
+            }
+
+            if (stateName.includes('비행')) {
+                monsterImg.classList.add('valstrax-flying');
+            } else {
+                monsterImg.classList.remove('valstrax-flying');
+            }
+
+            if (stateName.includes('대경직') || stateName.includes('함정')) {
+                monsterImg.classList.add('monster-knockdown-anim');
+            } else {
+                monsterImg.classList.remove('monster-knockdown-anim');
             }
         }
     }
@@ -1077,7 +1091,7 @@ class HuntRenderer {
         }
     }
 
-    triggerDeathTag(idx, timerVal = 5) {
+    triggerDeathTag(idx, w, timerVal = 5) {
         if (!this.card) return;
         const tag = this.card.querySelector(`#status-tag-${idx}`);
         if (tag) {
@@ -1085,13 +1099,62 @@ class HuntRenderer {
             tag.className = 'game-hunt-status-tag fainted';
         }
         
-        // Hide weapon image when carted
+        // Hide weapon image and clear stun classes when carted
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         if (weaponCard) {
+            weaponCard.classList.remove('stunned');
+            weaponCard.classList.remove('roar-stunned');
+            const imgContainer = weaponCard.querySelector('.game-hunt-weapon-img-container');
+            if (imgContainer) {
+                const roarOverlay = imgContainer.querySelector('.roar-stun-overlay');
+                if (roarOverlay) {
+                    roarOverlay.remove();
+                }
+            }
             const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
             if (weaponImg) {
-                weaponImg.style.transition = 'opacity 0.2s ease-out';
-                weaponImg.style.opacity = '0';
+                if (w) {
+                    // Get exact rect of original weapon image to spawn the cart animation locally
+                    const rect = weaponImg.getBoundingClientRect();
+                    
+                    // Hide original image instantly
+                    weaponImg.style.transition = 'none';
+                    weaponImg.style.opacity = '0';
+                    
+                    // Create private local cart element at exact position
+                    const cart = document.createElement('div');
+                    cart.className = 'game-hunt-cart-local';
+                    cart.style.position = 'fixed';
+                    cart.style.top = `${rect.top}px`;
+                    cart.style.left = `${rect.left}px`;
+                    cart.style.width = `${rect.width}px`;
+                    cart.style.height = `${rect.height}px`;
+                    cart.style.zIndex = '2147483647';
+                    cart.style.pointerEvents = 'none';
+                    
+                    // Content of local cart: grayscaled/rotated weapon image, cart emoji, name label
+                    cart.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                            <div style="transform: rotate(-90deg) translate(-5px, -5px); filter: grayscale(0.6) brightness(0.8); width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                <img src="img/weapons/${w.filename}" style="width: 60px; height: 60px;" />
+                            </div>
+                            <div style="font-size: 2.8rem; margin-top: -22px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">🛒</div>
+                            <div style="font-size: 0.8rem; font-weight: bold; background: rgba(20, 10, 10, 0.9); color: #ff3b30; border: 1.2px solid #ff3b30; padding: 1px 6px; border-radius: 4px; margin-top: 2px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                                ${w.name} 수레행
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(cart);
+                    cart.style.animation = 'cart-local-slide-out 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
+                    
+                    setTimeout(() => {
+                        cart.remove();
+                    }, 3500);
+                } else {
+                    weaponImg.style.transition = 'opacity 0.2s ease-out';
+                    weaponImg.style.opacity = '0';
+                }
             }
         }
     }
@@ -1131,19 +1194,18 @@ class HuntRenderer {
             const imgContainer = weaponCard.querySelector('.game-hunt-weapon-img-container');
             if (imgContainer) {
                 imgContainer.classList.remove('ls-spirit-border-1', 'ls-spirit-border-2', 'ls-spirit-border-3');
-                if (w.id === 'long_sword' && w.spiritLevel > 0) {
-                    imgContainer.classList.add(`ls-spirit-border-${w.spiritLevel}`);
-                }
             }
 
-            // Handle Long Sword Image direct filter classes
+            // Handle Weapon Image direct filter classes
             const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
             if (weaponImg) {
                 weaponImg.style.transition = 'opacity 0.2s ease-in';
                 weaponImg.style.opacity = '1';
-                weaponImg.classList.remove('ls-spirit-img-1', 'ls-spirit-img-2', 'ls-spirit-img-3');
+                weaponImg.classList.remove('ls-spirit-img-1', 'ls-spirit-img-2', 'ls-spirit-img-3', 'cb-shield-charged-img');
                 if (w.id === 'long_sword' && w.spiritLevel > 0) {
                     weaponImg.classList.add(`ls-spirit-img-${w.spiritLevel}`);
+                } else if (w.id === 'charge_blade' && w.shieldChargeDuration > 0) {
+                    weaponImg.classList.add('cb-shield-charged-img');
                 }
             }
 
@@ -1165,7 +1227,7 @@ class HuntRenderer {
             if (w.id === 'dual_blades' && w.demonModeDuration > 0) {
                 weaponCard.classList.add('db-demon-mode');
             }
-            if (w.id === 'charge_blade' && w.phials > 0) {
+            if (w.id === 'charge_blade' && w.shieldChargeDuration > 0) {
                 // Charge Blade shield charge activates overlay
                 weaponCard.classList.add('cb-shield-charged');
                 if (shieldOverlay) {
@@ -1174,6 +1236,18 @@ class HuntRenderer {
             }
             if (w.id === 'insect_glaive' && w.extractDuration > 0) {
                 weaponCard.classList.add('ig-3-extracts');
+            }
+
+            // Restore status tag to active when revived / restored
+            const tag = this.card.querySelector(`#status-tag-${w.index}`);
+            if (tag) {
+                if (w.status === 'alive') {
+                    tag.textContent = '⚔️';
+                    tag.className = 'game-hunt-status-tag active';
+                } else if (w.status === 'stunned') {
+                    tag.textContent = '🌀';
+                    tag.className = 'game-hunt-status-tag stunned';
+                }
             }
         }
     }
@@ -1322,14 +1396,19 @@ class HuntRenderer {
 
     spawnCombatChatBubble(idx, message) {
         if (!this.card) return;
-        const targetEl = this.card.querySelector(`#fight-card-${idx}`) || this.card.querySelector(`#hunt-opt-${idx}`);
-        if (!targetEl) return;
+        
+        // Find the parent weapon card or lobby option card
+        const parentCard = this.card.querySelector(`#fight-card-${idx}`) || this.card.querySelector(`#hunt-opt-${idx}`);
+        if (!parentCard) return;
 
         // Hide lobby prep bubble immediately if it's currently visible
-        const prepBubble = targetEl.querySelector('.lobby-prep-bubble');
+        const prepBubble = parentCard.querySelector('.lobby-prep-bubble');
         if (prepBubble) {
             prepBubble.classList.remove('visible');
         }
+
+        // Target the weapon image container for rendering the bubble, fallback to parentCard
+        const targetEl = parentCard.querySelector('.game-hunt-weapon-img-container') || parentCard;
 
         // Remove old bubble if exists
         const oldBubble = targetEl.querySelector('.combat-chat-bubble');

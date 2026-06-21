@@ -141,3 +141,77 @@ function pSBC(p, c0, c1, l) {
     if (h) return "rgb" + (f ? "a(" : "(") + r + "," + g + "," + b + (f ? "," + m(a * 1000) / 1000 : "") + ")";
     else return "#" + (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0)).toString(16).slice(1, f ? undefined : -2)
 }
+
+// [New] Global helper to parse and find CMC video commands in a chat message
+function findCMCVideosInMessage(message) {
+    const CMC_FILES = window.HIVE_CMC_FILES || [];
+    if (!message || CMC_FILES.length === 0) return [];
+
+    const findBestMatch = (term) => {
+        term = term.toLowerCase().trim();
+        // 1. Exact match
+        let match = CMC_FILES.find(f => f.toLowerCase() === term);
+        if (match) return match;
+        // 2. Starts with / Ends with / Includes
+        match = CMC_FILES.find(f => f.toLowerCase().startsWith(term));
+        if (match) return match;
+        match = CMC_FILES.find(f => term.startsWith(f.toLowerCase()));
+        if (match) return match;
+        match = CMC_FILES.find(f => f.toLowerCase().includes(term));
+        if (match) return match;
+        match = CMC_FILES.find(f => term.includes(f.toLowerCase()));
+        if (match) return match;
+        // 3. Common substring of length >= 2
+        match = CMC_FILES.find(f => {
+            const fLower = f.toLowerCase();
+            for (let len = Math.min(fLower.length, term.length); len >= 2; len--) {
+                for (let i = 0; i <= fLower.length - len; i++) {
+                    const sub = fLower.substring(i, i + len);
+                    if (term.includes(sub)) return true;
+                }
+            }
+            return false;
+        });
+        return match || null;
+    };
+
+    const videoQueue = [];
+    const tokens = message.trim().split(/\s+/);
+    let searchPos = 0;
+    for (const token of tokens) {
+        if (token.startsWith('#') && token.length > 1) {
+            const term = token.substring(1);
+            const matchedFile = findBestMatch(term);
+            if (matchedFile) {
+                const indexInOriginal = message.indexOf(token, searchPos);
+                videoQueue.push({
+                    type: 'video',
+                    name: matchedFile,
+                    startIndex: indexInOriginal !== -1 ? indexInOriginal : 0,
+                    length: token.length
+                });
+                if (indexInOriginal !== -1) {
+                    searchPos = indexInOriginal + token.length;
+                }
+                if (videoQueue.length >= 5) break;
+            }
+        }
+    }
+    return videoQueue;
+}
+
+// [New] Maps space-removed index back to its index in the original string with spaces
+function mapIndexSpaceRemovedToOriginal(spaceRemovedIndex, originalString) {
+    let spaceRemovedCount = 0;
+    for (let i = 0; i < originalString.length; i++) {
+        if (originalString[i].match(/\s/)) {
+            continue;
+        }
+        if (spaceRemovedCount === spaceRemovedIndex) {
+            return i;
+        }
+        spaceRemovedCount++;
+    }
+    return originalString.length;
+}
+

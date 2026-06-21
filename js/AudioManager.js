@@ -16,6 +16,10 @@ class AudioManager {
         // [Volume Control] 현재 재생 중인 소리 추적
         this.activeVoices = 0;
 
+        // [New] Sequential Chat Audio Queue
+        this.pendingChatAudioQueue = [];
+        this._processingQueue = false;
+
         // 1. 오디오 엔진 시동
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         this.audioCtx = new AudioContext();
@@ -50,6 +54,9 @@ class AudioManager {
             this.eventBus.on('audio:playVisualSound', (soundPath) => {
                 this.playSound(soundPath, { force: true, type: 'visual' });
             });
+            this.eventBus.on('chat:videoFinished', () => {
+                this.processPendingChatAudioQueue();
+            });
             this.eventBus.on('system:muteAudio', () => {
                 this.setEnabled(false);
                 this.playSound(this.soundHive['윈도우종료'], { force: true });
@@ -81,11 +88,28 @@ class AudioManager {
         if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('blob:')) {
             return src;
         }
-        const cleanSrc = src.replace(/^\.\//, '');
-        if (cleanSrc.startsWith('SFX/') || cleanSrc.startsWith('BGM/') || cleanSrc.startsWith('MonsterHunter_Soundtracks/')) {
-            return src;
+        
+        let path = src.replace(/^\.\//, '');
+        
+        // Check for virtual rename mapping
+        if (this.configManager) {
+            const renames = this.configManager.getSfxRenames() || {};
+            let lookupPath = path;
+            let hasSfxPrefix = false;
+            if (lookupPath.startsWith('SFX/')) {
+                lookupPath = lookupPath.substring(4);
+                hasSfxPrefix = true;
+            }
+            if (renames[lookupPath]) {
+                const physical = renames[lookupPath];
+                path = hasSfxPrefix ? 'SFX/' + physical : physical;
+            }
         }
-        return this.basePath + src;
+
+        if (path.startsWith('SFX/') || path.startsWith('BGM/') || path.startsWith('MonsterHunter_Soundtracks/')) {
+            return './' + path;
+        }
+        return this.basePath + path;
     }
 
     _buildVisualAudioPaths() {
@@ -218,9 +242,9 @@ class AudioManager {
         return msg;
     }
 
-    // 소리만 재생 (채팅 트리거용 - Legacy Logic 유지)
-    checkAndPlay(message, force = false) {
-        if (!this.enabled && !force) return;
+    // [New] Extracts matched SFX sequence for a message
+    getSFXSequence(message) {
+        if (!message) return [];
         // [User Request] 띄어쓰기 상관없이 발동되도록 공백 모두 제거
         const normOriginal = message.normalize('NFC').replace(/\s+/g, '');
 
@@ -285,13 +309,50 @@ class AudioManager {
                 }
             }
         }
+        return sequence;
+    }
+
+    // 소리만 재생 (채팅 트리거용 - Legacy Logic 유지)
+    async checkAndPlay(message, force = false, hasVideo = false) {
+        if (!this.enabled && !force) return;
+
+        // If a video is currently playing, or this message triggers a video, queue the audio
+        const isVideoActive = (window._activeVideoCount && window._activeVideoCount > 0);
+        if (hasVideo || isVideoActive) {
+            console.log(`[AudioManager] Video active (${window._activeVideoCount}) or has video command. Queueing audio: "${message}"`);
+            this.pendingChatAudioQueue.push({ message, force });
+            return;
+        }
+
+        const sequence = this.getSFXSequence(message);
 
         if (sequence.length > 0) {
-            (async () => {
-                // 매번 재생 전 컴프레서 설정을 최신화 (실시간 반영)
-                this._updateCompressorSettings();
-                for (let item of sequence.slice(0, 5)) { await this.playSound(item.sound, { force, type: 'sfx' }); }
-            })();
+            // 매번 재생 전 컴프레서 설정을 최신화 (실시간 반영)
+            this._updateCompressorSettings();
+            for (let item of sequence.slice(0, 5)) { 
+                await this.playSound(item.sound, { force, type: 'sfx' }); 
+            }
+        }
+    }
+
+    // [New] Sequential Chat Audio Queue Processor
+    async processPendingChatAudioQueue() {
+        if (this._processingQueue) return;
+        this._processingQueue = true;
+
+        try {
+            while (this.pendingChatAudioQueue.length > 0) {
+                // If a video starts playing during queue processing, stop and wait
+                if (window._activeVideoCount && window._activeVideoCount > 0) {
+                    break;
+                }
+                const item = this.pendingChatAudioQueue.shift();
+                await this.checkAndPlay(item.message, item.force, false);
+            }
+        } catch (e) {
+            console.error("[AudioManager] Error processing audio queue:", e);
+        } finally {
+            this._processingQueue = false;
         }
     }
 
@@ -324,6 +385,27 @@ class AudioManager {
             fileName = target;
         }
         if (!fileName) return;
+
+        // Check for exclusions (using clean path)
+        if (this.configManager) {
+            let cleanFile = fileName.replace(/^\.\//, '');
+            if (cleanFile.startsWith('SFX/')) {
+                cleanFile = cleanFile.substring(4);
+            }
+            const excludedList = this.configManager.getExcludedSfx() || [];
+            
+            // Resolve physical path first for exclusion check
+            let lookupPath = cleanFile;
+            const renames = this.configManager.getSfxRenames() || {};
+            if (renames[lookupPath]) {
+                lookupPath = renames[lookupPath];
+            }
+            
+            if (excludedList.includes(cleanFile) || excludedList.includes(lookupPath)) {
+                console.log(`[AudioManager] Blocked playback of excluded sound: ${fileName}`);
+                return;
+            }
+        }
 
         // [파일명 검증 가드] 음원 확장자가 포함되지 않은 텍스트형 키워드는 무시하여 404 에러 및 브라우저 디코딩 클릭 노이즈 예방
         const hasAudioExtension = /\.(mp3|wav|ogg|m4a|aac|webm|flac)$/i.test(fileName);

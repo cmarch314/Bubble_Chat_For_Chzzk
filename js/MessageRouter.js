@@ -137,10 +137,12 @@ class MessageRouter {
         } else {
             const t0 = performance.now();
 
+            const hasVideo = !msgData.isDonation && typeof findCMCVideosInMessage === 'function' && findCMCVideosInMessage(updatedTrimmedMsg).length > 0;
+
             // [퀴즈 중 사운드 차단] 퀴즈 진행 중에는 채팅 사운드 재생을 막아 퀴즈 음원과의 혼동을 방지
             const quizActive = this.visualDirector.activeGame && this.visualDirector.activeGame.quizSilence;
-            if (!quizActive) {
-                this.audioManager.checkAndPlay(msgData.message, msgData.isStreamer);
+            if (!quizActive && !hasVideo) {
+                this.audioManager.checkAndPlay(msgData.message, msgData.isStreamer, false);
             }
 
             if (msgData.isDonation) return;

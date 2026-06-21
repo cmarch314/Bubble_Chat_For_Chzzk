@@ -141,6 +141,9 @@ class ConfigManager {
         if (window.RANDOM_NAMES) this._randomNames = [...window.RANDOM_NAMES];
         if (window.NORMALIZER_CONFIG) this._normalizerConfig = { ...this._normalizerConfig, ...window.NORMALIZER_CONFIG };
 
+        this._excludedSfx = Array.isArray(window.HIVE_EXCLUDED_SFX) ? [...window.HIVE_EXCLUDED_SFX] : [];
+        this._sfxRenames = (typeof window.HIVE_SFX_RENAMES === 'object' && window.HIVE_SFX_RENAMES !== null) ? { ...window.HIVE_SFX_RENAMES } : {};
+
         // 2. [Fix] 로컬 스토리지 덮어쓰기 제거.
         // config.js 파일을 수정했는데 로컬스토리지에 저장된 예전 설정값(1.0)이 덮어씌워지는 문제를 방지합니다.
 
@@ -154,6 +157,8 @@ class ConfigManager {
             delete window.WELCOME_MESSAGES;
             delete window.RANDOM_NAMES;
             delete window.NORMALIZER_CONFIG;
+            delete window.HIVE_EXCLUDED_SFX;
+            delete window.HIVE_SFX_RENAMES;
         } catch (e) {
             console.warn("[ConfigManager] Could not delete global window variables.");
         }
@@ -170,6 +175,8 @@ class ConfigManager {
     getWelcomeMessages() { return this._welcomeMessages; }
     getRandomNames() { return this._randomNames; }
     getNormalizerConfig() { return this._normalizerConfig; }
+    getExcludedSfx() { return this._excludedSfx; }
+    getSfxRenames() { return this._sfxRenames; }
 
     // ==========================================
     // [Setter Methods] - 설정 변경 시 내부 객체와 로컬스토리지만 업데이트

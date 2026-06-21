@@ -260,6 +260,7 @@ class HuntEffect extends BaseEffect {
 
     startFight(container) {
         this.phase = 'fighting';
+        document.body.classList.add('in-hunt');
 
         // Handle Unknown Monster random reveal upon hunt start
         const realMonsters = (this.monsters || []).filter(m => m.id !== 'unknown_monster');
@@ -481,15 +482,17 @@ class HuntEffect extends BaseEffect {
                     this.renderer.triggerHitAnimation(idx, w, damage);
                 },
                 onTriggerDeathTag: (idx) => {
-                    this.renderer.triggerDeathTag(idx, 5);
                     const w = this.selectedWeapons[idx];
-                    this.triggerCartAnimation(w);
+                    this.renderer.triggerDeathTag(idx, w, 5);
                 },
                 onTriggerStunUI: (idx, isStunned) => this.renderer.triggerStunUI(idx, isStunned),
                 onTriggerRoarStun: (idx, isStunned) => this.renderer.triggerRoarStun(idx, isStunned),
                 onTriggerMonsterKnockdownAnim: () => this.renderer.triggerMonsterKnockdownAnim(),
                 onGameEnd: (victory, winner) => this.endGame(container, victory, winner),
-                onNextConsecutive: () => this.spawnNextConsecutiveMonster(container)
+                onNextConsecutive: () => this.spawnNextConsecutiveMonster(container),
+                onTriggerValstraxAmbush: () => {
+                    this.director.trigger('valstrax');
+                }
             }
         });
 
@@ -658,6 +661,14 @@ class HuntEffect extends BaseEffect {
         this.engine.monsterKnockdownDuration = 0;
         this.engine.monsterKnockdownTriggered = { 80: false, 60: false, 40: false, 20: false };
 
+        if (this.selectedMonster.id.includes('valstrax')) {
+            this.engine.valstraxChargeCount = 0;
+            this.engine.valstraxChargeDmg = 0;
+            this.engine.valstraxChargeTimer = 0;
+            this.engine.valstraxEnrageTimer = 0;
+            this.engine.valstraxFlyingTimer = 0;
+        }
+
         // Reset BGM
         this.audioManager.stopBgms();
         const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster.nameKO);
@@ -681,8 +692,20 @@ class HuntEffect extends BaseEffect {
             showMonsterHp: this.SHOW_MONSTER_HP
         });
 
+        // Restore actual UI states for monster HP, timer, and hunter HP
+        this.renderer.updateMonsterHpUI(this.engine.monsterHp, this.engine.monsterMaxHp);
+        this.renderer.updateTimerUI(this.engine.battleTime);
+        this.selectedWeapons.forEach(w => this.renderer.updateHpUI(w));
+        this.renderer.updateCartUI(this.engine.cartCount);
+
         // Restore borders
         this.selectedWeapons.forEach(w => this.renderer.restoreBorder(w.index, w));
+
+        // Restart Tick loop (Process through HuntEngine)
+        this.fightInterval = setInterval(() => {
+            if (this.phase !== 'fighting') return;
+            this.engine.processTick();
+        }, 100);
     }
 
     endGame(container, isVictory, winner = null) {
@@ -1055,6 +1078,7 @@ class HuntEffect extends BaseEffect {
             container.style.animation = "game-fade-out 0.5s ease-in forwards";
             setTimeout(() => {
                 this.renderer.removeContainer();
+                document.body.classList.remove('in-hunt');
                 this.audioManager.stopBgms();
                 if (this.resolveGame) {
                     this.resolveGame();
@@ -1073,6 +1097,7 @@ class HuntEffect extends BaseEffect {
 
         this.audioManager.stopBgms();
         this.renderer.removeContainer();
+        document.body.classList.remove('in-hunt');
 
         if (this.resolveGame) {
             this.resolveGame();
