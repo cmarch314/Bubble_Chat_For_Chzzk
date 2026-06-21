@@ -50,8 +50,8 @@ function setupTwemojiOverride() {
                 const originalCallback = options;
                 options = {
                     base: 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/',
-                    folder: '72x72',
-                    ext: '.png',
+                    folder: 'svg',
+                    ext: '.svg',
                     callback: originalCallback
                 };
             } else {
@@ -60,10 +60,10 @@ function setupTwemojiOverride() {
                     options.base = 'https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/';
                 }
                 if (!options.folder && !options.size) {
-                    options.folder = '72x72';
+                    options.folder = 'svg';
                 }
                 if (!options.ext) {
-                    options.ext = '.png';
+                    options.ext = '.svg';
                 }
             }
             const result = originalParse.call(twemoji, what, options);
