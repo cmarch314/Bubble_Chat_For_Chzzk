@@ -1114,14 +1114,19 @@ class HuntRenderer {
             const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
             if (weaponImg) {
                 if (w) {
-                    // Get exact rect of original weapon image to spawn the cart animation locally
+                    // Get exact rect of original weapon image BEFORE rotating card to spawn the cart animation locally
                     const rect = weaponImg.getBoundingClientRect();
                     
-                    // Hide original image instantly
-                    weaponImg.style.transition = 'none';
-                    weaponImg.style.opacity = '0';
+                    // Add dead class and rotate card 180 degrees
+                    weaponCard.classList.add('dead');
+                    weaponCard.style.transform = 'rotate(180deg)';
                     
-                    // Create private local cart element at exact position
+                    // Animate the original weapon image itself using rotated coordinates
+                    weaponImg.style.transition = 'none';
+                    weaponImg.style.filter = 'grayscale(0.6) brightness(0.8) drop-shadow(0 4px 8px rgba(0,0,0,0.4))';
+                    weaponImg.style.animation = 'cart-weapon-slide-out 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
+                    
+                    // Create private local cart element at exact position (without the duplicate weapon image)
                     const cart = document.createElement('div');
                     cart.className = 'game-hunt-cart-local';
                     cart.style.position = 'fixed';
@@ -1132,13 +1137,10 @@ class HuntRenderer {
                     cart.style.zIndex = '2147483647';
                     cart.style.pointerEvents = 'none';
                     
-                    // Content of local cart: grayscaled/rotated weapon image, cart emoji, name label
+                    // Content of local cart: ONLY the cart emoji and name label (NO duplicate weapon image)
                     cart.innerHTML = `
                         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                            <div style="transform: rotate(-90deg) translate(-5px, -5px); filter: grayscale(0.6) brightness(0.8); width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                                <img src="img/weapons/${w.filename}" style="width: 60px; height: 60px;" />
-                            </div>
-                            <div style="font-size: 2.8rem; margin-top: -22px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">🛒</div>
+                            <div style="font-size: 2.8rem; margin-top: 10px; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">🛒</div>
                             <div style="font-size: 0.8rem; font-weight: bold; background: rgba(20, 10, 10, 0.9); color: #ff3b30; border: 1.2px solid #ff3b30; padding: 1px 6px; border-radius: 4px; margin-top: 2px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
                                 ${w.name} 수레행
                             </div>
@@ -1174,7 +1176,8 @@ class HuntRenderer {
         const weaponCard = this.card.querySelector(`#fight-card-${w.index}`);
         if (weaponCard) {
             // Remove all custom classes from card
-            weaponCard.classList.remove('ls-spirit-1', 'ls-spirit-2', 'ls-spirit-3', 'db-demon-mode', 'cb-shield-charged', 'ig-3-extracts');
+            weaponCard.classList.remove('dead', 'ls-spirit-1', 'ls-spirit-2', 'ls-spirit-3', 'db-demon-mode', 'cb-shield-charged', 'ig-3-extracts');
+            weaponCard.style.transform = '';
             weaponCard.style.borderColor = '';
             weaponCard.style.boxShadow = '';
 
@@ -1201,6 +1204,9 @@ class HuntRenderer {
             if (weaponImg) {
                 weaponImg.style.transition = 'opacity 0.2s ease-in';
                 weaponImg.style.opacity = '1';
+                weaponImg.style.animation = 'none';
+                weaponImg.style.transform = 'none';
+                weaponImg.style.filter = '';
                 weaponImg.classList.remove('ls-spirit-img-1', 'ls-spirit-img-2', 'ls-spirit-img-3', 'cb-shield-charged-img');
                 if (w.id === 'long_sword' && w.spiritLevel > 0) {
                     weaponImg.classList.add(`ls-spirit-img-${w.spiritLevel}`);

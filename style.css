@@ -4941,6 +4941,21 @@ body {
     }
 }
 
+@keyframes cart-weapon-slide-out {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    15% {
+        transform: translate(0, 15px) scale(0.95) rotate(-15deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(300px, -600px) scale(0.8) rotate(-105deg);
+        opacity: 0;
+    }
+}
+
 .game-hunt-status-tag {
     font-size: 1.875rem; /* 원래 1.25rem에서 50% 확대 */
     padding: 4px 10px;
