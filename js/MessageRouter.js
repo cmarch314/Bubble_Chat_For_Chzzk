@@ -82,11 +82,11 @@ class MessageRouter {
 
         const lowerTrimmedMsg = updatedTrimmedMsg.toLowerCase();
         for (const key in visualMap) {
-            if (key === 'dolphin' && !msgData.isStreamer) continue;
-            if (key === 'bangjong' && !msgData.isStreamer) continue;
-            if (key === 'mulsulsan' && (!msgData.isStreamer && !msgData.isDonation)) continue;
-            if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation)) continue;
-            if (key === 'random_dance' && (!msgData.isStreamer && !msgData.isDonation)) continue;
+            if (key === 'dolphin' && (!msgData.isStreamer && !msgData.isDonation && !this.config.debugMode)) continue;
+            if (key === 'bangjong' && (!msgData.isStreamer && !this.config.debugMode)) continue;
+            if (key === 'mulsulsan' && (!msgData.isStreamer && !msgData.isDonation && !this.config.debugMode)) continue;
+            if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation && !this.config.debugMode)) continue;
+            if (key === 'random_dance' && (!msgData.isStreamer && !msgData.isDonation && !this.config.debugMode)) continue;
             
             const effect = visualMap[key];
             const soundKey = effect.soundKey;

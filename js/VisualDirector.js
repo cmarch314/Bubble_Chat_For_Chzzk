@@ -102,25 +102,25 @@ class VisualDirector {
 
     _buildRegistry() {
         return {
-            usho: { soundKey: "우쇼", instance: new UshoEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            skull: { soundKey: "해골", instance: new SkullEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            couple: { soundKey: "커플", instance: new CoupleEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            vergil: { soundKey: "버질", instance: new VergilEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            dolphin: { soundKey: "돌핀", instance: new DolphinEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            valstrax: { soundKey: "발파", instance: new ValstraxEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            bangjong: { soundKey: "방종송", instance: new BangjongEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            dango: { soundKey: "당고", instance: new DangoEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            king: { soundKey: "몬창왕", instance: new KingEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            godsong: { soundKey: "갓겜송", instance: new GodsongEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            gazabu: { soundKey: "가자부송", instance: new GazabuEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            mulsulsan: { soundKey: "물설산", instance: new MulsulsanEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            random_dance: { soundKey: "랜덤댄스", instance: new RandomDanceEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            sound_quiz: { soundKey: null, instance: new SoundQuizEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            racing: { soundKey: null, instance: new RacingEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            raid: { soundKey: null, instance: new RaidEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            hunt: { soundKey: null, instance: new HuntEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            game_help: { soundKey: null, instance: new GameHelpEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
-            commands_scroll: { soundKey: null, instance: new CommandsScrollEffect(this), execute(ctx) { return this.instance.execute(ctx); } }
+            usho: { key: "usho", soundKey: "우쇼", instance: new UshoEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            skull: { key: "skull", soundKey: "해골", instance: new SkullEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            couple: { key: "couple", soundKey: "커플", instance: new CoupleEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            vergil: { key: "vergil", soundKey: "버질", instance: new VergilEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            dolphin: { key: "dolphin", soundKey: "돌핀", instance: new DolphinEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            valstrax: { key: "valstrax", soundKey: "발파", instance: new ValstraxEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            bangjong: { key: "bangjong", soundKey: "방종송", instance: new BangjongEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            dango: { key: "dango", soundKey: "당고", instance: new DangoEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            king: { key: "king", soundKey: "몬창왕", instance: new KingEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            godsong: { key: "godsong", soundKey: "갓겜송", instance: new GodsongEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            gazabu: { key: "gazabu", soundKey: "가자부송", instance: new GazabuEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            mulsulsan: { key: "mulsulsan", soundKey: "물설산", instance: new MulsulsanEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            random_dance: { key: "random_dance", soundKey: "랜덤댄스", instance: new RandomDanceEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            sound_quiz: { key: "sound_quiz", soundKey: null, instance: new SoundQuizEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            racing: { key: "racing", soundKey: null, instance: new RacingEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            raid: { key: "raid", soundKey: null, instance: new RaidEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            hunt: { key: "hunt", soundKey: null, instance: new HuntEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            game_help: { key: "game_help", soundKey: null, instance: new GameHelpEffect(this), execute(ctx) { return this.instance.execute(ctx); } },
+            commands_scroll: { key: "commands_scroll", soundKey: null, instance: new CommandsScrollEffect(this), execute(ctx) { return this.instance.execute(ctx); } }
         };
     }
 
