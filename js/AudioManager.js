@@ -143,6 +143,31 @@ class AudioManager {
 
     connectMediaElement(mediaElement, type = 'visual') {
         if (!mediaElement) return;
+
+        // [Rule 1 Guard] Never connect media elements to AudioContext if loaded via file:// protocol,
+        // as Chromium blocks this with CORS and silently mutes the audio track.
+        const isLocal = window.location.protocol === 'file:';
+        if (isLocal) {
+            console.log(`[MediaStaging] Local file protocol detected. Bypassing Web Audio Context to prevent CORS mute. Using native volume control.`);
+            
+            const applyNativeVolume = () => {
+                const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
+                const typeMultiplier = (type === 'visual') ? volConfig.visual : volConfig.sfx;
+                mediaElement.muted = false;
+                mediaElement.volume = Math.min(1.0, Math.max(0, volConfig.master * typeMultiplier));
+            };
+
+            applyNativeVolume();
+
+            if (!this._nativeMediaElements) {
+                this._nativeMediaElements = [];
+            }
+            if (!this._nativeMediaElements.some(item => item.el === mediaElement)) {
+                this._nativeMediaElements.push({ el: mediaElement, type, apply: applyNativeVolume });
+            }
+            return;
+        }
+
         if (mediaElement.__webAudioConnected) return;
         mediaElement.__webAudioConnected = true;
 
@@ -219,6 +244,21 @@ class AudioManager {
         // ConfigManager에 업데이트 위임 (LocalStorage 저장 등 수행)
         if (this.configManager) {
             this.configManager.updateVolumeConfig(config);
+        }
+
+        // Update native media elements if registered (for file:// protocol bypass)
+        if (this._nativeMediaElements) {
+            this._nativeMediaElements = this._nativeMediaElements.filter(item => {
+                if (!item.el || !document.body.contains(item.el)) {
+                    return false;
+                }
+                try {
+                    item.apply();
+                } catch (e) {
+                    console.warn("[MediaStaging] Failed to update native volume for element:", e);
+                }
+                return true;
+            });
         }
     }
 
