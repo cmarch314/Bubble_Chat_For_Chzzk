@@ -1,4 +1,45 @@
 // ==========================================
+// [Global Emoji Image Load Fallback]
+// Catch any twemoji or .emoji image load failure and fallback to native unicode text.
+// This is registered globally in the capturing phase so it catches errors early.
+// ==========================================
+window.addEventListener('error', function(event) {
+    const target = event.target;
+    if (target && target.tagName === 'IMG') {
+        const isEmoji = target.classList.contains('emoji') || 
+                        (target.parentNode && target.parentNode.classList.contains('actor-emoji')) ||
+                        (target.closest && target.closest('.actor-emoji')) ||
+                        (target.src && target.src.includes('twemoji'));
+        if (isEmoji) {
+            let emojiChar = target.alt;
+            if (!emojiChar && target.src) {
+                try {
+                    const lastSlash = target.src.lastIndexOf('/');
+                    if (lastSlash !== -1) {
+                        const filename = target.src.substring(lastSlash + 1);
+                        const dotIdx = filename.indexOf('.');
+                        const codeStr = dotIdx !== -1 ? filename.substring(0, dotIdx) : filename;
+                        const codePoints = codeStr.split('-').map(part => parseInt(part, 16));
+                        if (codePoints.every(cp => !isNaN(cp) && cp > 0)) {
+                            emojiChar = String.fromCodePoint(...codePoints);
+                        }
+                    }
+                } catch (e) {
+                    console.error("[Twemoji Fallback] Error parsing hex code from URL:", e);
+                }
+            }
+            if (emojiChar) {
+                console.warn(`[Twemoji Global Capture] Failed to load emoji image: ${target.src}. Falling back to native: ${emojiChar}`);
+                const textNode = document.createTextNode(emojiChar);
+                if (target.parentNode) {
+                    target.parentNode.replaceChild(textNode, target);
+                }
+            }
+        }
+    }
+}, true); // True to capture error event at the window level before bubbling is skipped for resource loads
+
+// ==========================================
 // [Global Twemoji CDN Fix] MaxCDN is dead, route all twemoji requests to jsDelivr
 // ==========================================
 function setupTwemojiOverride() {
@@ -25,7 +66,25 @@ function setupTwemojiOverride() {
                     options.ext = '.png';
                 }
             }
-            return originalParse.call(twemoji, what, options);
+            const result = originalParse.call(twemoji, what, options);
+            
+            // [Cdn/Network Fallback] Double protection: attach local onerror handlers
+            if (what && what.nodeType === 1) {
+                const images = what.querySelectorAll('img.emoji');
+                images.forEach(img => {
+                    if (!img._hasOnError) {
+                        img._hasOnError = true;
+                        img.onerror = function() {
+                            console.warn(`[Twemoji Inline onerror] Failed to load emoji: ${img.src}. Falling back to native: ${img.alt}`);
+                            const textNode = document.createTextNode(img.alt || '');
+                            if (img.parentNode) {
+                                img.parentNode.replaceChild(textNode, img);
+                            }
+                        };
+                    }
+                });
+            }
+            return result;
         };
         window.twemoji._isOverridden = true;
         return true;

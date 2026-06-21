@@ -77,7 +77,7 @@ function parseEmojisToImages(text, size = '1.35rem') {
     for (const emoji of sortedEmojis) {
         if (result.includes(emoji)) {
             const code = EMOJI_CODE_MAP[emoji];
-            const imgTag = `<img class="emoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${code}.svg" style="width:${size}; height:${size}; vertical-align:middle; display:inline-block;" />`;
+            const imgTag = `<img class="emoji" alt="${emoji}" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${code}.svg" style="width:${size}; height:${size}; vertical-align:middle; display:inline-block;" />`;
             result = result.split(emoji).join(imgTag);
         }
     }
@@ -479,14 +479,14 @@ class RacingEffect extends BaseEffect {
         container.className = 'game-overlay-container';
         container.innerHTML = `
             <div class="game-racing-card">
-                <div class="game-title"><img class="emoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3c7.svg" style="width:3.3rem; height:3.3rem; vertical-align:middle; display:inline-block;" /> 채팅 경마 게임!</div>
+                <div class="game-title"><img class="emoji" alt="🏇" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3c7.svg" style="width:3.3rem; height:3.3rem; vertical-align:middle; display:inline-block;" /> 채팅 경마 게임!</div>
                 <div class="game-subtitle">응원할 선수를 채팅창에 입력하여 배팅하세요!</div>
                 
                 <div class="game-racing-options-grid">
                     ${this.racers.map(r => `
                     <div class="game-racing-option-card" id="opt-${r.id}">
                         <div class="race-bet-emoji" style="display:flex; align-items:center; justify-content:center; height:7rem;">
-                            <img class="emoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${r.code}.svg" style="width:7rem; height:7rem; display:block; transform: scaleX(-1);" />
+                            <img class="emoji" alt="${r.emoji}" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${r.code}.svg" style="width:7rem; height:7rem; display:block; transform: scaleX(-1);" />
                         </div>
                         <div style="font-weight:bold; font-size:1.4rem; margin-top:8px; color:#fff;">${r.id + 1}. ${r.name}</div>
                         <div style="font-size:0.9rem; color:#00ffa3; margin-top:5px; font-weight:bold; background:rgba(0,255,163,0.1); border-radius:6px; padding:3px 0;">채팅: ${r.id + 1}</div>
@@ -720,7 +720,7 @@ class RacingEffect extends BaseEffect {
         track.className = 'game-racetrack-container';
         track.innerHTML = `
             <div class="game-title" style="font-size:3.5rem; text-align:center; margin-bottom: 8px;">
-                <img class="emoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3c7.svg" style="width:3.5rem; height:3.5rem; vertical-align:middle; display:inline-block;" /> 실시간 경마 레이스! <img class="emoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3c1.svg" style="width:3.5rem; height:3.5rem; vertical-align:middle; display:inline-block;" />
+                <img class="emoji" alt="🏇" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3c7.svg" style="width:3.5rem; height:3.5rem; vertical-align:middle; display:inline-block;" /> 실시간 경마 레이스! <img class="emoji" alt="🏁" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3c1.svg" style="width:3.5rem; height:3.5rem; vertical-align:middle; display:inline-block;" />
             </div>
             <div style="font-size:2.0rem; text-align:center; color:#00d2ff; margin-bottom:20px; font-weight:bold;">
                 채팅창에 번호(1~4) 또는 이모지를 쳐서 응원선수에게 부스트(⚡)를 주세욧!
@@ -732,13 +732,13 @@ class RacingEffect extends BaseEffect {
                     <div class="game-racer-wrapper" id="wrapper-${r.id}" style="left: 80px;">
                         <div class="game-racer-status-bubble" id="status-bubble-${r.id}"></div>
                         <div class="game-racer-avatar" id="avatar-${r.id}">
-                            <img class="emoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${r.code}.svg" style="width:clamp(70px, 8.4vh, 140px); height:clamp(70px, 8.4vh, 140px); display:block;" />
+                            <img class="emoji" alt="${r.emoji}" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/${r.code}.svg" style="width:clamp(70px, 8.4vh, 140px); height:clamp(70px, 8.4vh, 140px); display:block;" />
                         </div>
                         <div class="game-racer-label" id="label-${r.id}">${r.name}</div>
                     </div>
                 </div>
             `).join('')}
-            <div class="game-commentary-bar" id="game-commentary"><img class="emoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3a4.svg" style="width:2.0rem; height:2.0rem; vertical-align:middle; display:inline-block;" /> [중계진] 경기 신호와 함께 힘차게 출발했습니다! 초반 기선 제압이 중요합니다!</div>
+            <div class="game-commentary-bar" id="game-commentary"><img class="emoji" alt="🎤" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@latest/assets/svg/1f3a4.svg" style="width:2.0rem; height:2.0rem; vertical-align:middle; display:inline-block;" /> [중계진] 경기 신호와 함께 힘차게 출발했습니다! 초반 기선 제압이 중요합니다!</div>
         `;
         document.body.appendChild(track);
 
