@@ -4808,9 +4808,18 @@ body {
 }
 
 .game-hunt-weapon-card.dead {
-    filter: grayscale(1) opacity(0.3);
-    border-color: rgba(255, 0, 0, 0.2);
-    transform: translateY(5px);
+    border-color: rgba(255, 0, 0, 0.25);
+    background: rgba(10, 8, 6, 0.9);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+}
+
+.game-hunt-weapon-card.dead .game-hunt-hp-wrapper,
+.game-hunt-weapon-card.dead .game-hunt-status-tag-container,
+.game-hunt-weapon-card.dead .atb-circular-container,
+.game-hunt-weapon-card.dead .game-hunt-weapon-name,
+.game-hunt-weapon-card.dead div[id^="personality-tag-"] {
+    filter: grayscale(1);
+    opacity: 0.3;
 }
 
 .game-hunt-weapon-img {
@@ -4936,8 +4945,8 @@ body {
         opacity: 1;
     }
     100% {
-        transform: translate(-300px, 600px) scale(0.8) rotate(-15deg);
-        opacity: 0;
+        transform: translate(-300px, 800px) scale(0.85) rotate(-15deg);
+        opacity: 1;
     }
 }
 
@@ -4951,8 +4960,8 @@ body {
         opacity: 1;
     }
     100% {
-        transform: translate(300px, -600px) scale(0.8) rotate(-105deg);
-        opacity: 0;
+        transform: translate(300px, -800px) scale(0.85) rotate(-105deg);
+        opacity: 1;
     }
 }
 
