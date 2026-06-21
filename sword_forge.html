@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Eldritch Forge - 3D 슬라이딩 커스텀 마검 제련소</title>
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #08090c;
+            --panel-bg: rgba(15, 17, 26, 0.78);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary-glow: #00ffd2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            background: rgba(8, 9, 12, 0.5);
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 1.6rem;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #00ffd2 0%, #ff3366 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            height: calc(100vh - 85px);
+            position: relative;
+        }
+
+        /* 3D WebGL Viewport (Full Screen Background) */
+        .viewport-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        canvas#three-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Control Panel Styles (Left overlay) */
+        .control-panel {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            width: 460px;
+            z-index: 5;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+        }
+
+        .tab-menu {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: rgba(0, 255, 210, 0.1);
+            color: #00ffd2;
+            border: 1px solid rgba(0, 255, 210, 0.2);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .val-display {
+            color: #00ffd2;
+            font-family: monospace;
+        }
+
+        /* Slider Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #00ffd2;
+            cursor: pointer;
+            box-shadow: 0 0 8px #00ffd2;
+            transition: transform 0.1s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+
+        /* Style Selectors */
+        .style-picker {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .style-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .style-btn.active {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: rgba(255, 51, 102, 0.5);
+            color: #ff3366;
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.25);
+        }
+
+        .style-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Interactive Metadata Panel (Right Overlay) */
+        .info-panel {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            z-index: 5;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px 24px;
+            border-radius: 16px;
+            pointer-events: none;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            min-width: 280px;
+        }
+
+        .sword-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 4px;
+            text-shadow: 0 0 10px rgba(0, 255, 210, 0.3);
+        }
+
+        .sword-type {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #00ffd2;
+            font-weight: 700;
+        }
+
+        .instruction-box {
+            margin-top: 15px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+            line-height: 1.4;
+        }
+
+        /* Actions buttons overlay (Bottom Center) */
+        .actions-overlay {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            display: flex;
+            gap: 16px;
+            background: rgba(10, 11, 16, 0.5);
+            padding: 10px 20px;
+            border-radius: 100px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 12px 24px;
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #00ffd2 0%, #00b395 100%);
+            border: none;
+            color: #08090c;
+            box-shadow: 0 4px 15px rgba(0, 255, 210, 0.2);
+        }
+
+        .action-btn.primary:hover {
+            box-shadow: 0 4px 20px rgba(0, 255, 210, 0.45);
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, #ff3366 0%, #b30030 100%);
+            border: none;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.2);
+        }
+
+        .action-btn.secondary:hover {
+            box-shadow: 0 4px 20px rgba(255, 51, 102, 0.45);
+        }
+
+        .color-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .control-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .control-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .control-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>The Eldritch Forge 3D</h1>
+            <div class="subtitle">마검 3D 제련소 - 검신 신축 및 손잡이 슬라이드 시스템</div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-weight: bold; color: #00ffd2; font-family: 'Outfit'; font-size: 0.95rem;">3D WebGL Engine</div>
+            <div class="subtitle">마우스 드래그: 회전 | 휠: 줌</div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        
+        <!-- WebGL Viewport -->
+        <div class="viewport-container">
+            <canvas id="three-canvas"></canvas>
+        </div>
+
+        <!-- Left Controls overlay -->
+        <div class="control-panel">
+            <div class="tab-menu">
+                <button class="tab-btn active" onclick="switchTab(event, 'part-assembly-tab')">파츠 결합 (Assembly)</button>
+                <button class="tab-btn" onclick="switchTab(event, 'blade-tab')">검날 (Blade)</button>
+                <button class="tab-btn" onclick="switchTab(event, 'hilt-tab')">손잡이 (Hilt)</button>
+            </div>
+
+            <!-- Tab 1: Part Assembly (Sliding Mech) -->
+            <div id="part-assembly-tab" class="tab-content active">
+                <div style="background: rgba(0, 255, 210, 0.05); border: 1px dashed rgba(0, 255, 210, 0.2); border-radius: 10px; padding: 15px; font-size: 0.78rem; line-height: 1.45; color: #a4f3e6;">
+                    ℹ️ <strong>메커니즘 설명</strong>:<br>
+                    이 검은 <strong>2개의 독립된 파츠</strong>로 구성됩니다. <strong>[검날+레일 파트]</strong>를 따라 <strong>[손잡이+클램프 파트]</strong>가 통째로 미끄러지듯 슬라이드하여 검의 전체 길이를 조절합니다. 슬라이드 시 검날 파트에 고정된 톱니 모양의 기계식 슬라이드 레일이 드러납니다.
+                </div>
+
+                <div class="control-group">
+                    <label>손잡이 슬라이드 조정 (Grip Slide) <span class="val-display" id="val-handleSlide">0.0</span></label>
+                    <input type="range" id="handleSlide" min="0.0" max="2.4" step="0.05" value="0.0" oninput="updateVal('handleSlide', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>내부 샤프트 두께 (Inner Core Width) <span class="val-display" id="val-coreWidth">0.12</span></label>
+                    <input type="range" id="coreWidth" min="0.08" max="0.22" step="0.01" value="0.12" oninput="updateVal('coreWidth', this.value)">
+                </div>
+            </div>
+
+            <!-- Tab 2: Blade -->
+            <div id="blade-tab" class="tab-content">
+                <div class="control-group">
+                    <label>검날 스타일 (Blade Style)</label>
+                    <div class="style-picker">
+                        <button class="style-btn active" onclick="setStyle('blade', 'steel', this)">실버 강철 (Steel)</button>
+                        <button class="style-btn" onclick="setStyle('blade', 'laser', this)">에너지 블레이드</button>
+                        <button class="style-btn" onclick="setStyle('blade', 'flame', this)">다크 룬 (Void)</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>검날 길이 (Blade Length) <span class="val-display" id="val-bladeLength">4.2</span></label>
+                    <input type="range" id="bladeLength" min="2.5" max="6.5" step="0.1" value="4.2" oninput="updateVal('bladeLength', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>검날 너비 (Blade Width) <span class="val-display" id="val-bladeWidth">0.7</span></label>
+                    <input type="range" id="bladeWidth" min="0.4" max="1.4" step="0.05" value="0.7" oninput="updateVal('bladeWidth', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>검날 색상</label>
+                    <div class="color-row">
+                        <input type="color" id="bladeColor" value="#e2e8f0" oninput="updateColor('bladeColor', this.value)">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">메인 반사색</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Hilt & Guard -->
+            <div id="hilt-tab" class="tab-content">
+                <div class="control-group">
+                    <label>손잡이 sleeve 재질 (Grip Style)</label>
+                    <div class="style-picker">
+                        <button class="style-btn active" onclick="setStyle('hilt', 'leather', this)">가죽 스트랩 (Leather)</button>
+                        <button class="style-btn" onclick="setStyle('hilt', 'cyber', this)">네온 탄소 (Carbon)</button>
+                        <button class="style-btn" onclick="setStyle('hilt', 'ornate', this)">황금 왕실 (Gold)</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Grip sleeve 길이 (Sleeve Length) <span class="val-display" id="val-sleeveLength">1.4</span></label>
+                    <input type="range" id="sleeveLength" min="0.8" max="2.6" step="0.1" value="1.4" oninput="updateVal('sleeveLength', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>코등이(Guard) 너비 <span class="val-display" id="val-guardWidth">1.8</span></label>
+                    <input type="range" id="guardWidth" min="0.8" max="3.0" step="0.1" value="1.8" oninput="updateVal('guardWidth', this.value)">
+                </div>
+
+                <div class="control-group">
+                    <label>손잡이 및 가드 테두리 색상</label>
+                    <div class="color-row">
+                        <input type="color" id="hiltColor" value="#5c1d1d" oninput="updateColor('hiltColor', this.value)">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">손잡이 가죽/도색 색상</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>코등이 금속 색상</label>
+                    <div class="color-row">
+                        <input type="color" id="guardColor" value="#d4af37" oninput="updateColor('guardColor', this.value)">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">가드/폼멜 색상</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Info overlay -->
+        <div class="info-panel">
+            <div class="sword-name" id="sword-fantasy-name">성스러운 결속의 인도자</div>
+            <div class="sword-type" id="sword-fantasy-type">3D 슬라이드 마검</div>
+            <div class="instruction-box">
+                • <strong>드래그</strong>: 검 주위를 회전하여 시점을 변경합니다.<br>
+                • <strong>휠 스크롤</strong>: 줌인 / 줌아웃<br>
+                • <strong>우클릭 드래그</strong>: 카메라 이동 (Pan)<br>
+                • <strong>손잡이 슬라이드</strong>: 손잡이 파트가 검날 하단의 기계식 Notch 레일을 따라 실제로 미끄러지며(Slide) 고정되는 2-파트 설계 구조입니다.
+            </div>
+        </div>
+
+        <!-- Bottom Actions overlay -->
+        <div class="actions-overlay">
+            <button class="action-btn primary" onclick="swingSword3D()">⚔️ 휘두르기 (Slash)</button>
+            <button class="action-btn secondary" onclick="chargeGlow3D()">⚡ 기 충전 (Charge)</button>
+            <button class="action-btn" onclick="randomForge3D()">🔨 무작위 제련</button>
+        </div>
+
+    </div>
+
+    <!-- Load Three.js and OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // --- Web Audio Synthesizer ---
+        class SynthesizedAudio {
+            constructor() { this.ctx = null; }
+            init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+            playSwing() {
+                try {
+                    this.init(); if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const now = this.ctx.currentTime;
+                    const bufferSize = this.ctx.sampleRate * 0.4;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                    
+                    const noise = this.ctx.createBufferSource(); noise.buffer = buffer;
+                    const filter = this.ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.Q.value = 8.0;
+                    filter.frequency.setValueAtTime(1200, now);
+                    filter.frequency.exponentialRampToValueAtTime(150, now + 0.35);
+                    
+                    const gain = this.ctx.createGain();
+                    gain.gain.setValueAtTime(0.01, now);
+                    gain.gain.linearRampToValueAtTime(0.5, now + 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+                    
+                    noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+                    
+                    const osc = this.ctx.createOscillator(); const oscGain = this.ctx.createGain();
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.exponentialRampToValueAtTime(60, now + 0.35);
+                    oscGain.gain.setValueAtTime(0.2, now); oscGain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    
+                    osc.connect(oscGain); oscGain.connect(this.ctx.destination);
+                    noise.start(now); noise.stop(now + 0.4);
+                    osc.start(now); osc.stop(now + 0.4);
+                } catch (e) { console.warn(e); }
+            }
+            playClang() {
+                try {
+                    this.init(); if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const now = this.ctx.currentTime;
+                    const osc1 = this.ctx.createOscillator(); const gain1 = this.ctx.createGain();
+                    osc1.type = 'sine'; osc1.frequency.setValueAtTime(1500, now);
+                    osc1.frequency.linearRampToValueAtTime(800, now + 0.12);
+                    gain1.gain.setValueAtTime(0.3, now); gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    
+                    const osc2 = this.ctx.createOscillator(); const gain2 = this.ctx.createGain();
+                    osc2.type = 'triangle'; osc2.frequency.setValueAtTime(220, now);
+                    gain2.gain.setValueAtTime(0.25, now); gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                    
+                    osc1.connect(gain1); gain1.connect(this.ctx.destination);
+                    osc2.connect(gain2); gain2.connect(this.ctx.destination);
+                    osc1.start(now); osc1.stop(now + 0.8);
+                    osc2.start(now); osc2.stop(now + 0.8);
+                } catch (e) { console.warn(e); }
+            }
+            playCharge() {
+                try {
+                    this.init(); if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator(); const filter = this.ctx.createBiquadFilter(); const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50, now); osc.frequency.linearRampToValueAtTime(260, now + 1.8);
+                    filter.type = 'lowpass'; filter.frequency.setValueAtTime(80, now); filter.frequency.exponentialRampToValueAtTime(1500, now + 1.8);
+                    filter.Q.value = 10.0;
+                    gain.gain.setValueAtTime(0.01, now); gain.gain.linearRampToValueAtTime(0.3, now + 0.5);
+                    gain.gain.linearRampToValueAtTime(0.3, now + 1.5); gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+                    
+                    osc.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(now); osc.stop(now + 2.0);
+                } catch (e) { console.warn(e); }
+            }
+            playSlide() {
+                try {
+                    this.init(); if (this.ctx.state === 'suspended') this.ctx.resume();
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator(); const filter = this.ctx.createBiquadFilter(); const gain = this.ctx.createGain();
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(180, now); osc.frequency.linearRampToValueAtTime(290, now + 0.12);
+                    filter.type = 'lowpass'; filter.frequency.setValueAtTime(300, now);
+                    gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    osc.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+                    osc.start(now); osc.stop(now + 0.12);
+                } catch (e) {}
+            }
+        }
+        const audio = new SynthesizedAudio();
+
+        // --- 3D Scene Configurations ---
+        const config = {
+            handleSlide: 0.0,
+            coreWidth: 0.12,
+            
+            bladeStyle: 'steel',
+            bladeLength: 4.2,
+            bladeWidth: 0.7,
+            bladeColor: '#e2e8f0',
+            
+            sleeveLength: 1.4,
+            guardWidth: 1.8,
+            guardHeight: 0.25,
+            guardColor: '#d4af37',
+            
+            hiltStyle: 'leather',
+            hiltColor: '#5c1d1d'
+        };
+
+        const FANTASY_NAMES = {
+            prefix: ["폭풍의", "여명의", "검은 룬의", "빛을 머금은", "에테르", "고대", "천상의", "암흑 기사", "사이버네틱", "차원 가르는", "플라즈마", "공허의", "강철 영혼", "신화의"],
+            noun: ["인도자", "수호검", "파괴자", "영혼의 칼날", "지배자", "조율사", "발키리", "소울칼리버", "참격검", "슬라이더", "신축검"],
+            suffix: ["의 서약", "의 분노", "의 속삭임", "의 해방", "의 심판", "의 울림", "의 파수꾼", "의 성물"]
+        };
+
+        function generateSwordName3D() {
+            const p = FANTASY_NAMES.prefix[Math.floor(Math.random() * FANTASY_NAMES.prefix.length)];
+            const n = FANTASY_NAMES.noun[Math.floor(Math.random() * FANTASY_NAMES.noun.length)];
+            const s = FANTASY_NAMES.suffix[Math.floor(Math.random() * FANTASY_NAMES.suffix.length)];
+            
+            let desc = "레전더리 등급: ";
+            if (config.bladeStyle === 'laser') desc += "에너지 ";
+            else if (config.bladeStyle === 'flame') desc += "공허의 ";
+            else desc += "강철 ";
+            
+            desc += "2-파츠 슬라이딩 기계식 검";
+
+            document.getElementById('sword-fantasy-name').innerText = `${p} ${n}${s}`;
+            document.getElementById('sword-fantasy-type').innerText = desc;
+        }
+
+        // --- Tab Switching ---
+        function switchTab(evt, tabId) {
+            document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // --- Setup Three.js Engine ---
+        const canvas = document.getElementById('three-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x08090c, 0.04);
+
+        const camera = new THREE.PerspectiveCamera(40, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+        camera.position.set(0, 0, 9);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 3;
+        controls.maxDistance = 15;
+        controls.target.set(0, 0.5, 0);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0x222533, 1.2);
+        scene.add(ambientLight);
+
+        // Neon directional lights for cool visual aesthetic (Teal & Pink)
+        const light1 = new THREE.DirectionalLight(0x00ffd2, 1.5);
+        light1.position.set(5, 3, 5);
+        scene.add(light1);
+
+        const light2 = new THREE.DirectionalLight(0xff0066, 1.2);
+        light2.position.set(-5, -2, -5);
+        scene.add(light2);
+
+        const pointLight = new THREE.PointLight(0x00ffd2, 1.0, 10);
+        pointLight.position.set(0, 2, 1);
+        scene.add(pointLight);
+
+        // --- Sword 3D Mesh Assembly ---
+        const swordGroup = new THREE.Group();
+        scene.add(swordGroup);
+
+        // Subgroups for Part 1 (Core/Blade) and Part 2 (Sliding Handle)
+        const coreGroup = new THREE.Group(); // Blade, Guard, Inner Tang
+        const handleGroup = new THREE.Group(); // Sliding Grip sleeve, Pommel, Inner Telescopic sleeve
+        
+        swordGroup.add(coreGroup);
+        swordGroup.add(handleGroup);
+
+        // Reusable Materials
+        let steelMat, guardMat, leatherMat, neonMat, innerCoreMat;
+
+        function initMaterials() {
+            steelMat = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(config.bladeColor),
+                roughness: 0.15,
+                metalness: 0.95,
+                flatShading: false
+            });
+
+            guardMat = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(config.guardColor),
+                roughness: 0.25,
+                metalness: 0.85
+            });
+
+            leatherMat = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(config.hiltColor),
+                roughness: 0.7,
+                metalness: 0.1
+            });
+
+            neonMat = new THREE.MeshStandardMaterial({
+                color: 0x00ffd2,
+                emissive: 0x00ffd2,
+                emissiveIntensity: 1.5,
+                roughness: 0.2,
+                metalness: 0.1
+            });
+
+            innerCoreMat = new THREE.MeshStandardMaterial({
+                color: 0x94a3b8, // silver metal
+                roughness: 0.2,
+                metalness: 0.9
+            });
+        }
+        initMaterials();
+
+        // 3D Geometry containers
+        let bladeMesh, guardMesh, tangMesh;
+        let gripSleeveMesh, pommelMesh, teleMesh;
+
+        function rebuildSword3D() {
+            // --- Clean existing meshes in subgroups ---
+            while(coreGroup.children.length > 0) {
+                const obj = coreGroup.children[0];
+                coreGroup.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+            }
+            while(handleGroup.children.length > 0) {
+                const obj = handleGroup.children[0];
+                handleGroup.remove(obj);
+                if (obj.geometry) obj.geometry.dispose();
+            }
+
+            // Update Material Colors dynamically
+            steelMat.color.set(config.bladeColor);
+            guardMat.color.set(config.guardColor);
+            leatherMat.color.set(config.hiltColor);
+
+            // 1. --- PART 1: CORE / BLADE ASSEMBLY ---
+            
+            // BLADE GEOMETRY
+            let bladeGeom;
+            if (config.bladeStyle === 'laser') {
+                // Cylindrical glowing light saber style
+                bladeGeom = new THREE.CylinderGeometry(config.bladeWidth * 0.15, config.bladeWidth * 0.2, config.bladeLength, 16);
+                const blade = new THREE.Mesh(bladeGeom, neonMat);
+                blade.position.y = config.bladeLength / 2;
+                coreGroup.add(blade);
+                
+                // Add inner bright core
+                const coreGeom = new THREE.CylinderGeometry(config.bladeWidth * 0.06, config.bladeWidth * 0.08, config.bladeLength * 0.98, 16);
+                const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const core = new THREE.Mesh(coreGeom, whiteMat);
+                core.position.y = config.bladeLength / 2;
+                coreGroup.add(core);
+            } else if (config.bladeStyle === 'flame') {
+                // Void / Rune Greatsword style (thick diamond geometry with details)
+                bladeGeom = new THREE.BoxGeometry(config.bladeWidth, config.bladeLength, 0.12);
+                const voidMat = new THREE.MeshStandardMaterial({
+                    color: 0x1e1b4b, // deep dark indigo
+                    emissive: 0x4f46e5, // purple glow
+                    emissiveIntensity: 0.6,
+                    roughness: 0.4,
+                    metalness: 0.7
+                });
+                const blade = new THREE.Mesh(bladeGeom, voidMat);
+                blade.position.y = config.bladeLength / 2;
+                coreGroup.add(blade);
+
+                // Add tip cone
+                const tipGeom = new THREE.ConeGeometry(config.bladeWidth * 0.707, 0.8, 4);
+                tipGeom.scale(1, 1, 0.1);
+                const tip = new THREE.Mesh(tipGeom, voidMat);
+                tip.rotation.y = Math.PI / 4;
+                tip.position.y = config.bladeLength + 0.4;
+                coreGroup.add(tip);
+            } else {
+                // STEEL: Extruded Diamond Cross-Section (Classic Sword)
+                const shape = new THREE.Shape();
+                const halfW = config.bladeWidth / 2;
+                shape.moveTo(0, 0.08); // Center ridge top
+                shape.lineTo(halfW, 0); // Right edge
+                shape.lineTo(0, -0.08); // Center ridge bottom
+                shape.lineTo(-halfW, 0); // Left edge
+                shape.lineTo(0, 0.08);
+
+                const extrudeSettings = {
+                    steps: 1,
+                    depth: config.bladeLength,
+                    bevelEnabled: true,
+                    bevelThickness: 0.2,
+                    bevelSize: 0.02,
+                    bevelOffset: 0,
+                    bevelSegments: 2
+                };
+                
+                bladeGeom = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+                const blade = new THREE.Mesh(bladeGeom, steelMat);
+                blade.rotation.x = -Math.PI / 2; // point upwards
+                blade.position.y = 0.1; // adjust flush against guard
+                coreGroup.add(blade);
+
+                // Blade Tip Cone (Squashed)
+                const tipGeom = new THREE.ConeGeometry(config.bladeWidth * 0.707, 0.7, 4);
+                tipGeom.scale(1, 1, 0.16);
+                const tip = new THREE.Mesh(tipGeom, steelMat);
+                tip.rotation.y = Math.PI / 4;
+                tip.position.y = config.bladeLength + 0.45;
+                coreGroup.add(tip);
+            }
+
+            // GUARD (코등이)
+            // Stays flush at the origin Y = 0
+            const guardGeom = new THREE.BoxGeometry(config.guardWidth, config.guardHeight, 0.4);
+            const guard = new THREE.Mesh(guardGeom, guardMat);
+            guard.position.y = 0;
+            coreGroup.add(guard);
+
+            // CENTRAL CORE SLIDE RAIL (Part 1 - Central mechanical notched rail/track extending from guard down)
+            const railLength = 4.2;
+            const railW = config.coreWidth * 1.5;
+            const railD = config.coreWidth * 1.1;
+            const railGeom = new THREE.BoxGeometry(railW, railLength, railD);
+            const tang = new THREE.Mesh(railGeom, innerCoreMat);
+            tang.position.y = -railLength / 2; // centers the rail extending downwards
+            coreGroup.add(tang);
+
+            // Add mechanical locking teeth/notches along the slide rail edges
+            const notchSpacing = 0.35;
+            const notchCount = Math.floor((railLength - 0.4) / notchSpacing);
+            for (let i = 0; i < notchCount; i++) {
+                const notchY = -0.2 - (i * notchSpacing);
+                // Left Notch tooth
+                const toothGeom = new THREE.BoxGeometry(railW * 0.25, 0.08, railD * 1.1);
+                const toothL = new THREE.Mesh(toothGeom, steelMat);
+                toothL.position.set(-railW * 0.48, notchY, 0);
+                coreGroup.add(toothL);
+                
+                // Right Notch tooth
+                const toothR = toothL.clone();
+                toothR.position.x = railW * 0.48;
+                coreGroup.add(toothR);
+
+                // Add small mechanical center slot markings (indents/lines)
+                const lineGeom = new THREE.BoxGeometry(railW * 0.4, 0.03, railD * 1.15);
+                const mark = new THREE.Mesh(lineGeom, new THREE.MeshBasicMaterial({ color: 0x0f172a }));
+                mark.position.set(0, notchY, 0);
+                coreGroup.add(mark);
+            }
+
+
+            // 2. --- PART 2: SLIDING GRIP & COLLAR LATCH ASSEMBLY ---
+            // Inside the handleGroup.
+            // When slide = 0, handleGroup Y = 0 (flush against guard).
+            // When slide increases, handleGroup Y moves downwards (Y = -slideVal).
+            const slideVal = config.handleSlide;
+
+            // COLLAR LATCH (슬라이드 손잡이의 최상단 고정/조절용 클램프 칼라)
+            // Sits at the top of the handle group (Y = 0) and encloses the rail
+            const collarW = railW * 1.35;
+            const collarH = 0.28;
+            const collarD = railD * 1.35;
+            const collarGeom = new THREE.BoxGeometry(collarW, collarH, collarD);
+            const collar = new THREE.Mesh(collarGeom, guardMat); // matching guard metal color
+            collar.position.y = -collarH / 2;
+            handleGroup.add(collar);
+
+            // Add mechanical clamp release lever or screws on the collar
+            const leverGeom = new THREE.BoxGeometry(collarW * 0.25, 0.12, collarD * 0.4);
+            const lever = new THREE.Mesh(leverGeom, steelMat);
+            lever.position.set(collarW * 0.5, -collarH / 2, 0);
+            handleGroup.add(lever);
+
+            // GRIP SLEEVE (손잡이 그립 - 슬리브 구조로 칼라 바로 아래에서 시작됨)
+            let gripGeom;
+            let gripMesh;
+            const sL = config.sleeveLength;
+            const hW = config.coreWidth * 1.6; // sleeve outer thickness
+            const gripStartY = -collarH; // start right below collar
+
+            if (config.hiltStyle === 'cyber') {
+                // Carbon Cyberpunk grip with rings
+                gripGeom = new THREE.CylinderGeometry(hW * 1.05, hW * 1.05, sL, 8);
+                const darkCarbonMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.4 });
+                gripMesh = new THREE.Mesh(gripGeom, darkCarbonMat);
+                
+                // Add glowing neon rings along the grip
+                const ringCount = Math.floor(sL / 0.4);
+                for(let i=0; i<ringCount; i++) {
+                    const rGeom = new THREE.TorusGeometry(hW * 1.12, 0.04, 8, 24);
+                    const ring = new THREE.Mesh(rGeom, neonMat);
+                    ring.rotation.x = Math.PI / 2;
+                    ring.position.y = gripStartY - sL/2 + (i * 0.4) + 0.2;
+                    handleGroup.add(ring);
+                }
+            } else if (config.hiltStyle === 'ornate') {
+                // Gold Royal ornate grip
+                gripGeom = new THREE.CylinderGeometry(hW * 1.1, hW * 1.1, sL, 16);
+                gripMesh = new THREE.Mesh(gripGeom, guardMat); // Gold texture
+                
+                // Add golden ring ornaments
+                const rGeom = new THREE.TorusGeometry(hW * 1.25, 0.07, 12, 24);
+                const ring1 = new THREE.Mesh(rGeom, guardMat);
+                ring1.rotation.x = Math.PI/2;
+                ring1.position.y = gripStartY - sL/2 + 0.1;
+                handleGroup.add(ring1);
+
+                const ring2 = ring1.clone();
+                ring2.position.y = gripStartY - sL/2 + sL - 0.1;
+                handleGroup.add(ring2);
+            } else {
+                // Leather Strap Wrap
+                gripGeom = new THREE.CylinderGeometry(hW, hW, sL, 16);
+                gripMesh = new THREE.Mesh(gripGeom, leatherMat);
+                
+                // Add spiral wrap lines/bands
+                const wrapCount = Math.floor(sL / 0.18);
+                for(let i=0; i<wrapCount; i++) {
+                    const wrapGeom = new THREE.TorusGeometry(hW * 1.06, 0.03, 8, 16);
+                    const wrap = new THREE.Mesh(wrapGeom, new THREE.MeshStandardMaterial({color: 0x1a0d0d, roughness: 0.9}));
+                    wrap.rotation.x = Math.PI / 2;
+                    wrap.rotation.y = 0.15; // diagonal wrap tilt
+                    wrap.position.y = gripStartY - sL/2 + (i * 0.18) + 0.09;
+                    handleGroup.add(wrap);
+                }
+            }
+            // Grip sleeve is centered right below the collar
+            gripMesh.position.y = gripStartY - sL/2;
+            handleGroup.add(gripMesh);
+
+            // POMMEL (폼멜 - 손잡이 최하단 무게추)
+            // Attaches to the bottom of the grip sleeve
+            const pommelGeom = new THREE.SphereGeometry(hW * 1.3, 16, 16);
+            const pommel = new THREE.Mesh(pommelGeom, guardMat);
+            pommel.position.y = gripStartY - sL;
+            handleGroup.add(pommel);
+
+            // Positioning the sliding group based on the handleSlide Y offset
+            handleGroup.position.y = -slideVal;
+        }
+
+        rebuildSword3D();
+
+        // --- UI Value Updaters ---
+        let lastSlideTime = 0;
+        function updateVal(key, val) {
+            config[key] = parseFloat(val);
+            document.getElementById(`val-${key}`).innerText = val;
+            rebuildSword3D();
+            
+            if (key === 'handleSlide') {
+                const now = Date.now();
+                if (now - lastSlideTime > 120) {
+                    audio.playSlide();
+                    lastSlideTime = now;
+                }
+            }
+        }
+
+        function updateColor(key, val) {
+            config[key] = val;
+            rebuildSword3D();
+        }
+
+        function setStyle(part, style, btn) {
+            const btns = btn.parentNode.querySelectorAll('.style-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (part === 'blade') config.bladeStyle = style;
+            else if (part === 'hilt') config.hiltStyle = style;
+            
+            rebuildSword3D();
+            generateSwordName3D();
+            audio.playClang();
+        }
+
+        // --- 3D Particle / Glow Charge Effects ---
+        let particles3D = [];
+        const particleGroup = new THREE.Group();
+        scene.add(particleGroup);
+
+        function spawn3DSparks() {
+            const count = 40;
+            const bL = config.bladeLength;
+            for(let i=0; i<count; i++) {
+                const geom = new THREE.BoxGeometry(0.04, 0.04, 0.04);
+                const mat = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color(config.bladeStyle === 'laser' ? 0x00ffd2 : 0xff3366),
+                    transparent: true,
+                    opacity: 1.0
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                
+                // Spawn randomly along blade
+                const ratio = Math.random();
+                mesh.position.set(
+                    (Math.random() - 0.5) * config.bladeWidth * 0.8,
+                    ratio * bL,
+                    (Math.random() - 0.5) * 0.1
+                );
+                
+                // Random velocity
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 0.08 + 0.02;
+                mesh.userData = {
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed + 0.02,
+                    vz: (Math.random() - 0.5) * speed,
+                    life: Math.random() * 30 + 20
+                };
+                
+                particleGroup.add(mesh);
+                particles3D.push(mesh);
+            }
+        }
+
+        // --- 3D Action Animations ---
+        let isSlashing = false;
+        let slashTime = 0;
+
+        function swingSword3D() {
+            if (isSlashing) return;
+            isSlashing = true;
+            slashTime = 0;
+            audio.playSwing();
+            spawn3DSparks();
+        }
+
+        let isCharging = false;
+        let chargeTime = 0;
+
+        function chargeGlow3D() {
+            if (isCharging) {
+                isCharging = false;
+                pointLight.intensity = 1.0;
+                return;
+            }
+            isCharging = true;
+            chargeTime = 0;
+            audio.playCharge();
+            
+            // Burst sparks
+            spawn3DSparks();
+        }
+
+        function randomForge3D() {
+            // Sliders randomized
+            const slide = (Math.random() * 2.2).toFixed(2);
+            const bL = (2.8 + Math.random() * 3.5).toFixed(1);
+            const bW = (0.5 + Math.random() * 0.8).toFixed(2);
+            const sL = (1.0 + Math.random() * 1.5).toFixed(1);
+            const gW = (1.0 + Math.random() * 1.8).toFixed(1);
+
+            document.getElementById('handleSlide').value = slide;
+            updateVal('handleSlide', slide);
+            document.getElementById('bladeLength').value = bL;
+            updateVal('bladeLength', bL);
+            document.getElementById('bladeWidth').value = bW;
+            updateVal('bladeWidth', bW);
+            document.getElementById('sleeveLength').value = sL;
+            updateVal('sleeveLength', sL);
+            document.getElementById('guardWidth').value = gW;
+            updateVal('guardWidth', gW);
+
+            // Style buttons randomized
+            const styles = {
+                blade: ['steel', 'laser', 'flame'],
+                hilt: ['leather', 'cyber', 'ornate']
+            };
+            const rb = styles.blade[Math.floor(Math.random() * styles.blade.length)];
+            const rh = styles.hilt[Math.floor(Math.random() * styles.hilt.length)];
+
+            document.querySelectorAll('.tab-content').forEach(c => {
+                const targetBtn = c.querySelector(`.style-picker button[onclick*="${rb}"]`) ||
+                                  c.querySelector(`.style-picker button[onclick*="${rh}"]`);
+                if (targetBtn) targetBtn.click();
+            });
+
+            // Random colors
+            const randomHex = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            const bc = randomHex();
+            const gc = randomHex();
+            const hc = randomHex();
+
+            document.getElementById('bladeColor').value = bc;
+            updateColor('bladeColor', bc);
+            document.getElementById('guardColor').value = gc;
+            updateColor('guardColor', gc);
+            document.getElementById('hiltColor').value = hc;
+            updateColor('hiltColor', hc);
+
+            audio.playClang();
+            generateSwordName3D();
+        }
+
+        // --- Render Loop ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            const delta = clock.getDelta();
+            
+            // Ambient idle spin
+            if (!isSlashing) {
+                swordGroup.rotation.y += 0.005;
+                swordGroup.rotation.x = 0;
+                swordGroup.rotation.z = 0;
+            }
+
+            // Slashing Animation Physics
+            if (isSlashing) {
+                slashTime += delta * 2.2;
+                if (slashTime < 1.0) {
+                    // Slash path swing
+                    swordGroup.rotation.z = Math.sin(slashTime * Math.PI) * 1.8;
+                    swordGroup.rotation.y = -Math.sin(slashTime * Math.PI) * 0.8;
+                    swordGroup.rotation.x = Math.sin(slashTime * Math.PI) * 0.4;
+                } else {
+                    isSlashing = false;
+                    swordGroup.rotation.set(0, 0, 0);
+                }
+            }
+
+            // Charging magic pulses
+            if (isCharging) {
+                chargeTime += delta * 4;
+                pointLight.intensity = 2.0 + Math.sin(chargeTime) * 1.5;
+                
+                // slow spin during charge
+                swordGroup.rotation.y += 0.04;
+                
+                // Spawn a few sparks
+                if (Math.random() < 0.2) spawn3DSparks();
+            }
+
+            // Update 3D Particles
+            particles3D = particles3D.filter(p => {
+                p.position.x += p.userData.vx;
+                p.position.y += p.userData.vy;
+                p.position.z += p.userData.vz;
+                
+                p.userData.life--;
+                p.material.opacity = p.userData.life / 30;
+                
+                if (p.userData.life <= 0) {
+                    particleGroup.remove(p);
+                    p.geometry.dispose();
+                    p.material.dispose();
+                    return false;
+                }
+                return true;
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Responsive handling
+        window.addEventListener('resize', () => {
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        });
+
+        generateSwordName3D();
+    </script>
+</body>
+</html>
