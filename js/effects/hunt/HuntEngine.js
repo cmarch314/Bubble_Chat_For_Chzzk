@@ -927,7 +927,7 @@ class HuntEngine {
         const currentHealProb = w.personality === 'newbie' ? 0.95 : healProb;
         if (w.hp <= w.maxHp * hpThreshold && w.potions > 0 && Math.random() < currentHealProb) {
             w.potions--;
-            w.itemDuration = 20;
+            w.itemDuration = 5;
             const healAmount = Math.round(w.maxHp * 0.60);
             w.hp = Math.min(w.maxHp, w.hp + healAmount);
             this.addLog(`🧪 [포션] ${w.hunterName} (${w.name})이(가) 비약을 복용 +${healAmount} HP (남은 물약: ${w.potions}/10)`, '#2eff7b');
