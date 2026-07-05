@@ -186,7 +186,16 @@ class HuntEffect extends BaseEffect {
                 let chosenWeaponId = null;
                 let chosenPersonality = null;
 
-                if (remain) {
+                // Subscriber check helper
+                let isSub = msgData.isSubscriber || msgData.isSubscription || msgData.isStreamer || this.config.debugMode || false;
+                if (!isSub && msgData.badges && Array.isArray(msgData.badges)) {
+                    isSub = msgData.badges.some(badge => {
+                        const id = (badge.badgeId || "").toLowerCase();
+                        return id.includes("subscription") || id.includes("subscriber") || id.includes("sub");
+                    });
+                }
+
+                if (remain && isSub) {
                     const tokens = remain.split(/\s+/);
                     for (const token of tokens) {
                         if (WEAPON_NAME_MAP[token]) {
@@ -195,15 +204,6 @@ class HuntEffect extends BaseEffect {
                             chosenPersonality = PERSONALITY_MAP[token];
                         }
                     }
-                }
-
-                // Subscriber check helper
-                let isSub = msgData.isSubscriber || msgData.isSubscription || false;
-                if (!isSub && msgData.badges && Array.isArray(msgData.badges)) {
-                    isSub = msgData.badges.some(badge => {
-                        const id = (badge.badgeId || "").toLowerCase();
-                        return id.includes("subscription") || id.includes("subscriber") || id.includes("sub");
-                    });
                 }
 
                 this.bets[msgData.nickname] = {
