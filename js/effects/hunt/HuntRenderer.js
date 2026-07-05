@@ -283,7 +283,10 @@ class HuntRenderer {
         this.card.classList.remove('entry-anim');
         this.card.style.position = 'relative';
 
-        const { hpLabelText, selectedMonster, selectedWeapons, showMonsterHp } = data;
+        const { hpLabelText, selectedMonster, selectedWeapons, showMonsterHp, timeLimit } = data;
+        const limitSec = timeLimit || 120;
+        const initialMin = String(Math.floor(limitSec / 60)).padStart(2, '0');
+        const initialSec = String(limitSec % 60).padStart(2, '0');
 
         this.card.innerHTML = `
             <div id="game-hunt-top-panel" style="display: flex; flex-direction: column; align-items: center; width: 100%; background: rgba(0,0,0,0.65); border: 2px solid #c5a059; border-radius: 20px; padding: 20px 25px; box-shadow: 0 8px 32px rgba(0,0,0,0.7); position: relative; margin-bottom: 24px; box-sizing: border-box;">
@@ -412,7 +415,7 @@ class HuntRenderer {
                         white-space: nowrap;
                         box-sizing: border-box;
                     ">
-                        전투 시간: 00:00
+                        남은 시간: ${initialMin}:${initialSec}
                     </div>
                 </div>
             </div>
@@ -664,7 +667,7 @@ class HuntRenderer {
         const min = String(Math.floor(timeSec / 60)).padStart(2, '0');
         const sec = String(timeSec % 60).padStart(2, '0');
         const timerLbl = this.card.querySelector('#battle-timer-label');
-        if (timerLbl) timerLbl.textContent = `전투 시간: ${min}:${sec}`;
+        if (timerLbl) timerLbl.textContent = `남은 시간: ${min}:${sec}`;
     }
 
     showSkillBubble(idxOrMonster, text) {
@@ -1027,12 +1030,14 @@ class HuntRenderer {
                 }
 
                 setTimeout(() => {
-                    weaponCard.classList.remove('large-hit-anim');
-                    if (w.status === 'alive' && w.hp > 0) {
-                        const currentTag = this.card.querySelector(`#status-tag-${idx}`);
-                        if (currentTag) {
-                            currentTag.textContent = '⚔️';
-                            currentTag.className = 'game-hunt-status-tag active';
+                    if (w && w.status !== 'dead') {
+                        weaponCard.classList.remove('large-hit-anim');
+                        if (w.status === 'alive' && w.hp > 0) {
+                            const currentTag = this.card.querySelector(`#status-tag-${idx}`);
+                            if (currentTag) {
+                                currentTag.textContent = '⚔️';
+                                currentTag.className = 'game-hunt-status-tag active';
+                            }
                         }
                     }
                 }, 2500);
@@ -1048,12 +1053,14 @@ class HuntRenderer {
                 }
 
                 setTimeout(() => {
-                    weaponCard.classList.remove('small-hit-anim');
-                    if (w.status === 'alive' && w.hp > 0) {
-                        const currentTag = this.card.querySelector(`#status-tag-${idx}`);
-                        if (currentTag) {
-                            currentTag.textContent = '⚔️';
-                            currentTag.className = 'game-hunt-status-tag active';
+                    if (w && w.status !== 'dead') {
+                        weaponCard.classList.remove('small-hit-anim');
+                        if (w.status === 'alive' && w.hp > 0) {
+                            const currentTag = this.card.querySelector(`#status-tag-${idx}`);
+                            if (currentTag) {
+                                currentTag.textContent = '⚔️';
+                                currentTag.className = 'game-hunt-status-tag active';
+                            }
                         }
                     }
                 }, 1000);
@@ -1099,46 +1106,51 @@ class HuntRenderer {
             tag.className = 'game-hunt-status-tag fainted';
         }
         
-        // Hide weapon image and clear stun classes when carted
-        const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
-        if (weaponCard) {
-            weaponCard.classList.remove('stunned');
-            weaponCard.classList.remove('roar-stunned');
-            const imgContainer = weaponCard.querySelector('.game-hunt-weapon-img-container');
-            if (imgContainer) {
-                const roarOverlay = imgContainer.querySelector('.roar-stun-overlay');
-                if (roarOverlay) {
-                    roarOverlay.remove();
+        // Wrap fainted card animation and overlay generation in a 180ms delay to let the hit-shake complete first
+        setTimeout(() => {
+            if (!this.card) return;
+            const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
+            if (weaponCard) {
+                weaponCard.classList.remove('stunned', 'roar-stunned', 'large-hit-anim', 'small-hit-anim');
+                const imgContainer = weaponCard.querySelector('.game-hunt-weapon-img-container');
+                if (imgContainer) {
+                    const roarOverlay = imgContainer.querySelector('.roar-stun-overlay');
+                    if (roarOverlay) {
+                        roarOverlay.remove();
+                    }
+                }
+                const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
+                if (weaponImg) {
+                    if (w) {
+                        // Double check status: if they revived during these 180ms, do not animate
+                        if (w.status !== 'dead') return;
+
+                        // Add dead class to card and deactivate weapon image filter
+                        weaponCard.classList.add('dead');
+                        weaponImg.style.transition = 'filter 0.3s ease';
+                        weaponImg.style.filter = 'grayscale(0.5)';
+                        
+                        // Clear previous inline transform/animation/transition first to ensure clean state
+                        weaponCard.style.transform = '';
+                        weaponCard.style.borderColor = '';
+                        weaponCard.style.boxShadow = '';
+                        weaponCard.style.transition = 'none';
+                        weaponCard.style.animation = 'none';
+                        void weaponCard.offsetWidth; // Force reflow
+                        
+                        // Animate the weapon card itself down-left
+                        weaponCard.style.animation = 'cart-card-slide-out 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
+                        
+                        // Remove any existing faint cart overlay first
+                        const oldOverlay = weaponCard.querySelector('.faint-cart-overlay');
+                        if (oldOverlay) oldOverlay.remove();
+                    } else {
+                        weaponImg.style.transition = 'opacity 0.2s ease-out';
+                        weaponImg.style.opacity = '0';
+                    }
                 }
             }
-            const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
-            if (weaponImg) {
-                if (w) {
-                    // Add dead class to card and deactivate weapon image filter
-                    weaponCard.classList.add('dead');
-                    weaponImg.style.transition = 'filter 0.3s ease';
-                    weaponImg.style.filter = 'grayscale(0.5)';
-                    
-                    // Animate the weapon card itself down-left
-                    weaponCard.style.transition = 'none';
-                    weaponCard.style.animation = 'cart-card-slide-out 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
-                    
-                    // Create and append the faint cart overlay inside the weapon card
-                    const cartOverlay = document.createElement('div');
-                    cartOverlay.className = 'faint-cart-overlay';
-                    cartOverlay.innerHTML = `
-                        <div style="font-size: 3.5rem; line-height: 1; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">🛒</div>
-                        <div style="font-size: 0.85rem; font-weight: bold; background: rgba(20, 10, 10, 0.95); color: #ff3b30; border: 1.2px solid #ff3b30; padding: 2px 8px; border-radius: 4px; margin-top: 4px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                            ${w.name} 수레행
-                        </div>
-                    `;
-                    weaponCard.appendChild(cartOverlay);
-                } else {
-                    weaponImg.style.transition = 'opacity 0.2s ease-out';
-                    weaponImg.style.opacity = '0';
-                }
-            }
-        }
+        }, 180);
     }
 
     triggerMonsterKnockdownAnim() {
@@ -1153,6 +1165,7 @@ class HuntRenderer {
 
     restoreBorder(wIndex, w) {
         if (!this.card || !w) return;
+        if (w.status === 'dead') return;
         const weaponCard = this.card.querySelector(`#fight-card-${w.index}`);
         if (weaponCard) {
             // Remove all custom classes and animations from card
@@ -1161,6 +1174,7 @@ class HuntRenderer {
             weaponCard.style.transform = '';
             weaponCard.style.borderColor = '';
             weaponCard.style.boxShadow = '';
+            weaponCard.style.transition = 'transform 0.15s ease, border-color 0.15s ease';
             
             const cartOverlay = weaponCard.querySelector('.faint-cart-overlay');
             if (cartOverlay) {
@@ -1246,6 +1260,7 @@ class HuntRenderer {
 
     shakeWeapon(idx, w, borderClr = '#ff3b30', isAttack = false, moveName = null, isDodge = false) {
         if (!this.card) return;
+        if (w && w.status === 'dead' && !isAttack) return; // Dead hunters sliding out do not shake, but lethal hits should shake first
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         if (weaponCard) {
             const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
@@ -1271,7 +1286,10 @@ class HuntRenderer {
                     bow: { className: 'w-anim-bow', duration: 650 }
                 };
 
-                if (w && animMap[w.id]) {
+                if (moveName && (moveName.includes('공중회전난무') || moveName.includes('공중 회전') || moveName.includes('리와이베기'))) {
+                    animClass = 'w-anim-db-levi';
+                    animDuration = 1200;
+                } else if (w && animMap[w.id]) {
                     animClass = animMap[w.id].className;
                     animDuration = animMap[w.id].duration;
                 }
@@ -1283,7 +1301,7 @@ class HuntRenderer {
                         'attack-hammer-charge2', 'attack-hammer-charge3', 'attack-hammer-tornado', 
                         'attack-hammer-anim', 'attack-gs-charge1', 'attack-gs-charge2', 
                         'attack-gs-charge3', 'attack-bowgun-anim',
-                        'w-anim-gs', 'w-anim-ls', 'w-anim-db', 'w-anim-sns', 'w-anim-hm',
+                        'w-anim-gs', 'w-anim-ls', 'w-anim-db', 'w-anim-db-levi', 'w-anim-sns', 'w-anim-hm',
                         'w-anim-hh', 'w-anim-lc', 'w-anim-gl', 'w-anim-sa', 'w-anim-cb',
                         'w-anim-ig', 'w-anim-lbg', 'w-anim-hbg', 'w-anim-bow'
                     ];
@@ -1295,9 +1313,11 @@ class HuntRenderer {
                 weaponCard.style.borderColor = borderClr;
                 weaponCard.style.zIndex = "10";
                 setTimeout(() => {
-                    if (weaponImg) weaponImg.classList.remove(animClass);
-                    this.restoreBorder(idx, w);
-                    weaponCard.style.zIndex = "";
+                    if (w && w.status !== 'dead') {
+                        if (weaponImg) weaponImg.classList.remove(animClass);
+                        this.restoreBorder(idx, w);
+                        weaponCard.style.zIndex = "";
+                    }
                 }, animDuration);
             } else {
                 if (!isDodge) {
@@ -1305,8 +1325,10 @@ class HuntRenderer {
                 }
                 weaponCard.style.borderColor = borderClr;
                 setTimeout(() => {
-                    if (!isDodge) weaponCard.style.transform = '';
-                    this.restoreBorder(idx, w);
+                    if (w && w.status !== 'dead') {
+                        if (!isDodge) weaponCard.style.transform = '';
+                        this.restoreBorder(idx, w);
+                    }
                 }, 150);
             }
         }

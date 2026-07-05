@@ -246,13 +246,13 @@ class HuntEffect extends BaseEffect {
             const bet = this.bets[msgData.nickname];
             if (bet !== undefined && msg) {
                 this.renderer.spawnCombatChatBubble(bet.index, msg);
-                return false;
+                return true;
             }
         } else if (this.phase === 'fighting' || this.phase === 'ended') {
             const hunter = this.selectedWeapons.find(w => w.hunterName === msgData.nickname);
             if (hunter && msg) {
                 this.renderer.spawnCombatChatBubble(hunter.index, msg);
-                return false;
+                return true;
             }
         }
         return false;
@@ -399,11 +399,13 @@ class HuntEffect extends BaseEffect {
             ? `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`
             : `👾 [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
 
+        const timeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 120;
         this.renderer.renderFight({
             hpLabelText,
             selectedMonster: this.selectedMonster,
             selectedWeapons: this.selectedWeapons,
-            showMonsterHp: this.SHOW_MONSTER_HP
+            showMonsterHp: this.SHOW_MONSTER_HP,
+            timeLimit: timeLimitVal
         });
 
         // Initialize pure Simulation Engine
@@ -426,6 +428,7 @@ class HuntEffect extends BaseEffect {
             COMBO_LIST: this.initializer.COMBO_LIST,
             SHOW_MONSTER_HP: this.SHOW_MONSTER_HP,
             hunterSpeedMultiplier: this.config.getHuntConfig()?.hunterSpeedMultiplier !== undefined ? this.config.getHuntConfig().hunterSpeedMultiplier : 1.15,
+            timeLimit: timeLimitVal,
             callbacks: {
                 onLog: (text, color) => this.addCombatLog(text, color),
                 onPlaySFX: (fileName, fallbackKey) => this.audioManager.playMHAsset(fileName, fallbackKey),
@@ -473,7 +476,12 @@ class HuntEffect extends BaseEffect {
                             weaponCard.classList.remove('guard-shake-anim');
                             void weaponCard.offsetWidth;
                             weaponCard.classList.add('guard-shake-anim');
-                            setTimeout(() => weaponCard.classList.remove('guard-shake-anim'), 300);
+                            const w = this.selectedWeapons[idx];
+                            setTimeout(() => {
+                                if (w && w.status !== 'dead') {
+                                    weaponCard.classList.remove('guard-shake-anim');
+                                }
+                            }, 300);
                         }
                     }
                 },
@@ -499,7 +507,8 @@ class HuntEffect extends BaseEffect {
 
         // Set initial UI states
         this.renderer.updateCartUI(0);
-        this.renderer.updateTimerUI(0);
+        const initialLimit = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 120;
+        this.renderer.updateTimerUI(initialLimit);
 
         // Tick loop (Process through HuntEngine)
         this.fightInterval = setInterval(() => {
@@ -686,16 +695,18 @@ class HuntEffect extends BaseEffect {
         // Re-render Fighting UI header/monster showcase
         const actionLabel = this.monsterTier === 'elder' ? '토벌' : '수렵';
         const hpLabelText = `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
+        const resumeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 120;
         this.renderer.renderFight({
             hpLabelText,
             selectedMonster: this.selectedMonster,
             selectedWeapons: this.selectedWeapons,
-            showMonsterHp: this.SHOW_MONSTER_HP
+            showMonsterHp: this.SHOW_MONSTER_HP,
+            timeLimit: resumeLimitVal
         });
 
         // Restore actual UI states for monster HP, timer, and hunter HP
         this.renderer.updateMonsterHpUI(this.engine.monsterHp, this.engine.monsterMaxHp);
-        this.renderer.updateTimerUI(this.engine.battleTime);
+        this.renderer.updateTimerUI(this.engine.getRemainingSeconds());
         this.selectedWeapons.forEach(w => this.renderer.updateHpUI(w));
         this.renderer.updateCartUI(this.engine.cartCount);
 
@@ -1075,6 +1086,7 @@ class HuntEffect extends BaseEffect {
             });
         }
  
+        const displayDuration = isVictory ? 30000 : 15000;
         setTimeout(() => {
             container.style.animation = "game-fade-out 0.5s ease-in forwards";
             setTimeout(() => {
@@ -1086,7 +1098,7 @@ class HuntEffect extends BaseEffect {
                     this.resolveGame = null;
                 }
             }, 500);
-        }, 30000);
+        }, displayDuration);
     }
 
     forceStopGame() {

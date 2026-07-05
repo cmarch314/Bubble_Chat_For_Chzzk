@@ -31,6 +31,7 @@ class HuntEngine {
         this.COMBO_LIST = config.COMBO_LIST;
         this.SHOW_MONSTER_HP = config.SHOW_MONSTER_HP;
         this.hunterSpeedMultiplier = config.hunterSpeedMultiplier !== undefined ? config.hunterSpeedMultiplier : 1.15;
+        this.timeLimit = config.timeLimit || 120;
 
         // Valstrax Custom States
         if (this.selectedMonster.id.includes('valstrax')) {
@@ -115,8 +116,13 @@ class HuntEngine {
         if (this.callbacks.onUpdateCartUI) this.callbacks.onUpdateCartUI(carts);
     }
 
+    getRemainingSeconds() {
+        return Math.max(0, this.timeLimit - Math.floor(this.battleTime / 10));
+    }
+
     updateTimerUI(timeSec) {
-        if (this.callbacks.onUpdateTimerUI) this.callbacks.onUpdateTimerUI(timeSec);
+        const remaining = this.getRemainingSeconds();
+        if (this.callbacks.onUpdateTimerUI) this.callbacks.onUpdateTimerUI(remaining);
     }
 
     showSkillBubble(idxOrMonster, text) {
@@ -182,6 +188,13 @@ class HuntEngine {
     processTick() {
         this.battleTime++;
         this.updateTimerUI(this.battleTime);
+
+        // Check timeout fail condition
+        if (this.getRemainingSeconds() <= 0) {
+            this.addLog(`⏰ [시간 초과] 제한 시간이 초과되어 퀘스트에 실패했습니다...`, '#ff3b30');
+            this.triggerGameEnd(false);
+            return;
+        }
 
         // Global faint safety check
         this.selectedWeapons.forEach(w => {
@@ -1267,7 +1280,10 @@ class HuntEngine {
                 currentCombo.name.includes('고출력') || 
                 currentCombo.name.includes('투구깨기') || 
                 currentCombo.name.includes('용격포') || 
-                currentCombo.name.includes('참모아')
+                currentCombo.name.includes('참모아') ||
+                currentCombo.name.includes('공중회전난무') ||
+                currentCombo.name.includes('리와이베기') ||
+                currentCombo.name.includes('공중 회전')
             )) {
                 attackTicks = 18; // Special/heavy attacks take 1.8s
             }
