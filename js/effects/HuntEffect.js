@@ -399,7 +399,7 @@ class HuntEffect extends BaseEffect {
             ? `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`
             : `👾 [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
 
-        const timeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 120;
+        const timeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 180;
         this.renderer.renderFight({
             hpLabelText,
             selectedMonster: this.selectedMonster,
@@ -660,6 +660,7 @@ class HuntEffect extends BaseEffect {
         this.engine.monsterTier = this.monsterTier;
         this.engine.monsterHp = baseHp;
         this.engine.monsterMaxHp = baseHp;
+        this.engine.battleTime = 0; // Reset countdown timer for each monster!
         this.engine.monsterAtb = 0;
         this.engine.monsterState = 'normal';
         this.engine.monsterSpeed = 2.2 * this.monsterAtbSpeedMod;
@@ -696,7 +697,7 @@ class HuntEffect extends BaseEffect {
         // Re-render Fighting UI header/monster showcase
         const actionLabel = this.monsterTier === 'elder' ? '토벌' : '수렵';
         const hpLabelText = `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
-        const resumeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 120;
+        const resumeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 180;
         this.renderer.renderFight({
             hpLabelText,
             selectedMonster: this.selectedMonster,

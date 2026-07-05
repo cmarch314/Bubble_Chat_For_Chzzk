@@ -32,7 +32,7 @@ class HuntEngine {
         this.COMBO_LIST = config.COMBO_LIST;
         this.SHOW_MONSTER_HP = config.SHOW_MONSTER_HP;
         this.hunterSpeedMultiplier = config.hunterSpeedMultiplier !== undefined ? config.hunterSpeedMultiplier : 1.15;
-        this.timeLimit = config.timeLimit || 120;
+        this.timeLimit = config.timeLimit || 180;
 
         // Valstrax Custom States
         if (this.selectedMonster.id.includes('valstrax')) {
