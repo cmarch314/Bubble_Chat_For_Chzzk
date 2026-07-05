@@ -10,7 +10,7 @@ window.HIVE_VOLUME_CONFIG = {
 };
 
 window.HIVE_HUNT_CONFIG = {
-    "hunterSpeedMultiplier": 1.265,
+    "hunterSpeedMultiplier": 1.30,
     "timeLimit": 120
 };
 
