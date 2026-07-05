@@ -151,7 +151,7 @@ class HuntEffect extends BaseEffect {
             const PERSONALITY_MAP = {
                 '공격적': 'offensive', '공격': 'offensive', '극공': 'offensive',
                 '수비적': 'defensive', '수비': 'defensive', '방어적': 'defensive', '방어': 'defensive',
-                '베테랑': 'veteran', '숙련자': 'veteran', '고수': 'veteran',
+                '베테랑': 'veteran', '숙련자': 'veteran', '고수': 'veteran', '배태랑': 'veteran', '배테랑': 'veteran', '베태랑': 'veteran',
                 '서포터': 'support', '서포트': 'support', '지원': 'support',
                 '뉴비': 'newbie', '초보': 'newbie', '몬린이': 'newbie',
                 '밸런스': 'normal', '평범': 'normal', '일반': 'normal', '평범한': 'normal', '노멀': 'normal', '밸런': 'normal'
