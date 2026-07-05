@@ -494,9 +494,9 @@ class HuntEngine {
 
             if (w.status === 'alive' && !w.roarStunned && !isHitStunned && !isRolling && !isGuarding && !isGathering && !isUsingItem && !isAttacking) {
                 let fillRate = 1.0;
-                if (w.speedGroup === 'very_fast') fillRate = 2.0;
-                else if (w.speedGroup === 'fast') fillRate = 1.5;
-                else if (w.speedGroup === 'slow') fillRate = 0.65;
+                if (w.speedGroup === 'very_fast') fillRate = 1.4;
+                else if (w.speedGroup === 'fast') fillRate = 1.2;
+                else if (w.speedGroup === 'slow') fillRate = 0.85;
                 
                 // Apply hunter speed multiplier from config
                 fillRate *= this.hunterSpeedMultiplier;
