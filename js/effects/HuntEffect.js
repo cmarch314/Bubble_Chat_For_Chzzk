@@ -393,7 +393,7 @@ class HuntEffect extends BaseEffect {
         } else if (this.monsterTier === 'colossal') {
             baseHp = 36000;
             baseStunThreshold = 750;
-            this.monsterDamageMod = 1.35;
+            this.monsterDamageMod = 2.0; // 헌터 체력의 90% 데미지 (기본 0.45 * 2.0 = 0.90)
             this.monsterAtbSpeedMod = 0.7; // 초대형은 몸집이 아주 커서 행동이 느림 (0.7배)
             this.tierLabel = "초대형 몬스터";
         }
@@ -661,7 +661,7 @@ class HuntEffect extends BaseEffect {
         } else if (this.monsterTier === 'colossal') {
             baseHp = 36000;
             baseStunThreshold = 750;
-            this.monsterDamageMod = 1.35;
+            this.monsterDamageMod = 2.0; // 헌터 체력의 90% 데미지 (기본 0.45 * 2.0 = 0.90)
             this.monsterAtbSpeedMod = 0.7; // 초대형은 몸집이 아주 커서 행동이 느림 (0.7배)
             this.tierLabel = "초대형 몬스터";
         }
