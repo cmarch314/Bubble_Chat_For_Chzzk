@@ -149,12 +149,12 @@ class HuntEffect extends BaseEffect {
         if (this.phase === 'voting') {
             // Mapping for Weapons and Personalities
             const PERSONALITY_MAP = {
-                '공격적': 'offensive', '공격': 'offensive', '극공': 'offensive',
-                '수비적': 'defensive', '수비': 'defensive', '방어적': 'defensive', '방어': 'defensive',
-                '베테랑': 'veteran', '숙련자': 'veteran', '고수': 'veteran', '배태랑': 'veteran', '배테랑': 'veteran', '베태랑': 'veteran',
-                '서포터': 'support', '서포트': 'support', '지원': 'support',
-                '뉴비': 'newbie', '초보': 'newbie', '몬린이': 'newbie',
-                '밸런스': 'normal', '평범': 'normal', '일반': 'normal', '평범한': 'normal', '노멀': 'normal', '밸런': 'normal'
+                '공격적': 'offensive', '공격': 'offensive', '극공': 'offensive', '공격형': 'offensive',
+                '수비적': 'defensive', '수비': 'defensive', '방어적': 'defensive', '방어': 'defensive', '수비형': 'defensive', '방어형': 'defensive',
+                '베테랑': 'veteran', '숙련자': 'veteran', '고수': 'veteran', '배태랑': 'veteran', '배테랑': 'veteran', '베태랑': 'veteran', '베테랑형': 'veteran',
+                '서포터': 'support', '서포트': 'support', '지원': 'support', '지원형': 'support', '서폿': 'support',
+                '뉴비': 'newbie', '초보': 'newbie', '몬린이': 'newbie', '뉴비형': 'newbie', '초보형': 'newbie',
+                '밸런스': 'normal', '평범': 'normal', '일반': 'normal', '평범한': 'normal', '노멀': 'normal', '밸런': 'normal', '밸런스형': 'normal'
             };
 
             const WEAPON_NAME_MAP = {
@@ -191,7 +191,11 @@ class HuntEffect extends BaseEffect {
                 if (!isSub && msgData.badges && Array.isArray(msgData.badges)) {
                     isSub = msgData.badges.some(badge => {
                         const id = (badge.badgeId || "").toLowerCase();
-                        return id.includes("subscription") || id.includes("subscriber") || id.includes("sub");
+                        const title = (badge.title || badge.name || "").toLowerCase();
+                        const url = (badge.imageUrl || badge.url || "").toLowerCase();
+                        return id.includes("subscription") || id.includes("subscriber") || id.includes("sub") ||
+                               title.includes("구독") || title.includes("sub") ||
+                               url.includes("subscription") || url.includes("subscriber") || url.includes("sub");
                     });
                 }
 
