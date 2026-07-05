@@ -877,22 +877,12 @@ class HuntEffect extends BaseEffect {
                     w.isCarving = true; // 갈무리(채집) 상태 활성화
                     const tag = card.querySelector(`#status-tag-${w.index}`);
                     
-                    if (w.index === winner.index) {
-                        weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
-                        void weaponCard.offsetWidth;
-                        weaponCard.classList.add('victory-jump');
-                        if (tag) {
-                            tag.textContent = '🏆 MVP 🏆';
-                            tag.className = 'game-hunt-status-tag active';
-                        }
-                    } else {
-                        weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
-                        void weaponCard.offsetWidth;
-                        weaponCard.classList.add('victory-bounce');
-                        if (tag) {
-                            tag.textContent = '⚔️ 생존';
-                            tag.className = 'game-hunt-status-tag active';
-                        }
+                    weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
+                    void weaponCard.offsetWidth;
+                    weaponCard.classList.add('victory-bounce');
+                    if (tag) {
+                        tag.textContent = '⚔️ 생존';
+                        tag.className = 'game-hunt-status-tag active';
                     }
 
                     // Stagger delay based on hunter index in selectedWeapons array (0, 1.2s, 2.4s, 3.6s)
