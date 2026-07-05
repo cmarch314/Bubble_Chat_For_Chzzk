@@ -12,6 +12,7 @@ class HuntEngine {
         this.monsterTier = config.monsterTier || 'normal';
         this.monsterHp = config.monsterHp || 12000;
         this.monsterMaxHp = config.monsterMaxHp || 12000;
+        this.monsterSpeedMultiplier = config.monsterSpeedMultiplier !== undefined ? config.monsterSpeedMultiplier : 1.0;
         this.monsterAtb = config.monsterAtb || 0;
         this.monsterState = config.monsterState || 'normal';
         this.monsterSpeed = config.monsterSpeed || this.getMonsterSpeedForState(this.monsterState);
@@ -153,7 +154,7 @@ class HuntEngine {
         if (this.selectedMonster.id.includes('vaal_hazak')) {
             baseSpeed *= 0.75;
         }
-        return baseSpeed;
+        return baseSpeed * this.monsterSpeedMultiplier;
     }
 
     triggerHunterCart(target) {

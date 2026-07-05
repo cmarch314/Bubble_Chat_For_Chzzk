@@ -428,6 +428,7 @@ class HuntEffect extends BaseEffect {
             COMBO_LIST: this.initializer.COMBO_LIST,
             SHOW_MONSTER_HP: this.SHOW_MONSTER_HP,
             hunterSpeedMultiplier: this.config.getHuntConfig()?.hunterSpeedMultiplier !== undefined ? this.config.getHuntConfig().hunterSpeedMultiplier : 1.15,
+            monsterSpeedMultiplier: this.config.getHuntConfig()?.monsterSpeedMultiplier !== undefined ? this.config.getHuntConfig().monsterSpeedMultiplier : 1.0,
             timeLimit: timeLimitVal,
             callbacks: {
                 onLog: (text, color) => this.addCombatLog(text, color),
