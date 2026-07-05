@@ -160,6 +160,7 @@ class HuntEngine {
     triggerHunterCart(target) {
         target.status = 'dead';
         target.hp = 0; // 체력을 명확하게 0으로 설정
+        this.updateHpUI(target); // [FIX] 수레 탈 때 체력바도 즉시 0으로 갱신하여 UI 동기화
         target.atb = 0;
         target.roarStunned = false; // 포효 경직 상태 해제
         target.roarStunDuration = 0;
