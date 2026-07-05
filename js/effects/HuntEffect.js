@@ -388,13 +388,19 @@ class HuntEffect extends BaseEffect {
             baseHp = 24000;
             baseStunThreshold = 500;
             this.monsterDamageMod = 1.15;
-            this.monsterAtbSpeedMod = 1.45;
+            this.monsterAtbSpeedMod = 1.2; // 1.45에서 1.2로 하향
             this.tierLabel = "고룡종";
+        } else if (this.monsterTier === 'colossal') {
+            baseHp = 36000;
+            baseStunThreshold = 750;
+            this.monsterDamageMod = 1.35;
+            this.monsterAtbSpeedMod = 0.7; // 초대형은 몸집이 아주 커서 행동이 느림 (0.7배)
+            this.tierLabel = "초대형 몬스터";
         }
 
         this.cartCount = 0;
 
-        const actionLabel = this.monsterTier === 'elder' ? '토벌' : '수렵';
+        const actionLabel = (this.monsterTier === 'elder' || this.monsterTier === 'colossal') ? '토벌' : '수렵';
         const hpLabelText = this.consecutiveTotal > 1 
             ? `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`
             : `👾 [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
@@ -650,8 +656,14 @@ class HuntEffect extends BaseEffect {
             baseHp = 24000;
             baseStunThreshold = 500;
             this.monsterDamageMod = 1.4;
-            this.monsterAtbSpeedMod = 1.5;
+            this.monsterAtbSpeedMod = 1.2; // 1.5에서 1.2로 하향
             this.tierLabel = "고룡종";
+        } else if (this.monsterTier === 'colossal') {
+            baseHp = 36000;
+            baseStunThreshold = 750;
+            this.monsterDamageMod = 1.35;
+            this.monsterAtbSpeedMod = 0.7; // 초대형은 몸집이 아주 커서 행동이 느림 (0.7배)
+            this.tierLabel = "초대형 몬스터";
         }
 
         // Apply new values to existing engine
@@ -695,7 +707,7 @@ class HuntEffect extends BaseEffect {
         }
 
         // Re-render Fighting UI header/monster showcase
-        const actionLabel = this.monsterTier === 'elder' ? '토벌' : '수렵';
+        const actionLabel = (this.monsterTier === 'elder' || this.monsterTier === 'colossal') ? '토벌' : '수렵';
         const hpLabelText = `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
         const resumeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 180;
         this.renderer.renderFight({

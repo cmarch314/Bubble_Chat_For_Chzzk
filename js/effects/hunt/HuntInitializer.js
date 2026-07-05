@@ -179,7 +179,7 @@ class HuntInitializer {
 
     getMonsterTier(monster) {
         if (!monster) return 'large';
-        const id = (monster.id || "").toLowerCase();
+        const id = (monster.id || "").toLowerCase().replace(/'/g, '_');
         
         const smallIds = [
             'aptonoth', 'apceros', 'gajau', 'gastodon', 'girros', 'jagras', 
@@ -200,14 +200,22 @@ class HuntInitializer {
             return 'medium';
         }
 
+        const colossalIds = [
+            'lao_shan_lung', 'yamatsukami', 'kulve_taroth', 'safi_jiiva', 
+            'xeno_jiiva', 'shara_ishvalda', 'fatalis', 'amatsu', 
+            'behemoth', 'akantor', 'ukanlos', 'nakarkos'
+        ];
+        if (colossalIds.includes(id)) {
+            return 'colossal';
+        }
+
         const elderIds = [
-            'ancient_leshen', 'alatreon', 'amatsu', 'behemoth', 'blackveil_vaal_hazak',
-            'crimson_glow_valstrax', 'fatalis', 'furious_rajang', 'kirin', 
-            'kulve_taroth', 'kushala_daora', 'lunastra', 'malzeno', 'namielle', 
-            'nergigante', 'primordial_malzeno', 'ruiner_nergigante', 'safi_jiiva', 
-            'shara_ishvalda', 'teostra', 'vaal_hazak', 'valstrax', 'velkhana', 
-            'xeno_jiiva', 'shagaru_magala', 'akantor', 'ukanlos', 'nakarkos', 
-            'lao_shan_lung', 'yamatsukami'
+            'ancient_leshen', 'alatreon', 'blackveil_vaal_hazak',
+            'crimson_glow_valstrax', 'furious_rajang', 'kirin', 
+            'kushala_daora', 'lunastra', 'malzeno', 'namielle', 
+            'nergigante', 'primordial_malzeno', 'ruiner_nergigante', 
+            'teostra', 'vaal_hazak', 'valstrax', 'velkhana', 
+            'shagaru_magala'
         ];
         if (elderIds.includes(id)) {
             return 'elder';
