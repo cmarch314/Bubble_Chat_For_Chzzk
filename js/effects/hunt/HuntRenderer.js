@@ -1286,7 +1286,7 @@ class HuntRenderer {
                     bow: { className: 'w-anim-bow', duration: 650 }
                 };
 
-                if (moveName && (moveName.includes('공중회전난무') || moveName.includes('공중 회전') || moveName.includes('리와이베기'))) {
+                if (moveName && (moveName.includes('공중회전난무') || moveName.includes('공중 회전') || moveName.includes('리와이베기') || moveName.includes('돌진연참'))) {
                     animClass = 'w-anim-db-levi';
                     animDuration = 1200;
                 } else if (w && animMap[w.id]) {
