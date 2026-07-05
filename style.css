@@ -4828,7 +4828,7 @@ body {
     margin: 0 auto 16px;
     display: block;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) brightness(1.2);
-    transition: transform 0.4s cubic-bezier(0.3, 1.2, 0.5, 1), filter 0.4s ease;
+    transition: filter 0.4s ease;
 }
 
 .game-hunt-weapon-name {
