@@ -1,0 +1,10 @@
+{
+  "name": "bubblechat",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Chzzk chat overlay runtime",
+  "scripts": {
+    "verify": "node scripts/verify-project.js",
+    "test": "node tests/message-router.test.js && node scratch/test_integration.js && node scratch/test_attack_animations.js && node scratch/test_lobby.js && node scratch/test_charge_blade_shield.js"
+  }
+}
