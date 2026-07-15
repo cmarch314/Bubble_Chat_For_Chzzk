@@ -6,6 +6,8 @@ const managedTimersCode = fs.readFileSync(path.join(__dirname, '../js/runtime/Ma
 eval(managedTimersCode + "; globalThis.ManagedTimers = ManagedTimers;");
 const huntLifecycleCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntLifecycle.js'), 'utf8');
 eval(huntLifecycleCode + "; globalThis.HuntLifecycle = HuntLifecycle;");
+const participantParserCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntParticipantParser.js'), 'utf8');
+eval(participantParserCode + "; globalThis.HuntParticipantParser = HuntParticipantParser;");
 
 // Mock frontend globals
 global.BaseEffect = class BaseEffect {
