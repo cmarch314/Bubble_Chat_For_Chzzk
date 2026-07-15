@@ -4245,7 +4245,7 @@ window.HIVE_VISUAL_CONFIG = {
     "godsong": {
         "soundKey": "갓겜송",
         "duration": 14500,
-        "audioPath": "./SFX/갓겜합시다FULL.mp3",
+        "audioPath": "./SFX/Chzzk_Signatures/갓겜합시다FULL.mp3",
         "videoPath": "./Video/GodGame.mp4",
         "videoOpacity": 0.7,
         "beetleDelay": 7000,
@@ -4487,7 +4487,7 @@ window.HIVE_VISUAL_CONFIG = {
         "duration": 23000,
         "imagePath": "./img/King_Of_MH.png",
         "soundKey": null,
-        "audioPath": "./SFX/아들아.mp3",
+        "audioPath": "./SFX/Chzzk_Signatures/아들아.mp3",
         "volume": 0.7,
         "emojiPool": [
             "❄️"

@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "description": "Chzzk chat overlay runtime",
   "scripts": {
-    "verify": "node scripts/verify-project.js",
+    "verify": "node scripts/verify-project.js && node scripts/verify-runtime-assets.js",
+    "verify:assets": "node scripts/verify-runtime-assets.js",
     "analyze:audio": "node scripts/analyze-audio-levels.js",
     "test": "node tests/event-bus.test.js && node tests/safe-content.test.js && node tests/audio-level-profile.test.js && node tests/disposable-scope.test.js && node tests/managed-timers.test.js && node tests/game-effect-runtime.test.js && node tests/layout-contracts.test.js && node tests/obs-overlay-contracts.test.js && node tests/effect-registry.test.js && node tests/hunt-lifecycle.test.js && node tests/hunt-tier-rules.test.js && node tests/hunt-participant-parser.test.js && node tests/hunt-engine-dependencies.test.js && node tests/hunt-renderer-lifecycle.test.js && node tests/message-queue.test.js && node tests/visual-director.test.js && node tests/audio-manager-lifecycle.test.js && node tests/chzzk-gateway-lifecycle.test.js && node tests/chzzk-session-refresh.test.js && node tests/bubble-chat-app.test.js && node tests/message-router.test.js && node scratch/test_integration.js && node scratch/test_attack_animations.js && node scratch/test_lobby.js && node scratch/test_charge_blade_shield.js"
   }

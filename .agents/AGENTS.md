@@ -135,3 +135,8 @@ d:/BubbleChat/
 * Effects derived from `BaseEffect` must schedule delayed work through `this.timers`. `EffectRegistry` begins a fresh execution scope and clears it when `execute()` settles, including error paths.
 * Long-lived renderers and managers must own an explicit `ManagedTimers` instance and clear it when their UI, phase, or application is disposed. Hunt fight animations are cleared separately from the engine scheduler.
 * Do not add raw `setTimeout()` or `setInterval()` calls to effects or UI controllers. The only exception is a pure engine's injected default scheduler, which must be replaceable by its lifecycle owner.
+
+### Rule 13: Runtime Media References Must Be Verifiable
+* `npm run verify` must pass before a release or OBS handoff. It validates both source integrity and configured runtime media assets.
+* Sound-config paths are relative to `SFX/`. Visual-config paths must be explicit root-relative `./...` paths, except Random Dance pool filenames which resolve under `Video/RandomDance/`.
+* After adding, removing, renaming, or replacing media, run `npm run analyze:audio` and then `npm run verify`. Do not hand-edit the generated audio-level table.
