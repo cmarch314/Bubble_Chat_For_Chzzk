@@ -6,6 +6,8 @@ const vm = require('vm');
 const rendererPath = path.resolve(__dirname, '../js/effects/hunt/HuntRenderer.js');
 const rendererSource = fs.readFileSync(rendererPath, 'utf8');
 const context = vm.createContext({ console, window: {} });
+const notificationPath = path.resolve(__dirname, '../js/effects/hunt/HuntNotificationRenderer.js');
+vm.runInContext(fs.readFileSync(notificationPath, 'utf8'), context, { filename: notificationPath });
 vm.runInContext(`${rendererSource}\nglobalThis.HuntRenderer = HuntRenderer;`, context, {
     filename: rendererPath
 });
@@ -46,6 +48,9 @@ assert.strictEqual(animationClearCount, 1);
 assert.strictEqual(removed, oldContainer);
 assert.strictEqual(renderer.container, null);
 assert.strictEqual(renderer.card, null);
+assert.ok(renderer.notifications, 'notification renderer must be composed by HuntRenderer');
+assert.match(rendererSource, /this\.notifications = new HuntNotificationRenderer\(this\)/);
+assert.doesNotMatch(rendererSource, /className = 'combat-chat-bubble'/);
 
 const effectPath = path.resolve(__dirname, '../js/effects/HuntEffect.js');
 const effectSource = fs.readFileSync(effectPath, 'utf8');

@@ -140,3 +140,8 @@ d:/BubbleChat/
 * `npm run verify` must pass before a release or OBS handoff. It validates both source integrity and configured runtime media assets.
 * Sound-config paths are relative to `SFX/`. Visual-config paths must be explicit root-relative `./...` paths, except Random Dance pool filenames which resolve under `Video/RandomDance/`.
 * After adding, removing, renaming, or replacing media, run `npm run analyze:audio` and then `npm run verify`. Do not hand-edit the generated audio-level table.
+
+### Rule 14: Feature Data, Rules, Presentation, and Notifications Stay Separate
+* Racing data lives in `RacingData.js`, deterministic selection and lookup rules in `RacingRules.js`, and racing presentation styles in `styles/racing.css`.
+* Hunt monster calculations live in `HuntMonsterRules.js`. Hunt chat, lobby, and material popups live in `HuntNotificationRenderer.js`; `HuntRenderer` owns and delegates to it.
+* Chat input cleanup must pass through `ChatMessageNormalizer` before `ChatRenderer` creates DOM. Do not reintroduce duplicate inline data tables or dynamic feature CSS.

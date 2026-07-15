@@ -56,6 +56,7 @@ eval(huntDataCode);
 const huntInitializerCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntInitializer.js'), 'utf8');
 eval(huntInitializerCode + "; globalThis.HuntInitializer = HuntInitializer;");
 
+const huntNotificationRendererCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntNotificationRenderer.js'), 'utf8');
 const huntRendererCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntRenderer.js'), 'utf8');
 const huntEffectCode = fs.readFileSync(path.join(__dirname, '../js/effects/HuntEffect.js'), 'utf8');
 
@@ -92,6 +93,7 @@ const director = {
   }
 };
 
+eval(huntNotificationRendererCode + "; globalThis.HuntNotificationRenderer = HuntNotificationRenderer;");
 eval(huntRendererCode + "; globalThis.HuntRenderer = HuntRenderer;");
 eval(huntEffectCode + "; globalThis.HuntEffect = HuntEffect;");
 
@@ -162,4 +164,7 @@ async function run() {
   process.exit(0);
 }
 
-run().catch(console.error);
+run().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});
