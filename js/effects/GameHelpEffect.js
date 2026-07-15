@@ -10,27 +10,29 @@ class GameHelpEffect extends BaseEffect {
         style.id = 'game-help-styles';
         style.innerHTML = `
             .game-help-title {
-                font-size: 3.2rem;
+                grid-column: 1 / -1;
+                font-size: 2.8rem;
                 font-weight: 900;
                 background: linear-gradient(90deg, #00ffa3, #00d2ff);
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
-                margin-bottom: 30px;
+                margin-bottom: 4px;
                 text-shadow: 0 0 15px rgba(0, 255, 163, 0.25);
                 text-align: center;
             }
             .game-help-item {
-                margin-bottom: 30px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-                padding-bottom: 20px;
+                min-width: 0;
+                margin: 0;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 18px;
+                padding: 20px 22px;
+                background: rgba(255, 255, 255, 0.035);
             }
             .game-help-item:last-child {
-                border-bottom: none;
-                margin-bottom: 0;
-                padding-bottom: 0;
+                border: 1px solid rgba(255, 255, 255, 0.15);
             }
             .game-help-name {
-                font-size: 2.2rem;
+                font-size: 1.9rem;
                 font-weight: bold;
                 color: #00d2ff;
                 margin-bottom: 8px;
@@ -45,20 +47,21 @@ class GameHelpEffect extends BaseEffect {
                 padding: 4px 12px;
                 border-radius: 8px;
                 font-family: monospace;
-                font-size: 1.6rem;
+                font-size: 1.35rem;
                 margin-left: auto;
             }
             .game-help-desc {
-                font-size: 1.55rem;
+                font-size: 1.32rem;
                 color: #ccc;
-                line-height: 1.6;
-                padding-left: 36px;
+                line-height: 1.5;
+                padding-left: 0;
             }
             .game-help-footer {
+                grid-column: 1 / -1;
                 text-align: center;
-                font-size: 1.3rem;
+                font-size: 1.2rem;
                 color: #888;
-                margin-top: 35px;
+                margin-top: 2px;
             }
         `;
         document.head.appendChild(style);
