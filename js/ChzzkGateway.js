@@ -2,7 +2,7 @@
 // [Class 2] Chzzk Network Gateway
 // ==========================================
 class ChzzkGateway {
-    constructor(config, eventBus, legacyMessageHandler = null) {
+    constructor(config, eventBus, legacyMessageHandler = null, timers = {}) {
         this.config = config;
         this.eventBus = eventBus;
         this.onMessage = legacyMessageHandler;
@@ -16,9 +16,17 @@ class ChzzkGateway {
             { prefix: "https://api.codetabs.com/v1/proxy?quest=", encode: true }
         ];
         this.attemptCount = 1;
+        this.reconnectTimer = null;
+        this.heartbeatTimer = null;
+        this.socketGeneration = 0;
+        this.setTimeout = timers.setTimeout || ((callback, delay) => setTimeout(callback, delay));
+        this.clearTimeout = timers.clearTimeout || (id => clearTimeout(id));
+        this.setInterval = timers.setInterval || ((callback, delay) => setInterval(callback, delay));
+        this.clearInterval = timers.clearInterval || (id => clearInterval(id));
     }
 
     async connect() {
+        this._clearReconnect();
         const id = this.config.channelId || "NULL";
         const src = this.config.idSource || "Unknown";
         this._showLoader(`치지직 채널 접속 중...<br><div style="font-size: 0.5em; margin-top: 10px; opacity: 0.7; word-break: break-all;">ID: ${id}</div><div style="font-size: 0.4em; margin-top: 5px; opacity: 0.5;">(${this.attemptCount}번째 시도)</div>`, "loading");
@@ -85,35 +93,78 @@ class ChzzkGateway {
             this.config.log(`Connection Failed: ${e.message}`);
             this._showLoader(`연결 실패: ${e.message}<br>${this.attemptCount}번째 시도 실패. 5초 후 재시도`, "error");
             this.attemptCount++;
-            setTimeout(() => this.connect(), 5000);
+            this._scheduleReconnect(5000);
         }
     }
 
     _connectSocket(chatChannelId, accessToken) {
-        this.ws = new WebSocket('wss://kr-ss1.chat.naver.com/chat');
+        this._clearHeartbeat();
+        const generation = ++this.socketGeneration;
+        const socket = new WebSocket('wss://kr-ss1.chat.naver.com/chat');
+        this.ws = socket;
 
-        this.ws.onopen = () => {
+        socket.onopen = () => {
+            if (generation !== this.socketGeneration) return;
             this.config.log("WS Open. Sending Handshake.");
             this._showLoader("채팅 서버 연결 완료!", "success");
             window.dispatchEvent(new CustomEvent('chzzk_connected')); // Signal connection success
             this.attemptCount = 1; // Success! Reset counter
-            this.ws.send(JSON.stringify({
+            socket.send(JSON.stringify({
                 ver: "2", cmd: 100, svcid: "game", cid: chatChannelId,
                 bdy: { accTkn: accessToken, auth: "READ", devType: 2001, uid: null }, tid: 1
             }));
         };
 
-        this.ws.onmessage = (e) => this._parsePacket(JSON.parse(e.data), chatChannelId);
-        this.ws.onclose = () => {
+        socket.onmessage = (e) => {
+            if (generation !== this.socketGeneration) return;
+            try {
+                this._parsePacket(JSON.parse(e.data), chatChannelId);
+            } catch (error) {
+                this.config.log(`WS packet parse failed: ${error.message}`);
+            }
+        };
+        socket.onclose = () => {
+            if (generation !== this.socketGeneration) return;
+            this._clearHeartbeat();
             this.config.log("WS Closed. Reconnecting...");
             this.attemptCount++;
-            setTimeout(() => this.connect(), 3000);
+            this._scheduleReconnect(3000);
         };
-        this.ws.onerror = (err) => console.error("WS Error", err);
+        socket.onerror = (err) => console.error("WS Error", err);
 
-        setInterval(() => {
-            if (this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify({ ver: "2", cmd: 0 }));
+        this.heartbeatTimer = this.setInterval(() => {
+            if (generation !== this.socketGeneration) return;
+            if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ ver: "2", cmd: 0 }));
         }, 20000);
+    }
+
+    _scheduleReconnect(delay) {
+        this._clearReconnect();
+        this.reconnectTimer = this.setTimeout(() => {
+            this.reconnectTimer = null;
+            this.connect();
+        }, delay);
+    }
+
+    _clearReconnect() {
+        if (this.reconnectTimer === null) return;
+        this.clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = null;
+    }
+
+    _clearHeartbeat() {
+        if (this.heartbeatTimer === null) return;
+        this.clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = null;
+    }
+
+    disconnect() {
+        this.socketGeneration++;
+        this._clearReconnect();
+        this._clearHeartbeat();
+        const socket = this.ws;
+        this.ws = null;
+        if (socket && typeof socket.close === 'function') socket.close();
     }
 
     _parsePacket(data, chatChannelId) {
