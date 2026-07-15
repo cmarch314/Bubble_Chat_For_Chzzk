@@ -135,6 +135,7 @@ d:/BubbleChat/
 ### Rule 12: Timers Must Follow Their Owner's Lifecycle
 * Effects derived from `BaseEffect` must schedule delayed work through `this.timers`. `EffectRegistry` begins a fresh execution scope and clears it when `execute()` settles, including error paths.
 * Long-lived renderers and managers must own an explicit `ManagedTimers` instance and clear it when their UI, phase, or application is disposed. Hunt fight animations are cleared separately from the engine scheduler.
+* A hunt tick must return immediately after timeout, game end, or consecutive-monster handover. Never let the completed monster's tick mutate the newly initialized battle state.
 * Do not add raw `setTimeout()` or `setInterval()` calls to effects or UI controllers. The only exception is a pure engine's injected default scheduler, which must be replaceable by its lifecycle owner.
 
 ### Rule 13: Runtime Media References Must Be Verifiable

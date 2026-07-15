@@ -227,6 +227,7 @@ class HuntBattleTickExecutor {
         if (engine.monsterHp <= 0) {
             if (engine.currentConsecutiveIndex < engine.consecutiveTotal - 1) {
                 engine.triggerNextConsecutive();
+                return;
             } else {
                 const aliveList = engine.selectedWeapons.filter(w => w.status === 'alive');
                 const winner = aliveList.length > 0 ? aliveList[0] : engine.selectedWeapons[0];
