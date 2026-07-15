@@ -142,7 +142,7 @@ d:/BubbleChat/
 * After adding, removing, renaming, or replacing media, run `npm run analyze:audio` and then `npm run verify`. Do not hand-edit the generated audio-level table.
 
 ### Rule 14: Feature Data, Rules, Presentation, and Notifications Stay Separate
-* Racing data lives in `RacingData.js`, deterministic selection and lookup rules in `RacingRules.js`, and racing presentation styles in `styles/racing.css`.
+* Racing data lives in `RacingData.js`, deterministic selection and lookup rules in `RacingRules.js`, the active simulation loop in `RacingRunner.js`, and racing presentation styles in `styles/racing.css`.
 * Hunt monster calculations live in `HuntMonsterRules.js`; monster and weapon turns execute through `HuntMonsterTurnExecutor.js` and `HuntHunterTurnExecutor.js`. Combat animations live in `HuntCombatAnimator.js`; chat, lobby, and material popups live in `HuntNotificationRenderer.js`. `HuntRenderer` owns and delegates to both render helpers.
 * Chat input cleanup must pass through `ChatMessageNormalizer` before `ChatRenderer` creates DOM. Do not reintroduce duplicate inline data tables or dynamic feature CSS.
 

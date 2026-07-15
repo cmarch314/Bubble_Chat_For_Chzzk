@@ -59,8 +59,11 @@ assert.doesNotMatch(quizSource, /setTimeout\(|setInterval\(|clearTimeout\(|clear
 
 const racingPath = path.resolve(__dirname, '../js/effects/RacingEffect.js');
 const racingSource = fs.readFileSync(racingPath, 'utf8');
+const racingRunnerSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/RacingRunner.js'), 'utf8');
 assert.match(racingSource, /this\.runtime = new GameEffectRuntime\(this, director\)/);
+assert.match(racingSource, /return RacingRunner\.start\(this, resolve\)/);
 assert.match(racingSource, /if \(!this\.runtime\.end\(\)\) return;/);
 assert.doesNotMatch(racingSource, /setTimeout\(|setInterval\(|clearTimeout\(|clearInterval\(/);
+assert.doesNotMatch(racingRunnerSource, /\bthis\.|setTimeout\(|setInterval\(|clearTimeout\(|clearInterval\(/);
 
 console.log('[test] GameEffectRuntime ownership and completion contract passed.');

@@ -18,15 +18,17 @@ for (const racer of window.RACING_ALL_RACERS) {
 }
 
 const effectSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/RacingEffect.js'), 'utf8');
+const runnerSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/RacingRunner.js'), 'utf8');
 assert.match(effectSource, /window\.RACING_ALL_RACERS/);
-assert.match(effectSource, /window\.RACING_INTRO_TEXTS/);
+assert.match(runnerSource, /window\.RACING_INTRO_TEXTS/);
 assert.match(effectSource, /window\.RACING_EMOJI_CODE_MAP/);
-assert.doesNotMatch(effectSource, /const ALL_RACERS\s*=\s*\[/);
-assert.doesNotMatch(effectSource, /const INTRO_TEXTS\s*=\s*\{/);
+assert.doesNotMatch(effectSource + runnerSource, /const ALL_RACERS\s*=\s*\[/);
+assert.doesNotMatch(effectSource + runnerSource, /const INTRO_TEXTS\s*=\s*\{/);
 assert.doesNotMatch(effectSource, /_injectStyles|style\.innerHTML/);
 
 const indexSource = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
 assert.match(indexSource, /styles\/racing\.css/);
+assert.match(indexSource, /RacingRunner\.js/);
 assert.ok(fs.existsSync(path.resolve(__dirname, '../styles/racing.css')));
 
 console.log('[test] Racing data single-source contract passed.');
