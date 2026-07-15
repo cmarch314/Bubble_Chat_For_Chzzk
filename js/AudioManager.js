@@ -14,6 +14,9 @@ class AudioManager {
         this.activeFallbackAudio = new Set();
         this.disposed = false;
         this.basePath = './SFX/';
+        this.levelProfile = typeof AudioLevelProfile === 'function'
+            ? new AudioLevelProfile(window.HIVE_AUDIO_LEVELS || {})
+            : { gain: () => 1, volume: (path, volume) => Math.min(1, Math.max(0, volume)) };
         // [Performance] 오디오 버퍼 캐시 (중복 로딩 방지)
         this.bufferCache = new Map();
 
@@ -44,6 +47,7 @@ class AudioManager {
         this.soundHive = {};
         this.enabled = true;
         this.volumeConfig = { ...this.configManager.getVolumeConfig() };
+        this.masterGain.gain.value = this.volumeConfig.master;
         this.updateConfigLegacy(this.configManager.getSoundConfig());
 
         // [Visual Audio Tracking]
@@ -175,7 +179,7 @@ class AudioManager {
         });
     }
 
-    connectMediaElement(mediaElement, type = 'visual') {
+    connectMediaElement(mediaElement, type = 'visual', options = {}) {
         if (!mediaElement) return;
 
         // [Rule 1 Guard] Never connect media elements to AudioContext if loaded via file:// protocol,
@@ -184,12 +188,7 @@ class AudioManager {
         if (isLocal) {
             console.log(`[MediaStaging] Local file protocol detected. Bypassing Web Audio Context to prevent CORS mute. Using native volume control.`);
             
-            const applyNativeVolume = () => {
-                const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-                const typeMultiplier = (type === 'visual') ? volConfig.visual : volConfig.sfx;
-                mediaElement.muted = false;
-                mediaElement.volume = Math.min(1.0, Math.max(0, volConfig.master * typeMultiplier));
-            };
+            const applyNativeVolume = () => this.applyNativeVolume(mediaElement, { type, ...options });
 
             applyNativeVolume();
 
@@ -197,7 +196,7 @@ class AudioManager {
                 this._nativeMediaElements = [];
             }
             if (!this._nativeMediaElements.some(item => item.el === mediaElement)) {
-                this._nativeMediaElements.push({ el: mediaElement, type, apply: applyNativeVolume });
+                this._nativeMediaElements.push({ el: mediaElement, type, apply: applyNativeVolume, detached: false });
             }
             return;
         }
@@ -211,34 +210,71 @@ class AudioManager {
             
             const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
             const typeMultiplier = (type === 'visual') ? volConfig.visual : volConfig.sfx;
-            preGainNode.gain.value = typeMultiplier;
+            const path = options.path || mediaElement.currentSrc || mediaElement.src || '';
+            preGainNode.gain.value = typeMultiplier * this._profileGain(path, type);
 
             sourceNode.connect(preGainNode);
 
-            const normConfig = this.configManager ? this.configManager.getNormalizerConfig() : { enabled: true, visual: false, sfx: true };
-            const applyNormalizer = normConfig.enabled &&
-                ((type === 'visual' && normConfig.visual) || (type === 'sfx' && normConfig.sfx));
-
-            if (applyNormalizer) {
-                // Apply Pre-amp boost for normalizer
-                const boost = 2.5; 
-                preGainNode.gain.value = typeMultiplier * boost;
-                preGainNode.connect(this.compressor);
-                console.log(`[MediaStaging] ON - Media Element Connected. Drive:${(typeMultiplier * boost).toFixed(1)} -> Comp -> Master`);
-            } else {
-                preGainNode.connect(this.masterGain);
-                console.log(`[MediaStaging] OFF - Media Element Connected. Drive:${typeMultiplier.toFixed(1)} -> Master`);
-            }
+            preGainNode.connect(this.compressor);
         } catch (e) {
             console.warn("[AudioManager] Failed to connect media element:", e);
         }
+    }
+
+    getOutputVolume(path, type = 'visual', baseVolume = 1) {
+        const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
+        const typeMultiplier = type === 'sfx' ? volConfig.sfx : volConfig.visual;
+        const staged = volConfig.master * typeMultiplier * baseVolume;
+        return Math.min(1, Math.max(0, staged * this._profileGain(path, type)));
+    }
+
+    _profileGain(path, type) {
+        const config = this.configManager?.getNormalizerConfig?.() || {
+            enabled: true, visual: true, sfx: true
+        };
+        const categoryEnabled = type === 'sfx' ? config.sfx !== false : config.visual !== false;
+        return config.enabled !== false && categoryEnabled ? this.levelProfile.gain(path) : 1;
+    }
+
+    applyNativeVolume(mediaElement, options = {}) {
+        if (!mediaElement) return 0;
+        const type = options.type || 'visual';
+        const baseVolume = options.baseVolume ?? mediaElement.__bubbleBaseVolume ?? 1;
+        const path = options.path || mediaElement.currentSrc || mediaElement.src || '';
+        mediaElement.__bubbleBaseVolume = baseVolume;
+        mediaElement.muted = false;
+        mediaElement.volume = this.getOutputVolume(path, type, baseVolume);
+        return mediaElement.volume;
+    }
+
+    createNativeAudio(path, options = {}) {
+        const audio = new Audio(path);
+        audio.loop = options.loop === true;
+        audio.__bubbleBaseVolume = options.baseVolume ?? 1;
+        this.applyNativeVolume(audio, {
+            path,
+            type: options.type || 'visual',
+            baseVolume: audio.__bubbleBaseVolume
+        });
+        if (!this._nativeMediaElements) this._nativeMediaElements = [];
+        const apply = () => this.applyNativeVolume(audio, {
+            path,
+            type: options.type || 'visual',
+            baseVolume: audio.__bubbleBaseVolume
+        });
+        const entry = { el: audio, type: options.type || 'visual', apply, detached: true };
+        this._nativeMediaElements.push(entry);
+        audio.addEventListener?.('ended', () => {
+            this._nativeMediaElements = (this._nativeMediaElements || []).filter(item => item !== entry);
+        }, { once: true });
+        return audio;
     }
 
     _updateCompressorSettings() {
         if (!this.compressor) return;
         // Use default settings if window.COMPRESSOR_SETTINGS is not set (it wasn't encapsulated but that's fine, we can keep it hardcoded for now or use defaults)
         const settings = window.COMPRESSOR_SETTINGS || {
-            threshold: -15, knee: 0, ratio: 20, attack: 0, release: 0.1
+            threshold: -18, knee: 12, ratio: 4, attack: 0.008, release: 0.18
         };
         this.compressor.threshold.value = settings.threshold;
         this.compressor.knee.value = settings.knee;
@@ -274,6 +310,7 @@ class AudioManager {
     updateVolumeConfig(config) {
         if (!config) return;
         this.volumeConfig = { ...this.volumeConfig, ...config };
+        this.masterGain.gain.setTargetAtTime(this.volumeConfig.master, this.audioCtx.currentTime, 0.05);
 
         // ConfigManager에 업데이트 위임 (LocalStorage 저장 등 수행)
         if (this.configManager) {
@@ -283,7 +320,7 @@ class AudioManager {
         // Update native media elements if registered (for file:// protocol bypass)
         if (this._nativeMediaElements) {
             this._nativeMediaElements = this._nativeMediaElements.filter(item => {
-                if (!item.el || !document.body.contains(item.el)) {
+                if (!item.el || (!item.detached && !document.body.contains(item.el)) || item.el.ended) {
                     return false;
                 }
                 try {
@@ -519,7 +556,8 @@ class AudioManager {
         // ★★★ [Gain Staging] ★★★
         // Input Drive: 컴프레서로 밀어넣는 소리의 크기 (입력 배율만 적용)
         const typeMultiplier = (type === 'visual') ? volConfig.visual : volConfig.sfx;
-        const driveGain = baseVolume * typeMultiplier;
+        const profileGain = this._profileGain(playPath, type);
+        const driveGain = baseVolume * typeMultiplier * profileGain;
 
         // Output Ceiling: 컴프레서를 거친 뒤의 최종 볼륨 (Master 적용)
         const outputCeiling = volConfig.master;
@@ -555,15 +593,9 @@ class AudioManager {
 
                     source.connect(preGainNode);
 
-                    if (applyNormalizer) {
-                        const boost = 2.5; // Normalizer Pre-amp boost
-                        preGainNode.gain.value = scaledDriveGain * boost;
-                        preGainNode.connect(this.compressor);
-                        console.log(`[Staging] ON - Voices:${this.activeVoices} Drive:${(scaledDriveGain * boost).toFixed(1)} -> Comp -> Ceiling:${outputCeiling.toFixed(1)}`);
-                    } else {
-                        preGainNode.connect(this.masterGain);
-                        console.log(`[Staging] OFF - Voices:${this.activeVoices} Drive:${scaledDriveGain.toFixed(1)} -> Ceiling:${outputCeiling.toFixed(1)}`);
-                    }
+                    // Per-file loudness gain does the normalization. The compressor is
+                    // the final collision/peak safety stage for every decoded SFX.
+                    preGainNode.connect(this.compressor);
 
                     source.start(0);
                     source.onended = () => {
@@ -604,13 +636,15 @@ class AudioManager {
                         .catch(e => {
                             // [Strategy B] HTML5 Fallback
                             console.warn(`[AudioManager] Fallback for "${fileName}": ${e.message}`);
-                            const audio = new Audio(playPath);
+                            const audio = this.createNativeAudio(playPath, {
+                                type,
+                                baseVolume
+                            });
                             if (this.disposed) {
                                 resolve();
                                 return;
                             }
                             this.activeFallbackAudio.add(audio);
-                            audio.volume = Math.min(1.0, Math.max(0, driveGain * outputCeiling));
                             const cleanup = () => {
                                 this.activeFallbackAudio.delete(audio);
                                 resolve();

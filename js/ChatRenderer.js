@@ -115,11 +115,9 @@ class ChatRenderer {
             video.style.marginTop = '4px';
             video.playsInline = true;
 
-            // Apply volume configuration to native video element
-            const volConfig = window.HIVE_VOLUME_CONFIG || { master: 1.0, visual: 1.0 };
-            const masterVol = typeof volConfig.master === 'number' ? volConfig.master : 1.0;
-            const visualVol = typeof volConfig.visual === 'number' ? volConfig.visual : 1.0;
-            video.volume = Math.min(1.0, Math.max(0, masterVol * visualVol));
+            // Native media stays compatible with OBS file:// sources while using
+            // the measured per-file loudness profile.
+            this.audioManager?.connectMediaElement(video, 'visual');
 
             // Clear standard text timeout
             timeout = null;
@@ -173,6 +171,7 @@ class ChatRenderer {
                 if (item.type === 'video') {
                     video.style.display = 'block';
                     video.src = `AI CMC/${encodeURIComponent(item.name)}.mp4`;
+                    this.audioManager?.applyNativeVolume(video, { type: 'visual', path: video.src });
                     video.play().catch(e => {
                         console.error("CMC video play failed, skipping:", e);
                         if (!hasTriggeredNext) {

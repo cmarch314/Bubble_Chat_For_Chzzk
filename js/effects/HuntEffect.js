@@ -102,12 +102,14 @@ class HuntEffect extends BaseEffect {
                 'BGM/MHRS_Elgado.mp3'
             ];
             const selectedLobby = lobbyBgms[Math.floor(Math.random() * lobbyBgms.length)];
-            this.audioManager.lobbyBgm = new Audio(selectedLobby);
-            this.audioManager.lobbyBgm.loop = true;
-            const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.audioManager.lobbyBgm.volume = volConfig.master * volConfig.visual * 0.315;
+            this.audioManager.lobbyBgm = this.director.audioManager.createNativeAudio(selectedLobby, {
+                type: 'visual', baseVolume: 0.315, loop: true
+            });
             this.audioManager.lobbyBgmPromise = this.audioManager.lobbyBgm.play().catch(() => {
                 this.audioManager.lobbyBgm.src = 'BGM/SportBGM.mp3';
+                this.director.audioManager.applyNativeVolume(this.audioManager.lobbyBgm, {
+                    type: 'visual', path: 'BGM/SportBGM.mp3', baseVolume: 0.315
+                });
                 this.audioManager.lobbyBgmPromise = this.audioManager.lobbyBgm.play().catch(err => console.warn("Lobby BGM failed to play:", err));
             });
         } catch (e) {
@@ -310,14 +312,19 @@ class HuntEffect extends BaseEffect {
 
         const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster.nameKO);
         try {
-            this.audioManager.battleBgm = new Audio(bgmSrc);
-            this.audioManager.battleBgm.loop = true;
-            const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.audioManager.battleBgm.volume = volConfig.master * volConfig.visual * 0.315;
+            this.audioManager.battleBgm = this.director.audioManager.createNativeAudio(bgmSrc, {
+                type: 'visual', baseVolume: 0.315, loop: true
+            });
             this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(() => {
                 this.audioManager.battleBgm.src = 'BGM/MHGU_Arena.mp3';
+                this.director.audioManager.applyNativeVolume(this.audioManager.battleBgm, {
+                    type: 'visual', path: 'BGM/MHGU_Arena.mp3', baseVolume: 0.315
+                });
                 this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(err => {
                     this.audioManager.battleBgm.src = 'BGM/MHW_Proof_of_a_Hero.mp3';
+                    this.director.audioManager.applyNativeVolume(this.audioManager.battleBgm, {
+                        type: 'visual', path: 'BGM/MHW_Proof_of_a_Hero.mp3', baseVolume: 0.315
+                    });
                     this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(e => console.warn("Battle BGM failed:", e));
                 });
             });
@@ -614,10 +621,9 @@ class HuntEffect extends BaseEffect {
         this.audioManager.stopBgms();
         const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster.nameKO);
         try {
-            this.audioManager.battleBgm = new Audio(bgmSrc);
-            this.audioManager.battleBgm.loop = true;
-            const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.audioManager.battleBgm.volume = volConfig.master * volConfig.visual * 0.315;
+            this.audioManager.battleBgm = this.director.audioManager.createNativeAudio(bgmSrc, {
+                type: 'visual', baseVolume: 0.315, loop: true
+            });
             this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(e => console.warn("Battle BGM failed:", e));
         } catch (e) {
             console.warn("Audio error:", e);
@@ -671,9 +677,9 @@ class HuntEffect extends BaseEffect {
                     'BGM/MHR_Quest_Clear_Kamura.mp3'
                 ];
                 const selectedClear = successBgms[Math.floor(Math.random() * successBgms.length)];
-                this.audioManager.winBgm = new Audio(selectedClear);
-                const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-                this.audioManager.winBgm.volume = volConfig.master * volConfig.visual * 0.315;
+                this.audioManager.winBgm = this.director.audioManager.createNativeAudio(selectedClear, {
+                    type: 'visual', baseVolume: 0.315
+                });
                 this.audioManager.winBgmPromise = this.audioManager.winBgm.play().catch(() => {
                     this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['우승!'] || '우승!');
                 });
@@ -688,9 +694,9 @@ class HuntEffect extends BaseEffect {
                     'BGM/MHR_Quest_Fail.mp3'
                 ];
                 const selectedFail = failBgms[Math.floor(Math.random() * failBgms.length)];
-                this.audioManager.winBgm = new Audio(selectedFail);
-                const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-                this.audioManager.winBgm.volume = volConfig.master * volConfig.visual * 0.315;
+                this.audioManager.winBgm = this.director.audioManager.createNativeAudio(selectedFail, {
+                    type: 'visual', baseVolume: 0.315
+                });
                 this.audioManager.winBgmPromise = this.audioManager.winBgm.play().catch(() => {
                     this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['안돼'] || '안돼');
                 });

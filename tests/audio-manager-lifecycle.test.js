@@ -32,7 +32,10 @@ const context = vm.createContext({
     console,
     window: {
         AudioContext: FakeAudioContext,
-        location: { protocol: 'file:' }
+        location: { protocol: 'file:' },
+        HIVE_AUDIO_LEVELS: {
+            'Video/test.mp4': { gainDb: -6 }
+        }
     },
     document: { body: { contains: () => true } },
     Audio: class {},
@@ -46,9 +49,10 @@ const context = vm.createContext({
 });
 
 const scopePath = path.resolve(__dirname, '../js/runtime/DisposableScope.js');
+const profilePath = path.resolve(__dirname, '../js/runtime/AudioLevelProfile.js');
 const busPath = path.resolve(__dirname, '../js/EventBus.js');
 const audioPath = path.resolve(__dirname, '../js/AudioManager.js');
-const source = [scopePath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
+const source = [scopePath, profilePath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
     + '\nglobalThis.Exports = { AudioManager, EventBus };';
 vm.runInContext(source, context, { filename: audioPath });
 
@@ -58,13 +62,18 @@ const config = {
     getVisualConfig: () => ({}),
     getSfxRenames: () => ({}),
     getExcludedSfx: () => [],
-    getNormalizerConfig: () => ({ enabled: true, visual: false, sfx: false }),
+    getNormalizerConfig: () => ({ enabled: true, visual: true, sfx: true }),
     updateVolumeConfig() {}
 };
 const bus = new context.Exports.EventBus();
 const audio = new context.Exports.AudioManager(config, bus);
-const media = { paused: false, pause() { this.paused = true; } };
+const media = {
+    src: 'file:///D:/BubbleChat/Video/test.mp4',
+    paused: false,
+    pause() { this.paused = true; }
+};
 audio.connectMediaElement(media, 'visual');
+assert.ok(Math.abs(media.volume - 0.501187) < 0.0001, 'native file media must receive measured gain');
 
 audio.setEnabled(false);
 bus.emit('system:unmuteAudio');

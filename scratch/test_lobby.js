@@ -82,7 +82,13 @@ const director = {
     emit() {}
   },
   audioManager: {
-    volumeConfig: { master: 1, visual: 1, sfx: 1 }
+    volumeConfig: { master: 1, visual: 1, sfx: 1 },
+    createNativeAudio(path, options = {}) {
+      const audio = new Audio(path);
+      audio.loop = options.loop === true;
+      return audio;
+    },
+    applyNativeVolume() {}
   }
 };
 

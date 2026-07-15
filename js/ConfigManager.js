@@ -16,7 +16,7 @@ class ConfigManager {
         this._volumeConfig = { master: 1.0, visual: 1.0, sfx: 1.0 };
         this._welcomeMessages = [];
         this._randomNames = [];
-        this._normalizerConfig = { enabled: true, visual: false, sfx: false };
+        this._normalizerConfig = { enabled: true, visual: true, sfx: true };
         this._huntConfig = { hunterSpeedMultiplier: 1.15 };
 
         this._initBroadcastChannel();

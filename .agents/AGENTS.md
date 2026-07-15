@@ -65,6 +65,10 @@ d:/BubbleChat/
 6. **Remote Content Safety**:
    - `js/runtime/SafeContent.js` is the single policy layer for escaping remote chat text, validating HTTPS emote URLs, and constraining remote color values.
 
+7. **Measured Audio Levels**:
+   - `scripts/analyze-audio-levels.js` measures local media without modifying originals and generates `js/audio-levels.generated.js`.
+   - `js/runtime/AudioLevelProfile.js` applies those file-specific gains. Decoded SFX use the shared compressor; local `file://` media uses native element volume to avoid OBS Chromium CORS muting.
+
 ---
 
 ## 3. Critical Guardrails & Behavioral Rules
@@ -121,3 +125,8 @@ d:/BubbleChat/
 * Nicknames, chat messages, winners, participants, and other Chzzk-provided values must use `textContent` or `SafeContent.escapeHTML()` before entering an HTML template.
 * Only `SafeContent.renderEmotesHTML()` may turn remote chat text into rich markup. It permits escaped text plus validated HTTPS emote images.
 * Remote colors must pass through `SafeContent.cssColor()` before being used in inline styles. Never interpolate an untrusted color or URL into HTML.
+
+### Rule 11: Loudness Normalization Must Preserve Local Playback
+* Never rewrite or destructively normalize source media. Store measured LUFS/true-peak compensation in `js/audio-levels.generated.js`.
+* All programmatic `Audio` creation must go through `AudioManager.createNativeAudio()`. DOM media must be registered through `AudioManager.connectMediaElement()`.
+* The shared compressor is collision and peak protection, not the primary loudness normalizer. File-specific measured gain is applied before it for decoded SFX and through native volume for local media.

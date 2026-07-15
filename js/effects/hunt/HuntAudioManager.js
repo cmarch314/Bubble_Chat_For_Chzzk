@@ -149,14 +149,13 @@ class HuntAudioManager {
 
         const dedicatedPath = `SFX/MonsterHunter_Roars/roar_${finalId}.mp3`;
         const defaultPath = `SFX/MonsterHunter_Roars/roar_default.mp3`;
-        const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-        const volume = Math.min(1.0, Math.max(0, volConfig.master * volConfig.sfx * 0.7));
-
-        const audio = new Audio(dedicatedPath);
-        audio.volume = volume;
+        const audio = this.director.audioManager.createNativeAudio(dedicatedPath, {
+            type: 'sfx', baseVolume: 0.7
+        });
         audio.play().catch(() => {
-            const defaultAudio = new Audio(defaultPath);
-            defaultAudio.volume = volume;
+            const defaultAudio = this.director.audioManager.createNativeAudio(defaultPath, {
+                type: 'sfx', baseVolume: 0.7
+            });
             defaultAudio.play().catch(() => {
                 this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['포효'] || '포효');
             });
@@ -200,70 +199,11 @@ class HuntAudioManager {
         
         const filePath = `MonsterHunter_Soundtracks/${subPath}`;
         try {
-            const audio = new Audio(filePath);
-            const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            const baseVolume = volConfig.master * volConfig.sfx * 0.75 * volumeMultiplier;
-
-            if (volumeMultiplier > 1.0 && window.location.protocol !== 'file:') {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (AudioContext) {
-                    const ctx = new AudioContext();
-                    const source = ctx.createMediaElementSource(audio);
-                    const gainNode = ctx.createGain();
-
-                    gainNode.gain.value = baseVolume;
-                    source.connect(gainNode);
-                    gainNode.connect(ctx.destination);
-
-                    if (ctx.state === 'suspended') {
-                        ctx.resume();
-                    }
-
-                    let isCleaned = false;
-                    const cleanup = () => {
-                        if (isCleaned) return;
-                        isCleaned = true;
-                        try {
-                            audio.pause();
-                            gainNode.gain.value = 0;
-                            source.disconnect();
-                            gainNode.disconnect();
-                            ctx.close().catch(() => {});
-                        } catch (e) {
-                            console.warn("Cleanup AudioContext error:", e);
-                        }
-                    };
-
-                    audio.play().catch(e => {
-                        console.warn(`Failed to play amplified audio: ${filePath}`, e);
-                        cleanup();
-                    });
-
-                    audio.onended = cleanup;
-                    audio.onerror = cleanup;
-
-                    if (durationLimitMs) {
-                        setTimeout(() => {
-                            const fadeDuration = 500;
-                            const fadeInterval = 50;
-                            let elapsed = 0;
-                            const originalGain = gainNode.gain.value;
-                            const timer = setInterval(() => {
-                                elapsed += fadeInterval;
-                                if (elapsed >= fadeDuration) {
-                                    clearInterval(timer);
-                                    cleanup();
-                                } else {
-                                    gainNode.gain.value = Math.max(0, originalGain * (1 - elapsed / fadeDuration));
-                                }
-                            }, fadeInterval);
-                        }, durationLimitMs - 500 > 0 ? durationLimitMs - 500 : 0);
-                    }
-                    return;
-                }
-            }
-
-            audio.volume = Math.min(1.0, Math.max(0, baseVolume));
+            // Native playback is required for OBS file:// compatibility. Loudness
+            // compensation is supplied by AudioManager's measured level profile.
+            const audio = this.director.audioManager.createNativeAudio(filePath, {
+                type: 'sfx', baseVolume: 0.75 * volumeMultiplier
+            });
             audio.play().then(() => {
                 if (durationLimitMs) {
                     setTimeout(() => {

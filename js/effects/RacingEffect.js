@@ -398,10 +398,9 @@ class RacingEffect extends BaseEffect {
 
         // [New] Betting Phase Background BGM Play
         try {
-            this.bettingBgm = new Audio('BGM/SportBGM.mp3');
-            this.bettingBgm.loop = false;
-            const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.bettingBgm.volume = volConfig.master * volConfig.visual * 0.39;
+            this.bettingBgm = this.director.audioManager.createNativeAudio('BGM/SportBGM.mp3', {
+                type: 'visual', baseVolume: 0.39
+            });
             this.bettingBgmPlayPromise = this.bettingBgm.play().catch(e => console.warn("Betting BGM playback blocked:", e));
         } catch (e) {
             console.warn("Failed to initialize Betting BGM:", e);
@@ -706,10 +705,9 @@ class RacingEffect extends BaseEffect {
 
         // 1. 질주 배경 BGM 로딩 및 재생 (소개 페이즈부터 시작)
         try {
-            this.raceBgm = new Audio('BGM/William Tell.mp3');
-            this.raceBgm.loop = false; // 루프 방지 설정 명시화
-            const volConfig = this.director.audioManager.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            this.raceBgm.volume = volConfig.master * volConfig.visual * 0.45;
+            this.raceBgm = this.director.audioManager.createNativeAudio('BGM/William Tell.mp3', {
+                type: 'visual', baseVolume: 0.45
+            });
             this.raceBgmPlayPromise = this.raceBgm.play().catch(e => console.warn("Race BGM playback blocked:", e));
         } catch (e) {
             console.warn("Failed to load racing BGM:", e);
