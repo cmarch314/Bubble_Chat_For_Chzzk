@@ -8,6 +8,7 @@ class RaidEffect extends BaseEffect {
         this.bossName = '우주 괴수';
         this.damageLog = {}; // { nickname: totalDamage }
         this.resolveGame = null;
+        this.runtime = new GameEffectRuntime(this, director);
         this._injectStyles();
     }
 
@@ -140,8 +141,7 @@ class RaidEffect extends BaseEffect {
     }
 
     async execute(context) {
-        this.director.activeGame = this;
-        this.isActive = true;
+        this.runtime.start();
         this.damageLog = {};
 
         // Randomize boss
@@ -198,7 +198,7 @@ class RaidEffect extends BaseEffect {
                 sc.style.animation = 'none';
                 void sc.offsetWidth; // trigger reflow
                 sc.style.transform = `translate(${(Math.random() - 0.5) * 30}px, ${(Math.random() - 0.5) * 30}px) scale(1.1)`;
-                setTimeout(() => {
+                this.runtime.timeout(() => {
                     sc.style.transform = '';
                     sc.style.animation = 'boss-float 3s ease-in-out infinite alternate';
                 }, 100);
@@ -209,20 +209,19 @@ class RaidEffect extends BaseEffect {
         const timerEl = container.querySelector('.game-timer');
 
         return new Promise(resolve => {
-            const timerInterval = setInterval(() => {
+            const timerInterval = this.runtime.interval(() => {
                 timeLeft--;
                 if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
                     this.endRaid(container, false, resolve);
                 } else {
                     timerEl.textContent = `남은 시간: ${timeLeft}초`;
                 }
             }, 1000);
 
-            this.resolveGame = (isVictory) => {
-                clearInterval(timerInterval);
+            this.resolveGame = this.runtime.once((isVictory) => {
+                this.runtime.clear(timerInterval);
                 this.endRaid(container, isVictory, resolve);
-            };
+            });
         });
     }
 
@@ -283,14 +282,14 @@ class RaidEffect extends BaseEffect {
         document.body.appendChild(proj);
 
         // Animate projectile to boss center
-        setTimeout(() => {
+        this.runtime.timeout(() => {
             proj.style.left = `${bossX - 25}px`;
             proj.style.top = `${bossY - 25}px`;
             proj.style.transform = `scale(0.5) rotate(${Math.random() * 720}deg)`;
         }, 50);
 
         // When it hits (approx 400ms)
-        setTimeout(() => {
+        this.runtime.timeout(() => {
             proj.remove();
             
             // Play hit sound
@@ -303,13 +302,13 @@ class RaidEffect extends BaseEffect {
             pop.style.left = `${bossX + (Math.random() - 0.5) * 60}px`;
             pop.style.top = `${bossY + (Math.random() - 0.5) * 60}px`;
             document.body.appendChild(pop);
-            setTimeout(() => pop.remove(), 800);
+            this.runtime.timeout(() => pop.remove(), 800);
         }, 450);
     }
 
     endRaid(container, isVictory, resolve) {
-        this.isActive = false;
-        this.director.activeGame = null;
+        if (!this.runtime.end()) return;
+        this.resolveGame = null;
 
         const uiPanel = container.querySelector('.game-raid-ui-panel');
         const sc = container.querySelector('.game-boss-showcase');
@@ -353,9 +352,9 @@ class RaidEffect extends BaseEffect {
             `;
         }
 
-        setTimeout(() => {
+        this.runtime.timeout(() => {
             container.style.animation = "game-fade-out 0.5s ease-in forwards";
-            setTimeout(() => {
+            this.runtime.timeout(() => {
                 container.remove();
                 resolve();
             }, 500);
