@@ -6,6 +6,7 @@ class SoundQuizEffect extends BaseEffect {
         this.winner = null;
         this.scores = {};
         this.forceStopped = false;
+        this.runtime = new GameEffectRuntime(this, director);
     }
 
     _getLeaderboardHTML() {
@@ -43,8 +44,7 @@ class SoundQuizEffect extends BaseEffect {
     }
 
     async execute(context) {
-        this.director.activeGame = this;
-        this.isActive = true;
+        this.runtime.start();
         this.quizSilence = true; // 퀴즈 중 다른 채팅 사운드 차단 플래그
         this.winner = null;
         this.scores = {};
@@ -162,7 +162,7 @@ class SoundQuizEffect extends BaseEffect {
                         }
                         
                         if (!this.isActive || !playActive || this.forceStopped) return;
-                        await new Promise(r => setTimeout(r, 6000));
+                        if (!await this.runtime.wait(6000)) return;
                         
                         if (!this.isActive || !playActive || this.forceStopped || !videoEl) return;
                         videoEl.currentTime = 0;
@@ -180,7 +180,7 @@ class SoundQuizEffect extends BaseEffect {
                         await this.audioManager.playSound(soundObj || this.correctAnswer, { force: true, type: 'visual' });
                         
                         if (!this.isActive || !playActive || this.forceStopped) return;
-                        await new Promise(r => setTimeout(r, 2000));
+                        if (!await this.runtime.wait(2000)) return;
                         
                         if (!this.isActive || !playActive || this.forceStopped) return;
                         await this.audioManager.playSound(soundObj || this.correctAnswer, { force: true, type: 'visual' });
@@ -193,10 +193,10 @@ class SoundQuizEffect extends BaseEffect {
                 const timerEl = container.querySelector('.game-timer');
 
                 const roundWinner = await new Promise(resolveRound => {
-                    const timerInterval = setInterval(() => {
+                    const timerInterval = this.runtime.interval(() => {
                         timeLeft--;
                         if (timeLeft <= 0) {
-                            clearInterval(timerInterval);
+                            this.runtime.clear(timerInterval);
                             playActive = false;
                             resolveRound(null);
                         } else {
@@ -212,11 +212,11 @@ class SoundQuizEffect extends BaseEffect {
                         }
                     }, 1000);
 
-                    this.resolveGame = (winnerNickname) => {
-                        clearInterval(timerInterval);
+                    this.resolveGame = this.runtime.once((winnerNickname) => {
+                        this.runtime.clear(timerInterval);
                         playActive = false;
                         resolveRound(winnerNickname);
-                    };
+                    });
                 });
 
                 if (roundWinner === '__FORCE_STOP__') {
@@ -259,13 +259,13 @@ class SoundQuizEffect extends BaseEffect {
                 }
 
                 // Wait 5 seconds before next round
-                await new Promise(r => setTimeout(r, 5000));
+                if (!await this.runtime.wait(5000)) break;
                 cleanupFireworks();
             }
 
-            this.isActive = false;
+            this.runtime.end();
             this.quizSilence = false; // 퀴즈 종료 — 채팅 사운드 복원
-            this.director.activeGame = null;
+            this.resolveGame = null;
 
 
             if (this.forceStopped) {
@@ -295,9 +295,9 @@ class SoundQuizEffect extends BaseEffect {
                 <div class="game-participants-count" style="font-size:1.8rem; margin-top: 30px;">참여해주신 모든 분들 감사합니다!</div>
             `;
 
-            setTimeout(() => {
+            this.runtime.timeout(() => {
                 card.style.animation = "game-fade-out 0.5s ease-in forwards";
-                setTimeout(() => {
+                this.runtime.timeout(() => {
                     container.remove();
                     resolve();
                 }, 500);
@@ -393,7 +393,7 @@ class SoundQuizEffect extends BaseEffect {
         createFirework(canvas.width * 0.5, canvas.height * 0.25);
 
         // Periodically generate more fireworks
-        const intervalId = setInterval(() => {
+        const intervalId = this.runtime.interval(() => {
             createFirework(
                 canvas.width * 0.15 + Math.random() * (canvas.width * 0.7),
                 canvas.height * 0.15 + Math.random() * (canvas.height * 0.4)
@@ -417,7 +417,7 @@ class SoundQuizEffect extends BaseEffect {
         tick();
 
         return () => {
-            clearInterval(intervalId);
+            this.runtime.clear(intervalId);
             cancelAnimationFrame(animId);
             window.removeEventListener('resize', resizeCanvas);
             canvas.remove();

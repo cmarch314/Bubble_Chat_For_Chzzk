@@ -30,11 +30,15 @@ complete();
 complete();
 assert.strictEqual(completionCount, 1);
 
+const pendingWait = runtime.wait(5000);
+
 assert.strictEqual(runtime.end(), true);
 assert.strictEqual(runtime.end(), false);
 assert.strictEqual(owner.isActive, false);
 assert.strictEqual(director.activeGame, null);
 assert.strictEqual(calls.filter(call => call === 'clearAll').length, 2);
+
+pendingWait.then(completed => assert.strictEqual(completed, false));
 
 director.activeGame = { another: true };
 runtime.start();
@@ -47,5 +51,10 @@ const raidSource = fs.readFileSync(raidPath, 'utf8');
 assert.match(raidSource, /this\.runtime = new GameEffectRuntime\(this, director\)/);
 assert.match(raidSource, /if \(!this\.runtime\.end\(\)\) return;/);
 assert.doesNotMatch(raidSource, /setTimeout\(|setInterval\(|clearTimeout\(|clearInterval\(/);
+
+const quizPath = path.resolve(__dirname, '../js/effects/SoundQuizEffect.js');
+const quizSource = fs.readFileSync(quizPath, 'utf8');
+assert.match(quizSource, /this\.runtime = new GameEffectRuntime\(this, director\)/);
+assert.doesNotMatch(quizSource, /setTimeout\(|setInterval\(|clearTimeout\(|clearInterval\(/);
 
 console.log('[test] GameEffectRuntime ownership and completion contract passed.');

@@ -4,9 +4,11 @@ class GameEffectRuntime {
         this.director = director;
         this.timers = options.timers || new ManagedTimers();
         this.ended = true;
+        this.waiters = new Set();
     }
 
     start() {
+        this.cancelWaiters();
         this.timers.clearAll();
         this.ended = false;
         this.owner.isActive = true;
@@ -20,6 +22,7 @@ class GameEffectRuntime {
         if (this.director.activeGame === this.owner) {
             this.director.activeGame = null;
         }
+        this.cancelWaiters();
         this.timers.clearAll();
         return true;
     }
@@ -34,6 +37,27 @@ class GameEffectRuntime {
 
     clear(timerId) {
         this.timers.clear(timerId);
+    }
+
+    wait(delay) {
+        if (this.ended) return Promise.resolve(false);
+        return new Promise(resolve => {
+            let timerId = null;
+            const finish = completed => {
+                this.waiters.delete(cancel);
+                if (!completed) this.timers.clear(timerId);
+                resolve(completed);
+            };
+            const cancel = () => finish(false);
+            this.waiters.add(cancel);
+            timerId = this.timeout(() => finish(true), delay);
+        });
+    }
+
+    cancelWaiters() {
+        const waiters = Array.from(this.waiters);
+        this.waiters.clear();
+        waiters.forEach(cancel => cancel());
     }
 
     once(callback) {
