@@ -5,19 +5,29 @@ class ChatRenderer {
     constructor(eventBus, audioManager = null) {
         this.eventBus = eventBus;
         this.audioManager = audioManager;
+        this.scope = new DisposableScope();
+        this.timers = new ManagedTimers();
+        this.scope.add(() => this.timers.clearAll());
         this.container = document.getElementById('chat');
         this.boxPos = 0;
         this.activeBubbles = [];
 
         if (this.eventBus) {
-            this.eventBus.on('chat:render', (data) => {
+            this.scope.add(this.eventBus.on('chat:render', (data) => {
                 try {
                     this.render(data);
                 } catch (e) {
                     console.error("[ChatRenderer] Render Error:", e);
                 }
-            });
+            }));
         }
+    }
+
+    dispose() {
+        this.timers.clearAll();
+        this.scope.dispose();
+        for (const bubble of this.activeBubbles) bubble?.remove?.();
+        this.activeBubbles = [];
     }
 
     render(data) {
@@ -126,7 +136,7 @@ class ChatRenderer {
             const cleanupVideoBubble = () => {
                 if (hasCleanedUp) return;
                 hasCleanedUp = true;
-                clearTimeout(safetyTimeout);
+                this.timers.clear(safetyTimeout);
 
                 // Decrement active video count
                 window._activeVideoCount = Math.max(0, (window._activeVideoCount || 0) - 1);
@@ -140,12 +150,12 @@ class ChatRenderer {
 
                 if (chatBox.parentElement) {
                     chatBox.classList.remove('visible');
-                    setTimeout(() => chatBox.remove(), 1000);
+                    this.timers.timeout(() => chatBox.remove(), 1000);
                 }
             };
 
             // Safety net: force remove after a timeout based on video count
-            let safetyTimeout = setTimeout(() => {
+            let safetyTimeout = this.timers.timeout(() => {
                 cleanupVideoBubble();
             }, Math.max(30000, unifiedQueue.length * 15000));
 
@@ -288,10 +298,10 @@ class ChatRenderer {
 
         // 타임아웃 제거
         if (timeout) {
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 if (chatBox.parentElement) {
                     chatBox.classList.remove('visible');
-                    setTimeout(() => chatBox.remove(), 1000);
+                    this.timers.timeout(() => chatBox.remove(), 1000);
                 }
             }, timeout);
         }

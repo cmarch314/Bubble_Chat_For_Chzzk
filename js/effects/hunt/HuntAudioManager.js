@@ -9,6 +9,7 @@ class HuntAudioManager {
         this.lobbyBgmPromise = null;
         this.battleBgmPromise = null;
         this.winBgmPromise = null;
+        this.timers = new ManagedTimers();
     }
 
     getMonsterBgm(monsterName) {
@@ -206,15 +207,15 @@ class HuntAudioManager {
             });
             audio.play().then(() => {
                 if (durationLimitMs) {
-                    setTimeout(() => {
+                    this.timers.timeout(() => {
                         const fadeDuration = 500;
                         const fadeInterval = 50;
                         let elapsed = 0;
                         const originalVol = audio.volume;
-                        const timer = setInterval(() => {
+                        const timer = this.timers.interval(() => {
                             elapsed += fadeInterval;
                             if (elapsed >= fadeDuration) {
-                                clearInterval(timer);
+                                this.timers.clear(timer);
                                 audio.pause();
                                 audio.volume = 0;
                             } else {
@@ -230,6 +231,7 @@ class HuntAudioManager {
     }
 
     stopBgms() {
+        this.timers.clearAll();
         const stop = (bgm, promise) => {
             if (bgm) {
                 const action = () => {

@@ -35,9 +35,9 @@ class CoupleEffect extends BaseEffect {
             flashback.classList.add('visible');
 
             // Fade out message shortly before flashback ends
-            setTimeout(() => { centerMsgSnippet.style.animation = "hvn-couple-fadeOut 1s forwards"; }, messageTotalTime - 1500);
+            this.timers.timeout(() => { centerMsgSnippet.style.animation = "hvn-couple-fadeOut 1s forwards"; }, messageTotalTime - 1500);
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 if (centerMsgSnippet) centerMsgSnippet.remove();
                 flashback.classList.remove('visible');
                 overlay.classList.add('visible');
@@ -80,11 +80,11 @@ class CoupleEffect extends BaseEffect {
 
                 const phaseStep = emojiPhaseDuration / 4;
                 updateState(0);
-                setTimeout(() => updateState(1), phaseStep);
-                setTimeout(() => updateState(2), phaseStep * 2);
-                setTimeout(() => updateState(3), phaseStep * 2.5);
+                this.timers.timeout(() => updateState(1), phaseStep);
+                this.timers.timeout(() => updateState(2), phaseStep * 2);
+                this.timers.timeout(() => updateState(3), phaseStep * 2.5);
 
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     overlay.style.backgroundColor = ''; overlay.classList.remove('visible');
                     emojiContainer.innerText = '❤️‍🩹'; emojiContainer.style.fontSize = '';
                     resolve();

@@ -63,9 +63,9 @@ class DangoEffect extends BaseEffect {
                 }
             }
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 overlay.classList.remove('visible');
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     if (video) video.pause();
                     if (container) container.innerHTML = '';
                 }, 1000);

@@ -42,12 +42,16 @@ const context = vm.createContext({
     setTimeout: (handler, delay) => {
         scheduled.push({ handler, delay });
         return scheduled.length;
-    }
+    },
+    clearTimeout() {},
+    setInterval,
+    clearInterval
 });
 
 const scopePath = path.resolve(__dirname, '../js/runtime/DisposableScope.js');
+const timersPath = path.resolve(__dirname, '../js/runtime/ManagedTimers.js');
 const sourcePath = path.resolve(__dirname, '../js/BubbleChatApp.js');
-const source = `${fs.readFileSync(scopePath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.BubbleChatApp = BubbleChatApp;`;
+const source = `${fs.readFileSync(scopePath, 'utf8')}\n${fs.readFileSync(timersPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.BubbleChatApp = BubbleChatApp;`;
 vm.runInContext(source, context, { filename: sourcePath });
 
 const constructors = {
@@ -55,7 +59,7 @@ const constructors = {
     ConfigManager: fakeType('config'),
     AudioManager: fakeType('audio', { dispose: () => calls.push(['audioDispose']) }),
     AssetPreloader: fakeType('preloader', { start: () => calls.push(['preload']) }),
-    ChatRenderer: fakeType('chatRenderer'),
+    ChatRenderer: fakeType('chatRenderer', { dispose: () => calls.push(['chatRendererDispose']) }),
     VisualDirector: fakeType('visuals', {
         clearQueue: () => calls.push(['clearQueue']),
         trigger: (...args) => calls.push(['trigger', ...args]),
@@ -95,6 +99,7 @@ app.stop();
 assert.strictEqual(calls.filter(call => call[0] === 'disconnect').length, 1);
 assert.strictEqual(calls.filter(call => call[0] === 'visualDispose').length, 1);
 assert.strictEqual(calls.filter(call => call[0] === 'audioDispose').length, 1);
+assert.strictEqual(calls.filter(call => call[0] === 'chatRendererDispose').length, 1);
 assert.strictEqual(context.window.processMessage, undefined);
 
 console.log('[test] BubbleChatApp lifecycle contract passed.');

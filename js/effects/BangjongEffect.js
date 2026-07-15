@@ -26,7 +26,7 @@ class BangjongEffect extends BaseEffect {
             txt.className = 'bangjong-text';
             txt.innerHTML = renderMessageWithEmotesHTML(msg, context.emotes || {});
             overlay.appendChild(txt);
-            setTimeout(() => { if (txt.parentNode) txt.remove(); }, conf.duration);
+            this.timers.timeout(() => { if (txt.parentNode) txt.remove(); }, conf.duration);
         }
 
         // Spawn characters (Teostra & Lunastra)
@@ -75,19 +75,19 @@ class BangjongEffect extends BaseEffect {
                     actor.style.top = destY + '%';
 
                     const totalWait = (duration * 1000) + (Math.random() > 0.7 ? 500 + Math.random() * 1500 : 0);
-                    setTimeout(movePuppy, totalWait);
+                    this.timers.timeout(movePuppy, totalWait);
                 };
 
-                setTimeout(movePuppy, i * 300);
+                this.timers.timeout(movePuppy, i * 300);
             }
         }
 
         return new Promise(resolve => {
             overlay.classList.add('visible');
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 isActive = false;
                 overlay.classList.remove('visible');
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     if (container) container.innerHTML = '';
                     const txt = overlay.querySelector('.bangjong-text');
                     if (txt) txt.remove();

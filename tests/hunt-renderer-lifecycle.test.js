@@ -16,7 +16,11 @@ const lobbyTimers = {
         clearCount++;
     }
 };
-const renderer = new context.HuntRenderer({ lobbyTimers });
+let animationClearCount = 0;
+const animationTimers = {
+    clearAll() { animationClearCount++; }
+};
+const renderer = new context.HuntRenderer({ lobbyTimers, animationTimers });
 renderer.lobbyTimer = 17;
 renderer.lobbyTimeouts = [18, 19];
 renderer.clearLobbyTimer();
@@ -38,6 +42,7 @@ const oldContainer = renderer.container;
 renderer.removeContainer();
 
 assert.strictEqual(clearCount, 2);
+assert.strictEqual(animationClearCount, 1);
 assert.strictEqual(removed, oldContainer);
 assert.strictEqual(renderer.container, null);
 assert.strictEqual(renderer.card, null);

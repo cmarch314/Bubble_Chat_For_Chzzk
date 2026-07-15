@@ -71,7 +71,7 @@ class KingEffect extends BaseEffect {
                 createFlake(conf.emojiPool, false);
             }
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 if (overlay.classList.contains('visible')) {
                     const delayedCount = conf.delayedEmojiCount || 100;
                     for (let i = 0; i < delayedCount; i++) {
@@ -85,9 +85,9 @@ class KingEffect extends BaseEffect {
             // Play visual sound via EventBus
             this.eventBus.emit('audio:playVisualSound', conf.audioPath);
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 overlay.classList.remove('visible');
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     if (snowContainer) snowContainer.innerHTML = '';
                 }, 1000);
                 resolve();

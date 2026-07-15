@@ -1,6 +1,8 @@
 class BubbleChatApp {
     constructor(constructors = {}) {
         this.scope = new DisposableScope();
+        this.timers = new ManagedTimers();
+        this.scope.add(() => this.timers.clearAll());
         const Types = {
             EventBus: constructors.EventBus || EventBus,
             ConfigManager: constructors.ConfigManager || ConfigManager,
@@ -51,7 +53,7 @@ class BubbleChatApp {
         const connectedHandler = () => this._handleConnected();
         window.addEventListener('chzzk_connected', connectedHandler, { once: true });
         this.scope.add(() => window.removeEventListener?.('chzzk_connected', connectedHandler));
-        setTimeout(() => this._runStartupEffect(), 1000);
+        this.timers.timeout(() => this._runStartupEffect(), 1000);
         this.network.connect();
         return this;
     }
@@ -60,6 +62,7 @@ class BubbleChatApp {
         if (this.stopped) return;
         this.stopped = true;
         this.network.disconnect?.();
+        this.chatRenderer.dispose?.();
         this.visuals.dispose?.();
         this.audio.dispose?.();
         this.scope.dispose();
@@ -74,10 +77,10 @@ class BubbleChatApp {
         const loader = document.getElementById('loading-screen');
         if (loader) {
             loader.classList.add('hidden');
-            setTimeout(() => loader.remove(), 1000);
+            this.timers.timeout(() => loader.remove(), 1000);
         }
 
-        setTimeout(() => this.preloader.start(), 2000);
+        this.timers.timeout(() => this.preloader.start(), 2000);
     }
 
     _runStartupEffect() {

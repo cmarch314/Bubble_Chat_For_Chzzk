@@ -15,8 +15,13 @@ class EffectRegistry {
             soundKey: soundKey || null,
             kind: options.kind || 'visual',
             instance,
-            execute(context) {
-                return this.instance.execute(context);
+            async execute(context) {
+                this.instance.beginExecution?.();
+                try {
+                    return await this.instance.execute(context);
+                } finally {
+                    this.instance.endExecution?.();
+                }
             }
         };
         return this;

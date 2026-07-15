@@ -64,7 +64,7 @@ class UshoEffect extends BaseEffect {
                 bgVideo.play().catch(e => console.warn("Background video play failed:", e));
             }
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 overlay.classList.replace('phase-scan', 'phase-reveal');
                 if (video) {
                     this.audioManager.connectMediaElement(video, 'visual');
@@ -73,7 +73,7 @@ class UshoEffect extends BaseEffect {
                 }
             }, conf.scanPhase);
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 overlay.classList.remove('visible', 'phase-reveal', 'phase-scan');
                 if (video) video.pause();
                 if (bgVideo) bgVideo.pause();

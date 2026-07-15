@@ -71,7 +71,7 @@ class RandomDanceEffect extends BaseEffect {
             leftContainer.style.opacity = '0';
             rightContainer.style.opacity = '0';
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 const vid1 = selectedVideos[currentIndex];
                 const vid2 = selectedVideos[(currentIndex + 1) % selectedVideos.length];
                 spawnVideo(leftContainer, vid1);
@@ -89,18 +89,18 @@ class RandomDanceEffect extends BaseEffect {
             overlay.classList.remove('rd-bloom');
 
             cycleVideos();
-            const interval = setInterval(cycleVideos, conf.cycleInterval || 6000);
+            const interval = this.timers.interval(cycleVideos, conf.cycleInterval || 6000);
 
-            const bloomTimeout = setTimeout(() => {
+            const bloomTimeout = this.timers.timeout(() => {
                 overlay.classList.add('rd-bloom');
             }, 6000);
 
-            setTimeout(() => {
-                clearInterval(interval);
-                clearTimeout(bloomTimeout);
+            this.timers.timeout(() => {
+                this.timers.clear(interval);
+                this.timers.clear(bloomTimeout);
                 overlay.classList.remove('visible', 'rd-bloom');
 
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     leftContainer.innerHTML = '';
                     rightContainer.innerHTML = '';
                     resolve();

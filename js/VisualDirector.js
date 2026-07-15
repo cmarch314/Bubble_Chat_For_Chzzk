@@ -7,10 +7,13 @@ class VisualDirector {
         this.eventBus = eventBus;
         this.audioManager = audioManager;
         this.scope = new DisposableScope();
+        this.timers = new ManagedTimers();
+        this.scope.add(() => this.timers.clearAll());
         this.queue = [];
         this.isLocked = false;
         this.activeEffect = null;
-        this.wait = options.wait || (duration => new Promise(resolve => setTimeout(resolve, duration)));
+        this.wait = options.wait || (duration => new Promise(resolve => this.timers.timeout(resolve, duration)));
+        this.disposed = false;
         this.enabled = false; // [Default] OFF (Manual trigger keywords)
         this.alertsEnabled = true; // [Default] ON (Sub/Donation Alerts)
         this.activeGame = null; // [New] Currently running chat game
@@ -35,6 +38,8 @@ class VisualDirector {
     }
 
     dispose() {
+        if (this.disposed) return;
+        this.disposed = true;
         this.clearQueue();
         if (this.activeGame && typeof this.activeGame.forceStopGame === 'function') {
             this.activeGame.forceStopGame();
@@ -49,6 +54,7 @@ class VisualDirector {
     }
 
     trigger(effectType, context = {}) {
+        if (this.disposed) return false;
         // [Refinement] enabled 체크는 호출부(network callback)에서 세밀하게 처리하므로 여기선 제외
         if (!this.registry[effectType]) return false;
         console.log(`📥 [VisualDirector] Queuing: ${effectType}`);
@@ -58,7 +64,7 @@ class VisualDirector {
     }
 
     async _processQueue() {
-        if (this.isLocked || this.queue.length === 0) return;
+        if (this.disposed || this.isLocked || this.queue.length === 0) return;
 
         this.isLocked = true;
         const { effect, context } = this.queue.shift();
@@ -89,6 +95,8 @@ class VisualDirector {
         const vConfCommon = this.config.getVisualConfig();
         const cooldown = (vConfCommon && vConfCommon.common && vConfCommon.common.cooldown) || 1000;
         await this.wait(cooldown);
+
+        if (this.disposed) return;
 
         this.activeEffect = null;
         this.isLocked = false;
@@ -131,7 +139,7 @@ class VisualDirector {
         this._showFloatingText(parts.rest, 0, floatTime - 500, styleClass, context.emotes, conf.fontSize, textScale);
         this._showFloatingText(parts.last, floatTime - 400, 500, styleClass, context.emotes, conf.fontSize, textScale);
         return new Promise(resolve => {
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 overlay.classList.add('visible');
                 const emoji = overlay.querySelector('.' + emojiClass);
                 let active = true;
@@ -140,28 +148,28 @@ class VisualDirector {
                     void emoji.offsetWidth;
                     emoji.classList.add('glitching');
                     const delay = (conf.glitchMinDelay || 260) + Math.random() * ((conf.glitchMaxDelay || 780) - (conf.glitchMinDelay || 260));
-                    setTimeout(() => {
+                    this.timers.timeout(() => {
                         emoji.classList.remove('glitching');
-                        if (active) setTimeout(glitch, delay);
+                        if (active) this.timers.timeout(glitch, delay);
                     }, 200);
                 };
                 glitch();
-                setTimeout(() => { active = false; overlay.classList.remove('visible'); resolve(); }, conf.duration - floatTime);
+                this.timers.timeout(() => { active = false; overlay.classList.remove('visible'); resolve(); }, conf.duration - floatTime);
             }, floatTime);
         });
     }
 
     _showFloatingText(text, delay, duration, styleClass, emotes, fontSize, textScale = 1.5) {
         if (!text) return;
-        setTimeout(() => {
+        this.timers.timeout(() => {
             const el = document.createElement('div'); el.className = `visual-center-text ${styleClass}`;
             if (fontSize) el.style.fontSize = fontSize;
             el.innerHTML = renderMessageWithEmotesHTML(this._wrapText(text, (this.config.getVisualConfig()?.common?.textWrapLimit || 200)), emotes || {}, textScale);
             document.body.appendChild(el);
             el.style.animation = "hvn-skull-fadeIn 0.2s forwards";
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 el.style.animation = "hvn-skull-fadeOut 0.2s forwards";
-                setTimeout(() => el.remove(), 200);
+                this.timers.timeout(() => el.remove(), 200);
             }, duration - 200);
         }, delay);
     }
@@ -255,7 +263,7 @@ class VisualDirector {
         el.style.animationDuration = opts.duration + 'ms';
         if (opts.styles) Object.keys(opts.styles).forEach(key => { if (key.startsWith('--')) el.style.setProperty(key, opts.styles[key]); else if (key !== 'nametag' && key !== 'nameColor') el.style[key] = opts.styles[key]; });
         parent.appendChild(el);
-        setTimeout(() => { if (el.parentNode) el.remove(); }, opts.duration + 2000);
+        this.timers.timeout(() => { if (el.parentNode) el.remove(); }, opts.duration + 2000);
         return el;
     }
 }

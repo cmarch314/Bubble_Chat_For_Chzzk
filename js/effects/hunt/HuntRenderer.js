@@ -5,6 +5,7 @@ class HuntRenderer {
         this.lobbyTimer = null;
         this.lobbyTimeouts = [];
         this.lobbyTimers = options.lobbyTimers || new ManagedTimers();
+        this.animationTimers = options.animationTimers || new ManagedTimers();
     }
 
     setContainer(container) {
@@ -28,8 +29,13 @@ class HuntRenderer {
         this.lobbyTimeouts = [];
     }
 
+    clearAnimationTimers() {
+        this.animationTimers.clearAll();
+    }
+
     removeContainer() {
         this.clearLobbyTimer();
+        this.clearAnimationTimers();
         if (this.container && this.container.parentNode) {
             this.container.parentNode.removeChild(this.container);
         }
@@ -38,6 +44,7 @@ class HuntRenderer {
     }
 
     renderLobby(data) {
+        this.clearAnimationTimers();
         // Check if card already exists to prevent glitchy entry animations on consecutive rounds
         const isReentry = !!this.card;
 
@@ -283,6 +290,7 @@ class HuntRenderer {
     }
 
     renderFight(data) {
+        this.clearAnimationTimers();
         if (!this.container || !this.card) return;
         this.card.classList.remove('entry-anim');
         this.card.style.position = 'relative';
@@ -693,15 +701,15 @@ class HuntRenderer {
         bubble.textContent = text;
         targetEl.appendChild(bubble);
 
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             bubble.style.opacity = '1';
             bubble.style.transform = 'translateX(-50%) translateY(-15px)';
         }, 10);
 
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             bubble.style.opacity = '0';
             bubble.style.transform = 'translateX(-50%) translateY(-30px)';
-            setTimeout(() => bubble.remove(), 400);
+            this.animationTimers.timeout(() => bubble.remove(), 400);
         }, 2500);
     }
 
@@ -715,7 +723,7 @@ class HuntRenderer {
         monsterImg.classList.remove('monster-roar-vibrate');
         void monsterImg.offsetWidth;
         monsterImg.classList.add('monster-roar-vibrate');
-        setTimeout(() => monsterImg.classList.remove('monster-roar-vibrate'), 1200);
+        this.animationTimers.timeout(() => monsterImg.classList.remove('monster-roar-vibrate'), 1200);
 
         // Spawn a large shaking speaker emoji that fades out
         const speaker = document.createElement('div');
@@ -725,23 +733,23 @@ class HuntRenderer {
 
         // Spawn concentric sound wave rings
         for (let i = 0; i < 3; i++) {
-            setTimeout(() => {
+            this.animationTimers.timeout(() => {
                 if (!this.card) return;
                 const ring = document.createElement('div');
                 ring.className = 'roar-wave-ring';
                 showcase.appendChild(ring);
-                setTimeout(() => ring.remove(), 1000);
+                this.animationTimers.timeout(() => ring.remove(), 1000);
             }, i * 300);
         }
 
         // Vibrate all hunter cards during the roar
         const weaponCards = this.card.querySelectorAll('.game-hunt-weapon-card');
         weaponCards.forEach(c => c.classList.add('hunter-roar-shake-anim'));
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             weaponCards.forEach(c => c.classList.remove('hunter-roar-shake-anim'));
         }, 1500);
 
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             speaker.remove();
         }, 1500);
     }
@@ -753,7 +761,7 @@ class HuntRenderer {
             monsterImg.classList.remove('monster-charge-slide');
             void monsterImg.offsetWidth;
             monsterImg.classList.add('monster-charge-slide');
-            setTimeout(() => monsterImg.classList.remove('monster-charge-slide'), 750);
+            this.animationTimers.timeout(() => monsterImg.classList.remove('monster-charge-slide'), 750);
         }
     }
 
@@ -791,33 +799,33 @@ class HuntRenderer {
                 monsterImg.classList.remove('monster-tailspin-anim');
                 void monsterImg.offsetWidth;
                 monsterImg.classList.add('monster-tailspin-anim');
-                setTimeout(() => monsterImg.classList.remove('monster-tailspin-anim'), 600);
+                this.animationTimers.timeout(() => monsterImg.classList.remove('monster-tailspin-anim'), 600);
                 
                 // Spawn a spinning/scaling wind slash emoji centered on the monster
                 const slash = document.createElement('div');
                 slash.className = 'tailspin-slash-particle';
                 slash.textContent = '🌀';
                 showcase.appendChild(slash);
-                setTimeout(() => slash.remove(), 700);
+                this.animationTimers.timeout(() => slash.remove(), 700);
 
                 // Slight forward tackle impact during tail spin
                 monsterImg.style.transition = 'transform 0.2s ease';
                 monsterImg.style.transform = `translateY(40px)`;
                 
                 // Card heavy shake on impact
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     if (this.card) {
                         this.card.classList.remove('card-heavy-shake-anim');
                         void this.card.offsetWidth;
                         this.card.classList.add('card-heavy-shake-anim');
-                        setTimeout(() => this.card.classList.remove('card-heavy-shake-anim'), 500);
+                        this.animationTimers.timeout(() => this.card.classList.remove('card-heavy-shake-anim'), 500);
                     }
                 }, 200);
 
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     monsterImg.style.transition = 'transform 0.4s ease-in-out';
                     monsterImg.style.transform = '';
-                    setTimeout(() => {
+                    this.animationTimers.timeout(() => {
                         monsterImg.style.transition = '';
                     }, 400);
                 }, 200);
@@ -840,7 +848,7 @@ class HuntRenderer {
                 const ody = -(dy / len) * 80;
 
                 for (let i = 0; i < 4; i++) {
-                    setTimeout(() => {
+                    this.animationTimers.timeout(() => {
                         if (!this.card) return;
                         const dust = document.createElement('div');
                         dust.className = 'charge-dust-particle';
@@ -850,7 +858,7 @@ class HuntRenderer {
                         dust.style.left = `calc(50% + ${(Math.random() - 0.5) * 60}px)`;
                         dust.style.top = `calc(50% + ${(Math.random() - 0.5) * 60}px)`;
                         showcase.appendChild(dust);
-                        setTimeout(() => dust.remove(), 700);
+                        this.animationTimers.timeout(() => dust.remove(), 700);
                     }, i * 80);
                 }
 
@@ -859,23 +867,23 @@ class HuntRenderer {
                 monsterImg.style.transform = `translate(${dx * 0.4}px, ${dy * 0.4}px) scale(1.15)`;
                 
                 // Card heavy shake on impact
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     if (this.card) {
                         this.card.classList.remove('card-heavy-shake-anim');
                         void this.card.offsetWidth;
                         this.card.classList.add('card-heavy-shake-anim');
-                        setTimeout(() => this.card.classList.remove('card-heavy-shake-anim'), 500);
+                        this.animationTimers.timeout(() => this.card.classList.remove('card-heavy-shake-anim'), 500);
                     }
                 }, 300);
 
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     monsterImg.style.transition = 'transform 0.1s ease-out';
                     monsterImg.style.transform = `translate(${dx * 0.85}px, ${dy * 0.85}px) scale(1.2)`;
                     
-                    setTimeout(() => {
+                    this.animationTimers.timeout(() => {
                         monsterImg.style.transition = 'transform 0.4s ease-in-out';
                         monsterImg.style.transform = '';
-                        setTimeout(() => {
+                        this.animationTimers.timeout(() => {
                             monsterImg.style.transition = '';
                         }, 400);
                     }, 150);
@@ -895,12 +903,12 @@ class HuntRenderer {
             const dy = cardCenter.y - monsterCenter.y;
 
             // Trigger card shake on physical impact
-            setTimeout(() => {
+            this.animationTimers.timeout(() => {
                 if (this.card) {
                     this.card.classList.remove('card-heavy-shake-anim');
                     void this.card.offsetWidth;
                     this.card.classList.add('card-heavy-shake-anim');
-                    setTimeout(() => this.card.classList.remove('card-heavy-shake-anim'), 500);
+                    this.animationTimers.timeout(() => this.card.classList.remove('card-heavy-shake-anim'), 500);
                 }
             }, 200);
 
@@ -908,10 +916,10 @@ class HuntRenderer {
                 monsterImg.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                 monsterImg.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
 
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     monsterImg.style.transition = 'transform 0.3s ease-in-out';
                     monsterImg.style.transform = '';
-                    setTimeout(() => {
+                    this.animationTimers.timeout(() => {
                         monsterImg.style.transition = '';
                     }, 300);
                 }, 200);
@@ -937,7 +945,7 @@ class HuntRenderer {
                 leftEmoji.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
                 rightEmoji.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
 
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     monsterImg.style.transition = 'transform 0.3s ease-in-out';
                     monsterImg.style.transform = '';
 
@@ -948,7 +956,7 @@ class HuntRenderer {
                     leftEmoji.style.opacity = '0';
                     rightEmoji.style.opacity = '0';
 
-                    setTimeout(() => {
+                    this.animationTimers.timeout(() => {
                         monsterImg.style.transition = '';
                         leftEmoji.remove();
                         rightEmoji.remove();
@@ -993,14 +1001,14 @@ class HuntRenderer {
                     proj.style.top = `${passY}px`;
                     proj.style.opacity = '0';
 
-                    setTimeout(() => {
+                    this.animationTimers.timeout(() => {
                         proj.remove();
                     }, 400);
                 } else {
                     proj.style.left = `${destX}px`;
                     proj.style.top = `${destY}px`;
 
-                    setTimeout(() => {
+                    this.animationTimers.timeout(() => {
                         proj.remove();
 
                         const burnEl = document.createElement('div');
@@ -1008,9 +1016,9 @@ class HuntRenderer {
                         burnEl.textContent = emoji;
                         curTargetCard.appendChild(burnEl);
 
-                        setTimeout(() => {
+                        this.animationTimers.timeout(() => {
                             burnEl.style.opacity = '0';
-                            setTimeout(() => burnEl.remove(), 500);
+                            this.animationTimers.timeout(() => burnEl.remove(), 500);
                         }, 1500);
                     }, 400);
                 }
@@ -1033,7 +1041,7 @@ class HuntRenderer {
                     tag.className = 'game-hunt-status-tag fainted';
                 }
 
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     if (!this.card) return; // [FIX] 강제 중단 시 TypeError 방지
                     if (w && w.status !== 'dead') {
                         weaponCard.classList.remove('large-hit-anim');
@@ -1057,7 +1065,7 @@ class HuntRenderer {
                     tag.className = 'game-hunt-status-tag stunned';
                 }
 
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     if (!this.card) return; // [FIX] 강제 중단 시 TypeError 방지
                     if (w && w.status !== 'dead') {
                         weaponCard.classList.remove('small-hit-anim');
@@ -1081,7 +1089,7 @@ class HuntRenderer {
             container.classList.remove('roll-anim');
             void container.offsetWidth; // trigger reflow
             container.classList.add('roll-anim');
-            setTimeout(() => container.classList.remove('roll-anim'), 600);
+            this.animationTimers.timeout(() => container.classList.remove('roll-anim'), 600);
         }
     }
 
@@ -1113,7 +1121,7 @@ class HuntRenderer {
         }
         
         // Wrap fainted card animation and overlay generation in a 180ms delay to let the hit-shake complete first
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             if (!this.card) return;
             const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
             if (weaponCard) {
@@ -1324,7 +1332,7 @@ class HuntRenderer {
 
                 weaponCard.style.borderColor = borderClr;
                 weaponCard.style.zIndex = "10";
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     if (w && w.status !== 'dead') {
                         if (weaponImg) {
                             weaponImg.classList.remove(animClass);
@@ -1339,7 +1347,7 @@ class HuntRenderer {
                     weaponCard.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px) scale(0.95)`;
                 }
                 weaponCard.style.borderColor = borderClr;
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     if (w && w.status !== 'dead') {
                         if (!isDodge) weaponCard.style.transform = '';
                         this.restoreBorder(idx, w);
@@ -1354,7 +1362,7 @@ class HuntRenderer {
         const showcase = this.card.querySelector('#monster-showcase-panel');
         if (showcase) {
             showcase.style.transform = `translate(${(Math.random() - 0.5) * 20}px, ${(Math.random() - 0.5) * 20}px)`;
-            setTimeout(() => showcase.style.transform = '', 100);
+            this.animationTimers.timeout(() => showcase.style.transform = '', 100);
         }
     }
 
@@ -1411,15 +1419,15 @@ class HuntRenderer {
         targetEl.appendChild(emojiEl);
 
         // Animate up and fade out (starts from weapon image center and floats up higher)
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             emojiEl.style.opacity = '1';
             emojiEl.style.transform = 'translate(-50%, -80px) scale(1.3)';
         }, 50);
 
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             emojiEl.style.opacity = '0';
             emojiEl.style.transform = 'translate(-50%, -120px) scale(1.0)';
-            setTimeout(() => emojiEl.remove(), 400);
+            this.animationTimers.timeout(() => emojiEl.remove(), 400);
         }, 2200);
     }
 
@@ -1458,15 +1466,15 @@ class HuntRenderer {
         targetEl.appendChild(bubble);
 
         // Transition in
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             bubble.classList.add('visible');
         }, 10);
 
         // Auto remove bubble after 4 seconds
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             if (bubble.parentNode) {
                 bubble.classList.remove('visible');
-                setTimeout(() => {
+                this.animationTimers.timeout(() => {
                     if (bubble.parentNode) bubble.remove();
                 }, 400);
             }
@@ -1508,18 +1516,18 @@ class HuntRenderer {
             part.style.setProperty('--dy', `-${65 + Math.random() * 50}px`);
 
             targetEl.appendChild(part);
-            setTimeout(() => part.remove(), 1200);
+            this.animationTimers.timeout(() => part.remove(), 1200);
         }
 
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             bubble.style.opacity = '1';
             bubble.style.transform = 'translateX(-50%) translateY(-20px)';
         }, 10);
 
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             bubble.style.opacity = '0';
             bubble.style.transform = 'translateX(-50%) translateY(-35px)';
-            setTimeout(() => bubble.remove(), 300);
+            this.animationTimers.timeout(() => bubble.remove(), 300);
         }, 2200);
     }
 
@@ -1573,15 +1581,15 @@ class HuntRenderer {
 
         targetEl.appendChild(box);
 
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             box.style.opacity = '1';
             box.style.transform = 'translateX(-50%) translateY(0)';
         }, 30);
 
-        setTimeout(() => {
+        this.animationTimers.timeout(() => {
             box.style.opacity = '0';
             box.style.transform = 'translateX(-50%) translateY(-15px)';
-            setTimeout(() => box.remove(), 400);
+            this.animationTimers.timeout(() => box.remove(), 400);
         }, 2500);
     }
 }

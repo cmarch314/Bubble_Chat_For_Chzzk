@@ -177,10 +177,10 @@ class CommandsScrollEffect extends BaseEffect {
         return new Promise(resolve => {
             this.resolveFn = resolve;
             
-            this.rollTimeout = setTimeout(() => {
+            this.rollTimeout = this.timers.timeout(() => {
                 if (!this.isActive) return;
                 container.classList.remove('visible');
-                this.fadeTimeout = setTimeout(() => {
+                this.fadeTimeout = this.timers.timeout(() => {
                     this.cleanup();
                 }, 500);
             }, durationSec * 1000);
@@ -193,8 +193,8 @@ class CommandsScrollEffect extends BaseEffect {
             this.director.activeGame = this.previousActiveGame;
         }
         this.previousActiveGame = null;
-        if (this.rollTimeout) clearTimeout(this.rollTimeout);
-        if (this.fadeTimeout) clearTimeout(this.fadeTimeout);
+        if (this.rollTimeout) this.timers.clear(this.rollTimeout);
+        if (this.fadeTimeout) this.timers.clear(this.fadeTimeout);
         if (this.container) {
             this.container.remove();
             this.container = null;
@@ -213,10 +213,10 @@ class CommandsScrollEffect extends BaseEffect {
             this.container.classList.remove('visible');
         }
         
-        if (this.rollTimeout) clearTimeout(this.rollTimeout);
-        if (this.fadeTimeout) clearTimeout(this.fadeTimeout);
+        if (this.rollTimeout) this.timers.clear(this.rollTimeout);
+        if (this.fadeTimeout) this.timers.clear(this.fadeTimeout);
         
-        this.fadeTimeout = setTimeout(() => {
+        this.fadeTimeout = this.timers.timeout(() => {
             this.cleanup();
         }, 500);
     }

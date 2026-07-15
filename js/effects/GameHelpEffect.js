@@ -125,12 +125,12 @@ class GameHelpEffect extends BaseEffect {
         this.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()[dingKey] || dingKey);
 
         return new Promise(resolve => {
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 const card = container.querySelector('.game-help-card');
                 if (card) {
                     card.style.animation = "game-fade-out 0.5s ease-in forwards";
                 }
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     container.remove();
                     resolve();
                 }, 500);

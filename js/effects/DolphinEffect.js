@@ -41,7 +41,7 @@ class DolphinEffect extends BaseEffect {
         });
 
         const dolphinLife = conf.duration - conf.dolphinDelay;
-        setTimeout(() => {
+        this.timers.timeout(() => {
             const dolphinEl = this.director._spawnActor(overlayC, 'lead-dolphin', "🐬", { duration: dolphinLife + 5000 });
             const animateWildBounce = (el, total) => {
                 const start = Date.now(); let rot = 0;
@@ -53,14 +53,14 @@ class DolphinEffect extends BaseEffect {
                     rot -= d;
                     el.style.transition = `top ${800 / speed}ms ease-in-out, left ${800 / speed}ms ease-in-out, transform ${1200 / speed}ms cubic-bezier(0.1, 0.5, 0.2, 1)`;
                     el.style.left = `${x}%`; el.style.top = `${y}%`; el.style.transform = `translate(-50%, -50%) rotate(${rot}deg) scale(${conf.dolphinScale || 1.2})`;
-                    setTimeout(bounce, (900 + Math.random() * 300) / speed);
+                    this.timers.timeout(bounce, (900 + Math.random() * 300) / speed);
                 };
                 // Emerge spinning from the bottom (top: 120%, rotate: -360deg, scale: 0)
                 el.style.left = '50%'; el.style.top = '120%'; el.style.transform = 'translate(-50%, -50%) rotate(-360deg) scale(0)';
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     el.style.transition = `top ${800 / speed}ms cubic-bezier(0.175, 0.885, 0.32, 1.275), transform ${800 / speed}ms cubic-bezier(0.175, 0.885, 0.32, 1.275)`;
                     el.style.left = '50%'; el.style.top = '50%'; el.style.transform = `translate(-50%, -50%) rotate(0deg) scale(${conf.dolphinScale || 1.2})`;
-                    setTimeout(bounce, 800 / speed);
+                    this.timers.timeout(bounce, 800 / speed);
                 }, 100);
             };
             if (dolphinEl) animateWildBounce(dolphinEl, dolphinLife + 2000);
@@ -93,7 +93,7 @@ class DolphinEffect extends BaseEffect {
             const sizeUnit = baseSize.replace(/[0-9.]/g, '') || 'rem';
             const randomSize = `${sizeVal * (0.6 + Math.random() * 0.8)}${sizeUnit}`;
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 this.director._spawnActor(overlayC, 'sea-jump', smallSeaCreatures[Math.floor(Math.random() * smallSeaCreatures.length)], {
                     duration: duration,
                     styles: {
@@ -110,7 +110,7 @@ class DolphinEffect extends BaseEffect {
         }
 
         for (let i = 0; i < conf.extraCount; i++) {
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 this.director._spawnActor(overlayC, 'sea-extra', smallSeaCreatures[Math.floor(Math.random() * smallSeaCreatures.length)], {
                     duration: 3000 + Math.random() * 2000,
                     styles: {
@@ -129,7 +129,7 @@ class DolphinEffect extends BaseEffect {
         let msg = context.message || "";
         msg = msg.replace(/!돌핀/i, '').trim();
         if (msg) {
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 const txt = document.createElement('div'); txt.className = 'dolphin-text';
                 txt.style.animation = `hvn-dolphin-textFade ${dolphinLife / 1000}s ease-in-out forwards`;
                 txt.innerHTML = renderMessageWithEmotesHTML(this.director._wrapText(msg, (this.config.getVisualConfig()?.common?.textWrapLimit || 200), "<br>"), context.emotes || {}, 2.0);
@@ -137,7 +137,7 @@ class DolphinEffect extends BaseEffect {
             }, conf.dolphinDelay);
         }
         return new Promise(resolve => {
-            setTimeout(() => { ov.style.opacity = '0'; setTimeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 2000); }, conf.duration);
+            this.timers.timeout(() => { ov.style.opacity = '0'; this.timers.timeout(() => { if (ov.parentNode) ov.remove(); resolve(); }, 2000); }, conf.duration);
         });
     }
 }

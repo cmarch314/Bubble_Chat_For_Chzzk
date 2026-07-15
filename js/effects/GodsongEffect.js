@@ -78,7 +78,7 @@ class GodsongEffect extends BaseEffect {
                     }
 
                     if (imgConf.exitTime) {
-                        setTimeout(() => {
+                        this.timers.timeout(() => {
                             wrapper.style.animationTimingFunction = "ease-in";
                             wrapper.style.animationDuration = "1.5s";
                             wrapper.style.animationDelay = "0s";
@@ -93,7 +93,7 @@ class GodsongEffect extends BaseEffect {
                                 wrapper.style.opacity = "0";
                             }
 
-                            setTimeout(() => {
+                            this.timers.timeout(() => {
                                 if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
                             }, 1500);
                         }, imgConf.exitTime);
@@ -105,7 +105,7 @@ class GodsongEffect extends BaseEffect {
 
             overlay.classList.add('visible');
 
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 overlay.classList.remove('visible');
                 resolve();
             }, conf.duration);

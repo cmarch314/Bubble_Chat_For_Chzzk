@@ -26,9 +26,9 @@ class MulsulsanEffect extends BaseEffect {
 
         return new Promise(resolve => {
             overlay.classList.add('visible');
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 overlay.classList.remove('visible');
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     if (bg) {
                         bg.pause();
                         bg.currentTime = 0;

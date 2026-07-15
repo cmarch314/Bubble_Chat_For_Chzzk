@@ -4,9 +4,10 @@ const path = require('path');
 const vm = require('vm');
 
 const scopePath = path.resolve(__dirname, '../js/runtime/DisposableScope.js');
+const timersPath = path.resolve(__dirname, '../js/runtime/ManagedTimers.js');
 const sourcePath = path.resolve(__dirname, '../js/VisualDirector.js');
-const context = vm.createContext({ console, Promise });
-const source = `${fs.readFileSync(scopePath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.VisualDirector = VisualDirector;`;
+const context = vm.createContext({ console, Promise, setTimeout, clearTimeout, setInterval, clearInterval });
+const source = `${fs.readFileSync(scopePath, 'utf8')}\n${fs.readFileSync(timersPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.VisualDirector = VisualDirector;`;
 vm.runInContext(source, context, { filename: sourcePath });
 
 function deferred() {

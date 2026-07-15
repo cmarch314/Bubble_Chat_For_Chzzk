@@ -32,7 +32,7 @@ class ValstraxEffect extends BaseEffect {
             overlay.appendChild(cloudsContainer);
 
             // 3. 5초: 제트기 (붉은 선 - 두 줄) & 제트운 (흰 선)
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 const contrailL = document.createElement('div');
                 contrailL.className = 'valstrax-contrail valstrax-jet-left contrail-active';
                 overlay.appendChild(contrailL);
@@ -51,13 +51,13 @@ class ValstraxEffect extends BaseEffect {
             }, conf.jetDelay);
 
             // 4. 6초: 시네마틱 구름 서지 (전환 가림막)
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 const surge = document.createElement('div');
                 surge.className = 'valstrax-surge';
                 overlay.appendChild(surge);
 
                 // 구름이 화면을 완전히 가리는 피크 시점(약 0.6초 뒤)에 요소 교체
-                setTimeout(() => {
+                this.timers.timeout(() => {
                     overlay.querySelectorAll('.valstrax-clouds, .valstrax-jet, .valstrax-contrail, .valstrax-initial-bg').forEach(el => el.remove());
 
                     const flashLayer = document.createElement('div');
@@ -77,11 +77,11 @@ class ValstraxEffect extends BaseEffect {
                 }, 600); // 0.6s Peak Timing
 
                 // 3초 뒤(페이드아웃 완료 후) 서지 레이어 제거
-                setTimeout(() => surge.remove(), 3000);
+                this.timers.timeout(() => surge.remove(), 3000);
             }, conf.flashDelay);
 
             // 5. 7.3초: 별 폭발 & 유성 진입
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 if (this.activeStar) this.activeStar.style.display = 'none';
 
                 const shaker = document.createElement('div');
@@ -95,13 +95,13 @@ class ValstraxEffect extends BaseEffect {
             }, conf.starExplodeDelay);
 
             // 6. 충돌 임팩트 (impactDelay 지점)
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 const impactFlash = document.createElement('div');
                 impactFlash.className = 'valstrax-impact-flash';
                 overlay.appendChild(impactFlash);
 
-                setTimeout(() => impactFlash.classList.add('flash-fade-out'), 100);
-                setTimeout(() => impactFlash.remove(), 1200);
+                this.timers.timeout(() => impactFlash.classList.add('flash-fade-out'), 100);
+                this.timers.timeout(() => impactFlash.remove(), 1200);
 
                 overlay.querySelectorAll('.valstrax-clouds, .valstrax-mountains, .valstrax-jet, .valstrax-meteor, .valstrax-star, .valstrax-flash-layer, .valstrax-shaker, .valstrax-contrail').forEach(el => el.remove());
 
@@ -132,7 +132,7 @@ class ValstraxEffect extends BaseEffect {
             }, conf.impactDelay);
 
             // 7. 메시지 등장 (textAppearDelay 지점)
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 let msg = context.message || "";
                 msg = msg.replace(/!발파/i, '').trim();
 
@@ -148,7 +148,7 @@ class ValstraxEffect extends BaseEffect {
             }, conf.textAppearDelay);
 
             // 8. 18초: 종료
-            setTimeout(() => {
+            this.timers.timeout(() => {
                 overlay.remove();
                 resolve();
             }, conf.duration);

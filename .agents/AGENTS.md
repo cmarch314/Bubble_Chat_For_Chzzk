@@ -130,3 +130,8 @@ d:/BubbleChat/
 * Never rewrite or destructively normalize source media. Store measured LUFS/true-peak compensation in `js/audio-levels.generated.js`.
 * All programmatic `Audio` creation must go through `AudioManager.createNativeAudio()`. DOM media must be registered through `AudioManager.connectMediaElement()`.
 * The shared compressor is collision and peak protection, not the primary loudness normalizer. File-specific measured gain is applied before it for decoded SFX and through native volume for local media.
+
+### Rule 12: Timers Must Follow Their Owner's Lifecycle
+* Effects derived from `BaseEffect` must schedule delayed work through `this.timers`. `EffectRegistry` begins a fresh execution scope and clears it when `execute()` settles, including error paths.
+* Long-lived renderers and managers must own an explicit `ManagedTimers` instance and clear it when their UI, phase, or application is disposed. Hunt fight animations are cleared separately from the engine scheduler.
+* Do not add raw `setTimeout()` or `setInterval()` calls to effects or UI controllers. The only exception is a pure engine's injected default scheduler, which must be replaceable by its lifecycle owner.
