@@ -45,6 +45,8 @@ globalThis.HuntAudioManager = class HuntAudioManager {
 // Read files
 const managedTimersCode = fs.readFileSync(path.join(__dirname, '../js/runtime/ManagedTimers.js'), 'utf8');
 eval(managedTimersCode + "; globalThis.ManagedTimers = ManagedTimers;");
+const huntLifecycleCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntLifecycle.js'), 'utf8');
+eval(huntLifecycleCode + "; globalThis.HuntLifecycle = HuntLifecycle;");
 
 const huntDataCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntData.js'), 'utf8');
 eval(huntDataCode);

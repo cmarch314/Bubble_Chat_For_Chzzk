@@ -4,6 +4,8 @@ const vm = require('vm');
 
 const managedTimersCode = fs.readFileSync(path.join(__dirname, '../js/runtime/ManagedTimers.js'), 'utf8');
 eval(managedTimersCode + "; globalThis.ManagedTimers = ManagedTimers;");
+const huntLifecycleCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntLifecycle.js'), 'utf8');
+eval(huntLifecycleCode + "; globalThis.HuntLifecycle = HuntLifecycle;");
 
 // Mock frontend globals
 global.BaseEffect = class BaseEffect {

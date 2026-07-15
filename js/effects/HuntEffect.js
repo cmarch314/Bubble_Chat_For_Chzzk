@@ -2,7 +2,7 @@ class HuntEffect extends BaseEffect {
     constructor(director) {
         super(director);
         this.isActive = false;
-        this.phase = 'idle'; // 'idle', 'voting', 'fighting', 'ended'
+        this.lifecycle = new HuntLifecycle();
         this.bets = {}; // { nickname: { index, color } }
         this.selectedWeapons = []; // 4 selected weapons
         this.selectedMonster = null; // random monster
@@ -29,6 +29,14 @@ class HuntEffect extends BaseEffect {
             defensive: ['😌', '👍', '😊', '👌', '🧡'],
             normal: ['🙂', '👍', '😄', '👏', '❤️']
         };
+    }
+
+    get phase() {
+        return this.lifecycle.state;
+    }
+
+    set phase(nextState) {
+        this.lifecycle.transition(nextState);
     }
 
     async execute(context) {
