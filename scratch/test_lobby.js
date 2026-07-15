@@ -56,6 +56,7 @@ eval(huntDataCode);
 const huntInitializerCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntInitializer.js'), 'utf8');
 eval(huntInitializerCode + "; globalThis.HuntInitializer = HuntInitializer;");
 
+const huntCombatAnimatorCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntCombatAnimator.js'), 'utf8');
 const huntNotificationRendererCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntNotificationRenderer.js'), 'utf8');
 const huntRendererCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntRenderer.js'), 'utf8');
 const huntEffectCode = fs.readFileSync(path.join(__dirname, '../js/effects/HuntEffect.js'), 'utf8');
@@ -93,6 +94,7 @@ const director = {
   }
 };
 
+eval(huntCombatAnimatorCode + "; globalThis.HuntCombatAnimator = HuntCombatAnimator;");
 eval(huntNotificationRendererCode + "; globalThis.HuntNotificationRenderer = HuntNotificationRenderer;");
 eval(huntRendererCode + "; globalThis.HuntRenderer = HuntRenderer;");
 eval(huntEffectCode + "; globalThis.HuntEffect = HuntEffect;");
