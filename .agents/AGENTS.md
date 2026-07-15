@@ -125,6 +125,7 @@ d:/BubbleChat/
 * Nicknames, chat messages, winners, participants, and other Chzzk-provided values must use `textContent` or `SafeContent.escapeHTML()` before entering an HTML template.
 * Only `SafeContent.renderEmotesHTML()` may turn remote chat text into rich markup. It permits escaped text plus validated HTTPS emote images.
 * Remote colors must pass through `SafeContent.cssColor()` before being used in inline styles. Never interpolate an untrusted color or URL into HTML.
+* Hunt participant cards are part of this boundary: selected hunter names and hunter colors must remain escaped and color-validated even when the surrounding weapon data is local.
 
 ### Rule 11: Loudness Normalization Must Preserve Local Playback
 * Never rewrite or destructively normalize source media. Store measured LUFS/true-peak compensation in `js/audio-levels.generated.js`.

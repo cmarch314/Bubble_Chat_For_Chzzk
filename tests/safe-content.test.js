@@ -36,4 +36,9 @@ assert.strictEqual(SafeContent.remoteImageUrl('data:text/html,x'), null);
 assert.strictEqual(SafeContent.cssColor('#12aBcD'), '#12aBcD');
 assert.strictEqual(SafeContent.cssColor('red; background:url(x)'), '#ffffff');
 
+const huntRendererSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntRenderer.js'), 'utf8');
+assert.match(huntRendererSource, /SafeContent\.escapeHTML\(w\.hunterName \|\| 'HUNTER'\)/);
+assert.match(huntRendererSource, /SafeContent\.cssColor\(w\.hunterColor, '#c98534'\)/);
+assert.doesNotMatch(huntRendererSource, /👤 \$\{w\.hunterName\}/);
+
 console.log('[test] SafeContent remote-input contract passed.');

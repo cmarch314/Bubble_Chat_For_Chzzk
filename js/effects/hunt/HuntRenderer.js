@@ -501,8 +501,8 @@ class HuntRenderer {
                         <span id="potion-count-${w.index}">🧪 ${w.potions}</span>
                     </div>
  
-                    <div class="game-hunt-weapon-name" style="font-size: 2.5rem; font-weight: bold; color:${w.hunterColor || '#c98534'}; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; margin-bottom: 6px;">
-                        👤 ${w.hunterName}
+                    <div class="game-hunt-weapon-name" style="font-size: 2.5rem; font-weight: bold; color:${SafeContent.cssColor(w.hunterColor, '#c98534')}; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; margin-bottom: 6px;">
+                        👤 ${SafeContent.escapeHTML(w.hunterName || 'HUNTER')}
                     </div>
                 </div>`).join('')}
             </div>
