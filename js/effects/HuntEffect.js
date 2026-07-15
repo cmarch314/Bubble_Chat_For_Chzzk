@@ -221,6 +221,7 @@ class HuntEffect extends BaseEffect {
     }
 
     startFight(container) {
+        this.renderer.clearLobbyTimer();
         this.phase = 'fighting';
         document.body.classList.add('in-hunt');
 

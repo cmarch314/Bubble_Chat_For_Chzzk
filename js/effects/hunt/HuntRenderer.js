@@ -1,9 +1,10 @@
 class HuntRenderer {
-    constructor() {
+    constructor(options = {}) {
         this.container = null;
         this.card = null;
         this.lobbyTimer = null;
         this.lobbyTimeouts = [];
+        this.lobbyTimers = options.lobbyTimers || new ManagedTimers();
     }
 
     setContainer(container) {
@@ -22,14 +23,9 @@ class HuntRenderer {
     }
 
     clearLobbyTimer() {
-        if (this.lobbyTimer) {
-            clearInterval(this.lobbyTimer);
-            this.lobbyTimer = null;
-        }
-        if (this.lobbyTimeouts && this.lobbyTimeouts.length > 0) {
-            this.lobbyTimeouts.forEach(t => clearTimeout(t));
-            this.lobbyTimeouts = [];
-        }
+        this.lobbyTimers.clearAll();
+        this.lobbyTimer = null;
+        this.lobbyTimeouts = [];
     }
 
     removeContainer() {
@@ -141,11 +137,12 @@ class HuntRenderer {
         this.card = this.container.querySelector('.game-hunt-card');
         
         // Remove entry-anim class after animation finishes to prevent glitches during DOM updates
-        setTimeout(() => {
+        const entryTimeout = this.lobbyTimers.timeout(() => {
             if (this.card) {
                 this.card.classList.remove('entry-anim');
             }
         }, 600);
+        this.lobbyTimeouts.push(entryTimeout);
 
         this.startLobbyPrepTimer();
     }
@@ -181,7 +178,7 @@ class HuntRenderer {
                 bubble.innerHTML = msg;
                 bubble.classList.add('visible');
                 
-                const hideTimeout = setTimeout(() => {
+                const hideTimeout = this.lobbyTimers.timeout(() => {
                     if (bubble) {
                         bubble.classList.remove('visible');
                     }
@@ -193,14 +190,14 @@ class HuntRenderer {
         // 1. Staggered initial show (0.5s, 2s, 3.5s, 5.5s)
         this.lobbyTimeouts = [];
         for (let i = 0; i < 4; i++) {
-            const initialTimeout = setTimeout(() => {
+            const initialTimeout = this.lobbyTimers.timeout(() => {
                 showBubble(i);
             }, 500 + i * 1500);
             this.lobbyTimeouts.push(initialTimeout);
         }
 
         // 2. Periodically show bubble organically (every 3 seconds) for a random hunter
-        this.lobbyTimer = setInterval(() => {
+        this.lobbyTimer = this.lobbyTimers.interval(() => {
             if (!this.container) return;
             const targetIndex = Math.floor(Math.random() * 4);
             const bubble = this.container.querySelector(`#prep-bubble-${targetIndex}`);
