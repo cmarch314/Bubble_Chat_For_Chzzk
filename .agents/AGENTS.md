@@ -57,6 +57,11 @@ d:/BubbleChat/
 4. **Chat Bubble & Video Overlay**:
    - `ChatRenderer.js` processes standard chat messages. It detects hashtag (`#`) prefixes to parse video commands, mounts the video player inside chat bubbles, and manages volume.
 
+5. **Chat Connection Supervision**:
+   - `ChzzkGateway.js` treats WebSocket transport-open and Chzzk authentication-ready as separate states.
+   - A running OBS page must survive a Chzzk broadcast restart without reloading. The gateway periodically re-discovers the current internal chat session, obtains a fresh token, authenticates a replacement socket, and only then retires the previous socket.
+   - A cached `chatChannelId` is a startup hint, not a permanent source of truth. Socket close, authentication timeout, stale protocol traffic, or a changed live-session identifier must force rediscovery.
+
 ---
 
 ## 3. Critical Guardrails & Behavioral Rules
@@ -103,5 +108,9 @@ d:/BubbleChat/
     - Always specify `encoding='utf-8'` explicitly (e.g., `open(file, 'w', encoding='utf-8')`).
     - For Python scripts on Windows, run with the environment variable `PYTHONUTF8=1` or python command line flag `-X utf8` to ensure that python uses UTF-8 as the default encoding for file operations and standard output.
 
-
+### Rule 9: OBS Chat Session Handover
+* **No page reload for routine recovery**: Network recovery must restart only the gateway. It must not call `location.reload()` or destroy active games, effects, chat bubbles, or audio state.
+* **Authenticated readiness**: Never emit `chzzk_connected` on `WebSocket.onopen`. Emit readiness only after the Chzzk `10100` authentication response is received.
+* **Safe replacement**: During a broadcast-session handover, retain the currently authenticated socket until the replacement socket has authenticated. Ignore chat packets from pending or retired sockets to prevent duplicates.
+* **Bounded retries**: Reconnects use bounded exponential backoff with jitter, and live-session monitoring failures must not tear down a working connection.
 

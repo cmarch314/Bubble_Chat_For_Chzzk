@@ -1,148 +1,307 @@
-// ==========================================
-// [Class 2] Chzzk Network Gateway
-// ==========================================
+// Chzzk connection supervisor for the OBS overlay.
+// Keeps the page and running effects alive while chat sessions are replaced.
 class ChzzkGateway {
     constructor(config, eventBus, legacyMessageHandler = null, timers = {}) {
         this.config = config;
         this.eventBus = eventBus;
         this.onMessage = legacyMessageHandler;
+
         this.ws = null;
-        this.proxies = [
-            { prefix: "https://api.allorigins.win/get?url=", encode: true },
-            { prefix: "https://api.cors.lol/?url=", encode: true },
-            { prefix: "https://proxy.corsfix.com/", encode: false },
-            { prefix: "https://thingproxy.freeboard.io/fetch/", encode: false },
-            { prefix: "https://corsproxy.io/?", encode: true },
-            { prefix: "https://api.codetabs.com/v1/proxy?quest=", encode: true }
-        ];
+        this.pendingSocket = null;
+        this.activeChatChannelId = null;
+        this.socketGeneration = 0;
+        this.connectGeneration = 0;
+
         this.attemptCount = 1;
+        this.failureCount = 0;
         this.reconnectTimer = null;
         this.heartbeatTimer = null;
-        this.socketGeneration = 0;
+        this.sessionCheckTimer = null;
+        this.authTimer = null;
+
+        this.state = 'idle';
+        this.stopped = false;
+        this.connectInFlight = false;
+        this.sessionCheckInFlight = false;
+        this.lastPacketAt = 0;
+        this.preferredTransport = null;
+
         this.setTimeout = timers.setTimeout || ((callback, delay) => setTimeout(callback, delay));
         this.clearTimeout = timers.clearTimeout || (id => clearTimeout(id));
         this.setInterval = timers.setInterval || ((callback, delay) => setInterval(callback, delay));
         this.clearInterval = timers.clearInterval || (id => clearInterval(id));
+        this.now = timers.now || (() => Date.now());
+        this.random = timers.random || Math.random;
+        this.sessionCheckIntervalMs = timers.sessionCheckIntervalMs || 30000;
+        this.authTimeoutMs = timers.authTimeoutMs || 8000;
+        this.staleConnectionMs = timers.staleConnectionMs || 120000;
     }
 
-    async connect() {
+    async connect(options = {}) {
+        if (this.connectInFlight) return;
+
+        this.stopped = false;
+        this.connectInFlight = true;
+        const generation = ++this.connectGeneration;
+        const forceDiscovery = options.forceDiscovery === true;
+        const cacheKey = `chzzk_chat_channel_id_${this.config.channelId}`;
+
         this._clearReconnect();
-        const id = this.config.channelId || "NULL";
-        const src = this.config.idSource || "Unknown";
-        this._showLoader(`치지직 채널 접속 중...<br><div style="font-size: 0.5em; margin-top: 10px; opacity: 0.7; word-break: break-all;">ID: ${id}</div><div style="font-size: 0.4em; margin-top: 5px; opacity: 0.5;">(${this.attemptCount}번째 시도)</div>`, "loading");
+        this._setState('discovering', options.reason || 'connect');
+        this._showLoader(`치지직 채널 연결 중… (${this.attemptCount}번째 시도)`, 'loading');
 
         try {
-            if (!this.config.channelId || this.config.channelId === "NULL") {
-                throw new Error("채널 ID가 설정되지 않았습니다. config.js 혹은 URL 파라미터를 확인해주세요.");
+            if (!this.config.channelId || this.config.channelId === 'NULL') {
+                throw new Error('채널 ID가 설정되지 않았습니다.');
             }
 
-            const cacheKey = `chzzk_chat_channel_id_${this.config.channelId}`;
-            let chatChannelId = null;
+            let chatChannelId = forceDiscovery ? null : this._readCachedChannelId(cacheKey);
+            if (!chatChannelId) {
+                const statusData = await this._fetchLiveStatus();
+                chatChannelId = statusData?.content?.chatChannelId;
+                if (!chatChannelId) throw new Error('현재 방송의 채팅 세션을 찾지 못했습니다.');
+                this._writeCachedChannelId(cacheKey, chatChannelId);
+            }
 
+            if (generation !== this.connectGeneration || this.stopped) return;
+            this._setState('fetching-token');
+            this._showLoader(`채팅 인증 정보 요청 중… (${this.attemptCount}번째 시도)`, 'loading');
+
+            let tokenData;
             try {
-                chatChannelId = localStorage.getItem(cacheKey);
-            } catch (storageError) {
-                this.config.log(`LocalStorage read failed: ${storageError.message}`);
+                tokenData = await this._fetchAccessToken(chatChannelId);
+            } catch (error) {
+                this._removeCachedChannelId(cacheKey);
+                throw new Error(`채팅 인증 정보 요청 실패: ${error.message}`);
             }
 
-            if (chatChannelId) {
-                this.config.log(`Using cached chatChannelId: ${chatChannelId}`);
-            } else {
-                this.config.log(`Fetching live-status to get chatChannelId`);
-                const statusData = await this._fetchWithProxy(
-                    `https://api.chzzk.naver.com/polling/v2/channels/${this.config.channelId}/live-status`
-                );
-                if (!statusData || !statusData.content || !statusData.content.chatChannelId) {
-                    throw new Error("채널 라이브 상태 정보를 가져올 수 없습니다.");
-                }
-                chatChannelId = statusData.content.chatChannelId;
-
-                try {
-                    localStorage.setItem(cacheKey, chatChannelId);
-                } catch (storageError) {
-                    this.config.log(`LocalStorage write failed: ${storageError.message}`);
-                }
+            const accessToken = tokenData?.content?.accessToken;
+            if (!accessToken) {
+                this._removeCachedChannelId(cacheKey);
+                throw new Error('채팅 인증 응답이 올바르지 않습니다.');
             }
 
-            this._showLoader(`채팅 서버 접근 권한 요청 중... [${id}] (${this.attemptCount}번째 시도)`, "loading");
-            
-            let tokenData = null;
-            try {
-                tokenData = await this._fetchWithProxy(
-                    `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING`
-                );
-            } catch (tokenError) {
-                // If token request fails, clear cache and retry
-                try {
-                    localStorage.removeItem(cacheKey);
-                } catch (storageError) {}
-                throw new Error(`채팅 토큰 획득 실패 (캐시 초기화됨): ${tokenError.message}`);
-            }
-
-            if (!tokenData || !tokenData.content || !tokenData.content.accessToken) {
-                try {
-                    localStorage.removeItem(cacheKey);
-                } catch (storageError) {}
-                throw new Error("채팅 토큰 정보가 올바르지 않습니다. (캐시 초기화됨)");
-            }
-            const accessToken = tokenData.content.accessToken;
-
+            if (generation !== this.connectGeneration || this.stopped) return;
             this._connectSocket(chatChannelId, accessToken);
-
-        } catch (e) {
-            this.config.log(`Connection Failed: ${e.message}`);
-            this._showLoader(`연결 실패: ${e.message}<br>${this.attemptCount}번째 시도 실패. 5초 후 재시도`, "error");
+        } catch (error) {
+            if (generation !== this.connectGeneration || this.stopped) return;
+            this.config.log(`Connection failed: ${error.message}`);
+            this._showLoader(`연결 실패 · 자동 재시도 중 (${this.attemptCount}회)`, 'error');
             this.attemptCount++;
-            this._scheduleReconnect(5000);
+            this.failureCount++;
+            this._setState('backoff', error.message);
+            this._scheduleReconnect(this._getReconnectDelay(), {
+                forceDiscovery: true,
+                reason: 'connect-failed'
+            });
+        } finally {
+            if (generation === this.connectGeneration) this.connectInFlight = false;
         }
     }
 
+    _readCachedChannelId(cacheKey) {
+        try {
+            const value = localStorage.getItem(cacheKey);
+            if (value) this.config.log(`Using cached chat session: ${value}`);
+            return value;
+        } catch (error) {
+            this.config.log(`LocalStorage read failed: ${error.message}`);
+            return null;
+        }
+    }
+
+    _writeCachedChannelId(cacheKey, value) {
+        try {
+            localStorage.setItem(cacheKey, value);
+        } catch (error) {
+            this.config.log(`LocalStorage write failed: ${error.message}`);
+        }
+    }
+
+    _removeCachedChannelId(cacheKey) {
+        try {
+            localStorage.removeItem(cacheKey);
+        } catch (error) {
+            this.config.log(`LocalStorage remove failed: ${error.message}`);
+        }
+    }
+
+    _fetchLiveStatus() {
+        this.config.log('Discovering current live chat session.');
+        return this._fetchWithProxy(
+            `https://api.chzzk.naver.com/polling/v2/channels/${this.config.channelId}/live-status`
+        );
+    }
+
+    _fetchAccessToken(chatChannelId) {
+        return this._fetchWithProxy(
+            `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${chatChannelId}&chatType=STREAMING`
+        );
+    }
+
     _connectSocket(chatChannelId, accessToken) {
-        this._clearHeartbeat();
+        this._closePendingSocket();
         const generation = ++this.socketGeneration;
         const socket = new WebSocket('wss://kr-ss1.chat.naver.com/chat');
-        this.ws = socket;
+        this.pendingSocket = socket;
+        this._setState('opening-socket');
 
         socket.onopen = () => {
-            if (generation !== this.socketGeneration) return;
-            this.config.log("WS Open. Sending Handshake.");
-            this._showLoader("채팅 서버 연결 완료!", "success");
-            window.dispatchEvent(new CustomEvent('chzzk_connected')); // Signal connection success
-            this.attemptCount = 1; // Success! Reset counter
+            if (socket !== this.pendingSocket || generation !== this.socketGeneration || this.stopped) return;
+            this._setState('authenticating');
+            this.config.log('WS open. Authenticating chat session.');
             socket.send(JSON.stringify({
-                ver: "2", cmd: 100, svcid: "game", cid: chatChannelId,
-                bdy: { accTkn: accessToken, auth: "READ", devType: 2001, uid: null }, tid: 1
+                ver: '2',
+                cmd: 100,
+                svcid: 'game',
+                cid: chatChannelId,
+                bdy: { accTkn: accessToken, auth: 'READ', devType: 2001, uid: null },
+                tid: 1
             }));
+
+            this._clearAuthTimer();
+            this.authTimer = this.setTimeout(() => {
+                if (socket !== this.pendingSocket || generation !== this.socketGeneration) return;
+                this.config.log('Chat authentication timed out. Refreshing session.');
+                this._failPendingSocket(socket, 'auth-timeout');
+            }, this.authTimeoutMs);
         };
 
-        socket.onmessage = (e) => {
-            if (generation !== this.socketGeneration) return;
+        socket.onmessage = event => {
+            if (this.stopped || (socket !== this.pendingSocket && socket !== this.ws)) return;
             try {
-                this._parsePacket(JSON.parse(e.data), chatChannelId);
+                if (socket === this.ws) this.lastPacketAt = this.now();
+                this._parsePacket(JSON.parse(event.data), chatChannelId, socket, generation);
             } catch (error) {
                 this.config.log(`WS packet parse failed: ${error.message}`);
             }
         };
-        socket.onclose = () => {
-            if (generation !== this.socketGeneration) return;
-            this._clearHeartbeat();
-            this.config.log("WS Closed. Reconnecting...");
-            this.attemptCount++;
-            this._scheduleReconnect(3000);
-        };
-        socket.onerror = (err) => console.error("WS Error", err);
 
+        socket.onclose = () => this._handleSocketClose(socket, generation);
+        socket.onerror = () => this.config.log('WS transport error.');
+    }
+
+    _handleSocketClose(socket, generation) {
+        if (this.stopped || generation > this.socketGeneration) return;
+        const wasPending = socket === this.pendingSocket;
+        const wasActive = socket === this.ws;
+        if (!wasPending && !wasActive) return;
+
+        if (wasPending) this.pendingSocket = null;
+        if (wasActive) this.ws = null;
+        this._clearAuthTimer();
+        if (wasActive) {
+            this._clearHeartbeat();
+            this._clearSessionCheck();
+        }
+
+        this.config.log('WS closed. Refreshing the live chat session.');
+        this.attemptCount++;
+        this.failureCount++;
+        this._setState('backoff', 'socket-closed');
+        this._scheduleReconnect(this._getReconnectDelay(), {
+            forceDiscovery: true,
+            reason: 'socket-closed'
+        });
+    }
+
+    _markSocketReady(socket, generation, chatChannelId) {
+        if (socket !== this.pendingSocket || generation !== this.socketGeneration || this.stopped) return;
+
+        this._clearAuthTimer();
+        const previousSocket = this.ws;
+        this.ws = socket;
+        this.pendingSocket = null;
+        this.activeChatChannelId = chatChannelId;
+        this.lastPacketAt = this.now();
+        this.failureCount = 0;
+        this.attemptCount = 1;
+        this._setState('ready');
+
+        if (previousSocket && previousSocket !== socket) this._closeSocketSilently(previousSocket);
+        this._startHeartbeat(socket);
+        this._startSessionCheck();
+        this._showLoader('채팅 연결 완료', 'success');
+        window.dispatchEvent(new CustomEvent('chzzk_connected'));
+        this.eventBus?.emit?.('network:ready', { chatChannelId });
+    }
+
+    _startHeartbeat(socket) {
+        this._clearHeartbeat();
         this.heartbeatTimer = this.setInterval(() => {
-            if (generation !== this.socketGeneration) return;
-            if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify({ ver: "2", cmd: 0 }));
+            if (socket !== this.ws || this.stopped) return;
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ ver: '2', cmd: 0 }));
+            }
         }, 20000);
     }
 
-    _scheduleReconnect(delay) {
+    _startSessionCheck() {
+        this._clearSessionCheck();
+        this.sessionCheckTimer = this.setInterval(
+            () => this._checkLiveSession(),
+            this.sessionCheckIntervalMs
+        );
+    }
+
+    async _checkLiveSession() {
+        if (this.sessionCheckInFlight || this.stopped || !this.ws) return;
+        this.sessionCheckInFlight = true;
+        try {
+            if (this.lastPacketAt && this.now() - this.lastPacketAt > this.staleConnectionMs) {
+                this.config.log('Chat transport is stale. Re-authenticating without a page reload.');
+                this._restartSession('stale-transport');
+                return;
+            }
+
+            const statusData = await this._fetchLiveStatus();
+            const currentChatChannelId = statusData?.content?.chatChannelId;
+            if (currentChatChannelId && currentChatChannelId !== this.activeChatChannelId) {
+                this.config.log(`Live chat session changed: ${this.activeChatChannelId} -> ${currentChatChannelId}`);
+                this._restartSession('live-session-changed');
+            }
+        } catch (error) {
+            // A monitoring failure must not tear down a working chat connection.
+            this.config.log(`Live session check skipped: ${error.message}`);
+        } finally {
+            this.sessionCheckInFlight = false;
+        }
+    }
+
+    _restartSession(reason) {
+        if (this.stopped) return;
+        this.connectGeneration++;
+        this.connectInFlight = false;
+        this._closePendingSocket();
+        this._clearAuthTimer();
+        this._clearSessionCheck();
+        this._scheduleReconnect(0, { forceDiscovery: true, reason });
+    }
+
+    _failPendingSocket(socket, reason) {
+        if (socket !== this.pendingSocket) return;
+        this.pendingSocket = null;
+        this._closeSocketSilently(socket);
+        this.failureCount++;
+        this.attemptCount++;
+        this._setState('backoff', reason);
+        this._scheduleReconnect(this._getReconnectDelay(), {
+            forceDiscovery: true,
+            reason
+        });
+    }
+
+    _getReconnectDelay() {
+        const base = Math.min(15000, 1000 * (2 ** Math.min(this.failureCount, 4)));
+        return Math.round(base + (base * 0.2 * this.random()));
+    }
+
+    _scheduleReconnect(delay, options = {}) {
+        if (this.stopped) return;
         this._clearReconnect();
         this.reconnectTimer = this.setTimeout(() => {
             this.reconnectTimer = null;
-            this.connect();
+            this.connect(options);
         }, delay);
     }
 
@@ -158,224 +317,245 @@ class ChzzkGateway {
         this.heartbeatTimer = null;
     }
 
+    _clearSessionCheck() {
+        if (this.sessionCheckTimer === null) return;
+        this.clearInterval(this.sessionCheckTimer);
+        this.sessionCheckTimer = null;
+    }
+
+    _clearAuthTimer() {
+        if (this.authTimer === null) return;
+        this.clearTimeout(this.authTimer);
+        this.authTimer = null;
+    }
+
+    _closeSocketSilently(socket) {
+        if (!socket || typeof socket.close !== 'function') return;
+        socket.onclose = null;
+        try { socket.close(); } catch (error) {}
+    }
+
+    _closePendingSocket() {
+        const socket = this.pendingSocket;
+        this.pendingSocket = null;
+        this._closeSocketSilently(socket);
+    }
+
+    _setState(state, reason = '') {
+        this.state = state;
+        this.eventBus?.emit?.('network:state', {
+            state,
+            reason,
+            attempt: this.attemptCount
+        });
+    }
+
     disconnect() {
+        this.stopped = true;
+        this.connectGeneration++;
+        this.connectInFlight = false;
         this.socketGeneration++;
         this._clearReconnect();
         this._clearHeartbeat();
-        const socket = this.ws;
+        this._clearSessionCheck();
+        this._clearAuthTimer();
+        this._closePendingSocket();
+        this._closeSocketSilently(this.ws);
         this.ws = null;
-        if (socket && typeof socket.close === 'function') socket.close();
+        this.activeChatChannelId = null;
+        this._setState('stopped');
     }
 
-    _parsePacket(data, chatChannelId) {
+    _parsePacket(data, chatChannelId, socket = this.ws, generation = this.socketGeneration) {
         if (data.cmd === 0) {
-            this.ws.send(JSON.stringify({ ver: "2", cmd: 10000 }));
+            if (socket?.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ ver: '2', cmd: 10000 }));
+            }
             return;
         }
 
         if (data.cmd === 10100) {
+            if (socket === this.pendingSocket) this._markSocketReady(socket, generation, chatChannelId);
+
             let historyCount = 0;
             if (this.config.debugMode) historyCount = 10;
             else if (this.config.loadHistory) historyCount = 50;
 
-            if (historyCount > 0) {
-                this.ws.send(JSON.stringify({
-                    ver: "2", cmd: 5101, svcid: "game", cid: chatChannelId,
-                    bdy: { recentMessageCount: historyCount }, tid: 2, sid: data.bdy.sid
+            if (historyCount > 0 && socket?.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    ver: '2', cmd: 5101, svcid: 'game', cid: chatChannelId,
+                    bdy: { recentMessageCount: historyCount }, tid: 2, sid: data.bdy?.sid
                 }));
             }
+            return;
         }
 
-        // [FIX] 93102 (후원/구독) 코드 필수 포함
-        if ([93101, 93102, 15101, 94101].includes(data.cmd)) {
-            const chats = (data.cmd === 15101) ? data.bdy.messageList : data.bdy;
-            if (!chats) return; // Null check added back for stability
+        if (![93101, 93102, 15101, 94101].includes(data.cmd) || socket !== this.ws) return;
+        const chats = data.cmd === 15101 ? data.bdy?.messageList : data.bdy;
+        if (!chats) return;
 
-            // 93102나 94101이 단일 객체로 올 수 있으므로 배열로 변환
-            const chatArray = Array.isArray(chats) ? chats : [chats];
+        const chatArray = Array.isArray(chats) ? chats : [chats];
+        chatArray.forEach(chat => {
+            if (!chat) return;
+            let profile = {};
+            let extra = {};
+            try {
+                profile = chat.profile ? JSON.parse(chat.profile) : {};
+                extra = chat.extras ? JSON.parse(chat.extras) : {};
+            } catch (error) {
+                this.config.log(`Chat metadata parse failed: ${error.message}`);
+                return;
+            }
 
-            chatArray.forEach(chat => {
-                if (!chat) return; // Individual chat null check
-                let profile = {}, extra = {};
-                try {
-                    profile = chat.profile ? JSON.parse(chat.profile) : {};
-                    extra = chat.extras ? JSON.parse(chat.extras) : {};
-                } catch (e) {
-                    console.error("JSON Parse Error (Profile/Extras):", e);
-                    return; // Skip malformed chat
-                }
+            const msgType = chat.messageTypeCode || chat.msgTypeCode || 1;
+            const isDonation = msgType === 10;
+            const isSubscription = msgType === 11;
+            const colorCode = profile?.streamingProperty?.nicknameColor?.colorCode || null;
+            const messageData = {
+                message: chat.msg || chat.content || '',
+                nickname: profile.nickname || 'Anonymous',
+                color: colorCode,
+                badges: profile.activityBadges || [],
+                emojis: extra.emojis || {},
+                isStreamer: profile.userRoleCode === 'streamer' || profile.userIdHash === this.config.channelId,
+                isSubscriber: !!profile?.streamingProperty?.subscription,
+                uid: profile.userIdHash,
+                type: 'chat',
+                isDonation,
+                donationAmount: isDonation ? extra.payAmount || 0 : 0,
+                isSubscription,
+                subMonth: isSubscription ? extra.month || 1 : 0,
+                msgType
+            };
 
-                // [Protocol V1.0] 타입 코드 식별 (msgTypeCode fallback 추가)
-                const msgType = chat.messageTypeCode || chat.msgTypeCode || 1;
-                const isDonation = (msgType === 10);
-                const isSubscription = (msgType === 11);
-
-                // [Fix] Extract color safely
-                let colorCode = null;
-                if (profile && profile.streamingProperty && profile.streamingProperty.nicknameColor) {
-                    colorCode = profile.streamingProperty.nicknameColor.colorCode;
-                }
-
-                let donationAmount = 0;
-                let subMonth = 0;
-                if (isDonation) donationAmount = extra.payAmount || 0;
-                if (isSubscription) subMonth = extra.month || 1;
-
-                const messageData = {
-                    message: chat.msg || chat.content || "",
-                    nickname: profile.nickname || "Anonymous",
-                    color: colorCode,
-                    badges: profile.activityBadges || [],
-                    emojis: extra.emojis || {},
-                    isStreamer: profile.userRoleCode === 'streamer' || profile.userIdHash === this.config.channelId,
-                    isSubscriber: !!(profile && profile.streamingProperty && profile.streamingProperty.subscription), // [FIX] 치지직 구독 감지 로직 강화
-                    uid: profile.userIdHash,
-                    type: 'chat',
-
-                    // [Antigravity 확장 필드]
-                    isDonation: isDonation,
-                    donationAmount: donationAmount,
-                    isSubscription: isSubscription,
-                    subMonth: subMonth,
-                    msgType: msgType
-                };
-
-                if (this.eventBus) {
-                    this.eventBus.emit('chat:received', messageData);
-                } else if (this.onMessage) {
-                    this.onMessage(messageData); // Fallback
-                }
-            });
-        }
+            if (this.eventBus) this.eventBus.emit('chat:received', messageData);
+            else this.onMessage?.(messageData);
+        });
     }
 
     _prepareUrl(url) {
         const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}_t=${Date.now()}`;
+        return `${url}${separator}_t=${this.now()}`;
     }
 
     async _fetchWithTimeout(url, options = {}, timeoutMs = 4000) {
         const controller = new AbortController();
-        const id = setTimeout(() => controller.abort(), timeoutMs);
+        const timeout = this.setTimeout(() => controller.abort(), timeoutMs);
         try {
-            const response = await fetch(url, { ...options, signal: controller.signal });
-            clearTimeout(id);
-            return response;
-        } catch (error) {
-            clearTimeout(id);
-            throw error;
+            return await fetch(url, { ...options, signal: controller.signal });
+        } finally {
+            this.clearTimeout(timeout);
         }
+    }
+
+    _transportCandidates(targetUrl) {
+        return [
+            { id: 'direct', run: () => this._fetchDirect(targetUrl) },
+            { id: 'allorigins', run: () => this._fetchAllOrigins(targetUrl) },
+            { id: 'cors-lol', run: () => this._fetchStandardProxy('https://api.cors.lol/?url=', targetUrl, true) },
+            { id: 'corsfix', run: () => this._fetchStandardProxy('https://proxy.corsfix.com/', targetUrl, false) },
+            { id: 'thingproxy', run: () => this._fetchStandardProxy('https://thingproxy.freeboard.io/fetch/', targetUrl, false) },
+            { id: 'corsproxy-io', run: () => this._fetchStandardProxy('https://corsproxy.io/?', targetUrl, true) },
+            { id: 'codetabs', run: () => this._fetchStandardProxy('https://api.codetabs.com/v1/proxy?quest=', targetUrl, true) }
+        ];
     }
 
     async _fetchWithProxy(url) {
-        // Prepare target URL once to share across all requests
         const targetUrl = this._prepareUrl(url);
+        const candidates = this._transportCandidates(targetUrl);
 
-        // Fast proxies run in parallel (including the new Corsfix proxy)
-        const fastProxies = [
-            this._fetchAllOrigins(targetUrl),
-            this._fetchStandardProxy("https://api.cors.lol/?url=", targetUrl, true),
-            this._fetchStandardProxy("https://proxy.corsfix.com/", targetUrl, false)
-        ];
-
-        try {
-            return await Promise.any(fastProxies);
-        } catch (aggregateError) {
-            // Fallbacks run sequentially
-            const fallbackProxies = [
-                { prefix: "https://thingproxy.freeboard.io/fetch/", encode: false },
-                { prefix: "https://corsproxy.io/?", encode: true },
-                { prefix: "https://api.codetabs.com/v1/proxy?quest=", encode: true }
-            ];
-
-            for (let proxy of fallbackProxies) {
+        if (this.preferredTransport) {
+            const preferred = candidates.find(candidate => candidate.id === this.preferredTransport);
+            if (preferred) {
                 try {
-                    return await this._fetchStandardProxy(proxy.prefix, targetUrl, proxy.encode);
-                } catch (e) {
-                    this.config.log(`Fallback proxy ${proxy.prefix} failed: ${e.message}`);
+                    return await preferred.run();
+                } catch (error) {
+                    this.config.log(`Preferred transport ${preferred.id} failed: ${error.message}`);
+                    this.preferredTransport = null;
                 }
             }
-
-            // Last resort: direct fetch (in case CORS restrictions are relaxed or running locally/extension)
-            try {
-                const res = await this._fetchWithTimeout(targetUrl);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && data.code === 200 && data.content) {
-                        return data;
-                    }
-                }
-            } catch (e) {}
-
-            throw new Error(`연결 실패 (모든 프록시 응답 없음)`);
         }
+
+        const primary = candidates.slice(0, 4);
+        try {
+            return await this._raceTransports(primary);
+        } catch (primaryError) {
+            return this._raceTransports(candidates.slice(4));
+        }
+    }
+
+    async _raceTransports(candidates) {
+        const result = await Promise.any(candidates.map(async candidate => ({
+            id: candidate.id,
+            data: await candidate.run()
+        })));
+        this.preferredTransport = result.id;
+        return result.data;
+    }
+
+    async _fetchDirect(targetUrl) {
+        const response = await this._fetchWithTimeout(targetUrl);
+        return this._parseApiResponse(response, 'Direct');
     }
 
     async _fetchAllOrigins(targetUrl) {
-        // targetUrl has already been prepared with timestamp cache-buster
         const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-        const res = await this._fetchWithTimeout(proxyUrl);
-        if (!res.ok) throw new Error("AllOrigins HTTP Error");
-        const wrapper = await res.json();
-        if (!wrapper || !wrapper.contents) throw new Error("AllOrigins No Contents");
+        const response = await this._fetchWithTimeout(proxyUrl);
+        if (!response.ok) throw new Error(`AllOrigins HTTP ${response.status}`);
+        const wrapper = await response.json();
+        if (!wrapper?.contents) throw new Error('AllOrigins returned no content');
         const data = JSON.parse(wrapper.contents);
-        if (!data || data.code !== 200 || !data.content) {
-            throw new Error(`AllOrigins Chzzk Invalid Response (code: ${data ? data.code : 'unknown'})`);
-        }
+        this._validateApiData(data, 'AllOrigins');
         return data;
     }
 
-    async _fetchStandardProxy(proxyPrefix, targetUrl, encode = true) {
-        // targetUrl has already been prepared with timestamp cache-buster
-        const fullUrl = proxyPrefix + (encode ? encodeURIComponent(targetUrl) : targetUrl);
-        const res = await this._fetchWithTimeout(fullUrl);
-        if (!res.ok) throw new Error(`Proxy HTTP Error: ${res.status}`);
-        const data = await res.json();
-        if (!data || data.code !== 200 || !data.content) {
-            throw new Error(`Proxy Chzzk Invalid Response (code: ${data ? data.code : 'unknown'})`);
-        }
+    async _fetchStandardProxy(prefix, targetUrl, encode = true) {
+        const fullUrl = prefix + (encode ? encodeURIComponent(targetUrl) : targetUrl);
+        const response = await this._fetchWithTimeout(fullUrl);
+        return this._parseApiResponse(response, prefix);
+    }
+
+    async _parseApiResponse(response, source) {
+        if (!response.ok) throw new Error(`${source} HTTP ${response.status}`);
+        const data = await response.json();
+        this._validateApiData(data, source);
         return data;
     }
 
-    _showLoader(msg, type) {
-        // [Refactor] Use Premium Loading Screen
+    _validateApiData(data, source) {
+        if (!data || data.code !== 200 || !data.content) {
+            throw new Error(`${source} returned an invalid Chzzk response`);
+        }
+    }
+
+    _showLoader(message, type) {
         const loader = document.getElementById('loading-screen');
-        const loaderText = loader ? loader.querySelector('.loader-text') : null;
-
+        const loaderText = loader?.querySelector?.('.loader-text');
         if (loader && loaderText) {
-            // Update text
-            // Strip HTML tags for cleaner look if needed, or keep them if styling allows
-            loaderText.innerHTML = msg;
+            loaderText.textContent = message;
             loader.classList.remove('hidden');
-
+            loaderText.style.color = type === 'error' ? '#ff4444' : '';
             if (type === 'success') {
-                setTimeout(() => {
-                    loader.classList.add('hidden');
-                    setTimeout(() => loader.remove(), 1000);
-                }, 1000);
-            } else if (type === 'error') {
-                // Keep error visible or style it differently
-                loaderText.style.color = '#ff4444';
+                this.setTimeout(() => loader.classList.add('hidden'), 1000);
             }
-        } else {
-            // Fallback: Create legacy loader if premium one is missing
-            let legacyLoader = document.getElementById('chzzk-loader');
-            if (!legacyLoader) {
-                legacyLoader = document.createElement('div');
-                legacyLoader.id = 'chzzk-loader';
-                document.body.appendChild(legacyLoader);
-                Object.assign(legacyLoader.style, {
-                    position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-                    background: 'rgba(0,0,0,0.8)', color: 'white', padding: '20px', borderRadius: '10px', zIndex: '9999',
-                    fontSize: '3em'
-                });
-            }
-            legacyLoader.innerHTML = msg;
-            legacyLoader.style.display = 'block';
-
-            if (type === 'success') {
-                setTimeout(() => { legacyLoader.style.opacity = 0; setTimeout(() => legacyLoader.remove(), 500); }, 1000);
-            }
+            return;
         }
+
+        let fallback = document.getElementById('chzzk-loader');
+        if (!fallback && document.createElement && document.body?.appendChild) {
+            fallback = document.createElement('div');
+            fallback.id = 'chzzk-loader';
+            document.body.appendChild(fallback);
+            Object.assign(fallback.style, {
+                position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+                background: 'rgba(0,0,0,0.8)', color: 'white', padding: '20px', borderRadius: '10px',
+                zIndex: '9999', fontSize: '3em'
+            });
+        }
+        if (!fallback) return;
+        fallback.textContent = message;
+        fallback.style.display = 'block';
+        fallback.style.color = type === 'error' ? '#ff4444' : 'white';
+        if (type === 'success') this.setTimeout(() => fallback.remove?.(), 1000);
     }
 }

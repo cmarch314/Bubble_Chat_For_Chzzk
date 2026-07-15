@@ -55,7 +55,7 @@ globalThis.CustomEvent = class {
     }
 };
 
-// Mock WebSocket to prevent full connection and just resolve on open
+// Mock WebSocket: transport open is not enough; emulate Chzzk auth completion.
 globalThis.WebSocket = class {
     constructor(url) {
         console.log(`[WebSocket] Connecting to: ${url}`);
@@ -70,6 +70,14 @@ globalThis.WebSocket = class {
     }
     send(data) {
         console.log(`[WebSocket] Sent: ${data}`);
+        const packet = JSON.parse(data);
+        if (packet.cmd === 100) {
+            setTimeout(() => {
+                this.onmessage?.({
+                    data: JSON.stringify({ cmd: 10100, bdy: { sid: 'MOCK_SESSION' } })
+                });
+            }, 5);
+        }
     }
     close() {
         console.log(`[WebSocket] Closed`);
