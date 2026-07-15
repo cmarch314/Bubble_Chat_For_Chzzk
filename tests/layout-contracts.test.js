@@ -13,8 +13,8 @@ assert.match(helpCardRule[1], /overflow:\s*hidden/);
 assert.match(helpCardRule[1], /box-sizing:\s*border-box/);
 assert.match(helpCardRule[1], /grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/);
 
-const helpSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/GameHelpEffect.js'), 'utf8');
-assert.match(helpSource, /\.game-help-title\s*\{[\s\S]*?grid-column:\s*1 \/ -1/);
-assert.match(helpSource, /\.game-help-footer\s*\{[\s\S]*?grid-column:\s*1 \/ -1/);
+const effectCss = fs.readFileSync(path.resolve(__dirname, '../styles/game-effects.css'), 'utf8');
+assert.match(effectCss, /\.game-help-title\s*\{[\s\S]*?grid-column:\s*1 \/ -1/);
+assert.match(effectCss, /\.game-help-footer\s*\{[\s\S]*?grid-column:\s*1 \/ -1/);
 
 console.log('[test] Responsive game layout contract passed.');

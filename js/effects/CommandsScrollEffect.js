@@ -1,114 +1,12 @@
 class CommandsScrollEffect extends BaseEffect {
     constructor(director) {
         super(director);
-        this._injectStyles();
         this.isActive = false;
         this.resolveFn = null;
         this.container = null;
         this.rollTimeout = null;
         this.fadeTimeout = null;
         this.previousActiveGame = null;
-    }
-
-    _injectStyles() {
-        if (document.getElementById('commands-scroll-styles')) return;
-        const style = document.createElement('style');
-        style.id = 'commands-scroll-styles';
-        style.innerHTML = `
-            .commands-scroll-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(10, 5, 20, 0.95);
-                backdrop-filter: blur(10px);
-                z-index: 2147483640;
-                display: flex;
-                justify-content: center;
-                align-items: flex-start;
-                overflow: hidden;
-                font-family: 'CookieRun-Regular', sans-serif;
-                color: #fff;
-                opacity: 0;
-                transition: opacity 0.5s ease;
-            }
-            .commands-scroll-overlay.visible {
-                opacity: 1;
-            }
-            .commands-scroll-wrapper {
-                position: absolute;
-                width: 85%;
-                max-width: 1200px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                padding-top: 50px;
-                padding-bottom: 150px;
-            }
-            @keyframes commands-credits-roll {
-                0% { transform: translateY(100vh); }
-                100% { transform: translateY(-105%); }
-            }
-            .commands-scroll-title {
-                font-size: 4.2rem;
-                font-weight: 900;
-                text-align: center;
-                color: #00ffa3;
-                text-shadow: 0 0 25px rgba(0, 255, 163, 0.6);
-                margin-bottom: 12px;
-                letter-spacing: 2px;
-            }
-            .commands-scroll-subtitle {
-                font-size: 2.0rem;
-                text-align: center;
-                color: #aaa;
-                margin-bottom: 60px;
-            }
-            .commands-sections-wrapper {
-                display: flex;
-                flex-direction: column;
-                gap: 60px;
-                width: 100%;
-            }
-            .commands-section {
-                flex: 1;
-                background: rgba(255, 255, 255, 0.03);
-                border: 3px solid rgba(0, 255, 163, 0.2);
-                border-radius: 24px;
-                padding: 40px;
-                box-shadow: inset 0 0 20px rgba(0, 255, 163, 0.05);
-            }
-            .commands-section-title {
-                font-size: 2.5rem;
-                font-weight: bold;
-                color: #00d2ff;
-                border-bottom: 2px solid rgba(0, 210, 255, 0.3);
-                padding-bottom: 18px;
-                margin-bottom: 30px;
-                text-align: center;
-                text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
-            }
-            .commands-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                gap: 15px;
-                width: 100%;
-            }
-            .command-item {
-                font-size: 1.5rem;
-                font-weight: bold;
-                background: rgba(255, 255, 255, 0.05);
-                border-radius: 12px;
-                padding: 10px 16px;
-                text-align: center;
-                color: #eee;
-                word-break: break-all;
-                border: 1.5px solid rgba(255, 255, 255, 0.05);
-                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            }
-        `;
-        document.head.appendChild(style);
     }
 
     async execute(context) {
