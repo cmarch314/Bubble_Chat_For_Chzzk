@@ -10,6 +10,8 @@ class AudioManager {
         this.configManager = configManager;
         this.eventBus = eventBus;
         this.scope = new DisposableScope();
+        this.timers = new ManagedTimers();
+        this.scope.add(() => this.timers.clearAll());
         this.activeBufferSources = new Set();
         this.activeFallbackAudio = new Set();
         this.disposed = false;
@@ -694,7 +696,7 @@ class AudioManager {
                 if (window.requestIdleCallback) {
                     requestIdleCallback(processAudio);
                 } else {
-                    setTimeout(() => processAudio({ timeRemaining: () => 10 }), 50);
+                    this.timers.timeout(() => processAudio({ timeRemaining: () => 10 }), 50);
                 }
             }
         };
@@ -702,7 +704,7 @@ class AudioManager {
         if (window.requestIdleCallback) {
             requestIdleCallback(processAudio);
         } else {
-            setTimeout(() => processAudio({ timeRemaining: () => 10 }), 50);
+            this.timers.timeout(() => processAudio({ timeRemaining: () => 10 }), 50);
         }
     }
 }

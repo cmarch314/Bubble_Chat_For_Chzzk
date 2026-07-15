@@ -6,6 +6,7 @@ class DebugController {
     constructor(configManager, eventBus) {
         this.config = configManager;
         this.eventBus = eventBus;
+        this.timers = new ManagedTimers();
 
         this._demoInterval = null;
         this._demoTimeout = null;
@@ -28,8 +29,8 @@ class DebugController {
 
     _exposeMethods() {
         window.stopDemoSequence = () => {
-            if (this._demoInterval) clearInterval(this._demoInterval);
-            if (this._demoTimeout) clearTimeout(this._demoTimeout);
+            if (this._demoInterval) this.timers.clear(this._demoInterval);
+            if (this._demoTimeout) this.timers.clear(this._demoTimeout);
             this._demoInterval = null;
             this._demoTimeout = null;
             console.log("🎬 Demo Sequence Stopped.");
@@ -47,7 +48,7 @@ class DebugController {
 
             const names = this.config.getRandomNames() || ["Anonymous", "트수", "시청자"];
 
-            this._demoInterval = setInterval(() => {
+            this._demoInterval = this.timers.interval(() => {
                 const messages = this.config.getWelcomeMessages();
                 if (!messages || messages.length === 0) return;
 
@@ -65,7 +66,7 @@ class DebugController {
                 }
             }, 1500);
 
-            this._demoTimeout = setTimeout(() => {
+            this._demoTimeout = this.timers.timeout(() => {
                 window.stopDemoSequence();
                 console.log("🎬 Demo Sequence Finished.");
                 if (window.processMessage) {
@@ -79,7 +80,7 @@ class DebugController {
         // Queue Stress Test (Random Burst Mode)
         window.runQueueStressTest = () => {
             if (this._stressTestInterval) {
-                clearInterval(this._stressTestInterval);
+                this.timers.clear(this._stressTestInterval);
                 this._stressTestInterval = null;
             }
             console.warn("🚀 Starting Queue Stress Test (Random 0-3 msg/sec)...");
@@ -105,10 +106,10 @@ class DebugController {
                 }
             };
 
-            this._stressTestInterval = setInterval(() => {
+            this._stressTestInterval = this.timers.interval(() => {
                 seconds++;
                 if (seconds > 20) {
-                    clearInterval(this._stressTestInterval);
+                    this.timers.clear(this._stressTestInterval);
                     this._stressTestInterval = null;
                     console.warn("🚀 Stress Test Completed (20s Limit).");
                     return;
@@ -119,11 +120,11 @@ class DebugController {
         };
 
         // 자동 실행 (선택사항, main.js에서 하던 역할 복구)
-        setTimeout(() => { if (window.runQueueStressTest) window.runQueueStressTest(); }, 500);
+        this.timers.timeout(() => { if (window.runQueueStressTest) window.runQueueStressTest(); }, 500);
     }
 
     _startWelcomeLoop() {
-        if (this._welcomeInterval) clearInterval(this._welcomeInterval);
+        if (this._welcomeInterval) this.timers.clear(this._welcomeInterval);
         const messages = this.config.getWelcomeMessages();
         if (!messages || messages.length === 0) return;
 
@@ -132,7 +133,7 @@ class DebugController {
         const vConf = this.config.getVisualConfig() || {};
         const visualKeys = Object.keys(vConf).length > 0 ? Object.keys(vConf) : ['해골', '돌핀', '버질', '하트', '커플', '우쇼', '발파', '방종송'];
 
-        this._welcomeInterval = setInterval(() => {
+        this._welcomeInterval = this.timers.interval(() => {
             let msg = messages[Math.floor(Math.random() * messages.length)];
             let isVisual = false;
 
@@ -156,10 +157,7 @@ class DebugController {
     }
 
     stopAll() {
-        if (this._demoInterval) clearInterval(this._demoInterval);
-        if (this._demoTimeout) clearTimeout(this._demoTimeout);
-        if (this._welcomeInterval) clearInterval(this._welcomeInterval);
-        if (this._stressTestInterval) clearInterval(this._stressTestInterval);
+        this.timers.clearAll();
 
         this._demoInterval = null;
         this._demoTimeout = null;

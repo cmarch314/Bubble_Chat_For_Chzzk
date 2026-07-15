@@ -6,7 +6,9 @@ class AssetPreloader {
     constructor(configManager, audioManager) {
         this.configManager = configManager;
         this.audioManager = audioManager;
+        this.timers = new ManagedTimers();
         this.hasStarted = false;
+        this.disposed = false;
     }
 
     start() {
@@ -81,6 +83,7 @@ class AssetPreloader {
 
         // 유휴 상태(requestIdleCallback)를 활용하여 DOM 부하 분산
         const processItems = (deadline) => {
+            if (this.disposed) return;
             while (urls.length > 0 && deadline.timeRemaining() > 0) {
                 const url = urls.pop();
                 const link = document.createElement('link');
@@ -101,7 +104,7 @@ class AssetPreloader {
                 if (window.requestIdleCallback) {
                     requestIdleCallback(processItems);
                 } else {
-                    setTimeout(() => processItems({ timeRemaining: () => 10 }), 50);
+                    this.timers.timeout(() => processItems({ timeRemaining: () => 10 }), 50);
                 }
             }
         };
@@ -109,7 +112,12 @@ class AssetPreloader {
         if (window.requestIdleCallback) {
             requestIdleCallback(processItems);
         } else {
-            setTimeout(() => processItems({ timeRemaining: () => 10 }), 50);
+            this.timers.timeout(() => processItems({ timeRemaining: () => 10 }), 50);
         }
+    }
+
+    dispose() {
+        this.disposed = true;
+        this.timers.clearAll();
     }
 }

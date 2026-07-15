@@ -58,7 +58,10 @@ const constructors = {
     EventBus: FakeEventBus,
     ConfigManager: fakeType('config'),
     AudioManager: fakeType('audio', { dispose: () => calls.push(['audioDispose']) }),
-    AssetPreloader: fakeType('preloader', { start: () => calls.push(['preload']) }),
+    AssetPreloader: fakeType('preloader', {
+        start: () => calls.push(['preload']),
+        dispose: () => calls.push(['preloaderDispose'])
+    }),
     ChatRenderer: fakeType('chatRenderer', { dispose: () => calls.push(['chatRendererDispose']) }),
     VisualDirector: fakeType('visuals', {
         clearQueue: () => calls.push(['clearQueue']),
@@ -66,7 +69,7 @@ const constructors = {
         dispose: () => calls.push(['visualDispose'])
     }),
     SystemController: fakeType('system'),
-    DebugController: fakeType('debug'),
+    DebugController: fakeType('debug', { stopAll: () => calls.push(['debugStopAll']) }),
     MessageRouter: fakeType('router', { route: data => calls.push(['route', data]) }),
     MessageQueue: fakeType('queue', { enqueue: data => calls.push(['enqueue', data]) }),
     ChzzkGateway: fakeType('network', {
@@ -96,6 +99,8 @@ assert.deepStrictEqual(scheduled.map(item => item.delay), [1000, 2000]);
 
 app.stop();
 app.stop();
+assert.strictEqual(calls.filter(call => call[0] === 'preloaderDispose').length, 1);
+assert.strictEqual(calls.filter(call => call[0] === 'debugStopAll').length, 1);
 assert.strictEqual(calls.filter(call => call[0] === 'disconnect').length, 1);
 assert.strictEqual(calls.filter(call => call[0] === 'visualDispose').length, 1);
 assert.strictEqual(calls.filter(call => call[0] === 'audioDispose').length, 1);

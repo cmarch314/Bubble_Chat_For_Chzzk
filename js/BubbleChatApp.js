@@ -62,6 +62,8 @@ class BubbleChatApp {
         if (this.stopped) return;
         this.stopped = true;
         this.network.disconnect?.();
+        this.preloader.dispose?.();
+        this.debugController.stopAll?.();
         this.chatRenderer.dispose?.();
         this.visuals.dispose?.();
         this.audio.dispose?.();
