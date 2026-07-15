@@ -49,5 +49,10 @@ assert.match(
     /startFight\(container\)\s*\{\s*this\.renderer\.clearLobbyTimer\(\);/,
     'fight startup must stop the lobby timer loop before changing phases'
 );
+assert.doesNotMatch(
+    effectSource,
+    /clearTimeout\(|clearInterval\(/,
+    'HuntEffect must release timers only through its ManagedTimers owner'
+);
 
 console.log('[test] HuntRenderer lobby timer lifecycle contract passed.');

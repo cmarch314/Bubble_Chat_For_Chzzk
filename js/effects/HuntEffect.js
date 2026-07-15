@@ -553,11 +553,8 @@ class HuntEffect extends BaseEffect {
     clearAllTimers() {
         if (this.gameTimer) { this.timers.clear(this.gameTimer); this.gameTimer = null; }
         if (this.fightInterval) { this.timers.clear(this.fightInterval); this.fightInterval = null; }
-        if (this.victoryEmojiTimeouts && this.victoryEmojiTimeouts.length > 0) {
-            this.victoryEmojiTimeouts.forEach(t => clearTimeout(t));
-            this.victoryEmojiTimeouts = [];
-        }
         this.timers.clearAll();
+        this.victoryEmojiTimeouts = [];
     }
 
     spawnNextConsecutiveMonster(container) {
