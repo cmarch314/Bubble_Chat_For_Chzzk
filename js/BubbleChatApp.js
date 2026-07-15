@@ -1,5 +1,6 @@
 class BubbleChatApp {
     constructor(constructors = {}) {
+        this.scope = new DisposableScope();
         const Types = {
             EventBus: constructors.EventBus || EventBus,
             ConfigManager: constructors.ConfigManager || ConfigManager,
@@ -32,20 +33,36 @@ class BubbleChatApp {
         this.messageQueue = new Types.MessageQueue(this.eventBus);
         this.network = new Types.ChzzkGateway(this.config, this.eventBus);
         this.started = false;
+        this.stopped = false;
     }
 
     start() {
         if (this.started) return this;
         this.started = true;
 
-        this.eventBus.on('chat:process', msgData => this.router.route(msgData));
-        this.eventBus.on('chat:received', msgData => this.messageQueue.enqueue(msgData));
-        window.processMessage = msgData => this.messageQueue.enqueue(msgData);
+        this.scope.add(this.eventBus.on('chat:process', msgData => this.router.route(msgData)));
+        this.scope.add(this.eventBus.on('chat:received', msgData => this.messageQueue.enqueue(msgData)));
+        const processMessage = msgData => this.messageQueue.enqueue(msgData);
+        window.processMessage = processMessage;
+        this.scope.add(() => {
+            if (window.processMessage === processMessage) delete window.processMessage;
+        });
 
-        window.addEventListener('chzzk_connected', () => this._handleConnected(), { once: true });
+        const connectedHandler = () => this._handleConnected();
+        window.addEventListener('chzzk_connected', connectedHandler, { once: true });
+        this.scope.add(() => window.removeEventListener?.('chzzk_connected', connectedHandler));
         setTimeout(() => this._runStartupEffect(), 1000);
         this.network.connect();
         return this;
+    }
+
+    stop() {
+        if (this.stopped) return;
+        this.stopped = true;
+        this.network.disconnect?.();
+        this.visuals.dispose?.();
+        this.audio.dispose?.();
+        this.scope.dispose();
     }
 
     _handleConnected() {

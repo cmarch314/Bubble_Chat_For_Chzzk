@@ -3,9 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const scopePath = path.resolve(__dirname, '../js/runtime/DisposableScope.js');
 const sourcePath = path.resolve(__dirname, '../js/VisualDirector.js');
 const context = vm.createContext({ console, Promise });
-const source = `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.VisualDirector = VisualDirector;`;
+const source = `${fs.readFileSync(scopePath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.VisualDirector = VisualDirector;`;
 vm.runInContext(source, context, { filename: sourcePath });
 
 function deferred() {

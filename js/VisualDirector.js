@@ -6,6 +6,7 @@ class VisualDirector {
         this.config = config;
         this.eventBus = eventBus;
         this.audioManager = audioManager;
+        this.scope = new DisposableScope();
         this.queue = [];
         this.isLocked = false;
         this.activeEffect = null;
@@ -17,11 +18,11 @@ class VisualDirector {
         this.registry = options.registry || this._buildRegistry();
 
         if (this.eventBus) {
-            this.eventBus.on('system:disableVisuals', () => this.setEnabled(false));
-            this.eventBus.on('system:enableVisuals', () => this.setEnabled(true));
-            this.eventBus.on('system:toggleVisuals', () => this.setEnabled(!this.enabled));
-            this.eventBus.on('system:disableAlerts', () => this.setAlertsEnabled(false));
-            this.eventBus.on('system:enableAlerts', () => this.setAlertsEnabled(true));
+            this.scope.add(this.eventBus.on('system:disableVisuals', () => this.setEnabled(false)));
+            this.scope.add(this.eventBus.on('system:enableVisuals', () => this.setEnabled(true)));
+            this.scope.add(this.eventBus.on('system:toggleVisuals', () => this.setEnabled(!this.enabled)));
+            this.scope.add(this.eventBus.on('system:disableAlerts', () => this.setAlertsEnabled(false)));
+            this.scope.add(this.eventBus.on('system:enableAlerts', () => this.setAlertsEnabled(true)));
         }
     }
 
@@ -31,6 +32,20 @@ class VisualDirector {
         console.log("🧹 [VisualDirector] Clearing Queue...");
         this.queue = [];
         // Keep the lock while the active effect finishes naturally.
+    }
+
+    dispose() {
+        this.clearQueue();
+        if (this.activeGame && typeof this.activeGame.forceStopGame === 'function') {
+            this.activeGame.forceStopGame();
+        }
+        this.activeGame = null;
+        for (const effect of Object.values(this.registry)) {
+            if (effect.instance && typeof effect.instance.dispose === 'function') {
+                effect.instance.dispose();
+            }
+        }
+        this.scope.dispose();
     }
 
     trigger(effectType, context = {}) {

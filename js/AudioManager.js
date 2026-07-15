@@ -9,6 +9,10 @@ class AudioManager {
     constructor(configManager, eventBus) {
         this.configManager = configManager;
         this.eventBus = eventBus;
+        this.scope = new DisposableScope();
+        this.activeBufferSources = new Set();
+        this.activeFallbackAudio = new Set();
+        this.disposed = false;
         this.basePath = './SFX/';
         // [Performance] 오디오 버퍼 캐시 (중복 로딩 방지)
         this.bufferCache = new Map();
@@ -48,38 +52,68 @@ class AudioManager {
 
         // Event Bus Listeners
         if (this.eventBus) {
-            this.eventBus.on('audio:playSFX', (soundPath, options) => {
+            this.scope.add(this.eventBus.on('audio:playSFX', (soundPath, options) => {
                 this.playSound(soundPath, options);
-            });
-            this.eventBus.on('audio:playVisualSound', (soundPath) => {
+            }));
+            this.scope.add(this.eventBus.on('audio:playVisualSound', (soundPath) => {
                 this.playSound(soundPath, { force: true, type: 'visual' });
-            });
-            this.eventBus.on('chat:videoFinished', () => {
+            }));
+            this.scope.add(this.eventBus.on('chat:videoFinished', () => {
                 this.processPendingChatAudioQueue();
-            });
-            this.eventBus.on('system:muteAudio', () => {
+            }));
+            this.scope.add(this.eventBus.on('system:muteAudio', () => {
                 this.setEnabled(false);
                 this.playSound(this.soundHive['윈도우종료'], { force: true });
-            });
-            this.eventBus.on('system:unmuteAudio', () => {
+            }));
+            this.scope.add(this.eventBus.on('system:unmuteAudio', () => {
                 this.setEnabled(true);
-            });
-            this.eventBus.on('system:toggleAudio', () => {
+            }));
+            this.scope.add(this.eventBus.on('system:toggleAudio', () => {
                 const next = !this.enabled;
                 this.setEnabled(next);
                 if (!next) {
                     this.playSound(this.soundHive['윈도우종료'], { force: true });
                 }
-            });
-            this.eventBus.on('system:updateVolume', (config) => {
+            }));
+            this.scope.add(this.eventBus.on('system:updateVolume', (config) => {
                 this.updateVolumeConfig(config);
-            });
-            this.eventBus.on('system:updateConfig', (key) => {
+            }));
+            this.scope.add(this.eventBus.on('system:updateConfig', (key) => {
                 if (key === '켜기') this.updateConfig('all', true);
                 else if (key === '끄기') this.updateConfig('all', false);
                 else if (key === '도네') this.updateConfig('visual');
                 else if (key === '채팅') this.updateConfig('sfx');
-            });
+            }));
+        }
+    }
+
+    dispose() {
+        if (this.disposed) return;
+        this.disposed = true;
+        this.scope.dispose();
+        this.pendingChatAudioQueue = [];
+        this._processingQueue = false;
+
+        for (const source of this.activeBufferSources) {
+            try { source.stop(); } catch (error) {}
+            try { source.disconnect(); } catch (error) {}
+        }
+        this.activeBufferSources.clear();
+
+        for (const audio of this.activeFallbackAudio) {
+            try { audio.pause(); } catch (error) {}
+            audio.onended = null;
+            audio.onerror = null;
+        }
+        this.activeFallbackAudio.clear();
+
+        for (const item of this._nativeMediaElements || []) {
+            try { item.el.pause(); } catch (error) {}
+        }
+        this._nativeMediaElements = [];
+        this.bufferCache.clear();
+        if (this.audioCtx && typeof this.audioCtx.close === 'function') {
+            this.audioCtx.close().catch(() => {});
         }
     }
 
@@ -354,6 +388,7 @@ class AudioManager {
 
     // 소리만 재생 (채팅 트리거용 - Legacy Logic 유지)
     async checkAndPlay(message, force = false, hasVideo = false) {
+        if (this.disposed) return;
         if (!this.enabled && !force) return;
 
         // If a video is currently playing, or this message triggers a video, queue the audio
@@ -398,6 +433,7 @@ class AudioManager {
 
     // ★★★ [Split Gain Staging Edition] playSound ★★★
     async playSound(input, options = {}) {
+        if (this.disposed) return;
         let force = false;
         let type = 'sfx';
 
@@ -500,6 +536,10 @@ class AudioManager {
                 // [Strategy A] Web Audio Buffer (Drive -> Limiter -> Ceiling)
                 // Helper: Play from decoded buffer
                 const playBuffer = (audioBuffer) => {
+                    if (this.disposed) {
+                        resolve();
+                        return;
+                    }
                     const source = this.audioCtx.createBufferSource();
                     source.buffer = audioBuffer;
 
@@ -507,6 +547,7 @@ class AudioManager {
 
                     // [Dynamic Volume Scaling] 소리가 겹칠수록 볼륨을 줄여서 컴프레서 폭발 방지
                     this.activeVoices++;
+                    this.activeBufferSources.add(source);
                     const voiceScale = Math.max(0.3, 1.0 - (this.activeVoices * 0.15)); // 1개=0.85, 2개=0.7... 최소 30% 유지
                     const scaledDriveGain = driveGain * voiceScale;
 
@@ -526,6 +567,7 @@ class AudioManager {
 
                     source.start(0);
                     source.onended = () => {
+                        this.activeBufferSources.delete(source);
                         this.activeVoices = Math.max(0, this.activeVoices - 1);
                         source.disconnect();
                         preGainNode.disconnect();
@@ -563,10 +605,19 @@ class AudioManager {
                             // [Strategy B] HTML5 Fallback
                             console.warn(`[AudioManager] Fallback for "${fileName}": ${e.message}`);
                             const audio = new Audio(playPath);
+                            if (this.disposed) {
+                                resolve();
+                                return;
+                            }
+                            this.activeFallbackAudio.add(audio);
                             audio.volume = Math.min(1.0, Math.max(0, driveGain * outputCeiling));
-                            audio.onended = () => resolve();
-                            audio.onerror = () => resolve();
-                            audio.play().catch(err => resolve());
+                            const cleanup = () => {
+                                this.activeFallbackAudio.delete(audio);
+                                resolve();
+                            };
+                            audio.onended = cleanup;
+                            audio.onerror = cleanup;
+                            audio.play().catch(cleanup);
                         });
                 }
 

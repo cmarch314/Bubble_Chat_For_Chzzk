@@ -1,0 +1,83 @@
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+
+class FakeAudioContext {
+    constructor() {
+        this.state = 'running';
+        this.destination = {};
+        this.currentTime = 0;
+        this.closed = false;
+    }
+
+    createDynamicsCompressor() {
+        return {
+            threshold: {}, knee: {}, ratio: {}, attack: {}, release: {},
+            connect() {}
+        };
+    }
+
+    createGain() {
+        return { gain: { value: 0, setTargetAtTime() {} }, connect() {}, disconnect() {} };
+    }
+
+    close() {
+        this.closed = true;
+        return Promise.resolve();
+    }
+}
+
+const context = vm.createContext({
+    console,
+    window: {
+        AudioContext: FakeAudioContext,
+        location: { protocol: 'file:' }
+    },
+    document: { body: { contains: () => true } },
+    Audio: class {},
+    fetch,
+    setTimeout,
+    clearTimeout,
+    requestIdleCallback: undefined,
+    Promise,
+    Map,
+    Set
+});
+
+const scopePath = path.resolve(__dirname, '../js/runtime/DisposableScope.js');
+const busPath = path.resolve(__dirname, '../js/EventBus.js');
+const audioPath = path.resolve(__dirname, '../js/AudioManager.js');
+const source = [scopePath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
+    + '\nglobalThis.Exports = { AudioManager, EventBus };';
+vm.runInContext(source, context, { filename: audioPath });
+
+const config = {
+    getVolumeConfig: () => ({ master: 1, visual: 1, sfx: 1 }),
+    getSoundConfig: () => ({}),
+    getVisualConfig: () => ({}),
+    getSfxRenames: () => ({}),
+    getExcludedSfx: () => [],
+    getNormalizerConfig: () => ({ enabled: true, visual: false, sfx: false }),
+    updateVolumeConfig() {}
+};
+const bus = new context.Exports.EventBus();
+const audio = new context.Exports.AudioManager(config, bus);
+const media = { paused: false, pause() { this.paused = true; } };
+audio.connectMediaElement(media, 'visual');
+
+audio.setEnabled(false);
+bus.emit('system:unmuteAudio');
+assert.strictEqual(audio.enabled, true);
+
+audio.setEnabled(false);
+audio.dispose();
+audio.dispose();
+bus.emit('system:unmuteAudio');
+
+assert.strictEqual(audio.enabled, false, 'disposed manager must not receive system events');
+assert.strictEqual(media.paused, true);
+assert.strictEqual(audio.audioCtx.closed, true);
+assert.strictEqual(audio.scope.disposed, true);
+
+console.log('[test] AudioManager disposal contract passed.');
