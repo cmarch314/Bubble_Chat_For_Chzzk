@@ -31,13 +31,12 @@ class ChatRenderer {
     }
 
     render(data) {
-        const { message, nickname, color, badges, emojis, type, uid } = data;
-        const emotes = emojis || {}; // Map emojis to emotes for compatibility
-        const originalMessage = message;
-        const normOriginal = originalMessage ? originalMessage.normalize('NFC').trim() : "";
-
-        // !명령어 제거 및 정리
-        let displayMessage = message ? message.replace(/(^|\s)![\S]+/g, "").replace(/\s+/g, " ").trim() : "";
+        const normalized = ChatMessageNormalizer.normalize(data);
+        const { nickname, color, badges, type, uid } = normalized;
+        const emotes = normalized.emotes;
+        const originalMessage = normalized.message;
+        const normOriginal = normalized.normalizedMessage;
+        let displayMessage = normalized.displayMessage;
 
         // DOM 요소 생성
         const elements = this._createBubbleElements();

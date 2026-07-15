@@ -1,0 +1,12 @@
+const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const vm = require('vm');
+const sourcePath = path.resolve(__dirname, '../js/chat/ChatMessageNormalizer.js');
+const context = vm.createContext({});
+vm.runInContext(`${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.ChatMessageNormalizer = ChatMessageNormalizer;`, context);
+const result = context.ChatMessageNormalizer.normalize({ message: '  !명령   안녕  세상 ', nickname: 123 });
+assert.strictEqual(result.normalizedMessage, '!명령   안녕  세상');
+assert.strictEqual(result.displayMessage, '안녕 세상');
+assert.strictEqual(result.nickname, '123');
+console.log('[test] Chat message normalization contract passed.');
