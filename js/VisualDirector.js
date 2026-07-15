@@ -2,17 +2,19 @@
 // [Class 5] Visual Director (Effects Engine)
 // ==========================================
 class VisualDirector {
-    constructor(config, eventBus, audioManager = null) {
+    constructor(config, eventBus, audioManager = null, options = {}) {
         this.config = config;
         this.eventBus = eventBus;
         this.audioManager = audioManager;
         this.queue = [];
         this.isLocked = false;
+        this.activeEffect = null;
+        this.wait = options.wait || (duration => new Promise(resolve => setTimeout(resolve, duration)));
         this.enabled = false; // [Default] OFF (Manual trigger keywords)
         this.alertsEnabled = true; // [Default] ON (Sub/Donation Alerts)
         this.activeGame = null; // [New] Currently running chat game
-        this._initOverlays();
-        this.registry = this._buildRegistry();
+        if (options.initializeOverlays !== false) this._initOverlays();
+        this.registry = options.registry || this._buildRegistry();
 
         if (this.eventBus) {
             this.eventBus.on('system:disableVisuals', () => this.setEnabled(false));
@@ -28,16 +30,16 @@ class VisualDirector {
     clearQueue() {
         console.log("🧹 [VisualDirector] Clearing Queue...");
         this.queue = [];
-        this.isLocked = false;
-        // [Fix] Removed global overlay removal to allow active effects to finish naturally.
+        // Keep the lock while the active effect finishes naturally.
     }
 
     trigger(effectType, context = {}) {
         // [Refinement] enabled 체크는 호출부(network callback)에서 세밀하게 처리하므로 여기선 제외
-        if (!this.registry[effectType]) return;
+        if (!this.registry[effectType]) return false;
         console.log(`📥 [VisualDirector] Queuing: ${effectType}`);
         this.queue.push({ effect: this.registry[effectType], context });
         this._processQueue();
+        return true;
     }
 
     async _processQueue() {
@@ -45,6 +47,7 @@ class VisualDirector {
 
         this.isLocked = true;
         const { effect, context } = this.queue.shift();
+        this.activeEffect = effect;
 
         // 1. Sound (Using Audio Manager - Real-time enabled check)
         // [User Request] Visual effect sounds should play even if SFX is muted (!음소거)
@@ -70,8 +73,9 @@ class VisualDirector {
         // 3. Cooldown
         const vConfCommon = this.config.getVisualConfig();
         const cooldown = (vConfCommon && vConfCommon.common && vConfCommon.common.cooldown) || 1000;
-        await new Promise(r => setTimeout(r, cooldown));
+        await this.wait(cooldown);
 
+        this.activeEffect = null;
         this.isLocked = false;
         this._processQueue();
     }
