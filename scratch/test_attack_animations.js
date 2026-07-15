@@ -2,6 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const managedTimersCode = fs.readFileSync(path.join(__dirname, '../js/runtime/ManagedTimers.js'), 'utf8');
+eval(managedTimersCode + "; globalThis.ManagedTimers = ManagedTimers;");
+
 // Mock frontend globals
 global.BaseEffect = class BaseEffect {
     constructor(director) {

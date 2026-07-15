@@ -10,6 +10,7 @@ class HuntEffect extends BaseEffect {
         this.fightInterval = null;
         this.victoryEmojiTimeouts = [];
         this.resolveGame = null;
+        this.timers = new ManagedTimers();
 
         // Configuration
         this.SHOW_MONSTER_HP = true;
@@ -38,7 +39,7 @@ class HuntEffect extends BaseEffect {
         
         // [FIX] 이전 수렵의 페이드아웃 타이머가 겹쳐서 새 UI를 파괴하는 버그 방지
         if (this.endGameFadeoutTimer) {
-            clearTimeout(this.endGameFadeoutTimer);
+            this.timers.clear(this.endGameFadeoutTimer);
             this.endGameFadeoutTimer = null;
         }
 
@@ -131,10 +132,10 @@ class HuntEffect extends BaseEffect {
         return new Promise(resolve => {
             this.resolveGame = resolve;
             
-            this.gameTimer = setInterval(() => {
+            this.gameTimer = this.timers.interval(() => {
                 timeLeft--;
                 if (timeLeft <= 0) {
-                    clearInterval(this.gameTimer);
+                    this.timers.clear(this.gameTimer);
                     this.gameTimer = null;
                     this.startFight(this.renderer.container);
                 } else {
@@ -495,7 +496,7 @@ class HuntEffect extends BaseEffect {
                             void weaponCard.offsetWidth;
                             weaponCard.classList.add('guard-shake-anim');
                             const w = this.selectedWeapons[idx];
-                            setTimeout(() => {
+                            this.timers.timeout(() => {
                                 if (w && w.status !== 'dead') {
                                     weaponCard.classList.remove('guard-shake-anim');
                                 }
@@ -529,7 +530,7 @@ class HuntEffect extends BaseEffect {
         this.renderer.updateTimerUI(initialLimit);
 
         // Tick loop (Process through HuntEngine)
-        this.fightInterval = setInterval(() => {
+        this.fightInterval = this.timers.interval(() => {
             if (this.phase !== 'fighting') return;
             this.engine.processTick();
         }, 100);
@@ -619,16 +620,17 @@ class HuntEffect extends BaseEffect {
         } else {
             document.body.appendChild(container);
         }
-        setTimeout(() => { if (container.parentNode) container.remove(); }, 4000);
+        this.timers.timeout(() => { if (container.parentNode) container.remove(); }, 4000);
     }
 
     clearAllTimers() {
-        if (this.gameTimer) { clearInterval(this.gameTimer); this.gameTimer = null; }
-        if (this.fightInterval) { clearInterval(this.fightInterval); this.fightInterval = null; }
+        if (this.gameTimer) { this.timers.clear(this.gameTimer); this.gameTimer = null; }
+        if (this.fightInterval) { this.timers.clear(this.fightInterval); this.fightInterval = null; }
         if (this.victoryEmojiTimeouts && this.victoryEmojiTimeouts.length > 0) {
             this.victoryEmojiTimeouts.forEach(t => clearTimeout(t));
             this.victoryEmojiTimeouts = [];
         }
+        this.timers.clearAll();
     }
 
     spawnNextConsecutiveMonster(container) {
@@ -744,7 +746,7 @@ class HuntEffect extends BaseEffect {
         this.selectedWeapons.forEach(w => this.renderer.restoreBorder(w.index, w));
 
         // Restart Tick loop (Process through HuntEngine)
-        this.fightInterval = setInterval(() => {
+        this.fightInterval = this.timers.interval(() => {
             if (this.phase !== 'fighting') return;
             this.engine.processTick();
         }, 100);
@@ -909,7 +911,7 @@ class HuntEffect extends BaseEffect {
                     const material3 = this.getMonsterMaterialName(this.selectedMonster.nameKO, w.personality);
 
                     // 1차 갈무리 (staggerDelay): 둥근 감정표현 버블로 칼질 이모지 띄우기
-                    const t1 = setTimeout(() => {
+                    const t1 = this.timers.timeout(() => {
                         if (this.phase === 'ended' && w.hp > 0) {
                             this.renderer.spawnVictoryEmoji(w.index, '🔪');
                         }
@@ -917,7 +919,7 @@ class HuntEffect extends BaseEffect {
                     this.victoryEmojiTimeouts.push(t1);
 
                     // 2차 갈무리 (staggerDelay + 2000): 칼질 이모지 버블 팝 & 1차 소재 사운드 & 소재 메시지 박스 표현
-                    const t2 = setTimeout(() => {
+                    const t2 = this.timers.timeout(() => {
                         if (this.phase === 'ended' && w.hp > 0) {
                             this.renderer.spawnVictoryEmoji(w.index, '🔪');
                             playCarveSound(material1);
@@ -928,7 +930,7 @@ class HuntEffect extends BaseEffect {
                     this.victoryEmojiTimeouts.push(t2);
 
                     // 3차 갈무리 (staggerDelay + 4000): 칼질 이모지 버블 팝 & 2차 소재 사운드 & 소재 메시지 박스 표현
-                    const t3 = setTimeout(() => {
+                    const t3 = this.timers.timeout(() => {
                         if (this.phase === 'ended' && w.hp > 0) {
                             this.renderer.spawnVictoryEmoji(w.index, '🔪');
                             playCarveSound(material2);
@@ -939,7 +941,7 @@ class HuntEffect extends BaseEffect {
                     this.victoryEmojiTimeouts.push(t3);
 
                     // 갈무리 완료 (staggerDelay + 6000): 갈무리 상태 해제 & 3차 소재 사운드 & 획득 완료 이모지 버블 & 소재 메시지 박스 표현
-                    const t4 = setTimeout(() => {
+                    const t4 = this.timers.timeout(() => {
                         if (this.phase === 'ended' && w.hp > 0) {
                             w.isCarving = false; // 갈무리 완수! 감정표현 차단 해제!
                             playCarveSound(material3);
@@ -975,7 +977,7 @@ class HuntEffect extends BaseEffect {
                         // 채집(갈무리) 중에는 감정표현 금지!
                         if (hunter.isCarving || hunter.isGathering) {
                             const delay = 1000; // 1초 뒤에 다시 시도
-                            const timeoutId = setTimeout(runHunterEmojiLoop, delay);
+                            const timeoutId = this.timers.timeout(runHunterEmojiLoop, delay);
                             this.victoryEmojiTimeouts.push(timeoutId);
                             return;
                         }
@@ -987,13 +989,13 @@ class HuntEffect extends BaseEffect {
                         this.renderer.spawnVictoryEmoji(hunter.index, randomEmoji);
 
                         const delay = 4000 + Math.random() * 2000;
-                        const timeoutId = setTimeout(runHunterEmojiLoop, delay);
+                        const timeoutId = this.timers.timeout(runHunterEmojiLoop, delay);
                         this.victoryEmojiTimeouts.push(timeoutId);
                     };
 
                     // 갈무리가 6초 동안 수행되므로, 최초 Stagger 지연을 staggerDelay + 6.5s ~ 8.5s로 주어 갈무리 직후부터 감정표현 루프가 돌게 만듭니다!
                     const initialDelay = staggerDelay + 6500 + Math.random() * 2000;
-                    const initialTimeoutId = setTimeout(runHunterEmojiLoop, initialDelay);
+                    const initialTimeoutId = this.timers.timeout(runHunterEmojiLoop, initialDelay);
                     this.victoryEmojiTimeouts.push(initialTimeoutId);
                 });
             }
@@ -1108,9 +1110,9 @@ class HuntEffect extends BaseEffect {
  
         const displayDuration = isVictory ? 30000 : 15000;
         // [FIX] 이전 수렵 UI 파괴 버그 방지를 위해 멤버 변수로 타이머 추적
-        this.endGameFadeoutTimer = setTimeout(() => {
+        this.endGameFadeoutTimer = this.timers.timeout(() => {
             container.style.animation = "game-fade-out 0.5s ease-in forwards";
-            this.endGameFadeoutTimer = setTimeout(() => {
+            this.endGameFadeoutTimer = this.timers.timeout(() => {
                 this.renderer.removeContainer();
                 document.body.classList.remove('in-hunt');
                 this.audioManager.stopBgms();
@@ -1130,7 +1132,7 @@ class HuntEffect extends BaseEffect {
 
         // [FIX] 중단 시에도 잔여 페이드아웃 타이머 제거
         if (this.endGameFadeoutTimer) {
-            clearTimeout(this.endGameFadeoutTimer);
+            this.timers.clear(this.endGameFadeoutTimer);
             this.endGameFadeoutTimer = null;
         }
 
