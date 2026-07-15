@@ -1030,6 +1030,7 @@ class HuntRenderer {
                 }
 
                 setTimeout(() => {
+                    if (!this.card) return; // [FIX] 강제 중단 시 TypeError 방지
                     if (w && w.status !== 'dead') {
                         weaponCard.classList.remove('large-hit-anim');
                         if (w.status === 'alive' && w.hp > 0) {
@@ -1053,6 +1054,7 @@ class HuntRenderer {
                 }
 
                 setTimeout(() => {
+                    if (!this.card) return; // [FIX] 강제 중단 시 TypeError 방지
                     if (w && w.status !== 'dead') {
                         weaponCard.classList.remove('small-hit-anim');
                         if (w.status === 'alive' && w.hp > 0) {
@@ -1204,8 +1206,8 @@ class HuntRenderer {
             if (weaponImg) {
                 weaponImg.style.transition = 'opacity 0.2s ease-in';
                 weaponImg.style.opacity = '1';
-                weaponImg.style.animation = 'none';
-                weaponImg.style.transform = 'none';
+                weaponImg.style.animation = ''; // [FIX] 'none'으로 고정하면 진행 중인 공격 애니메이션(CSS Class)이 즉시 취소됨
+                weaponImg.style.transform = ''; // [FIX] 동일한 이유로 CSS transform 애니메이션 방해 제거
                 weaponImg.style.filter = '';
                 weaponImg.classList.remove('ls-spirit-img-1', 'ls-spirit-img-2', 'ls-spirit-img-3', 'cb-shield-charged-img');
                 if (w.id === 'long_sword' && w.spiritLevel > 0) {
@@ -1305,16 +1307,25 @@ class HuntRenderer {
                         'w-anim-hh', 'w-anim-lc', 'w-anim-gl', 'w-anim-sa', 'w-anim-cb',
                         'w-anim-ig', 'w-anim-lbg', 'w-anim-hbg', 'w-anim-bow'
                     ];
-                    allClasses.forEach(cls => weaponImg.classList.remove(cls));
+                    // OBS CEF 호환: 접미사 붙은 애니메이션 클래스도 일괄 삭제
+                    allClasses.forEach(cls => {
+                        weaponImg.classList.remove(cls);
+                        for (let i = 0; i < 4; i++) weaponImg.classList.remove(`${cls}-${i}`);
+                    });
                     void weaponImg.offsetWidth; // trigger reflow
-                    weaponImg.classList.add(animClass);
+                    
+                    const targetAnimClass = animClass.startsWith('w-anim-') ? `${animClass}-${idx}` : animClass;
+                    weaponImg.classList.add(targetAnimClass);
                 }
 
                 weaponCard.style.borderColor = borderClr;
                 weaponCard.style.zIndex = "10";
                 setTimeout(() => {
                     if (w && w.status !== 'dead') {
-                        if (weaponImg) weaponImg.classList.remove(animClass);
+                        if (weaponImg) {
+                            weaponImg.classList.remove(animClass);
+                            weaponImg.classList.remove(`${animClass}-${idx}`);
+                        }
                         this.restoreBorder(idx, w);
                         weaponCard.style.zIndex = "";
                     }

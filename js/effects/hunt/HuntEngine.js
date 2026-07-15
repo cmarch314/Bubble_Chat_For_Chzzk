@@ -164,7 +164,9 @@ class HuntEngine {
         target.atb = 0;
         target.roarStunned = false; // 포효 경직 상태 해제
         target.roarStunDuration = 0;
+        if (this.callbacks.onTriggerRoarStun) this.callbacks.onTriggerRoarStun(target.index, false); // [FIX] 포효 UI 강제 해제
         target.stunDuration = 0; // 일반 기절 상태 해제
+        if (this.callbacks.onTriggerStunUI) this.callbacks.onTriggerStunUI(target.index, false); // [FIX] 기절 UI 강제 해제
         target.hitDuration = 0; // 피격 경직 상태 해제
         target.rollDuration = 0;
         target.guardDuration = 0;
@@ -324,6 +326,7 @@ class HuntEngine {
                 }
                 if (w.itemDuration && w.itemDuration > 0) {
                     w.itemDuration--;
+                    if (w.itemDuration === 0) w.isGathering = false; // [FIX] 채집/아이템 상태 안전한 해제
                 }
                 if (w.attackDuration && w.attackDuration > 0) {
                     w.attackDuration--;
@@ -432,6 +435,10 @@ class HuntEngine {
                     const loopTime = this.battleTime % 3600;
                     if (loopTime >= 900 && loopTime < 1800) restoreState = 'enraged';
                     else if (loopTime >= 2700 && loopTime < 3600) restoreState = 'exhausted';
+                } else {
+                    // [FIX] 발파루크 CC기(대경직 등) 해제 시 분노/충전 게이지 초기화하여 꼬임 방지
+                    this.valstraxChargeCount = 0;
+                    this.valstraxEnrageTimer = 0;
                 }
 
                 this.monsterState = restoreState;
@@ -616,7 +623,7 @@ class HuntEngine {
             let isDodge = false;
             let isForesightSlash = false;
 
-            const isStunned = target.status === 'stunned';
+            const isStunned = target.status === 'stunned' || target.roarStunned; // [FIX] 포효 중 가드/회피 불가
             const hasShield = !isStunned && (target.type === 'shield' || target.id === 'heavy_bowgun');
             let guardProb = isStunned ? 0 : 0.85;
             let dodgeProb = isStunned ? 0 : 0.75;
@@ -631,6 +638,11 @@ class HuntEngine {
                 guardProb = 0.45;
                 dodgeProb = 0.35;
                 foresightProb = 0.25;
+            }
+
+            // [FIX] 랜스 가드 확률 10% 가산
+            if (!isStunned && target.id === 'lance') {
+                guardProb = Math.min(1.0, guardProb + 0.10);
             }
 
             // Long Sword Foresight Slash
@@ -815,6 +827,8 @@ class HuntEngine {
     }
 
     executeHunterTurn(w) {
+        if (this.monsterHp <= 0) return; // [FIX] 몬스터 사망 시 사후 타격(Beatdown) 방지
+
         if (w.hitDuration && w.hitDuration > 0) {
             w.atb = 0;
             return;
@@ -841,18 +855,18 @@ class HuntEngine {
                     const prevMonsterName = prevMonster ? prevMonster.nameKO : "이전 몬스터";
                     const material = this.getPreviousMonsterMaterial(prevMonsterName);
                     w.isGathering = true;
+                    w.itemDuration = 25; // [FIX] tick 기반 상태 관리로 전환
                     this.addLog(`😅 [몬린이 딴짓] ${w.hunterName} (${w.name})이(가) 전투 도중 이전 토벌 대상인 [${prevMonsterName}]의 사체로 달려가 갈무리를 시도합니다! (획득: ${material})`, '#c98534');
                     this.playAudioFile('Unified_SFX/MH - Item Found.mp3');
                     this.spawnEmojiBubble(w.index, `🏃`);
                     this.shakeWeapon(w.index, '#c98534');
-                    setTimeout(() => { w.isGathering = false; }, 2500);
                 } else {
                     w.isGathering = true;
+                    w.itemDuration = 25; // [FIX] tick 기반 상태 관리로 전환
                     this.addLog(`🌿 [몬린이 딴짓] ${w.hunterName} (${w.name})이(가) 이쁜 풀꽃을 채집하느라 한눈을 팝니다! (획득: 약초)`, '#aaffaa');
                     this.playAudioFile('Unified_SFX/MH - Item Found.mp3');
                     this.spawnEmojiBubble(w.index, `🌿`);
                     this.shakeWeapon(w.index, '#aaffaa');
-                    setTimeout(() => { w.isGathering = false; }, 2500);
                 }
                 return;
             } else if (this.monsterState === 'enraged' && Math.random() < 0.35) {
@@ -1156,6 +1170,7 @@ class HuntEngine {
             // Insect Glaive extracts tripleUp
             if (w.id === 'insect_glaive') {
                 if (currentCombo.name === '진액 추출') {
+                    w.extractBuffs = w.extractBuffs || { red: 0, white: 0, orange: 0 }; // [FIX] 안전한 초기화
                     let colorAcquired = "";
                     if (!w.extractBuffs.red) {
                         w.extractBuffs.red = 1;

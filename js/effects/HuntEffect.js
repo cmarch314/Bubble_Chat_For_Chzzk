@@ -35,6 +35,13 @@ class HuntEffect extends BaseEffect {
             console.warn("Monster hunt game is already active. Ignoring double trigger.");
             return;
         }
+        
+        // [FIX] 이전 수렵의 페이드아웃 타이머가 겹쳐서 새 UI를 파괴하는 버그 방지
+        if (this.endGameFadeoutTimer) {
+            clearTimeout(this.endGameFadeoutTimer);
+            this.endGameFadeoutTimer = null;
+        }
+
         this.director.activeGame = this;
         this.isActive = true;
         this.phase = 'voting';
@@ -174,8 +181,8 @@ class HuntEffect extends BaseEffect {
                 '활': 'bow'
             };
 
-            // Remove "참가" prefix if exists
-            const cleaned = msg.replace(/^참가\s+/, '').trim();
+            // Remove "참가" or "!참가" prefix if exists
+            const cleaned = msg.replace(/^!?참가\s+/, '').trim();
             // Regex to capture "1", "!1", "1 해머", "1 공격적", "1 해머 공격적"
             const match = cleaned.match(/^!?([1-4])(?:\s+(.+))?$/);
 
@@ -606,8 +613,13 @@ class HuntEffect extends BaseEffect {
                 </div>
             </div>
         `;
-        document.body.appendChild(container);
-        setTimeout(() => container.remove(), 4000);
+        // [FIX] 렌더러 컨테이너 내부에 종속시켜 !중단 시 함께 삭제되도록 수정
+        if (this.renderer && this.renderer.container) {
+            this.renderer.container.appendChild(container);
+        } else {
+            document.body.appendChild(container);
+        }
+        setTimeout(() => { if (container.parentNode) container.remove(); }, 4000);
     }
 
     clearAllTimers() {
@@ -1095,9 +1107,10 @@ class HuntEffect extends BaseEffect {
         }
  
         const displayDuration = isVictory ? 30000 : 15000;
-        setTimeout(() => {
+        // [FIX] 이전 수렵 UI 파괴 버그 방지를 위해 멤버 변수로 타이머 추적
+        this.endGameFadeoutTimer = setTimeout(() => {
             container.style.animation = "game-fade-out 0.5s ease-in forwards";
-            setTimeout(() => {
+            this.endGameFadeoutTimer = setTimeout(() => {
                 this.renderer.removeContainer();
                 document.body.classList.remove('in-hunt');
                 this.audioManager.stopBgms();
@@ -1105,6 +1118,7 @@ class HuntEffect extends BaseEffect {
                     this.resolveGame();
                     this.resolveGame = null;
                 }
+                this.endGameFadeoutTimer = null;
             }, 500);
         }, displayDuration);
     }
@@ -1113,6 +1127,12 @@ class HuntEffect extends BaseEffect {
         this.isActive = false;
         this.phase = 'ended';
         this.director.activeGame = null;
+
+        // [FIX] 중단 시에도 잔여 페이드아웃 타이머 제거
+        if (this.endGameFadeoutTimer) {
+            clearTimeout(this.endGameFadeoutTimer);
+            this.endGameFadeoutTimer = null;
+        }
 
         this.clearAllTimers();
 

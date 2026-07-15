@@ -177,6 +177,7 @@ class ChzzkGateway {
                     badges: profile.activityBadges || [],
                     emojis: extra.emojis || {},
                     isStreamer: profile.userRoleCode === 'streamer' || profile.userIdHash === this.config.channelId,
+                    isSubscriber: !!(profile && profile.streamingProperty && profile.streamingProperty.subscription), // [FIX] 치지직 구독 감지 로직 강화
                     uid: profile.userIdHash,
                     type: 'chat',
 
