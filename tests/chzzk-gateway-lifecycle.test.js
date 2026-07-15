@@ -90,6 +90,7 @@ const config = {
     loadHistory: false
 };
 const gateway = new context.ChzzkGateway(config, eventBus, null, timers);
+assert.strictEqual(gateway._transportCandidates('https://example.invalid')[0].id, 'companion');
 
 gateway._connectSocket('chat-1', 'token-1');
 const first = sockets[0];

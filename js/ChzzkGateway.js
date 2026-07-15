@@ -450,6 +450,7 @@ class ChzzkGateway {
 
     _transportCandidates(targetUrl) {
         return [
+            { id: 'companion', run: () => this._fetchCompanion(targetUrl) },
             { id: 'direct', run: () => this._fetchDirect(targetUrl) },
             { id: 'allorigins', run: () => this._fetchAllOrigins(targetUrl) },
             { id: 'cors-lol', run: () => this._fetchStandardProxy('https://api.cors.lol/?url=', targetUrl, true) },
@@ -496,6 +497,15 @@ class ChzzkGateway {
     async _fetchDirect(targetUrl) {
         const response = await this._fetchWithTimeout(targetUrl);
         return this._parseApiResponse(response, 'Direct');
+    }
+
+    async _fetchCompanion(targetUrl) {
+        const response = await this._fetchWithTimeout(
+            `http://127.0.0.1:17890/api/chzzk?url=${encodeURIComponent(targetUrl)}`,
+            {},
+            2500
+        );
+        return this._parseApiResponse(response, 'Local companion');
     }
 
     async _fetchAllOrigins(targetUrl) {

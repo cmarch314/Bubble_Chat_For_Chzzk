@@ -150,3 +150,8 @@ d:/BubbleChat/
 * Runtime primitives remain in `config.js`. Sound mappings live in `config/sound-catalog.js`, visual-effect settings in `config/visual-config.js`, and chat-video commands in `config/cmc-catalog.js`.
 * Load the four files in that order in both `index.html` and `config.html`. Default catalogs may fill missing globals, but must not overwrite values exported into a user-managed `config.js`.
 * Any catalog move or edit must keep `tests/config-modules.test.js` and `npm run verify` passing so OBS cannot start with a partial mapping or missing media.
+
+### Rule 16: Prefer the Local OBS Companion Without Making It Mandatory
+* The recommended OBS URL is `http://127.0.0.1:17890/index.html`, served by `tools/chzzk-companion.js` through `START_OBS_OVERLAY.bat`.
+* `ChzzkGateway` must try the loopback companion first, while retaining direct and bounded public fallbacks when the companion is unavailable.
+* The companion may proxy only the allowlisted Chzzk live-status and access-token endpoints. Keep loopback binding, path containment, media range support, response size limits, and request timeouts intact.
