@@ -5205,7 +5205,7 @@ body {
 
 .skill-bubble {
     position: absolute;
-    bottom: 110%; /* 카드 ?�쪽?�로 ?��? */
+    bottom: 110%; /* 카드 위쪽으로 이동 */
     left: 50%;
     transform: translateX(-50%);
     background: rgba(20, 20, 20, 0.95);
