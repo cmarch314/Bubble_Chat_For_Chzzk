@@ -1,6 +1,6 @@
 const assert = require('assert');
 const path = require('path');
-const { isAllowedChzzkUrl, resolveStaticPath } = require('../tools/chzzk-companion');
+const { isAllowedChzzkUrl, readNumericOption, resolveStaticPath } = require('../tools/chzzk-companion');
 
 assert.strictEqual(isAllowedChzzkUrl(
     'https://api.chzzk.naver.com/polling/v2/channels/057a9a03fea9b368eb0c76b9e95e1ae5/live-status?_t=1'
@@ -16,5 +16,7 @@ assert.strictEqual(resolveStaticPath('/'), path.join(root, 'index.html'));
 assert.strictEqual(resolveStaticPath('/index.html'), path.join(root, 'index.html'));
 assert.strictEqual(resolveStaticPath('/../outside.txt'), null);
 assert.strictEqual(resolveStaticPath('/%2e%2e/outside.txt'), null);
+assert.strictEqual(readNumericOption(['--obs-parent', '1234'], '--obs-parent'), 1234);
+assert.strictEqual(readNumericOption(['--obs-parent', 'invalid'], '--obs-parent'), null);
 
 console.log('Chzzk local companion safety contract passed');

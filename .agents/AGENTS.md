@@ -152,6 +152,6 @@ d:/BubbleChat/
 * Any catalog move or edit must keep `tests/config-modules.test.js` and `npm run verify` passing so OBS cannot start with a partial mapping or missing media.
 
 ### Rule 16: Prefer the Local OBS Companion Without Making It Mandatory
-* The recommended OBS URL is `http://127.0.0.1:17890/index.html`, served by `tools/chzzk-companion.js` through `START_OBS_OVERLAY.bat`.
+* The recommended OBS URL is `http://127.0.0.1:17890/index.html`. `obs/bubblechat-companion.lua` starts the companion with OBS and stops it on unload; `START_OBS_OVERLAY.bat` is manual recovery only.
 * `ChzzkGateway` must try the loopback companion first, while retaining direct and bounded public fallbacks when the companion is unavailable.
-* The companion may proxy only the allowlisted Chzzk live-status and access-token endpoints. Keep loopback binding, path containment, media range support, response size limits, and request timeouts intact.
+* The companion may proxy only the allowlisted Chzzk live-status and access-token endpoints. Keep loopback binding, OBS-parent monitoring, PID/start-time identity checks, path containment, media range support, response size limits, and request timeouts intact.

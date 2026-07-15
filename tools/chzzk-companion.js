@@ -183,12 +183,37 @@ function createServer() {
     });
 }
 
+function readNumericOption(args, name) {
+    const index = args.indexOf(name);
+    if (index < 0) return null;
+    const value = Number(args[index + 1]);
+    return Number.isSafeInteger(value) && value > 0 ? value : null;
+}
+
+function bindToParentProcess(server, parentPid, intervalMs = 5000) {
+    if (!parentPid) return null;
+    const monitor = setInterval(() => {
+        try {
+            process.kill(parentPid, 0);
+        } catch (_) {
+            clearInterval(monitor);
+            server.close(() => process.exit(0));
+            setTimeout(() => process.exit(0), 2000).unref();
+        }
+    }, intervalMs);
+    server.on('close', () => clearInterval(monitor));
+    return monitor;
+}
+
 if (require.main === module) {
     const port = Number(process.env.BUBBLECHAT_PORT) || DEFAULT_PORT;
-    createServer().listen(port, HOST, () => {
+    const server = createServer();
+    const parentPid = readNumericOption(process.argv.slice(2), '--obs-parent');
+    bindToParentProcess(server, parentPid);
+    server.listen(port, HOST, () => {
         console.log(`BubbleChat OBS companion: http://${HOST}:${port}/index.html`);
         console.log('Keep this window open while OBS is using the overlay.');
     });
 }
 
-module.exports = { createServer, isAllowedChzzkUrl, resolveStaticPath };
+module.exports = { bindToParentProcess, createServer, isAllowedChzzkUrl, readNumericOption, resolveStaticPath };
