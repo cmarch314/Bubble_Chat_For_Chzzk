@@ -16,7 +16,7 @@ class SoundQuizEffect extends BaseEffect {
         }
         const items = sorted.slice(0, 3).map(([name, score], idx) => {
             const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉';
-            return `<span class="leaderboard-item">${medal} ${name}(${score}회)</span>`;
+            return `<span class="leaderboard-item">${medal} ${SafeContent.escapeHTML(name)}(${score}회)</span>`;
         });
         return `<div class="game-quiz-leaderboard">🏆 실시간 순위: ${items.join(' ')}</div>`;
     }
@@ -237,9 +237,9 @@ class SoundQuizEffect extends BaseEffect {
                         ${this._getLeaderboardHTML()}
                         <div class="game-title">🎉 정답자 발생! (${currentRound} / ${totalRounds})</div>
                         <div class="game-winner-announce" style="margin: 30px 0; color: #00ffa3;">
-                            🏆 ${roundWinner}님 정답!
+                            🏆 ${SafeContent.escapeHTML(roundWinner)}님 정답!
                         </div>
-                        <div class="game-status" style="color: #fff;">정답: <span style="color:#ffb703; font-size:2.7rem; font-weight:bold;">${this.correctAnswer}</span></div>
+                        <div class="game-status" style="color: #fff;">정답: <span style="color:#ffb703; font-size:2.7rem; font-weight:bold;">${SafeContent.escapeHTML(this.correctAnswer)}</span></div>
                         <div class="game-participants-count">
                             ${currentRound < totalRounds ? '5초 후 다음 라운드가 시작됩니다...' : '모든 퀴즈가 종료되었습니다!'}
                         </div>
@@ -251,7 +251,7 @@ class SoundQuizEffect extends BaseEffect {
                         ${this._getLeaderboardHTML()}
                         <div class="game-title" style="color: #ff3b30;">⏰ 시간 초과! (${currentRound} / ${totalRounds})</div>
                         <div class="game-status" style="margin: 30px 0;">아무도 맞추지 못했습니다...</div>
-                        <div class="game-status" style="color: #fff;">정답은 <span style="color:#ffb703; font-size:2.7rem; font-weight:bold;">${this.correctAnswer}</span> 이었습니다!</div>
+                        <div class="game-status" style="color: #fff;">정답은 <span style="color:#ffb703; font-size:2.7rem; font-weight:bold;">${SafeContent.escapeHTML(this.correctAnswer)}</span> 이었습니다!</div>
                         <div class="game-participants-count">
                             ${currentRound < totalRounds ? '5초 후 다음 라운드가 시작됩니다...' : '모든 퀴즈가 종료되었습니다!'}
                         </div>
@@ -287,7 +287,7 @@ class SoundQuizEffect extends BaseEffect {
                         ? sortedScores.map(([name, score], idx) => `
                             <div style="margin:12px 0; font-size:${idx === 0 ? '3.0rem' : '2.4rem'}; font-weight:${idx === 0 ? 'bold' : 'normal'};">
                                 ${idx === 0 ? '🥇 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : '👤 '} 
-                                ${name}: <span style="color:#00ffa3;">${score}회 정답</span>
+                                ${SafeContent.escapeHTML(name)}: <span style="color:#00ffa3;">${score}회 정답</span>
                             </div>
                         `).join('')
                         : '정답자가 한 명도 없었습니다 🥲'}

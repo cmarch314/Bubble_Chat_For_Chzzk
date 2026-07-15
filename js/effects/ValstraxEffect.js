@@ -138,7 +138,9 @@ class ValstraxEffect extends BaseEffect {
 
                 const msgBox = document.createElement('div');
                 msgBox.className = 'valstrax-msg-box';
-                msgBox.innerHTML = `<div>${msg}</div>`;
+                const msgText = document.createElement('div');
+                msgText.textContent = msg;
+                msgBox.appendChild(msgText);
                 overlay.appendChild(msgBox);
 
                 // Fade In 효과

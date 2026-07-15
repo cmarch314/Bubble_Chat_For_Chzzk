@@ -49,12 +49,12 @@ class ChatRenderer {
         if (badges && badges.length > 0) {
             badgeEle.classList.add('badges');
             badges.forEach(b => {
+                const badgeUrl = SafeContent.remoteImageUrl(b.imageUrl || b.url);
+                if (!badgeUrl) return;
                 let img = document.createElement('img');
-                img.src = b.imageUrl || b.url; // [Fix] Chzzk uses 'imageUrl'
-                if (img.src) {
-                    img.classList.add('badge');
-                    badgeEle.appendChild(img);
-                }
+                img.src = badgeUrl;
+                img.classList.add('badge');
+                badgeEle.appendChild(img);
             });
         }
 
@@ -237,8 +237,7 @@ class ChatRenderer {
             this._applyTextFilters(originalMessage, elements, userColor);
 
             // 이모티콘 처리 및 메시지 삽입
-            const safeMsg = displayMessage.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
-            messageEle.innerHTML = renderMessageWithEmotesHTML(safeMsg, emotes);
+            messageEle.innerHTML = renderMessageWithEmotesHTML(displayMessage, emotes);
 
             // Ensure Twemoji is applied
             if (window.twemoji) {
@@ -317,7 +316,8 @@ class ChatRenderer {
     }
 
     _resolveColor(color, uid) {
-        if (color && color !== "#000000" && color.startsWith("#")) return color;
+        const safeColor = SafeContent.cssColor(color, '');
+        if (safeColor && safeColor !== "#000000") return safeColor;
         if (color === "#000000") return "#000000";
 
         // [New] Fallback to internal random color if external lib is missing

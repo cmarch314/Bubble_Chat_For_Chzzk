@@ -62,6 +62,9 @@ d:/BubbleChat/
    - A running OBS page must survive a Chzzk broadcast restart without reloading. The gateway periodically re-discovers the current internal chat session, obtains a fresh token, authenticates a replacement socket, and only then retires the previous socket.
    - A cached `chatChannelId` is a startup hint, not a permanent source of truth. Socket close, authentication timeout, stale protocol traffic, or a changed live-session identifier must force rediscovery.
 
+6. **Remote Content Safety**:
+   - `js/runtime/SafeContent.js` is the single policy layer for escaping remote chat text, validating HTTPS emote URLs, and constraining remote color values.
+
 ---
 
 ## 3. Critical Guardrails & Behavioral Rules
@@ -114,3 +117,7 @@ d:/BubbleChat/
 * **Safe replacement**: During a broadcast-session handover, retain the currently authenticated socket until the replacement socket has authenticated. Ignore chat packets from pending or retired sockets to prevent duplicates.
 * **Bounded retries**: Reconnects use bounded exponential backoff with jitter, and live-session monitoring failures must not tear down a working connection.
 
+### Rule 10: Remote Chat Content Is Text by Default
+* Nicknames, chat messages, winners, participants, and other Chzzk-provided values must use `textContent` or `SafeContent.escapeHTML()` before entering an HTML template.
+* Only `SafeContent.renderEmotesHTML()` may turn remote chat text into rich markup. It permits escaped text plus validated HTTPS emote images.
+* Remote colors must pass through `SafeContent.cssColor()` before being used in inline styles. Never interpolate an untrusted color or URL into HTML.

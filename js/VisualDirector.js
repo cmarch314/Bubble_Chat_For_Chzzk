@@ -231,14 +231,16 @@ class VisualDirector {
         if (opts.styles && opts.styles.nametag) {
             el.style.cssText = "display:flex; flex-direction:column; align-items:center; justify-content:flex-end; white-space:nowrap;";
 
-            const userColor = opts.styles.nameColor || '#fff';
+            const userColor = SafeContent.cssColor(opts.styles.nameColor, '#ffffff');
             const nt = document.createElement('div'); nt.className = 'surfer-nametag';
-            nt.innerHTML = `<span class="user-name">${opts.styles.nametag}</span>`;
+            const name = document.createElement('span'); name.className = 'user-name';
+            name.textContent = String(opts.styles.nametag || '');
+            nt.appendChild(name);
             nt.style.setProperty('--user-color', userColor);
             el.appendChild(nt);
         }
         const inner = document.createElement('div'); inner.className = 'actor-emoji';
-        inner.innerHTML = emoji; inner.style.lineHeight = '1'; el.appendChild(inner);
+        inner.textContent = String(emoji || ''); inner.style.lineHeight = '1'; el.appendChild(inner);
         if (window.twemoji) {
             twemoji.parse(el);
             // Ensure generated twemoji images have inline-block display and correct size

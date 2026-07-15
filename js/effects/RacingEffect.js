@@ -1536,7 +1536,7 @@ class RacingEffect extends BaseEffect {
             </div>
             <div style="font-size:2.0rem; text-align:center; color:#fff; max-height: 280px; overflow-y: auto; background: rgba(0,0,0,0.4); padding: 20px; border-radius:20px; border:1px solid rgba(255,255,255,0.1);">
                 ${winners.length > 0 
-                    ? `<span style="color:#00ffa3; font-weight:bold; font-size:2.2rem;">🎉 우승을 맞춘 시청자 (${winners.length}명):</span><br><div style="margin-top:15px; color:#ffb703;">${winners.join(', ')}</div>`
+                    ? `<span style="color:#00ffa3; font-weight:bold; font-size:2.2rem;">🎉 우승을 맞춘 시청자 (${winners.length}명):</span><br><div style="margin-top:15px; color:#ffb703;">${winners.map(name => SafeContent.escapeHTML(name)).join(', ')}</div>`
                     : '맞춘 시청자가 없습니다.'}
             </div>
             <div style="font-size:1.6rem; text-align:center; color:#888; margin-top:25px;">참여해주신 모든 분들 감사합니다!</div>

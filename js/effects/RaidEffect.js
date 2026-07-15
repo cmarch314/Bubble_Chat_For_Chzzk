@@ -334,7 +334,7 @@ class RaidEffect extends BaseEffect {
                 <div class="game-title" style="font-size:3.5rem; color:#00ffa3;">🎉 레이드 성공! 🎉</div>
                 <div style="font-size:2.4rem; color:#fff; margin:20px 0;">우주 괴수가 물리쳐졌습니다!</div>
                 <div style="font-size:1.8rem; color:#ffb703; font-weight:bold;">
-                    🏆 MVP 모험가: ${mvpName} (${mvpDmg} DMG)
+                    🏆 MVP 모험가: ${SafeContent.escapeHTML(mvpName)} (${mvpDmg} DMG)
                 </div>
                 <div style="font-size:1.4rem; color:#888; margin-top:20px;">참여한 모든 시청자 여러분 수고하셨습니다!</div>
             `;
@@ -348,7 +348,7 @@ class RaidEffect extends BaseEffect {
             uiPanel.innerHTML = `
                 <div class="game-title" style="font-size:3.5rem; color:#ff3b30;">☠️ 레이드 실패 ☠️</div>
                 <div style="font-size:2.4rem; color:#fff; margin:20px 0;">시간이 초과되어 보스가 도망쳤습니다...</div>
-                <div style="font-size:1.6rem; color:#888;">보스에게 가장 큰 피해를 준 자: ${mvpName} (${mvpDmg} DMG)</div>
+                <div style="font-size:1.6rem; color:#888;">보스에게 가장 큰 피해를 준 자: ${SafeContent.escapeHTML(mvpName)} (${mvpDmg} DMG)</div>
             `;
         }
 

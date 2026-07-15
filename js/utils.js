@@ -146,23 +146,8 @@ function replaceWeaponNamesWithIcons(message) {
 }
 
 function renderMessageWithEmotesHTML(message, emotes, scale = 1) {
-    // Legacy helper for VisualDirector
-    let content = message;
-    if (emotes && Object.keys(emotes).length > 0) {
-        // [Fix] Broaden regex to catch {:d_15:} or {d_15} or other variants
-        content = message.replace(/\{[^}]+\}/g, (match) => {
-            // Remove {, }, : and whitespace to get pure ID
-            const emoteId = match.replace(/[\{\}:]/g, "").trim();
-            const d = emotes[emoteId];
-            const url = (d && (typeof d === 'string' ? d : (d.imageUrl || d.url))) || null;
-            // [Fix] Use height:auto and max-width to preserve aspect ratio, preventing flattening
-            // [Fix] Check if message is JUST this emote to scale it up
-            const isSingleEmote = message.trim() === match;
-            const sizeStyle = isSingleEmote ? "height: 10em; width: auto;" : `height: ${3 * scale}em; width: auto;`;
-
-            return url ? `<img src="${url}" class="emote_chzzk_inline" style="${sizeStyle} vertical-align: middle; display: inline-block;" alt="${emoteId}">` : match;
-        });
-    }
+    // All remote chat text is escaped before the approved emote markup is added.
+    const content = SafeContent.renderEmotesHTML(message, emotes, scale);
 
     let result = content;
     if (window.twemoji) {

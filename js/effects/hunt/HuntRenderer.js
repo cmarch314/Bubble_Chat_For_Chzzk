@@ -249,18 +249,25 @@ class HuntRenderer {
                         // Sort so subscribers come first in list representation too
                         const sortedList = [...list].sort((a, b) => (b.isSubscriber ? 1 : 0) - (a.isSubscriber ? 1 : 0));
                         
-                        const displayNames = sortedList.slice(0, 3).map(user => {
-                            const subSuffix = user.isSubscriber ? '<span style="color:#00ffaa;margin-left:2px;">👑</span>' : '';
-                            return `<span style="color: ${user.color || '#eee'}; font-weight: bold;">${user.nickname}</span>${subSuffix}`;
+                        namesEl.replaceChildren();
+                        sortedList.slice(0, 3).forEach((user, nameIndex) => {
+                            if (nameIndex > 0) namesEl.appendChild(document.createTextNode(', '));
+                            const name = document.createElement('span');
+                            name.style.color = SafeContent.cssColor(user.color, '#eeeeee');
+                            name.style.fontWeight = 'bold';
+                            name.textContent = String(user.nickname || 'Anonymous');
+                            namesEl.appendChild(name);
+                            if (user.isSubscriber) {
+                                const crown = document.createElement('span');
+                                crown.style.color = '#00ffaa';
+                                crown.style.marginLeft = '2px';
+                                crown.textContent = '👑';
+                                namesEl.appendChild(crown);
+                            }
                         });
-                        
-                        let suffix = '';
-                        if (totalCount > 3) {
-                            suffix = ` 외 ${totalCount - 3}명`;
-                        }
-                        namesEl.innerHTML = displayNames.join(', ') + suffix;
+                        if (totalCount > 3) namesEl.appendChild(document.createTextNode(` 외 ${totalCount - 3}명`));
                     } else {
-                        namesEl.innerHTML = '';
+                        namesEl.replaceChildren();
                     }
                 }
             }
@@ -1477,12 +1484,13 @@ class HuntRenderer {
 
         const bubble = document.createElement('div');
         bubble.className = isSubscriber ? 'lobby-bubble subscriber' : 'lobby-bubble';
-        bubble.innerHTML = `
-            <div style="font-size: 0.8rem; font-weight: bold; color: ${isSubscriber ? '#00ffa3' : '#c98534'}; margin-bottom: 2px;">
-                ${isSubscriber ? '👑 ' : ''}${nickname}
-            </div>
-            <div style="font-size: 0.95rem; font-weight: bold; color: #fff;">${message}</div>
-        `;
+        const nameLine = document.createElement('div');
+        nameLine.style.cssText = `font-size:0.8rem;font-weight:bold;color:${isSubscriber ? '#00ffa3' : '#c98534'};margin-bottom:2px;`;
+        nameLine.textContent = `${isSubscriber ? '👑 ' : ''}${nickname || 'Anonymous'}`;
+        const messageLine = document.createElement('div');
+        messageLine.style.cssText = 'font-size:0.95rem;font-weight:bold;color:#fff;';
+        messageLine.textContent = String(message || '');
+        bubble.append(nameLine, messageLine);
         targetEl.appendChild(bubble);
 
         // 2. Interactive Particles
