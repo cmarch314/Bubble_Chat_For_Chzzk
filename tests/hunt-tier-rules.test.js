@@ -26,6 +26,9 @@ assert.strictEqual(fallback.hp, 12000);
 assert.strictEqual(Object.isFrozen(fallback), true);
 
 const huntEffectSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/HuntEffect.js'), 'utf8');
+const resultPresenterSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntResultPresenter.js'), 'utf8');
 assert.match(huntEffectSource, /monsterStunThreshold:\s*baseStunThreshold/);
+assert.match(huntEffectSource, /return HuntResultPresenter\.show\(this, container, isVictory, winner\)/);
+assert.doesNotMatch(resultPresenterSource, /\bthis\./);
 
 console.log('[test] HuntTierRules balance contract passed.');

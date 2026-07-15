@@ -144,6 +144,7 @@ d:/BubbleChat/
 ### Rule 14: Feature Data, Rules, Presentation, and Notifications Stay Separate
 * Racing data lives in `RacingData.js`, deterministic selection and lookup rules in `RacingRules.js`, the active simulation loop in `RacingRunner.js`, and racing presentation styles in `styles/racing.css`.
 * Hunt monster calculations live in `HuntMonsterRules.js`; monster and weapon turns execute through `HuntMonsterTurnExecutor.js` and `HuntHunterTurnExecutor.js`. Combat animations live in `HuntCombatAnimator.js`; chat, lobby, and material popups live in `HuntNotificationRenderer.js`. `HuntRenderer` owns and delegates to both render helpers.
+* Hunt victory, defeat, rewards, and consecutive-hunt transitions render through `HuntResultPresenter.js`; keep phase control and chat commands in `HuntEffect.js`.
 * Chat input cleanup must pass through `ChatMessageNormalizer` before `ChatRenderer` creates DOM. Do not reintroduce duplicate inline data tables or dynamic feature CSS.
 
 ### Rule 15: Configuration Catalogs Stay Modular and Ordered
