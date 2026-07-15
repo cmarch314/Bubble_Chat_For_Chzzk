@@ -1,13 +1,14 @@
 // [Class 7] Message Queue Manager
 // ==========================================
 class MessageQueue {
-    constructor(eventBus, processor = null) {
+    constructor(eventBus, processor = null, options = {}) {
         this.eventBus = eventBus;
         this.processor = processor;
         this.queue = [];
         this.isProcessing = false;
         this.lastProcessTime = Date.now();
         this.baseDelay = 50; // 빠른 처리 (원래 300ms에서 단축)
+        this.schedule = options.schedule || ((callback, delay) => setTimeout(callback, delay));
     }
 
     enqueue(msgData) {
@@ -48,7 +49,10 @@ class MessageQueue {
         else dynamicDelay = 80;                      // Normal (거의 즉시)
 
         // 콘솔에 큐 상태 로그 출력 (디버깅용)
-        console.log(`[Queue] Proc: "${currentItem.data.message.substring(0, 10)}..." | Size: ${queueSize} | Delay: ${dynamicDelay}ms`);
+        const preview = typeof currentItem.data?.message === 'string'
+            ? currentItem.data.message.substring(0, 10)
+            : '';
+        console.log(`[Queue] Proc: "${preview}..." | Size: ${queueSize} | Delay: ${dynamicDelay}ms`);
 
         try {
             if (this.eventBus) {
@@ -58,7 +62,7 @@ class MessageQueue {
             console.error("[Queue] Processor Error:", e);
         }
 
-        setTimeout(() => {
+        this.schedule(() => {
             this._process();
         }, dynamicDelay);
     }

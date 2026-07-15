@@ -15,7 +15,7 @@ class BubbleChatApp {
         };
 
         this.eventBus = new Types.EventBus();
-        this.config = new Types.ConfigManager();
+        this.config = new Types.ConfigManager(this.eventBus);
         this.audio = new Types.AudioManager(this.config, this.eventBus);
         this.preloader = new Types.AssetPreloader(this.config, this.audio);
         this.chatRenderer = new Types.ChatRenderer(this.eventBus, this.audio);

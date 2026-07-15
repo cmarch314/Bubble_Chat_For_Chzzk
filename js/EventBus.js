@@ -16,6 +16,15 @@ class EventBus {
             this.listeners[event] = [];
         }
         this.listeners[event].push(callback);
+        return () => this.off(event, callback);
+    }
+
+    once(event, callback) {
+        const unsubscribe = this.on(event, (...args) => {
+            unsubscribe();
+            callback(...args);
+        });
+        return unsubscribe;
     }
 
     /**
@@ -35,7 +44,7 @@ class EventBus {
      */
     emit(event, ...args) {
         if (!this.listeners[event]) return;
-        this.listeners[event].forEach(callback => {
+        [...this.listeners[event]].forEach(callback => {
             try {
                 callback(...args);
             } catch (error) {
