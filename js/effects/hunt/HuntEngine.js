@@ -783,31 +783,17 @@ class HuntEngine {
     }
 
     checkMonsterKnockdown() {
-        if (this.selectedMonster.id.includes('valstrax')) {
-            return; // 발파루크는 일반 체력 기반 대경직 없음
-        }
-        const hpRatio = (this.monsterHp / this.monsterMaxHp) * 100;
-        let triggerKnockdown = false;
-        if (this.monsterHp > 0) {
-            if (hpRatio <= 80 && !this.monsterKnockdownTriggered[80]) {
-                this.monsterKnockdownTriggered[80] = true;
-                triggerKnockdown = true;
-            }
-            if (hpRatio <= 60 && !this.monsterKnockdownTriggered[60]) {
-                this.monsterKnockdownTriggered[60] = true;
-                triggerKnockdown = true;
-            }
-            if (hpRatio <= 40 && !this.monsterKnockdownTriggered[40]) {
-                this.monsterKnockdownTriggered[40] = true;
-                triggerKnockdown = true;
-            }
-            if (hpRatio <= 20 && !this.monsterKnockdownTriggered[20]) {
-                this.monsterKnockdownTriggered[20] = true;
-                triggerKnockdown = true;
-            }
-        }
+        const crossedThresholds = HuntMonsterRules.crossedKnockdownThresholds(
+            this.monsterHp,
+            this.monsterMaxHp,
+            this.monsterKnockdownTriggered,
+            this.selectedMonster.id
+        );
+        crossedThresholds.forEach(threshold => {
+            this.monsterKnockdownTriggered[threshold] = true;
+        });
 
-        if (triggerKnockdown) {
+        if (crossedThresholds.length) {
             this.monsterKnockdownDuration = 70;
             this.monsterStunDuration = 0;
             this.monsterState = 'knocked_down';
