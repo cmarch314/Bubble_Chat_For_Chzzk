@@ -49,3 +49,5 @@
 ### 🐛 버그 리포트 & 문의
 문제가 발생하면 방송 혹은 아래 디스코드 서버로 알려주세요!
 [디스코드 버그 리포트 서버](https://discord.gg/XM3VKJKC)
+
+개발·리팩터링 작업은 [REFACTORING.md](REFACTORING.md)의 구조, 검증, 복구 규칙을 따릅니다.

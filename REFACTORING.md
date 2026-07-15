@@ -1,0 +1,53 @@
+# BubbleChat 리팩터링 운영 기준
+
+## 최우선 원칙
+
+기존 방송 기능과 명령어 동작을 보존한다. 구조 변경은 반드시 회귀 테스트 또는 무결성 검사와 함께 작은 커밋으로 진행한다. 대용량 BGM·SFX·영상과 복구용 파일은 명시적으로 정리하기 전까지 삭제하거나 일괄 추적하지 않는다.
+
+## 현재 런타임 경계
+
+- `BubbleChatApp`: 애플리케이션 조립, 시작, 종료
+- `MessageRouter`: 시스템·게임·비주얼·일반 채팅 라우팅
+- `GameCommandMatcher`, `VisualCommandMatcher`: 명령어 판별 정책
+- `EffectRegistry`: 화면 효과 등록 정보와 생성자
+- `DisposableScope`, `ManagedTimers`: 이벤트 구독과 타이머 자원 소유권
+- `GameEffectRuntime`: 레이드·사운드퀴즈·레이싱의 활성 게임 소유권, 단일 완료, 타이머 정리
+- `HuntLifecycle`: 수렵 상태 전이
+- `HuntParticipantParser`, `HuntTierRules`: 수렵 입력과 밸런스 규칙
+- `HuntEngine`: 주입 가능한 난수·스케줄러를 사용하는 전투 시뮬레이션
+- `HuntRenderer`, `HuntAudioManager`: 수렵 화면과 오디오 어댑터
+
+## 변경 전후 필수 검증
+
+```powershell
+npm.cmd run verify
+npm.cmd test
+git diff --check
+```
+
+`verify`는 제품 JavaScript 문법, UTF-8 손상, `index.html` 로컬 리소스, CSS 블록·문자열·주석, CSS 로컬 자산을 검사한다. `test`는 핵심 수명주기와 라우팅 계약 및 기존 수렵 회귀 시나리오를 실행한다.
+
+## 금지되는 회귀 패턴
+
+- `activeGame`과 `isActive`를 여러 종료 경로에서 각각 임의로 해제하지 않는다.
+- 게임 효과에 새 네이티브 `setTimeout`/`setInterval`을 추가하지 않는다. 소유 런타임 또는 `ManagedTimers`를 사용한다.
+- WebSocket 재연결·하트비트 타이머를 소켓 세대 확인 없이 실행하지 않는다.
+- 오디오와 이벤트 구독을 `dispose()` 없이 생성하지 않는다.
+- 수렵 밸런스 숫자와 참가 명령 파싱을 거대 효과 클래스에 다시 흩어 놓지 않는다.
+- 추적되지 않은 미디어·복구본·실험 스크립트를 일괄 삭제하거나 커밋하지 않는다.
+
+## 복구 절차
+
+1. `codex/full-rebuild` 브랜치와 최신 태그 또는 커밋 ID를 확인한다.
+2. 전체 Git 번들이 있으면 `git clone <bundle-file> BubbleChat-recovered`로 독립 복구한다.
+3. 소스 ZIP은 빠른 열람용이며, 이력과 브랜치까지 보존하려면 Git 번들을 우선한다.
+4. 특정 단계로 되돌릴 때는 강제 초기화보다 새 복구 브랜치에서 원하는 체크포인트를 확인한다.
+5. 복구 직후 위 세 검증 명령을 모두 실행한다.
+
+## 남은 대형 작업의 안전한 순서
+
+1. 실제 OBS 해상도에서 채팅·수렵·레이싱·레이드·퀴즈 시각 회귀 캡처를 축적한다.
+2. `HuntRenderer`의 전투 애니메이션 타이머를 전용 수명주기 관리자로 점진 이관한다.
+3. 6천 줄 규모의 CSS는 시각 스냅샷이 생긴 뒤 기능 영역별 파일로 분리한다.
+4. `RacingEffect`의 경기 계산을 순수 엔진으로 추출하되 고정 난수 시나리오를 먼저 만든다.
+5. 미디어 카탈로그를 확정한 뒤에만 현재 추적되지 않은 대용량 자산을 별도 보관소 또는 릴리스 패키지로 정리한다.
