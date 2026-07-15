@@ -2,13 +2,14 @@
 // [Class 6.5] Message Router (Controller)
 // ==========================================
 class MessageRouter {
-    constructor(config, eventBus, systemController, audioManager, visualDirector, visualCommandMatcher = null) {
+    constructor(config, eventBus, systemController, audioManager, visualDirector, visualCommandMatcher = null, gameCommandMatcher = null) {
         this.config = config;
         this.eventBus = eventBus;
         this.systemController = systemController;
         this.audioManager = audioManager;
         this.visualDirector = visualDirector;
         this.visualCommandMatcher = visualCommandMatcher || new VisualCommandMatcher();
+        this.gameCommandMatcher = gameCommandMatcher || new GameCommandMatcher();
     }
 
     route(msgData) {
@@ -40,27 +41,10 @@ class MessageRouter {
         }
 
         // [New] 스트리머 전용 미니게임 기동 명령어 처리
-        if (msgData.isStreamer || this.config.debugMode) {
-            if (lowerMsg.startsWith('!퀴즈')) {
-                this.visualDirector.trigger('sound_quiz', { message: updatedTrimmedMsg, nickname: msgData.nickname });
-                return;
-            }
-            if (lowerMsg.startsWith('!경마')) {
-                this.visualDirector.trigger('racing', { message: updatedTrimmedMsg, nickname: msgData.nickname });
-                return;
-            }
-            if (lowerMsg.startsWith('!레이드')) {
-                this.visualDirector.trigger('raid', { message: updatedTrimmedMsg, nickname: msgData.nickname });
-                return;
-            }
-            if (lowerMsg.startsWith('!토벌') || lowerMsg.startsWith('!수렵')) {
-                this.visualDirector.trigger('hunt', { message: updatedTrimmedMsg, nickname: msgData.nickname });
-                return;
-            }
-            if (lowerMsg === '!커맨드') {
-                this.visualDirector.trigger('commands_scroll', { message: updatedTrimmedMsg, nickname: msgData.nickname });
-                return;
-            }
+        const gameEffect = this.gameCommandMatcher.find(updatedTrimmedMsg, msgData, this.config.debugMode);
+        if (gameEffect) {
+            this.visualDirector.trigger(gameEffect, { message: updatedTrimmedMsg, nickname: msgData.nickname });
+            return;
         }
 
         // 0.5 특별 이벤트(구독) 처리

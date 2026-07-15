@@ -3,9 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const gameMatcherPath = path.resolve(__dirname, '../js/routing/GameCommandMatcher.js');
 const matcherPath = path.resolve(__dirname, '../js/routing/VisualCommandMatcher.js');
 const sourcePath = path.resolve(__dirname, '../js/MessageRouter.js');
-const source = `${fs.readFileSync(matcherPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.MessageRouter = MessageRouter;`;
+const source = `${fs.readFileSync(gameMatcherPath, 'utf8')}\n${fs.readFileSync(matcherPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.MessageRouter = MessageRouter;`;
 const context = vm.createContext({ console, performance: { now: () => 0 } });
 vm.runInContext(source, context, { filename: sourcePath });
 const MessageRouter = context.MessageRouter;
@@ -62,6 +63,19 @@ function fixture(overrides = {}) {
     router.route(message());
     assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'audio', 'event']);
     assert.strictEqual(calls[2][1], 'chat:render');
+}
+
+{
+    const { calls, router } = fixture();
+    router.route(message({ isStreamer: true, message: '!수렵 3' }));
+    assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'visual']);
+    assert.strictEqual(calls[1][1], 'hunt');
+}
+
+{
+    const { calls, router } = fixture();
+    router.route(message({ message: '!수렵 3' }));
+    assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'audio', 'event']);
 }
 
 {
