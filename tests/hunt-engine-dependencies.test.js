@@ -5,6 +5,8 @@ const vm = require('vm');
 
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntEngine.js');
 const context = vm.createContext({ console, window: {}, setTimeout });
+const rulesPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterRules.js');
+vm.runInContext(fs.readFileSync(rulesPath, 'utf8'), context, { filename: rulesPath });
 const source = `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntEngine = HuntEngine;`;
 vm.runInContext(source, context, { filename: sourcePath });
 

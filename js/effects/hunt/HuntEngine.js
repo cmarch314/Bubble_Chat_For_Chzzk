@@ -149,14 +149,11 @@ class HuntEngine {
     }
 
     getMonsterSpeedForState(state) {
-        let baseSpeed = 2.2;
-        if (state === 'enraged') baseSpeed = 3.3;
-        else if (state === 'exhausted' || state === 'valstrax_charging') baseSpeed = 1.1;
-        
-        if (this.selectedMonster.id.includes('vaal_hazak')) {
-            baseSpeed *= 0.75;
-        }
-        return baseSpeed * this.monsterSpeedMultiplier;
+        return HuntMonsterRules.speedForState(
+            state,
+            this.selectedMonster.id,
+            this.monsterSpeedMultiplier
+        );
     }
 
     triggerHunterCart(target) {
@@ -778,10 +775,7 @@ class HuntEngine {
     }
 
     getPreviousMonsterMaterial(monsterName) {
-        const name = monsterName || "몬스터";
-        const materials = ["비늘", "갑각", "발톱", "꼬리", "날개", "꼬리뼈"];
-        const randomMat = materials[Math.floor(this.random() * materials.length)];
-        return `${name}의 ${randomMat}`;
+        return HuntMonsterRules.materialFor(monsterName, this.random);
     }
 
     triggerHitAnimation(idx, damage) {
