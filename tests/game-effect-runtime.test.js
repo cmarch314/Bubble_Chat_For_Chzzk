@@ -57,4 +57,10 @@ const quizSource = fs.readFileSync(quizPath, 'utf8');
 assert.match(quizSource, /this\.runtime = new GameEffectRuntime\(this, director\)/);
 assert.doesNotMatch(quizSource, /setTimeout\(|setInterval\(|clearTimeout\(|clearInterval\(/);
 
+const racingPath = path.resolve(__dirname, '../js/effects/RacingEffect.js');
+const racingSource = fs.readFileSync(racingPath, 'utf8');
+assert.match(racingSource, /this\.runtime = new GameEffectRuntime\(this, director\)/);
+assert.match(racingSource, /if \(!this\.runtime\.end\(\)\) return;/);
+assert.doesNotMatch(racingSource, /setTimeout\(|setInterval\(|clearTimeout\(|clearInterval\(/);
+
 console.log('[test] GameEffectRuntime ownership and completion contract passed.');

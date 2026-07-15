@@ -96,6 +96,7 @@ class RacingEffect extends BaseEffect {
         this.bettingBgmPlayPromise = null;
         this.raceBgm = null;
         this.raceBgmPlayPromise = null;
+        this.runtime = new GameEffectRuntime(this, director);
         this._injectStyles();
     }
 
@@ -351,8 +352,7 @@ class RacingEffect extends BaseEffect {
     }
 
     async execute(context) {
-        this.director.activeGame = this;
-        this.isActive = true;
+        this.runtime.start();
         this.phase = 'betting';
         this.bets = {};
 
@@ -534,11 +534,11 @@ class RacingEffect extends BaseEffect {
         }
 
         return new Promise(resolve => {
-            this.resolveGame = resolve;
-            this.bettingTimer = setInterval(() => {
+            this.resolveGame = this.runtime.once(resolve);
+            this.bettingTimer = this.runtime.interval(() => {
                 timeLeft--;
                 if (timeLeft <= 0) {
-                    clearInterval(this.bettingTimer);
+                    this.runtime.clear(this.bettingTimer);
                     this.bettingTimer = null;
                     if (this.bettingBgm) {
                         const bgm = this.bettingBgm;
@@ -560,7 +560,7 @@ class RacingEffect extends BaseEffect {
                         this.bettingBgmPlayPromise = null;
                     }
                     container.remove();
-                    this.startRace(resolve);
+                    this.startRace(this.resolveGame);
                 } else {
                     timerEl.textContent = `남은 배팅 시간: ${timeLeft}초`;
                 }
@@ -607,11 +607,10 @@ class RacingEffect extends BaseEffect {
     }
 
     forceStopGame() {
-        this.isActive = false;
+        if (!this.runtime.end()) return;
         this.phase = 'ended';
-        this.director.activeGame = null;
         if (this.bettingTimer) {
-            clearInterval(this.bettingTimer);
+            this.runtime.clear(this.bettingTimer);
             this.bettingTimer = null;
         }
         if (this.bettingBgm) {
@@ -828,9 +827,9 @@ class RacingEffect extends BaseEffect {
             }
         }
 
-        const interval = setInterval(() => {
+        const interval = this.runtime.interval(() => {
             if (!this.isActive) {
-                clearInterval(interval);
+                this.runtime.clear(interval);
                 return;
             }
             let finished = false;
@@ -1296,7 +1295,7 @@ class RacingEffect extends BaseEffect {
             }
 
             if (finished) {
-                clearInterval(interval);
+                this.runtime.clear(interval);
                 this.phase = 'ended'; // 채팅 부스트 중단
 
                 // 골인 즉시 우승 효과음 재생
@@ -1306,7 +1305,7 @@ class RacingEffect extends BaseEffect {
                 updateCommentary(`🎤 [중계진] 🏁 골인!!! ${winner.emoji} ${winner.name} 선수가 가장 먼저 결승선을 통과하며 우승을 차지합니다!!!`);
 
                 // 3.5초(3500ms) 동안 최종 주행 라인을 보여준 후 결과창으로 전환
-                setTimeout(() => {
+                this.runtime.timeout(() => {
                     this.endRace(track, winnerId, resolve);
                 }, 3500);
             }
@@ -1328,7 +1327,7 @@ class RacingEffect extends BaseEffect {
         particle.style.top = `${wrapper.offsetTop + Math.random() * 20}px`;
         
         lane.appendChild(particle);
-        setTimeout(() => {
+        this.runtime.timeout(() => {
             particle.remove();
         }, 800);
     }
@@ -1480,8 +1479,8 @@ class RacingEffect extends BaseEffect {
     }
     endRace(track, winnerId, resolve) {
         this.phase = 'ended';
-        this.isActive = false;
-        this.director.activeGame = null;
+        if (!this.runtime.end()) return;
+        this.resolveGame = null;
 
         if (this.raceBgm) {
             const bgm = this.raceBgm;
@@ -1492,12 +1491,12 @@ class RacingEffect extends BaseEffect {
 
             const fadeOutAndStop = () => {
                 let currentStep = 0;
-                const fadeInterval = setInterval(() => {
+                const fadeInterval = this.runtime.interval(() => {
                     currentStep++;
                     if (bgm && bgm.volume > volStep) {
                         bgm.volume = Math.max(0, bgm.volume - volStep);
                     } else {
-                        clearInterval(fadeInterval);
+                        this.runtime.clear(fadeInterval);
                         try {
                             bgm.pause();
                             bgm.volume = 0;
@@ -1544,9 +1543,9 @@ class RacingEffect extends BaseEffect {
         `, '5.0rem');
 
 
-        setTimeout(() => {
+        this.runtime.timeout(() => {
             track.style.animation = "game-fade-out 0.5s ease-in forwards";
-            setTimeout(() => {
+            this.runtime.timeout(() => {
                 track.remove();
                 resolve();
             }, 500);
