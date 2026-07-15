@@ -7,6 +7,8 @@ class HuntEngine {
         this.currentConsecutiveIndex = config.currentConsecutiveIndex || 0;
         this.consecutiveQueue = config.consecutiveQueue || [];
         this.callbacks = config.callbacks || {};
+        this.random = config.random || Math.random;
+        this.schedule = config.schedule || ((callback, delay) => setTimeout(callback, delay));
         
         // Monster Stats
         this.monsterTier = config.monsterTier || 'normal';
@@ -179,7 +181,7 @@ class HuntEngine {
         this.addLog(`🚨 [수레행] ${target.name}이(가) 쓰러졌습니다! 5초 후 부활합니다. (현재 수레: ${this.cartCount}/3)`, '#ff3b30');
         
         // 40% 확률로 사망 사운드 대신 "아이보!" 사운드 재생
-        if (Math.random() < 0.40) {
+        if (this.random() < 0.40) {
             this.playSFX('mh_aibo.mp3', '아이보');
         } else {
             this.playAudioFile('Unified_SFX/Player Fainted.mp3', 3500);
@@ -545,13 +547,13 @@ class HuntEngine {
         if (targetable.length === 0) return;
 
         const maxTargets = Math.min(4, targetable.length);
-        const numTargets = Math.floor(Math.random() * maxTargets) + 1;
-        const shuffledTargets = [...targetable].sort(() => Math.random() - 0.5);
+        const numTargets = Math.floor(this.random() * maxTargets) + 1;
+        const shuffledTargets = [...targetable].sort(() => this.random() - 0.5);
         const targetsToHit = shuffledTargets.slice(0, numTargets);
 
         const monsterKey = this.selectedMonster.id.replace(/-/g, '_').replace(/'/g, '');
         const list = this.MONSTER_ATTACKS[monsterKey] || this.MONSTER_ATTACKS[this.selectedMonster.id] || this.MONSTER_ATTACKS.default;
-        const attackName = list[Math.floor(Math.random() * list.length)];
+        const attackName = list[Math.floor(this.random() * list.length)];
 
         this.showSkillBubble('monster', attackName);
 
@@ -618,7 +620,7 @@ class HuntEngine {
             }
 
             // Normal Guard/Evade rolls
-            const defendRoll = Math.random();
+            const defendRoll = this.random();
             let isGuard = false;
             let isDodge = false;
             let isForesightSlash = false;
@@ -661,7 +663,7 @@ class HuntEngine {
 
             if (damage > 0) {
                 // Moxie check
-                if (target.hp - damage <= 0 && target.hasMoxie && Math.random() < 0.75) {
+                if (target.hp - damage <= 0 && target.hasMoxie && this.random() < 0.75) {
                     target.hp = 1;
                     target.hasMoxie = false;
                     target.atb = 0;
@@ -688,7 +690,7 @@ class HuntEngine {
                             target.hitDuration = 10; // 1.0 second
                         }
                         this.addLog(`💥 [피격] ${this.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 큰 타격! (-${damage} HP, 행동 게이지 초기화)`, '#ff5555');
-                        // this.playSFX('mh_hit.mp3', ['윽!', '으악!', '아야!'][Math.floor(Math.random() * 3)]);
+                        // this.playSFX('mh_hit.mp3', ['윽!', '으악!', '아야!'][Math.floor(this.random() * 3)]);
                         this.shakeMonster();
                         this.shakeWeapon(target.index);
                         this.triggerHitAnimation(target.index, damage);
@@ -728,7 +730,7 @@ class HuntEngine {
                 this.triggerHunterCart(target);
             } else {
                 // Stun check (15% chance on raw damage)
-                if (target.status === 'alive' && Math.random() < 0.15) {
+                if (target.status === 'alive' && this.random() < 0.15) {
                     target.status = 'stunned';
                     target.stunDuration = 50;
                     target.atb = 0;
@@ -778,7 +780,7 @@ class HuntEngine {
     getPreviousMonsterMaterial(monsterName) {
         const name = monsterName || "몬스터";
         const materials = ["비늘", "갑각", "발톱", "꼬리", "날개", "꼬리뼈"];
-        const randomMat = materials[Math.floor(Math.random() * materials.length)];
+        const randomMat = materials[Math.floor(this.random() * materials.length)];
         return `${name}의 ${randomMat}`;
     }
 
@@ -847,10 +849,10 @@ class HuntEngine {
 
         // 몬린이 전용 돌발 행동 패턴 (채집 딴짓 20%, 분노 시 공황 도주 35%)
         if (w.personality === 'newbie') {
-            const roll = Math.random();
+            const roll = this.random();
             if (roll < 0.20) {
                 w.itemDuration = 15; // 1.5초 행동 봉쇄
-                if (this.consecutiveTotal > 1 && this.currentConsecutiveIndex > 0 && Math.random() < 0.5) {
+                if (this.consecutiveTotal > 1 && this.currentConsecutiveIndex > 0 && this.random() < 0.5) {
                     const prevMonster = this.consecutiveQueue[this.currentConsecutiveIndex - 1];
                     const prevMonsterName = prevMonster ? prevMonster.nameKO : "이전 몬스터";
                     const material = this.getPreviousMonsterMaterial(prevMonsterName);
@@ -869,7 +871,7 @@ class HuntEngine {
                     this.shakeWeapon(w.index, '#aaffaa');
                 }
                 return;
-            } else if (this.monsterState === 'enraged' && Math.random() < 0.35) {
+            } else if (this.monsterState === 'enraged' && this.random() < 0.35) {
                 w.itemDuration = 15; // 1.5초 행동 봉쇄
                 this.addLog(`😱 [몬린이 공황] ${w.hunterName} (${w.name})이(가) 몬스터의 분노에 기겁하며 비명을 지르고 도망다닙니다! (무기 해제, 1.5초간 공황)`, '#ff5555');
                 this.playAudioFile('Unified_SFX/Unified_Rathian_Roar.mp3');
@@ -924,7 +926,7 @@ class HuntEngine {
                 return;
             }
             // Stonefall on elder dragons
-            if (this.monsterTier === 'elder' && (!w.stonesUsed || w.stonesUsed < 2) && Math.random() < 0.6) {
+            if (this.monsterTier === 'elder' && (!w.stonesUsed || w.stonesUsed < 2) && this.random() < 0.6) {
                 w.stonesUsed = (w.stonesUsed || 0) + 1;
                 w.itemDuration = 20;
                 this.monsterKnockdownDuration = 70;
@@ -942,7 +944,7 @@ class HuntEngine {
             }
 
             // Gather lifepowder if empty
-            if ((!w.lifepowders || w.lifepowders === 0) && Math.random() < 0.4) {
+            if ((!w.lifepowders || w.lifepowders === 0) && this.random() < 0.4) {
                 w.lifepowders = 1;
                 w.atb = 60;
                 w.isGathering = true;
@@ -950,7 +952,7 @@ class HuntEngine {
                 this.playAudioFile('Unified_SFX/MH - Item Found (rare).mp3');
                 this.spawnEmojiBubble(w.index, `🌿`);
                 this.shakeWeapon(w.index, '#aaffaa');
-                setTimeout(() => { w.isGathering = false; }, 2500);
+                this.schedule(() => { w.isGathering = false; }, 2500);
                 return;
             }
         }
@@ -958,7 +960,7 @@ class HuntEngine {
         // Self potion recovery (몬린이는 80% 이하일 때 95% 확률로 조기/강박적 복용)
         const hpThreshold = w.personality === 'newbie' ? 0.80 : 0.55;
         const currentHealProb = w.personality === 'newbie' ? 0.95 : healProb;
-        if (w.hp <= w.maxHp * hpThreshold && w.potions > 0 && Math.random() < currentHealProb) {
+        if (w.hp <= w.maxHp * hpThreshold && w.potions > 0 && this.random() < currentHealProb) {
             w.potions--;
             w.itemDuration = 5;
             const healAmount = Math.round(w.maxHp * 0.60);
@@ -1261,7 +1263,7 @@ class HuntEngine {
                 soundKey = '회전회오리';
             } else if (currentCombo.soundKey) {
                 if (Array.isArray(currentCombo.soundKey)) {
-                    soundKey = currentCombo.soundKey[Math.floor(Math.random() * currentCombo.soundKey.length)];
+                    soundKey = currentCombo.soundKey[Math.floor(this.random() * currentCombo.soundKey.length)];
                 } else {
                     soundKey = currentCombo.soundKey;
                 }
@@ -1373,7 +1375,7 @@ class HuntEngine {
             let damage = target.maxHp;
 
             // Normal Guard/Evade rolls
-            const defendRoll = Math.random();
+            const defendRoll = this.random();
             let isGuard = false;
             let isDodge = false;
             let isForesightSlash = false;
@@ -1409,7 +1411,7 @@ class HuntEngine {
 
             if (damage > 0) {
                 // Moxie check
-                if (target.hp - damage <= 0 && target.hasMoxie && Math.random() < 0.75) {
+                if (target.hp - damage <= 0 && target.hasMoxie && this.random() < 0.75) {
                     target.hp = 1;
                     target.hasMoxie = false;
                     target.atb = 0;
@@ -1511,7 +1513,7 @@ class HuntEngine {
         this.selectedWeapons.forEach(w => {
             if (w.status !== 'alive') return;
 
-            const defendRoll = Math.random();
+            const defendRoll = this.random();
             let isGuard = false;
             let isDodge = false;
             let isForesightSlash = false;
