@@ -25,229 +25,10 @@ class RacingEffect extends BaseEffect {
         this.raceBgm = null;
         this.raceBgmPlayPromise = null;
         this.runtime = new GameEffectRuntime(this, director);
-        this._injectStyles();
-    }
-
-    _injectStyles() {
-        if (document.getElementById('game-racing-styles')) return;
-        const style = document.createElement('style');
-        style.id = 'game-racing-styles';
-        style.innerHTML = `
-            .game-racetrack-container {
-                position: fixed;
-                top: 4vh;
-                left: 5%;
-                width: 90%;
-                max-height: 76vh;
-                background: rgba(10, 10, 25, 0.9);
-                border: 4px solid #00d2ff;
-                box-shadow: 0 0 40px rgba(0, 210, 255, 0.45), inset 0 0 20px rgba(0, 210, 255, 0.2);
-                border-radius: 28px;
-                padding: 2vh;
-                box-sizing: border-box;
-                backdrop-filter: blur(15px);
-                z-index: 2147483641;
-                animation: game-slide-up 0.5s ease-out forwards;
-                font-family: 'CookieRun-Regular', sans-serif;
-                overflow: visible;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-            }
-            .game-racing-card {
-                background: rgba(20, 10, 42, 0.9);
-                border: 6px solid #00ffa3;
-                box-shadow: 0 0 60px rgba(0, 255, 163, 0.45), inset 0 0 30px rgba(0, 255, 163, 0.2);
-                border-radius: 42px;
-                padding: 40px 60px;
-                width: 1100px;
-                text-align: center;
-                backdrop-filter: blur(15px);
-                animation: game-slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-                pointer-events: auto;
-                position: relative;
-                z-index: 2147483645;
-            }
-            .game-racing-card .game-title {
-                font-size: 4.5rem !important;
-                margin-bottom: 12px;
-            }
-            .game-racing-card .game-subtitle {
-                font-size: 2.2rem !important;
-                margin-bottom: 25px;
-                color: #00d2ff;
-                font-weight: bold;
-            }
-            .game-racing-card .game-timer {
-                font-size: 3.0rem !important;
-                margin-top: 25px;
-            }
-            .game-racing-card .game-participants-count {
-                font-size: 1.8rem !important;
-                margin-top: 15px;
-                color: #ffb703;
-                font-weight: bold;
-            }
-            .game-racing-options-grid {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 25px;
-                margin: 35px 0;
-            }
-            .game-racing-option-card {
-                background: rgba(255, 255, 255, 0.05);
-                border: 2.5px solid rgba(255, 255, 255, 0.1);
-                border-radius: 24px;
-                padding: 25px 15px;
-                text-align: center;
-                transition: all 0.25s ease;
-            }
-            .game-racing-option-card.active {
-                border-color: #00ffa3;
-                background: rgba(0, 255, 163, 0.15);
-                box-shadow: 0 0 25px rgba(0, 255, 163, 0.3);
-            }
-            .game-lane-track {
-                height: clamp(130px, 16.5vh, 200px);
-                position: relative;
-                border-bottom: 2px dashed rgba(255, 255, 255, 0.15);
-                display: flex;
-                align-items: center;
-                overflow: visible;
-            }
-            .game-lane-track:last-child {
-                border-bottom: none;
-            }
-            .game-lane-num-badge {
-                width: 80px;
-                font-size: clamp(2.5rem, 3.5vh, 4rem);
-                font-weight: bold;
-                color: #00d2ff;
-                text-align: center;
-                z-index: 10;
-            }
-            .game-racer-wrapper {
-                position: absolute;
-                left: 80px;
-                bottom: 0.5vh;
-                top: 0.5vh;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: flex-end;
-                z-index: 5;
-                transition: left 0.08s linear;
-                overflow: visible;
-            }
-            .game-racer-avatar {
-                font-size: clamp(70px, 8.4vh, 140px);
-                line-height: 1;
-                font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', sans-serif !important;
-                font-style: normal;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: clamp(70px, 8.4vh, 140px);
-                height: clamp(70px, 8.4vh, 140px);
-                transition: filter 0.15s ease;
-                will-change: transform;
-                flex-shrink: 0;
-                position: relative;
-                z-index: 6;
-            }
-            .game-racer-avatar img.emoji {
-                width: clamp(70px, 8.4vh, 140px) !important;
-                height: clamp(70px, 8.4vh, 140px) !important;
-                max-width: none !important;
-                max-height: none !important;
-                display: block !important;
-                pointer-events: none;
-                transform: scaleX(-1); /* 이모지 좌우 반전으로 우측 진행 방향 맞춤 */
-            }
-            .game-racer-label {
-                font-size: clamp(14px, 1.6vh, 22px);
-                font-weight: bold;
-                color: #fff;
-                background: rgba(0, 0, 0, 0.75);
-                padding: 4px 12px;
-                border-radius: 8px;
-                margin-top: 5px;
-                white-space: nowrap;
-                border: 1px solid rgba(255, 255, 255, 0.3);
-            }
-            .game-racer-status-bubble {
-                position: absolute;
-                top: -45px;
-                background: #ffb703;
-                color: #000;
-                font-size: 1.4rem;
-                font-weight: bold;
-                padding: 4px 12px;
-                border-radius: 10px;
-                white-space: nowrap;
-                opacity: 0;
-                transform: scale(0.8);
-                transition: opacity 0.15s ease, transform 0.15s ease;
-                pointer-events: none;
-                box-shadow: 0 5px 12px rgba(0,0,0,0.35);
-                z-index: 10;
-            }
-            .game-racer-status-bubble.visible {
-                opacity: 1;
-                transform: scale(1.0);
-            }
-            .game-racing-finish-line {
-                position: absolute;
-                right: 60px;
-                top: 0;
-                bottom: 0;
-                width: 16px;
-                background: repeating-linear-gradient(
-                    0deg,
-                    #fff,
-                    #fff 16px,
-                    #000 16px,
-                    #000 32px
-                );
-                box-shadow: 0 0 20px rgba(255, 255, 255, 0.65);
-                z-index: 3;
-            }
-            .game-racing-particle {
-                position: absolute;
-                font-size: 3.5rem;
-                pointer-events: none;
-                z-index: 100;
-                animation: racer-particle-float 0.8s ease-out forwards;
-            }
-            @keyframes racer-particle-float {
-                0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
-                100% { transform: translateY(-60px) scale(0.5) rotate(180deg); opacity: 0; }
-            }
-            .game-commentary-bar {
-                background: rgba(0, 0, 0, 0.85);
-                border: 2px solid #ffb703;
-                border-radius: 12px;
-                padding: 12px 20px;
-                font-size: clamp(1.4rem, 2vh, 2.2rem);
-                color: #ffb703;
-                font-weight: bold;
-                margin-top: 1vh;
-                text-align: center;
-                text-shadow: 0 0 5px rgba(255, 183, 3, 0.4);
-                min-height: 35px;
-                transition: all 0.2s ease;
-                animation: pulse-commentary 1.5s infinite alternate;
-            }
-            @keyframes pulse-commentary {
-                0% { border-color: #ffb703; box-shadow: 0 0 5px rgba(255,183,3,0.3); }
-                100% { border-color: #00d2ff; box-shadow: 0 0 15px rgba(0,210,255,0.5); }
-            }
-        `;
-        document.head.appendChild(style);
     }
 
     playRaceSound(category) {
-        const soundPools = {
+          const soundPools = {
             start: ['시작!', '가자', '가즈아', '가자!', '아스아!', '나이스', '오케이'],
             slip: ['꺄악', '아이썅', '어딜도', '어머어머', '응애', '지랄도풍년', '아이고~', '끼야악', '냥냥', '이상한데수', '뭐야!', '엥?'],
             trip: ['아이보', '이런씨벌', '이런시벌탱', '아악!', '너무한', '아이고~', '윽!', '시발', '시발롬'],
@@ -336,17 +117,7 @@ class RacingEffect extends BaseEffect {
 
         const ALL_RACERS = window.RACING_ALL_RACERS;
 
-        // Shuffle and pick 4 random racers each game
-        const shuffled = [...ALL_RACERS].sort(() => Math.random() - 0.5);
-        this.racers = shuffled.slice(0, 4).map((r, id) => ({
-            id, name: r.name, emoji: r.emoji, code: r.code,
-            pos: 0, speed: 0, boost: 0,
-            stunTicks: 0, shieldTicks: 0,
-            scale: 1, rotate: 0,
-            statusText: '', statusTimer: 0,
-            hasItem1: false, hasItem2: false,
-            eventCooldownTicks: 0
-        }));
+        this.racers = RacingRules.createRacers(ALL_RACERS);
 
         // Create Betting UI Card (Center of screen)
         const container = document.createElement('div');
@@ -453,11 +224,7 @@ class RacingEffect extends BaseEffect {
         }
 
         if (this.phase === 'betting') {
-            let index = -1;
-            if (msg === '1' || msg === '!1' || msg.includes('적토마') || msg.includes('🐎')) index = 0;
-            else if (msg === '2' || msg === '!2' || msg.includes('유니콘') || msg.includes('🦄')) index = 1;
-            else if (msg === '3' || msg === '!3' || msg.includes('얼룩마') || msg.includes('🦓')) index = 2;
-            else if (msg === '4' || msg === '!4' || msg.includes('질풍마') || msg.includes('🏇')) index = 3;
+            const index = RacingRules.resolveRacerIndex(msg, this.racers);
 
             if (index !== -1) {
                 this.bets[msgData.nickname] = { index, color: msgData.color || '#ffffff' };
@@ -465,11 +232,7 @@ class RacingEffect extends BaseEffect {
                 return true;
             }
         } else if (this.phase === 'racing') {
-            let boostIndex = -1;
-            if (msg.includes('1') || msg.includes('🐎') || msg.includes('적토마')) boostIndex = 0;
-            else if (msg.includes('2') || msg.includes('🦄') || msg.includes('유니콘')) boostIndex = 1;
-            else if (msg.includes('3') || msg.includes('🦓') || msg.includes('얼룩마')) boostIndex = 2;
-            else if (msg.includes('4') || msg.includes('🏇') || msg.includes('질풍마')) boostIndex = 3;
+            const boostIndex = RacingRules.resolveRacerIndex(msg, this.racers);
 
             if (boostIndex !== -1) {
                 this.racers[boostIndex].boost += 1.5; // add boost
@@ -726,7 +489,7 @@ class RacingEffect extends BaseEffect {
             // 2. 실제 달리기 처리
             // Periodic commentary updates every 90 ticks (~5.4s)
             if (ticks % 90 === 0) {
-                const sorted = [...this.racers].sort((a, b) => b.pos - a.pos);
+                const sorted = RacingRules.standings(this.racers);
                 const leader = sorted[0];
                 const second = sorted[1];
                 const last = sorted[3];
@@ -1107,7 +870,7 @@ class RacingEffect extends BaseEffect {
             const currentTime = this.raceBgm ? this.raceBgm.currentTime : 0;
             const duration = this.raceBgm ? this.raceBgm.duration : 42;
             if (this.raceBgm && (this.raceBgm.ended || (currentTime >= duration - 0.2 && duration > 5))) {
-                const leader = [...this.racers].sort((a, b) => b.pos - a.pos)[0];
+                const leader = RacingRules.leader(this.racers);
                 if (leader && leader.pos < 100) {
                     leader.pos = 100;
                     finished = true;
@@ -1157,7 +920,7 @@ class RacingEffect extends BaseEffect {
         const itemRoll = Math.random();
         if (itemRoll < 0.10) {
             // 🚀 Guided missile
-            const leader = [...this.racers].sort((a, b) => b.pos - a.pos)[0];
+            const leader = RacingRules.leader(this.racers);
             if (leader && leader.id !== r.id && (!leader.eventCooldownTicks || leader.eventCooldownTicks === 0)) {
                 leader.eventCooldownTicks = 50;
                 if (leader.shieldTicks > 0) {
@@ -1183,7 +946,7 @@ class RacingEffect extends BaseEffect {
             }
         } else if (itemRoll < 0.20) {
             // 🧲 Magnet
-            const leader = [...this.racers].sort((a, b) => b.pos - a.pos)[0];
+            const leader = RacingRules.leader(this.racers);
             if (leader && leader.id !== r.id && (!leader.eventCooldownTicks || leader.eventCooldownTicks === 0)) {
                 const stealAmount = 2;
                 leader.pos = Math.max(0, leader.pos - stealAmount);
@@ -1216,7 +979,7 @@ class RacingEffect extends BaseEffect {
             updateCommentary(`🎤 [중계진] 방어 모드! ${r.name} 선수가 다가오는 온갖 위험에 면역인 실드를 가동합니다!`);
         } else if (itemRoll < 0.50) {
             // 🍌 Banana trap to behind
-            const sorted = [...this.racers].sort((a, b) => b.pos - a.pos);
+            const sorted = RacingRules.standings(this.racers);
             const myIndex = sorted.findIndex(o => o.id === r.id);
             const behind = sorted[myIndex + 1];
             if (behind && (!behind.eventCooldownTicks || behind.eventCooldownTicks === 0)) {

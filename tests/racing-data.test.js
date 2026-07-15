@@ -23,5 +23,10 @@ assert.match(effectSource, /window\.RACING_INTRO_TEXTS/);
 assert.match(effectSource, /window\.RACING_EMOJI_CODE_MAP/);
 assert.doesNotMatch(effectSource, /const ALL_RACERS\s*=\s*\[/);
 assert.doesNotMatch(effectSource, /const INTRO_TEXTS\s*=\s*\{/);
+assert.doesNotMatch(effectSource, /_injectStyles|style\.innerHTML/);
+
+const indexSource = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+assert.match(indexSource, /styles\/racing\.css/);
+assert.ok(fs.existsSync(path.resolve(__dirname, '../styles/racing.css')));
 
 console.log('[test] Racing data single-source contract passed.');
