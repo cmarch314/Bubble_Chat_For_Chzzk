@@ -32,14 +32,22 @@ function collect(value, keyPath, visitor) {
     }
 }
 
-function loadWindowScript(file) {
+function loadWindowScripts(files) {
     const window = {};
-    const source = fs.readFileSync(path.join(root, file), 'utf8');
-    vm.runInNewContext(source, { window }, { filename: file });
+    const context = vm.createContext({ window });
+    for (const file of files) {
+        const source = fs.readFileSync(path.join(root, file), 'utf8');
+        vm.runInContext(source, context, { filename: file });
+    }
     return window;
 }
 
-const config = loadWindowScript('config.js');
+const config = loadWindowScripts([
+    'config.js',
+    path.join('config', 'sound-catalog.js'),
+    path.join('config', 'visual-config.js'),
+    path.join('config', 'cmc-catalog.js')
+]);
 
 collect(config.HIVE_SOUND_CONFIG, 'HIVE_SOUND_CONFIG', (reference, keyPath) => {
     if (!audioPattern.test(reference)) return;
@@ -63,7 +71,7 @@ for (const command of config.HIVE_CMC_FILES || []) {
     requireFile(path.join('AI CMC', `${command}.mp4`), 'HIVE_CMC_FILES');
 }
 
-const levels = loadWindowScript(path.join('js', 'audio-levels.generated.js')).HIVE_AUDIO_LEVELS || {};
+const levels = loadWindowScripts([path.join('js', 'audio-levels.generated.js')]).HIVE_AUDIO_LEVELS || {};
 for (const reference of Object.keys(levels)) {
     requireFile(reference, 'HIVE_AUDIO_LEVELS');
 }

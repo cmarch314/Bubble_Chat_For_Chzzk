@@ -145,3 +145,8 @@ d:/BubbleChat/
 * Racing data lives in `RacingData.js`, deterministic selection and lookup rules in `RacingRules.js`, and racing presentation styles in `styles/racing.css`.
 * Hunt monster calculations live in `HuntMonsterRules.js`. Hunt chat, lobby, and material popups live in `HuntNotificationRenderer.js`; `HuntRenderer` owns and delegates to it.
 * Chat input cleanup must pass through `ChatMessageNormalizer` before `ChatRenderer` creates DOM. Do not reintroduce duplicate inline data tables or dynamic feature CSS.
+
+### Rule 15: Configuration Catalogs Stay Modular and Ordered
+* Runtime primitives remain in `config.js`. Sound mappings live in `config/sound-catalog.js`, visual-effect settings in `config/visual-config.js`, and chat-video commands in `config/cmc-catalog.js`.
+* Load the four files in that order in both `index.html` and `config.html`. Default catalogs may fill missing globals, but must not overwrite values exported into a user-managed `config.js`.
+* Any catalog move or edit must keep `tests/config-modules.test.js` and `npm run verify` passing so OBS cannot start with a partial mapping or missing media.
