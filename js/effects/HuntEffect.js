@@ -386,37 +386,12 @@ class HuntEffect extends BaseEffect {
         this.audioManager.playMHAudioFile('Unified_SFX/MH - Hunters Depart (MH3U).mp3');
 
         this.monsterTier = this.initializer.getMonsterTier(this.selectedMonster);
-        let baseHp = 12000;
-        let baseStunThreshold = 300;
-        this.monsterDamageMod = 0.9;
-        this.monsterAtbSpeedMod = 1.15;
-        this.tierLabel = "대형 몬스터";
-
-        if (this.monsterTier === 'small') {
-            baseHp = 3000;
-            baseStunThreshold = 100;
-            this.monsterDamageMod = 0.3;
-            this.monsterAtbSpeedMod = 0.7;
-            this.tierLabel = "소형 몬스터";
-        } else if (this.monsterTier === 'medium') {
-            baseHp = 6000;
-            baseStunThreshold = 200;
-            this.monsterDamageMod = 0.65;
-            this.monsterAtbSpeedMod = 0.95;
-            this.tierLabel = "중형 몬스터";
-        } else if (this.monsterTier === 'elder') {
-            baseHp = 24000;
-            baseStunThreshold = 500;
-            this.monsterDamageMod = 1.15;
-            this.monsterAtbSpeedMod = 1.2; // 1.45에서 1.2로 하향
-            this.tierLabel = "고룡종";
-        } else if (this.monsterTier === 'colossal') {
-            baseHp = 36000;
-            baseStunThreshold = 750;
-            this.monsterDamageMod = 2.0; // 헌터 체력의 90% 데미지 (기본 0.45 * 2.0 = 0.90)
-            this.monsterAtbSpeedMod = 0.7; // 초대형은 몸집이 아주 커서 행동이 느림 (0.7배)
-            this.tierLabel = "초대형 몬스터";
-        }
+        const tierRules = HuntTierRules.resolve(this.monsterTier, 'initial');
+        const baseHp = tierRules.hp;
+        const baseStunThreshold = tierRules.stunThreshold;
+        this.monsterDamageMod = tierRules.damageMod;
+        this.monsterAtbSpeedMod = tierRules.atbSpeedMod;
+        this.tierLabel = tierRules.label;
 
         this.cartCount = 0;
 
@@ -449,6 +424,7 @@ class HuntEffect extends BaseEffect {
             monsterState: 'normal',
             monsterDamageMod: this.monsterDamageMod,
             monsterAtbSpeedMod: this.monsterAtbSpeedMod,
+            monsterStunThreshold: baseStunThreshold,
             tierLabel: this.tierLabel,
             MONSTER_ATTACKS: this.initializer.MONSTER_ATTACKS,
             COMBO_LIST: this.initializer.COMBO_LIST,
@@ -660,37 +636,12 @@ class HuntEffect extends BaseEffect {
 
         // Update stats in engine
         this.monsterTier = this.initializer.getMonsterTier(this.selectedMonster);
-        let baseHp = 12000;
-        let baseStunThreshold = 300;
-        this.monsterDamageMod = 1.0;
-        this.monsterAtbSpeedMod = 1.0;
-        this.tierLabel = "특수 몬스터";
-
-        if (this.monsterTier === 'small') {
-            baseHp = 3000;
-            baseStunThreshold = 100;
-            this.monsterDamageMod = 0.4;
-            this.monsterAtbSpeedMod = 0.8;
-            this.tierLabel = "소형 몬스터";
-        } else if (this.monsterTier === 'medium') {
-            baseHp = 6000;
-            baseStunThreshold = 200;
-            this.monsterDamageMod = 0.7;
-            this.monsterAtbSpeedMod = 1.0;
-            this.tierLabel = "중형 몬스터";
-        } else if (this.monsterTier === 'elder') {
-            baseHp = 24000;
-            baseStunThreshold = 500;
-            this.monsterDamageMod = 1.4;
-            this.monsterAtbSpeedMod = 1.2; // 1.5에서 1.2로 하향
-            this.tierLabel = "고룡종";
-        } else if (this.monsterTier === 'colossal') {
-            baseHp = 36000;
-            baseStunThreshold = 750;
-            this.monsterDamageMod = 2.0; // 헌터 체력의 90% 데미지 (기본 0.45 * 2.0 = 0.90)
-            this.monsterAtbSpeedMod = 0.7; // 초대형은 몸집이 아주 커서 행동이 느림 (0.7배)
-            this.tierLabel = "초대형 몬스터";
-        }
+        const tierRules = HuntTierRules.resolve(this.monsterTier, 'consecutive');
+        const baseHp = tierRules.hp;
+        const baseStunThreshold = tierRules.stunThreshold;
+        this.monsterDamageMod = tierRules.damageMod;
+        this.monsterAtbSpeedMod = tierRules.atbSpeedMod;
+        this.tierLabel = tierRules.label;
 
         // Apply new values to existing engine
         this.engine.selectedMonster = this.selectedMonster;

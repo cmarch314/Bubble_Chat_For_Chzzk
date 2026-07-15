@@ -5,6 +5,6 @@
   "description": "Chzzk chat overlay runtime",
   "scripts": {
     "verify": "node scripts/verify-project.js",
-    "test": "node tests/event-bus.test.js && node tests/disposable-scope.test.js && node tests/managed-timers.test.js && node tests/hunt-lifecycle.test.js && node tests/message-queue.test.js && node tests/visual-director.test.js && node tests/audio-manager-lifecycle.test.js && node tests/chzzk-gateway-lifecycle.test.js && node tests/bubble-chat-app.test.js && node tests/message-router.test.js && node scratch/test_integration.js && node scratch/test_attack_animations.js && node scratch/test_lobby.js && node scratch/test_charge_blade_shield.js"
+    "test": "node tests/event-bus.test.js && node tests/disposable-scope.test.js && node tests/managed-timers.test.js && node tests/hunt-lifecycle.test.js && node tests/hunt-tier-rules.test.js && node tests/message-queue.test.js && node tests/visual-director.test.js && node tests/audio-manager-lifecycle.test.js && node tests/chzzk-gateway-lifecycle.test.js && node tests/bubble-chat-app.test.js && node tests/message-router.test.js && node scratch/test_integration.js && node scratch/test_attack_animations.js && node scratch/test_lobby.js && node scratch/test_charge_blade_shield.js"
   }
 }
