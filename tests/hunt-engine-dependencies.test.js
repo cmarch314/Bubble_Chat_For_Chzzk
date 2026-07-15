@@ -6,7 +6,9 @@ const vm = require('vm');
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntEngine.js');
 const context = vm.createContext({ console, window: {}, setTimeout });
 const rulesPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterRules.js');
+const hunterTurnPath = path.resolve(__dirname, '../js/effects/hunt/HuntHunterTurnExecutor.js');
 vm.runInContext(fs.readFileSync(rulesPath, 'utf8'), context, { filename: rulesPath });
+vm.runInContext(fs.readFileSync(hunterTurnPath, 'utf8'), context, { filename: hunterTurnPath });
 const source = `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntEngine = HuntEngine;`;
 vm.runInContext(source, context, { filename: sourcePath });
 
@@ -26,6 +28,12 @@ const engine = new context.HuntEngine({
 
 assert.strictEqual(engine.random, random);
 assert.strictEqual(engine.schedule, schedule);
+assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntHunterTurnExecutor\.execute\(this, w\)/);
+assert.doesNotMatch(
+    fs.readFileSync(hunterTurnPath, 'utf8'),
+    /\bthis\./,
+    'hunter turn executor must receive engine state explicitly'
+);
 assert.strictEqual(engine.getPreviousMonsterMaterial('화룡'), '화룡의 비늘');
 assert.strictEqual(engine.getPreviousMonsterMaterial('화룡'), '화룡의 꼬리뼈');
 
