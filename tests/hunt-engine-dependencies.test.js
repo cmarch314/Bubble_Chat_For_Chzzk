@@ -6,8 +6,10 @@ const vm = require('vm');
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntEngine.js');
 const context = vm.createContext({ console, window: {}, setTimeout });
 const rulesPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterRules.js');
+const monsterTurnPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterTurnExecutor.js');
 const hunterTurnPath = path.resolve(__dirname, '../js/effects/hunt/HuntHunterTurnExecutor.js');
 vm.runInContext(fs.readFileSync(rulesPath, 'utf8'), context, { filename: rulesPath });
+vm.runInContext(fs.readFileSync(monsterTurnPath, 'utf8'), context, { filename: monsterTurnPath });
 vm.runInContext(fs.readFileSync(hunterTurnPath, 'utf8'), context, { filename: hunterTurnPath });
 const source = `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntEngine = HuntEngine;`;
 vm.runInContext(source, context, { filename: sourcePath });
@@ -28,7 +30,13 @@ const engine = new context.HuntEngine({
 
 assert.strictEqual(engine.random, random);
 assert.strictEqual(engine.schedule, schedule);
+assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntMonsterTurnExecutor\.execute\(this\)/);
 assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntHunterTurnExecutor\.execute\(this, w\)/);
+assert.doesNotMatch(
+    fs.readFileSync(monsterTurnPath, 'utf8'),
+    /\bthis\./,
+    'monster turn executor must receive engine state explicitly'
+);
 assert.doesNotMatch(
     fs.readFileSync(hunterTurnPath, 'utf8'),
     /\bthis\./,
