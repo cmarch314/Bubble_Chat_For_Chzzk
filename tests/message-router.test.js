@@ -3,8 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const matcherPath = path.resolve(__dirname, '../js/routing/VisualCommandMatcher.js');
 const sourcePath = path.resolve(__dirname, '../js/MessageRouter.js');
-const source = `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.MessageRouter = MessageRouter;`;
+const source = `${fs.readFileSync(matcherPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.MessageRouter = MessageRouter;`;
 const context = vm.createContext({ console, performance: { now: () => 0 } });
 vm.runInContext(source, context, { filename: sourcePath });
 const MessageRouter = context.MessageRouter;
@@ -61,6 +62,26 @@ function fixture(overrides = {}) {
     router.route(message());
     assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'audio', 'event']);
     assert.strictEqual(calls[2][1], 'chat:render');
+}
+
+{
+    const { calls, router } = fixture({
+        visualDirector: {
+            registry: { bangjong: { soundKey: 'restricted' } }
+        }
+    });
+    router.route(message({ message: '!restricted' }));
+    assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'audio', 'event']);
+}
+
+{
+    const { calls, router } = fixture({
+        visualDirector: {
+            registry: { bangjong: { soundKey: 'restricted' } }
+        }
+    });
+    router.route(message({ isStreamer: true, message: '!restricted' }));
+    assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'visual']);
 }
 
 {

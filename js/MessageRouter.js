@@ -2,12 +2,13 @@
 // [Class 6.5] Message Router (Controller)
 // ==========================================
 class MessageRouter {
-    constructor(config, eventBus, systemController, audioManager, visualDirector) {
+    constructor(config, eventBus, systemController, audioManager, visualDirector, visualCommandMatcher = null) {
         this.config = config;
         this.eventBus = eventBus;
         this.systemController = systemController;
         this.audioManager = audioManager;
         this.visualDirector = visualDirector;
+        this.visualCommandMatcher = visualCommandMatcher || new VisualCommandMatcher();
     }
 
     route(msgData) {
@@ -77,36 +78,13 @@ class MessageRouter {
         }
 
         // 1. 비주얼 이펙트 트리거 확인 (VisualDirector 위임)
-        let foundKeyword = null;
         const visualMap = this.visualDirector.registry;
-
-        const lowerTrimmedMsg = updatedTrimmedMsg.toLowerCase();
-        for (const key in visualMap) {
-            if (key === 'dolphin' && (!msgData.isStreamer && !msgData.isDonation && !this.config.debugMode)) continue;
-            if (key === 'bangjong' && (!msgData.isStreamer && !this.config.debugMode)) continue;
-            if (key === 'mulsulsan' && (!msgData.isStreamer && !msgData.isDonation && !this.config.debugMode)) continue;
-            if (key === 'gazabu' && (!msgData.isStreamer && !msgData.isDonation && !this.config.debugMode)) continue;
-            if (key === 'random_dance' && (!msgData.isStreamer && !msgData.isDonation && !this.config.debugMode)) continue;
-            
-            const effect = visualMap[key];
-            const soundKey = effect.soundKey;
-            if (!soundKey) continue;
-            const lowerSoundKey = soundKey.toLowerCase();
-
-            // Check "!해골" or "!skull" (case-insensitive)
-            const triggerKw = "!" + lowerSoundKey;
-            if (msgData.isDonation) {
-                if (lowerTrimmedMsg.includes(triggerKw)) {
-                    foundKeyword = key;
-                    break;
-                }
-            } else {
-                if (lowerTrimmedMsg.startsWith(triggerKw)) {
-                    foundKeyword = key;
-                    break;
-                }
-            }
-        }
+        const foundKeyword = this.visualCommandMatcher.find(
+            updatedTrimmedMsg,
+            msgData,
+            visualMap,
+            this.config.debugMode
+        );
 
         if (foundKeyword) {
             let shouldTrigger = false;
