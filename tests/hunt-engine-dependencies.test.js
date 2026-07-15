@@ -6,9 +6,13 @@ const vm = require('vm');
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntEngine.js');
 const context = vm.createContext({ console, window: {}, setTimeout });
 const rulesPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterRules.js');
+const battleTickPath = path.resolve(__dirname, '../js/effects/hunt/HuntBattleTickExecutor.js');
+const valstraxPath = path.resolve(__dirname, '../js/effects/hunt/HuntValstraxExecutor.js');
 const monsterTurnPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterTurnExecutor.js');
 const hunterTurnPath = path.resolve(__dirname, '../js/effects/hunt/HuntHunterTurnExecutor.js');
 vm.runInContext(fs.readFileSync(rulesPath, 'utf8'), context, { filename: rulesPath });
+vm.runInContext(fs.readFileSync(battleTickPath, 'utf8'), context, { filename: battleTickPath });
+vm.runInContext(fs.readFileSync(valstraxPath, 'utf8'), context, { filename: valstraxPath });
 vm.runInContext(fs.readFileSync(monsterTurnPath, 'utf8'), context, { filename: monsterTurnPath });
 vm.runInContext(fs.readFileSync(hunterTurnPath, 'utf8'), context, { filename: hunterTurnPath });
 const source = `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntEngine = HuntEngine;`;
@@ -30,8 +34,20 @@ const engine = new context.HuntEngine({
 
 assert.strictEqual(engine.random, random);
 assert.strictEqual(engine.schedule, schedule);
+assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntBattleTickExecutor\.execute\(this\)/);
+assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntValstraxExecutor\.executeChargeSuccess\(this\)/);
 assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntMonsterTurnExecutor\.execute\(this\)/);
 assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntHunterTurnExecutor\.execute\(this, w\)/);
+assert.doesNotMatch(
+    fs.readFileSync(valstraxPath, 'utf8'),
+    /\bthis\./,
+    'Valstrax executor must receive engine state explicitly'
+);
+assert.doesNotMatch(
+    fs.readFileSync(battleTickPath, 'utf8'),
+    /\bthis\./,
+    'battle tick executor must receive engine state explicitly'
+);
 assert.doesNotMatch(
     fs.readFileSync(monsterTurnPath, 'utf8'),
     /\bthis\./,
