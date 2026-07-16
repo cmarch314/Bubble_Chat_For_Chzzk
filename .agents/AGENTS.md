@@ -23,6 +23,7 @@ d:/BubbleChat/
 │   ├── MessageRouter.js        # Main chat command interceptor & router
 │   ├── VisualDirector.js       # Active overlay controller & activeGame manager
 │   ├── ChatRenderer.js         # Chat bubble rendering, text filters & video commands
+│   ├── chat/ChatMediaBubbleController.js # Ordered CMC video/SFX queue and cleanup
 │   ├── SystemController.js     # Chat system utilities (demo, end etc.)
 │   ├── DebugController.js      # Debug panels & simulation triggers
 │   └── effects/                # Visual effects and mini-games
@@ -62,7 +63,8 @@ d:/BubbleChat/
    - `MessageRouter.js` checks chat messages. Streamer commands (`!퀴즈`, `!경마`, `!레이드`, `!토벌`, `!커맨드`) trigger visual overlays in `VisualDirector.js`.
    - `VisualDirector.js` maintains an `activeGame` pointer. If a mini-game or overlay is active, standard chat messages are routed to its `.handleChat(msgData)` first.
 4. **Chat Bubble & Video Overlay**:
-   - `ChatRenderer.js` processes standard chat messages. It detects hashtag (`#`) prefixes to parse video commands, mounts the video player inside chat bubbles, and manages volume.
+   - `ChatRenderer.js` processes standard chat text, badges, colors, filters, and animations.
+   - `chat/ChatMediaBubbleController.js` owns hashtag (`#`) video/SFX ordering, player mounting, early handover, safety timeout, and active-video accounting.
 
 5. **Chat Connection Supervision**:
    - `ChzzkGateway.js` treats WebSocket transport-open and Chzzk authentication-ready as separate states.
