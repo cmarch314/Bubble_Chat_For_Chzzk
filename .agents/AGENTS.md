@@ -192,3 +192,12 @@ d:/BubbleChat/
 * Battle BGM selection is dedicated-theme first. Without a verified dedicated theme, `HuntBgmResolver` selects a weighted habitat and then a non-repeating track from that habitat pool. Do not restore name-substring routing as the primary path.
 * Hunt weapon audio uses semantic cues from `HuntAudioCatalog`; unrelated chat signatures must never be used as hit sounds. Local original assets may override these cues without being committed to Git.
 * Run `npm run audit:hunt` after hunt audio/BGM changes and `npm run simulate:hunt -- 200` after damage, defense, timing, or action-data changes. The fixed-seed contract targets 60–90% normal-tier win rate, 900–1750 ticks, and 0.3–1.5 carts per hunt.
+
+### Rule 18: `!수렵` Is a Chat-Participatory Autobattler
+* The hunt is an **autobattler first**. Hunters must choose targets, actions, defense, items, positioning abstractions, and weapon-resource rotations on their own. Do not turn normal combat into a sequence of mandatory chat inputs or manual action-game commands.
+* Chat participation changes high-level intent: focus target, risk posture, capture/slay policy, emergency team support, or a short tactical opportunity. It must not directly choose every attack, replace weapon AI, or make silent viewers responsible for survival.
+* Every hunt must remain complete, readable, and winnable with zero chat intervention. Participation provides bounded advantages, tradeoffs, spectacle, or strategic direction; it must never be an unlimited damage/heal faucet.
+* Preserve autobattler readability: telegraph important decisions, expose concise cause-and-effect in the combat log, limit simultaneous status icons, and keep the decisive action inside the 1920x1080 safe area.
+* Authentic Monster Hunter mechanics must be translated into simulation rules. Parts, hitzones, ailments, sharpness, capture, monster stamina, and ecology should deepen AI decisions and team composition rather than demand frame-perfect viewer execution.
+* Prefer periodic decision windows and aggregated votes over command spam. Apply per-user cooldowns, shared resources, diminishing returns, and deterministic tie-breaking. A decision window that receives no votes must resolve to a sensible AI default.
+* Balance tests must cover both `silent` and `participatory` scenarios. Chat participation may improve consistency or rewards, but must not invalidate weapon identity, monster threat, cart risk, or the baseline simulation contract.
