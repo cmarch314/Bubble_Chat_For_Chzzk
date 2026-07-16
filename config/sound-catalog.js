@@ -3097,7 +3097,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "volume": 0.7
     },
     "재장전": {
-        "src": "MonsterHunter_Hunters/mh_reload.mp3",
+        "src": "MonsterHunter_Hunters/mh_guard.mp3",
         "volume": 0.7
     },
     "저븅신": {
@@ -3775,7 +3775,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "volume": 0.9
     },
     "회피": {
-        "src": "MonsterHunter_Hunters/mh_reload.mp3",
+        "src": "MonsterHunter_Hunters/mh_guard.mp3",
         "volume": 0.7
     },
     "후달리냐": {

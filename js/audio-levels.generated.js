@@ -3042,6 +3042,17 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 33068,
     "mtimeMs": 1774407706046
   },
+  "SFX/Chzzk_Signatures/DDuk.mp3": {
+    "category": "sfx",
+    "inputLufs": null,
+    "meanDb": -15.6,
+    "truePeakDb": -3,
+    "gainDb": -0.4,
+    "measurement": "volume-fallback",
+    "duration": 0.22,
+    "bytes": 5757,
+    "mtimeMs": 1770428837215
+  },
   "SFX/Chzzk_Signatures/Defcon1.mp3": {
     "category": "sfx",
     "inputLufs": -12.26,
@@ -6884,6 +6895,17 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.57,
     "bytes": 26598,
     "mtimeMs": 1770428925725
+  },
+  "SFX/Chzzk_Signatures/샀어.mp3": {
+    "category": "sfx",
+    "inputLufs": null,
+    "meanDb": -19.2,
+    "truePeakDb": -3.8,
+    "gainDb": 2.8,
+    "measurement": "volume-fallback",
+    "duration": 0.34,
+    "bytes": 14736,
+    "mtimeMs": 1770534843750
   },
   "SFX/Chzzk_Signatures/샀어안샀어.mp3": {
     "category": "sfx",
@@ -11241,6 +11263,17 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 180674,
     "mtimeMs": 1780704944896
   },
+  "SFX/MonsterHunter_Hunters/mh_blunt_hit.mp3": {
+    "category": "sfx",
+    "inputLufs": null,
+    "truePeakDb": -91,
+    "gainDb": 0,
+    "measurement": "silence",
+    "silent": true,
+    "duration": 0.45,
+    "bytes": 2157,
+    "mtimeMs": 1780738897577
+  },
   "SFX/MonsterHunter_Hunters/mh_guard.mp3": {
     "category": "sfx",
     "inputLufs": -14.72,
@@ -11258,6 +11291,17 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.9,
     "bytes": 6597,
     "mtimeMs": 1780738897527
+  },
+  "SFX/MonsterHunter_Hunters/mh_reload.mp3": {
+    "category": "sfx",
+    "inputLufs": null,
+    "truePeakDb": -91,
+    "gainDb": 0,
+    "measurement": "silence",
+    "silent": true,
+    "duration": 1.5,
+    "bytes": 6381,
+    "mtimeMs": 1780738897682
   },
   "SFX/MonsterHunter_Hunters/mh_slash_hit.mp3": {
     "category": "sfx",
@@ -11789,6 +11833,17 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 18.88,
     "bytes": 48164038,
     "mtimeMs": 1770441258961
+  },
+  "Video/GodGame.mp4": {
+    "category": "visual",
+    "inputLufs": null,
+    "truePeakDb": -91,
+    "gainDb": 0,
+    "measurement": "silence",
+    "silent": true,
+    "duration": 15.27,
+    "bytes": 42429210,
+    "mtimeMs": 1770457727712
   },
   "Video/RandomDance/rd_001.mp4": {
     "category": "visual",
@@ -12689,6 +12744,50 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 6.04,
     "bytes": 2450958,
     "mtimeMs": 1770929217323
+  },
+  "Video/RandomDance/rd_101.mp4": {
+    "category": "visual",
+    "inputLufs": null,
+    "truePeakDb": -91,
+    "gainDb": 0,
+    "measurement": "silence",
+    "silent": true,
+    "duration": 6.08,
+    "bytes": 9504656,
+    "mtimeMs": 1770929359903
+  },
+  "Video/RandomDance/rd_102.mp4": {
+    "category": "visual",
+    "inputLufs": null,
+    "truePeakDb": -91,
+    "gainDb": 0,
+    "measurement": "silence",
+    "silent": true,
+    "duration": 6.08,
+    "bytes": 9452414,
+    "mtimeMs": 1770929548225
+  },
+  "Video/UshoBack.mp4": {
+    "category": "visual",
+    "inputLufs": null,
+    "truePeakDb": -91,
+    "gainDb": 0,
+    "measurement": "silence",
+    "silent": true,
+    "duration": 12.78,
+    "bytes": 35121361,
+    "mtimeMs": 1770456962456
+  },
+  "Video/가자부.mp4": {
+    "category": "visual",
+    "inputLufs": null,
+    "truePeakDb": -91,
+    "gainDb": 0,
+    "measurement": "silence",
+    "silent": true,
+    "duration": 8.9,
+    "bytes": 22842827,
+    "mtimeMs": 1770706634570
   },
   "Video/물설산씨티.mp4": {
     "category": "visual",

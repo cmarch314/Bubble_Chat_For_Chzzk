@@ -69,54 +69,92 @@ function targetFor(category) {
     return -16;
 }
 
-function analyze(filePath) {
+function runFfmpeg(args) {
     return new Promise((resolve, reject) => {
-        const child = spawn('ffmpeg', [
-            '-nostdin', '-hide_banner', '-nostats', '-i', filePath,
-            '-af', 'loudnorm=I=-16:TP=-1:LRA=11:print_format=json',
-            '-f', 'null', 'NUL'
-        ], { windowsHide: true });
+        const child = spawn('ffmpeg', args, { windowsHide: true });
         let log = '';
         child.stderr.setEncoding('utf8');
         child.stderr.on('data', chunk => { log += chunk; });
         child.on('error', reject);
-        child.on('close', code => {
-            const jsonStart = log.lastIndexOf('{');
-            const jsonEnd = log.lastIndexOf('}');
-            if (code !== 0 || jsonStart === -1 || jsonEnd <= jsonStart) {
-                reject(new Error(`ffmpeg measurement failed (${code})`));
-                return;
-            }
-            try {
-                const measurement = JSON.parse(log.slice(jsonStart, jsonEnd + 1));
-                const inputLufs = Number(measurement.input_i);
-                const truePeakDb = Number(measurement.input_tp);
-                if (!Number.isFinite(inputLufs) || !Number.isFinite(truePeakDb)) {
-                    throw new Error('invalid loudness result');
-                }
-                const duration = durationFromLog(log);
-                const relative = relativePath(filePath);
-                const category = categoryFor(relative, duration);
-                const desiredGain = targetFor(category) - inputLufs;
-                const peakLimitedGain = -1 - truePeakDb;
-                const gainDb = Math.max(-18, Math.min(12, desiredGain, peakLimitedGain));
-                const stat = fs.statSync(filePath);
-                resolve({
-                    relative,
-                    entry: {
-                        category,
-                        inputLufs: Number(inputLufs.toFixed(2)),
-                        truePeakDb: Number(truePeakDb.toFixed(2)),
-                        gainDb: Number(gainDb.toFixed(2)),
-                        duration: Number(duration.toFixed(3)),
-                        bytes: stat.size,
-                        mtimeMs: Math.round(stat.mtimeMs)
-                    }
-                });
-            } catch (error) {
-                reject(error);
-            }
+        child.on('close', code => resolve({ code, log }));
+    });
+}
+
+function buildEntry(filePath, relative, category, duration, measurement) {
+    const stat = fs.statSync(filePath);
+    return {
+        relative,
+        entry: {
+            category,
+            ...measurement,
+            duration: Number(duration.toFixed(3)),
+            bytes: stat.size,
+            mtimeMs: Math.round(stat.mtimeMs)
+        }
+    };
+}
+
+async function analyze(filePath) {
+    const loudness = await runFfmpeg([
+        '-nostdin', '-hide_banner', '-nostats', '-i', filePath,
+        '-af', 'loudnorm=I=-16:TP=-1:LRA=11:print_format=json',
+        '-f', 'null', 'NUL'
+    ]);
+    if (loudness.code !== 0) throw new Error(`ffmpeg measurement failed (${loudness.code})`);
+
+    const duration = durationFromLog(loudness.log);
+    const relative = relativePath(filePath);
+    const category = categoryFor(relative, duration);
+    const jsonStart = loudness.log.lastIndexOf('{');
+    const jsonEnd = loudness.log.lastIndexOf('}');
+    if (jsonStart !== -1 && jsonEnd > jsonStart) {
+        const measurement = JSON.parse(loudness.log.slice(jsonStart, jsonEnd + 1));
+        const inputLufs = Number(measurement.input_i);
+        const truePeakDb = Number(measurement.input_tp);
+        if (Number.isFinite(inputLufs) && Number.isFinite(truePeakDb)) {
+            const desiredGain = targetFor(category) - inputLufs;
+            const peakLimitedGain = -1 - truePeakDb;
+            const gainDb = Math.max(-18, Math.min(12, desiredGain, peakLimitedGain));
+            return buildEntry(filePath, relative, category, duration, {
+                inputLufs: Number(inputLufs.toFixed(2)),
+                truePeakDb: Number(truePeakDb.toFixed(2)),
+                gainDb: Number(gainDb.toFixed(2)),
+                measurement: 'loudnorm'
+            });
+        }
+    }
+
+    // EBU R128 cannot produce integrated LUFS for very short or silent clips.
+    // Fall back to mean/peak measurement so these assets still get deterministic staging.
+    const volume = await runFfmpeg([
+        '-nostdin', '-hide_banner', '-nostats', '-i', filePath,
+        '-af', 'volumedetect', '-f', 'null', 'NUL'
+    ]);
+    if (volume.code !== 0) throw new Error(`ffmpeg fallback measurement failed (${volume.code})`);
+    const meanMatch = volume.log.match(/mean_volume:\s*(-?(?:\d+(?:\.\d+)?|inf))\s*dB/i);
+    const peakMatch = volume.log.match(/max_volume:\s*(-?(?:\d+(?:\.\d+)?|inf))\s*dB/i);
+    const meanDb = Number(meanMatch?.[1]);
+    const truePeakDb = Number(peakMatch?.[1]);
+
+    if (!Number.isFinite(meanDb) || !Number.isFinite(truePeakDb) || truePeakDb <= -90) {
+        return buildEntry(filePath, relative, category, duration, {
+            inputLufs: null,
+            truePeakDb: Number.isFinite(truePeakDb) ? Number(truePeakDb.toFixed(2)) : null,
+            gainDb: 0,
+            measurement: 'silence',
+            silent: true
         });
+    }
+
+    const desiredGain = targetFor(category) - meanDb;
+    const peakLimitedGain = -1 - truePeakDb;
+    const gainDb = Math.max(-18, Math.min(12, desiredGain, peakLimitedGain));
+    return buildEntry(filePath, relative, category, duration, {
+        inputLufs: null,
+        meanDb: Number(meanDb.toFixed(2)),
+        truePeakDb: Number(truePeakDb.toFixed(2)),
+        gainDb: Number(gainDb.toFixed(2)),
+        measurement: 'volume-fallback'
     });
 }
 

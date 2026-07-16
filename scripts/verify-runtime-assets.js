@@ -5,6 +5,7 @@ const vm = require('vm');
 const root = path.resolve(__dirname, '..');
 const failures = [];
 const checked = new Set();
+const runtimeAudioReferences = new Set();
 const mediaPattern = /\.(?:mp3|wav|ogg|m4a|aac|flac|mp4|webm|png|jpe?g|gif)$/i;
 const audioPattern = /\.(?:mp3|wav|ogg|m4a|aac|flac)$/i;
 
@@ -51,7 +52,9 @@ const config = loadWindowScripts([
 
 collect(config.HIVE_SOUND_CONFIG, 'HIVE_SOUND_CONFIG', (reference, keyPath) => {
     if (!audioPattern.test(reference)) return;
-    requireFile(path.join('SFX', normalize(reference)), keyPath);
+    const runtimePath = path.join('SFX', normalize(reference));
+    requireFile(runtimePath, keyPath);
+    runtimeAudioReferences.add(runtimePath.replaceAll(path.sep, '/'));
 });
 
 collect(config.HIVE_VISUAL_CONFIG, 'HIVE_VISUAL_CONFIG', (reference, keyPath) => {
@@ -74,6 +77,37 @@ for (const command of config.HIVE_CMC_FILES || []) {
 const levels = loadWindowScripts([path.join('js', 'audio-levels.generated.js')]).HIVE_AUDIO_LEVELS || {};
 for (const reference of Object.keys(levels)) {
     requireFile(reference, 'HIVE_AUDIO_LEVELS');
+}
+
+const levelLookup = new Map(Object.entries(levels).map(([reference, entry]) => [reference.toLowerCase(), entry]));
+for (const reference of runtimeAudioReferences) {
+    const profile = levelLookup.get(reference.toLowerCase());
+    if (profile?.silent === true) {
+        failures.push(`HIVE_SOUND_CONFIG references silent audio: ${reference}`);
+    }
+}
+
+const profileRoots = ['SFX', 'BGM', 'MonsterHunter_Soundtracks', 'Video', 'AI CMC'];
+const normalizedProfiles = new Set(Object.keys(levels).map(reference => reference.replaceAll('\\', '/').toLowerCase()));
+for (const rootName of profileRoots) {
+    const rootPath = path.join(root, rootName);
+    if (!fs.existsSync(rootPath)) continue;
+    const stack = [rootPath];
+    while (stack.length > 0) {
+        const current = stack.pop();
+        for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+            const absolute = path.join(current, entry.name);
+            if (entry.isDirectory()) {
+                stack.push(absolute);
+                continue;
+            }
+            if (!audioPattern.test(entry.name) && !/\.(?:mp4|webm)$/i.test(entry.name)) continue;
+            const relative = path.relative(root, absolute).replaceAll(path.sep, '/');
+            if (!normalizedProfiles.has(relative.toLowerCase())) {
+                failures.push(`HIVE_AUDIO_LEVELS missing profile: ${relative}`);
+            }
+        }
+    }
 }
 
 console.log(`[assets] Verified ${checked.size} unique runtime media files.`);
