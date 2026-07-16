@@ -310,7 +310,7 @@ class HuntEffect extends BaseEffect {
             }
         });
 
-        const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster.nameKO);
+        const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster);
         try {
             this.audioManager.battleBgm = this.director.audioManager.createNativeAudio(bgmSrc, {
                 type: 'visual', baseVolume: 0.315, loop: true
@@ -619,7 +619,7 @@ class HuntEffect extends BaseEffect {
 
         // Reset BGM
         this.audioManager.stopBgms();
-        const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster.nameKO);
+        const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster);
         try {
             this.audioManager.battleBgm = this.director.audioManager.createNativeAudio(bgmSrc, {
                 type: 'visual', baseVolume: 0.315, loop: true

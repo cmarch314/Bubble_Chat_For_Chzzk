@@ -34,7 +34,11 @@ class HuntInitializer {
             default: ["포효 위협", "몸통 박치기", "꼬리 후려치기", "성난 돌진 공격"]
         };
 
-        this.COMBO_LIST = window.HUNT_COMBO_LIST;
+        this.COMBO_LIST = HuntWeaponCatalog.build(window.HUNT_COMBO_LIST || {});
+        const catalogErrors = HuntWeaponCatalog.validate(this.COMBO_LIST);
+        if (catalogErrors.length) {
+            console.warn('[HuntWeaponCatalog] Invalid actions:', catalogErrors);
+        }
     }
 
     parseCommand(message, monsters) {

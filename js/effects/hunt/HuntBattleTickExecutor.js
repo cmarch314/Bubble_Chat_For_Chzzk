@@ -138,9 +138,8 @@ class HuntBattleTickExecutor {
                     w.itemDuration--;
                     if (w.itemDuration === 0) w.isGathering = false; // [FIX] 채집/아이템 상태 안전한 해제
                 }
-                if (w.attackDuration && w.attackDuration > 0) {
-                    w.attackDuration--;
-                }
+                if (engine.actionStateMachine) engine.actionStateMachine.tick(w);
+                else if (w.attackDuration && w.attackDuration > 0) w.attackDuration--;
                 if (w.status === 'stunned' && w.stunDuration && w.stunDuration > 0) {
                     w.stunDuration--;
                     if (w.stunDuration === 0) {

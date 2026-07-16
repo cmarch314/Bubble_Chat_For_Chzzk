@@ -9,6 +9,7 @@ class HuntEngine {
         this.callbacks = config.callbacks || {};
         this.random = config.random || Math.random;
         this.schedule = config.schedule || ((callback, delay) => setTimeout(callback, delay));
+        this.actionStateMachine = config.actionStateMachine || new HuntActionStateMachine();
         
         // Monster Stats
         this.monsterTier = config.monsterTier || 'normal';
@@ -51,6 +52,8 @@ class HuntEngine {
             w.guardDuration = 0;
             w.itemDuration = 0;
             w.attackDuration = 0;
+            w.currentAction = null;
+            w.actionState = 'idle';
             w.isGathering = false;
         });
     }

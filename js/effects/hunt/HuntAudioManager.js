@@ -10,9 +10,16 @@ class HuntAudioManager {
         this.battleBgmPromise = null;
         this.winBgmPromise = null;
         this.timers = new ManagedTimers();
+        this.bgmResolver = new HuntBgmResolver();
+        this.lastBgmResolution = null;
     }
 
-    getMonsterBgm(monsterName) {
+    getMonsterBgm(monster) {
+        if (monster && typeof monster === 'object') {
+            this.lastBgmResolution = this.bgmResolver.resolve(monster);
+            if (this.lastBgmResolution.track) return this.lastBgmResolution.track;
+        }
+        const monsterName = typeof monster === 'string' ? monster : (monster && (monster.nameKO || monster.nameEN)) || '';
         const name = (monsterName || "").toLowerCase();
         if (name.includes('진오우거') || name.includes('zinogre')) return 'BGM/MHW_Zinogre.mp3';
         if (name.includes('타마미츠네') || name.includes('mizutsune')) return 'BGM/MHR_Mizutsune.mp3';

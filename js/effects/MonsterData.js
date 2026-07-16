@@ -830,7 +830,9 @@ window.MONSTER_ATTACKS = {
     default: ["포효 위협", "몸통 박치기", "꼬리 후려치기", "성난 돌진 공격"]
 };
 
-window.HUNT_COMBO_LIST = {
+// Historical snapshot retained for migration comparison only.
+// Runtime combat data is owned by hunt/HuntData.js and must never be overwritten here.
+window.HUNT_LEGACY_COMBO_LIST = {
     great_sword: [
         { name: "발차기", dmg: 70, sharp: 0, stun: 20, nextSpeed: "very_fast", soundKey: ["발차기!"], special: "🦶 [발차기] 매우 빠른 발차기로 몬스터의 턱을 걷어찹니다!" },
         { name: "모아베기", dmg: 290, sharp: -8, stun: 10, nextSpeed: "slow", soundKey: ["아주강력해", "기가맥", "개꿀잼"] },

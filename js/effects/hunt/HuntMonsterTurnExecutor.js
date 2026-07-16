@@ -31,9 +31,13 @@ class HuntMonsterTurnExecutor {
             let baseDmg = Math.floor(target.maxHp * 0.45);
             let damage = Math.floor(baseDmg * dmgMod * (engine.monsterDamageMod || 1.0));
 
-            // Great Sword Tackle check
-            const isGreatSwordCharging = target.id === 'great_sword' && target.comboIndex >= 1 && target.comboIndex <= 3;
-            if (isGreatSwordCharging) {
+            const actionMachine = engine.actionStateMachine;
+
+            // Great Sword tackle is now a real counter window, never an implicit combo-index bonus.
+            const isGreatSwordTackling = target.id === 'great_sword'
+                && actionMachine
+                && actionMachine.canCounter(target, 'tackle');
+            if (isGreatSwordTackling) {
                 damage = Math.floor(damage * 0.5);
                 target.hp = Math.max(0, target.hp - damage);
 
@@ -84,9 +88,11 @@ class HuntMonsterTurnExecutor {
             let isForesightSlash = false;
 
             const isStunned = target.status === 'stunned' || target.roarStunned; // [FIX] 포효 중 가드/회피 불가
-            const hasShield = !isStunned && (target.type === 'shield' || target.id === 'heavy_bowgun');
+            const actionAllowsGuard = !actionMachine || actionMachine.canGuard(target);
+            const actionAllowsEvade = !actionMachine || actionMachine.canEvade(target);
+            const hasShield = !isStunned && actionAllowsGuard && (target.type === 'shield' || target.id === 'heavy_bowgun');
             let guardProb = isStunned ? 0 : 0.85;
-            let dodgeProb = isStunned ? 0 : 0.75;
+            let dodgeProb = isStunned || !actionAllowsEvade ? 0 : 0.75;
 
             // Personality-based dodge modifiers
             let foresightProb = 0.70;
@@ -106,7 +112,8 @@ class HuntMonsterTurnExecutor {
             }
 
             // Long Sword Foresight Slash
-            if (!isStunned && target.id === 'long_sword' && defendRoll < foresightProb) {
+            const canForesight = actionMachine && actionMachine.canCounter(target, 'foresight');
+            if (!isStunned && target.id === 'long_sword' && canForesight && defendRoll < foresightProb) {
                 damage = 0;
                 isDodge = true;
                 isForesightSlash = true;
@@ -140,6 +147,7 @@ class HuntMonsterTurnExecutor {
                         target.guardDuration = 6;
                         attackResults.push({ index: target.index, result: 'guard' });
                     } else {
+                        if (actionMachine) actionMachine.cancel(target, 'hitstun');
                         target.atb = 0;
                         engine.updateWeaponAtbUI(target.index, 0);
                         if (damage >= 30) {
@@ -167,6 +175,7 @@ class HuntMonsterTurnExecutor {
                     engine.playSFX('mh_dodge.mp3', '회피');
                     engine.shakeWeapon(target.index, '#2eff7b', false, null, true);
                 }
+                if (actionMachine) actionMachine.cancel(target, isGuard ? 'guard' : 'evade');
                 if (engine.callbacks.onTriggerRollAnimation) engine.callbacks.onTriggerRollAnimation(target.index);
                 target.rollDuration = 6;
                 attackResults.push({ index: target.index, result: 'dodge' });

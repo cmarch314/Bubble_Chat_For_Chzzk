@@ -461,7 +461,7 @@ class HuntHunterTurnExecutor {
             engine.shakeMonster();
             engine.shakeWeapon(w.index, '#ff9500', true, currentCombo.name);
 
-            // Set attack duration based on attack type (ATB pauses during attack)
+            // Set attack duration based on the shared combat timeline (ATB pauses during attack).
             let attackTicks = 10; // Default 1.0s
             if (isKnockdownAttack) {
                 attackTicks = 18; // Heavy knockdown attack takes 1.8s
@@ -477,7 +477,9 @@ class HuntHunterTurnExecutor {
             )) {
                 attackTicks = 18; // Special/heavy attacks take 1.8s
             }
-            w.attackDuration = attackTicks;
+            currentCombo.durationTicks = currentCombo.durationTicks || attackTicks;
+            if (engine.actionStateMachine) engine.actionStateMachine.begin(w, currentCombo);
+            else w.attackDuration = attackTicks;
 
             // Advance combo index (except during knockdown)
             if (!isKnockdownAttack) {
