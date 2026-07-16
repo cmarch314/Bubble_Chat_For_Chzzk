@@ -52,19 +52,21 @@ const scopePath = path.resolve(__dirname, '../js/runtime/DisposableScope.js');
 const timersPath = path.resolve(__dirname, '../js/runtime/ManagedTimers.js');
 const profilePath = path.resolve(__dirname, '../js/runtime/AudioLevelProfile.js');
 const matcherPath = path.resolve(__dirname, '../js/audio/AudioCommandMatcher.js');
+const mediaStagerPath = path.resolve(__dirname, '../js/audio/AudioMediaStager.js');
 const busPath = path.resolve(__dirname, '../js/EventBus.js');
 const audioPath = path.resolve(__dirname, '../js/AudioManager.js');
-const source = [scopePath, timersPath, profilePath, matcherPath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
+const source = [scopePath, timersPath, profilePath, matcherPath, mediaStagerPath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
     + '\nglobalThis.Exports = { AudioManager, EventBus };';
 vm.runInContext(source, context, { filename: audioPath });
 
+const normalizerConfig = { enabled: true, visual: true, sfx: true };
 const config = {
     getVolumeConfig: () => ({ master: 1, visual: 1, sfx: 1 }),
     getSoundConfig: () => ({}),
     getVisualConfig: () => ({}),
     getSfxRenames: () => ({}),
     getExcludedSfx: () => [],
-    getNormalizerConfig: () => ({ enabled: true, visual: true, sfx: true }),
+    getNormalizerConfig: () => normalizerConfig,
     updateVolumeConfig() {}
 };
 const bus = new context.Exports.EventBus();
@@ -76,6 +78,8 @@ const media = {
 };
 audio.connectMediaElement(media, 'visual');
 assert.ok(Math.abs(media.volume - 0.501187) < 0.0001, 'native file media must receive measured gain');
+audio.updateConfig('visual');
+assert.strictEqual(media.volume, 1, 'normalizer changes must update active native media immediately');
 
 audio.setEnabled(false);
 bus.emit('system:unmuteAudio');

@@ -18,6 +18,7 @@ d:/BubbleChat/
 │   ├── ConfigManager.js        # Config settings loader (config.js / LocalStorage)
 │   ├── AudioManager.js         # Sound effects explorer & exclusion/rename router
 │   ├── audio/AudioCommandMatcher.js # Chat SFX normalization and deterministic keyword matching
+│   ├── audio/AudioMediaStager.js # OBS-safe native media volume and browser Web Audio routing
 │   ├── MessageRouter.js        # Main chat command interceptor & router
 │   ├── VisualDirector.js       # Active overlay controller & activeGame manager
 │   ├── ChatRenderer.js         # Chat bubble rendering, text filters & video commands
@@ -53,6 +54,7 @@ d:/BubbleChat/
 2. **Audio Staging**:
    - `AudioManager.js` coordinates playback, gain staging, media lifecycle, exclusions, and virtual path renames.
    - `audio/AudioCommandMatcher.js` owns catalog normalization, visual-sound exclusion, longest-keyword selection, and repeated-character suppression. Keep chat matching rules out of the playback engine.
+   - `audio/AudioMediaStager.js` owns DOM/native media registration, measured volume application, and the `file://` Web Audio prohibition. `AudioManager` keeps compatibility delegates for callers.
 3. **Chat Commands & Directing**:
    - `MessageRouter.js` checks chat messages. Streamer commands (`!퀴즈`, `!경마`, `!레이드`, `!토벌`, `!커맨드`) trigger visual overlays in `VisualDirector.js`.
    - `VisualDirector.js` maintains an `activeGame` pointer. If a mini-game or overlay is active, standard chat messages are routed to its `.handleChat(msgData)` first.
@@ -132,6 +134,7 @@ d:/BubbleChat/
 ### Rule 11: Loudness Normalization Must Preserve Local Playback
 * Never rewrite or destructively normalize source media. Store measured LUFS/true-peak compensation in `js/audio-levels.generated.js`.
 * All programmatic `Audio` creation must go through `AudioManager.createNativeAudio()`. DOM media must be registered through `AudioManager.connectMediaElement()`.
+* Those public methods delegate to `AudioMediaStager`; do not recreate media routing or active-media tracking inside effects.
 * The shared compressor is collision and peak protection, not the primary loudness normalizer. File-specific measured gain is applied before it for decoded SFX and through native volume for local media.
 * Every audio/video asset under the runtime media roots must have a level profile. Very short clips use the measured mean/peak fallback; silent tracks are marked explicitly and must never be mapped as a chat or gameplay sound.
 

@@ -51,6 +51,13 @@ class AudioManager {
         this.enabled = true;
         this.volumeConfig = { ...this.configManager.getVolumeConfig() };
         this.masterGain.gain.value = this.volumeConfig.master;
+        this.mediaStager = new AudioMediaStager({
+            configManager: this.configManager,
+            levelProfile: this.levelProfile,
+            getVolumeConfig: () => this.volumeConfig,
+            audioContext: this.audioCtx,
+            compressor: this.compressor
+        });
         this.updateConfigLegacy(this.configManager.getSoundConfig());
 
         // [Visual Audio Tracking]
@@ -114,10 +121,7 @@ class AudioManager {
         }
         this.activeFallbackAudio.clear();
 
-        for (const item of this._nativeMediaElements || []) {
-            try { item.el.pause(); } catch (error) {}
-        }
-        this._nativeMediaElements = [];
+        this.mediaStager.dispose();
         this.bufferCache.clear();
         if (this.audioCtx && typeof this.audioCtx.close === 'function') {
             this.audioCtx.close().catch(() => {});
@@ -160,94 +164,23 @@ class AudioManager {
     }
 
     connectMediaElement(mediaElement, type = 'visual', options = {}) {
-        if (!mediaElement) return;
-
-        // [Rule 1 Guard] Never connect media elements to AudioContext if loaded via file:// protocol,
-        // as Chromium blocks this with CORS and silently mutes the audio track.
-        const isLocal = window.location.protocol === 'file:';
-        if (isLocal) {
-            console.log(`[MediaStaging] Local file protocol detected. Bypassing Web Audio Context to prevent CORS mute. Using native volume control.`);
-            
-            const applyNativeVolume = () => this.applyNativeVolume(mediaElement, { type, ...options });
-
-            applyNativeVolume();
-
-            if (!this._nativeMediaElements) {
-                this._nativeMediaElements = [];
-            }
-            if (!this._nativeMediaElements.some(item => item.el === mediaElement)) {
-                this._nativeMediaElements.push({ el: mediaElement, type, apply: applyNativeVolume, detached: false });
-            }
-            return;
-        }
-
-        if (mediaElement.__webAudioConnected) return;
-        mediaElement.__webAudioConnected = true;
-
-        try {
-            const sourceNode = this.audioCtx.createMediaElementSource(mediaElement);
-            const preGainNode = this.audioCtx.createGain();
-            
-            const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-            const typeMultiplier = (type === 'visual') ? volConfig.visual : volConfig.sfx;
-            const path = options.path || mediaElement.currentSrc || mediaElement.src || '';
-            preGainNode.gain.value = typeMultiplier * this._profileGain(path, type);
-
-            sourceNode.connect(preGainNode);
-
-            preGainNode.connect(this.compressor);
-        } catch (e) {
-            console.warn("[AudioManager] Failed to connect media element:", e);
-        }
+        return this.mediaStager.connectMediaElement(mediaElement, type, options);
     }
 
     getOutputVolume(path, type = 'visual', baseVolume = 1) {
-        const volConfig = this.volumeConfig || { master: 1, visual: 1, sfx: 1 };
-        const typeMultiplier = type === 'sfx' ? volConfig.sfx : volConfig.visual;
-        const staged = volConfig.master * typeMultiplier * baseVolume;
-        return Math.min(1, Math.max(0, staged * this._profileGain(path, type)));
+        return this.mediaStager.outputVolume(path, type, baseVolume);
     }
 
     _profileGain(path, type) {
-        const config = this.configManager?.getNormalizerConfig?.() || {
-            enabled: true, visual: true, sfx: true
-        };
-        const categoryEnabled = type === 'sfx' ? config.sfx !== false : config.visual !== false;
-        return config.enabled !== false && categoryEnabled ? this.levelProfile.gain(path) : 1;
+        return this.mediaStager.profileGain(path, type);
     }
 
     applyNativeVolume(mediaElement, options = {}) {
-        if (!mediaElement) return 0;
-        const type = options.type || 'visual';
-        const baseVolume = options.baseVolume ?? mediaElement.__bubbleBaseVolume ?? 1;
-        const path = options.path || mediaElement.currentSrc || mediaElement.src || '';
-        mediaElement.__bubbleBaseVolume = baseVolume;
-        mediaElement.muted = false;
-        mediaElement.volume = this.getOutputVolume(path, type, baseVolume);
-        return mediaElement.volume;
+        return this.mediaStager.applyNativeVolume(mediaElement, options);
     }
 
     createNativeAudio(path, options = {}) {
-        const audio = new Audio(path);
-        audio.loop = options.loop === true;
-        audio.__bubbleBaseVolume = options.baseVolume ?? 1;
-        this.applyNativeVolume(audio, {
-            path,
-            type: options.type || 'visual',
-            baseVolume: audio.__bubbleBaseVolume
-        });
-        if (!this._nativeMediaElements) this._nativeMediaElements = [];
-        const apply = () => this.applyNativeVolume(audio, {
-            path,
-            type: options.type || 'visual',
-            baseVolume: audio.__bubbleBaseVolume
-        });
-        const entry = { el: audio, type: options.type || 'visual', apply, detached: true };
-        this._nativeMediaElements.push(entry);
-        audio.addEventListener?.('ended', () => {
-            this._nativeMediaElements = (this._nativeMediaElements || []).filter(item => item !== entry);
-        }, { once: true });
-        return audio;
+        return this.mediaStager.createNativeAudio(path, options);
     }
 
     _updateCompressorSettings() {
@@ -284,20 +217,7 @@ class AudioManager {
             this.configManager.updateVolumeConfig(config);
         }
 
-        // Update native media elements if registered (for file:// protocol bypass)
-        if (this._nativeMediaElements) {
-            this._nativeMediaElements = this._nativeMediaElements.filter(item => {
-                if (!item.el || (!item.detached && !document.body.contains(item.el)) || item.el.ended) {
-                    return false;
-                }
-                try {
-                    item.apply();
-                } catch (e) {
-                    console.warn("[MediaStaging] Failed to update native volume for element:", e);
-                }
-                return true;
-            });
-        }
+        this.mediaStager.updateVolumes();
     }
 
     // [명령어] 설정 변경 메서드 (New)
@@ -316,6 +236,7 @@ class AudioManager {
             conf.sfx = !conf.sfx;
             msg = `[시스템] 채팅 평준화: ${conf.sfx ? 'ON' : 'OFF (원음)'}`;
         }
+        this.mediaStager.updateVolumes();
         console.log(msg); // 콘솔 확인용
         return msg;
     }
