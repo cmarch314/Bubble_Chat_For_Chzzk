@@ -329,6 +329,9 @@ class HuntEngine {
                 dodgeProb = 0.22;
                 foresightProb = 0.20;
             }
+            const perkModifiers = w.perkModifiers || {};
+            guardProb += Number(perkModifiers.guardChance || 0);
+            dodgeProb += Number(perkModifiers.evadeChance || 0);
             if (!actionAllowsGuard) guardProb = 0;
             if (!actionAllowsEvade) dodgeProb = 0;
 

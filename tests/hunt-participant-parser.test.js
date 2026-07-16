@@ -1,30 +1,35 @@
 const assert = require('assert');
-const fs = require('fs');
-const path = require('path');
-const vm = require('vm');
+const HuntParticipantParser = require('../js/effects/hunt/HuntParticipantParser.js');
 
-const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntParticipantParser.js');
-const context = vm.createContext({ console });
-const source = `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntParticipantParser = HuntParticipantParser;`;
-vm.runInContext(source, context, { filename: sourcePath });
-const parser = new context.HuntParticipantParser();
+const parser = new HuntParticipantParser();
+assert.strictEqual(parser.parseRecruitment('hello'), null);
+assert.deepStrictEqual(parser.parseRecruitment('!참여'), { join: true });
+assert.deepStrictEqual(parser.parseRecruitment('！참가'), { join: true });
+assert.strictEqual(parser.parseRecruitment('!참여 !대검'), null);
 
-assert.strictEqual(parser.parse('hello', {}, false), null);
+const cases = [
+    ['!대검 지원가', 'great_sword', 'support'],
+    ['!지원가 대검', 'great_sword', 'support'],
+    ['!지원가, !대검', 'great_sword', 'support'],
+    ['!차액', 'charge_blade', null],
+    ['!차지액스', 'charge_blade', null],
+    ['!라이트보우건 공격형', 'light_bowgun', 'offensive'],
+    ['!헤보, !수비형', 'heavy_bowgun', 'defensive'],
+    ['!수렵피리 !서폿', 'hunting_horn', 'support']
+];
+cases.forEach(([input, weaponId, personality]) => {
+    const parsed = parser.parseLoadout(input);
+    assert.ok(parsed, `${input} should be recognized`);
+    assert.strictEqual(parsed.weaponId, weaponId);
+    assert.strictEqual(parsed.personality, personality);
+});
+assert.strictEqual(parser.parseLoadout('오늘 대검 멋있다'), null, 'ordinary chat must not change loadout');
+assert.strictEqual(parser.parseLoadout('잡담뿐'), null);
+assert.strictEqual(parser.parseLoadout('!추천').recommend, true);
+
+const legacy = parser.parse('3 차액 베테랑', { isSubscriber: true }, false);
 assert.deepStrictEqual(
-    { ...parser.parse('!참가 2', {}, false) },
-    { index: 1, isSubscriber: false, weaponId: null, personality: null }
-);
-assert.deepStrictEqual(
-    { ...parser.parse('3 차액 베테랑', { isSubscriber: true }, false) },
+    { index: legacy.index, isSubscriber: legacy.isSubscriber, weaponId: legacy.weaponId, personality: legacy.personality },
     { index: 2, isSubscriber: true, weaponId: 'charge_blade', personality: 'veteran' }
 );
-assert.deepStrictEqual(
-    { ...parser.parse('1 해머 공격적', {}, false) },
-    { index: 0, isSubscriber: false, weaponId: null, personality: null }
-);
-assert.deepStrictEqual(
-    { ...parser.parse('4 라보 뉴비형', { badges: [{ title: '12개월 구독' }] }, false) },
-    { index: 3, isSubscriber: true, weaponId: 'light_bowgun', personality: 'newbie' }
-);
-
-console.log('[test] HuntParticipantParser command contract passed.');
+console.log('[test] Hunt recruitment and flexible loadout parser passed.');

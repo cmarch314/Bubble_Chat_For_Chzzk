@@ -123,6 +123,9 @@ class HuntMonsterTurnExecutor {
                 dodgeProb = 0.22;
                 foresightProb = 0.20;
             }
+            const perkModifiers = target.perkModifiers || {};
+            guardProb += Number(perkModifiers.guardChance || 0);
+            dodgeProb += Number(perkModifiers.evadeChance || 0);
             if (!actionAllowsGuard) guardProb = 0;
             if (!actionAllowsEvade) dodgeProb = 0;
             if (actionAllowsGuard) guardProb = Math.min(0.97, guardProb + Number(target.nextGuardBoost || 0));
@@ -143,7 +146,8 @@ class HuntMonsterTurnExecutor {
                 isForesightSlash = true;
                 target.spiritLevel = Math.min(3, (target.spiritLevel || 0) + 1);
             } else if (hasShield && defendRoll < guardProb) {
-                damage = Math.max(1, Math.floor(damage * 0.20));
+                const guardReduction = Math.max(0.05, 0.20 - Number(perkModifiers.guardPower || 0));
+                damage = Math.max(1, Math.floor(damage * guardReduction));
                 isGuard = true;
             } else if (!hasShield && defendRoll < dodgeProb) {
                 damage = 0;

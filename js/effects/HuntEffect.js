@@ -3,7 +3,8 @@ class HuntEffect extends BaseEffect {
         super(director);
         this.isActive = false;
         this.lifecycle = new HuntLifecycle();
-        this.bets = {}; // { nickname: { index, color } }
+        this.bets = {}; // selected hunter lookup retained for engine compatibility
+        this.participants = [];
         this.selectedWeapons = []; // 4 selected weapons
         this.selectedMonster = null; // random monster
         this.gameTimer = null;
@@ -17,8 +18,22 @@ class HuntEffect extends BaseEffect {
 
         this.renderer = new HuntRenderer();
         this.audioManager = new HuntAudioManager(director, this.config);
-        this.initializer = new HuntInitializer();
+        const SeededRandom = typeof HuntSeededRandom !== 'undefined'
+            ? HuntSeededRandom
+            : class { next() { return Math.random(); } };
+        const LobbyRoster = typeof HuntLobbyRoster !== 'undefined'
+            ? HuntLobbyRoster
+            : class { constructor() { this.entries = new Map(); } list() { return []; } selectFour() { return []; } };
+        const LoadoutAdvisor = typeof HuntLoadoutAdvisor !== 'undefined'
+            ? HuntLoadoutAdvisor
+            : class { recommend(hunter, monster, weapons) { return weapons && weapons[0]; } };
+        this.LobbyRoster = LobbyRoster;
+        this.sessionRng = new SeededRandom(Date.now());
+        this.random = () => this.sessionRng.next();
+        this.initializer = new HuntInitializer({ random: this.random });
         this.participantParser = new HuntParticipantParser();
+        this.roster = new this.LobbyRoster(this.random);
+        this.loadoutAdvisor = new LoadoutAdvisor(this.initializer.WEAPONS);
         this.chatTactics = new HuntChatTactics();
         this.engine = null;
 
@@ -55,8 +70,10 @@ class HuntEffect extends BaseEffect {
 
         this.director.activeGame = this;
         this.isActive = true;
-        this.phase = 'voting';
+        this.phase = 'quest_board';
         this.bets = {};
+        this.participants = [];
+        this.roster = new this.LobbyRoster(this.random);
         this.chatTactics.reset();
 
         // Reset audio
@@ -88,7 +105,7 @@ class HuntEffect extends BaseEffect {
         this.consecutiveQueue = parsed.consecutiveQueue;
         this.selectedMonster = parsed.selectedMonster;
 
-        this.selectedWeapons = this.initializer.buildSelectedWeapons(parsed.chosenWeaponIds);
+        this.selectedWeapons = [];
 
         // Play Lobby BGM
         try {
@@ -120,25 +137,24 @@ class HuntEffect extends BaseEffect {
 
         const currentTier = this.initializer.getMonsterTier(this.selectedMonster);
         const isElder = (currentTier === 'elder');
-        let voteTitle = isElder ? "⚔️ 고룡 토벌 모집! ⚔️" : "⚔️ 몬스터 수렵 모집! ⚔️";
-        let voteSubtitle = isElder ? "함께 토벌할 헌터 번호(1~4)를 채팅창에 치세요!" : "함께 수렵할 헌터 번호(1~4)를 채팅창에 치세요!";
+        let voteTitle = isElder ? "⚔️ 집회소 고룡 토벌 수주 ⚔️" : "⚔️ 집회소 수렵 퀘스트 수주 ⚔️";
+        let voteSubtitle = "채팅에 !참여를 입력하세요. 모집 종료 후 4명의 헌터를 선발합니다.";
         if (this.consecutiveTotal > 1) {
             voteTitle = isElder 
                 ? `⚔️ 연속 토벌 모집! (1/${this.consecutiveTotal}) ⚔️` 
                 : `⚔️ 연속 수렵 모집! (1/${this.consecutiveTotal}) ⚔️`;
-            voteSubtitle = isElder 
-                ? `${this.consecutiveTotal}마리 연속 토벌! 함께 참가할 번호(1~4)를 채팅창에 치세요!` 
-                : `${this.consecutiveTotal}마리 연속 수렵! 함께 참가할 번호(1~4)를 채팅창에 치세요!`;
+            voteSubtitle = `${this.consecutiveTotal}마리 연속 퀘스트입니다. !참여 입력자 중 4명을 선발합니다.`;
         }
 
-        this.renderer.renderLobby({
+        this.renderer.renderQuestBoard({
             voteTitle,
             voteSubtitle,
             consecutiveTotal: this.consecutiveTotal,
             currentConsecutiveIndex: this.currentConsecutiveIndex,
             consecutiveQueue: this.consecutiveQueue,
             selectedMonster: this.selectedMonster,
-            selectedWeapons: this.selectedWeapons
+            participantCount: 0,
+            participants: []
         });
 
         let timeLeft = 30;
@@ -150,9 +166,9 @@ class HuntEffect extends BaseEffect {
                 if (timeLeft <= 0) {
                     this.timers.clear(this.gameTimer);
                     this.gameTimer = null;
-                    this.startFight(this.renderer.container);
+                    this.beginLoadout();
                 } else {
-                    this.renderer.updateBettingTimer(timeLeft);
+                    this.renderer.updatePhaseTimer(timeLeft, '모집 마감');
                 }
             }, 1000);
         });
@@ -167,54 +183,35 @@ class HuntEffect extends BaseEffect {
             return true;
         }
 
-        if (this.phase === 'voting') {
-            const selection = this.participantParser.parse(msg, msgData, this.config.debugMode);
-            if (selection) {
-                const { index, isSubscriber: isSub, weaponId: chosenWeaponId, personality: chosenPersonality } = selection;
-
-                this.bets[msgData.nickname] = {
-                    index,
-                    color: msgData.color || '#ffffff',
-                    isSubscriber: isSub,
-                    weaponId: chosenWeaponId,
-                    personality: chosenPersonality
-                };
-
-                this.renderer.updateBettingUI(this.bets);
-
-                // 스폰 이모지 및 참가 말풍선
-                const chosenWeaponObj = chosenWeaponId ? this.initializer.WEAPONS.find(wp => wp.id === chosenWeaponId) : null;
-                const chosenWeaponName = chosenWeaponObj ? chosenWeaponObj.name : '';
-                const pMap = {
-                    offensive: '💥 공격적',
-                    defensive: '🛡️ 수비적',
-                    support: '💚 서포터',
-                    newbie: '🐣 몬린이',
-                    veteran: '🏆 베테랑',
-                    normal: '⚖️ 밸런스'
-                };
-                const chosenPersName = chosenPersonality ? (pMap[chosenPersonality] || '⚖️ 밸런스') : '';
-
-                let feedbackMsg = `참가 신청!`;
-                if (chosenWeaponName && chosenPersName) {
-                    feedbackMsg = `⚔️ ${chosenWeaponName} (${chosenPersName})`;
-                } else if (chosenWeaponName) {
-                    feedbackMsg = `⚔️ ${chosenWeaponName}`;
-                } else if (chosenPersName) {
-                    feedbackMsg = `${chosenPersName}`;
+        if (this.phase === 'quest_board') {
+            if (this.participantParser.parseRecruitment(msg)) {
+                const registration = this.roster.register(msgData);
+                this.participants = this.roster.list();
+                this.renderer.updateRecruitmentUI(this.participants);
+                if (registration.added) this.renderer.spawnRecruitmentNotification(msgData.nickname);
+                return true;
+            }
+        } else if (this.phase === 'loadout') {
+            const hunter = this.selectedWeapons.find(item => !item.isNpc && item.hunterName === msgData.nickname);
+            const change = hunter ? this.participantParser.parseLoadout(msg) : null;
+            if (hunter && change) {
+                if (change.personality) hunter.personality = change.personality;
+                let weaponId = change.weaponId;
+                if (!weaponId && change.recommend) {
+                    const recommendation = this.loadoutAdvisor.recommend(hunter, this.selectedMonster, this.selectedWeapons);
+                    weaponId = recommendation && recommendation.id;
                 }
-
-                this.renderer.spawnLobbyNotification(index, msgData.nickname, feedbackMsg, isSub);
+                if (weaponId) this.initializer.replaceHunterWeapon(hunter, weaponId);
+                this.renderer.updateLoadoutCard(hunter);
+                const label = this.renderer.getPersonalityLabel(hunter.personality);
+                this.renderer.spawnCombatChatBubble(hunter.index, `✅ ${hunter.name} · ${label}`);
                 return true;
             }
-
-            // If the user is already registered in this.bets, display their chat above their card
-            const bet = this.bets[msgData.nickname];
-            if (bet !== undefined && msg) {
-                this.renderer.spawnCombatChatBubble(bet.index, msg);
+            if (hunter && msg) {
+                this.renderer.spawnCombatChatBubble(hunter.index, msg);
                 return true;
             }
-        } else if (this.phase === 'fighting' || this.phase === 'ended') {
+        } else if (this.phase === 'fighting' || this.phase === 'results') {
             if (this.phase === 'fighting') {
                 const tacticalResult = this.chatTactics.handle(this.engine, msgData, msg);
                 if (tacticalResult.handled) {
@@ -230,6 +227,40 @@ class HuntEffect extends BaseEffect {
             }
         }
         return false;
+    }
+
+    beginLoadout() {
+        this.renderer.clearLobbyTimer();
+        this.phase = 'loadout';
+        const selected = this.roster.selectFour();
+        this.selectedWeapons = this.initializer.buildSelectedWeapons([]);
+        this.bets = {};
+
+        this.selectedWeapons.forEach((hunter, index) => {
+            const entrant = selected[index];
+            hunter.hunterName = entrant.nickname;
+            hunter.hunterColor = entrant.color || '#cccccc';
+            hunter.isNpc = Boolean(entrant.isNpc);
+            this.bets[hunter.hunterName] = { index, color: hunter.hunterColor, isNpc: hunter.isNpc };
+        });
+
+        this.renderer.renderLoadout({
+            selectedMonster: this.selectedMonster,
+            selectedWeapons: this.selectedWeapons,
+            timeLeft: 25
+        });
+
+        let timeLeft = 25;
+        this.gameTimer = this.timers.interval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                this.timers.clear(this.gameTimer);
+                this.gameTimer = null;
+                this.startFight(this.renderer.container);
+            } else {
+                this.renderer.updatePhaseTimer(timeLeft, '장비 확정');
+            }
+        }, 1000);
     }
 
     startFight(container) {
@@ -256,69 +287,6 @@ class HuntEffect extends BaseEffect {
 
         this.audioManager.stopBgms();
         this.renderer.setContainer(container);
-
-        this.selectedWeapons.forEach(w => {
-            const voters = Object.entries(this.bets)
-                .filter(([nick, bet]) => bet.index === w.index)
-                .map(([nick, bet]) => ({
-                    nickname: nick,
-                    color: bet.color,
-                    isSubscriber: bet.isSubscriber,
-                    weaponId: bet.weaponId,
-                    personality: bet.personality
-                }));
-
-            if (voters.length > 0) {
-                // Prioritize subscribers
-                const subs = voters.filter(v => v.isSubscriber);
-                const chosen = subs.length > 0
-                    ? subs[Math.floor(Math.random() * subs.length)]
-                    : voters[Math.floor(Math.random() * voters.length)];
-
-                w.hunterName = chosen.nickname;
-                w.hunterColor = chosen.color;
-
-                // Handle weapon override if they selected a specific weapon
-                if (chosen.weaponId) {
-                    const matchedWeapon = this.initializer.WEAPONS.find(wp => wp.id === chosen.weaponId);
-                    if (matchedWeapon) {
-                        const prevIndex = w.index;
-                        const initialSpeedGroup = matchedWeapon.id === 'charge_blade' ? 'very_fast' : matchedWeapon.speedGroup;
-                        
-                        Object.assign(w, {
-                            ...matchedWeapon,
-                            speedGroup: initialSpeedGroup,
-                            index: prevIndex,
-                            hp: 100,
-                            maxHp: 100,
-                            status: 'alive',
-                            sharpness: 100,
-                            ammo: 5,
-                            hasMoxie: true,
-                            atb: 0,
-                            comboIndex: 0,
-                            respawnTimer: 0,
-                            potions: 10,
-                            lifepowders: 1,
-                            spiritLevel: 0,
-                            demonModeDuration: 0,
-                            phials: 5,
-                            overheatDuration: 0,
-                            extractBuffs: { red: 0, white: 0, orange: 0 },
-                            extractDuration: 0
-                        });
-                    }
-                }
-
-                // Handle personality override if they selected a specific personality
-                if (chosen.personality) {
-                    w.personality = chosen.personality;
-                }
-            } else {
-                w.hunterName = `HUNTER ${w.index + 1}`;
-                w.hunterColor = "#cccccc";
-            }
-        });
 
         const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster);
         try {
@@ -686,7 +654,7 @@ class HuntEffect extends BaseEffect {
 
     forceStopGame() {
         this.isActive = false;
-        this.phase = 'ended';
+        this.phase = 'results';
         this.director.activeGame = null;
 
         // [FIX] 중단 시에도 잔여 페이드아웃 타이머 제거

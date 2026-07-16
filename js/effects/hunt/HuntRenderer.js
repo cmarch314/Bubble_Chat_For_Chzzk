@@ -45,6 +45,136 @@ class HuntRenderer {
         this.card = null;
     }
 
+    getPersonalityStyle(personality) {
+        const styles = {
+            veteran: { label: '🏆 베테랑', color: '#ffc800', bg: 'rgba(255,200,0,0.16)' },
+            support: { label: '💚 지원형', color: '#00dc64', bg: 'rgba(0,220,100,0.16)' },
+            newbie: { label: '🐣 몬린이', color: '#64c8ff', bg: 'rgba(100,200,255,0.16)' },
+            offensive: { label: '💥 공격형', color: '#ff5a5a', bg: 'rgba(255,60,60,0.16)' },
+            defensive: { label: '🛡️ 수비형', color: '#6f9dff', bg: 'rgba(80,140,255,0.16)' },
+            normal: { label: '⚖️ 밸런스', color: '#c7c7c7', bg: 'rgba(160,160,160,0.16)' }
+        };
+        return styles[personality] || styles.normal;
+    }
+
+    getPersonalityLabel(personality) { return this.getPersonalityStyle(personality).label; }
+
+    escapeHTML(value) {
+        if (typeof SafeContent !== 'undefined' && SafeContent.escapeHTML) return SafeContent.escapeHTML(String(value || ''));
+        return String(value || '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+    }
+
+    safeColor(value, fallback = '#eeeeee') {
+        return typeof SafeContent !== 'undefined' && SafeContent.cssColor ? SafeContent.cssColor(value, fallback) : fallback;
+    }
+
+    renderQuestBoard(data) {
+        this.clearAnimationTimers();
+        if (!this.container) this.createContainer();
+        this.clearLobbyTimer();
+        const monster = data.selectedMonster || {};
+        const monsterName = this.escapeHTML(monster.nameKO || '미확인 몬스터');
+        const questSequence = data.consecutiveTotal > 1
+            ? `<div class="game-hunt-monster-showcase" style="font-size:.95rem;color:#9a7a58;margin:4px 0 8px;">${(data.consecutiveQueue || []).map((item, index) => `<span style="margin:0 7px;">${index + 1}. ${this.escapeHTML(item.nameKO || '???')}</span>`).join('')}</div>`
+            : '';
+        this.container.innerHTML = `
+            <div class="game-hunt-card entry-anim" style="position:relative;">
+                <div style="font-size:1rem;color:#c98534;font-weight:900;letter-spacing:3px;">🏕️ GATHERING HUB · QUEST BOARD</div>
+                <div class="game-title" style="font-size:2.45rem;margin:8px 0 4px;">${this.escapeHTML(data.voteTitle || '집회소 퀘스트')}</div>
+                <div style="font-size:1.1rem;color:#8a725d;margin-bottom:10px;">${this.escapeHTML(data.voteSubtitle || '')}</div>
+                ${questSequence}
+                <div style="display:grid;grid-template-columns:330px 1fr;gap:28px;align-items:center;max-width:1050px;margin:0 auto;">
+                    <div>
+                        <img src="img/monsters/${this.escapeHTML(monster.filename || 'rathalos.png')}" onerror="this.src='img/monsters/rathalos.png';" style="width:290px;height:290px;object-fit:contain;filter:drop-shadow(0 15px 26px rgba(0,0,0,.65));" />
+                        <div style="font-size:2rem;font-weight:900;color:#4e342e;">${monsterName}</div>
+                    </div>
+                    <div style="background:rgba(42,30,22,.92);border:3px double #c98534;border-radius:16px;padding:24px;min-height:270px;box-sizing:border-box;">
+                        <div style="font-size:1.25rem;color:#d7b77d;">수주 희망자</div>
+                        <div id="hunt-recruit-count" style="font-size:4.2rem;font-weight:1000;color:#fff;line-height:1.15;">0명</div>
+                        <div id="hunt-recruit-names" style="font-size:1.05rem;color:#d8d0c5;min-height:76px;line-height:1.6;word-break:break-all;">아직 서명한 헌터가 없습니다.</div>
+                        <div style="font-size:2rem;font-weight:1000;color:#00ffaa;margin-top:12px;text-shadow:0 0 16px rgba(0,255,170,.35);">!참여</div>
+                        <div id="hunt-recruit-feed" style="font-size:.95rem;color:#c98534;height:24px;margin-top:5px;"></div>
+                    </div>
+                </div>
+                <div class="game-timer" style="font-size:1.55rem;font-weight:bold;color:#8b5a2b;margin-top:12px;">⏳ 모집 마감 30초</div>
+            </div>`;
+        this.card = this.container.querySelector('.game-hunt-card');
+        this.lobbyTimers.timeout(() => this.card && this.card.classList.remove('entry-anim'), 600);
+    }
+
+    updateRecruitmentUI(participants = []) {
+        if (!this.card) return;
+        const count = this.card.querySelector('#hunt-recruit-count');
+        const names = this.card.querySelector('#hunt-recruit-names');
+        if (count) count.textContent = `${participants.length}명`;
+        if (names) {
+            names.replaceChildren();
+            if (!participants.length) {
+                names.textContent = '아직 서명한 헌터가 없습니다.';
+            } else {
+                participants.slice(-12).forEach((participant, index) => {
+                    if (index) names.appendChild(document.createTextNode(' · '));
+                    const span = document.createElement('span');
+                    span.textContent = participant.nickname;
+                    span.style.color = this.safeColor(participant.color, '#eeeeee');
+                    names.appendChild(span);
+                });
+            }
+        }
+    }
+
+    spawnRecruitmentNotification(nickname) {
+        if (!this.card) return;
+        const feed = this.card.querySelector('#hunt-recruit-feed');
+        if (feed) feed.textContent = `✒️ ${String(nickname || '헌터')}이(가) 퀘스트에 서명했습니다.`;
+    }
+
+    renderLoadout(data) {
+        this.clearAnimationTimers();
+        if (!this.container) this.createContainer();
+        this.clearLobbyTimer();
+        const monsterName = this.escapeHTML((data.selectedMonster && data.selectedMonster.nameKO) || '미확인 몬스터');
+        this.container.innerHTML = `
+            <div class="game-hunt-card" style="position:relative;">
+                <div style="font-size:1rem;color:#c98534;font-weight:900;letter-spacing:3px;">⚒️ HUNTER LOADOUT</div>
+                <div class="game-title" style="font-size:2.25rem;margin:6px 0 2px;">${monsterName} 출발 준비</div>
+                <div style="font-size:1.02rem;color:#796552;margin-bottom:13px;">퍽은 길드가 정했습니다. 무기와 기존 성향은 출발 전까지 몇 번이든 수정할 수 있습니다.</div>
+                <div class="game-hunt-weapons-grid" id="hunt-loadout-grid">
+                    ${(data.selectedWeapons || []).map(hunter => `<div class="game-hunt-weapon-card" id="hunt-opt-${hunter.index}" style="position:relative;padding:18px 14px;min-height:330px;"></div>`).join('')}
+                </div>
+                <div style="background:rgba(42,30,22,.9);border:1px solid #c98534;border-radius:10px;padding:8px 14px;margin:12px auto 5px;max-width:1050px;color:#f5eadb;font-size:1.04rem;">
+                    <b style="color:#00ffaa;">입력 예시</b>　!대검 지원가　·　!지원가 대검　·　!지원가, !대검　·　!차액　·　!추천
+                </div>
+                <div class="game-timer" style="font-size:1.5rem;font-weight:bold;color:#8b5a2b;margin-top:9px;">⏳ 장비 확정 ${data.timeLeft || 25}초</div>
+            </div>`;
+        this.card = this.container.querySelector('.game-hunt-card');
+        (data.selectedWeapons || []).forEach(hunter => this.updateLoadoutCard(hunter));
+    }
+
+    updateLoadoutCard(hunter) {
+        if (!this.card || !hunter) return;
+        const card = this.card.querySelector(`#hunt-opt-${hunter.index}`);
+        if (!card) return;
+        const personality = this.getPersonalityStyle(hunter.personality);
+        const perkNames = (hunter.perks || []).map(perk => `<span style="display:inline-block;background:rgba(0,0,0,.48);border:1px solid #6f5b48;border-radius:6px;padding:2px 6px;margin:2px;font-size:.86rem;color:#ead9bd;">${this.escapeHTML(perk.name)}</span>`).join('');
+        const hunterName = this.escapeHTML(hunter.hunterName || `HUNTER ${hunter.index + 1}`);
+        card.innerHTML = `
+            <div style="font-size:1.15rem;font-weight:900;color:${this.safeColor(hunter.hunterColor, '#eeeeee')};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${hunter.isNpc ? '🐱 ' : ''}${hunterName}</div>
+            <div class="game-hunt-weapon-img-container" style="position:relative;width:92px;height:92px;margin:7px auto;">
+                <img class="game-hunt-weapon-img" src="img/weapons/${this.escapeHTML(hunter.filename)}" style="width:92px;height:92px;margin:0;" />
+            </div>
+            <div style="font-size:1.55rem;font-weight:1000;color:#c98534;">${this.escapeHTML(hunter.name)}</div>
+            <div style="background:${personality.bg};border:1px solid ${personality.color};border-radius:7px;color:${personality.color};font-weight:900;padding:3px 7px;margin:5px 0;">${personality.label}</div>
+            <div style="font-size:.76rem;color:#9e8c78;letter-spacing:1px;margin-top:6px;">RANDOM PERKS · ${(hunter.perks || []).length}/5</div>
+            <div style="min-height:66px;line-height:1.4;">${perkNames || '<span style="font-size:.9rem;color:#8f8171;">백지의 기록 — 장점도 흉조도 없다.</span>'}</div>`;
+    }
+
+    updatePhaseTimer(timeLeft, label) {
+        if (!this.container) return;
+        const timer = this.container.querySelector('.game-timer');
+        if (timer) timer.textContent = `⏳ ${label} ${timeLeft}초`;
+    }
+
     renderLobby(data) {
         this.clearAnimationTimers();
         // Check if card already exists to prevent glitchy entry animations on consecutive rounds
@@ -499,6 +629,9 @@ class HuntRenderer {
                         }</span>
                         <span style="opacity:0.3;">|</span>
                         <span id="potion-count-${w.index}">🧪 ${w.potions}</span>
+                    </div>
+                    <div style="min-height:24px;margin:-7px 0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.72rem;color:#b9a78e;" title="${this.escapeHTML((w.perks || []).map(perk => `${perk.name}: ${perk.description}`).join(' / '))}">
+                        ${(w.perks || []).length ? `◆ ${(w.perks || []).map(perk => this.escapeHTML(perk.name)).join(' · ')}` : '◇ 백지의 기록'}
                     </div>
  
                     <div class="game-hunt-weapon-name" style="font-size: 2.5rem; font-weight: bold; color:${SafeContent.cssColor(w.hunterColor, '#c98534')}; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; margin-bottom: 6px;">

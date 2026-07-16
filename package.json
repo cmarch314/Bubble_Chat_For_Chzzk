@@ -5,7 +5,7 @@
   "description": "Chzzk chat overlay runtime",
   "scripts": {
     "start:obs": "node tools/chzzk-companion.js",
-    "pretest": "node tests/architecture-boundaries.test.js && node tests/hunt-architecture-boundaries.test.js && node tests/audio-command-matcher.test.js && node tests/audio-media-stager.test.js && node tests/audio-playback-engine.test.js && node tests/chat-media-controller.test.js && node tests/hunt-action-state-machine.test.js && node tests/hunt-weapon-catalog.test.js && node tests/hunt-weapon-action-selector.test.js && node tests/hunt-monster-patterns.test.js && node tests/hunt-bgm-resolver.test.js && node tests/hunt-chat-tactics.test.js && node tests/hunt-telemetry.test.js && node tests/hunt-balance-simulation.test.js",
+    "pretest": "node tests/architecture-boundaries.test.js && node tests/hunt-architecture-boundaries.test.js && node tests/hunt-perk-catalog.test.js && node tests/hunt-lobby-roster.test.js && node tests/hunt-loadout-advisor.test.js && node tests/hunt-loadout-mutation.test.js && node tests/audio-command-matcher.test.js && node tests/audio-media-stager.test.js && node tests/audio-playback-engine.test.js && node tests/chat-media-controller.test.js && node tests/hunt-action-state-machine.test.js && node tests/hunt-weapon-catalog.test.js && node tests/hunt-weapon-action-selector.test.js && node tests/hunt-monster-patterns.test.js && node tests/hunt-bgm-resolver.test.js && node tests/hunt-chat-tactics.test.js && node tests/hunt-telemetry.test.js && node tests/hunt-balance-simulation.test.js",
     "verify": "node scripts/verify-project.js && node scripts/verify-runtime-assets.js",
     "verify:assets": "node scripts/verify-runtime-assets.js",
     "analyze:audio": "node scripts/analyze-audio-levels.js",

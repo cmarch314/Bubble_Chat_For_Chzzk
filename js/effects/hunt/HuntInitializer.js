@@ -1,5 +1,6 @@
 class HuntInitializer {
-    constructor() {
+    constructor(options = {}) {
+        this.random = options.random || Math.random;
         this.WEAPONS = window.HUNT_WEAPONS || [
             { id: 'great_sword', name: '대검', filename: 'great_sword.svg', type: 'shield', speedGroup: 'slow' },
             { id: 'long_sword', name: '태도', filename: 'long_sword.svg', type: 'melee', speedGroup: 'fast' },
@@ -150,14 +151,15 @@ class HuntInitializer {
             }
         }
         while (selected.length < 4) {
-            selected.push(this.WEAPONS[Math.floor(Math.random() * this.WEAPONS.length)]);
+            selected.push(this.WEAPONS[Math.floor(this.random() * this.WEAPONS.length)]);
         }
 
         const personalities = ['offensive', 'offensive', 'normal', 'normal', 'defensive', 'veteran', 'support', 'newbie'];
         return selected.map((w, index) => {
             const initialSpeedGroup = w.id === 'charge_blade' ? 'very_fast' : w.speedGroup;
-            const personality = personalities[Math.floor(Math.random() * personalities.length)];
-            return {
+            const personality = personalities[Math.floor(this.random() * personalities.length)];
+            const perks = typeof HuntPerkCatalog !== 'undefined' ? HuntPerkCatalog.roll(this.random) : [];
+            const hunter = {
                 ...w,
                 speedGroup: initialSpeedGroup,
                 index,
@@ -170,7 +172,9 @@ class HuntInitializer {
                 atb: 0,
                 comboIndex: 0,
                 respawnTimer: 0,
-                personality: personality,
+                personality,
+                perks,
+                perkModifiers: typeof HuntPerkCatalog !== 'undefined' ? HuntPerkCatalog.aggregate(perks) : {},
                 potions: 10,
                 lifepowders: 1,
                 spiritLevel: 0,
@@ -181,7 +185,47 @@ class HuntInitializer {
                 extractBuffs: { red: 0, white: 0, orange: 0 },
                 extractDuration: 0
             };
+            return hunter;
         });
+    }
+
+    replaceHunterWeapon(hunter, weaponId) {
+        const matchedWeapon = this.WEAPONS.find(weapon => weapon.id === weaponId);
+        if (!hunter || !matchedWeapon) return false;
+        const preserved = {
+            index: hunter.index,
+            hunterName: hunter.hunterName,
+            hunterColor: hunter.hunterColor,
+            personality: hunter.personality,
+            perks: hunter.perks || [],
+            perkModifiers: hunter.perkModifiers || {},
+            isNpc: Boolean(hunter.isNpc)
+        };
+        const initialSpeedGroup = matchedWeapon.id === 'charge_blade' ? 'very_fast' : matchedWeapon.speedGroup;
+        Object.assign(hunter, {
+            ...matchedWeapon,
+            ...preserved,
+            speedGroup: initialSpeedGroup,
+            hp: 100,
+            maxHp: 100,
+            status: 'alive',
+            sharpness: 100,
+            ammo: 5,
+            hasMoxie: true,
+            atb: 0,
+            comboIndex: 0,
+            respawnTimer: 0,
+            potions: 10,
+            lifepowders: 1,
+            spiritLevel: 0,
+            demonModeDuration: 0,
+            phials: matchedWeapon.id === 'charge_blade' ? 0 : 5,
+            shieldChargeDuration: 0,
+            overheatDuration: 0,
+            extractBuffs: { red: 0, white: 0, orange: 0 },
+            extractDuration: 0
+        });
+        return true;
     }
 
     getMonsterTier(monster) {

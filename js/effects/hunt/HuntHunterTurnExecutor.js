@@ -17,6 +17,7 @@ class HuntHunterTurnExecutor {
         else if (w.personality === 'veteran') healProb = 0.80;
         else if (w.personality === 'support') healProb = 0.75;
         else if (w.personality === 'newbie') healProb = 0.30;
+        healProb = Math.max(0.05, Math.min(0.98, healProb + Number(w.perkModifiers && w.perkModifiers.healBias || 0)));
 
         // 몬린이 전용 돌발 행동 패턴 (채집 딴짓 20%, 분노 시 공황 도주 35%)
         if (w.personality === 'newbie') {
@@ -402,6 +403,12 @@ class HuntHunterTurnExecutor {
                     engine.restoreBorder(w.index);
                 }
             }
+
+            // Data-driven perk modifiers preserve autobattler behavior without bypassing action locks.
+            const perkModifiers = w.perkModifiers || {};
+            damage = Math.floor(damage * Number(perkModifiers.attackRate || 1));
+            if (w.hp <= w.maxHp * 0.35) damage = Math.floor(damage * Number(perkModifiers.lowHpAttack || 1));
+            if (engine.monsterState === 'enraged') damage = Math.floor(damage * Number(perkModifiers.enragedAttack || 1));
 
             // Sharpness/Ammo loss on strike
             let isDull = false;

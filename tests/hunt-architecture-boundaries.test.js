@@ -19,6 +19,9 @@ assert.ok(position('HuntBgmResolver.js') < position('HuntAudioManager.js'));
 assert.ok(position('HuntMonsterProfiles.js') < position('HuntMonsterPatternCatalog.js'));
 assert.ok(position('HuntMonsterPatternCatalog.js') < position('HuntInitializer.js'));
 assert.ok(position('HuntChatTactics.js') < position('HuntEffect.js'));
+assert.ok(position('HuntPerkCatalog.js') < position('HuntInitializer.js'));
+assert.ok(position('HuntLobbyRoster.js') < position('HuntEffect.js'));
+assert.ok(position('HuntLoadoutAdvisor.js') < position('HuntEffect.js'));
 
 assert.doesNotMatch(read('js/effects/MonsterData.js'), /window\.HUNT_COMBO_LIST\s*=/, 'MonsterData must not overwrite live weapon actions');
 assert.doesNotMatch(read('js/effects/hunt/HuntMonsterTurnExecutor.js'), /maxHp\s*\*\s*0\.45/, 'monster damage must come from pattern data');

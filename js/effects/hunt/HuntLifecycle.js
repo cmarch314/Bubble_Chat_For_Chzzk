@@ -3,10 +3,11 @@ class HuntLifecycle {
         this.state = 'idle';
         this.sessionId = 0;
         this.transitions = {
-            idle: new Set(['voting']),
-            voting: new Set(['fighting', 'ended']),
-            fighting: new Set(['ended']),
-            ended: new Set(['voting', 'idle'])
+            idle: new Set(['quest_board']),
+            quest_board: new Set(['loadout', 'results']),
+            loadout: new Set(['fighting', 'results']),
+            fighting: new Set(['results']),
+            results: new Set(['quest_board', 'idle'])
         };
     }
 
@@ -19,15 +20,16 @@ class HuntLifecycle {
         }
 
         this.state = nextState;
-        if (nextState === 'voting') this.sessionId++;
+        if (nextState === 'quest_board') this.sessionId++;
         return true;
     }
 
-    is(state) {
-        return this.state === state;
-    }
+    is(state) { return this.state === state; }
 
     snapshot() {
         return Object.freeze({ state: this.state, sessionId: this.sessionId });
     }
 }
+
+if (typeof module !== 'undefined' && module.exports) module.exports = HuntLifecycle;
+else window.HuntLifecycle = HuntLifecycle;

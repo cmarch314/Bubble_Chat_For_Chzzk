@@ -322,6 +322,7 @@ class HuntBattleTickExecutor {
                 
                 // Apply hunter speed multiplier from config
                 fillRate *= engine.hunterSpeedMultiplier;
+                fillRate *= Number(w.perkModifiers && w.perkModifiers.atbRate || 1);
                 
                 if (w.id === 'dual_blades' && w.demonModeDuration && w.demonModeDuration > 0) {
                     fillRate *= 1.2;

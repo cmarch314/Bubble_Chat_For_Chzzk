@@ -43,6 +43,9 @@ d:/BubbleChat/
 │       │   ├── HuntBgmResolver.js # Dedicated-first, habitat-weighted, repeat-safe BGM routing
 │       │   ├── HuntAudioCatalog.js # Roar-family routing and semantic weapon SFX layers
 │       │   ├── HuntChatTactics.js # In-fight chat strategy and shared support gauge
+│       │   ├── HuntPerkCatalog.js # 100 random personality perks and aggregate combat modifiers
+│       │   ├── HuntLobbyRoster.js # Unique !참여 registration and fair four-hunter selection
+│       │   ├── HuntLoadoutAdvisor.js # Perk/personality/monster-aware weapon recommendation
 │       │   ├── HuntSeededRandom.js # Deterministic hunt replay RNG
 │       │   ├── HuntBalanceTelemetry.js # Action, pattern, damage, defense, and cart metrics
 │       │   └── HuntInitializer.js
@@ -202,5 +205,5 @@ d:/BubbleChat/
 * Prefer periodic decision windows and aggregated votes over command spam. Apply per-user cooldowns, shared resources, diminishing returns, and deterministic tie-breaking. A decision window that receives no votes must resolve to a sensible AI default.
 * Balance tests must cover both `silent` and `participatory` scenarios. Chat participation may improve consistency or rewards, but must not invalidate weapon identity, monster threat, cart risk, or the baseline simulation contract.
 * The canonical quest flow is `quest_board → loadout → fighting → results`. `!참여` only registers a unique viewer at the quest board. Exactly four entrants are selected with seeded, auditable randomness when loadout begins; missing seats are filled by guild NPCs.
-* A selected hunter receives a random initial weapon and three personality-record candidates. Each record contains zero to five perks. During loadout they may use `!성향 1|2|3`, `!무기 <이름>`, or `!추천`; inactivity resolves to the AI's highest-scoring legal weapon/perk pairing.
-* Perks describe personality, not permanent account progression. Keep their combat modifiers data-driven, composable, capped, and visible in plain language. Never bury perk behavior in renderer branches or allow a perk to bypass action locks and monster immunities.
+* A selected hunter receives a random initial weapon, one existing personality, and zero to five immutable random perks. During loadout they may change weapon/personality repeatedly with direct aliases such as `!대검 지원가`, `!지원가 대검`, `!지원가, !대검`, or `!차액`; `!추천` selects a suitable weapon. Perks cannot be selected or rerolled.
+* Perks describe one hunt's quirks, not permanent account progression. Their combat modifiers belong in `HuntPerkCatalog`, must be composable and capped, and may never bypass action locks or monster immunities. Weapon recommendation belongs in `HuntLoadoutAdvisor`; recruitment and selection belong in `HuntLobbyRoster`.

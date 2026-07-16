@@ -131,7 +131,7 @@
 
 1. `HuntQuestDirector`: 집회소 수주·4인 선발·세팅·수렵·결과 상태 전환
 2. `HuntPerkCatalog`: 퍽 정의, 충돌 그룹과 무기 시너지 데이터
-3. `HuntLoadoutAdvisor`: 성향 기록과 무기의 적합도 계산 및 무응답 자동 선택
+3. `HuntLoadoutAdvisor`: 고정된 랜덤 퍽·기존 성향과 무기의 적합도 계산
 4. `HuntCombatResolver`: 부위·육질·예리도·피해 계산 단일화
 5. `HuntPartSystem`: 경직·파괴·절단과 패턴 약화
 6. `HuntAilmentSystem`: 누적·발동·내성 증가

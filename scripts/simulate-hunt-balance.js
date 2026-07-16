@@ -25,6 +25,7 @@ global.HuntMonsterTurnExecutor = loadBrowserClass('js/effects/hunt/HuntMonsterTu
 global.HuntHunterTurnExecutor = loadBrowserClass('js/effects/hunt/HuntHunterTurnExecutor.js', 'HuntHunterTurnExecutor');
 
 const HuntWeaponCatalog = require('../js/effects/hunt/HuntWeaponCatalog.js');
+const HuntPerkCatalog = require('../js/effects/hunt/HuntPerkCatalog.js');
 const HuntSeededRandom = require('../js/effects/hunt/HuntSeededRandom.js');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
 
@@ -34,7 +35,8 @@ const monsterPatterns = HuntMonsterPatternCatalog.build(window.MONSTER_ATTACKS);
 const weapons = window.HUNT_WEAPONS;
 const monsters = window.MONSTER_DATA.filter(monster => monsterPatterns[monster.id.replace(/-/g, '_')]);
 
-function makeHunter(weapon, index) {
+function makeHunter(weapon, index, random) {
+    const perks = HuntPerkCatalog.roll(random);
     return {
         ...weapon,
         index,
@@ -48,6 +50,8 @@ function makeHunter(weapon, index) {
         atb: 0,
         comboIndex: 0,
         personality: ['normal', 'offensive', 'defensive', 'veteran'][index],
+        perks,
+        perkModifiers: HuntPerkCatalog.aggregate(perks),
         potions: 10,
         lifepowders: 1,
         spiritLevel: 0,
@@ -66,7 +70,7 @@ function run(seed) {
     const random = () => seeded.next();
     const monster = monsters[Math.floor(random() * monsters.length)];
     const start = Math.floor(random() * weapons.length);
-    const selectedWeapons = Array.from({ length: 4 }, (_, index) => makeHunter(weapons[(start + index) % weapons.length], index));
+    const selectedWeapons = Array.from({ length: 4 }, (_, index) => makeHunter(weapons[(start + index) % weapons.length], index, random));
     let ended = false;
     let victory = false;
     const engine = new HuntEngine({

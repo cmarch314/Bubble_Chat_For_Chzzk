@@ -1,7 +1,7 @@
 class HuntResultPresenter {
     static show(effect, container, isVictory, winner = null) {
         effect.isActive = false;
-        effect.phase = 'ended';
+        effect.phase = 'results';
         effect.director.activeGame = null;
 
         effect.clearAllTimers();
@@ -159,7 +159,7 @@ class HuntResultPresenter {
 
                     // 1차 갈무리 (staggerDelay): 둥근 감정표현 버블로 칼질 이모지 띄우기
                     const t1 = effect.timers.timeout(() => {
-                        if (effect.phase === 'ended' && w.hp > 0) {
+                        if (effect.phase === 'results' && w.hp > 0) {
                             effect.renderer.spawnVictoryEmoji(w.index, '🔪');
                         }
                     }, staggerDelay);
@@ -167,7 +167,7 @@ class HuntResultPresenter {
 
                     // 2차 갈무리 (staggerDelay + 2000): 칼질 이모지 버블 팝 & 1차 소재 사운드 & 소재 메시지 박스 표현
                     const t2 = effect.timers.timeout(() => {
-                        if (effect.phase === 'ended' && w.hp > 0) {
+                        if (effect.phase === 'results' && w.hp > 0) {
                             effect.renderer.spawnVictoryEmoji(w.index, '🔪');
                             playCarveSound(material1);
                             effect.renderer.spawnMaterialBox(w.index, material1);
@@ -178,7 +178,7 @@ class HuntResultPresenter {
 
                     // 3차 갈무리 (staggerDelay + 4000): 칼질 이모지 버블 팝 & 2차 소재 사운드 & 소재 메시지 박스 표현
                     const t3 = effect.timers.timeout(() => {
-                        if (effect.phase === 'ended' && w.hp > 0) {
+                        if (effect.phase === 'results' && w.hp > 0) {
                             effect.renderer.spawnVictoryEmoji(w.index, '🔪');
                             playCarveSound(material2);
                             effect.renderer.spawnMaterialBox(w.index, material2);
@@ -189,7 +189,7 @@ class HuntResultPresenter {
 
                     // 갈무리 완료 (staggerDelay + 6000): 갈무리 상태 해제 & 3차 소재 사운드 & 획득 완료 이모지 버블 & 소재 메시지 박스 표현
                     const t4 = effect.timers.timeout(() => {
-                        if (effect.phase === 'ended' && w.hp > 0) {
+                        if (effect.phase === 'results' && w.hp > 0) {
                             w.isCarving = false; // 갈무리 완수! 감정표현 차단 해제!
                             playCarveSound(material3);
                             effect.renderer.spawnMaterialBox(w.index, material3);
@@ -219,7 +219,7 @@ class HuntResultPresenter {
                     const staggerDelay = originalIdx >= 0 ? originalIdx * 1200 : idx * 1200;
 
                     const runHunterEmojiLoop = () => {
-                        if (effect.phase !== 'ended') return;
+                        if (effect.phase !== 'results') return;
                         
                         // 채집(갈무리) 중에는 감정표현 금지!
                         if (hunter.isCarving || hunter.isGathering) {
