@@ -26,6 +26,16 @@ cases.forEach(([input, weaponId, personality]) => {
 assert.strictEqual(parser.parseLoadout('오늘 대검 멋있다'), null, 'ordinary chat must not change loadout');
 assert.strictEqual(parser.parseLoadout('잡담뿐'), null);
 assert.strictEqual(parser.parseLoadout('!추천').recommend, true);
+const personalityOnly = parser.parseLoadout('!지원가');
+assert.deepStrictEqual(
+    { weaponId: personalityOnly.weaponId, personality: personalityOnly.personality },
+    { weaponId: null, personality: 'support' }
+);
+const weaponOnly = parser.parseLoadout('!대검');
+assert.deepStrictEqual(
+    { weaponId: weaponOnly.weaponId, personality: weaponOnly.personality },
+    { weaponId: 'great_sword', personality: null }
+);
 
 const legacy = parser.parse('3 차액 베테랑', { isSubscriber: true }, false);
 assert.deepStrictEqual(

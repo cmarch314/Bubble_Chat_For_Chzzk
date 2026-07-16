@@ -143,7 +143,7 @@ class HuntRenderer {
                     ${(data.selectedWeapons || []).map(hunter => `<div class="game-hunt-weapon-card" id="hunt-opt-${hunter.index}" style="position:relative;padding:18px 14px;min-height:330px;"></div>`).join('')}
                 </div>
                 <div style="background:rgba(42,30,22,.9);border:1px solid #c98534;border-radius:10px;padding:8px 14px;margin:12px auto 5px;max-width:1050px;color:#f5eadb;font-size:1.04rem;">
-                    <b style="color:#00ffaa;">입력 예시</b>　!대검 지원가　·　!지원가 대검　·　!지원가, !대검　·　!차액　·　!추천
+                    <b style="color:#00ffaa;">입력 예시</b>　!대검 지원가　·　!지원가 대검　·　!지원가 입력 후 다음 채팅에 !대검　·　!차액　·　!추천
                 </div>
                 <div class="game-timer" style="font-size:1.5rem;font-weight:bold;color:#8b5a2b;margin-top:9px;">⏳ 장비 확정 ${data.timeLeft || 25}초</div>
             </div>`;

@@ -20,6 +20,7 @@ hunter.personality = 'support';
 hunter.perks = [{ id: 'fixed', name: '고정 퍽', modifiers: {} }];
 hunter.perkModifiers = { atbRate: 1.1 };
 
+// First chat: !지원가. Second chat: !차액. Partial edits accumulate.
 assert.strictEqual(initializer.replaceHunterWeapon(hunter, 'charge_blade'), true);
 assert.strictEqual(hunter.id, 'charge_blade');
 assert.strictEqual(hunter.hunterName, '선발자');
