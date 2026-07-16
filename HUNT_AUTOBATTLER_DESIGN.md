@@ -129,14 +129,18 @@
 
 ## 6. 구현 우선순위
 
-1. `HuntCombatResolver`: 부위·육질·예리도·피해 계산 단일화
-2. `HuntPartSystem`: 경직·파괴·절단과 패턴 약화
-3. `HuntAilmentSystem`: 누적·발동·내성 증가
-4. `HuntMonsterBrain`: 고정 시간 상태를 행동 기반 생태 AI로 교체
-5. `HuntWeaponResourceSystem`: 무기별 자동 운용 규칙 분리
-6. `HuntDecisionDirector`: 저빈도 투표와 무응답 AI 기본값
-7. `HuntQuestDirector`: 포획·지역 이동·난입·종료 조건
-8. 조합별·무참여/참여별 시뮬레이션과 OBS 현장 검수
+1. `HuntQuestDirector`: 집회소 수주·4인 선발·세팅·수렵·결과 상태 전환
+2. `HuntPerkCatalog`: 퍽 정의, 충돌 그룹과 무기 시너지 데이터
+3. `HuntLoadoutAdvisor`: 성향 기록과 무기의 적합도 계산 및 무응답 자동 선택
+4. `HuntCombatResolver`: 부위·육질·예리도·피해 계산 단일화
+5. `HuntPartSystem`: 경직·파괴·절단과 패턴 약화
+6. `HuntAilmentSystem`: 누적·발동·내성 증가
+7. `HuntMonsterBrain`: 고정 시간 상태를 행동 기반 생태 AI로 교체
+8. `HuntWeaponResourceSystem`: 무기별 자동 운용 규칙 분리
+9. `HuntDecisionDirector`: 저빈도 투표와 무응답 AI 기본값
+10. 조합별·무참여/참여별 시뮬레이션과 OBS 현장 검수
+
+집회소 단계와 100개 퍽의 상세 기준은 `HUNT_PERK_DESIGN.md`를 따른다.
 
 ## 7. 밸런스 검증 시나리오
 
