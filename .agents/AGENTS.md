@@ -29,6 +29,7 @@ d:/BubbleChat/
 │       │   ├── HuntEngine.js   # Game logic state loop (weapons, monster ATB)
 │       │   ├── HuntRenderer.js # Hunt UI updates and weapon/monster DOM elements
 │       │   ├── HuntAudioManager.js
+│       │   ├── HuntMonsterAttackAnimator.js # Monster attack movement/projectile presentation
 │       │   ├── HuntData.js
 │       │   └── HuntInitializer.js
 │       ├── EffectInterface.js  # BaseEffect class definition
@@ -142,6 +143,7 @@ d:/BubbleChat/
 * Effects derived from `BaseEffect` must schedule delayed work through `this.timers`. `EffectRegistry` begins a fresh execution scope and clears it when `execute()` settles, including error paths.
 * Long-lived renderers and managers must own an explicit `ManagedTimers` instance and clear it when their UI, phase, or application is disposed. Hunt fight animations are cleared separately from the engine scheduler.
 * A hunt tick must return immediately after timeout, game end, or consecutive-monster handover. Never let the completed monster's tick mutate the newly initialized battle state.
+* Monster attack movement and projectile branches live in `HuntMonsterAttackAnimator`; `HuntCombatAnimator` remains the hunter/status facade used by `HuntRenderer`.
 * Do not add raw `setTimeout()` or `setInterval()` calls to effects or UI controllers. The only exception is a pure engine's injected default scheduler, which must be replaceable by its lifecycle owner.
 
 ### Rule 13: Runtime Media References Must Be Verifiable

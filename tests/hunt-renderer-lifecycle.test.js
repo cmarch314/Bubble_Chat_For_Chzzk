@@ -6,8 +6,10 @@ const vm = require('vm');
 const rendererPath = path.resolve(__dirname, '../js/effects/hunt/HuntRenderer.js');
 const rendererSource = fs.readFileSync(rendererPath, 'utf8');
 const context = vm.createContext({ console, window: {} });
+const monsterAttackAnimatorPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterAttackAnimator.js');
 const animatorPath = path.resolve(__dirname, '../js/effects/hunt/HuntCombatAnimator.js');
 const notificationPath = path.resolve(__dirname, '../js/effects/hunt/HuntNotificationRenderer.js');
+vm.runInContext(fs.readFileSync(monsterAttackAnimatorPath, 'utf8'), context, { filename: monsterAttackAnimatorPath });
 vm.runInContext(fs.readFileSync(animatorPath, 'utf8'), context, { filename: animatorPath });
 vm.runInContext(fs.readFileSync(notificationPath, 'utf8'), context, { filename: notificationPath });
 vm.runInContext(`${rendererSource}\nglobalThis.HuntRenderer = HuntRenderer;`, context, {
@@ -56,6 +58,8 @@ assert.match(rendererSource, /this\.combatAnimator = new HuntCombatAnimator\(thi
 assert.match(rendererSource, /this\.notifications = new HuntNotificationRenderer\(this\)/);
 assert.doesNotMatch(rendererSource, /className = 'monster-attack-effect'/);
 assert.doesNotMatch(rendererSource, /className = 'combat-chat-bubble'/);
+assert.match(fs.readFileSync(animatorPath, 'utf8'), /return this\.monsterAttackAnimator\.triggerMonsterAttack/);
+assert.doesNotMatch(fs.readFileSync(animatorPath, 'utf8'), /cleanName\.includes\('돌진'\)/);
 
 const effectPath = path.resolve(__dirname, '../js/effects/HuntEffect.js');
 const effectSource = fs.readFileSync(effectPath, 'utf8');
