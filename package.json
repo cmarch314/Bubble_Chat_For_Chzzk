@@ -5,7 +5,7 @@
   "description": "Chzzk chat overlay runtime",
   "scripts": {
     "start:obs": "node tools/chzzk-companion.js",
-    "pretest": "node tests/audio-command-matcher.test.js && node tests/audio-media-stager.test.js",
+    "pretest": "node tests/audio-command-matcher.test.js && node tests/audio-media-stager.test.js && node tests/audio-playback-engine.test.js",
     "verify": "node scripts/verify-project.js && node scripts/verify-runtime-assets.js",
     "verify:assets": "node scripts/verify-runtime-assets.js",
     "analyze:audio": "node scripts/analyze-audio-levels.js",

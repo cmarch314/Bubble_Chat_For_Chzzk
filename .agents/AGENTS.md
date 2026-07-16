@@ -19,6 +19,7 @@ d:/BubbleChat/
 │   ├── AudioManager.js         # Sound effects explorer & exclusion/rename router
 │   ├── audio/AudioCommandMatcher.js # Chat SFX normalization and deterministic keyword matching
 │   ├── audio/AudioMediaStager.js # OBS-safe native media volume and browser Web Audio routing
+│   ├── audio/AudioPlaybackEngine.js # Decoded SFX playback, cache, collision gain, and native fallback
 │   ├── MessageRouter.js        # Main chat command interceptor & router
 │   ├── VisualDirector.js       # Active overlay controller & activeGame manager
 │   ├── ChatRenderer.js         # Chat bubble rendering, text filters & video commands
@@ -56,6 +57,7 @@ d:/BubbleChat/
    - `AudioManager.js` coordinates playback, gain staging, media lifecycle, exclusions, and virtual path renames.
    - `audio/AudioCommandMatcher.js` owns catalog normalization, visual-sound exclusion, longest-keyword selection, and repeated-character suppression. Keep chat matching rules out of the playback engine.
    - `audio/AudioMediaStager.js` owns DOM/native media registration, measured volume application, and the `file://` Web Audio prohibition. `AudioManager` keeps compatibility delegates for callers.
+   - `audio/AudioPlaybackEngine.js` owns decoded-buffer playback, cache eviction, concurrent voice scaling, and native fallback. It receives `AudioManager` explicitly and must not own app lifecycle.
 3. **Chat Commands & Directing**:
    - `MessageRouter.js` checks chat messages. Streamer commands (`!퀴즈`, `!경마`, `!레이드`, `!토벌`, `!커맨드`) trigger visual overlays in `VisualDirector.js`.
    - `VisualDirector.js` maintains an `activeGame` pointer. If a mini-game or overlay is active, standard chat messages are routed to its `.handleChat(msgData)` first.

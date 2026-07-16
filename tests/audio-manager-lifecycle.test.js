@@ -53,9 +53,10 @@ const timersPath = path.resolve(__dirname, '../js/runtime/ManagedTimers.js');
 const profilePath = path.resolve(__dirname, '../js/runtime/AudioLevelProfile.js');
 const matcherPath = path.resolve(__dirname, '../js/audio/AudioCommandMatcher.js');
 const mediaStagerPath = path.resolve(__dirname, '../js/audio/AudioMediaStager.js');
+const playbackEnginePath = path.resolve(__dirname, '../js/audio/AudioPlaybackEngine.js');
 const busPath = path.resolve(__dirname, '../js/EventBus.js');
 const audioPath = path.resolve(__dirname, '../js/AudioManager.js');
-const source = [scopePath, timersPath, profilePath, matcherPath, mediaStagerPath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
+const source = [scopePath, timersPath, profilePath, matcherPath, mediaStagerPath, playbackEnginePath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
     + '\nglobalThis.Exports = { AudioManager, EventBus };';
 vm.runInContext(source, context, { filename: audioPath });
 
