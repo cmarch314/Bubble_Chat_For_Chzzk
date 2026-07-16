@@ -33,6 +33,9 @@ class HuntInitializer {
             velkhana: ["빙룡의 포효", "빙벽 생성 강타", "얼음 브레스 방출", "고리형 절대영도 폭발", "꼬리 얼음칼 찌르기"],
             default: ["포효 위협", "몸통 박치기", "꼬리 후려치기", "성난 돌진 공격"]
         };
+        this.MONSTER_PATTERNS = HuntMonsterPatternCatalog.build(this.MONSTER_ATTACKS);
+        const patternErrors = HuntMonsterPatternCatalog.validate(this.MONSTER_PATTERNS);
+        if (patternErrors.length) console.warn('[HuntMonsterPatternCatalog] Invalid patterns:', patternErrors);
 
         this.COMBO_LIST = HuntWeaponCatalog.build(window.HUNT_COMBO_LIST || {});
         const catalogErrors = HuntWeaponCatalog.validate(this.COMBO_LIST);

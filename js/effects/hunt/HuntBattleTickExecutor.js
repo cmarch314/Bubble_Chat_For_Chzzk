@@ -1,6 +1,7 @@
 class HuntBattleTickExecutor {
     static execute(engine) {
         engine.battleTime++;
+        if (engine.monsterPatternSelector) engine.monsterPatternSelector.tick();
         engine.updateTimerUI(engine.battleTime);
 
         // Check timeout fail condition
@@ -293,6 +294,9 @@ class HuntBattleTickExecutor {
                 engine.monsterStunThreshold = Math.floor(engine.monsterStunThreshold * 1.5);
                 engine.addLog(`📢 ${engine.selectedMonster.nameKO}이(가) 기절에서 깨어나 정신을 가다듬습니다. (기절 내성치 상승: ${engine.monsterStunThreshold})`, '#00ffa3');
             }
+        } else if (engine.monsterRecoveryDuration > 0) {
+            engine.monsterRecoveryDuration--;
+            engine.monsterAtb = 0;
         } else if (engine.monsterRoarDuration > 0 || (engine.selectedMonster.id.includes('valstrax') && engine.monsterState === 'valstrax_flying')) {
             // 포효 시전 중 또는 발파루크 비행 중에는 몬스터 ATB가 충전되지 않음
             engine.monsterAtb = 0;

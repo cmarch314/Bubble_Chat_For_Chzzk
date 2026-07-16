@@ -10,6 +10,10 @@ class HuntEngine {
         this.random = config.random || Math.random;
         this.schedule = config.schedule || ((callback, delay) => setTimeout(callback, delay));
         this.actionStateMachine = config.actionStateMachine || new HuntActionStateMachine();
+        this.weaponActionSelector = config.weaponActionSelector || new HuntWeaponActionSelector(this.random);
+        this.monsterPatternSelector = config.monsterPatternSelector || new HuntMonsterPatternSelector(this.random);
+        this.teamTactic = config.teamTactic || 'balanced';
+        this.telemetry = config.telemetry || new HuntBalanceTelemetry();
         
         // Monster Stats
         this.monsterTier = config.monsterTier || 'normal';
@@ -30,8 +34,10 @@ class HuntEngine {
         this.monsterStunDuration = config.monsterStunDuration || 0;
         this.monsterKnockdownDuration = config.monsterKnockdownDuration || 0;
         this.monsterKnockdownTriggered = config.monsterKnockdownTriggered || { 80: false, 60: false, 40: false, 20: false };
+        this.monsterRecoveryDuration = 0;
 
         this.MONSTER_ATTACKS = config.MONSTER_ATTACKS;
+        this.MONSTER_PATTERNS = config.MONSTER_PATTERNS || HuntMonsterPatternCatalog.build(config.MONSTER_ATTACKS || {});
         this.COMBO_LIST = config.COMBO_LIST;
         this.SHOW_MONSTER_HP = config.SHOW_MONSTER_HP;
         this.hunterSpeedMultiplier = config.hunterSpeedMultiplier !== undefined ? config.hunterSpeedMultiplier : 1.15;
@@ -144,6 +150,7 @@ class HuntEngine {
     }
 
     triggerGameEnd(victory, winner) {
+        this.telemetry.finish(victory, this.battleTime);
         if (this.callbacks.onGameEnd) this.callbacks.onGameEnd(victory, winner);
     }
 
@@ -306,22 +313,27 @@ class HuntEngine {
             let isDodge = false;
             let isForesightSlash = false;
 
-            const hasShield = w.type === 'shield' || w.id === 'heavy_bowgun';
-            let guardProb = 0.85;
-            let dodgeProb = 0.75;
+            const actionAllowsGuard = this.actionStateMachine.canGuard(w);
+            const actionAllowsEvade = this.actionStateMachine.canEvade(w);
+            const hasShield = actionAllowsGuard && (w.type === 'shield' || w.id === 'heavy_bowgun');
+            let guardProb = actionAllowsGuard ? 0.62 : 0;
+            let dodgeProb = actionAllowsEvade ? 0.48 : 0;
 
-            let foresightProb = 0.70;
+            let foresightProb = 0.55;
             if (w.personality === 'veteran') {
-                guardProb = 0.90;
-                dodgeProb = 0.90;
-                foresightProb = 0.90;
+                guardProb = 0.78;
+                dodgeProb = 0.75;
+                foresightProb = 0.78;
             } else if (w.personality === 'newbie') {
-                guardProb = 0.45;
-                dodgeProb = 0.35;
-                foresightProb = 0.25;
+                guardProb = 0.30;
+                dodgeProb = 0.22;
+                foresightProb = 0.20;
             }
+            if (!actionAllowsGuard) guardProb = 0;
+            if (!actionAllowsEvade) dodgeProb = 0;
 
-            if (w.id === 'long_sword' && defendRoll < foresightProb) {
+            const canForesight = this.actionStateMachine.canCounter(w, 'foresight');
+            if (w.id === 'long_sword' && canForesight && defendRoll < foresightProb) {
                 isDodge = true;
                 isForesightSlash = true;
                 w.spiritLevel = Math.min(3, (w.spiritLevel || 0) + 1);
@@ -339,6 +351,7 @@ class HuntEngine {
                 if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(w.index);
                 w.rollDuration = 6;
             } else if (isGuard) {
+                this.actionStateMachine.cancel(w, 'guard');
                 this.addLog(`🛡️ [방패 가드] ${w.name}이(가) 포효를 방패로 막아내며 흔들림 없이 버팁니다!`, '#00ffff');
                 this.playSFX('mh_guard.mp3', '가드성공');
                 this.showSkillBubble(w.index, "가드!");
@@ -346,6 +359,7 @@ class HuntEngine {
                 if (this.callbacks.onTriggerGuardShake) this.callbacks.onTriggerGuardShake(w.index);
                 w.guardDuration = 6;
             } else if (isDodge) {
+                this.actionStateMachine.cancel(w, 'evade');
                 this.addLog(`🌀 [프레임 회피] ${w.name}이(가) 구르기 무적 시간으로 포효의 음파를 피해냈습니다!`, '#2eff7b');
                 this.playSFX('mh_dodge.mp3', '회피');
                 this.showSkillBubble(w.index, "회피!");
@@ -353,6 +367,7 @@ class HuntEngine {
                 if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(w.index);
                 w.rollDuration = 6;
             } else {
+                this.actionStateMachine.cancel(w, 'roar_stun');
                 // 대처 실패: 귀막기 경직 45틱 (4.5초)
                 w.roarStunned = true;
                 w.roarStunDuration = 45;

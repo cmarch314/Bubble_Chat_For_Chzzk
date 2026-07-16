@@ -33,6 +33,18 @@ d:/BubbleChat/
 │       │   ├── HuntAudioManager.js
 │       │   ├── HuntMonsterAttackAnimator.js # Monster attack movement/projectile presentation
 │       │   ├── HuntData.js
+│       │   ├── HuntWeaponCatalog.js # Normalized 14-weapon action catalog and audio/timing metadata
+│       │   ├── HuntWeaponActionSelector.js # Conditional action eligibility and combo routing
+│       │   ├── HuntActionStateMachine.js # Windup/active/recovery action lock and cancel windows
+│       │   ├── HuntMonsterPatternCatalog.js # Typed monster pattern timing/damage schema
+│       │   ├── HuntMonsterPatternSelector.js # Cooldown, state, and repeat-aware pattern selection
+│       │   ├── HuntMonsterProfiles.js # Curated flagship monster behavior overrides
+│       │   ├── HuntBgmCatalog.js # Dedicated themes, habitat pools, and display labels
+│       │   ├── HuntBgmResolver.js # Dedicated-first, habitat-weighted, repeat-safe BGM routing
+│       │   ├── HuntAudioCatalog.js # Roar-family routing and semantic weapon SFX layers
+│       │   ├── HuntChatTactics.js # In-fight chat strategy and shared support gauge
+│       │   ├── HuntSeededRandom.js # Deterministic hunt replay RNG
+│       │   ├── HuntBalanceTelemetry.js # Action, pattern, damage, defense, and cart metrics
 │       │   └── HuntInitializer.js
 │       ├── EffectInterface.js  # BaseEffect class definition
 │       ├── CommandsScrollEffect.js # Credits roll overlay for commands
@@ -171,3 +183,12 @@ d:/BubbleChat/
 * The recommended OBS URL is `http://127.0.0.1:17890/index.html`. `obs/bubblechat-companion.lua` starts the companion with OBS and stops it on unload; `START_OBS_OVERLAY.bat` is manual recovery only.
 * `ChzzkGateway` must try the loopback companion first, while retaining direct and bounded public fallbacks when the companion is unavailable.
 * The companion may proxy only the allowlisted Chzzk live-status and access-token endpoints. Keep loopback binding, OBS-parent monitoring, PID/start-time identity checks, path containment, media range support, response size limits, and request timeouts intact.
+
+### Rule 17: Hunt Combat Is Data-Driven and Timeline-Locked
+* `HuntData.js` is the only runtime owner of the legacy-compatible base weapon action list. `MonsterData.js` may retain a migration snapshot only under `HUNT_LEGACY_COMBO_LIST`; it must never overwrite `HUNT_COMBO_LIST`.
+* Every hunter action is normalized by `HuntWeaponCatalog` and selected through `HuntWeaponActionSelector`. Conditions, motion-value reference fields, gameplay damage, timing, tags, and audio cues must stay explicit; do not add more combo-index/name branching when a catalog field can express the rule.
+* An attack owns its hunter until `HuntActionStateMachine` reaches an allowed cancel window. Monster attacks and roars must call `canEvade`, `canGuard`, or `canCounter`; never roll an unrelated dodge during an active weapon animation.
+* Monster moves are pattern objects, not bare random strings. Selection must honor cooldowns, repeat protection, required state, HP gates, target count, windup, recovery, and damage ratio. Curated overrides belong in `HuntMonsterProfiles.js`.
+* Battle BGM selection is dedicated-theme first. Without a verified dedicated theme, `HuntBgmResolver` selects a weighted habitat and then a non-repeating track from that habitat pool. Do not restore name-substring routing as the primary path.
+* Hunt weapon audio uses semantic cues from `HuntAudioCatalog`; unrelated chat signatures must never be used as hit sounds. Local original assets may override these cues without being committed to Git.
+* Run `npm run audit:hunt` after hunt audio/BGM changes and `npm run simulate:hunt -- 200` after damage, defense, timing, or action-data changes. The fixed-seed contract targets 60–90% normal-tier win rate, 900–1750 ticks, and 0.3–1.5 carts per hunt.

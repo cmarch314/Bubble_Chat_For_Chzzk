@@ -350,6 +350,11 @@ class HuntCombatAnimator {
         if (weaponCard) {
             const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
             if (isAttack) {
+                const actionEffect = this.createActionEffect(moveName);
+                if (actionEffect) {
+                    weaponCard.appendChild(actionEffect);
+                    this.animationTimers.timeout(() => actionEffect.remove(), 900);
+                }
                 // Default fallback
                 let animClass = 'w-anim-ls';
                 let animDuration = 500;
@@ -426,6 +431,21 @@ class HuntCombatAnimator {
                 }, 150);
             }
         }
+    }
+
+    createActionEffect(moveName = '') {
+        if (typeof document === 'undefined') return null;
+        const name = String(moveName || '');
+        let kind = 'sever';
+        if (/포격|용격|폭발|초고출력|속성해방|기폭/.test(name)) kind = 'explosive';
+        else if (/탄|사격|화살|저격/.test(name)) kind = 'projectile';
+        else if (/간파|카운터|상쇄|가드 포인트|태클/.test(name)) kind = 'counter';
+        else if (/해머|쿵|방패치기|어퍼|빅뱅|연주|향옥/.test(name)) kind = 'blunt';
+        else if (/난무|연참|연격|기관용탄/.test(name)) kind = 'multi';
+        const effect = document.createElement('span');
+        effect.className = `hunt-action-effect hunt-action-effect-${kind}`;
+        effect.setAttribute('aria-hidden', 'true');
+        return effect;
     }
 
     shakeMonster() {

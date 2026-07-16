@@ -178,7 +178,11 @@ class HuntHunterTurnExecutor {
 
         // Execute combos
         const combos = engine.COMBO_LIST[w.id] || [];
-        let currentCombo = combos[w.comboIndex];
+        const selectedAction = engine.weaponActionSelector
+            ? engine.weaponActionSelector.select(w, combos, { monsterDowned: engine.monsterState === 'knocked_down' })
+            : { action: combos[w.comboIndex], index: w.comboIndex };
+        let currentCombo = selectedAction.action;
+        if (selectedAction.index >= 0) w.comboIndex = selectedAction.index;
         let isKnockdownAttack = false;
 
         let bypassKnockdownMaxDmg = w.id === 'great_sword';
@@ -293,6 +297,9 @@ class HuntHunterTurnExecutor {
             if (w.id === 'dual_blades' && w.demonModeDuration > 0) {
                 damage = Math.floor(damage * 1.2);
             }
+            if (engine.teamTactic === 'offensive') damage = Math.floor(damage * 1.08);
+            else if (engine.teamTactic === 'defensive') damage = Math.floor(damage * 0.95);
+            else if (engine.teamTactic === 'support') damage = Math.floor(damage * 0.98);
 
             // Charge Blade special phial costs
             if (w.id === 'charge_blade') {
@@ -411,6 +418,7 @@ class HuntHunterTurnExecutor {
 
             // Apply Damage to Monster
             engine.monsterHp = Math.max(0, engine.monsterHp - damage);
+            if (engine.telemetry) engine.telemetry.recordHunterAction(w.id, currentCombo, damage);
             engine.updateMonsterHpUI();
 
             if (engine.selectedMonster.id.includes('valstrax') && engine.monsterState === 'valstrax_charging') {
@@ -428,24 +436,8 @@ class HuntHunterTurnExecutor {
             // Check monster knockdown milestones
             engine.checkMonsterKnockdown();
 
-            // Hit sound triggers
-            let soundKey = '';
-            if (currentCombo.name && (currentCombo.name.includes('회전 회오리') || currentCombo.name.includes('회전회오리'))) {
-                soundKey = '회전회오리';
-            } else if (currentCombo.soundKey) {
-                if (Array.isArray(currentCombo.soundKey)) {
-                    soundKey = currentCombo.soundKey[Math.floor(engine.random() * currentCombo.soundKey.length)];
-                } else {
-                    soundKey = currentCombo.soundKey;
-                }
-            } else if (currentCombo.stun && currentCombo.stun > 0) {
-                soundKey = '타격음_베기';
-            } else if (currentCombo.dmg > 300) {
-                soundKey = '타격음_무겁';
-            } else {
-                soundKey = '타격음_베기';
-            }
-            engine.playSFX(null, soundKey);
+            // Weapon sounds are semantic layered cues, never unrelated chat signatures.
+            engine.playSFX(currentCombo.audioCue || 'slash_light', null);
 
             if (isKnockdownAttack) {
                 engine.addLog(`✨ [대경직 찬스!] ${w.name}이(가) 최강 기술 [${currentCombo.name}] 시전! (-${damage} HP)`, '#ff9500');
@@ -483,11 +475,10 @@ class HuntHunterTurnExecutor {
 
             // Advance combo index (except during knockdown)
             if (!isKnockdownAttack) {
-                if (w.id === 'great_sword' && w.comboIndex === 3) {
-                    w.comboIndex = 1;
-                } else {
-                    w.comboIndex = (w.comboIndex + 1) % combos.length;
-                }
+                w.lastActionId = currentCombo.id;
+                w.comboIndex = engine.weaponActionSelector
+                    ? engine.weaponActionSelector.nextIndex(w, combos, currentCombo)
+                    : (w.comboIndex + 1) % combos.length;
             }
         }
     }

@@ -14,9 +14,9 @@ class HuntAudioManager {
         this.lastBgmResolution = null;
     }
 
-    getMonsterBgm(monster) {
+    getMonsterBgm(monster, options = {}) {
         if (monster && typeof monster === 'object') {
-            this.lastBgmResolution = this.bgmResolver.resolve(monster);
+            this.lastBgmResolution = this.bgmResolver.resolve(monster, options);
             if (this.lastBgmResolution.track) return this.lastBgmResolution.track;
         }
         const monsterName = typeof monster === 'string' ? monster : (monster && (monster.nameKO || monster.nameEN)) || '';
@@ -83,6 +83,11 @@ class HuntAudioManager {
         return 'BGM/MHGU_Arena.mp3';
     }
 
+    getSelectedHabitatLabel() {
+        const habitatId = this.lastBgmResolution && this.lastBgmResolution.habitatId;
+        return habitatId && window.HUNT_HABITAT_LABELS ? window.HUNT_HABITAT_LABELS[habitatId] || habitatId : '';
+    }
+
     playMonsterRoar(monster) {
         if (!monster) return;
         
@@ -90,7 +95,7 @@ class HuntAudioManager {
         const cleanId = monster.id.toLowerCase().replace(/[-']/g, '_');
         
         // 2. Subspecies and Variant Routing Dictionary
-        const routingMap = {
+        const routingMap = window.HUNT_ROAR_ROUTE || {
             // Rathalos Family
             'azure_rathalos': 'rathalos',
             'silver_rathalos': 'rathalos',
@@ -171,21 +176,10 @@ class HuntAudioManager {
     }
 
     playMHAsset(fileName, fallbackKey) {
-        // Blacklist hit/damage sound effects to completely silence them as requested
-        const blacklist = ['mh_blunt_hit.mp3', 'mh_heavy_hit.mp3', 'mh_slash_hit.mp3'];
-        if (fileName && blacklist.some(f => fileName.toLowerCase().endsWith(f) || fileName.toLowerCase() === f)) {
-            console.log(`[Audio Blacklist] Blocked playing asset: ${fileName}`);
-            return;
-        }
+        if (fileName && this.playWeaponCue(fileName)) return;
 
         const soundConfig = this.config.getSoundConfig();
         if (fallbackKey && soundConfig[fallbackKey]) {
-            // Also check if fallbackKey resolves to one of the blacklisted files
-            const fallbackSrc = (soundConfig[fallbackKey].src || "").toLowerCase();
-            if (blacklist.some(f => fallbackSrc.endsWith(f) || fallbackSrc === f)) {
-                console.log(`[Audio Blacklist] Blocked fallback key: ${fallbackKey} (${fallbackSrc})`);
-                return;
-            }
             this.director.eventBus.emit('audio:playVisualSound', soundConfig[fallbackKey]);
             return;
         }
@@ -197,14 +191,26 @@ class HuntAudioManager {
         }
     }
 
+    playWeaponCue(cue) {
+        const layers = window.HUNT_WEAPON_AUDIO_CUES || {};
+        const selected = layers[cue];
+        if (!selected) return false;
+        selected.forEach(([path, volume], index) => {
+            this.timers.timeout(() => {
+                try {
+                    const audio = this.director.audioManager.createNativeAudio(path, {
+                        type: 'sfx', baseVolume: volume
+                    });
+                    audio.play().catch(() => {});
+                } catch (error) {
+                    console.warn(`[HuntAudio] Failed cue layer ${cue}: ${path}`, error);
+                }
+            }, index * 35);
+        });
+        return true;
+    }
+
     playMHAudioFile(subPath, durationLimitMs = null, volumeMultiplier = 1.0) {
-        // Blacklist hit/damage sound effects to completely silence them as requested
-        const blacklist = ['mh_blunt_hit.mp3', 'mh_heavy_hit.mp3', 'mh_slash_hit.mp3'];
-        if (subPath && blacklist.some(f => subPath.toLowerCase().includes(f))) {
-            console.log(`[Audio Blacklist] Blocked playing audio file: ${subPath}`);
-            return;
-        }
-        
         const filePath = `MonsterHunter_Soundtracks/${subPath}`;
         try {
             // Native playback is required for OBS file:// compatibility. Loudness

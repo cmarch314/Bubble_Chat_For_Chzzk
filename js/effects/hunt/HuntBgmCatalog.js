@@ -9,9 +9,15 @@ const HUNT_BGM_LOCALES = {
     kamura: ['BGM/MHR_Kamura.mp3', 'BGM/MHGU_Arena.mp3'],
     arena: ['BGM/MHGU_Arena.mp3']
 };
+const HUNT_HABITAT_LABELS = {
+    ancient_forest: '고대수의 숲', wildspire_waste: '개밋둑의 황야', coral_highlands: '육산호의 대지',
+    rotten_vale: '독기의 골짜기', elders_recess: '용결정의 땅', hoarfrost_reach: '바다 건너 극한지',
+    old_world: '구대륙 수렵지', kamura: '카무라 권역', arena: '결전장'
+};
 
 const HUNT_DEDICATED_THEMES = {
-    zinogre: ['BGM/MHW_Zinogre.mp3'],
+    // Zinogre is intentionally routed through habitat music until a verified
+    // dedicated file is supplied; the previous file duplicated Proof of a Hero.
     mizutsune: ['BGM/MHR_Mizutsune.mp3'],
     velkhana: ['BGM/MHW_Velkhana.mp3'],
     nergigante: ['BGM/MHW_Nergigante.mp3'],
@@ -81,9 +87,10 @@ registerHuntHabitats([
 registerHuntHabitats(['aptonoth', 'vespoid'], ['ancient_forest', 'wildspire_waste'], 'latest_available');
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { HUNT_BGM_LOCALES, HUNT_DEDICATED_THEMES, HUNT_MONSTER_HABITATS };
+    module.exports = { HUNT_BGM_LOCALES, HUNT_HABITAT_LABELS, HUNT_DEDICATED_THEMES, HUNT_MONSTER_HABITATS };
 } else {
     window.HUNT_BGM_LOCALES = HUNT_BGM_LOCALES;
+    window.HUNT_HABITAT_LABELS = HUNT_HABITAT_LABELS;
     window.HUNT_DEDICATED_THEMES = HUNT_DEDICATED_THEMES;
     window.HUNT_MONSTER_HABITATS = HUNT_MONSTER_HABITATS;
 }

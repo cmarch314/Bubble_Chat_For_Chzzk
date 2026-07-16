@@ -8,6 +8,8 @@ const huntLifecycleCode = fs.readFileSync(path.join(__dirname, '../js/effects/hu
 eval(huntLifecycleCode + "; globalThis.HuntLifecycle = HuntLifecycle;");
 const participantParserCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntParticipantParser.js'), 'utf8');
 eval(participantParserCode + "; globalThis.HuntParticipantParser = HuntParticipantParser;");
+const chatTacticsCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntChatTactics.js'), 'utf8');
+eval(chatTacticsCode + "; globalThis.HuntChatTactics = HuntChatTactics;");
 
 // Mock frontend globals
 global.BaseEffect = class BaseEffect {

@@ -7,6 +7,8 @@ const huntLifecycleCode = fs.readFileSync(path.join(__dirname, '../js/effects/hu
 eval(huntLifecycleCode + "; globalThis.HuntLifecycle = HuntLifecycle;");
 const participantParserCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntParticipantParser.js'), 'utf8');
 eval(participantParserCode + "; globalThis.HuntParticipantParser = HuntParticipantParser;");
+const chatTacticsCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntChatTactics.js'), 'utf8');
+eval(chatTacticsCode + "; globalThis.HuntChatTactics = HuntChatTactics;");
 
 function createMockElement() {
   const el = {
@@ -73,6 +75,10 @@ globalThis.HuntAudioManager = class HuntAudioManager {
 
 const huntDataCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntData.js'), 'utf8');
 eval(huntDataCode);
+const weaponCatalogCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntWeaponCatalog.js'), 'utf8');
+eval(weaponCatalogCode + "; globalThis.HuntWeaponCatalog = HuntWeaponCatalog;");
+const monsterPatternCatalogCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntMonsterPatternCatalog.js'), 'utf8');
+eval(monsterPatternCatalogCode + "; globalThis.HuntMonsterPatternCatalog = HuntMonsterPatternCatalog;");
 
 const huntInitializerCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntInitializer.js'), 'utf8');
 eval(huntInitializerCode + "; globalThis.HuntInitializer = HuntInitializer;");
@@ -103,7 +109,9 @@ async function runTests() {
   console.log("🧪 Running Charge Blade Shield Charge & SAED Requirement tests...");
   
   const hunt = new HuntEffect(director);
-  const combos = hunt.initializer.COMBO_LIST['charge_blade'];
+  // Preserve the legacy eight-step regression fixture; supplemental Wilds
+  // actions are covered by the conditional catalog tests.
+  const combos = hunt.initializer.COMBO_LIST['charge_blade'].slice(0, 8);
   
   // Setup Charge Blade hunter
   const w = {

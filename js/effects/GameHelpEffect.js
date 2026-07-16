@@ -48,7 +48,7 @@ class GameHelpEffect extends BaseEffect {
                         <span class="game-help-cmd">!토벌</span>
                     </div>
                     <div class="game-help-desc">
-                        무작위 4개의 무기가 몬스터와 대결합니다. 투표 시간 동안 생존할 무기 번호(1~4)를 쳐서 투표하고, 전투 종료 시 최후의 1인 무기가 10초간의 최후 결전을 버텨내면 수렵에 성공하여 투표한 시청자가 승리합니다. (시작: 스트리머 전용)
+                        무기 번호(1~4)로 참가한 뒤 전투 중 <strong>!공격/!안전/!지원</strong>으로 작전을 투표합니다. 참가자는 <strong>!회피/!가드</strong>, 모든 시청자는 공동 게이지로 <strong>!회복/!섬광/!함정/!낙석</strong>을 사용할 수 있습니다. (시작: 스트리머 전용)
                     </div>
                 </div>
 

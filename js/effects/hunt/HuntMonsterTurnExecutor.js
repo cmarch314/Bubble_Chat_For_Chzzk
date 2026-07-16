@@ -4,14 +4,29 @@ class HuntMonsterTurnExecutor {
         const targetable = engine.selectedWeapons.filter(w => w.status === 'alive');
         if (targetable.length === 0) return;
 
-        const maxTargets = Math.min(4, targetable.length);
-        const numTargets = Math.floor(engine.random() * maxTargets) + 1;
+        const monsterKey = engine.selectedMonster.id.replace(/-/g, '_').replace(/'/g, '');
+        const list = engine.MONSTER_PATTERNS[monsterKey] || engine.MONSTER_PATTERNS[engine.selectedMonster.id] || engine.MONSTER_PATTERNS.default;
+        const pattern = engine.monsterPatternSelector
+            ? engine.monsterPatternSelector.select(engine.selectedMonster, list, {
+                state: engine.monsterState,
+                hpRatio: engine.monsterHp / engine.monsterMaxHp
+            })
+            : list[Math.floor(engine.random() * list.length)];
+        if (!pattern) return;
+        const attackName = pattern.name;
+
+        if (pattern.type === 'roar') {
+            if (engine.telemetry) engine.telemetry.recordMonsterPattern(engine.selectedMonster.id, pattern, 'roar', 0);
+            engine.triggerMonsterRoarFlinch(false);
+            engine.monsterRecoveryDuration = pattern.recoveryTicks || 8;
+            return;
+        }
+
+        const maxTargets = Math.min(pattern.maxTargets || 1, targetable.length);
+        const minTargets = Math.min(pattern.minTargets || 1, maxTargets);
+        const numTargets = minTargets + Math.floor(engine.random() * (maxTargets - minTargets + 1));
         const shuffledTargets = [...targetable].sort(() => engine.random() - 0.5);
         const targetsToHit = shuffledTargets.slice(0, numTargets);
-
-        const monsterKey = engine.selectedMonster.id.replace(/-/g, '_').replace(/'/g, '');
-        const list = engine.MONSTER_ATTACKS[monsterKey] || engine.MONSTER_ATTACKS[engine.selectedMonster.id] || engine.MONSTER_ATTACKS.default;
-        const attackName = list[Math.floor(engine.random() * list.length)];
 
         engine.showSkillBubble('monster', attackName);
 
@@ -28,8 +43,10 @@ class HuntMonsterTurnExecutor {
         const attackResults = [];
 
         targetsToHit.forEach(target => {
-            let baseDmg = Math.floor(target.maxHp * 0.45);
+            let baseDmg = Math.max(1, Math.floor(target.maxHp * Number(pattern.damageRatio || 0.22)));
             let damage = Math.floor(baseDmg * dmgMod * (engine.monsterDamageMod || 1.0));
+            if (engine.teamTactic === 'defensive') damage = Math.max(1, Math.floor(damage * 0.88));
+            else if (engine.teamTactic === 'offensive') damage = Math.max(1, Math.floor(damage * 1.05));
 
             const actionMachine = engine.actionStateMachine;
 
@@ -75,6 +92,7 @@ class HuntMonsterTurnExecutor {
                 engine.shakeWeapon(target.index, '#ff9500');
                 if (engine.callbacks.onTriggerGuardShake) engine.callbacks.onTriggerGuardShake(target.index);
                 attackResults.push({ index: target.index, result: 'tackle' });
+                if (engine.telemetry) engine.telemetry.recordMonsterPattern(engine.selectedMonster.id, pattern, 'guard', damage);
                 if (target.hp <= 0) {
                     engine.triggerHunterCart(target);
                 }
@@ -91,24 +109,30 @@ class HuntMonsterTurnExecutor {
             const actionAllowsGuard = !actionMachine || actionMachine.canGuard(target);
             const actionAllowsEvade = !actionMachine || actionMachine.canEvade(target);
             const hasShield = !isStunned && actionAllowsGuard && (target.type === 'shield' || target.id === 'heavy_bowgun');
-            let guardProb = isStunned ? 0 : 0.85;
-            let dodgeProb = isStunned || !actionAllowsEvade ? 0 : 0.75;
+            let guardProb = isStunned ? 0 : 0.62;
+            let dodgeProb = isStunned || !actionAllowsEvade ? 0 : 0.48;
 
             // Personality-based dodge modifiers
-            let foresightProb = 0.70;
+            let foresightProb = 0.55;
             if (target.personality === 'veteran') {
-                guardProb = 0.90;
-                dodgeProb = 0.90;
-                foresightProb = 0.90;
+                guardProb = 0.78;
+                dodgeProb = 0.75;
+                foresightProb = 0.78;
             } else if (target.personality === 'newbie') {
-                guardProb = 0.45;
-                dodgeProb = 0.35;
-                foresightProb = 0.25;
+                guardProb = 0.30;
+                dodgeProb = 0.22;
+                foresightProb = 0.20;
             }
+            if (!actionAllowsGuard) guardProb = 0;
+            if (!actionAllowsEvade) dodgeProb = 0;
+            if (actionAllowsGuard) guardProb = Math.min(0.97, guardProb + Number(target.nextGuardBoost || 0));
+            if (actionAllowsEvade) dodgeProb = Math.min(0.97, dodgeProb + Number(target.nextEvadeBoost || 0));
+            target.nextGuardBoost = 0;
+            target.nextEvadeBoost = 0;
 
             // [FIX] 랜스 가드 확률 10% 가산
             if (!isStunned && target.id === 'lance') {
-                guardProb = Math.min(1.0, guardProb + 0.10);
+                guardProb = Math.min(0.92, guardProb + 0.12);
             }
 
             // Long Sword Foresight Slash
@@ -119,7 +143,7 @@ class HuntMonsterTurnExecutor {
                 isForesightSlash = true;
                 target.spiritLevel = Math.min(3, (target.spiritLevel || 0) + 1);
             } else if (hasShield && defendRoll < guardProb) {
-                damage = Math.max(1, Math.floor(damage * 0.08));
+                damage = Math.max(1, Math.floor(damage * 0.20));
                 isGuard = true;
             } else if (!hasShield && defendRoll < dodgeProb) {
                 damage = 0;
@@ -195,9 +219,10 @@ class HuntMonsterTurnExecutor {
             // Faint check
             if (target.hp <= 0) {
                 engine.triggerHunterCart(target);
+                if (engine.telemetry) engine.telemetry.recordCart();
             } else {
                 // Stun check (15% chance on raw damage)
-                if (target.status === 'alive' && engine.random() < 0.15) {
+                if (damage > 0 && target.status === 'alive' && engine.random() < 0.15) {
                     target.status = 'stunned';
                     target.stunDuration = 50;
                     target.atb = 0;
@@ -208,6 +233,14 @@ class HuntMonsterTurnExecutor {
                     if (engine.callbacks.onTriggerStunUI) engine.callbacks.onTriggerStunUI(target.index, true);
                 }
             }
+            if (engine.telemetry) {
+                engine.telemetry.recordMonsterPattern(
+                    engine.selectedMonster.id,
+                    pattern,
+                    isDodge ? 'dodge' : isGuard ? 'guard' : 'hit',
+                    damage
+                );
+            }
         });
 
         // Trigger dynamic monster attack animation
@@ -215,5 +248,9 @@ class HuntMonsterTurnExecutor {
         if (engine.callbacks.onTriggerMonsterAttack) {
             engine.callbacks.onTriggerMonsterAttack(attackType, emoji, attackResults, attackName);
         }
+        engine.monsterRecoveryDuration = Math.max(1, Math.round(
+            (pattern.recoveryTicks || 7)
+            * (engine.monsterState === 'enraged' ? 0.7 : engine.monsterState === 'exhausted' ? 1.5 : 1)
+        ));
     }
 }

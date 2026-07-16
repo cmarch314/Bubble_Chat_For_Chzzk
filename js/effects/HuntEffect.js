@@ -19,6 +19,7 @@ class HuntEffect extends BaseEffect {
         this.audioManager = new HuntAudioManager(director, this.config);
         this.initializer = new HuntInitializer();
         this.participantParser = new HuntParticipantParser();
+        this.chatTactics = new HuntChatTactics();
         this.engine = null;
 
         // Static emoji mapping for victory emotions (purely emotion/gesture based, no items)
@@ -56,6 +57,7 @@ class HuntEffect extends BaseEffect {
         this.isActive = true;
         this.phase = 'voting';
         this.bets = {};
+        this.chatTactics.reset();
 
         // Reset audio
         this.audioManager.stopBgms();
@@ -213,6 +215,14 @@ class HuntEffect extends BaseEffect {
                 return true;
             }
         } else if (this.phase === 'fighting' || this.phase === 'ended') {
+            if (this.phase === 'fighting') {
+                const tacticalResult = this.chatTactics.handle(this.engine, msgData, msg);
+                if (tacticalResult.handled) {
+                    const tacticalHunter = this.selectedWeapons.find(w => w.hunterName === msgData.nickname);
+                    if (tacticalHunter) this.renderer.spawnCombatChatBubble(tacticalHunter.index, tacticalResult.feedback);
+                    return true;
+                }
+            }
             const hunter = this.selectedWeapons.find(w => w.hunterName === msgData.nickname);
             if (hunter && msg) {
                 this.renderer.spawnCombatChatBubble(hunter.index, msg);
@@ -316,9 +326,10 @@ class HuntEffect extends BaseEffect {
                 type: 'visual', baseVolume: 0.315, loop: true
             });
             this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(() => {
-                this.audioManager.battleBgm.src = 'BGM/MHGU_Arena.mp3';
+                const fallbackBgm = this.audioManager.getMonsterBgm(this.selectedMonster, { preferDedicated: false });
+                this.audioManager.battleBgm.src = fallbackBgm;
                 this.director.audioManager.applyNativeVolume(this.audioManager.battleBgm, {
-                    type: 'visual', path: 'BGM/MHGU_Arena.mp3', baseVolume: 0.315
+                    type: 'visual', path: fallbackBgm, baseVolume: 0.315
                 });
                 this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(err => {
                     this.audioManager.battleBgm.src = 'BGM/MHW_Proof_of_a_Hero.mp3';
@@ -346,9 +357,11 @@ class HuntEffect extends BaseEffect {
         this.cartCount = 0;
 
         const actionLabel = (this.monsterTier === 'elder' || this.monsterTier === 'colossal') ? '토벌' : '수렵';
-        const hpLabelText = this.consecutiveTotal > 1 
-            ? `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`
-            : `👾 [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
+        const habitatLabel = this.audioManager.getSelectedHabitatLabel();
+        const habitatSuffix = habitatLabel ? ` · 🗺️ ${habitatLabel}` : '';
+        const hpLabelText = this.consecutiveTotal > 1
+            ? `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO}${habitatSuffix} [체력]`
+            : `👾 [${this.tierLabel}] ${this.selectedMonster.nameKO}${habitatSuffix} [체력]`;
 
         const timeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 180;
         this.renderer.renderFight({
@@ -377,6 +390,7 @@ class HuntEffect extends BaseEffect {
             monsterStunThreshold: baseStunThreshold,
             tierLabel: this.tierLabel,
             MONSTER_ATTACKS: this.initializer.MONSTER_ATTACKS,
+            MONSTER_PATTERNS: this.initializer.MONSTER_PATTERNS,
             COMBO_LIST: this.initializer.COMBO_LIST,
             SHOW_MONSTER_HP: this.SHOW_MONSTER_HP,
             hunterSpeedMultiplier: this.config.getHuntConfig()?.hunterSpeedMultiplier !== undefined ? this.config.getHuntConfig().hunterSpeedMultiplier : 1.15,
@@ -624,14 +638,23 @@ class HuntEffect extends BaseEffect {
             this.audioManager.battleBgm = this.director.audioManager.createNativeAudio(bgmSrc, {
                 type: 'visual', baseVolume: 0.315, loop: true
             });
-            this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(e => console.warn("Battle BGM failed:", e));
+            this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(() => {
+                const fallbackBgm = this.audioManager.getMonsterBgm(this.selectedMonster, { preferDedicated: false });
+                this.audioManager.battleBgm.src = fallbackBgm;
+                this.director.audioManager.applyNativeVolume(this.audioManager.battleBgm, {
+                    type: 'visual', path: fallbackBgm, baseVolume: 0.315
+                });
+                return this.audioManager.battleBgm.play().catch(e => console.warn("Battle BGM failed:", e));
+            });
         } catch (e) {
             console.warn("Audio error:", e);
         }
 
         // Re-render Fighting UI header/monster showcase
         const actionLabel = (this.monsterTier === 'elder' || this.monsterTier === 'colossal') ? '토벌' : '수렵';
-        const hpLabelText = `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO} [체력]`;
+        const habitatLabel = this.audioManager.getSelectedHabitatLabel();
+        const habitatSuffix = habitatLabel ? ` · 🗺️ ${habitatLabel}` : '';
+        const hpLabelText = `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO}${habitatSuffix} [체력]`;
         const resumeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 180;
         this.renderer.renderFight({
             hpLabelText,

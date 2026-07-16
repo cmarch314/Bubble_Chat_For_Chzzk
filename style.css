@@ -5798,6 +5798,82 @@ body {
     animation: hunter-roar-vibrate 0.15s linear infinite !important;
 }
 
+/* Timeline-synchronised action accents. These sit inside the 1080p hunter card. */
+.hunt-action-effect {
+    position: absolute;
+    left: 50%;
+    top: 45%;
+    width: 110px;
+    height: 110px;
+    z-index: 12;
+    pointer-events: none;
+    transform-origin: center;
+}
+.hunt-action-effect-sever {
+    border-top: 7px solid rgba(225, 245, 255, .95);
+    border-radius: 50%;
+    filter: drop-shadow(0 0 8px #60dfff);
+    animation: hunt-sever-accent .55s ease-out forwards;
+}
+.hunt-action-effect-blunt {
+    border: 7px solid rgba(255, 196, 64, .9);
+    border-radius: 50%;
+    animation: hunt-blunt-accent .6s ease-out forwards;
+}
+.hunt-action-effect-projectile {
+    width: 150px;
+    height: 5px;
+    background: linear-gradient(90deg, transparent, #fff, #62d7ff);
+    box-shadow: 0 0 12px #62d7ff;
+    animation: hunt-projectile-accent .5s ease-out forwards;
+}
+.hunt-action-effect-explosive {
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0 8%, #ffdf5d 9% 24%, #ff5c24 25% 43%, transparent 65%);
+    animation: hunt-explosive-accent .7s ease-out forwards;
+}
+.hunt-action-effect-counter {
+    border: 5px solid #7fffe1;
+    transform: rotate(45deg);
+    box-shadow: 0 0 18px #00ffc8, inset 0 0 18px #00ffc8;
+    animation: hunt-counter-accent .65s ease-out forwards;
+}
+.hunt-action-effect-multi {
+    border: 5px dashed #ff7dca;
+    border-radius: 50%;
+    animation: hunt-multi-accent .75s linear forwards;
+}
+@keyframes hunt-sever-accent {
+    0% { opacity: 0; transform: translate(-80%, 40%) rotate(-55deg) scale(.4); }
+    35% { opacity: 1; }
+    100% { opacity: 0; transform: translate(20%, -60%) rotate(35deg) scale(1.45); }
+}
+@keyframes hunt-blunt-accent {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(.15); }
+    55% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7); }
+}
+@keyframes hunt-projectile-accent {
+    0% { opacity: 0; transform: translate(-90%, 20%) rotate(-20deg) scaleX(.2); }
+    25% { opacity: 1; }
+    100% { opacity: 0; transform: translate(40%, -60%) rotate(-20deg) scaleX(1.6); }
+}
+@keyframes hunt-explosive-accent {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(.1); }
+    40% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(2); filter: blur(2px); }
+}
+@keyframes hunt-counter-accent {
+    0% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(.2); }
+    35% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) rotate(135deg) scale(1.35); }
+}
+@keyframes hunt-multi-accent {
+    0% { opacity: 0; transform: translate(-50%, -50%) rotate(0) scale(.3); }
+    30% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50%) rotate(540deg) scale(1.6); }
+}
+
 /* 14 Custom Weapon Attack Animations (Only moves the weapon image icon) */
 .w-anim-gs {
     animation: w-gs-smash 0.9s cubic-bezier(0.3, 0.8, 0.3, 1.1) forwards;
