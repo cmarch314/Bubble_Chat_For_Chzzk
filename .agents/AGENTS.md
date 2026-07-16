@@ -17,6 +17,7 @@ d:/BubbleChat/
 ├── js/                         # JavaScript Modules
 │   ├── ConfigManager.js        # Config settings loader (config.js / LocalStorage)
 │   ├── AudioManager.js         # Sound effects explorer & exclusion/rename router
+│   ├── audio/AudioCommandMatcher.js # Chat SFX normalization and deterministic keyword matching
 │   ├── MessageRouter.js        # Main chat command interceptor & router
 │   ├── VisualDirector.js       # Active overlay controller & activeGame manager
 │   ├── ChatRenderer.js         # Chat bubble rendering, text filters & video commands
@@ -50,7 +51,8 @@ d:/BubbleChat/
    - `config.js` acts as the source-of-truth configuration file. 
    - `ConfigManager.js` encapsulates configuration access, resolving properties in order: `config.js` variables -> `localStorage` overrides.
 2. **Audio Staging**:
-   - `AudioManager.js` coordinates all sound playing. It handles exclusions and virtual renames by mapping virtual paths to physical paths on disk dynamically before playing.
+   - `AudioManager.js` coordinates playback, gain staging, media lifecycle, exclusions, and virtual path renames.
+   - `audio/AudioCommandMatcher.js` owns catalog normalization, visual-sound exclusion, longest-keyword selection, and repeated-character suppression. Keep chat matching rules out of the playback engine.
 3. **Chat Commands & Directing**:
    - `MessageRouter.js` checks chat messages. Streamer commands (`!퀴즈`, `!경마`, `!레이드`, `!토벌`, `!커맨드`) trigger visual overlays in `VisualDirector.js`.
    - `VisualDirector.js` maintains an `activeGame` pointer. If a mini-game or overlay is active, standard chat messages are routed to its `.handleChat(msgData)` first.

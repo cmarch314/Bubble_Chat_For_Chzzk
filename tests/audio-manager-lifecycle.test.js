@@ -51,9 +51,10 @@ const context = vm.createContext({
 const scopePath = path.resolve(__dirname, '../js/runtime/DisposableScope.js');
 const timersPath = path.resolve(__dirname, '../js/runtime/ManagedTimers.js');
 const profilePath = path.resolve(__dirname, '../js/runtime/AudioLevelProfile.js');
+const matcherPath = path.resolve(__dirname, '../js/audio/AudioCommandMatcher.js');
 const busPath = path.resolve(__dirname, '../js/EventBus.js');
 const audioPath = path.resolve(__dirname, '../js/AudioManager.js');
-const source = [scopePath, timersPath, profilePath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
+const source = [scopePath, timersPath, profilePath, matcherPath, busPath, audioPath].map(file => fs.readFileSync(file, 'utf8')).join('\n')
     + '\nglobalThis.Exports = { AudioManager, EventBus };';
 vm.runInContext(source, context, { filename: audioPath });
 

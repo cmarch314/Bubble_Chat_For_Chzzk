@@ -16,6 +16,7 @@ class AudioManager {
         this.activeFallbackAudio = new Set();
         this.disposed = false;
         this.basePath = './SFX/';
+        this.commandMatcher = new AudioCommandMatcher(configManager);
         this.levelProfile = typeof AudioLevelProfile === 'function'
             ? new AudioLevelProfile(window.HIVE_AUDIO_LEVELS || {})
             : { gain: () => 1, volume: (path, volume) => Math.min(1, Math.max(0, volume)) };
@@ -153,32 +154,9 @@ class AudioManager {
     }
 
     _buildVisualAudioPaths() {
-        const vConf = this.configManager.getVisualConfig();
-        const sConf = this.configManager.getSoundConfig();
-        if (!vConf || !sConf) return;
-
-        Object.values(vConf).forEach(effect => {
-            const addKey = (key) => {
-                const mapped = sConf[key];
-                if (!mapped) return;
-                const getSrc = (item) => (typeof item === 'object' ? item.src : item) || "";
-                
-                const processPath = (src) => {
-                    if (!src) return;
-                    const path = this.resolveAudioPath(src);
-                    this.visualAudioPaths.add(path);
-                };
-
-                if (Array.isArray(mapped)) {
-                    mapped.forEach(item => processPath(getSrc(item)));
-                } else {
-                    processPath(getSrc(mapped));
-                }
-            };
-
-            if (effect.soundKey) addKey(effect.soundKey);
-            if (effect.audioOverride) addKey(effect.audioOverride);
-        });
+        this.visualAudioPaths = this.commandMatcher.buildVisualAudioPaths(
+            source => this.resolveAudioPath(source)
+        );
     }
 
     connectMediaElement(mediaElement, type = 'visual', options = {}) {
@@ -292,21 +270,8 @@ class AudioManager {
 
     // [Legacy] 기존 updateConfig -> updateConfigLegacy로 이름 변경 or 유지
     updateConfigLegacy(config) {
-        this.soundHive = {};
-        const processItem = (item) => {
-            const prependSfx = (src) => {
-                if (!src) return src;
-                if (src.startsWith('SFX/') || src.startsWith('./SFX/')) return src;
-                return `SFX/${src}`;
-            };
-            if (typeof item === 'string') return prependSfx(item);
-            else if (typeof item === 'object' && item !== null && item.src) return { ...item, src: prependSfx(item.src) };
-            return item;
-        };
-        for (const [key, value] of Object.entries(config)) {
-            if (Array.isArray(value)) this.soundHive[key] = value.map(processItem);
-            else this.soundHive[key] = processItem(value);
-        }
+        this.soundHive = this.commandMatcher.normalizeCatalog(config);
+        this.commandMatcher.setSoundHive(this.soundHive);
     }
 
     updateVolumeConfig(config) {
@@ -357,72 +322,7 @@ class AudioManager {
 
     // [New] Extracts matched SFX sequence for a message
     getSFXSequence(message) {
-        if (!message) return [];
-        // [User Request] 띄어쓰기 상관없이 발동되도록 공백 모두 제거
-        const normOriginal = message.normalize('NFC').replace(/\s+/g, '');
-
-        const visualKeys = new Set();
-        const vConf = this.configManager.getVisualConfig();
-        if (vConf) {
-            Object.keys(vConf).forEach(k => {
-                visualKeys.add(k.normalize('NFC').replace(/\s+/g, ''));
-                const val = vConf[k];
-                if (val && val.soundKey) visualKeys.add(val.soundKey.normalize('NFC').replace(/\s+/g, ''));
-                if (val && val.audioOverride) visualKeys.add(val.audioOverride.normalize('NFC').replace(/\s+/g, ''));
-            });
-        }
-
-        const lowerOriginal = normOriginal.toLowerCase(); // Case-insensitive matching
-
-        let allMatches = [];
-        Object.keys(this.soundHive).forEach(keyword => {
-            const originalNormKey = keyword.normalize('NFC');
-            const normKey = originalNormKey.replace(/\s+/g, ''); // 키워드의 공백도 제거
-            if (normKey.length === 0) return; // 빈 키워드 방지
-
-            const lowerKey = normKey.toLowerCase();
-            if (visualKeys.has(normKey)) return;
-
-            let searchPos = 0, index;
-            while ((index = lowerOriginal.indexOf(lowerKey, searchPos)) !== -1) {
-                allMatches.push({
-                    startIndex: index,
-                    endIndex: index + normKey.length,
-                    length: normKey.length,
-                    sound: this.soundHive[keyword],
-                    keyword: originalNormKey // 원본 키워드 유지 (중복 방지용)
-                });
-                searchPos = index + 1;
-            }
-        });
-
-        allMatches.sort((a, b) => (a.startIndex === b.startIndex) ? b.length - a.length : a.startIndex - b.startIndex);
-
-        let sequence = [], lastEnd = 0;
-        let usedKeywords = new Set();
-
-        for (let match of allMatches) {
-            if (match.startIndex >= lastEnd) {
-                const firstChar = match.keyword[0];
-                const isSingleCharRepeat = match.keyword.length > 1 && match.keyword.split('').every(c => c === firstChar);
-
-                // [사용자 피드백 반영]
-                // 1. "ㅋㅋㅋㅋ" 같은 한 글자 반복형 키워드만 딱 한 번만 나오도록 제한
-                if (isSingleCharRepeat && usedKeywords.has(match.keyword)) continue;
-
-                sequence.push(match);
-                lastEnd = match.endIndex;
-                usedKeywords.add(match.keyword);
-
-                // 2. 한 글자 반복형인 경우, 뒤에 붙어있는 똑같은 글자들을 모두 건너뜁니다 (중복 방지)
-                if (isSingleCharRepeat) {
-                    while (lastEnd < normOriginal.length && normOriginal[lastEnd] === firstChar) {
-                        lastEnd++;
-                    }
-                }
-            }
-        }
-        return sequence;
+        return this.commandMatcher.match(message);
     }
 
     // 소리만 재생 (채팅 트리거용 - Legacy Logic 유지)
