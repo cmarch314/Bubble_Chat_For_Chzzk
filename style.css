@@ -149,6 +149,78 @@ body {
   transition: opacity 0.2s, max-height .8ms, margin-top 30ms;
 }
 
+.chat-box--clown {
+  bottom: 0;
+  width: 520px;
+  max-width: min(520px, 96vw);
+}
+
+.chat-box--clown .chat-line-bg {
+  border-radius: 24px;
+}
+
+.chat-line .chat-line-inner.chat-line-inner--clown {
+  display: flex;
+  position: relative;
+  min-height: 286px;
+  margin-bottom: 8px;
+  align-items: stretch;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  border: 6px solid #0a0a0a;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.08) 28%, rgba(0,0,0,.72) 100%),
+    url('img/광대.jpg') center / cover no-repeat;
+  box-shadow: 0 7px 20px rgba(0,0,0,.62), inset 0 0 0 2px rgba(255,255,255,.12);
+}
+
+.name-box.name-box--clown {
+  position: relative;
+  z-index: 2;
+  width: fit-content;
+  max-width: 74%;
+  margin: 10px 0 0 10px;
+  padding: 3px 10px;
+  border: 2px solid rgba(255,255,255,.72);
+  border-radius: 999px;
+  background: rgba(0,0,0,.74) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,.65);
+}
+
+.name-box--clown .user-name {
+  color: #fff !important;
+  font-family: "Arial Black", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: .8em;
+  font-weight: 900;
+  text-shadow: 0 2px 3px #000;
+}
+
+.message.message--clown {
+  display: flex;
+  position: relative;
+  z-index: 2;
+  min-height: 150px;
+  padding: 18px 22px 22px;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: visible;
+  color: #fff;
+  font-family: "Arial Black", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-size: 1.72em;
+  font-weight: 1000;
+  line-height: 1.12;
+  text-align: center;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  -webkit-text-stroke: 5px #050505;
+  paint-order: stroke fill;
+  text-shadow: 0 3px 0 #000, 0 0 8px #000, 0 0 16px rgba(0,0,0,.95);
+}
+
 .chat-line.visible {
   margin-top: 2px;
   max-height: 340px;

@@ -11,6 +11,7 @@ class ChatRenderer {
         this.container = document.getElementById('chat');
         this.boxPos = 0;
         this.activeBubbles = [];
+        this.mediaBubbleController = new ChatMediaBubbleController(this);
 
         if (this.eventBus) {
             this.scope.add(this.eventBus.on('chat:render', (data) => {
@@ -28,7 +29,6 @@ class ChatRenderer {
         this.scope.dispose();
         for (const bubble of this.activeBubbles) bubble?.remove?.();
         this.activeBubbles = [];
-        this.mediaBubbleController = new ChatMediaBubbleController(this);
     }
 
     render(data) {
@@ -38,6 +38,9 @@ class ChatRenderer {
         const originalMessage = normalized.message;
         const normOriginal = normalized.normalizedMessage;
         let displayMessage = normalized.displayMessage;
+        const specialBubble = typeof ChatSpecialBubbleCommand !== 'undefined'
+            ? ChatSpecialBubbleCommand.parse(originalMessage)
+            : null;
 
         // DOM 요소 생성
         const elements = this._createBubbleElements();
@@ -74,7 +77,14 @@ class ChatRenderer {
         let usesSlot = true;
         let timeout = 10000;
 
-        if (videoQueue.length > 0) {
+        if (specialBubble?.kind === 'clown') {
+            chatBox.classList.add('chat-box--clown');
+            chatLineInner.classList.add('chat-line-inner--clown');
+            nameBox.classList.add('name-box--clown');
+            messageEle.classList.add('message--clown');
+            messageEle.textContent = specialBubble.text;
+            timeout = 10000;
+        } else if (videoQueue.length > 0) {
             const mediaResult = this.mediaBubbleController.mount(originalMessage, elements, videoQueue);
             timeout = mediaResult.timeout;
         } else {

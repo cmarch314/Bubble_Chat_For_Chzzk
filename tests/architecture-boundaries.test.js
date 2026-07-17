@@ -18,6 +18,7 @@ assertLoadedBefore('js/audio/AudioCommandMatcher.js', 'js/AudioManager.js');
 assertLoadedBefore('js/audio/AudioMediaStager.js', 'js/AudioManager.js');
 assertLoadedBefore('js/audio/AudioPlaybackEngine.js', 'js/AudioManager.js');
 assertLoadedBefore('js/chat/ChatMediaBubbleController.js', 'js/ChatRenderer.js');
+assertLoadedBefore('js/chat/ChatSpecialBubbleCommand.js', 'js/ChatRenderer.js');
 assertLoadedBefore('js/effects/hunt/HuntMonsterAttackAnimator.js', 'js/effects/hunt/HuntCombatAnimator.js');
 
 const jsRoot = path.join(root, 'js');

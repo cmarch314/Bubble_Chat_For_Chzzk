@@ -82,3 +82,4 @@ assert.match(controllerSource, /video\.duration - 0\.5/);
 assert.match(controllerSource, /unifiedQueue\.sort\(\(a, b\) => a\.startIndex - b\.startIndex\)/);
 
 console.log('[test] Chat media bubble ownership and startup contract passed.');
+require('./chat-special-bubble-command.test.js');
