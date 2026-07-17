@@ -8,6 +8,16 @@ class HuntResultPresenter {
 
         effect.audioManager.stopBgms();
 
+        // Let the quest jingle establish itself, then add one locally extracted
+        // Rise character/DLC voice line as a light result-screen flourish.
+        effect.audioManager.timers.timeout(() => {
+            effect.audioManager.playCharacterDialogue('result', {
+                force: true,
+                maxDuration: 7,
+                volume: isVictory ? 0.5 : 0.46
+            });
+        }, 1100);
+
         if (isVictory) {
             try {
                 const successBgms = [

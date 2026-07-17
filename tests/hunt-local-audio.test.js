@@ -25,7 +25,8 @@ const context = vm.createContext({
                 { path: 'local/gs.mp3', category: 'weapon', group: 'g_swd', duration: 1 },
                 { path: 'local/roar.mp3', category: 'monster', group: 'em002', duration: 2, sourceBank: 'em002_00_vo_media' },
                 { path: 'local/hit.mp3', category: 'hit', group: 'monster', duration: 1 },
-                { path: 'local/voice.mp3', category: 'hunter_voice', group: 'm_01', language: 'ja', duration: 2 }
+                { path: 'local/voice.mp3', category: 'hunter_voice', group: 'm_01', language: 'ja', duration: 2 },
+                { path: 'local/dlc-voice.mp3', category: 'hunter_voice', group: 'd_01', language: 'ja', duration: 2 }
             ]
         })
     }),
@@ -54,6 +55,9 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     await Promise.resolve();
     assert.deepStrictEqual(played.map(item => item.audioPath), ['local/roar.mp3', 'local/gs.mp3', 'local/hit.mp3']);
     assert.strictEqual(played[0].options.baseVolume, 0.78 * 0.8);
+    assert.strictEqual(manager.playCharacterDialogue('result', { force: true }), true);
+    await Promise.resolve();
+    assert.strictEqual(played.at(-1).audioPath, 'local/dlc-voice.mp3');
     console.log('[test] Hunt local Rise audio routing contract passed.');
 })().catch(error => {
     console.error(error);

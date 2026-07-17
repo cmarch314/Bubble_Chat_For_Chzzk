@@ -15,6 +15,7 @@ class HuntAudioManager {
         this.localAudioEntries = [];
         this.localAudioByCategory = new Map();
         this.localAudioGain = 0.8;
+        this.lastCharacterDialogueAt = 0;
         this.localAudioReady = this.loadLocalAudioManifest();
     }
 
@@ -43,6 +44,9 @@ class HuntAudioManager {
         let pool = this.localAudioByCategory.get(category) || [];
         if (options.group) pool = pool.filter(entry => entry.group === options.group);
         if (options.groups && options.groups.length) pool = pool.filter(entry => options.groups.includes(entry.group));
+        if (options.groupPrefixes && options.groupPrefixes.length) {
+            pool = pool.filter(entry => options.groupPrefixes.some(prefix => String(entry.group || '').startsWith(prefix)));
+        }
         if (options.sourceIncludes) pool = pool.filter(entry => String(entry.sourceBank || '').toLowerCase().includes(options.sourceIncludes));
         if (options.languages && options.languages.length) {
             const preferred = pool.filter(entry => options.languages.includes(entry.language));
@@ -112,6 +116,38 @@ class HuntAudioManager {
             maxDuration: options.maxDuration || 4.5,
             volume: options.volume || 0.58
         });
+    }
+
+    playCharacterDialogue(moment = 'ambient', options = {}) {
+        const now = Date.now();
+        const cooldownMs = Number(options.cooldownMs ?? 12000);
+        if (!options.force && now - this.lastCharacterDialogueAt < cooldownMs) return false;
+
+        const common = {
+            languages: options.languages || ['ja', 'fc', 'en', 'neutral'],
+            minDuration: 0.45,
+            maxDuration: options.maxDuration || 7,
+            volume: options.volume || 0.54
+        };
+        let played = false;
+
+        // NPC/character dialogue is the cleanest fit for lobby and quest-result beats.
+        if (moment === 'lobby' || moment === 'result' || moment === 'ambient') {
+            played = this.playLocalAudio('dialogue', common);
+        }
+
+        // Rise's extra character voice sets are preserved as distinct bank groups.
+        // d_/c_/s_ groups are preferred here so normal combat grunts do not dominate
+        // the fun dialogue layer; all hunter voices remain a safe final fallback.
+        if (!played) {
+            played = this.playLocalAudio('hunter_voice', {
+                ...common,
+                groupPrefixes: options.groupPrefixes || ['d_', 'c_', 's_']
+            });
+        }
+        if (!played) played = this.playLocalAudio('hunter_voice', common);
+        if (played) this.lastCharacterDialogueAt = now;
+        return played;
     }
 
     getMonsterBgm(monster, options = {}) {
@@ -289,7 +325,7 @@ class HuntAudioManager {
             if (played) return;
         }
         if (/mh_cart|mh_aibo/i.test(fileName || '')) {
-            if (Math.random() < 0.22 && this.playLocalAudio('dialogue', { languages: ['ja', 'fc', 'en'], maxDuration: 7, volume: 0.56 })) return;
+            if (Math.random() < 0.22 && this.playCharacterDialogue('combat', { maxDuration: 7, volume: 0.56 })) return;
             if (this.playHunterVoice({ maxDuration: 6, volume: 0.62 })) return;
         }
         if (/mh_potion|item|chest/i.test(fileName || '') && this.playLocalAudio('item', { maxDuration: 5, volume: 0.6 })) return;
