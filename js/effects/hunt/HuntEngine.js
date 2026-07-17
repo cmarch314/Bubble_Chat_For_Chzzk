@@ -68,8 +68,8 @@ class HuntEngine {
         if (this.callbacks.onLog) this.callbacks.onLog(text, color);
     }
 
-    playSFX(fileName, fallbackKey) {
-        if (this.callbacks.onPlaySFX) this.callbacks.onPlaySFX(fileName, fallbackKey);
+    playSFX(fileName, fallbackKey, context = {}) {
+        if (this.callbacks.onPlaySFX) this.callbacks.onPlaySFX(fileName, fallbackKey, context);
     }
 
     playAudioFile(subPath, durationLimitMs, volumeMultiplier) {

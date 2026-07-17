@@ -444,7 +444,7 @@ class HuntHunterTurnExecutor {
             engine.checkMonsterKnockdown();
 
             // Weapon sounds are semantic layered cues, never unrelated chat signatures.
-            engine.playSFX(currentCombo.audioCue || 'slash_light', null);
+            engine.playSFX(currentCombo.audioCue || 'slash_light', null, { weaponId: w.id, hunterIndex: w.index });
 
             if (isKnockdownAttack) {
                 engine.addLog(`✨ [대경직 찬스!] ${w.name}이(가) 최강 기술 [${currentCombo.name}] 시전! (-${damage} HP)`, '#ff9500');

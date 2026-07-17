@@ -12,6 +12,106 @@ class HuntAudioManager {
         this.timers = new ManagedTimers();
         this.bgmResolver = new HuntBgmResolver();
         this.lastBgmResolution = null;
+        this.localAudioEntries = [];
+        this.localAudioByCategory = new Map();
+        this.localAudioGain = 0.8;
+        this.localAudioReady = this.loadLocalAudioManifest();
+    }
+
+    async loadLocalAudioManifest() {
+        if (typeof fetch !== 'function') return false;
+        try {
+            const response = await fetch('local_assets/monster_hunter/rise/manifest.json', { cache: 'no-store' });
+            if (!response.ok) return false;
+            const manifest = await response.json();
+            this.localAudioGain = Number(manifest.defaultGain || 0.8);
+            this.localAudioEntries = Array.isArray(manifest.entries) ? manifest.entries : [];
+            this.localAudioByCategory.clear();
+            this.localAudioEntries.forEach(entry => {
+                if (!this.localAudioByCategory.has(entry.category)) this.localAudioByCategory.set(entry.category, []);
+                this.localAudioByCategory.get(entry.category).push(entry);
+            });
+            console.info(`[HuntAudio] Local Rise library ready: ${this.localAudioEntries.length} clips`);
+            return this.localAudioEntries.length > 0;
+        } catch (error) {
+            console.info('[HuntAudio] Local Rise library unavailable; using fallback SFX.');
+            return false;
+        }
+    }
+
+    selectLocalAudio(category, options = {}) {
+        let pool = this.localAudioByCategory.get(category) || [];
+        if (options.group) pool = pool.filter(entry => entry.group === options.group);
+        if (options.groups && options.groups.length) pool = pool.filter(entry => options.groups.includes(entry.group));
+        if (options.sourceIncludes) pool = pool.filter(entry => String(entry.sourceBank || '').toLowerCase().includes(options.sourceIncludes));
+        if (options.languages && options.languages.length) {
+            const preferred = pool.filter(entry => options.languages.includes(entry.language));
+            if (preferred.length) pool = preferred;
+        }
+        if (options.maxDuration) pool = pool.filter(entry => Number(entry.duration || 0) <= options.maxDuration);
+        if (options.minDuration) pool = pool.filter(entry => Number(entry.duration || 0) >= options.minDuration);
+        if (!pool.length) return null;
+        return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    playLocalAudio(category, options = {}) {
+        const entry = this.selectLocalAudio(category, options);
+        if (!entry) return false;
+        try {
+            const audio = this.director.audioManager.createNativeAudio(entry.path, {
+                type: 'sfx',
+                baseVolume: Math.min(1, Number(options.volume || 0.7) * this.localAudioGain)
+            });
+            audio.play().catch(() => {});
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    weaponGroup(weaponId) {
+        return ({
+            great_sword: 'g_swd', long_sword: 'l_swd', sword_shield: 's_swd', dual_blades: 'd_bld',
+            hammer: 'ham', hunting_horn: 'hrn', lance: 'lan', gunlance: 'g_lan', switch_axe: 's_axe',
+            charge_blade: 'c_axe', insect_glaive: 'i_gla', light_bowgun: 'l_bg', heavy_bowgun: 'h_bg', bow: 'bow'
+        })[weaponId] || null;
+    }
+
+    monsterGroup(monsterId) {
+        const clean = String(monsterId || '').toLowerCase();
+        const routes = {
+            rathian: 'em001', rathalos: 'em002', diablos: 'em007', rajang: 'em023', furious_rajang: 'em023',
+            kushala_daora: 'em024', chameleos: 'em025', teostra: 'em027', tigrex: 'em032', nargacuga: 'em037',
+            barioth: 'em042', royal_ludroth: 'em047', zinogre: 'em057', amatsu: 'em058', brachydios: 'em063',
+            gore_magala: 'em071', shagaru_magala: 'em072', seregios: 'em077', glavenus: 'em080',
+            mizutsune: 'em082', valstrax: 'em086', crimson_glow_valstrax: 'em086', velkhana: 'em124'
+        };
+        const direct = routes[clean];
+        if (direct) return direct;
+        const family = Object.keys(routes).find(id => clean.includes(id));
+        return family ? routes[family] : null;
+    }
+
+    playMonsterAction(monster, kind = 'attack') {
+        const group = this.monsterGroup(monster && monster.id ? monster.id : monster);
+        if (!group) return false;
+        const sourceIncludes = kind === 'roar' ? '_vo_' : (Math.random() < 0.58 ? '_se_' : '_fx_');
+        if (this.playLocalAudio('monster', { group, sourceIncludes, volume: kind === 'roar' ? 0.78 : 0.64, maxDuration: kind === 'roar' ? 8 : 5 })) return true;
+        if (kind === 'attack') {
+            const alternate = sourceIncludes === '_se_' ? '_fx_' : '_se_';
+            if (this.playLocalAudio('monster', { group, sourceIncludes: alternate, volume: 0.64, maxDuration: 5 })) return true;
+            return this.playLocalAudio('monster', { group, volume: 0.6, maxDuration: 5 });
+        }
+        return false;
+    }
+
+    playHunterVoice(options = {}) {
+        return this.playLocalAudio('hunter_voice', {
+            languages: options.languages || ['ja', 'fc', 'en', 'neutral'],
+            minDuration: 0.25,
+            maxDuration: options.maxDuration || 4.5,
+            volume: options.volume || 0.58
+        });
     }
 
     getMonsterBgm(monster, options = {}) {
@@ -90,6 +190,7 @@ class HuntAudioManager {
 
     playMonsterRoar(monster) {
         if (!monster) return;
+        if (this.playMonsterAction(monster, 'roar')) return;
         
         // 1. ID Normalization (lowercase and replace hyphens/apostrophes with underscores)
         const cleanId = monster.id.toLowerCase().replace(/[-']/g, '_');
@@ -175,7 +276,23 @@ class HuntAudioManager {
         });
     }
 
-    playMHAsset(fileName, fallbackKey) {
+    playMHAsset(fileName, fallbackKey, context = {}) {
+        if (fileName === 'monster_attack' && this.playMonsterAction(context.monsterId, 'attack')) return;
+        const weaponGroup = this.weaponGroup(context.weaponId);
+        if (weaponGroup && this.playLocalAudio('weapon', { group: weaponGroup, maxDuration: 5, volume: 0.64 })) {
+            this.timers.timeout(() => this.playLocalAudio('hit', { group: 'monster', maxDuration: 3, volume: 0.48 }), 35);
+            return;
+        }
+        if (/mh_hit|hunter_hit/i.test(fileName || '')) {
+            const played = this.playLocalAudio('hit', { group: 'hunter', maxDuration: 3, volume: 0.62 });
+            if (Math.random() < 0.52) this.playHunterVoice({ maxDuration: 3.5, volume: 0.54 });
+            if (played) return;
+        }
+        if (/mh_cart|mh_aibo/i.test(fileName || '')) {
+            if (Math.random() < 0.22 && this.playLocalAudio('dialogue', { languages: ['ja', 'fc', 'en'], maxDuration: 7, volume: 0.56 })) return;
+            if (this.playHunterVoice({ maxDuration: 6, volume: 0.62 })) return;
+        }
+        if (/mh_potion|item|chest/i.test(fileName || '') && this.playLocalAudio('item', { maxDuration: 5, volume: 0.6 })) return;
         if (fileName && this.playWeaponCue(fileName)) return;
 
         const soundConfig = this.config.getSoundConfig();
@@ -195,6 +312,11 @@ class HuntAudioManager {
         const layers = window.HUNT_WEAPON_AUDIO_CUES || {};
         const selected = layers[cue];
         if (!selected) return false;
+        const localGroupByCue = {
+            bow_shot: 'bow', bowgun_shot: Math.random() < 0.5 ? 'l_bg' : 'h_bg', mechanical_transform: Math.random() < 0.5 ? 's_axe' : 'c_axe',
+            blunt_light: 'ham', blunt_heavy: 'ham', explosive_heavy: 'g_lan', slash_light: 'l_swd', slash_heavy: 'g_swd'
+        };
+        if (this.playLocalAudio('weapon', { group: localGroupByCue[cue], maxDuration: 5, volume: 0.64 })) return true;
         selected.forEach(([path, volume], index) => {
             this.timers.timeout(() => {
                 try {

@@ -22,6 +22,8 @@ class HuntMonsterTurnExecutor {
             return;
         }
 
+        engine.playSFX('monster_attack', null, { monsterId: engine.selectedMonster.id, patternType: pattern.type });
+
         const maxTargets = Math.min(pattern.maxTargets || 1, targetable.length);
         const minTargets = Math.min(pattern.minTargets || 1, maxTargets);
         const numTargets = minTargets + Math.floor(engine.random() * (maxTargets - minTargets + 1));
@@ -155,6 +157,7 @@ class HuntMonsterTurnExecutor {
             }
 
             if (damage > 0) {
+                engine.playSFX('mh_hit.mp3', null, { hunterIndex: target.index, monsterId: engine.selectedMonster.id });
                 // Moxie check
                 if (target.hp - damage <= 0 && target.hasMoxie && engine.random() < 0.75) {
                     target.hp = 1;

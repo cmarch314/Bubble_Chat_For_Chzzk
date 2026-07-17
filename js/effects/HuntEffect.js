@@ -370,7 +370,7 @@ class HuntEffect extends BaseEffect {
             timeLimit: timeLimitVal,
             callbacks: {
                 onLog: (text, color) => this.addCombatLog(text, color),
-                onPlaySFX: (fileName, fallbackKey) => this.audioManager.playMHAsset(fileName, fallbackKey),
+                onPlaySFX: (fileName, fallbackKey, context) => this.audioManager.playMHAsset(fileName, fallbackKey, context),
                 onPlayAudioFile: (subPath, durationLimitMs, volumeMultiplier) => this.audioManager.playMHAudioFile(subPath, durationLimitMs, volumeMultiplier),
                 onShakeWeapon: (idx, borderClr, isAttack, moveName, isDodge = false) => {
                     const w = this.selectedWeapons[idx];
