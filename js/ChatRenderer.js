@@ -79,6 +79,9 @@ class ChatRenderer {
 
         if (specialBubble?.kind === 'clown') {
             chatBox.classList.add('chat-box--clown');
+            const clownPositions = [2, 25, 48, 71];
+            const clownSlot = Math.floor((this.boxPos % 80) / 20);
+            chatBox.style.left = `min(${clownPositions[clownSlot]}%, calc(100% - 528px))`;
             chatLineInner.classList.add('chat-line-inner--clown');
             chatLineInner.style.background = '';
             nameBox.classList.add('name-box--clown');

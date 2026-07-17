@@ -22,11 +22,27 @@ assert.match(huntRenderer, /class="game-hunt-card game-hunt-pregame-card hunt-qu
 assert.match(huntRenderer, /class="game-hunt-card game-hunt-pregame-card hunt-loadout-board/);
 assert.match(huntRenderer, /class="hunt-combat-info"/);
 assert.match(huntRenderer, /renderPerkBubbles/);
+assert.match(huntRenderer, /getPerkEffectKeywords/);
+assert.match(huntRenderer, /hunt-perk-effect--\$\{effect\.direction\}/);
 assert.match(huntRenderer, /class="hunt-perk-bubble hunt-perk-bubble--/);
 assert.ok(!huntRenderer.includes('RANDOM PERKS'), 'loadout must not show a generic PERK caption');
 assert.ok(!huntRenderer.includes('◆ PERK'), 'combat cards must show individual skill bubbles');
 assert.match(css, /\.game-overlay-container\.hunt-pregame-overlay\s*\{[\s\S]*?height:\s*85vh/);
 assert.match(css, /\.game-hunt-card\.hunt-combat-board\s*\{[\s\S]*?1760px/);
 assert.match(css, /\.hunt-combat-info\s*\{[\s\S]*?grid-template-areas/);
+assert.match(css, /\.hunt-perk-icon\s*\{[\s\S]*?width:\s*28px/);
+assert.match(css, /\.hunt-perk-effect--down\s*\{[\s\S]*?color:/);
+
+const HuntRenderer = require('../js/effects/hunt/HuntRenderer.js');
+const perkRenderer = Object.create(HuntRenderer.prototype);
+const perkHTML = perkRenderer.renderPerkBubbles([{
+    name: '겁쟁이',
+    description: '이 긴 설명은 카드 본문에 노출되지 않아야 한다.',
+    affinities: ['mobility'],
+    modifiers: { evadeChance: 0.12, attackRate: 0.96 }
+}]);
+assert.match(perkHTML, /회피↑/);
+assert.match(perkHTML, /공격↓/);
+assert.ok(!perkHTML.includes('hunt-perk-lore'), 'perk cards must render effect keywords instead of clipped prose');
 
 console.log('[test] Responsive game layout contract passed.');

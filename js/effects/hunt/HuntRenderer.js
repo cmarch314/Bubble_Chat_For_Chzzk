@@ -87,14 +87,37 @@ class HuntRenderer {
         return { icon: iconByAffinity[affinity] || '✦', tone };
     }
 
+    getPerkEffectKeywords(perk = {}) {
+        const labels = {
+            attackRate: '공격',
+            atbRate: '속도',
+            evadeChance: '회피',
+            evadePower: '회피력',
+            guardChance: '가드',
+            guardPower: '가드력',
+            healBias: '회복',
+            lowHpAttack: '빈사공격',
+            enragedAttack: '분노공격'
+        };
+        return Object.entries(perk.modifiers || {}).map(([key, value]) => {
+            const neutral = key.endsWith('Rate') || key.endsWith('Attack') ? 1 : 0;
+            const direction = Number(value) >= neutral ? 'up' : 'down';
+            return {
+                label: labels[key] || key,
+                direction,
+                symbol: direction === 'up' ? '↑' : '↓'
+            };
+        });
+    }
+
     renderPerkBubbles(perks = [], compact = false) {
         if (!perks.length) {
             return '<span class="hunt-perk-bubble hunt-perk-bubble--empty"><span class="hunt-perk-icon">◇</span><span class="hunt-perk-name">백지의 기록</span></span>';
         }
         return perks.map(perk => {
             const visual = this.getPerkVisual(perk);
-            const lore = compact ? '' : `<span class="hunt-perk-lore">${this.escapeHTML(perk.description || '길드의 기록에는 이유가 적혀 있지 않다.')}</span>`;
-            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone}${compact ? ' hunt-perk-bubble--compact' : ''}" title="${this.escapeHTML(`${perk.name}: ${perk.description || ''}`)}"><span class="hunt-perk-icon">${visual.icon}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${lore}</span></span>`;
+            const keywords = compact ? '' : `<span class="hunt-perk-effects">${this.getPerkEffectKeywords(perk).map(effect => `<span class="hunt-perk-effect hunt-perk-effect--${effect.direction}">${this.escapeHTML(effect.label)}${effect.symbol}</span>`).join('')}</span>`;
+            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone}${compact ? ' hunt-perk-bubble--compact' : ''}" title="${this.escapeHTML(`${perk.name}: ${perk.description || ''}`)}"><span class="hunt-perk-icon">${visual.icon}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${keywords}</span></span>`;
         }).join('');
     }
 

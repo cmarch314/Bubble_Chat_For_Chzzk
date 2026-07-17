@@ -7460,7 +7460,7 @@ body.in-hunt #chat {
     margin-top: 10px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
     align-content: flex-start;
 }
 
@@ -7469,10 +7469,10 @@ body.in-hunt #chat {
     --perk-glow: rgba(66,255,208,.2);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
-    min-height: 62px;
-    padding: 7px 10px 7px 7px;
+    min-height: 54px;
+    padding: 6px 8px 6px 6px;
     border: 1px solid var(--perk-accent);
     border-radius: 15px;
     background:
@@ -7504,15 +7504,15 @@ body.in-hunt #chat {
 
 .hunt-perk-icon {
     display: grid;
-    flex: 0 0 38px;
-    width: 38px;
-    height: 38px;
+    flex: 0 0 28px;
+    width: 28px;
+    height: 28px;
     place-items: center;
     border: 1px solid var(--perk-accent);
     border-radius: 50%;
     background: rgba(4,10,10,.72);
     color: var(--perk-accent);
-    font-size: 1.1rem;
+    font-size: .82rem;
     font-weight: 1000;
     line-height: 1;
     text-shadow: 0 0 9px var(--perk-accent);
@@ -7520,13 +7520,17 @@ body.in-hunt #chat {
 }
 
 .hunt-perk-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
     min-width: 0;
 }
 
 .hunt-perk-name {
     display: block;
     color: #fff3cc;
-    font-size: 1.04rem;
+    font-size: .96rem;
     font-weight: 1000;
     line-height: 1.12;
     white-space: nowrap;
@@ -7534,17 +7538,31 @@ body.in-hunt #chat {
     text-overflow: ellipsis;
 }
 
-.hunt-perk-lore {
-    display: -webkit-box;
-    margin-top: 3px;
-    overflow: hidden;
-    color: #b9aa8f;
-    font-size: .76rem;
-    font-weight: 500;
-    line-height: 1.25;
-    letter-spacing: 0;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+.hunt-perk-effects {
+    display: flex;
+    margin-top: 4px;
+    flex-wrap: wrap;
+    gap: 3px;
+    min-width: 0;
+}
+
+.hunt-perk-effect {
+    padding: 1px 4px 2px;
+    border: 1px solid currentColor;
+    border-radius: 5px;
+    font-size: .67rem;
+    font-weight: 900;
+    line-height: 1.05;
+    white-space: nowrap;
+    background: rgba(0,0,0,.32);
+}
+
+.hunt-perk-effect--up {
+    color: #7effbe;
+}
+
+.hunt-perk-effect--down {
+    color: #ff9b90;
 }
 
 .hunt-loadout-board .hunt-loadout-guide {
