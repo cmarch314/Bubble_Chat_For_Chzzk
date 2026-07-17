@@ -20,6 +20,7 @@ class HuntAudioManager {
         this.hunterVoiceCooldowns = new Map();
         this.hunterVoiceRoster = [];
         this.voiceProfileCatalog = [];
+        this.cmcVoiceProfile = null;
         this.lastCharacterDialogueAt = 0;
         this.localAudioReady = this.loadLocalAudioManifest();
     }
@@ -146,11 +147,9 @@ class HuntAudioManager {
                 isCmc: true
             };
         });
-        if (cmcEntries.length) {
-            this.voiceProfileCatalog.push({
-                key: 'ko:cmc', language: 'ko', group: 'cmc', isDlc: true, isCmc: true, entries: cmcEntries
-            });
-        }
+        this.cmcVoiceProfile = cmcEntries.length
+            ? { key: 'ko:cmc', language: 'ko', group: 'cmc', isCmc: true, entries: cmcEntries }
+            : null;
         return this.voiceProfileCatalog;
     }
 
@@ -169,12 +168,8 @@ class HuntAudioManager {
         this.hunterVoiceCooldowns.clear();
         if (!this.voiceProfileCatalog.length) return false;
 
-        const cmcProfile = this.voiceProfileCatalog.find(profile => profile.isCmc);
-        const normalProfiles = this.voiceProfileCatalog.filter(profile => !profile.isCmc);
-        const japanese = normalProfiles.filter(profile => profile.language === 'ja');
-        const normalSlots = Math.max(0, hunters.length - (cmcProfile ? 1 : 0));
-        const available = japanese.length >= normalSlots ? japanese : normalProfiles;
-        if (!available.length && !cmcProfile) return false;
+        const japanese = this.voiceProfileCatalog.filter(profile => profile.language === 'ja');
+        const available = japanese.length >= hunters.length ? japanese : this.voiceProfileCatalog;
         const dlc = available.filter(profile => profile.isDlc);
         const standard = available.filter(profile => !profile.isDlc);
         const used = new Set();
@@ -190,9 +185,8 @@ class HuntAudioManager {
         };
 
         hunters.forEach((hunter, position) => {
-            const reserveCmc = cmcProfile && position === hunters.length - 1;
             const preferredPool = position % 2 === 0 ? dlc : standard;
-            const profile = reserveCmc ? cmcProfile : pick(preferredPool, `${hunter.hunterName || 'hunter'}:${hunter.index ?? position}`);
+            const profile = pick(preferredPool, `${hunter.hunterName || 'hunter'}:${hunter.index ?? position}`);
             if (!profile) return;
             used.add(profile.key);
             const index = Number(hunter.index ?? position);
@@ -201,8 +195,7 @@ class HuntAudioManager {
                 key: profile.key,
                 language: profile.language,
                 group: profile.group,
-                isDlc: profile.isDlc,
-                isCmc: profile.isCmc === true
+                isDlc: profile.isDlc
             };
         });
         return this.hunterVoiceProfiles.size > 0;
@@ -220,23 +213,6 @@ class HuntAudioManager {
         }
         const profile = this.hunterVoiceProfiles.get(Number(hunterIndex));
         if (!profile) return null;
-        if (profile.isCmc) {
-            const cuePools = {
-                attack: ['에라이', '으루아', '십자베기', '올려칠', '신기술', '빨리잡', '빨리해'],
-                attack_heavy: ['으루아', '오오오', '천재지변', '역대급', '드디어고룡'],
-                hit: ['아제발요', '환장', '너무 아쉽네요', '할말없', '퉤'],
-                cart: ['아제발요', '늙어죽', '할말없', '환장'],
-                evade: ['어라', '어디가', '끄덕', '뭐'],
-                guard: ['어라', '끄덕', '뭐'],
-                item: ['고치라코소', '저도그렇게', '조금만더보여'],
-                support: ['고치라코소', '저도그렇게', '조금만더보여'],
-                victory: ['굉장해', '끝내주', '스고이', '멋져', '와우', '우와', '캬', '짝짝짝', '정말대단']
-            };
-            const preferred = cuePools[action] || cuePools.attack;
-            const semanticPool = profile.entries.filter(entry => preferred.some(cue => String(entry.cueName || '').startsWith(cue)));
-            const pool = semanticPool.length ? semanticPool : profile.entries;
-            return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
-        }
         const rules = {
             attack: [0.12, 1.55],
             attack_heavy: [0.2, 2.2],
@@ -257,13 +233,34 @@ class HuntAudioManager {
         return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
     }
 
+    selectCmcActionVoice(action = 'attack') {
+        if (!this.cmcVoiceProfile) return null;
+        const cuePools = {
+            attack: ['에라이', '으루아', '십자베기', '올려칠', '신기술', '빨리잡', '빨리해'],
+            attack_heavy: ['으루아', '오오오', '천재지변', '역대급', '드디어고룡'],
+            hit: ['아제발요', '환장', '너무 아쉽네요', '할말없', '퉤'],
+            cart: ['아제발요', '늙어죽', '할말없', '환장'],
+            evade: ['어라', '어디가', '끄덕', '뭐'],
+            guard: ['어라', '끄덕', '뭐'],
+            item: ['고치라코소', '저도그렇게', '조금만더보여'],
+            support: ['고치라코소', '저도그렇게', '조금만더보여'],
+            victory: ['굉장해', '끝내주', '스고이', '멋져', '와우', '우와', '캬', '짝짝짝', '정말대단']
+        };
+        const preferred = cuePools[action] || cuePools.attack;
+        const semanticPool = this.cmcVoiceProfile.entries.filter(entry => preferred.some(cue => String(entry.cueName || '').startsWith(cue)));
+        const pool = semanticPool.length ? semanticPool : this.cmcVoiceProfile.entries;
+        return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+    }
+
     playHunterActionVoice(hunterIndex, action = 'attack', options = {}) {
         if (hunterIndex === undefined || hunterIndex === null) return false;
         if (!options.force && Math.random() > Number(options.chance ?? 1)) return false;
         const now = Date.now();
         const key = Number(hunterIndex);
         if (!options.force && now < Number(this.hunterVoiceCooldowns.get(key) || 0)) return false;
-        const entry = this.selectHunterActionVoice(key, action);
+        const cmcChance = Math.min(1, Math.max(0, Number(options.cmcChance ?? 0.14)));
+        const useCmc = !options.disableCmc && this.cmcVoiceProfile && Math.random() < cmcChance;
+        const entry = useCmc ? this.selectCmcActionVoice(action) : this.selectHunterActionVoice(key, action);
         if (!entry) return false;
         const played = this.playLocalEntry(entry, { volume: options.volume ?? 0.56 });
         if (played) this.hunterVoiceCooldowns.set(key, now + Number(options.cooldownMs ?? 1100));

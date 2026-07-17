@@ -10,7 +10,7 @@ const played = [];
 const configured = [];
 const context = vm.createContext({
     console: { info() {}, warn() {} },
-    Math: Object.assign(Object.create(Math), { random: () => 0 }),
+    Math: Object.assign(Object.create(Math), { random: () => 0.5 }),
     ManagedTimers: class {
         timeout(callback) { callback(); return 1; }
         interval() { return 1; }
@@ -98,7 +98,7 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     assert.ok(assignedDlc.entries.some(entry => entry.path === 'local/dlc-short.mp3'), 'short combat grunts must remain eligible');
     assert.ok(!assignedDlc.entries.some(entry => entry.path === 'local/dlc-pre.mp3'), 'explicit pre-roll fragments must be excluded');
     const fixedProfile = hunters[0].voiceProfile.key;
-    assert.strictEqual(manager.playHunterActionVoice(0, 'victory', { force: true }), true);
+    assert.strictEqual(manager.playHunterActionVoice(0, 'victory', { force: true, disableCmc: true }), true);
     assert.strictEqual(hunters[0].voiceProfile.key, fixedProfile, 'one hunter must never switch voice profile mid-hunt');
     assert.ok(played.at(-1).audioPath === 'local/voice.mp3' || played.at(-1).audioPath === 'local/dlc-voice.mp3');
 
@@ -109,9 +109,10 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
 
     const fullParty = [0, 1, 2, 3].map(index => ({ index, hunterName: `Hunter ${index + 1}` }));
     assert.strictEqual(manager.assignHunterVoiceProfiles(fullParty), true);
-    assert.strictEqual(fullParty[3].voiceProfile.isCmc, true, 'one fixed party member should receive the CMC voice set');
-    assert.strictEqual(manager.selectHunterActionVoice(3, 'attack').path, 'AI CMC/에라이.mp4');
-    assert.ok(fullParty.slice(0, 3).every(hunter => !hunter.voiceProfile.isCmc), 'CMC must not leak across hunter identities');
+    assert.ok(fullParty.every(hunter => hunter.voiceProfile.group !== 'cmc'), 'CMC must not be fixed to any hunter identity');
+    assert.strictEqual(manager.selectCmcActionVoice('attack').path, 'AI CMC/에라이.mp4');
+    assert.strictEqual(manager.playHunterActionVoice(2, 'attack', { force: true, cmcChance: 1 }), true);
+    assert.strictEqual(played.at(-1).audioPath, 'AI CMC/에라이.mp4', 'CMC should appear as a random action interjection');
     console.log('[test] Hunt local Rise audio routing contract passed.');
 })().catch(error => {
     console.error(error);
