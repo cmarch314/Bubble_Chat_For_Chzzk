@@ -7264,3 +7264,309 @@ body.in-hunt #chat {
 .db-demon-mode .game-hunt-weapon-img.w-anim-db-levi-1 { animation: w-db-levi-demon-1 1.2s ease-in-out forwards; }
 .db-demon-mode .game-hunt-weapon-img.w-anim-db-levi-2 { animation: w-db-levi-demon-2 1.2s ease-in-out forwards; }
 .db-demon-mode .game-hunt-weapon-img.w-anim-db-levi-3 { animation: w-db-levi-demon-3 1.2s ease-in-out forwards; }
+
+/* Hunt 1080p readability pass: reserve the bottom 15% for chat. */
+.game-overlay-container.hunt-pregame-overlay {
+    height: 85vh;
+    padding: 1.2vh 1.25vw 0;
+}
+
+.hunt-pregame-overlay .game-hunt-pregame-card {
+    width: 100%;
+    height: calc(85vh - 2.2vh);
+    max-width: 1760px;
+    box-sizing: border-box;
+    padding: 28px 48px 24px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.hunt-pregame-overlay .game-title {
+    font-size: 3rem !important;
+    line-height: 1.12;
+    color: #3d2415;
+    text-shadow: 0 1px 0 rgba(255,255,255,.35);
+}
+
+.hunt-pregame-overlay .game-title + div {
+    font-size: 1.25rem !important;
+    line-height: 1.35;
+    color: #4b3325 !important;
+    font-weight: 800;
+}
+
+.hunt-quest-board .hunt-quest-content {
+    width: min(1540px, 100%);
+    max-width: none !important;
+    flex: 1;
+    grid-template-columns: minmax(430px, .85fr) minmax(680px, 1.35fr) !important;
+    gap: 48px !important;
+    min-height: 0;
+}
+
+.hunt-quest-board .hunt-quest-monster {
+    width: min(390px, 36vh) !important;
+    height: min(390px, 36vh) !important;
+}
+
+.hunt-quest-board .hunt-recruit-panel {
+    min-height: 410px !important;
+    padding: 38px 44px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: inset 0 0 30px rgba(0,0,0,.55), 0 12px 30px rgba(54,31,13,.25);
+}
+
+.hunt-quest-board #hunt-recruit-count {
+    font-size: 6rem !important;
+}
+
+.hunt-quest-board #hunt-recruit-names {
+    min-height: 94px !important;
+    font-size: 1.45rem !important;
+    color: #f2e6d2 !important;
+}
+
+.hunt-quest-board #hunt-recruit-feed {
+    height: 32px !important;
+    font-size: 1.2rem !important;
+}
+
+.hunt-pregame-overlay .game-timer {
+    font-size: 2rem !important;
+    margin-top: 14px !important;
+    color: #5f3518 !important;
+}
+
+.hunt-loadout-board .game-hunt-weapons-grid {
+    flex: 1;
+    min-height: 0;
+    margin: 18px 0 12px;
+    gap: 24px;
+}
+
+.hunt-loadout-board .hunt-loadout-card {
+    min-height: 0 !important;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 25px 20px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-width: 3px;
+}
+
+.hunt-loadout-board .hunt-loadout-hunter-name {
+    font-size: 1.5rem !important;
+}
+
+.hunt-loadout-board .hunt-loadout-weapon-icon,
+.hunt-loadout-board .hunt-loadout-weapon-icon img {
+    width: 132px !important;
+    height: 132px !important;
+}
+
+.hunt-loadout-board .hunt-loadout-weapon-icon {
+    margin: 12px auto !important;
+}
+
+.hunt-loadout-board .hunt-loadout-weapon-name {
+    font-size: 2rem !important;
+}
+
+.hunt-loadout-board .hunt-loadout-personality {
+    font-size: 1.25rem;
+    padding: 7px 10px !important;
+    margin: 9px 0 !important;
+}
+
+.hunt-loadout-board .hunt-loadout-perk-caption {
+    color: #d8b777 !important;
+    font-size: .9rem !important;
+    font-weight: 900;
+    letter-spacing: 2px !important;
+}
+
+.hunt-loadout-board .hunt-loadout-perks {
+    flex: 1;
+    min-height: 100px !important;
+    margin-top: 7px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    align-content: flex-start;
+}
+
+.hunt-loadout-perk {
+    display: block !important;
+    position: relative;
+    min-width: 0;
+    min-height: 53px;
+    padding: 7px 9px 7px 28px !important;
+    margin: 0 !important;
+    border: 1px solid #d0a44e !important;
+    border-left: 5px solid #00d5a0 !important;
+    border-radius: 4px 10px 10px 4px !important;
+    background: linear-gradient(135deg, rgba(11,34,31,.98), rgba(35,24,18,.98)) !important;
+    color: #fff1c9 !important;
+    font-size: 1.08rem !important;
+    font-weight: 900;
+    letter-spacing: .02em;
+    box-shadow: 0 0 0 1px rgba(255,220,137,.12), 0 5px 12px rgba(0,0,0,.4), inset 0 0 12px rgba(0,213,160,.09);
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.hunt-perk-gem {
+    position: absolute;
+    left: 8px;
+    color: #38ffd0;
+    text-shadow: 0 0 8px rgba(56,255,208,.8);
+}
+
+.hunt-perk-name {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hunt-perk-lore {
+    display: -webkit-box;
+    margin-top: 3px;
+    overflow: hidden;
+    color: #b9aa8f;
+    font-size: .7rem;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: 0;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.hunt-loadout-empty {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 9px 14px;
+    border: 1px dashed #8d7459;
+    border-radius: 8px;
+    color: #c7b69f !important;
+    font-size: 1rem !important;
+}
+
+.hunt-loadout-board .hunt-loadout-guide {
+    width: min(1380px, 100%);
+    max-width: none !important;
+    box-sizing: border-box;
+    padding: 11px 18px !important;
+    margin: 8px auto 3px !important;
+    font-size: 1.25rem !important;
+}
+
+/* Combat cards use their available width instead of stacking every datum vertically. */
+.game-hunt-card.hunt-combat-board {
+    width: min(1760px, calc(100vw - 48px));
+    box-sizing: border-box;
+    padding-left: 34px;
+    padding-right: 34px;
+}
+
+.hunt-combat-board .game-hunt-weapons-grid {
+    gap: 18px;
+    margin-top: 16px;
+}
+
+.hunt-combat-board .game-hunt-weapon-card {
+    display: grid;
+    grid-template-columns: 124px minmax(0, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 18px !important;
+    text-align: left;
+}
+
+.hunt-combat-board .game-hunt-weapon-img-container {
+    grid-column: 1;
+    margin: 0 auto !important;
+}
+
+.hunt-combat-info {
+    grid-column: 2;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+        "name name name"
+        "hp hp hp"
+        "meta status atb"
+        "perks perks perks";
+    gap: 7px 9px;
+    align-items: center;
+}
+
+.hunt-combat-info .game-hunt-weapon-name {
+    grid-area: name;
+    max-width: none !important;
+    margin: 0 !important;
+    font-size: 1.65rem !important;
+    line-height: 1.15;
+}
+
+.hunt-combat-info .game-hunt-status-tag-container {
+    grid-area: status;
+    position: static !important;
+    width: auto !important;
+    height: 44px !important;
+}
+
+.hunt-combat-info .game-hunt-status-tag {
+    font-size: 1.05rem !important;
+    padding: 5px 8px;
+}
+
+.hunt-combat-info .atb-circular-container {
+    grid-area: atb;
+    position: static !important;
+    width: 46px !important;
+    height: 46px !important;
+}
+
+.hunt-combat-info .game-hunt-hp-wrapper {
+    grid-area: hp;
+    height: 31px !important;
+    margin: 1px 0 0 !important;
+    border-radius: 9px;
+}
+
+.hunt-combat-info .game-hunt-hp-text {
+    font-size: 1.05rem;
+    font-weight: 1000;
+    color: #fff;
+    text-shadow: 0 1px 3px #000;
+}
+
+.hunt-combat-info div[id^="personality-tag-"] {
+    grid-area: meta;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+    font-size: 1.05rem !important;
+}
+
+.hunt-combat-perks {
+    grid-area: perks;
+    min-height: 30px !important;
+    margin: 0 !important;
+    padding: 6px 9px 6px 12px;
+    border: 1px solid rgba(208,164,78,.72);
+    border-left: 4px solid #00d5a0;
+    border-radius: 5px 9px 9px 5px;
+    background: linear-gradient(90deg, rgba(9,38,33,.95), rgba(31,23,18,.82));
+    color: #ffe7aa !important;
+    font-size: .88rem !important;
+    font-weight: 900;
+    line-height: 1.25;
+    box-sizing: border-box;
+    box-shadow: inset 0 0 10px rgba(0,213,160,.09);
+}
