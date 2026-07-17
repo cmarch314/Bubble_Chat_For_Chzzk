@@ -2,3 +2,14 @@ backup_v1/
 .runtime/
 *.log
 .DS_Store
+
+# Local-only Monster Hunter audio and game-file extracts.
+# These remain available to OBS/BubbleChat but must never be committed.
+/local_assets/monster_hunter/
+/game_extracts/
+/MonsterHunter_Soundtracks/
+/SFX/
+/BGM/MH*.mp3
+*.wem
+*.bnk
+*.pck
