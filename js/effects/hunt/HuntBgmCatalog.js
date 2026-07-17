@@ -6,7 +6,8 @@ const HUNT_BGM_LOCALES = {
     elders_recess: ['BGM/MHW_Elders_Recess.mp3'],
     hoarfrost_reach: ['BGM/MHWI_Hoarfrost_Reach.mp3'],
     old_world: ['BGM/MHGU_Arena.mp3'],
-    kamura: ['BGM/MHR_Kamura.mp3', 'BGM/MHGU_Arena.mp3'],
+    // Kamura village music is a lobby cue, not a battle-area cue.
+    kamura: ['BGM/MHGU_Arena.mp3'],
     arena: ['BGM/MHGU_Arena.mp3']
 };
 const HUNT_HABITAT_LABELS = {
@@ -18,6 +19,7 @@ const HUNT_HABITAT_LABELS = {
 const HUNT_DEDICATED_THEMES = {
     // Zinogre is intentionally routed through habitat music until a verified
     // dedicated file is supplied; the previous file duplicated Proof of a Hero.
+    magnamalo: ['BGM/MHR_Magnamalo.mp3'],
     mizutsune: ['BGM/MHR_Mizutsune.mp3'],
     velkhana: ['BGM/MHW_Velkhana.mp3'],
     nergigante: ['BGM/MHW_Nergigante.mp3'],

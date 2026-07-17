@@ -23,8 +23,11 @@ const context = vm.createContext({
         json: async () => ({
             defaultGain: 0.8,
             entries: [
-                { path: 'local/gs.mp3', category: 'weapon', group: 'g_swd', duration: 1 },
+                { path: 'local/gs.mp3', category: 'weapon', group: 'g_swd', duration: 1, sourceBank: 'pl_wp_g_swd_com_media.bnk.2.X64' },
+                { path: 'local/gs-gimmick.mp3', category: 'weapon', group: 'g_swd', duration: 1, sourceBank: 'pl_wp_g_swd_gimmick_116_media.bnk.2.X64' },
                 { path: 'local/dragon-piercer.mp3', category: 'weapon', group: 'bow', duration: 1.1, sourceBank: 'pl_wp_bow_com_media.bnk.2.X64' },
+                { path: 'local/bow-shot.mp3', category: 'weapon', group: 'bow', duration: 0.6, sourceBank: 'pl_wp_bow_com_media.bnk.2.X64' },
+                { path: 'local/bow-laser-gimmick.mp3', category: 'weapon', group: 'bow', duration: 0.6, sourceBank: 'pl_wp_bow_gimmick_118_media.bnk.2.X64' },
                 { path: 'local/roar.mp3', category: 'monster', group: 'em002', duration: 2, sourceBank: 'em002_00_vo_media' },
                 { path: 'local/hit.mp3', category: 'hit', group: 'monster', duration: 1 },
                 { path: 'local/hunter-hit.mp3', category: 'hit', group: 'hunter', duration: 0.8, sourceBank: 'hit_pl_media.bnk.2.X64' },
@@ -35,7 +38,15 @@ const context = vm.createContext({
             ]
         })
     }),
-    window: { HUNT_WEAPON_AUDIO_CUES: {}, HUNT_ROAR_ROUTE: {} }
+    window: {
+        HUNT_WEAPON_AUDIO_CUES: {}, HUNT_ROAR_ROUTE: {},
+        HIVE_CMC_FILES: ['에라이', '아제발요', '굉장해'],
+        HIVE_AUDIO_LEVELS: {
+            'AI CMC/에라이.mp4': { duration: 1 },
+            'AI CMC/아제발요.mp4': { duration: 1.2 },
+            'AI CMC/굉장해.mp4': { duration: 1.4 }
+        }
+    }
 });
 
 vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
@@ -63,6 +74,7 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     manager.playMHAsset('slash_heavy', null, { weaponId: 'great_sword' });
     await Promise.resolve();
     assert.deepStrictEqual(played.map(item => item.audioPath), ['local/roar.mp3', 'local/gs.mp3', 'local/hit.mp3']);
+    assert.ok(!played.some(item => item.audioPath === 'local/gs-gimmick.mp3'), 'normal great sword attacks must reject gimmick banks');
     assert.strictEqual(played[0].options.baseVolume, 1, 'hunt audio gain must double and cap native playback safely');
     manager.playMHAsset('dragon_piercer', null, { weaponId: 'bow', hunterIndex: 0 });
     manager.playMHAsset('mh_hit.mp3', null, { hunterIndex: 0 });
@@ -89,6 +101,17 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     assert.strictEqual(manager.playHunterActionVoice(0, 'victory', { force: true }), true);
     assert.strictEqual(hunters[0].voiceProfile.key, fixedProfile, 'one hunter must never switch voice profile mid-hunt');
     assert.ok(played.at(-1).audioPath === 'local/voice.mp3' || played.at(-1).audioPath === 'local/dlc-voice.mp3');
+
+    manager.playMHAsset('bow_shot', null, { weaponId: 'bow', hunterIndex: 0 });
+    await Promise.resolve();
+    assert.ok(played.some(item => item.audioPath === 'local/bow-shot.mp3'));
+    assert.ok(!played.some(item => item.audioPath === 'local/bow-laser-gimmick.mp3'), 'bow attacks must never select laser-like gimmick banks');
+
+    const fullParty = [0, 1, 2, 3].map(index => ({ index, hunterName: `Hunter ${index + 1}` }));
+    assert.strictEqual(manager.assignHunterVoiceProfiles(fullParty), true);
+    assert.strictEqual(fullParty[3].voiceProfile.isCmc, true, 'one fixed party member should receive the CMC voice set');
+    assert.strictEqual(manager.selectHunterActionVoice(3, 'attack').path, 'AI CMC/에라이.mp4');
+    assert.ok(fullParty.slice(0, 3).every(hunter => !hunter.voiceProfile.isCmc), 'CMC must not leak across hunter identities');
     console.log('[test] Hunt local Rise audio routing contract passed.');
 })().catch(error => {
     console.error(error);

@@ -1,5 +1,9 @@
 const assert = require('assert');
 const HuntBgmResolver = require('../js/effects/hunt/HuntBgmResolver.js');
+const catalog = require('../js/effects/hunt/HuntBgmCatalog.js');
+
+assert.deepStrictEqual(catalog.HUNT_DEDICATED_THEMES.magnamalo, ['BGM/MHR_Magnamalo.mp3']);
+assert.ok(!catalog.HUNT_BGM_LOCALES.kamura.includes('BGM/MHR_Kamura.mp3'), 'village lobby music must never be used as a hunt-area fallback');
 
 const resolver = new HuntBgmResolver({
     random: () => 0,

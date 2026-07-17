@@ -3,6 +3,8 @@ const HuntPerkCatalog = require('../js/effects/hunt/HuntPerkCatalog.js');
 const HuntSeededRandom = require('../js/effects/hunt/HuntSeededRandom.js');
 
 const all = HuntPerkCatalog.all();
+assert.strictEqual(new Set(all.map(perk => perk.description)).size, 100, 'every perk needs unique lore');
+assert.ok(all.every(perk => !perk.description.includes('축복인지 흉조인지')), 'placeholder perk lore must be removed');
 assert.strictEqual(all.length, 100);
 assert.strictEqual(new Set(all.map(perk => perk.id)).size, 100);
 assert.strictEqual(new Set(all.map(perk => perk.name)).size, 100);

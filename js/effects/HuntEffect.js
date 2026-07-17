@@ -150,6 +150,7 @@ class HuntEffect extends BaseEffect {
             currentConsecutiveIndex: this.currentConsecutiveIndex,
             consecutiveQueue: this.consecutiveQueue,
             selectedMonster: this.selectedMonster,
+            questTier: currentTier,
             participantCount: 0,
             participants: []
         });

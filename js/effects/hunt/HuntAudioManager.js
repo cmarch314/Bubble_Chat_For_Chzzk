@@ -54,7 +54,10 @@ class HuntAudioManager {
         if (options.groupPrefixes && options.groupPrefixes.length) {
             pool = pool.filter(entry => options.groupPrefixes.some(prefix => String(entry.group || '').startsWith(prefix)));
         }
-        if (options.sourceIncludes) pool = pool.filter(entry => String(entry.sourceBank || '').toLowerCase().includes(options.sourceIncludes));
+        if (options.sourceIncludes) {
+            const needle = String(options.sourceIncludes).toLowerCase();
+            pool = pool.filter(entry => String(entry.sourceBank || '').toLowerCase().includes(needle));
+        }
         if (options.languages && options.languages.length) {
             const preferred = pool.filter(entry => options.languages.includes(entry.language));
             if (preferred.length) pool = preferred;
@@ -130,6 +133,24 @@ class HuntAudioManager {
         this.voiceProfileCatalog = (combatReady.length ? combatReady : candidates).sort((a, b) =>
             (languageRank[a.language] ?? 9) - (languageRank[b.language] ?? 9) || a.group.localeCompare(b.group)
         );
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const cmcEntries = (globalScope.HIVE_CMC_FILES || []).map(cueName => {
+            const path = `AI CMC/${cueName}.mp4`;
+            return {
+                path,
+                category: 'cmc_voice',
+                group: 'cmc',
+                language: 'ko',
+                duration: Number(globalScope.HIVE_AUDIO_LEVELS?.[path]?.duration || 2),
+                cueName,
+                isCmc: true
+            };
+        });
+        if (cmcEntries.length) {
+            this.voiceProfileCatalog.push({
+                key: 'ko:cmc', language: 'ko', group: 'cmc', isDlc: true, isCmc: true, entries: cmcEntries
+            });
+        }
         return this.voiceProfileCatalog;
     }
 
@@ -148,8 +169,12 @@ class HuntAudioManager {
         this.hunterVoiceCooldowns.clear();
         if (!this.voiceProfileCatalog.length) return false;
 
-        const japanese = this.voiceProfileCatalog.filter(profile => profile.language === 'ja');
-        const available = japanese.length >= hunters.length ? japanese : this.voiceProfileCatalog;
+        const cmcProfile = this.voiceProfileCatalog.find(profile => profile.isCmc);
+        const normalProfiles = this.voiceProfileCatalog.filter(profile => !profile.isCmc);
+        const japanese = normalProfiles.filter(profile => profile.language === 'ja');
+        const normalSlots = Math.max(0, hunters.length - (cmcProfile ? 1 : 0));
+        const available = japanese.length >= normalSlots ? japanese : normalProfiles;
+        if (!available.length && !cmcProfile) return false;
         const dlc = available.filter(profile => profile.isDlc);
         const standard = available.filter(profile => !profile.isDlc);
         const used = new Set();
@@ -165,8 +190,9 @@ class HuntAudioManager {
         };
 
         hunters.forEach((hunter, position) => {
+            const reserveCmc = cmcProfile && position === hunters.length - 1;
             const preferredPool = position % 2 === 0 ? dlc : standard;
-            const profile = pick(preferredPool, `${hunter.hunterName || 'hunter'}:${hunter.index ?? position}`);
+            const profile = reserveCmc ? cmcProfile : pick(preferredPool, `${hunter.hunterName || 'hunter'}:${hunter.index ?? position}`);
             if (!profile) return;
             used.add(profile.key);
             const index = Number(hunter.index ?? position);
@@ -175,7 +201,8 @@ class HuntAudioManager {
                 key: profile.key,
                 language: profile.language,
                 group: profile.group,
-                isDlc: profile.isDlc
+                isDlc: profile.isDlc,
+                isCmc: profile.isCmc === true
             };
         });
         return this.hunterVoiceProfiles.size > 0;
@@ -193,6 +220,23 @@ class HuntAudioManager {
         }
         const profile = this.hunterVoiceProfiles.get(Number(hunterIndex));
         if (!profile) return null;
+        if (profile.isCmc) {
+            const cuePools = {
+                attack: ['에라이', '으루아', '십자베기', '올려칠', '신기술', '빨리잡', '빨리해'],
+                attack_heavy: ['으루아', '오오오', '천재지변', '역대급', '드디어고룡'],
+                hit: ['아제발요', '환장', '너무 아쉽네요', '할말없', '퉤'],
+                cart: ['아제발요', '늙어죽', '할말없', '환장'],
+                evade: ['어라', '어디가', '끄덕', '뭐'],
+                guard: ['어라', '끄덕', '뭐'],
+                item: ['고치라코소', '저도그렇게', '조금만더보여'],
+                support: ['고치라코소', '저도그렇게', '조금만더보여'],
+                victory: ['굉장해', '끝내주', '스고이', '멋져', '와우', '우와', '캬', '짝짝짝', '정말대단']
+            };
+            const preferred = cuePools[action] || cuePools.attack;
+            const semanticPool = profile.entries.filter(entry => preferred.some(cue => String(entry.cueName || '').startsWith(cue)));
+            const pool = semanticPool.length ? semanticPool : profile.entries;
+            return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+        }
         const rules = {
             attack: [0.12, 1.55],
             attack_heavy: [0.2, 2.2],
@@ -232,6 +276,31 @@ class HuntAudioManager {
             hammer: 'ham', hunting_horn: 'hrn', lance: 'lan', gunlance: 'g_lan', switch_axe: 's_axe',
             charge_blade: 'c_axe', insect_glaive: 'i_gla', light_bowgun: 'l_bg', heavy_bowgun: 'h_bg', bow: 'bow'
         })[weaponId] || null;
+    }
+
+    weaponCommonBank(weaponId) {
+        const group = this.weaponGroup(weaponId);
+        return group ? `pl_wp_${group}_com_media` : null;
+    }
+
+    playWeaponAction(weaponId, cue = 'attack') {
+        const group = this.weaponGroup(weaponId);
+        const sourceIncludes = this.weaponCommonBank(weaponId);
+        if (!group || !sourceIncludes) return false;
+        const profiles = {
+            bow_shot: [0.24, 0.85],
+            bowgun_shot: [0.2, 1.1],
+            dragon_piercer: [0.9, 1.4],
+            slash_heavy: [0.7, 2.7],
+            blunt_heavy: [0.7, 2.7],
+            explosive_heavy: [0.75, 2.7],
+            mechanical_transform: [0.45, 2.4],
+            attack_heavy: [0.7, 2.7]
+        };
+        const [minDuration, maxDuration] = profiles[cue] || [0.18, 1.1];
+        const options = { group, sourceIncludes, minDuration, maxDuration, maxDurationFallback: 3, volume: cue === 'dragon_piercer' ? 0.72 : 0.64 };
+        if (this.playLocalAudio('weapon', options)) return true;
+        return this.playLocalAudio('weapon', { group, sourceIncludes, maxDuration: 3, volume: options.volume });
     }
 
     monsterGroup(monsterId) {
@@ -471,7 +540,7 @@ class HuntAudioManager {
     playMHAsset(fileName, fallbackKey, context = {}) {
         if (fileName === 'monster_attack' && this.playMonsterAction(context.monsterId, 'attack')) return;
         if (fileName === 'dragon_piercer') {
-            const played = this.playWeaponCue(fileName);
+            const played = this.playWeaponAction('bow', 'dragon_piercer');
             this.playHunterActionVoice(context.hunterIndex, 'attack_heavy', { chance: 0.5, volume: 0.58 });
             if (played) {
                 this.timers.timeout(() => this.playLocalAudio('hit', { group: 'monster', minDuration: 0.42, maxDuration: 1.25, volume: 0.52 }), 70);
@@ -479,10 +548,14 @@ class HuntAudioManager {
             return;
         }
         const weaponGroup = this.weaponGroup(context.weaponId);
-        if (weaponGroup && this.playLocalAudio('weapon', { group: weaponGroup, maxDuration: 5, volume: 0.64 })) {
+        if (weaponGroup) {
+            const played = this.playWeaponAction(context.weaponId, fileName || 'attack');
             const voiceAction = /heavy|explosive|charge/i.test(fileName || '') ? 'attack_heavy' : 'attack';
-            this.playHunterActionVoice(context.hunterIndex, voiceAction, { chance: 0.32, volume: 0.56 });
-            this.timers.timeout(() => this.playLocalAudio('hit', { group: 'monster', maxDuration: 3, volume: 0.48 }), 35);
+            if (played) {
+                this.playHunterActionVoice(context.hunterIndex, voiceAction, { chance: 0.32, volume: 0.56 });
+                this.timers.timeout(() => this.playLocalAudio('hit', { group: 'monster', maxDuration: 3, volume: 0.48 }), 35);
+            }
+            // A weapon-context action must never spill into another weapon's bank.
             return;
         }
         if (/mh_hit|hunter_hit/i.test(fileName || '')) {
@@ -520,32 +593,17 @@ class HuntAudioManager {
     }
 
     playWeaponCue(cue) {
-        const layers = window.HUNT_WEAPON_AUDIO_CUES || {};
-        const selected = layers[cue];
         if (cue === 'dragon_piercer') {
-            return this.playLocalAudio('weapon', {
-                group: 'bow', sourceIncludes: 'pl_wp_bow_com_media', minDuration: 0.9, maxDuration: 1.4, volume: 0.72
-            });
+            return this.playWeaponAction('bow', 'dragon_piercer');
         }
-        const localGroupByCue = {
-            bow_shot: 'bow', bowgun_shot: Math.random() < 0.5 ? 'l_bg' : 'h_bg', mechanical_transform: Math.random() < 0.5 ? 's_axe' : 'c_axe',
-            blunt_light: 'ham', blunt_heavy: 'ham', explosive_heavy: 'g_lan', slash_light: 'l_swd', slash_heavy: 'g_swd'
+        const localWeaponByCue = {
+            bow_shot: 'bow', bowgun_shot: Math.random() < 0.5 ? 'light_bowgun' : 'heavy_bowgun',
+            mechanical_transform: Math.random() < 0.5 ? 'switch_axe' : 'charge_blade',
+            blunt_light: 'hammer', blunt_heavy: 'hammer', explosive_heavy: 'gunlance',
+            slash_light: 'long_sword', slash_heavy: 'great_sword'
         };
-        if (this.playLocalAudio('weapon', { group: localGroupByCue[cue], maxDuration: 5, volume: 0.64 })) return true;
-        if (!selected) return false;
-        selected.forEach(([path, volume], index) => {
-            this.timers.timeout(() => {
-                try {
-                    const audio = this.director.audioManager.createNativeAudio(path, {
-                        type: 'sfx', baseVolume: this.huntVolume(volume)
-                    });
-                    audio.play().catch(() => {});
-                } catch (error) {
-                    console.warn(`[HuntAudio] Failed cue layer ${cue}: ${path}`, error);
-                }
-            }, index * 35);
-        });
-        return true;
+        const weaponId = localWeaponByCue[cue];
+        return weaponId ? this.playWeaponAction(weaponId, cue) : false;
     }
 
     playMHAudioFile(subPath, durationLimitMs = null, volumeMultiplier = 1.0, context = {}) {

@@ -349,7 +349,9 @@ class HuntCombatAnimator {
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         if (weaponCard) {
             const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
+            const kinsectImg = weaponCard.querySelector('.ig-kinsect');
             if (isAttack) {
+                const isKinsectExtract = w?.id === 'insect_glaive' && String(moveName || '').includes('진액 추출');
                 const actionEffect = this.createActionEffect(moveName);
                 if (actionEffect) {
                     weaponCard.appendChild(actionEffect);
@@ -384,7 +386,7 @@ class HuntCombatAnimator {
                     animDuration = animMap[w.id].duration;
                 }
 
-                if (weaponImg) {
+                if (weaponImg && !isKinsectExtract) {
                     // Remove all old and new animation classes
                     const allClasses = [
                         'attack-melee-anim', 'attack-hammer-kkt', 'attack-hammer-keep-sway', 
@@ -406,6 +408,13 @@ class HuntCombatAnimator {
                     weaponImg.classList.add(targetAnimClass);
                 }
 
+                if (kinsectImg && w?.id === 'insect_glaive') {
+                    kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
+                    void kinsectImg.offsetWidth;
+                    kinsectImg.classList.add(isKinsectExtract ? 'ig-kinsect-extract' : 'ig-kinsect-assault');
+                    animDuration = isKinsectExtract ? 1100 : Math.max(animDuration, 760);
+                }
+
                 weaponCard.style.borderColor = borderClr;
                 weaponCard.style.zIndex = "10";
                 this.animationTimers.timeout(() => {
@@ -414,6 +423,7 @@ class HuntCombatAnimator {
                             weaponImg.classList.remove(animClass);
                             weaponImg.classList.remove(`${animClass}-${idx}`);
                         }
+                        if (kinsectImg) kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
                         this.restoreBorder(idx, w);
                         weaponCard.style.zIndex = "";
                     }

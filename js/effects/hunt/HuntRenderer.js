@@ -84,7 +84,7 @@ class HuntRenderer {
             if (Number(value) < neutral) downside++;
         });
         const tone = upside && downside ? 'twisted' : downside ? 'ominous' : 'boon';
-        return { icon: iconByAffinity[affinity] || '✦', tone };
+        return { icon: iconByAffinity[affinity] || '✦', tone, affinity: affinity || 'neutral' };
     }
 
     renderPerkBubbles(perks = [], compact = false) {
@@ -95,7 +95,7 @@ class HuntRenderer {
             const visual = this.getPerkVisual(perk);
             const description = perk.description || '길드의 기록에는 이유가 적혀 있지 않다.';
             const lore = compact ? '' : `<span class="hunt-perk-lore"><span class="hunt-perk-lore-track">${this.escapeHTML(description)}</span></span>`;
-            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone}${compact ? ' hunt-perk-bubble--compact' : ''}" title="${this.escapeHTML(`${perk.name}: ${description}`)}"><span class="hunt-perk-icon">${visual.icon}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${lore}</span></span>`;
+            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone} hunt-perk-bubble--skill-${visual.affinity}${compact ? ' hunt-perk-bubble--compact' : ''}" title="${this.escapeHTML(`${perk.name}: ${description}`)}"><span class="hunt-perk-icon">${visual.icon}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${lore}</span></span>`;
         }).join('');
     }
 
@@ -115,6 +115,19 @@ class HuntRenderer {
         });
     }
 
+    getQuestLocaleLabel(monsters = []) {
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const habitats = globalScope.HUNT_MONSTER_HABITATS || {};
+        const labels = globalScope.HUNT_HABITAT_LABELS || {};
+        const localeLabels = monsters.map(monster => {
+            const id = String(monster?.id || '').toLowerCase().replace(/[-']/g, '_');
+            const habitatId = habitats[id]?.habitats?.[0]?.id || 'arena';
+            return labels[habitatId] || '결전장';
+        });
+        const unique = [...new Set(localeLabels)];
+        return unique.length > 1 ? `${unique.slice(0, 2).join(' · ')} 외` : (unique[0] || '결전장');
+    }
+
     renderQuestBoard(data) {
         this.clearAnimationTimers();
         if (!this.container) this.createContainer();
@@ -124,37 +137,57 @@ class HuntRenderer {
         const monsterName = this.escapeHTML(monster.nameKO || '미확인 몬스터');
         const questMonsters = data.consecutiveTotal > 1 ? (data.consecutiveQueue || []) : [monster];
         const isConsecutive = questMonsters.length > 1;
-        const questMonsterCards = questMonsters.map((item, index) => `
-            <div class="hunt-quest-target${index === 0 ? ' hunt-quest-target--first' : ''}">
-                <span class="hunt-quest-target-number">${index + 1}</span>
+        const tier = data.questTier || 'large';
+        const rank = ({ small: 2, medium: 4, large: 6, elder: 7, colossal: 7 })[tier] || 6;
+        const rewardBase = ({ small: 1800, medium: 4800, large: 10800, elder: 25200, colossal: 28800 })[tier] || 10800;
+        const questKind = tier === 'elder' || tier === 'colossal' ? '토벌' : '수렵';
+        const questTitle = isConsecutive ? `${monsterName} 외 ${questMonsters.length - 1}마리` : monsterName;
+        const questObjective = isConsecutive ? `대형 몬스터 ${questMonsters.length}마리 연속 ${questKind}` : `${monsterName} 1마리 ${questKind}`;
+        const localeLabel = this.escapeHTML(this.getQuestLocaleLabel(questMonsters));
+        const targetCards = questMonsters.map((item, index) => `
+            <div class="hunt-rise-target${index === 0 ? ' hunt-rise-target--primary' : ''}">
+                <span class="hunt-rise-target-number">${index + 1}</span>
                 <img src="img/monsters/${this.escapeHTML(item.filename || 'rathalos.png')}" onerror="this.src='img/monsters/rathalos.png';" alt="" />
-                <span class="hunt-quest-target-name">${this.escapeHTML(item.nameKO || '미확인 몬스터')}</span>
+                <span class="hunt-rise-target-name">${this.escapeHTML(item.nameKO || '미확인 몬스터')}</span>
             </div>`).join('');
-        const questVisual = isConsecutive
-            ? `<div class="hunt-quest-roster">
-                    <div class="hunt-quest-roster-heading"><b>대연속 목표</b><span>${questMonsters.length}마리 · 순서대로 토벌</span></div>
-                    <div class="hunt-quest-target-grid" style="--quest-target-columns:${Math.min(5, questMonsters.length)};">${questMonsterCards}</div>
-               </div>`
-            : `<div class="hunt-quest-single-target">
-                    <img class="hunt-quest-monster" src="img/monsters/${this.escapeHTML(monster.filename || 'rathalos.png')}" onerror="this.src='img/monsters/rathalos.png';" />
-                    <div class="hunt-quest-single-name">${monsterName}</div>
-               </div>`;
+        const waitingSlots = Array.from({ length: 4 }, (_, index) => `
+            <div class="hunt-rise-recruit-slot"><b>${index + 1}</b><span>참가 대기</span></div>`).join('');
         this.container.innerHTML = `
             <div class="game-hunt-card game-hunt-pregame-card hunt-quest-board${isConsecutive ? ' hunt-quest-board--consecutive' : ''} entry-anim" style="position:relative;">
-                <div style="font-size:1rem;color:#c98534;font-weight:900;letter-spacing:3px;">🏕️ GATHERING HUB · QUEST BOARD</div>
-                <div class="game-title" style="font-size:2.45rem;margin:8px 0 4px;">${this.escapeHTML(data.voteTitle || '집회소 퀘스트')}</div>
-                <div style="font-size:1.1rem;color:#8a725d;margin-bottom:10px;">${this.escapeHTML(data.voteSubtitle || '')}</div>
-                <div class="hunt-quest-content">
-                    ${questVisual}
-                    <div class="hunt-recruit-panel" style="background:rgba(42,30,22,.92);border:3px double #c98534;border-radius:16px;padding:24px;min-height:270px;box-sizing:border-box;">
-                        <div style="font-size:1.25rem;color:#d7b77d;">수주 희망자</div>
-                        <div id="hunt-recruit-count" style="font-size:4.2rem;font-weight:1000;color:#fff;line-height:1.15;">0명</div>
-                        <div id="hunt-recruit-names" style="font-size:1.05rem;color:#d8d0c5;min-height:76px;line-height:1.6;word-break:break-all;">아직 서명한 헌터가 없습니다.</div>
-                        <div style="font-size:2rem;font-weight:1000;color:#00ffaa;margin-top:12px;text-shadow:0 0 16px rgba(0,255,170,.35);">!참가</div>
-                        <div id="hunt-recruit-feed" style="font-size:.95rem;color:#c98534;height:24px;margin-top:5px;"></div>
+                <header class="hunt-rise-header">
+                    <div class="hunt-rise-kamura-mark"><span>集</span></div>
+                    <div class="hunt-rise-heading-copy">
+                        <span>집회소 퀘스트 · 수주 확인</span>
+                        <strong>${this.escapeHTML(data.voteTitle || '집회소 퀘스트')}</strong>
                     </div>
+                    <div class="hunt-rise-rank"><span>QUEST</span><b>${'★'.repeat(rank)}</b></div>
+                </header>
+                <div class="hunt-rise-layout">
+                    <section class="hunt-rise-sheet">
+                        <div class="hunt-rise-sheet-tab">${isConsecutive ? '대연속 퀘스트' : `${questKind} 퀘스트`}</div>
+                        <div class="hunt-rise-quest-title"><small>QUEST TITLE</small><strong>${questTitle}</strong></div>
+                        <div class="hunt-rise-objective-heading"><span>주요 목표</span><b>${questObjective}</b></div>
+                        <div class="hunt-rise-target-grid${isConsecutive ? '' : ' hunt-rise-target-grid--single'}" style="--quest-target-columns:${Math.min(5, questMonsters.length)};">${targetCards}</div>
+                        <div class="hunt-rise-details">
+                            <div><span>목적지</span><b>${localeLabel}</b></div>
+                            <div><span>제한 시간</span><b>50분</b></div>
+                            <div><span>보수금</span><b>${(rewardBase * questMonsters.length).toLocaleString('ko-KR')} z</b></div>
+                            <div><span>실패 조건</span><b>제한 시간 종료 · 전원 전투 불능</b></div>
+                            <div><span>참가 조건</span><b>집회소에 모인 모든 헌터</b></div>
+                        </div>
+                    </section>
+                    <aside class="hunt-rise-recruit-panel">
+                        <div class="hunt-rise-recruit-title"><span>참가 요청</span><small>JOIN REQUEST</small></div>
+                        <div class="hunt-rise-recruit-count"><strong id="hunt-recruit-count">0</strong><span>/ 4</span></div>
+                        <div id="hunt-recruit-names" class="hunt-rise-recruit-slots">${waitingSlots}</div>
+                        <div class="hunt-rise-join-command"><small>채팅 입력</small><strong>!참가</strong></div>
+                        <div id="hunt-recruit-feed" class="hunt-rise-recruit-feed">수주 희망자를 기다리는 중입니다.</div>
+                    </aside>
                 </div>
-                <div class="game-timer" style="font-size:1.55rem;font-weight:bold;color:#8b5a2b;margin-top:12px;">⏳ 모집 마감 30초 · 4명 충원 시 즉시 마감</div>
+                <footer class="hunt-rise-footer">
+                    <span>${this.escapeHTML(data.voteSubtitle || '')}</span>
+                    <div class="game-timer">모집 마감 30초 · 4명 충원 시 즉시 수주</div>
+                </footer>
             </div>`;
         this.card = this.container.querySelector('.game-hunt-card');
         this.lobbyTimers.timeout(() => this.card && this.card.classList.remove('entry-anim'), 600);
@@ -164,19 +197,21 @@ class HuntRenderer {
         if (!this.card) return;
         const count = this.card.querySelector('#hunt-recruit-count');
         const names = this.card.querySelector('#hunt-recruit-names');
-        if (count) count.textContent = `${participants.length}명`;
+        if (count) count.textContent = String(participants.length);
         if (names) {
             names.replaceChildren();
-            if (!participants.length) {
-                names.textContent = '아직 서명한 헌터가 없습니다.';
-            } else {
-                participants.slice(-12).forEach((participant, index) => {
-                    if (index) names.appendChild(document.createTextNode(' · '));
-                    const span = document.createElement('span');
-                    span.textContent = participant.nickname;
-                    span.style.color = this.safeColor(participant.color, '#eeeeee');
-                    names.appendChild(span);
-                });
+            for (let index = 0; index < 4; index++) {
+                const participant = participants[index];
+                const slot = document.createElement('div');
+                slot.className = `hunt-rise-recruit-slot${participant ? ' hunt-rise-recruit-slot--filled' : ''}`;
+                const number = document.createElement('b');
+                number.textContent = String(index + 1);
+                const nickname = document.createElement('span');
+                nickname.textContent = participant?.nickname || '참가 대기';
+                if (participant) nickname.style.color = this.safeColor(participant.color, '#ffffff');
+                slot.appendChild(number);
+                slot.appendChild(nickname);
+                names.appendChild(slot);
             }
         }
     }
@@ -635,6 +670,7 @@ class HuntRenderer {
                 <div class="game-hunt-weapon-card ${w.status === 'dead' ? 'dead' : ''}" id="fight-card-${w.index}" style="position:relative; transition: transform 0.15s ease, border-color 0.15s ease; ${w.status === 'dead' ? 'transform: rotate(180deg);' : ''}">
                     <div class="game-hunt-weapon-img-container" style="position: relative; width: 115px; height: 115px; margin: 0 auto 16px;">
                         <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" style="margin: 0;" />
+                        ${w.id === 'insect_glaive' ? `<img class="ig-kinsect" id="ig-kinsect-${w.index}" src="img/weapons/kinsect.svg" alt="" />` : ''}
                         ${w.id === 'gunlance' ? `
                             <div class="game-hunt-weapon-overlay gunlance-overheat-overlay" id="overheat-overlay-${w.index}" style="background: linear-gradient(180deg, #ff3b30 0%, #ff9500 100%); mask-image: url('img/weapons/gunlance.svg'); -webkit-mask-image: url('img/weapons/gunlance.svg'); opacity: ${w.overheatDuration ? 1 : 0}; clip-path: inset(${w.overheatDuration ? (30 - w.overheatDuration) / 30 * 100 : 100}% 0px 0px 0px); -webkit-clip-path: inset(${w.overheatDuration ? (30 - w.overheatDuration) / 30 * 100 : 100}% 0px 0px 0px);"></div>
                         ` : ''}

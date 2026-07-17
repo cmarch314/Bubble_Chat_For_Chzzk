@@ -846,6 +846,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3835581,
     "mtimeMs": 1780695898806
   },
+  "BGM/MHR_Magnamalo.mp3": {
+    "category": "bgm",
+    "inputLufs": -17.71,
+    "truePeakDb": -1.61,
+    "gainDb": -4.29,
+    "measurement": "loudnorm",
+    "duration": 146.24,
+    "bytes": 3511341,
+    "mtimeMs": 1784269472294
+  },
   "BGM/MHR_Quest_Clear_Kamura.mp3": {
     "category": "bgm",
     "inputLufs": -12.79,

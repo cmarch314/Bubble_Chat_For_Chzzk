@@ -141,7 +141,7 @@ async function testCommand(msg) {
       },
       querySelector(sel) {
         if (sel === '.game-timer') return timerElement;
-        return { textContent: '' };
+        return { textContent: '', classList: { remove() {} } };
       }
     };
     return el;
@@ -160,9 +160,9 @@ async function testCommand(msg) {
   console.log(`\n=== TEST COMMAND: "${msg}" ===`);
   console.log("consecutiveTotal:", hunt.consecutiveTotal);
   console.log("consecutiveQueue Length:", hunt.consecutiveQueue ? hunt.consecutiveQueue.length : 'undefined');
-  const targetCards = capturedHTML.match(/<div class="hunt-quest-target(?:\s|")/g) || [];
+  const targetCards = capturedHTML.match(/<div class="hunt-rise-target(?:\s|")/g) || [];
   const hasMultipleIcons = capturedHTML.includes('hunt-quest-board--consecutive')
-    && capturedHTML.includes('hunt-quest-target-grid')
+    && capturedHTML.includes('hunt-rise-target-grid')
     && targetCards.length === hunt.consecutiveQueue.length;
   console.log("Lobby rendering check (all monster cards):", hasMultipleIcons ? "PASS" : "FAIL");
   if (!hasMultipleIcons) throw new Error('Consecutive quest board did not render every monster card');
