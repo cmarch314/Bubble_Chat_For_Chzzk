@@ -79,9 +79,6 @@ class HuntEffect extends BaseEffect {
         // Reset audio
         this.audioManager.stopBgms();
 
-        // Play supply box opening SFX
-        this.audioManager.playMHAudioFile('Unified_SFX/MH - Open Chest.mp3');
-
         // Load monsters list
         let monsters = this.initializer.fallbackMonsters;
         try {
@@ -138,12 +135,12 @@ class HuntEffect extends BaseEffect {
         const currentTier = this.initializer.getMonsterTier(this.selectedMonster);
         const isElder = (currentTier === 'elder');
         let voteTitle = isElder ? "⚔️ 집회소 고룡 토벌 수주 ⚔️" : "⚔️ 집회소 수렵 퀘스트 수주 ⚔️";
-        let voteSubtitle = "채팅에 !참여를 입력하세요. 모집 종료 후 4명의 헌터를 선발합니다.";
+        let voteSubtitle = "채팅에 !참가를 입력하세요. 모집 종료 후 4명의 헌터를 선발합니다.";
         if (this.consecutiveTotal > 1) {
             voteTitle = isElder 
                 ? `⚔️ 연속 토벌 모집! (1/${this.consecutiveTotal}) ⚔️` 
                 : `⚔️ 연속 수렵 모집! (1/${this.consecutiveTotal}) ⚔️`;
-            voteSubtitle = `${this.consecutiveTotal}마리 연속 퀘스트입니다. !참여 입력자 중 4명을 선발합니다.`;
+            voteSubtitle = `${this.consecutiveTotal}마리 연속 퀘스트입니다. !참가 입력자 중 4명을 선발합니다.`;
         }
 
         this.renderer.renderQuestBoard({
@@ -189,6 +186,11 @@ class HuntEffect extends BaseEffect {
                 this.participants = this.roster.list();
                 this.renderer.updateRecruitmentUI(this.participants);
                 if (registration.added) this.renderer.spawnRecruitmentNotification(msgData.nickname);
+                if (registration.added && registration.count >= 4) {
+                    if (this.gameTimer) this.timers.clear(this.gameTimer);
+                    this.gameTimer = null;
+                    this.beginLoadout();
+                }
                 return true;
             }
         } else if (this.phase === 'loadout') {
@@ -230,8 +232,10 @@ class HuntEffect extends BaseEffect {
     }
 
     beginLoadout() {
+        if (this.phase !== 'quest_board') return;
         this.renderer.clearLobbyTimer();
         this.phase = 'loadout';
+        this.audioManager.playMHAudioFile('Unified_SFX/MH - Open Chest.mp3');
         const selected = this.roster.selectFour();
         this.selectedWeapons = this.initializer.buildSelectedWeapons([]);
         this.bets = {};
@@ -247,10 +251,10 @@ class HuntEffect extends BaseEffect {
         this.renderer.renderLoadout({
             selectedMonster: this.selectedMonster,
             selectedWeapons: this.selectedWeapons,
-            timeLeft: 25
+            timeLeft: 60
         });
 
-        let timeLeft = 25;
+        let timeLeft = 60;
         this.gameTimer = this.timers.interval(() => {
             timeLeft--;
             if (timeLeft <= 0) {

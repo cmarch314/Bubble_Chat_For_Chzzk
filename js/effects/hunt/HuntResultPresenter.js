@@ -145,10 +145,7 @@ class HuntResultPresenter {
                     weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
                     void weaponCard.offsetWidth;
                     weaponCard.classList.add('victory-bounce');
-                    if (tag) {
-                        tag.textContent = '⚔️ 생존';
-                        tag.className = 'game-hunt-status-tag active';
-                    }
+                    if (tag) tag.remove();
 
                     // Stagger delay based on hunter index in selectedWeapons array (0, 1.2s, 2.4s, 3.6s)
                     const staggerDelay = i * 1200;

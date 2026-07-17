@@ -92,11 +92,11 @@ class HuntRenderer {
                         <div style="font-size:1.25rem;color:#d7b77d;">수주 희망자</div>
                         <div id="hunt-recruit-count" style="font-size:4.2rem;font-weight:1000;color:#fff;line-height:1.15;">0명</div>
                         <div id="hunt-recruit-names" style="font-size:1.05rem;color:#d8d0c5;min-height:76px;line-height:1.6;word-break:break-all;">아직 서명한 헌터가 없습니다.</div>
-                        <div style="font-size:2rem;font-weight:1000;color:#00ffaa;margin-top:12px;text-shadow:0 0 16px rgba(0,255,170,.35);">!참여</div>
+                        <div style="font-size:2rem;font-weight:1000;color:#00ffaa;margin-top:12px;text-shadow:0 0 16px rgba(0,255,170,.35);">!참가</div>
                         <div id="hunt-recruit-feed" style="font-size:.95rem;color:#c98534;height:24px;margin-top:5px;"></div>
                     </div>
                 </div>
-                <div class="game-timer" style="font-size:1.55rem;font-weight:bold;color:#8b5a2b;margin-top:12px;">⏳ 모집 마감 30초</div>
+                <div class="game-timer" style="font-size:1.55rem;font-weight:bold;color:#8b5a2b;margin-top:12px;">⏳ 모집 마감 30초 · 4명 충원 시 즉시 마감</div>
             </div>`;
         this.card = this.container.querySelector('.game-hunt-card');
         this.lobbyTimers.timeout(() => this.card && this.card.classList.remove('entry-anim'), 600);
@@ -145,7 +145,7 @@ class HuntRenderer {
                 <div style="background:rgba(42,30,22,.9);border:1px solid #c98534;border-radius:10px;padding:8px 14px;margin:12px auto 5px;max-width:1050px;color:#f5eadb;font-size:1.04rem;">
                     <b style="color:#00ffaa;">입력 예시</b>　!대검 지원가　·　!지원가 대검　·　!지원가 입력 후 다음 채팅에 !대검　·　!차액　·　!추천
                 </div>
-                <div class="game-timer" style="font-size:1.5rem;font-weight:bold;color:#8b5a2b;margin-top:9px;">⏳ 장비 확정 ${data.timeLeft || 25}초</div>
+                <div class="game-timer" style="font-size:1.5rem;font-weight:bold;color:#8b5a2b;margin-top:9px;">⏳ 장비 확정 ${data.timeLeft || 60}초</div>
             </div>`;
         this.card = this.container.querySelector('.game-hunt-card');
         (data.selectedWeapons || []).forEach(hunter => this.updateLoadoutCard(hunter));

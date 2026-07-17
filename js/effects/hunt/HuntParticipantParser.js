@@ -29,7 +29,7 @@ class HuntParticipantParser {
     parseRecruitment(message) {
         const tokens = this._tokens(message);
         if (tokens.length !== 1) return null;
-        return tokens[0] === '참여' || tokens[0] === '참가' ? { join: true } : null;
+        return tokens[0] === '참가' ? { join: true } : null;
     }
 
     parseLoadout(message) {

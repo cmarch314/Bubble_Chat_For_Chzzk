@@ -68,6 +68,18 @@ assert.match(
     /startFight\(container\)\s*\{\s*this\.renderer\.clearLobbyTimer\(\);/,
     'fight startup must stop the lobby timer loop before changing phases'
 );
+assert.match(effectSource, /let timeLeft = 30;/, 'quest-board recruitment must last 30 seconds');
+assert.match(effectSource, /registration\.count >= 4/, 'four unique entrants must advance immediately');
+assert.match(effectSource, /beginLoadout\(\)\s*\{\s*if \(this\.phase !== 'quest_board'\) return;/, 'loadout handover must be idempotent');
+assert.match(effectSource, /renderLoadout\([\s\S]*?timeLeft: 60[\s\S]*?let timeLeft = 60;/, 'loadout must last one minute');
+assert.match(
+    effectSource,
+    /beginLoadout\(\)[\s\S]*?playMHAudioFile\('Unified_SFX\/MH - Open Chest\.mp3'\)/,
+    'supply-box SFX must play when recruitment hands over to loadout'
+);
+const resultPresenterSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntResultPresenter.js'), 'utf8');
+assert.doesNotMatch(resultPresenterSource, /⚔️ 생존/, 'results must not display a survivor status label');
+assert.match(resultPresenterSource, /if \(tag\) tag\.remove\(\);/, 'survivor status tag must be removed on victory');
 assert.doesNotMatch(
     effectSource,
     /clearTimeout\(|clearInterval\(/,

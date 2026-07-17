@@ -3,9 +3,10 @@ const HuntParticipantParser = require('../js/effects/hunt/HuntParticipantParser.
 
 const parser = new HuntParticipantParser();
 assert.strictEqual(parser.parseRecruitment('hello'), null);
-assert.deepStrictEqual(parser.parseRecruitment('!참여'), { join: true });
+assert.deepStrictEqual(parser.parseRecruitment('!참가'), { join: true });
 assert.deepStrictEqual(parser.parseRecruitment('！참가'), { join: true });
-assert.strictEqual(parser.parseRecruitment('!참여 !대검'), null);
+assert.strictEqual(parser.parseRecruitment('!참가 !대검'), null);
+assert.strictEqual(parser.parseRecruitment('!참여'), null);
 
 const cases = [
     ['!대검 지원가', 'great_sword', 'support'],
