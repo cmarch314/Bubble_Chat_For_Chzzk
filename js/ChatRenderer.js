@@ -75,13 +75,12 @@ class ChatRenderer {
         const videoQueue = typeof findCMCVideosInMessage === 'function' ? findCMCVideosInMessage(originalMessage) : [];
 
         let usesSlot = true;
+        let slotSpan = 1;
         let timeout = 10000;
 
         if (specialBubble?.kind === 'clown') {
             chatBox.classList.add('chat-box--clown');
-            const clownPositions = [2, 25, 48, 71];
-            const clownSlot = Math.floor((this.boxPos % 80) / 20);
-            chatBox.style.left = `min(${clownPositions[clownSlot]}%, calc(100% - 528px))`;
+            slotSpan = 2;
             chatLineInner.classList.add('chat-line-inner--clown');
             chatLineInner.style.background = '';
             nameBox.classList.add('name-box--clown');
@@ -107,10 +106,6 @@ class ChatRenderer {
             if (displayMessage.length <= 5) {
                 messageEle.style.fontSize = (2.6 - displayMessage.length / 3) + "em";
                 messageEle.style.textAlign = "center";
-                chatBox.style.left = (this.boxPos % 100) + Math.random() * 5 % 10 + "%";
-            } else {
-                this.boxPos = this.boxPos % 100;
-                chatBox.style.left = this.boxPos + "%";
             }
 
             // 애니메이션 적용 (나락, 흔들기 등)
@@ -121,8 +116,7 @@ class ChatRenderer {
 
         // 슬롯 관리 (화면 겹침 방지)
         if (usesSlot) {
-            this.boxPos += 20;
-            this.activeBubbles.push(chatBox);
+            this._claimBubbleSlots(chatBox, slotSpan);
         }
 
         // DOM 조립 및 화면 표시
@@ -140,18 +134,15 @@ class ChatRenderer {
 
         requestAnimationFrame(() => chatBox.classList.add('visible'));
 
-        // 오래된 버블 제거 (슬롯 관리)
-        if (this.activeBubbles.length > 5) {
-            let cb = this.activeBubbles.shift();
-            if (cb) cb.classList.remove('visible');
-        }
-
         // 타임아웃 제거
         if (timeout) {
             this.timers.timeout(() => {
                 if (chatBox.parentElement) {
                     chatBox.classList.remove('visible');
-                    this.timers.timeout(() => chatBox.remove(), 1000);
+                    this.timers.timeout(() => {
+                        chatBox.remove();
+                        this._releaseBubbleSlots(chatBox);
+                    }, 1000);
                 }
             }, timeout);
         }
@@ -172,6 +163,52 @@ class ChatRenderer {
         chatLineInner.appendChild(chatLineTail);
 
         return { chatBox, chatLine, chatLineBg, chatLineInner, chatUser, nameBox, nameEle, badgeEle, messageEle };
+    }
+
+    _claimBubbleSlots(chatBox, requestedSpan = 1) {
+        const slotCount = 5;
+        const span = Math.max(1, Math.min(slotCount, Number(requestedSpan) || 1));
+        this.activeBubbles = this.activeBubbles.filter(bubble => bubble && bubble.parentElement);
+
+        const findAvailableStart = () => {
+            const occupied = new Set();
+            this.activeBubbles.forEach(bubble => {
+                const start = Number(bubble.dataset?.chatSlotStart);
+                const bubbleSpan = Number(bubble.dataset?.chatSlotSpan || 1);
+                if (!Number.isFinite(start)) return;
+                for (let slot = start; slot < start + bubbleSpan; slot++) occupied.add(slot);
+            });
+            const cursor = Math.floor((this.boxPos % 100) / 20);
+            for (let offset = 0; offset < slotCount; offset++) {
+                const start = (cursor + offset) % slotCount;
+                if (start + span > slotCount) continue;
+                let free = true;
+                for (let slot = start; slot < start + span; slot++) {
+                    if (occupied.has(slot)) free = false;
+                }
+                if (free) return start;
+            }
+            return null;
+        };
+
+        let start = findAvailableStart();
+        while (start === null && this.activeBubbles.length) {
+            const oldest = this.activeBubbles.shift();
+            oldest?.remove?.();
+            start = findAvailableStart();
+        }
+        if (start === null) start = 0;
+
+        chatBox.dataset.chatSlotStart = String(start);
+        chatBox.dataset.chatSlotSpan = String(span);
+        chatBox.style.left = `${start * 20}%`;
+        this.boxPos = ((start + span) % slotCount) * 20;
+        this.activeBubbles.push(chatBox);
+        return { start, span };
+    }
+
+    _releaseBubbleSlots(chatBox) {
+        this.activeBubbles = this.activeBubbles.filter(bubble => bubble !== chatBox && bubble?.parentElement);
     }
 
     _resolveColor(color, uid) {

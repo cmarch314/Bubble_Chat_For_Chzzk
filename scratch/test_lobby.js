@@ -160,8 +160,12 @@ async function testCommand(msg) {
   console.log(`\n=== TEST COMMAND: "${msg}" ===`);
   console.log("consecutiveTotal:", hunt.consecutiveTotal);
   console.log("consecutiveQueue Length:", hunt.consecutiveQueue ? hunt.consecutiveQueue.length : 'undefined');
-  const hasMultipleIcons = capturedHTML.includes('game-hunt-monster-showcase') && capturedHTML.includes('1') && capturedHTML.includes('2') && capturedHTML.includes('3');
-  console.log("Lobby rendering check (multiple items):", hasMultipleIcons ? "PASS" : "FAIL");
+  const targetCards = capturedHTML.match(/<div class="hunt-quest-target(?:\s|")/g) || [];
+  const hasMultipleIcons = capturedHTML.includes('hunt-quest-board--consecutive')
+    && capturedHTML.includes('hunt-quest-target-grid')
+    && targetCards.length === hunt.consecutiveQueue.length;
+  console.log("Lobby rendering check (all monster cards):", hasMultipleIcons ? "PASS" : "FAIL");
+  if (!hasMultipleIcons) throw new Error('Consecutive quest board did not render every monster card');
 
   // Clean up timer to exit gracefully
   if (hunt.gameTimer) {

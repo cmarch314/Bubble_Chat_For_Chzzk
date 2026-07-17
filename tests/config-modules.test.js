@@ -17,7 +17,7 @@ for (const file of files) {
     vm.runInContext(fs.readFileSync(path.join(root, file), 'utf8'), context, { filename: file });
 }
 
-assert.strictEqual(window.HIVE_VOLUME_CONFIG.master, 1.2);
+assert.strictEqual(window.HIVE_VOLUME_CONFIG.master, 1.5);
 assert.strictEqual(window.HIVE_VOLUME_CONFIG.visual, 1);
 assert.strictEqual(window.HIVE_VOLUME_CONFIG.sfx, 1);
 assert.ok(Object.keys(window.HIVE_SOUND_CONFIG).length > 700, 'sound catalog must remain complete');

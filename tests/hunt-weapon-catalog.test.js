@@ -11,7 +11,7 @@ assert.deepStrictEqual(HuntWeaponCatalog.validate(catalog), []);
 assert.ok(catalog.great_sword[0].tags.includes('charge'));
 assert.strictEqual(catalog.great_sword[0].audioCue, 'slash_heavy');
 assert.strictEqual(catalog.charge_blade[0].audioCue, 'explosive_heavy');
-assert.strictEqual(catalog.bow[0].audioCue, 'bow_shot');
+assert.strictEqual(catalog.bow[0].audioCue, 'dragon_piercer');
 assert.strictEqual(catalog.great_sword[0].durationTicks, 18);
 
 console.log('[test] Hunt weapon catalog contract passed.');

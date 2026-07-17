@@ -252,12 +252,12 @@ class HuntAudioManager {
     playMonsterAction(monster, kind = 'attack') {
         const group = this.monsterGroup(monster && monster.id ? monster.id : monster);
         if (!group) return false;
-        const sourceIncludes = kind === 'roar' ? '_vo_' : (Math.random() < 0.58 ? '_se_' : '_fx_');
-        if (this.playLocalAudio('monster', { group, sourceIncludes, volume: kind === 'roar' ? 0.78 : 0.64, maxDuration: kind === 'roar' ? 8 : 5 })) return true;
+        const sourceIncludes = kind === 'roar' ? '_vo_' : '_fx_';
+        const minDuration = kind === 'roar' ? 0.55 : 0.65;
+        if (this.playLocalAudio('monster', { group, sourceIncludes, volume: kind === 'roar' ? 0.78 : 0.64, minDuration, maxDuration: kind === 'roar' ? 8 : 5 })) return true;
         if (kind === 'attack') {
-            const alternate = sourceIncludes === '_se_' ? '_fx_' : '_se_';
-            if (this.playLocalAudio('monster', { group, sourceIncludes: alternate, volume: 0.64, maxDuration: 5 })) return true;
-            return this.playLocalAudio('monster', { group, volume: 0.6, maxDuration: 5 });
+            if (this.playLocalAudio('monster', { group, sourceIncludes: '_se_', volume: 0.64, minDuration, maxDuration: 5 })) return true;
+            return this.playLocalAudio('monster', { group, volume: 0.6, minDuration, maxDuration: 5 });
         }
         return false;
     }
@@ -470,6 +470,14 @@ class HuntAudioManager {
 
     playMHAsset(fileName, fallbackKey, context = {}) {
         if (fileName === 'monster_attack' && this.playMonsterAction(context.monsterId, 'attack')) return;
+        if (fileName === 'dragon_piercer') {
+            const played = this.playWeaponCue(fileName);
+            this.playHunterActionVoice(context.hunterIndex, 'attack_heavy', { chance: 0.5, volume: 0.58 });
+            if (played) {
+                this.timers.timeout(() => this.playLocalAudio('hit', { group: 'monster', minDuration: 0.42, maxDuration: 1.25, volume: 0.52 }), 70);
+            }
+            return;
+        }
         const weaponGroup = this.weaponGroup(context.weaponId);
         if (weaponGroup && this.playLocalAudio('weapon', { group: weaponGroup, maxDuration: 5, volume: 0.64 })) {
             const voiceAction = /heavy|explosive|charge/i.test(fileName || '') ? 'attack_heavy' : 'attack';
@@ -478,9 +486,13 @@ class HuntAudioManager {
             return;
         }
         if (/mh_hit|hunter_hit/i.test(fileName || '')) {
-            const played = this.playLocalAudio('hit', { group: 'hunter', maxDuration: 3, volume: 0.62 });
+            const played = this.playLocalAudio('hit', {
+                group: 'hunter', sourceIncludes: 'hit_pl_', minDuration: 0.42, maxDuration: 1.6, volume: 0.62
+            });
             this.playHunterActionVoice(context.hunterIndex, 'hit', { chance: 0.68, volume: 0.58 });
-            if (played) return;
+            // Never fall back to the old generic "click" impact. If the local Rise
+            // bank is still loading, the voice layer is preferable to a wrong SFX.
+            return played;
         }
         if (/mh_guard|guard/i.test(fileName || '')) {
             this.playHunterActionVoice(context.hunterIndex, 'guard', { chance: 0.38, volume: 0.54 });
@@ -510,12 +522,17 @@ class HuntAudioManager {
     playWeaponCue(cue) {
         const layers = window.HUNT_WEAPON_AUDIO_CUES || {};
         const selected = layers[cue];
-        if (!selected) return false;
+        if (cue === 'dragon_piercer') {
+            return this.playLocalAudio('weapon', {
+                group: 'bow', sourceIncludes: 'pl_wp_bow_com_media', minDuration: 0.9, maxDuration: 1.4, volume: 0.72
+            });
+        }
         const localGroupByCue = {
             bow_shot: 'bow', bowgun_shot: Math.random() < 0.5 ? 'l_bg' : 'h_bg', mechanical_transform: Math.random() < 0.5 ? 's_axe' : 'c_axe',
             blunt_light: 'ham', blunt_heavy: 'ham', explosive_heavy: 'g_lan', slash_light: 'l_swd', slash_heavy: 'g_swd'
         };
         if (this.playLocalAudio('weapon', { group: localGroupByCue[cue], maxDuration: 5, volume: 0.64 })) return true;
+        if (!selected) return false;
         selected.forEach(([path, volume], index) => {
             this.timers.timeout(() => {
                 try {

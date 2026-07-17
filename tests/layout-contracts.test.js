@@ -22,8 +22,11 @@ assert.match(huntRenderer, /class="game-hunt-card game-hunt-pregame-card hunt-qu
 assert.match(huntRenderer, /class="game-hunt-card game-hunt-pregame-card hunt-loadout-board/);
 assert.match(huntRenderer, /class="hunt-combat-info"/);
 assert.match(huntRenderer, /renderPerkBubbles/);
-assert.match(huntRenderer, /getPerkEffectKeywords/);
-assert.match(huntRenderer, /hunt-perk-effect--\$\{effect\.direction\}/);
+assert.match(huntRenderer, /activatePerkMarquees/);
+assert.match(huntRenderer, /hunt-perk-lore-track/);
+assert.match(huntRenderer, /class="hunt-loadout-build-line"/);
+assert.match(huntRenderer, /hunt-quest-board--consecutive/);
+assert.match(huntRenderer, /hunt-quest-target-grid/);
 assert.match(huntRenderer, /class="hunt-perk-bubble hunt-perk-bubble--/);
 assert.ok(!huntRenderer.includes('RANDOM PERKS'), 'loadout must not show a generic PERK caption');
 assert.ok(!huntRenderer.includes('◆ PERK'), 'combat cards must show individual skill bubbles');
@@ -31,18 +34,55 @@ assert.match(css, /\.game-overlay-container\.hunt-pregame-overlay\s*\{[\s\S]*?he
 assert.match(css, /\.game-hunt-card\.hunt-combat-board\s*\{[\s\S]*?1760px/);
 assert.match(css, /\.hunt-combat-info\s*\{[\s\S]*?grid-template-areas/);
 assert.match(css, /\.hunt-perk-icon\s*\{[\s\S]*?width:\s*28px/);
-assert.match(css, /\.hunt-perk-effect--down\s*\{[\s\S]*?color:/);
+assert.match(css, /\.hunt-loadout-board \.hunt-loadout-build-line\s*\{[\s\S]*?display:\s*flex/);
+assert.match(css, /\.hunt-loadout-board \.hunt-perk-lore\s*\{[\s\S]*?font-size:\s*\.82rem/);
+assert.match(css, /\.hunt-perk-lore--scrolling\s+\.hunt-perk-lore-track/);
+assert.match(css, /@keyframes hunt-perk-lore-scroll/);
+assert.doesNotMatch(css, /\.hunt-perk-lore--scrolling[\s\S]*?animation-direction:\s*alternate/);
+assert.match(css, /\.hunt-quest-target-grid\s*\{[\s\S]*?--quest-target-columns/);
+assert.match(css, /\.hunt-quest-target-name\s*\{[\s\S]*?font-size:\s*1\.12rem/);
 
 const HuntRenderer = require('../js/effects/hunt/HuntRenderer.js');
 const perkRenderer = Object.create(HuntRenderer.prototype);
 const perkHTML = perkRenderer.renderPerkBubbles([{
     name: '겁쟁이',
-    description: '이 긴 설명은 카드 본문에 노출되지 않아야 한다.',
+    description: '이 긴 설명은 카드 본문에 노출되어야 합니다.',
     affinities: ['mobility'],
     modifiers: { evadeChance: 0.12, attackRate: 0.96 }
 }]);
-assert.match(perkHTML, /회피↑/);
-assert.match(perkHTML, /공격↓/);
-assert.ok(!perkHTML.includes('hunt-perk-lore'), 'perk cards must render effect keywords instead of clipped prose');
+assert.match(perkHTML, /hunt-perk-lore-track/);
+assert.ok(perkHTML.includes('이 긴 설명은 카드 본문에 노출되어야 합니다.'), 'original perk lore must be restored');
+assert.ok(!perkHTML.includes('hunt-perk-effect'), 'keyword-only perk effects must stay rolled back');
+
+const scrollingClasses = new Set();
+const loreStyle = {
+    values: {},
+    setProperty(name, value) { this.values[name] = value; },
+    removeProperty(name) { delete this.values[name]; }
+};
+const trackStyle = {
+    animationDuration: '',
+    removeProperty(name) {
+        if (name === 'animation-duration') this.animationDuration = '';
+    }
+};
+const track = { scrollWidth: 230, style: trackStyle };
+const lore = {
+    clientWidth: 100,
+    style: loreStyle,
+    classList: {
+        add(name) { scrollingClasses.add(name); },
+        remove(name) { scrollingClasses.delete(name); }
+    },
+    querySelector(selector) { return selector === '.hunt-perk-lore-track' ? track : null; }
+};
+perkRenderer.activatePerkMarquees({ querySelectorAll: () => [lore] });
+assert.strictEqual(loreStyle.values['--perk-scroll-distance'], '130px');
+assert.ok(scrollingClasses.has('hunt-perk-lore--scrolling'));
+assert.match(trackStyle.animationDuration, /s$/);
+
+track.scrollWidth = 100;
+perkRenderer.activatePerkMarquees({ querySelectorAll: () => [lore] });
+assert.ok(!scrollingClasses.has('hunt-perk-lore--scrolling'), 'short perk lore must remain stationary');
 
 console.log('[test] Responsive game layout contract passed.');

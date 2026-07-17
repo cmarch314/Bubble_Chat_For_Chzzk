@@ -87,38 +87,32 @@ class HuntRenderer {
         return { icon: iconByAffinity[affinity] || '✦', tone };
     }
 
-    getPerkEffectKeywords(perk = {}) {
-        const labels = {
-            attackRate: '공격',
-            atbRate: '속도',
-            evadeChance: '회피',
-            evadePower: '회피력',
-            guardChance: '가드',
-            guardPower: '가드력',
-            healBias: '회복',
-            lowHpAttack: '빈사공격',
-            enragedAttack: '분노공격'
-        };
-        return Object.entries(perk.modifiers || {}).map(([key, value]) => {
-            const neutral = key.endsWith('Rate') || key.endsWith('Attack') ? 1 : 0;
-            const direction = Number(value) >= neutral ? 'up' : 'down';
-            return {
-                label: labels[key] || key,
-                direction,
-                symbol: direction === 'up' ? '↑' : '↓'
-            };
-        });
-    }
-
     renderPerkBubbles(perks = [], compact = false) {
         if (!perks.length) {
             return '<span class="hunt-perk-bubble hunt-perk-bubble--empty"><span class="hunt-perk-icon">◇</span><span class="hunt-perk-name">백지의 기록</span></span>';
         }
         return perks.map(perk => {
             const visual = this.getPerkVisual(perk);
-            const keywords = compact ? '' : `<span class="hunt-perk-effects">${this.getPerkEffectKeywords(perk).map(effect => `<span class="hunt-perk-effect hunt-perk-effect--${effect.direction}">${this.escapeHTML(effect.label)}${effect.symbol}</span>`).join('')}</span>`;
-            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone}${compact ? ' hunt-perk-bubble--compact' : ''}" title="${this.escapeHTML(`${perk.name}: ${perk.description || ''}`)}"><span class="hunt-perk-icon">${visual.icon}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${keywords}</span></span>`;
+            const description = perk.description || '길드의 기록에는 이유가 적혀 있지 않다.';
+            const lore = compact ? '' : `<span class="hunt-perk-lore"><span class="hunt-perk-lore-track">${this.escapeHTML(description)}</span></span>`;
+            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone}${compact ? ' hunt-perk-bubble--compact' : ''}" title="${this.escapeHTML(`${perk.name}: ${description}`)}"><span class="hunt-perk-icon">${visual.icon}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${lore}</span></span>`;
         }).join('');
+    }
+
+    activatePerkMarquees(root) {
+        if (!root?.querySelectorAll) return;
+        root.querySelectorAll('.hunt-perk-lore').forEach(lore => {
+            const track = lore.querySelector('.hunt-perk-lore-track');
+            if (!track) return;
+            lore.classList.remove('hunt-perk-lore--scrolling');
+            lore.style.removeProperty('--perk-scroll-distance');
+            track.style.removeProperty('animation-duration');
+            const overflow = Math.ceil(track.scrollWidth - lore.clientWidth);
+            if (overflow <= 2) return;
+            lore.style.setProperty('--perk-scroll-distance', `${overflow}px`);
+            track.style.animationDuration = `${Math.min(14, Math.max(6, 5 + overflow / 32))}s`;
+            lore.classList.add('hunt-perk-lore--scrolling');
+        });
     }
 
     renderQuestBoard(data) {
@@ -128,20 +122,30 @@ class HuntRenderer {
         this.container.classList?.add('hunt-pregame-overlay');
         const monster = data.selectedMonster || {};
         const monsterName = this.escapeHTML(monster.nameKO || '미확인 몬스터');
-        const questSequence = data.consecutiveTotal > 1
-            ? `<div class="game-hunt-monster-showcase" style="font-size:.95rem;color:#9a7a58;margin:4px 0 8px;">${(data.consecutiveQueue || []).map((item, index) => `<span style="margin:0 7px;">${index + 1}. ${this.escapeHTML(item.nameKO || '???')}</span>`).join('')}</div>`
-            : '';
+        const questMonsters = data.consecutiveTotal > 1 ? (data.consecutiveQueue || []) : [monster];
+        const isConsecutive = questMonsters.length > 1;
+        const questMonsterCards = questMonsters.map((item, index) => `
+            <div class="hunt-quest-target${index === 0 ? ' hunt-quest-target--first' : ''}">
+                <span class="hunt-quest-target-number">${index + 1}</span>
+                <img src="img/monsters/${this.escapeHTML(item.filename || 'rathalos.png')}" onerror="this.src='img/monsters/rathalos.png';" alt="" />
+                <span class="hunt-quest-target-name">${this.escapeHTML(item.nameKO || '미확인 몬스터')}</span>
+            </div>`).join('');
+        const questVisual = isConsecutive
+            ? `<div class="hunt-quest-roster">
+                    <div class="hunt-quest-roster-heading"><b>대연속 목표</b><span>${questMonsters.length}마리 · 순서대로 토벌</span></div>
+                    <div class="hunt-quest-target-grid" style="--quest-target-columns:${Math.min(5, questMonsters.length)};">${questMonsterCards}</div>
+               </div>`
+            : `<div class="hunt-quest-single-target">
+                    <img class="hunt-quest-monster" src="img/monsters/${this.escapeHTML(monster.filename || 'rathalos.png')}" onerror="this.src='img/monsters/rathalos.png';" />
+                    <div class="hunt-quest-single-name">${monsterName}</div>
+               </div>`;
         this.container.innerHTML = `
-            <div class="game-hunt-card game-hunt-pregame-card hunt-quest-board entry-anim" style="position:relative;">
+            <div class="game-hunt-card game-hunt-pregame-card hunt-quest-board${isConsecutive ? ' hunt-quest-board--consecutive' : ''} entry-anim" style="position:relative;">
                 <div style="font-size:1rem;color:#c98534;font-weight:900;letter-spacing:3px;">🏕️ GATHERING HUB · QUEST BOARD</div>
                 <div class="game-title" style="font-size:2.45rem;margin:8px 0 4px;">${this.escapeHTML(data.voteTitle || '집회소 퀘스트')}</div>
                 <div style="font-size:1.1rem;color:#8a725d;margin-bottom:10px;">${this.escapeHTML(data.voteSubtitle || '')}</div>
-                ${questSequence}
-                <div class="hunt-quest-content" style="display:grid;grid-template-columns:330px 1fr;gap:28px;align-items:center;max-width:1050px;margin:0 auto;">
-                    <div>
-                        <img class="hunt-quest-monster" src="img/monsters/${this.escapeHTML(monster.filename || 'rathalos.png')}" onerror="this.src='img/monsters/rathalos.png';" style="width:290px;height:290px;object-fit:contain;filter:drop-shadow(0 15px 26px rgba(0,0,0,.65));" />
-                        <div style="font-size:2rem;font-weight:900;color:#4e342e;">${monsterName}</div>
-                    </div>
+                <div class="hunt-quest-content">
+                    ${questVisual}
                     <div class="hunt-recruit-panel" style="background:rgba(42,30,22,.92);border:3px double #c98534;border-radius:16px;padding:24px;min-height:270px;box-sizing:border-box;">
                         <div style="font-size:1.25rem;color:#d7b77d;">수주 희망자</div>
                         <div id="hunt-recruit-count" style="font-size:4.2rem;font-weight:1000;color:#fff;line-height:1.15;">0명</div>
@@ -218,9 +222,13 @@ class HuntRenderer {
             <div class="game-hunt-weapon-img-container hunt-loadout-weapon-icon" style="position:relative;width:92px;height:92px;margin:7px auto;">
                 <img class="game-hunt-weapon-img" src="img/weapons/${this.escapeHTML(hunter.filename)}" style="width:92px;height:92px;margin:0;" />
             </div>
-            <div class="hunt-loadout-weapon-name" style="font-size:1.55rem;font-weight:1000;color:#c98534;">${this.escapeHTML(hunter.name)}</div>
-            <div class="hunt-loadout-personality" style="background:${personality.bg};border:1px solid ${personality.color};border-radius:7px;color:${personality.color};font-weight:900;padding:3px 7px;margin:5px 0;">${personality.label}</div>
+            <div class="hunt-loadout-build-line">
+                <div class="hunt-loadout-weapon-name" style="font-size:1.55rem;font-weight:1000;color:#c98534;">${this.escapeHTML(hunter.name)}</div>
+                <div class="hunt-loadout-personality" style="background:${personality.bg};border:1px solid ${personality.color};border-radius:7px;color:${personality.color};font-weight:900;padding:3px 7px;">${personality.label}</div>
+            </div>
             <div class="hunt-loadout-perks">${perkBubbles}</div>`;
+        const schedule = typeof requestAnimationFrame === 'function' ? requestAnimationFrame : callback => callback();
+        schedule(() => this.activatePerkMarquees(card));
     }
 
     updatePhaseTimer(timeLeft, label) {

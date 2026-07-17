@@ -24,8 +24,10 @@ const context = vm.createContext({
             defaultGain: 0.8,
             entries: [
                 { path: 'local/gs.mp3', category: 'weapon', group: 'g_swd', duration: 1 },
+                { path: 'local/dragon-piercer.mp3', category: 'weapon', group: 'bow', duration: 1.1, sourceBank: 'pl_wp_bow_com_media.bnk.2.X64' },
                 { path: 'local/roar.mp3', category: 'monster', group: 'em002', duration: 2, sourceBank: 'em002_00_vo_media' },
                 { path: 'local/hit.mp3', category: 'hit', group: 'monster', duration: 1 },
+                { path: 'local/hunter-hit.mp3', category: 'hit', group: 'hunter', duration: 0.8, sourceBank: 'hit_pl_media.bnk.2.X64' },
                 { path: 'local/voice.mp3', category: 'hunter_voice', group: 'm_01', language: 'ja', duration: 2 },
                 { path: 'local/dlc-voice.mp3', category: 'hunter_voice', group: 'd_01', language: 'ja', duration: 2 },
                 { path: 'local/dlc-short.mp3', category: 'hunter_voice', group: 'd_01', language: 'ja', duration: 0.18, sourceStream: 'combat_001.wav' },
@@ -62,6 +64,14 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     await Promise.resolve();
     assert.deepStrictEqual(played.map(item => item.audioPath), ['local/roar.mp3', 'local/gs.mp3', 'local/hit.mp3']);
     assert.strictEqual(played[0].options.baseVolume, 1, 'hunt audio gain must double and cap native playback safely');
+    manager.playMHAsset('dragon_piercer', null, { weaponId: 'bow', hunterIndex: 0 });
+    manager.playMHAsset('mh_hit.mp3', null, { hunterIndex: 0 });
+    await Promise.resolve();
+    assert.deepStrictEqual(
+        played.slice(3, 6).map(item => item.audioPath),
+        ['local/dragon-piercer.mp3', 'local/hit.mp3', 'local/hunter-hit.mp3'],
+        'dragon piercer and hunter damage must use dedicated locally extracted Rise banks'
+    );
     assert.strictEqual(manager.playCharacterDialogue('result', { force: true }), true);
     await Promise.resolve();
     assert.strictEqual(played.at(-1).audioPath, 'local/dlc-voice.mp3');

@@ -80,6 +80,9 @@ assert.match(
 const resultPresenterSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntResultPresenter.js'), 'utf8');
 assert.doesNotMatch(resultPresenterSource, /⚔️ 생존/, 'results must not display a survivor status label');
 assert.match(resultPresenterSource, /if \(tag\) tag\.remove\(\);/, 'survivor status tag must be removed on victory');
+assert.match(resultPresenterSource, /hunterStaggerMs:\s*2400/, 'carving hunter stagger must run at half speed');
+assert.match(resultPresenterSource, /stepMs:\s*4000/, 'carving steps must run at half speed');
+assert.match(resultPresenterSource, /soundCooldownMs:\s*1400/, 'carving item sounds must be rate-limited');
 assert.doesNotMatch(
     effectSource,
     /clearTimeout\(|clearInterval\(/,

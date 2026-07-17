@@ -4,7 +4,7 @@
 window.CHZZK_CHANNEL_ID = "057a9a03fea9b368eb0c76b9e95e1ae5"; // [Optional] Set your Channel ID here to skip lookup
 
 window.HIVE_VOLUME_CONFIG = {
-    "master": 1.2,
+    "master": 1.5,
     "visual": 1,
     "sfx": 1
 };

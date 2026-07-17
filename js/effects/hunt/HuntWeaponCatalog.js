@@ -124,6 +124,7 @@ class HuntWeaponCatalog {
 
     static audioFor(weaponId, action) {
         const tags = HuntWeaponCatalog.tagsFor(weaponId, action);
+        if (weaponId === 'bow' && /용의 화살/.test(action.name || '')) return 'dragon_piercer';
         if (/용격|초고출력|풀버스트/.test(action.name || '')) return 'explosive_heavy';
         if (tags.includes('ranged')) return weaponId === 'bow' ? 'bow_shot' : 'bowgun_shot';
         if (tags.includes('blunt')) return Number(action.dmg || 0) >= 300 ? 'blunt_heavy' : 'blunt_light';

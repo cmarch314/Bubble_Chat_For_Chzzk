@@ -132,7 +132,16 @@ class HuntResultPresenter {
                 `;
             }
 
+            const carveTiming = {
+                hunterStaggerMs: 2400,
+                stepMs: 4000,
+                soundCooldownMs: 1400
+            };
+            let lastCarveSoundAt = 0;
             const playCarveSound = (materialName) => {
+                const now = Date.now();
+                if (now - lastCarveSoundAt < carveTiming.soundCooldownMs) return false;
+                lastCarveSoundAt = now;
                 if (materialName.includes('홍옥') || materialName.includes('보옥') || materialName.includes('투기모피') || materialName.includes('대꼬리') || materialName.includes('재생가시')) {
                     effect.audioManager.playMHAudioFile('Unified_SFX/MH - Item Found (rarest).mp3', null, 0.5);
                 } else if (materialName.includes('그레이트') || materialName.includes('비약') || materialName.includes('귀인약') || materialName.includes('가루')) {
@@ -140,6 +149,7 @@ class HuntResultPresenter {
                 } else {
                     effect.audioManager.playMHAudioFile('Unified_SFX/MH - Item Found.mp3', null, 0.5);
                 }
+                return true;
             };
             
             // 기절한 헌터들은 기절 상태 유지, 생존자들은 3회 갈무리 슥슥 시작
@@ -157,8 +167,9 @@ class HuntResultPresenter {
                     weaponCard.classList.add('victory-bounce');
                     if (tag) tag.remove();
 
-                    // Stagger delay based on hunter index in selectedWeapons array (0, 1.2s, 2.4s, 3.6s)
-                    const staggerDelay = i * 1200;
+                    // Half-speed carving: each hunter and each carve step gets twice
+                    // the old spacing so four result tracks do not sound like SFX spam.
+                    const staggerDelay = i * carveTiming.hunterStaggerMs;
 
                     const material1 = effect.getMonsterMaterialName(effect.selectedMonster.nameKO, w.personality);
                     const material2 = effect.getMonsterMaterialName(effect.selectedMonster.nameKO, w.personality);
@@ -180,7 +191,7 @@ class HuntResultPresenter {
                             effect.renderer.spawnMaterialBox(w.index, material1);
                             effect.addCombatLog(`🍖 [갈무리] ${w.hunterName}이(가) [${material1}]을(를) 획득했습니다.`);
                         }
-                    }, staggerDelay + 2000);
+                    }, staggerDelay + carveTiming.stepMs);
                     effect.victoryEmojiTimeouts.push(t2);
 
                     // 3차 갈무리 (staggerDelay + 4000): 칼질 이모지 버블 팝 & 2차 소재 사운드 & 소재 메시지 박스 표현
@@ -191,7 +202,7 @@ class HuntResultPresenter {
                             effect.renderer.spawnMaterialBox(w.index, material2);
                             effect.addCombatLog(`🍖 [갈무리] ${w.hunterName}이(가) [${material2}]을(를) 획득했습니다.`);
                         }
-                    }, staggerDelay + 4000);
+                    }, staggerDelay + carveTiming.stepMs * 2);
                     effect.victoryEmojiTimeouts.push(t3);
 
                     // 갈무리 완료 (staggerDelay + 6000): 갈무리 상태 해제 & 3차 소재 사운드 & 획득 완료 이모지 버블 & 소재 메시지 박스 표현
@@ -203,7 +214,7 @@ class HuntResultPresenter {
                             effect.addCombatLog(`🍖 [갈무리] ${w.hunterName}이(가) [${material3}]을(를) 획득했습니다.`);
                             effect.renderer.spawnVictoryEmoji(w.index, '💎');
                         }
-                    }, staggerDelay + 6000);
+                    }, staggerDelay + carveTiming.stepMs * 3);
                     effect.victoryEmojiTimeouts.push(t4);
 
                 } else {
@@ -223,7 +234,7 @@ class HuntResultPresenter {
             if (livingHunters.length > 0) {
                 livingHunters.forEach((hunter, idx) => {
                     const originalIdx = effect.selectedWeapons.findIndex(w => w.index === hunter.index);
-                    const staggerDelay = originalIdx >= 0 ? originalIdx * 1200 : idx * 1200;
+                    const staggerDelay = (originalIdx >= 0 ? originalIdx : idx) * carveTiming.hunterStaggerMs;
 
                     const runHunterEmojiLoop = () => {
                         if (effect.phase !== 'results') return;
@@ -247,8 +258,8 @@ class HuntResultPresenter {
                         effect.victoryEmojiTimeouts.push(timeoutId);
                     };
 
-                    // 갈무리가 6초 동안 수행되므로, 최초 Stagger 지연을 staggerDelay + 6.5s ~ 8.5s로 주어 갈무리 직후부터 감정표현 루프가 돌게 만듭니다!
-                    const initialDelay = staggerDelay + 6500 + Math.random() * 2000;
+                    // 갈무리 3단계(12초)가 끝난 뒤 감정표현 루프를 시작합니다.
+                    const initialDelay = staggerDelay + carveTiming.stepMs * 3 + 500 + Math.random() * 2000;
                     const initialTimeoutId = effect.timers.timeout(runHunterEmojiLoop, initialDelay);
                     effect.victoryEmojiTimeouts.push(initialTimeoutId);
                 });
