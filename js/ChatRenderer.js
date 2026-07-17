@@ -80,6 +80,7 @@ class ChatRenderer {
         if (specialBubble?.kind === 'clown') {
             chatBox.classList.add('chat-box--clown');
             chatLineInner.classList.add('chat-line-inner--clown');
+            chatLineInner.style.background = '';
             nameBox.classList.add('name-box--clown');
             messageEle.classList.add('message--clown');
             messageEle.textContent = specialBubble.text;
