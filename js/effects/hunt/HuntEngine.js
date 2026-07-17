@@ -72,8 +72,8 @@ class HuntEngine {
         if (this.callbacks.onPlaySFX) this.callbacks.onPlaySFX(fileName, fallbackKey, context);
     }
 
-    playAudioFile(subPath, durationLimitMs, volumeMultiplier) {
-        if (this.callbacks.onPlayAudioFile) this.callbacks.onPlayAudioFile(subPath, durationLimitMs, volumeMultiplier);
+    playAudioFile(subPath, durationLimitMs, volumeMultiplier, context = {}) {
+        if (this.callbacks.onPlayAudioFile) this.callbacks.onPlayAudioFile(subPath, durationLimitMs, volumeMultiplier, context);
     }
 
     shakeWeapon(idx, borderClr, isAttack, moveName, isDodge = false) {
@@ -189,9 +189,9 @@ class HuntEngine {
         
         // 40% 확률로 사망 사운드 대신 "아이보!" 사운드 재생
         if (this.random() < 0.40) {
-            this.playSFX('mh_aibo.mp3', '아이보');
+            this.playSFX('mh_aibo.mp3', '아이보', { hunterIndex: target.index, action: 'cart' });
         } else {
-            this.playAudioFile('Unified_SFX/Player Fainted.mp3', 3500);
+            this.playAudioFile('Unified_SFX/Player Fainted.mp3', 3500, 1, { hunterIndex: target.index, action: 'cart', voiceChance: 0.9, voiceVolume: 0.62 });
         }
 
         if (this.callbacks.onTriggerDeathTag) this.callbacks.onTriggerDeathTag(target.index);

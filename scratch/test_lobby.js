@@ -40,6 +40,9 @@ globalThis.HuntAudioManager = class HuntAudioManager {
   constructor() {}
   stopBgms() {}
   playMHAudioFile() {}
+  huntVolume(volume) { return Math.min(1, volume * 2); }
+  prepareHunterVoiceProfiles() { return Promise.resolve(true); }
+  playConfiguredSound() { return true; }
 };
 
 // Read files

@@ -8,12 +8,12 @@ class HuntResultPresenter {
 
         effect.audioManager.stopBgms();
 
-        // Let the quest jingle establish itself, then add one locally extracted
-        // Rise character/DLC voice line as a light result-screen flourish.
+        // Let the quest jingle establish itself, then let one of the already
+        // assigned hunters speak with the same fixed voice used in combat.
         effect.audioManager.timers.timeout(() => {
-            effect.audioManager.playCharacterDialogue('result', {
+            const resultHunter = winner || effect.selectedWeapons.find(hunter => hunter.hp > 0) || effect.selectedWeapons[0];
+            effect.audioManager.playHunterActionVoice(resultHunter && resultHunter.index, isVictory ? 'victory' : 'cart', {
                 force: true,
-                maxDuration: 7,
                 volume: isVictory ? 0.5 : 0.46
             });
         }, 1100);
@@ -30,13 +30,13 @@ class HuntResultPresenter {
                 ];
                 const selectedClear = successBgms[Math.floor(Math.random() * successBgms.length)];
                 effect.audioManager.winBgm = effect.director.audioManager.createNativeAudio(selectedClear, {
-                    type: 'visual', baseVolume: 0.315
+                    type: 'visual', baseVolume: effect.audioManager.huntVolume(0.315)
                 });
                 effect.audioManager.winBgmPromise = effect.audioManager.winBgm.play().catch(() => {
-                    effect.director.eventBus.emit('audio:playVisualSound', effect.config.getSoundConfig()['우승!'] || '우승!');
+                    effect.audioManager.playConfiguredSound(effect.config.getSoundConfig()['우승!'] || '우승!');
                 });
             } catch (e) {
-                effect.director.eventBus.emit('audio:playVisualSound', effect.config.getSoundConfig()['우승!'] || '우승!');
+                effect.audioManager.playConfiguredSound(effect.config.getSoundConfig()['우승!'] || '우승!');
             }
         } else {
             try {
@@ -47,13 +47,13 @@ class HuntResultPresenter {
                 ];
                 const selectedFail = failBgms[Math.floor(Math.random() * failBgms.length)];
                 effect.audioManager.winBgm = effect.director.audioManager.createNativeAudio(selectedFail, {
-                    type: 'visual', baseVolume: 0.315
+                    type: 'visual', baseVolume: effect.audioManager.huntVolume(0.315)
                 });
                 effect.audioManager.winBgmPromise = effect.audioManager.winBgm.play().catch(() => {
-                    effect.director.eventBus.emit('audio:playVisualSound', effect.config.getSoundConfig()['안돼'] || '안돼');
+                    effect.audioManager.playConfiguredSound(effect.config.getSoundConfig()['안돼'] || '안돼');
                 });
             } catch (e) {
-                effect.director.eventBus.emit('audio:playVisualSound', effect.config.getSoundConfig()['안돼'] || '안돼');
+                effect.audioManager.playConfiguredSound(effect.config.getSoundConfig()['안돼'] || '안돼');
             }
         }
 

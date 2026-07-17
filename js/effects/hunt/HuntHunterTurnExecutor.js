@@ -31,14 +31,14 @@ class HuntHunterTurnExecutor {
                     w.isGathering = true;
                     w.itemDuration = 25; // [FIX] tick 기반 상태 관리로 전환
                     engine.addLog(`😅 [몬린이 딴짓] ${w.hunterName} (${w.name})이(가) 전투 도중 이전 토벌 대상인 [${prevMonsterName}]의 사체로 달려가 갈무리를 시도합니다! (획득: ${material})`, '#c98534');
-                    engine.playAudioFile('Unified_SFX/MH - Item Found.mp3');
+                    engine.playAudioFile('Unified_SFX/MH - Item Found.mp3', null, 1, { hunterIndex: w.index, action: 'item' });
                     engine.spawnEmojiBubble(w.index, `🏃`);
                     engine.shakeWeapon(w.index, '#c98534');
                 } else {
                     w.isGathering = true;
                     w.itemDuration = 25; // [FIX] tick 기반 상태 관리로 전환
                     engine.addLog(`🌿 [몬린이 딴짓] ${w.hunterName} (${w.name})이(가) 이쁜 풀꽃을 채집하느라 한눈을 팝니다! (획득: 약초)`, '#aaffaa');
-                    engine.playAudioFile('Unified_SFX/MH - Item Found.mp3');
+                    engine.playAudioFile('Unified_SFX/MH - Item Found.mp3', null, 1, { hunterIndex: w.index, action: 'item' });
                     engine.spawnEmojiBubble(w.index, `🌿`);
                     engine.shakeWeapon(w.index, '#aaffaa');
                 }
@@ -46,7 +46,7 @@ class HuntHunterTurnExecutor {
             } else if (engine.monsterState === 'enraged' && engine.random() < 0.35) {
                 w.itemDuration = 15; // 1.5초 행동 봉쇄
                 engine.addLog(`😱 [몬린이 공황] ${w.hunterName} (${w.name})이(가) 몬스터의 분노에 기겁하며 비명을 지르고 도망다닙니다! (무기 해제, 1.5초간 공황)`, '#ff5555');
-                engine.playAudioFile('Unified_SFX/Unified_Rathian_Roar.mp3');
+                engine.playAudioFile('Unified_SFX/Unified_Rathian_Roar.mp3', null, 1, { hunterIndex: w.index, action: 'cart', voiceChance: 0.85 });
                 engine.spawnEmojiBubble(w.index, `😱`);
                 engine.shakeWeapon(w.index, '#ff5555');
                 return;
@@ -69,7 +69,7 @@ class HuntHunterTurnExecutor {
                     }
                 });
                 engine.addLog(`🌿 [생명의 가루] ${w.hunterName}이(가) 생명의 가루를 흩뿌려 아군 전체 회복 및 ATB 충전! (+25 HP, +60 ATB)`, '#00ffaa');
-                engine.playAudioFile('Unified_SFX/MH - Item Found.mp3');
+                engine.playAudioFile('Unified_SFX/MH - Item Found.mp3', null, 1, { hunterIndex: w.index, action: 'support' });
                 engine.showSkillBubble(w.index, "🌿 생명의 가루!");
                 engine.selectedWeapons.forEach(m => {
                     if (m.status === 'alive') engine.shakeWeapon(m.index, '#00ffaa');
@@ -121,7 +121,7 @@ class HuntHunterTurnExecutor {
                 w.atb = 60;
                 w.isGathering = true;
                 engine.addLog(`🌿 [채집] ${w.hunterName}이(가) 허브를 채집해 라이프파우더 1개를 보충했습니다!`, '#aaffaa');
-                engine.playAudioFile('Unified_SFX/MH - Item Found (rare).mp3');
+                engine.playAudioFile('Unified_SFX/MH - Item Found (rare).mp3', null, 1, { hunterIndex: w.index, action: 'item' });
                 engine.spawnEmojiBubble(w.index, `🌿`);
                 engine.shakeWeapon(w.index, '#aaffaa');
                 engine.schedule(() => { w.isGathering = false; }, 2500);
@@ -138,7 +138,7 @@ class HuntHunterTurnExecutor {
             const healAmount = Math.round(w.maxHp * 0.60);
             w.hp = Math.min(w.maxHp, w.hp + healAmount);
             engine.addLog(`🧪 [포션] ${w.hunterName} (${w.name})이(가) 비약을 복용 +${healAmount} HP (남은 물약: ${w.potions}/10)`, '#2eff7b');
-            engine.playAudioFile('Unified_SFX/Potion Drink.mp3', null, 2.5);
+            engine.playAudioFile('Unified_SFX/Potion Drink.mp3', null, 2.5, { hunterIndex: w.index, action: 'item' });
             engine.updateHpUI(w);
             engine.updatePotionCountUI(w.index, w.potions);
             engine.showSkillBubble(w.index, `🧪 물약 회복 (+60%)`);
@@ -153,7 +153,7 @@ class HuntHunterTurnExecutor {
             w.ammo = 5;
             w.itemDuration = 12;
             engine.addLog(`🔄 [재장전] ${w.hunterName} (${w.name})이(가) 탄창을 갈고 재장전을 실행합니다. (재장전 전 잔탄: ${prevAmmo}/5)`, '#00a8ff');
-            engine.playSFX('mh_reload.mp3', '팅!');
+            engine.playSFX('mh_reload.mp3', '팅!', { hunterIndex: w.index, action: 'item' });
             engine.shakeWeapon(w.index, '#00a8ff');
             return;
         }
@@ -165,7 +165,7 @@ class HuntHunterTurnExecutor {
             w.sharpness = 100;
             w.itemDuration = 30;
             engine.addLog(`✨ [숫돌질] ${w.hunterName} (${w.name})이(가) 구석에서 숫돌을 갈아 예리도를 회복합니다! (숫돌질 전 예리도: ${prevSharpness}/100)`, '#c98534');
-            engine.playAudioFile('Unified_SFX/MH - Combine Item.mp3');
+            engine.playAudioFile('Unified_SFX/MH - Combine Item.mp3', null, 1, { hunterIndex: w.index, action: 'item' });
             engine.shakeWeapon(w.index, '#c98534');
             return;
         }

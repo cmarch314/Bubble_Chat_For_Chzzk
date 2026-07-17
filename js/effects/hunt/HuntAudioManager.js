@@ -15,6 +15,11 @@ class HuntAudioManager {
         this.localAudioEntries = [];
         this.localAudioByCategory = new Map();
         this.localAudioGain = 0.8;
+        this.huntVolumeGain = 2;
+        this.hunterVoiceProfiles = new Map();
+        this.hunterVoiceCooldowns = new Map();
+        this.hunterVoiceRoster = [];
+        this.voiceProfileCatalog = [];
         this.lastCharacterDialogueAt = 0;
         this.localAudioReady = this.loadLocalAudioManifest();
     }
@@ -32,6 +37,8 @@ class HuntAudioManager {
                 if (!this.localAudioByCategory.has(entry.category)) this.localAudioByCategory.set(entry.category, []);
                 this.localAudioByCategory.get(entry.category).push(entry);
             });
+            this.buildHunterVoiceProfileCatalog();
+            if (this.hunterVoiceRoster.length) this.assignHunterVoiceProfiles(this.hunterVoiceRoster);
             console.info(`[HuntAudio] Local Rise library ready: ${this.localAudioEntries.length} clips`);
             return this.localAudioEntries.length > 0;
         } catch (error) {
@@ -61,16 +68,162 @@ class HuntAudioManager {
     playLocalAudio(category, options = {}) {
         const entry = this.selectLocalAudio(category, options);
         if (!entry) return false;
+        return this.playLocalEntry(entry, options);
+    }
+
+    huntVolume(volume) {
+        return Math.min(1, Math.max(0, Number(volume || 0) * this.huntVolumeGain));
+    }
+
+    playConfiguredSound(input, type = 'visual') {
+        if (!input || !this.director.audioManager?.playSound) return false;
+        const boost = item => {
+            if (typeof item === 'string') return { src: item, volume: this.huntVolume(0.5) };
+            if (item && typeof item === 'object' && item.src) {
+                return { ...item, volume: this.huntVolume(item.volume ?? 0.5) };
+            }
+            return item;
+        };
+        const boosted = Array.isArray(input) ? input.map(boost) : boost(input);
+        this.director.audioManager.playSound(boosted, { force: true, type });
+        return true;
+    }
+
+    playLocalEntry(entry, options = {}) {
+        if (!entry) return false;
         try {
             const audio = this.director.audioManager.createNativeAudio(entry.path, {
                 type: 'sfx',
-                baseVolume: Math.min(1, Number(options.volume || 0.7) * this.localAudioGain)
+                baseVolume: this.huntVolume(Number(options.volume ?? 0.7) * this.localAudioGain)
             });
             audio.play().catch(() => {});
             return true;
         } catch (error) {
             return false;
         }
+    }
+
+    buildHunterVoiceProfileCatalog() {
+        const profiles = new Map();
+        (this.localAudioByCategory.get('hunter_voice') || []).forEach(entry => {
+            const duration = Number(entry.duration || 0);
+            if (!duration || duration > 7 || /\[pre\]/i.test(String(entry.sourceStream || ''))) return;
+            const language = String(entry.language || 'neutral');
+            const group = String(entry.group || 'common');
+            const key = `${language}:${group}`;
+            if (!profiles.has(key)) {
+                profiles.set(key, {
+                    key,
+                    language,
+                    group,
+                    isDlc: /^(?:d|c|s)_/i.test(group),
+                    entries: []
+                });
+            }
+            profiles.get(key).entries.push(entry);
+        });
+        const languageRank = { ja: 0, fc: 1, en: 2, neutral: 3 };
+        const candidates = [...profiles.values()];
+        const combatReady = candidates.filter(profile =>
+            profile.entries.length >= 40 && profile.entries.filter(entry => Number(entry.duration || 0) <= 1.55).length >= 10
+        );
+        this.voiceProfileCatalog = (combatReady.length ? combatReady : candidates).sort((a, b) =>
+            (languageRank[a.language] ?? 9) - (languageRank[b.language] ?? 9) || a.group.localeCompare(b.group)
+        );
+        return this.voiceProfileCatalog;
+    }
+
+    voiceProfileHash(value) {
+        let hash = 2166136261;
+        for (const char of String(value || '')) {
+            hash ^= char.charCodeAt(0);
+            hash = Math.imul(hash, 16777619);
+        }
+        return hash >>> 0;
+    }
+
+    assignHunterVoiceProfiles(hunters = []) {
+        this.hunterVoiceRoster = hunters;
+        this.hunterVoiceProfiles.clear();
+        this.hunterVoiceCooldowns.clear();
+        if (!this.voiceProfileCatalog.length) return false;
+
+        const japanese = this.voiceProfileCatalog.filter(profile => profile.language === 'ja');
+        const available = japanese.length >= hunters.length ? japanese : this.voiceProfileCatalog;
+        const dlc = available.filter(profile => profile.isDlc);
+        const standard = available.filter(profile => !profile.isDlc);
+        const used = new Set();
+
+        const pick = (pool, seed) => {
+            const source = pool.length ? pool : available;
+            const start = this.voiceProfileHash(seed) % source.length;
+            for (let offset = 0; offset < source.length; offset++) {
+                const candidate = source[(start + offset) % source.length];
+                if (!used.has(candidate.key)) return candidate;
+            }
+            return source[start];
+        };
+
+        hunters.forEach((hunter, position) => {
+            const preferredPool = position % 2 === 0 ? dlc : standard;
+            const profile = pick(preferredPool, `${hunter.hunterName || 'hunter'}:${hunter.index ?? position}`);
+            if (!profile) return;
+            used.add(profile.key);
+            const index = Number(hunter.index ?? position);
+            this.hunterVoiceProfiles.set(index, profile);
+            hunter.voiceProfile = {
+                key: profile.key,
+                language: profile.language,
+                group: profile.group,
+                isDlc: profile.isDlc
+            };
+        });
+        return this.hunterVoiceProfiles.size > 0;
+    }
+
+    prepareHunterVoiceProfiles(hunters = []) {
+        this.hunterVoiceRoster = hunters;
+        if (this.voiceProfileCatalog.length) return Promise.resolve(this.assignHunterVoiceProfiles(hunters));
+        return this.localAudioReady.then(() => this.assignHunterVoiceProfiles(hunters));
+    }
+
+    selectHunterActionVoice(hunterIndex, action = 'attack') {
+        if (!this.hunterVoiceProfiles.has(Number(hunterIndex)) && this.hunterVoiceRoster.length && this.voiceProfileCatalog.length) {
+            this.assignHunterVoiceProfiles(this.hunterVoiceRoster);
+        }
+        const profile = this.hunterVoiceProfiles.get(Number(hunterIndex));
+        if (!profile) return null;
+        const rules = {
+            attack: [0.12, 1.55],
+            attack_heavy: [0.2, 2.2],
+            hit: [0.12, 1.15],
+            evade: [0.12, 1.05],
+            guard: [0.15, 1.4],
+            item: [0.75, 2.8],
+            cart: [1.1, 4.8],
+            victory: [1.2, 6],
+            support: [0.7, 2.8]
+        };
+        const [minDuration, maxDuration] = rules[action] || rules.attack;
+        const actionPool = profile.entries.filter(entry => {
+            const duration = Number(entry.duration || 0);
+            return duration >= minDuration && duration <= maxDuration;
+        });
+        const pool = actionPool.length ? actionPool : profile.entries;
+        return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+    }
+
+    playHunterActionVoice(hunterIndex, action = 'attack', options = {}) {
+        if (hunterIndex === undefined || hunterIndex === null) return false;
+        if (!options.force && Math.random() > Number(options.chance ?? 1)) return false;
+        const now = Date.now();
+        const key = Number(hunterIndex);
+        if (!options.force && now < Number(this.hunterVoiceCooldowns.get(key) || 0)) return false;
+        const entry = this.selectHunterActionVoice(key, action);
+        if (!entry) return false;
+        const played = this.playLocalEntry(entry, { volume: options.volume ?? 0.56 });
+        if (played) this.hunterVoiceCooldowns.set(key, now + Number(options.cooldownMs ?? 1100));
+        return played;
     }
 
     weaponGroup(weaponId) {
@@ -110,6 +263,9 @@ class HuntAudioManager {
     }
 
     playHunterVoice(options = {}) {
+        if (options.hunterIndex !== undefined && options.hunterIndex !== null) {
+            return this.playHunterActionVoice(options.hunterIndex, options.action || 'attack', options);
+        }
         return this.playLocalAudio('hunter_voice', {
             languages: options.languages || ['ja', 'fc', 'en', 'neutral'],
             minDuration: 0.25,
@@ -300,14 +456,14 @@ class HuntAudioManager {
         const dedicatedPath = `SFX/MonsterHunter_Roars/roar_${finalId}.mp3`;
         const defaultPath = `SFX/MonsterHunter_Roars/roar_default.mp3`;
         const audio = this.director.audioManager.createNativeAudio(dedicatedPath, {
-            type: 'sfx', baseVolume: 0.7
+            type: 'sfx', baseVolume: this.huntVolume(0.7)
         });
         audio.play().catch(() => {
             const defaultAudio = this.director.audioManager.createNativeAudio(defaultPath, {
-                type: 'sfx', baseVolume: 0.7
+                type: 'sfx', baseVolume: this.huntVolume(0.7)
             });
             defaultAudio.play().catch(() => {
-                this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['포효'] || '포효');
+                this.playConfiguredSound(this.config.getSoundConfig()['포효'] || '포효');
             });
         });
     }
@@ -316,24 +472,31 @@ class HuntAudioManager {
         if (fileName === 'monster_attack' && this.playMonsterAction(context.monsterId, 'attack')) return;
         const weaponGroup = this.weaponGroup(context.weaponId);
         if (weaponGroup && this.playLocalAudio('weapon', { group: weaponGroup, maxDuration: 5, volume: 0.64 })) {
+            const voiceAction = /heavy|explosive|charge/i.test(fileName || '') ? 'attack_heavy' : 'attack';
+            this.playHunterActionVoice(context.hunterIndex, voiceAction, { chance: 0.32, volume: 0.56 });
             this.timers.timeout(() => this.playLocalAudio('hit', { group: 'monster', maxDuration: 3, volume: 0.48 }), 35);
             return;
         }
         if (/mh_hit|hunter_hit/i.test(fileName || '')) {
             const played = this.playLocalAudio('hit', { group: 'hunter', maxDuration: 3, volume: 0.62 });
-            if (Math.random() < 0.52) this.playHunterVoice({ maxDuration: 3.5, volume: 0.54 });
+            this.playHunterActionVoice(context.hunterIndex, 'hit', { chance: 0.68, volume: 0.58 });
             if (played) return;
         }
+        if (/mh_guard|guard/i.test(fileName || '')) {
+            this.playHunterActionVoice(context.hunterIndex, 'guard', { chance: 0.38, volume: 0.54 });
+        }
+        if (/mh_dodge|dodge|evade/i.test(fileName || '')) {
+            this.playHunterActionVoice(context.hunterIndex, 'evade', { chance: 0.42, volume: 0.54 });
+        }
         if (/mh_cart|mh_aibo/i.test(fileName || '')) {
-            if (Math.random() < 0.22 && this.playCharacterDialogue('combat', { maxDuration: 7, volume: 0.56 })) return;
-            if (this.playHunterVoice({ maxDuration: 6, volume: 0.62 })) return;
+            if (this.playHunterActionVoice(context.hunterIndex, 'cart', { chance: 0.78, volume: 0.62 })) return;
         }
         if (/mh_potion|item|chest/i.test(fileName || '') && this.playLocalAudio('item', { maxDuration: 5, volume: 0.6 })) return;
         if (fileName && this.playWeaponCue(fileName)) return;
 
         const soundConfig = this.config.getSoundConfig();
         if (fallbackKey && soundConfig[fallbackKey]) {
-            this.director.eventBus.emit('audio:playVisualSound', soundConfig[fallbackKey]);
+            this.playConfiguredSound(soundConfig[fallbackKey]);
             return;
         }
         if (fileName) {
@@ -357,7 +520,7 @@ class HuntAudioManager {
             this.timers.timeout(() => {
                 try {
                     const audio = this.director.audioManager.createNativeAudio(path, {
-                        type: 'sfx', baseVolume: volume
+                        type: 'sfx', baseVolume: this.huntVolume(volume)
                     });
                     audio.play().catch(() => {});
                 } catch (error) {
@@ -368,13 +531,19 @@ class HuntAudioManager {
         return true;
     }
 
-    playMHAudioFile(subPath, durationLimitMs = null, volumeMultiplier = 1.0) {
+    playMHAudioFile(subPath, durationLimitMs = null, volumeMultiplier = 1.0, context = {}) {
         const filePath = `MonsterHunter_Soundtracks/${subPath}`;
+        if (context.hunterIndex !== undefined && context.action) {
+            this.playHunterActionVoice(context.hunterIndex, context.action, {
+                chance: context.voiceChance ?? 0.55,
+                volume: context.voiceVolume ?? 0.56
+            });
+        }
         try {
             // Native playback is required for OBS file:// compatibility. Loudness
             // compensation is supplied by AudioManager's measured level profile.
             const audio = this.director.audioManager.createNativeAudio(filePath, {
-                type: 'sfx', baseVolume: 0.75 * volumeMultiplier
+                type: 'sfx', baseVolume: this.huntVolume(0.75 * volumeMultiplier)
             });
             audio.play().then(() => {
                 if (durationLimitMs) {

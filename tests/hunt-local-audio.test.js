@@ -7,6 +7,7 @@ const vm = require('vm');
 
 const source = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntAudioManager.js'), 'utf8');
 const played = [];
+const configured = [];
 const context = vm.createContext({
     console: { info() {}, warn() {} },
     Math: Object.assign(Object.create(Math), { random: () => 0 }),
@@ -26,7 +27,9 @@ const context = vm.createContext({
                 { path: 'local/roar.mp3', category: 'monster', group: 'em002', duration: 2, sourceBank: 'em002_00_vo_media' },
                 { path: 'local/hit.mp3', category: 'hit', group: 'monster', duration: 1 },
                 { path: 'local/voice.mp3', category: 'hunter_voice', group: 'm_01', language: 'ja', duration: 2 },
-                { path: 'local/dlc-voice.mp3', category: 'hunter_voice', group: 'd_01', language: 'ja', duration: 2 }
+                { path: 'local/dlc-voice.mp3', category: 'hunter_voice', group: 'd_01', language: 'ja', duration: 2 },
+                { path: 'local/dlc-short.mp3', category: 'hunter_voice', group: 'd_01', language: 'ja', duration: 0.18, sourceStream: 'combat_001.wav' },
+                { path: 'local/dlc-pre.mp3', category: 'hunter_voice', group: 'd_01', language: 'ja', duration: 0.18, sourceStream: 'combat_001 [pre]' }
             ]
         })
     }),
@@ -38,6 +41,7 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
 (async () => {
     const manager = new context.window.HuntAudioManager({
         audioManager: {
+            playSound: (input, options) => configured.push({ input, options }),
             createNativeAudio: (audioPath, options) => ({
                 volume: options.baseVolume,
                 play: async () => played.push({ audioPath, options }),
@@ -48,16 +52,33 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     }, { getSoundConfig: () => ({}) });
 
     assert.strictEqual(await manager.localAudioReady, true);
+    assert.strictEqual(manager.huntVolume(0.315), 0.63);
+    assert.strictEqual(manager.playConfiguredSound('local/configured.mp3'), true);
+    assert.strictEqual(configured[0].input.volume, 1, 'configured hunt sounds must use twice the default 0.5 gain');
     assert.strictEqual(manager.monsterGroup('rathalos'), 'em002');
     assert.strictEqual(manager.weaponGroup('great_sword'), 'g_swd');
     assert.strictEqual(manager.playMonsterAction({ id: 'rathalos' }, 'roar'), true);
     manager.playMHAsset('slash_heavy', null, { weaponId: 'great_sword' });
     await Promise.resolve();
     assert.deepStrictEqual(played.map(item => item.audioPath), ['local/roar.mp3', 'local/gs.mp3', 'local/hit.mp3']);
-    assert.strictEqual(played[0].options.baseVolume, 0.78 * 0.8);
+    assert.strictEqual(played[0].options.baseVolume, 1, 'hunt audio gain must double and cap native playback safely');
     assert.strictEqual(manager.playCharacterDialogue('result', { force: true }), true);
     await Promise.resolve();
     assert.strictEqual(played.at(-1).audioPath, 'local/dlc-voice.mp3');
+
+    const hunters = [
+        { index: 0, hunterName: '첫째' },
+        { index: 1, hunterName: '둘째' }
+    ];
+    assert.strictEqual(manager.assignHunterVoiceProfiles(hunters), true);
+    assert.notStrictEqual(hunters[0].voiceProfile.key, hunters[1].voiceProfile.key, 'hunters need distinct fixed voice profiles');
+    const assignedDlc = manager.hunterVoiceProfiles.get(0);
+    assert.ok(assignedDlc.entries.some(entry => entry.path === 'local/dlc-short.mp3'), 'short combat grunts must remain eligible');
+    assert.ok(!assignedDlc.entries.some(entry => entry.path === 'local/dlc-pre.mp3'), 'explicit pre-roll fragments must be excluded');
+    const fixedProfile = hunters[0].voiceProfile.key;
+    assert.strictEqual(manager.playHunterActionVoice(0, 'victory', { force: true }), true);
+    assert.strictEqual(hunters[0].voiceProfile.key, fixedProfile, 'one hunter must never switch voice profile mid-hunt');
+    assert.ok(played.at(-1).audioPath === 'local/voice.mp3' || played.at(-1).audioPath === 'local/dlc-voice.mp3');
     console.log('[test] Hunt local Rise audio routing contract passed.');
 })().catch(error => {
     console.error(error);

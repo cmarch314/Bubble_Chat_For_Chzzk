@@ -119,12 +119,12 @@ class HuntEffect extends BaseEffect {
             ];
             const selectedLobby = lobbyBgms[Math.floor(Math.random() * lobbyBgms.length)];
             this.audioManager.lobbyBgm = this.director.audioManager.createNativeAudio(selectedLobby, {
-                type: 'visual', baseVolume: 0.315, loop: true
+                type: 'visual', baseVolume: this.audioManager.huntVolume(0.315), loop: true
             });
             this.audioManager.lobbyBgmPromise = this.audioManager.lobbyBgm.play().catch(() => {
                 this.audioManager.lobbyBgm.src = 'BGM/SportBGM.mp3';
                 this.director.audioManager.applyNativeVolume(this.audioManager.lobbyBgm, {
-                    type: 'visual', path: 'BGM/SportBGM.mp3', baseVolume: 0.315
+                    type: 'visual', path: 'BGM/SportBGM.mp3', baseVolume: this.audioManager.huntVolume(0.315)
                 });
                 this.audioManager.lobbyBgmPromise = this.audioManager.lobbyBgm.play().catch(err => console.warn("Lobby BGM failed to play:", err));
             });
@@ -247,6 +247,7 @@ class HuntEffect extends BaseEffect {
             hunter.isNpc = Boolean(entrant.isNpc);
             this.bets[hunter.hunterName] = { index, color: hunter.hunterColor, isNpc: hunter.isNpc };
         });
+        this.audioManager.prepareHunterVoiceProfiles(this.selectedWeapons);
 
         this.renderer.renderLoadout({
             selectedMonster: this.selectedMonster,
@@ -295,18 +296,18 @@ class HuntEffect extends BaseEffect {
         const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster);
         try {
             this.audioManager.battleBgm = this.director.audioManager.createNativeAudio(bgmSrc, {
-                type: 'visual', baseVolume: 0.315, loop: true
+                type: 'visual', baseVolume: this.audioManager.huntVolume(0.315), loop: true
             });
             this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(() => {
                 const fallbackBgm = this.audioManager.getMonsterBgm(this.selectedMonster, { preferDedicated: false });
                 this.audioManager.battleBgm.src = fallbackBgm;
                 this.director.audioManager.applyNativeVolume(this.audioManager.battleBgm, {
-                    type: 'visual', path: fallbackBgm, baseVolume: 0.315
+                    type: 'visual', path: fallbackBgm, baseVolume: this.audioManager.huntVolume(0.315)
                 });
                 this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(err => {
                     this.audioManager.battleBgm.src = 'BGM/MHW_Proof_of_a_Hero.mp3';
                     this.director.audioManager.applyNativeVolume(this.audioManager.battleBgm, {
-                        type: 'visual', path: 'BGM/MHW_Proof_of_a_Hero.mp3', baseVolume: 0.315
+                        type: 'visual', path: 'BGM/MHW_Proof_of_a_Hero.mp3', baseVolume: this.audioManager.huntVolume(0.315)
                     });
                     this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(e => console.warn("Battle BGM failed:", e));
                 });
@@ -315,7 +316,7 @@ class HuntEffect extends BaseEffect {
             console.warn("Audio error:", e);
         }
 
-        this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['가기'] || '가기');
+        this.audioManager.playConfiguredSound(this.config.getSoundConfig()['가기'] || '가기');
         this.audioManager.playMHAudioFile('Unified_SFX/MH - Hunters Depart (MH3U).mp3');
 
         this.monsterTier = this.initializer.getMonsterTier(this.selectedMonster);
@@ -371,7 +372,7 @@ class HuntEffect extends BaseEffect {
             callbacks: {
                 onLog: (text, color) => this.addCombatLog(text, color),
                 onPlaySFX: (fileName, fallbackKey, context) => this.audioManager.playMHAsset(fileName, fallbackKey, context),
-                onPlayAudioFile: (subPath, durationLimitMs, volumeMultiplier) => this.audioManager.playMHAudioFile(subPath, durationLimitMs, volumeMultiplier),
+                onPlayAudioFile: (subPath, durationLimitMs, volumeMultiplier, audioContext) => this.audioManager.playMHAudioFile(subPath, durationLimitMs, volumeMultiplier, audioContext),
                 onShakeWeapon: (idx, borderClr, isAttack, moveName, isDodge = false) => {
                     const w = this.selectedWeapons[idx];
                     this.renderer.shakeWeapon(idx, w, borderClr, isAttack, moveName, isDodge);
@@ -565,7 +566,7 @@ class HuntEffect extends BaseEffect {
         this.addCombatLog(`🐉 [대연속 ${nextAction} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] ${this.selectedMonster.nameKO}이(가) 출현했습니다!`, '#c98534');
 
         // Play start SFX
-        this.director.eventBus.emit('audio:playVisualSound', this.config.getSoundConfig()['가자!'] || '가자!');
+        this.audioManager.playConfiguredSound(this.config.getSoundConfig()['가자!'] || '가자!');
 
         // Update stats in engine
         this.monsterTier = this.initializer.getMonsterTier(this.selectedMonster);
@@ -608,13 +609,13 @@ class HuntEffect extends BaseEffect {
         const bgmSrc = this.audioManager.getMonsterBgm(this.selectedMonster);
         try {
             this.audioManager.battleBgm = this.director.audioManager.createNativeAudio(bgmSrc, {
-                type: 'visual', baseVolume: 0.315, loop: true
+                type: 'visual', baseVolume: this.audioManager.huntVolume(0.315), loop: true
             });
             this.audioManager.battleBgmPromise = this.audioManager.battleBgm.play().catch(() => {
                 const fallbackBgm = this.audioManager.getMonsterBgm(this.selectedMonster, { preferDedicated: false });
                 this.audioManager.battleBgm.src = fallbackBgm;
                 this.director.audioManager.applyNativeVolume(this.audioManager.battleBgm, {
-                    type: 'visual', path: fallbackBgm, baseVolume: 0.315
+                    type: 'visual', path: fallbackBgm, baseVolume: this.audioManager.huntVolume(0.315)
                 });
                 return this.audioManager.battleBgm.play().catch(e => console.warn("Battle BGM failed:", e));
             });

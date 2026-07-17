@@ -165,14 +165,14 @@ class HuntMonsterTurnExecutor {
                     target.atb = 0;
                     engine.updateWeaponAtbUI(target.index, 0);
                     engine.addLog(`🔥 [근성 발휘!] ${target.name}이(가) ${engine.selectedMonster.nameKO}의 치명타를 입고 근성으로 1 HP 생존했습니다! (행동 게이지 초기화)`, '#c98534');
-                    engine.playSFX('mh_guard.mp3', '오살았어');
+                    engine.playSFX('mh_guard.mp3', '오살았어', { hunterIndex: target.index, action: 'guard' });
                     engine.shakeWeapon(target.index, '#00ffa3');
                     attackResults.push({ index: target.index, result: 'hit' });
                 } else {
                     target.hp = Math.max(0, target.hp - damage);
                     if (isGuard) {
                         engine.addLog(`🛡️ [방패 가드] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 방어해냈습니다! (-${damage} HP)`, '#00ffff');
-                        engine.playSFX('mh_guard.mp3', '가드성공');
+                        engine.playSFX('mh_guard.mp3', '가드성공', { hunterIndex: target.index, action: 'guard' });
                         engine.shakeWeapon(target.index, '#00ffff');
                         if (engine.callbacks.onTriggerGuardShake) engine.callbacks.onTriggerGuardShake(target.index);
                         target.guardDuration = 6;
@@ -197,13 +197,13 @@ class HuntMonsterTurnExecutor {
             } else {
                 if (isForesightSlash) {
                     engine.addLog(`⚡ [간파베기] ${target.name}이(가) 간파베기로 공격을 흘려내며 기인 게이지가 상승했습니다! (현재 레벨: ${target.spiritLevel}/3)`, '#c98534');
-                    engine.playSFX('mh_guard.mp3', '가드성공');
+                    engine.playSFX('mh_guard.mp3', '가드성공', { hunterIndex: target.index, action: 'guard' });
                     engine.showSkillBubble(target.index, "간파베기!");
                     engine.restoreBorder(target.index);
                     engine.shakeWeapon(target.index, '#c98534');
                 } else {
                     engine.addLog(`🌀 [회피] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 구르기로 회피했습니다!`, '#2eff7b');
-                    engine.playSFX('mh_dodge.mp3', '회피');
+                    engine.playSFX('mh_dodge.mp3', '회피', { hunterIndex: target.index, action: 'evade' });
                     engine.shakeWeapon(target.index, '#2eff7b', false, null, true);
                 }
                 if (actionMachine) actionMachine.cancel(target, isGuard ? 'guard' : 'evade');
