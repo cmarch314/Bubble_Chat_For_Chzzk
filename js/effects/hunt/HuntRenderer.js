@@ -68,6 +68,36 @@ class HuntRenderer {
         return typeof SafeContent !== 'undefined' && SafeContent.cssColor ? SafeContent.cssColor(value, fallback) : fallback;
     }
 
+    getPerkVisual(perk = {}) {
+        const affinities = Array.isArray(perk.affinities) ? perk.affinities : [];
+        const iconByAffinity = {
+            guard: '⛨', mobility: '➤', support: '✚', burst: '◆', status: '◈',
+            blunt: '●', sever: '✦', ranged: '⌁', explosive: '✹'
+        };
+        const affinity = affinities.find(item => iconByAffinity[item]);
+        const modifiers = Object.entries(perk.modifiers || {});
+        let upside = 0;
+        let downside = 0;
+        modifiers.forEach(([key, value]) => {
+            const neutral = key.endsWith('Rate') || key.endsWith('Attack') ? 1 : 0;
+            if (Number(value) > neutral) upside++;
+            if (Number(value) < neutral) downside++;
+        });
+        const tone = upside && downside ? 'twisted' : downside ? 'ominous' : 'boon';
+        return { icon: iconByAffinity[affinity] || '✦', tone };
+    }
+
+    renderPerkBubbles(perks = [], compact = false) {
+        if (!perks.length) {
+            return '<span class="hunt-perk-bubble hunt-perk-bubble--empty"><span class="hunt-perk-icon">◇</span><span class="hunt-perk-name">백지의 기록</span></span>';
+        }
+        return perks.map(perk => {
+            const visual = this.getPerkVisual(perk);
+            const lore = compact ? '' : `<span class="hunt-perk-lore">${this.escapeHTML(perk.description || '길드의 기록에는 이유가 적혀 있지 않다.')}</span>`;
+            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone}${compact ? ' hunt-perk-bubble--compact' : ''}" title="${this.escapeHTML(`${perk.name}: ${perk.description || ''}`)}"><span class="hunt-perk-icon">${visual.icon}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${lore}</span></span>`;
+        }).join('');
+    }
+
     renderQuestBoard(data) {
         this.clearAnimationTimers();
         if (!this.container) this.createContainer();
@@ -158,7 +188,7 @@ class HuntRenderer {
         const card = this.card.querySelector(`#hunt-opt-${hunter.index}`);
         if (!card) return;
         const personality = this.getPersonalityStyle(hunter.personality);
-        const perkNames = (hunter.perks || []).map(perk => `<span class="hunt-loadout-perk" style="display:inline-block;background:rgba(0,0,0,.48);border:1px solid #6f5b48;border-radius:6px;padding:2px 6px;margin:2px;font-size:.86rem;color:#ead9bd;"><span class="hunt-perk-gem">◆</span><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span><span class="hunt-perk-lore">${this.escapeHTML(perk.description || '길드의 기록에는 이유가 적혀 있지 않다.')}</span></span>`).join('');
+        const perkBubbles = this.renderPerkBubbles(hunter.perks || []);
         const hunterName = this.escapeHTML(hunter.hunterName || `HUNTER ${hunter.index + 1}`);
         card.innerHTML = `
             <div class="hunt-loadout-hunter-name" style="font-size:1.15rem;font-weight:900;color:${this.safeColor(hunter.hunterColor, '#eeeeee')};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${hunter.isNpc ? '🐱 ' : ''}${hunterName}</div>
@@ -167,8 +197,7 @@ class HuntRenderer {
             </div>
             <div class="hunt-loadout-weapon-name" style="font-size:1.55rem;font-weight:1000;color:#c98534;">${this.escapeHTML(hunter.name)}</div>
             <div class="hunt-loadout-personality" style="background:${personality.bg};border:1px solid ${personality.color};border-radius:7px;color:${personality.color};font-weight:900;padding:3px 7px;margin:5px 0;">${personality.label}</div>
-            <div class="hunt-loadout-perk-caption" style="font-size:.76rem;color:#9e8c78;letter-spacing:1px;margin-top:6px;">RANDOM PERKS · ${(hunter.perks || []).length}/5</div>
-            <div class="hunt-loadout-perks" style="min-height:66px;line-height:1.4;">${perkNames || '<span class="hunt-loadout-empty" style="font-size:.9rem;color:#8f8171;">◇ 백지의 기록 — 장점도 흉조도 없다.</span>'}</div>`;
+            <div class="hunt-loadout-perks">${perkBubbles}</div>`;
     }
 
     updatePhaseTimer(timeLeft, label) {
@@ -636,9 +665,7 @@ class HuntRenderer {
                         <span style="opacity:0.3;">|</span>
                         <span id="potion-count-${w.index}">🧪 ${w.potions}</span>
                     </div>
-                    <div class="hunt-combat-perks" style="min-height:24px;margin:-7px 0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.72rem;color:#b9a78e;" title="${this.escapeHTML((w.perks || []).map(perk => `${perk.name}: ${perk.description}`).join(' / '))}">
-                        ${(w.perks || []).length ? `◆ PERK · ${(w.perks || []).map(perk => this.escapeHTML(perk.name)).join(' · ')}` : '◇ 백지의 기록'}
-                    </div>
+                    <div class="hunt-combat-perks">${this.renderPerkBubbles(w.perks || [], true)}</div>
  
                     <div class="game-hunt-weapon-name" style="font-size: 2.5rem; font-weight: bold; color:${SafeContent.cssColor(w.hunterColor, '#c98534')}; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; margin-bottom: 6px;">
                         👤 ${SafeContent.escapeHTML(w.hunterName || 'HUNTER')}
