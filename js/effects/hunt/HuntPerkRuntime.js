@@ -1,7 +1,18 @@
 class HuntPerkRuntime {
     constructor(engine) { this.engine = engine; }
 
-    static names(hunter) { return new Set((hunter?.perks || []).map(perk => perk.name)); }
+    static names(hunter) {
+        if (!hunter) return new Set();
+        // Perk arrays are reassigned (never mutated in place), so memoize the name
+        // Set by array identity: rebuilt only when hunter.perks is swapped, not on
+        // every per-hit damage/stun/sharpness lookup or tick.
+        const perks = hunter.perks || null;
+        if (hunter._perkNamesSource !== perks) {
+            hunter._perkNamesSource = perks;
+            hunter._perkNames = new Set((perks || []).map(perk => perk.name));
+        }
+        return hunter._perkNames;
+    }
     static has(hunter, name) { return this.names(hunter).has(name); }
 
     initialize(hunter) {
