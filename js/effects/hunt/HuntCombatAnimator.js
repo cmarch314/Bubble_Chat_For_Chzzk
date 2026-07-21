@@ -402,11 +402,38 @@ class HuntCombatAnimator {
         if (isAttack) {
             const profile = HuntWeaponAnimationCatalog.resolve(w?.id, actionOrName);
             const actionEffect = this.createActionEffect(profile);
+            const impactDelay = Math.floor(profile.durationMs * 0.52);
+
             if (actionEffect) {
                 const impactStage = this.card.querySelector('#monster-showcase-panel');
                 (impactStage || weaponCard).appendChild(actionEffect);
                 this.animationTimers.timeout(() => actionEffect.remove(), Math.min(1200, profile.durationMs));
             }
+
+            // Frame-synchronized hit SFX & impact feedback
+            this.animationTimers.timeout(() => {
+                if (!this.card) return;
+                const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
+                const weaponType = profile.effect || 'sever';
+                const hitzoneVal = Number(this.owner.currentHitzone ?? 45);
+
+                this.owner.playSFX?.('hit_impact', null, {
+                    hunterIndex: idx,
+                    weaponId: w?.id,
+                    weaponType,
+                    hitzoneValue: hitzoneVal,
+                    action: 'hit_impact'
+                });
+
+                if (monsterImg && profile.impact) {
+                    monsterImg.classList.remove('small-hit-anim', 'large-hit-anim');
+                    void monsterImg.offsetWidth;
+                    monsterImg.classList.add(hitzoneVal >= 45 ? 'large-hit-anim' : 'small-hit-anim');
+                    this.animationTimers.timeout(() => {
+                        monsterImg?.classList.remove('small-hit-anim', 'large-hit-anim');
+                    }, 350);
+                }
+            }, impactDelay);
 
             let animDuration = profile.durationMs;
             weaponCard.dataset.huntActionId = profile.actionId;
@@ -460,14 +487,27 @@ class HuntCombatAnimator {
 
         if (kind === 'bomb') {
             effect.innerHTML = '<div class="hunt-barrel-bomb">💣</div><div class="hunt-bomb-blast">💥</div><strong>대형나무통폭탄!</strong>';
-            monsterImg.classList.remove('monster-bomb-hit');
-            void monsterImg.offsetWidth;
-            monsterImg.classList.add('monster-bomb-hit');
-            this.card.classList.add('hunt-bomb-shake');
+            showcase.appendChild(effect);
+
+            // Stage 1 (0ms): Placement & Fuse ignition SFX
+            this.owner.playSFX?.('bomb_fuse', null, { action: 'item', item: 'fuse' });
+
+            // Stage 2 (550ms): Explosion, blast visual, screen shake & barrel bomb SFX
+            this.animationTimers.timeout(() => {
+                effect.classList.add('detonated');
+                monsterImg.classList.remove('monster-bomb-hit');
+                void monsterImg.offsetWidth;
+                monsterImg.classList.add('monster-bomb-hit');
+                this.card?.classList.add('hunt-bomb-shake');
+                this.owner.playSFX?.('barrel_bomb', null, { action: 'item', item: 'large-barrel-bomb' });
+            }, 550);
+
             this.animationTimers.timeout(() => {
                 monsterImg.classList.remove('monster-bomb-hit');
                 this.card?.classList.remove('hunt-bomb-shake');
-            }, 1500);
+                effect.remove();
+            }, 1800);
+            return;
         } else if (kind === 'shocktrap') {
             effect.innerHTML = '<div class="hunt-shock-trap">⚡🪤⚡</div><strong>마비함정!</strong>';
             monsterImg.classList.remove('monster-flash-hit');

@@ -112,6 +112,68 @@ const HUNT_VERIFIED_LOCAL_ITEM_CUES = {
             ['local_assets/monster_hunter/world/weapon/insect_glaive/wp10_rod_epvsp_shell_nbnk_002_88588799.mp3', 0.62, 0],
             ['local_assets/monster_hunter/world/weapon/insect_glaive/wp10_rod_epvsp_shell_nbnk_019_792796667.mp3', 0.62, 45]
         ]
+    }],
+    barrel_bomb: [{
+        label: 'barrel bomb explosion and blast',
+        evidence: 'World gunlance explosive shell & Wyrmstake detonation evidence',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/gunlance/wp07_gun_epvsp_shell_nbnk_009_272642002.mp3', 0.78, 0],
+            ['local_assets/monster_hunter/world/weapon/gunlance/wp07_gun_epvsp_shell_nbnk_040_932229979.mp3', 0.82, 85]
+        ]
+    }],
+    bomb_fuse: [{
+        label: 'barrel bomb fuse and placement',
+        evidence: 'World item placement and ignition surrogate',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_047_766270597.mp3', 0.55, 0]
+        ]
+    }]
+};
+
+const HUNT_VERIFIED_HIT_CUES = {
+    sever_weakspot: [{
+        label: 'sharp severing weakspot hit',
+        evidence: 'World slash hit evidence',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/great_sword/wp00_two_epvsp_nbnk_013_877804327.mp3', 0.65, 0],
+            ['local_assets/monster_hunter/world/weapon/switch_axe/wp08_saxe_epvsp_nbnk_002_235177133.mp3', 0.70, 45]
+        ]
+    }],
+    sever_normal: [{
+        label: 'sharp severing normal hit',
+        evidence: 'World slash hit evidence',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/switch_axe/wp08_saxe_epvsp_nbnk_002_235177133.mp3', 0.65, 0]
+        ]
+    }],
+    blunt_weakspot: [{
+        label: 'heavy blunt weakspot hit',
+        evidence: 'World hammer hit evidence',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/hammer/wp04_ham_epvsp_nbnk_005_421068735.mp3', 0.75, 0],
+            ['local_assets/monster_hunter/world/weapon/hammer/wp04_ham_epvsp_nbnk_002_146760325.mp3', 0.65, 40]
+        ]
+    }],
+    blunt_normal: [{
+        label: 'heavy blunt normal hit',
+        evidence: 'World hammer hit evidence',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/hammer/wp04_ham_epvsp_nbnk_002_146760325.mp3', 0.65, 0]
+        ]
+    }],
+    ranged_weakspot: [{
+        label: 'ranged piercer weakspot hit',
+        evidence: 'World bow shell evidence',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_032_473159840.mp3', 0.70, 0]
+        ]
+    }],
+    bounce_hard: [{
+        label: 'deflection bounce on hard shell',
+        evidence: 'World weapon deflection evidence',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/charge_blade/wp_caxe_cmn_nbnk_025_766523265.mp3', 0.60, 0]
+        ]
     }]
 };
 
@@ -227,6 +289,7 @@ if (typeof module !== 'undefined' && module.exports) {
         HUNT_PROTECTED_CLASSIC_AUDIO,
         HUNT_VERIFIED_LOCAL_WEAPON_CUES,
         HUNT_VERIFIED_LOCAL_ITEM_CUES,
+        HUNT_VERIFIED_HIT_CUES,
         HUNT_VERIFIED_LOCAL_MONSTER_CUES
     };
 } else {
@@ -235,5 +298,6 @@ if (typeof module !== 'undefined' && module.exports) {
     window.HUNT_PROTECTED_CLASSIC_AUDIO = HUNT_PROTECTED_CLASSIC_AUDIO;
     window.HUNT_VERIFIED_LOCAL_WEAPON_CUES = HUNT_VERIFIED_LOCAL_WEAPON_CUES;
     window.HUNT_VERIFIED_LOCAL_ITEM_CUES = HUNT_VERIFIED_LOCAL_ITEM_CUES;
+    window.HUNT_VERIFIED_HIT_CUES = HUNT_VERIFIED_HIT_CUES;
     window.HUNT_VERIFIED_LOCAL_MONSTER_CUES = HUNT_VERIFIED_LOCAL_MONSTER_CUES;
 }

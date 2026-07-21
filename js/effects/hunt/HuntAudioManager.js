@@ -458,6 +458,13 @@ class HuntAudioManager {
         return this.playVerifiedLayers(variants[Math.floor(Math.random() * variants.length)]);
     }
 
+    playVerifiedHitCue(cueKey) {
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const variants = globalScope.HUNT_VERIFIED_HIT_CUES?.[cueKey];
+        if (!Array.isArray(variants) || !variants.length) return false;
+        return this.playVerifiedLayers(variants[Math.floor(Math.random() * variants.length)]);
+    }
+
     playVerifiedLayers(variant) {
         if (!variant || !Array.isArray(variant.layers) || !variant.layers.length) return false;
         let scheduled = false;
@@ -739,6 +746,22 @@ class HuntAudioManager {
         if (fileName === 'lifepowder') {
             this.playVerifiedItemCue('lifepowder');
             this.playHunterActionVoice(context.hunterIndex, 'support', { chance: 0.3, volume: 0.52 });
+            return;
+        }
+        if (fileName === 'barrel_bomb' || context.item === 'large-barrel-bomb') {
+            this.playVerifiedItemCue('barrel_bomb');
+            this.playHunterActionVoice(context.hunterIndex, 'item', { chance: 0.4, volume: 0.54 });
+            return;
+        }
+        if (fileName === 'hit_impact' || context.action === 'hit_impact') {
+            const weaponType = context.weaponType || 'sever';
+            const hitzoneVal = Number(context.hitzoneValue ?? 45);
+            const isWeakspot = hitzoneVal >= 45;
+            const isBounce = hitzoneVal < 25;
+            const cueKey = isBounce
+                ? 'bounce_hard'
+                : `${weaponType}_${isWeakspot ? 'weakspot' : 'normal'}`;
+            this.playVerifiedHitCue(cueKey);
             return;
         }
         const rosterHunter = this.hunterVoiceRoster.find(hunter => Number(hunter.index) === Number(context.hunterIndex));
