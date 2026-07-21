@@ -44,30 +44,41 @@ function actionLabelPatterns(action) {
 
     if (id.startsWith('great_sword.')) {
         if (/true_charged_slash/.test(id)) add(/true charged slash|真正的带电斩击/);
-        else if (/charged_slash/.test(id)) add(/charged slash/);
+        else if (/charged_slash|charge/.test(id)) add(/charged slash/, /charge tier/);
+        else add(/slash/, /tackle/, /overhead/);
+    } else if (id.startsWith('long_sword.')) {
+        if (/spirit_roundslash|spirit_iai/.test(id)) add(/spirit iai/, /spirit roundslash/);
+        else if (/spirit|helm_breaker/.test(id)) add(/spirit/, /thrust/, /iai/);
+        else add(/slash/, /stab/);
     } else if (id.startsWith('hammer.')) {
         if (/charge|release|mighty/.test(id)) add(/swing charge/, /power charge/, /charging hold/);
+        else add(/smash/, /upswing/, /big bang/);
     } else if (id.startsWith('sword_shield.')) {
         if (/backstep/.test(id)) add(/backstep charge/);
         if (/charged_slash/.test(id)) add(/charged slash release/);
+        else add(/slash/, /bash/, /rush/);
     } else if (id.startsWith('gunlance.')) {
         if (/full_burst/.test(id)) add(/burst fire/);
         if (/wyvern_fire/.test(id)) add(/wyvern'?s fire/);
         if (/wyrmstake/.test(id)) add(/wyrmstake cannon/);
         if (/shell/.test(id)) add(/shell.*explosion/, /shell charging/);
+        else add(/slash/, /slam/);
     } else if (id.startsWith('switch_axe.')) {
         if (/zero_sum|full_release|unbridled|discharge/.test(id)) add(/discharge finisher/, /phial explosion/);
         if (/sword_/.test(id)) add(/sword slash effect/, /amped state slash/);
         if (/heavy_slam/.test(id)) add(/slam attack/);
+        else add(/slash/, /swing/);
     } else if (id.startsWith('charge_blade.')) {
         if (/saed/.test(id)) add(/super amped element(?:al)? discharge/);
         else if (/element_discharge|aed/.test(id)) add(/phial explosion/, /axe phial swing/);
         if (/load_phials/.test(id)) add(/load phials/);
         if (/charged_double_slash/.test(id)) add(/charged double slash/);
         if (/savage_axe/.test(id)) add(/phial infused slash/);
+        else add(/slash/, /thrust/);
     } else if (id.startsWith('insect_glaive.')) {
         if (/extract|focus_thrust/.test(id)) add(/kinsect hit/, /mark target/);
         if (/rising_spiral|descending|airborne/.test(id)) add(/midair/, /vault jump/);
+        else add(/slash/, /thrust/);
     } else if (id.startsWith('bow.')) {
         if (/dragon_piercer/.test(id) || cue === 'dragon_piercer') add(/dragon piercer/);
         else if (/arc/.test(id)) add(/arc shot/);
@@ -86,6 +97,11 @@ function scoreWeaponActionEntry(action, entry) {
     let score = 0;
     if (cue && cue !== 'none' && family === cue) score += 120;
     if (family === 'weapon_action') score += 8;
+
+    // Favor weapon effect/action banks (epvsp) over common banks (com/cmn)
+    if (/_epvsp_|_ep_/.test(bank)) score += 50;
+    if (/_com_|_cmn_|_cmn\./.test(bank)) score -= 120;
+
     const patterns = actionLabelPatterns(action);
     const matches = patterns.filter(pattern => pattern.test(label)).length;
     score += matches * 45;

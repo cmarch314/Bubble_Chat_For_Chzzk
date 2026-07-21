@@ -531,25 +531,36 @@ class HuntAudioManager {
         if (!group) return false;
 
         // Exact labelled actions remain authoritative. When an action-specific
-        // event has not been mapped yet, use only audio proven to belong to the
-        // same weapon. This keeps combat audible without borrowing unrelated
-        // clicks, lasers, chat sounds, or another weapon's bank.
+        // event has not been mapped yet, use audio proven to belong to the same weapon.
+        // Action effect banks (epvsp) are prioritized over common banks, and non-attack clips
+        // (gimmick, wirebug, sheathing, slinger, ui) are strictly excluded.
         if (this.playVerifiedWeaponCue(weaponId, cue)) return true;
         if (this.playEvidenceRankedWeaponAction(weaponId, context.actionId)) return true;
+
+        const nonAttackExclusions = ['gimmick', 'wirebug', 'slinger', 'sheath', 'ui'];
 
         if (this.playLocalAudio('weapon', {
             weaponId,
             actionFamilies: [cue, 'weapon_action'],
             semanticOnly: true,
-            excludeSourceIncludes: ['gimmick'],
+            excludeSourceIncludes: nonAttackExclusions,
             preferGames: ['world', 'rise'],
             volume: 0.64
+        })) return true;
+
+        if (this.playLocalAudio('weapon', {
+            weaponId,
+            bankEvidenceOnly: true,
+            sourceIncludes: 'epvsp',
+            excludeSourceIncludes: nonAttackExclusions,
+            preferGames: ['world', 'rise'],
+            volume: 0.58
         })) return true;
 
         return this.playLocalAudio('weapon', {
             weaponId,
             bankEvidenceOnly: true,
-            excludeSourceIncludes: ['gimmick'],
+            excludeSourceIncludes: nonAttackExclusions,
             preferGames: ['world', 'rise'],
             volume: 0.58
         });
