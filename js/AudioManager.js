@@ -42,9 +42,20 @@ class AudioManager {
         this.masterGain = this.audioCtx.createGain();
         this.masterGain.gain.value = 1.0;
 
+        // Master volume may intentionally exceed 1.0. A final limiter after
+        // that boost prevents normalized chat voices from regaining clipped
+        // transient peaks at the destination.
+        this.outputLimiter = this.audioCtx.createDynamicsCompressor();
+        this.outputLimiter.threshold.value = -1;
+        this.outputLimiter.knee.value = 0;
+        this.outputLimiter.ratio.value = 20;
+        this.outputLimiter.attack.value = 0.001;
+        this.outputLimiter.release.value = 0.08;
+
         // [핵심 연결] 컴프레서는 항상 마스터 게인으로 연결됨
         this.compressor.connect(this.masterGain);
-        this.masterGain.connect(this.audioCtx.destination);
+        this.masterGain.connect(this.outputLimiter);
+        this.outputLimiter.connect(this.audioCtx.destination);
 
         // [Core Settings]
         this.soundHive = {};

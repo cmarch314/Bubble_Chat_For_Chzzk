@@ -1,6 +1,7 @@
 class HuntCombatAnimator {
     constructor(owner) {
         this.owner = owner;
+        this.activeWeaponAnimations = new Map();
         this.monsterAttackAnimator = new HuntMonsterAttackAnimator(
             owner,
             () => this.triggerMonsterRoar()
@@ -10,6 +11,23 @@ class HuntCombatAnimator {
     get card() { return this.owner.card; }
 
     get animationTimers() { return this.owner.animationTimers; }
+
+    clearWeaponAnimations() {
+        this.activeWeaponAnimations.forEach(animation => {
+            try { animation.cancel(); } catch (_) { /* detached OBS node */ }
+        });
+        this.activeWeaponAnimations.clear();
+        if (!this.card?.querySelectorAll) return;
+        this.card.querySelectorAll('.game-hunt-weapon-img').forEach(weaponImg => {
+            this.cancelWeaponAnimation(weaponImg);
+            weaponImg.style.removeProperty('transform');
+        });
+        this.card.querySelectorAll('.hunt-action-effect').forEach(effect => effect.remove());
+        this.card.querySelectorAll('.hunt-environment-effect').forEach(effect => effect.remove());
+        this.card.querySelectorAll('.ig-kinsect').forEach(kinsect => {
+            kinsect.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
+        });
+    }
 
     showSkillBubble(idxOrMonster, text) {
         if (!this.card) return;
@@ -26,7 +44,9 @@ class HuntCombatAnimator {
         if (oldBubble) oldBubble.remove();
 
         const bubble = document.createElement('div');
-        bubble.className = 'skill-bubble';
+        bubble.className = idxOrMonster === 'monster'
+            ? 'skill-bubble monster-skill-bubble'
+            : 'skill-bubble hunter-skill-bubble';
         bubble.textContent = text;
         targetEl.appendChild(bubble);
 
@@ -44,7 +64,7 @@ class HuntCombatAnimator {
 
     triggerMonsterRoar() {
         if (!this.card) return;
-        const monsterImg = this.card.querySelector('#fight-monster-img');
+        const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
         const showcase = this.card.querySelector('#monster-showcase-panel');
         if (!monsterImg || !showcase) return;
 
@@ -85,7 +105,7 @@ class HuntCombatAnimator {
 
     triggerMonsterCharge() {
         if (!this.card) return;
-        const monsterImg = this.card.querySelector('#fight-monster-img');
+        const monsterImg = this.card.querySelector('.hunt-small-monster.is-attacking') || this.card.querySelector('#fight-monster-img');
         if (monsterImg) {
             monsterImg.classList.remove('monster-charge-slide');
             void monsterImg.offsetWidth;
@@ -94,11 +114,12 @@ class HuntCombatAnimator {
         }
     }
 
-    triggerMonsterAttack(type, emoji, targets, attackName = '') {
-        return this.monsterAttackAnimator.triggerMonsterAttack(type, emoji, targets, attackName);
+    triggerMonsterAttack(type, emoji, targets, attackName = '', pattern = null) {
+        return this.monsterAttackAnimator.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
     }
     triggerHitAnimation(idx, w, damage) {
         if (!this.card) return;
+        this.interruptWeaponVisual(idx, w);
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         if (weaponCard && w.hp > 0) {
             if (damage >= 30) {
@@ -153,38 +174,64 @@ class HuntCombatAnimator {
         }
     }
 
+    interruptWeaponVisual(idx, w) {
+        const weaponCard = this.card?.querySelector(`#fight-card-${idx}`);
+        const weaponImg = weaponCard?.querySelector('.game-hunt-weapon-img');
+        if (weaponImg) {
+            this.cancelWeaponAnimation(weaponImg);
+            weaponImg.style.removeProperty('transform');
+        }
+        if (w?.id === 'great_sword') this.owner.updateWeaponChargeAuraUI(idx, w);
+    }
+
     triggerRollAnimation(idx) {
         if (!this.card) return;
-        const container = this.card.querySelector(`#fight-card-${idx} .game-hunt-weapon-img-container`);
-        if (container) {
-            container.classList.remove('roll-anim');
-            void container.offsetWidth; // trigger reflow
-            container.classList.add('roll-anim');
-            this.animationTimers.timeout(() => container.classList.remove('roll-anim'), 600);
+        const weaponImg = this.card.querySelector(`#fight-card-${idx} .game-hunt-weapon-img`);
+        if (weaponImg) {
+            this.cancelWeaponAnimation(weaponImg);
+            weaponImg.classList.remove('roll-anim');
+            void weaponImg.offsetWidth; // trigger reflow
+            weaponImg.classList.add('roll-anim');
+            this.animationTimers.timeout(() => weaponImg.classList.remove('roll-anim'), 600);
         }
+    }
+
+    triggerInvincibleJump(idx, active) {
+        if (!this.card) return;
+        const weaponImg = this.card.querySelector(`#fight-card-${idx} .game-hunt-weapon-img`);
+        if (!weaponImg) return;
+        this.cancelWeaponAnimation(weaponImg);
+        weaponImg.style.removeProperty('transform');
+        weaponImg.classList.toggle('hunter-invincible-jump', Boolean(active));
     }
 
     triggerStunUI(idx, isStunned) {
         if (!this.card) return;
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
-        const tag = this.card.querySelector(`#status-tag-${idx}`);
+        const imgContainer = weaponCard?.querySelector('.game-hunt-weapon-img-container');
         if (isStunned) {
+            const weaponImg = weaponCard?.querySelector('.game-hunt-weapon-img');
+            if (weaponImg) {
+                this.cancelWeaponAnimation(weaponImg);
+                weaponImg.style.removeProperty('transform');
+            }
             if (weaponCard) weaponCard.classList.add('stunned');
-            if (tag) {
-                tag.textContent = '🌀';
-                tag.className = 'game-hunt-status-tag stunned';
+            if (imgContainer && !imgContainer.querySelector('.hunter-stun-orbit')) {
+                const orbit = document.createElement('div');
+                orbit.className = 'hunter-stun-orbit';
+                orbit.setAttribute('aria-label', '기절');
+                orbit.innerHTML = '<i>💫</i><i>⭐</i><i>💫</i><i>⭐</i>';
+                imgContainer.appendChild(orbit);
             }
         } else {
             if (weaponCard) weaponCard.classList.remove('stunned');
-            if (tag) {
-                tag.textContent = '⚔️';
-                tag.className = 'game-hunt-status-tag active';
-            }
+            imgContainer?.querySelector('.hunter-stun-orbit')?.remove();
         }
     }
 
     triggerDeathTag(idx, w, timerVal = 5) {
         if (!this.card) return;
+        this.interruptWeaponVisual(idx, w);
         const tag = this.card.querySelector(`#status-tag-${idx}`);
         if (tag) {
             tag.textContent = `💀 ${timerVal}s`;
@@ -203,6 +250,7 @@ class HuntCombatAnimator {
                     if (roarOverlay) {
                         roarOverlay.remove();
                     }
+                    imgContainer.querySelector('.hunter-stun-orbit')?.remove();
                 }
                 const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
                 if (weaponImg) {
@@ -240,7 +288,7 @@ class HuntCombatAnimator {
 
     triggerMonsterKnockdownAnim() {
         if (!this.card) return;
-        const monsterImg = this.card.querySelector('#fight-monster-img');
+        const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
         if (monsterImg) {
             monsterImg.classList.remove('enraged');
             monsterImg.classList.remove('stunned_monster');
@@ -343,115 +391,181 @@ class HuntCombatAnimator {
         }
     }
 
-    shakeWeapon(idx, w, borderClr = '#ff3b30', isAttack = false, moveName = null, isDodge = false) {
+    shakeWeapon(idx, w, borderClr = '#ff3b30', isAttack = false, actionOrName = null, isDodge = false) {
         if (!this.card) return;
-        if (w && w.status === 'dead' && !isAttack) return; // Dead hunters sliding out do not shake, but lethal hits should shake first
+        if (w && w.status === 'dead' && !isAttack) return;
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
-        if (weaponCard) {
-            const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
-            const kinsectImg = weaponCard.querySelector('.ig-kinsect');
-            if (isAttack) {
-                const isKinsectExtract = w?.id === 'insect_glaive' && String(moveName || '').includes('진액 추출');
-                const actionEffect = this.createActionEffect(moveName);
-                if (actionEffect) {
-                    weaponCard.appendChild(actionEffect);
-                    this.animationTimers.timeout(() => actionEffect.remove(), 900);
-                }
-                // Default fallback
-                let animClass = 'w-anim-ls';
-                let animDuration = 500;
+        if (!weaponCard) return;
+        const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
+        const kinsectImg = weaponCard.querySelector('.ig-kinsect');
 
-                const animMap = {
-                    great_sword: { className: 'w-anim-gs', duration: 900 },
-                    long_sword: { className: 'w-anim-ls', duration: 500 },
-                    dual_blades: { className: 'w-anim-db', duration: 450 },
-                    sword_shield: { className: 'w-anim-sns', duration: 400 },
-                    hammer: { className: 'w-anim-hm', duration: 850 },
-                    hunting_horn: { className: 'w-anim-hh', duration: 600 },
-                    lance: { className: 'w-anim-lc', duration: 550 },
-                    gunlance: { className: 'w-anim-gl', duration: 650 },
-                    switch_axe: { className: 'w-anim-sa', duration: 600 },
-                    charge_blade: { className: 'w-anim-cb', duration: 750 },
-                    insect_glaive: { className: 'w-anim-ig', duration: 650 },
-                    light_bowgun: { className: 'w-anim-lbg', duration: 500 },
-                    heavy_bowgun: { className: 'w-anim-hbg', duration: 700 },
-                    bow: { className: 'w-anim-bow', duration: 650 }
-                };
-
-                if (moveName && (moveName.includes('공중회전난무') || moveName.includes('공중 회전') || moveName.includes('리와이베기') || moveName.includes('돌진연참'))) {
-                    animClass = 'w-anim-db-levi';
-                    animDuration = 1200;
-                } else if (w && animMap[w.id]) {
-                    animClass = animMap[w.id].className;
-                    animDuration = animMap[w.id].duration;
-                }
-
-                if (weaponImg && !isKinsectExtract) {
-                    // Remove all old and new animation classes
-                    const allClasses = [
-                        'attack-melee-anim', 'attack-hammer-kkt', 'attack-hammer-keep-sway', 
-                        'attack-hammer-charge2', 'attack-hammer-charge3', 'attack-hammer-tornado', 
-                        'attack-hammer-anim', 'attack-gs-charge1', 'attack-gs-charge2', 
-                        'attack-gs-charge3', 'attack-bowgun-anim',
-                        'w-anim-gs', 'w-anim-ls', 'w-anim-db', 'w-anim-db-levi', 'w-anim-sns', 'w-anim-hm',
-                        'w-anim-hh', 'w-anim-lc', 'w-anim-gl', 'w-anim-sa', 'w-anim-cb',
-                        'w-anim-ig', 'w-anim-lbg', 'w-anim-hbg', 'w-anim-bow'
-                    ];
-                    // OBS CEF 호환: 접미사 붙은 애니메이션 클래스도 일괄 삭제
-                    allClasses.forEach(cls => {
-                        weaponImg.classList.remove(cls);
-                        for (let i = 0; i < 4; i++) weaponImg.classList.remove(`${cls}-${i}`);
-                    });
-                    void weaponImg.offsetWidth; // trigger reflow
-                    
-                    const targetAnimClass = animClass.startsWith('w-anim-') ? `${animClass}-${idx}` : animClass;
-                    weaponImg.classList.add(targetAnimClass);
-                }
-
-                if (kinsectImg && w?.id === 'insect_glaive') {
-                    kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
-                    void kinsectImg.offsetWidth;
-                    kinsectImg.classList.add(isKinsectExtract ? 'ig-kinsect-extract' : 'ig-kinsect-assault');
-                    animDuration = isKinsectExtract ? 1100 : Math.max(animDuration, 760);
-                }
-
-                weaponCard.style.borderColor = borderClr;
-                weaponCard.style.zIndex = "10";
-                this.animationTimers.timeout(() => {
-                    if (w && w.status !== 'dead') {
-                        if (weaponImg) {
-                            weaponImg.classList.remove(animClass);
-                            weaponImg.classList.remove(`${animClass}-${idx}`);
-                        }
-                        if (kinsectImg) kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
-                        this.restoreBorder(idx, w);
-                        weaponCard.style.zIndex = "";
-                    }
-                }, animDuration);
-            } else {
-                if (!isDodge) {
-                    weaponCard.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px) scale(0.95)`;
-                }
-                weaponCard.style.borderColor = borderClr;
-                this.animationTimers.timeout(() => {
-                    if (w && w.status !== 'dead') {
-                        if (!isDodge) weaponCard.style.transform = '';
-                        this.restoreBorder(idx, w);
-                    }
-                }, 150);
+        if (isAttack) {
+            const profile = HuntWeaponAnimationCatalog.resolve(w?.id, actionOrName);
+            const actionEffect = this.createActionEffect(profile);
+            if (actionEffect) {
+                const impactStage = this.card.querySelector('#monster-showcase-panel');
+                (impactStage || weaponCard).appendChild(actionEffect);
+                this.animationTimers.timeout(() => actionEffect.remove(), Math.min(1200, profile.durationMs));
             }
+
+            let animDuration = profile.durationMs;
+            weaponCard.dataset.huntActionId = profile.actionId;
+            weaponCard.dataset.huntMotion = profile.motion;
+            if (weaponImg && profile.animateWeapon) this.playWeaponAnimation(weaponImg, w?.id, idx, profile);
+
+            if (kinsectImg && w?.id === 'insect_glaive') {
+                kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
+                if (profile.kinsect !== 'none') {
+                    void kinsectImg.offsetWidth;
+                    kinsectImg.classList.add(profile.kinsect === 'extract' ? 'ig-kinsect-extract' : 'ig-kinsect-assault');
+                    animDuration = Math.max(animDuration, profile.kinsect === 'extract' ? 1080 : 760);
+                }
+            }
+
+            weaponCard.style.borderColor = borderClr;
+            weaponCard.style.zIndex = '10';
+            this.animationTimers.timeout(() => {
+                if (w && w.status !== 'dead') {
+                    if (weaponImg) this.cancelWeaponAnimation(weaponImg);
+                    if (kinsectImg) kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
+                    this.restoreBorder(idx, w);
+                    weaponCard.style.zIndex = '';
+                }
+            }, animDuration);
+            return;
+        }
+
+        if (!isDodge) {
+            weaponCard.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px) scale(0.95)`;
+        }
+        weaponCard.style.borderColor = borderClr;
+        this.animationTimers.timeout(() => {
+            if (w && w.status !== 'dead') {
+                if (!isDodge) weaponCard.style.transform = '';
+                this.restoreBorder(idx, w);
+            }
+        }, 150);
+    }
+
+    triggerEnvironmentEffect(kind) {
+        if (!this.card) return;
+        const showcase = this.card.querySelector('#monster-showcase-panel');
+        const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
+        if (!showcase || !monsterImg || !['pitfall', 'rockfall', 'flash', 'shocktrap', 'bomb'].includes(kind)) return;
+
+        showcase.querySelectorAll('.hunt-environment-effect').forEach(effect => effect.remove());
+        const effect = document.createElement('div');
+        effect.className = `hunt-environment-effect environment-${kind}`;
+        effect.setAttribute('aria-hidden', 'true');
+
+        if (kind === 'bomb') {
+            effect.innerHTML = '<div class="hunt-barrel-bomb">💣</div><div class="hunt-bomb-blast">💥</div><strong>대형나무통폭탄!</strong>';
+            monsterImg.classList.remove('monster-bomb-hit');
+            void monsterImg.offsetWidth;
+            monsterImg.classList.add('monster-bomb-hit');
+            this.card.classList.add('hunt-bomb-shake');
+            this.animationTimers.timeout(() => {
+                monsterImg.classList.remove('monster-bomb-hit');
+                this.card?.classList.remove('hunt-bomb-shake');
+            }, 1500);
+        } else if (kind === 'shocktrap') {
+            effect.innerHTML = '<div class="hunt-shock-trap">⚡🪤⚡</div><strong>마비함정!</strong>';
+            monsterImg.classList.remove('monster-flash-hit');
+            void monsterImg.offsetWidth;
+            monsterImg.classList.add('monster-flash-hit');
+            this.animationTimers.timeout(() => monsterImg.classList.remove('monster-flash-hit'), 1600);
+        } else if (kind === 'flash') {
+            effect.innerHTML = '<div class="hunt-flash-burst">✨</div><strong>섬광!</strong>';
+            monsterImg.classList.remove('monster-flash-hit');
+            void monsterImg.offsetWidth;
+            monsterImg.classList.add('monster-flash-hit');
+            this.animationTimers.timeout(() => monsterImg.classList.remove('monster-flash-hit'), 1200);
+        } else if (kind === 'pitfall') {
+            effect.innerHTML = `
+                <div class="pitfall-crack"></div><div class="pitfall-hole"></div>
+                <div class="pitfall-net">🕸️</div>
+                ${Array.from({ length: 12 }, (_, index) => `<i class="pitfall-dirt" style="--i:${index}"></i>`).join('')}
+                <strong>🪤 구멍함정!</strong>`;
+            monsterImg.classList.remove('monster-pitfall-caught');
+            void monsterImg.offsetWidth;
+            monsterImg.classList.add('monster-pitfall-caught');
+            this.animationTimers.timeout(() => monsterImg.classList.remove('monster-pitfall-caught'), 2200);
+        } else {
+            effect.innerHTML = `
+                <div class="rockfall-warning">⚠️</div>
+                ${Array.from({ length: 5 }, (_, index) => `<b class="rockfall-boulder" style="--i:${index}">🪨</b>`).join('')}
+                <div class="rockfall-impact-ring"></div>
+                ${Array.from({ length: 14 }, (_, index) => `<i class="rockfall-debris" style="--i:${index}"></i>`).join('')}
+                <strong>💥 낙석 명중!</strong>`;
+            monsterImg.classList.remove('monster-rockfall-hit');
+            void monsterImg.offsetWidth;
+            monsterImg.classList.add('monster-rockfall-hit');
+            this.card.classList.add('hunt-rockfall-shake');
+            this.animationTimers.timeout(() => {
+                monsterImg.classList.remove('monster-rockfall-hit');
+                this.card?.classList.remove('hunt-rockfall-shake');
+            }, 1900);
+        }
+        showcase.appendChild(effect);
+        this.animationTimers.timeout(() => effect.remove(), kind === 'flash' ? 1400 : (kind === 'pitfall' ? 2500 : 2300));
+    }
+
+    playWeaponAnimation(weaponImg, weaponId, idx, profile) {
+        this.cancelWeaponAnimation(weaponImg);
+        if (typeof weaponImg.animate === 'function') {
+            const animation = weaponImg.animate(
+                HuntWeaponAnimationCatalog.keyframes(profile, idx),
+                { duration: profile.durationMs, easing: 'ease-in-out', iterations: 1 }
+            );
+            this.activeWeaponAnimations.set(weaponImg, animation);
+            animation.onfinish = () => {
+                if (this.activeWeaponAnimations.get(weaponImg) === animation) {
+                    // A finished Web Animation can retain its terminal keyframe in OBS Chromium.
+                    // Great Sword charge profiles end in a raised preparation pose, so release
+                    // the effect before removing our only handle to it.
+                    try { animation.cancel(); } catch (_) { /* detached OBS node */ }
+                    this.activeWeaponAnimations.delete(weaponImg);
+                    weaponImg.style.removeProperty('transform');
+                }
+            };
+            return;
+        }
+
+        // Old CEF fallback. Current OBS Chromium uses Web Animations and receives the semantic profile above.
+        const suffix = ({
+            great_sword: 'gs', long_sword: 'ls', dual_blades: 'db', sword_shield: 'sns', hammer: 'hm',
+            hunting_horn: 'hh', lance: 'lc', gunlance: 'gl', switch_axe: 'sa', charge_blade: 'cb',
+            insect_glaive: 'ig', light_bowgun: 'lbg', heavy_bowgun: 'hbg', bow: 'bow'
+        })[weaponId] || 'ls';
+        const fallbackClass = `w-anim-${suffix}-${idx}`;
+        weaponImg.dataset.huntFallbackClass = fallbackClass;
+        weaponImg.classList.remove(fallbackClass);
+        void weaponImg.offsetWidth;
+        weaponImg.classList.add(fallbackClass);
+        this.animationTimers.timeout(() => weaponImg.classList.remove(fallbackClass), profile.durationMs);
+    }
+
+    cancelWeaponAnimation(weaponImg) {
+        if (!weaponImg) return;
+        const animation = this.activeWeaponAnimations.get(weaponImg);
+        const animations = typeof weaponImg.getAnimations === 'function'
+            ? weaponImg.getAnimations()
+            : [];
+        new Set([animation, ...animations].filter(Boolean)).forEach(activeAnimation => {
+            try { activeAnimation.cancel(); } catch (_) { /* detached OBS node */ }
+        });
+        this.activeWeaponAnimations.delete(weaponImg);
+        const fallbackClass = weaponImg?.dataset?.huntFallbackClass;
+        if (fallbackClass) {
+            weaponImg.classList.remove(fallbackClass);
+            delete weaponImg.dataset.huntFallbackClass;
         }
     }
 
-    createActionEffect(moveName = '') {
+    createActionEffect(profile) {
         if (typeof document === 'undefined') return null;
-        const name = String(moveName || '');
-        let kind = 'sever';
-        if (/포격|용격|폭발|초고출력|속성해방|기폭/.test(name)) kind = 'explosive';
-        else if (/탄|사격|화살|저격/.test(name)) kind = 'projectile';
-        else if (/간파|카운터|상쇄|가드 포인트|태클/.test(name)) kind = 'counter';
-        else if (/해머|쿵|방패치기|어퍼|빅뱅|연주|향옥/.test(name)) kind = 'blunt';
-        else if (/난무|연참|연격|기관용탄/.test(name)) kind = 'multi';
+        const kind = profile?.effect;
+        if (!kind || kind === 'none') return null;
         const effect = document.createElement('span');
         effect.className = `hunt-action-effect hunt-action-effect-${kind}`;
         effect.setAttribute('aria-hidden', 'true');

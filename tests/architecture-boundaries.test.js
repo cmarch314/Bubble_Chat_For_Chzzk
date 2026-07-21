@@ -20,6 +20,7 @@ assertLoadedBefore('js/audio/AudioPlaybackEngine.js', 'js/AudioManager.js');
 assertLoadedBefore('js/chat/ChatMediaBubbleController.js', 'js/ChatRenderer.js');
 assertLoadedBefore('js/chat/ChatSpecialBubbleCommand.js', 'js/ChatRenderer.js');
 assertLoadedBefore('js/effects/hunt/HuntMonsterAttackAnimator.js', 'js/effects/hunt/HuntCombatAnimator.js');
+assertLoadedBefore('js/effects/hunt/HuntWeaponAnimationCatalog.js', 'js/effects/hunt/HuntCombatAnimator.js');
 
 const jsRoot = path.join(root, 'js');
 const productFiles = [];
@@ -47,6 +48,7 @@ assert.deepStrictEqual(
 assert.doesNotMatch(read('js/AudioManager.js'), /createBufferSource\s*\(|decodeAudioData\s*\(/);
 assert.doesNotMatch(read('js/ChatRenderer.js'), /document\.createElement\('video'\)|_activeVideoCount/);
 assert.doesNotMatch(read('js/effects/hunt/HuntCombatAnimator.js'), /cleanName\.includes\('돌진'\)/);
+assert.doesNotMatch(read('js/effects/hunt/HuntCombatAnimator.js'), /includes\('진액 추출'\)|\/포격\|용격/);
 assert.doesNotMatch(read('js/ChzzkGateway.js'), /location\.reload\s*\(/);
 assert.doesNotMatch(read('RENEWAL_REPORT.md'), /방송 전 `START_OBS_OVERLAY\.bat` 실행을 기본 운영 절차/);
 

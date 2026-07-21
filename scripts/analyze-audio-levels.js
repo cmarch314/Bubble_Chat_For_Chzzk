@@ -8,6 +8,7 @@ const roots = ['SFX', 'BGM', 'MonsterHunter_Soundtracks', 'Video', 'AI CMC'];
 const extensions = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac', '.mp4', '.webm']);
 const concurrencyArg = process.argv.find(arg => arg.startsWith('--concurrency='));
 const concurrency = Math.max(1, Number(concurrencyArg?.split('=')[1]) || 4);
+const CHAT_VOICE_POLICY_VERSION = 2;
 
 function collectFiles(directory) {
     if (!fs.existsSync(directory)) return [];
@@ -59,13 +60,15 @@ function durationFromLog(log) {
 function categoryFor(relative, duration) {
     if (relative.startsWith('BGM/')) return 'bgm';
     if (relative.startsWith('Video/') || relative.startsWith('AI CMC/')) return 'visual';
+    if (relative.startsWith('SFX/Add/') || relative.startsWith('SFX/Chzzk_Signatures/')) return 'chat_voice';
     if (relative.startsWith('MonsterHunter_Soundtracks/') && duration > 30) return 'bgm';
     return 'sfx';
 }
 
-function targetFor(category) {
+function targetFor(category, duration = 0) {
     if (category === 'bgm') return -22;
     if (category === 'visual') return -18;
+    if (category === 'chat_voice') return duration < 0.4 ? -20 : -18;
     return -16;
 }
 
@@ -105,6 +108,7 @@ async function analyze(filePath) {
     const duration = durationFromLog(loudness.log);
     const relative = relativePath(filePath);
     const category = categoryFor(relative, duration);
+    const policy = category === 'chat_voice' ? { policyVersion: CHAT_VOICE_POLICY_VERSION } : {};
     const jsonStart = loudness.log.lastIndexOf('{');
     const jsonEnd = loudness.log.lastIndexOf('}');
     if (jsonStart !== -1 && jsonEnd > jsonStart) {
@@ -112,14 +116,15 @@ async function analyze(filePath) {
         const inputLufs = Number(measurement.input_i);
         const truePeakDb = Number(measurement.input_tp);
         if (Number.isFinite(inputLufs) && Number.isFinite(truePeakDb)) {
-            const desiredGain = targetFor(category) - inputLufs;
+            const desiredGain = targetFor(category, duration) - inputLufs;
             const peakLimitedGain = -1 - truePeakDb;
             const gainDb = Math.max(-18, Math.min(12, desiredGain, peakLimitedGain));
             return buildEntry(filePath, relative, category, duration, {
                 inputLufs: Number(inputLufs.toFixed(2)),
                 truePeakDb: Number(truePeakDb.toFixed(2)),
                 gainDb: Number(gainDb.toFixed(2)),
-                measurement: 'loudnorm'
+                measurement: 'loudnorm',
+                ...policy
             });
         }
     }
@@ -142,11 +147,12 @@ async function analyze(filePath) {
             truePeakDb: Number.isFinite(truePeakDb) ? Number(truePeakDb.toFixed(2)) : null,
             gainDb: 0,
             measurement: 'silence',
-            silent: true
+            silent: true,
+            ...policy
         });
     }
 
-    const desiredGain = targetFor(category) - meanDb;
+    const desiredGain = targetFor(category, duration) - meanDb;
     const peakLimitedGain = -1 - truePeakDb;
     const gainDb = Math.max(-18, Math.min(12, desiredGain, peakLimitedGain));
     return buildEntry(filePath, relative, category, duration, {
@@ -154,7 +160,8 @@ async function analyze(filePath) {
         meanDb: Number(meanDb.toFixed(2)),
         truePeakDb: Number(truePeakDb.toFixed(2)),
         gainDb: Number(gainDb.toFixed(2)),
-        measurement: 'volume-fallback'
+        measurement: 'volume-fallback',
+        ...policy
     });
 }
 
@@ -165,7 +172,11 @@ async function main() {
         const relative = relativePath(filePath);
         const existing = entries[relative];
         const stat = fs.statSync(filePath);
-        return !existing || existing.bytes !== stat.size || existing.mtimeMs !== Math.round(stat.mtimeMs);
+        const isChatVoice = relative.startsWith('SFX/Add/') || relative.startsWith('SFX/Chzzk_Signatures/');
+        return !existing
+            || existing.bytes !== stat.size
+            || existing.mtimeMs !== Math.round(stat.mtimeMs)
+            || (isChatVoice && existing.policyVersion !== CHAT_VOICE_POLICY_VERSION);
     });
 
     let cursor = 0;

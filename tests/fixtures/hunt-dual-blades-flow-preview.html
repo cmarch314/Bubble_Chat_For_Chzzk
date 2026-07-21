@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hunt Dual Blades Preview</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: radial-gradient(circle at 50% 34%, #4b272b, #100b0c 70%); color: #fff; font-family: Arial, sans-serif; }
+    main { height: 918px; padding: 48px 80px; border-bottom: 2px dashed rgba(0,255,170,.5); }
+    h1 { margin: 0; text-align: center; color: #ffb0a6; font-size: 38px; letter-spacing: 3px; }
+    p { margin: 16px 0 40px; text-align: center; color: #dbc7c3; font-size: 22px; }
+    section { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+    article { min-height: 520px; padding: 32px; border: 2px solid #a64f52; border-radius: 24px; background: rgba(13,8,9,.9); box-shadow: 0 16px 36px #000; text-align: center; }
+    img { width: 190px; height: 190px; object-fit: contain; filter: drop-shadow(0 0 18px rgba(239,72,72,.5)); }
+    h2 { margin: 20px 0 14px; color: #ffc1b3; font-size: 30px; }
+    .action { min-height: 98px; display: grid; place-items: center; border: 1px solid #c65e62; border-radius: 14px; background: rgba(190,55,60,.17); color: #fff; font-size: 31px; font-weight: 800; }
+    small { display: block; margin-top: 22px; color: #e7aeb0; font-size: 18px; line-height: 1.5; }
+    footer { height: 162px; display: grid; place-items: center; background: rgba(0,0,0,.4); color: rgba(255,255,255,.65); font-size: 25px; }
+  </style>
+</head>
+<body>
+  <main data-testid="dual-blades-flow-preview">
+    <h1>쌍검 · 빠른 연계는 숨기고 전환점은 크게</h1>
+    <p>세부 기술명은 내부에서만 처리하며, 시청자는 상태 변화와 완성된 마무리에 집중합니다.</p>
+    <section>
+      <article><img src="../../img/weapons/dual_blades.svg" alt="쌍검"><h2>평상·귀인 연계</h2><div class="action">기술명 버블 생략</div><small>이단베기 3단 / 귀인베기 4단을<br>빠른 내부 연계로 처리</small></article>
+      <article><img src="../../img/weapons/dual_blades.svg" alt="쌍검"><h2>상태 전환</h2><div class="action">귀인화!</div><small>스태미나가 충분할 때 진입<br>부족하면 명시적으로 해제</small></article>
+      <article><img src="../../img/weapons/dual_blades.svg" alt="쌍검"><h2>다운 기회</h2><div class="action">귀인난무 III!</div><small>귀인난무 I → II는 조용히 빌드업<br>III에서만 크게 노출</small></article>
+      <article><img src="../../img/weapons/dual_blades.svg" alt="쌍검"><h2>게이지 소비</h2><div class="action">귀인강화 연참!</div><small>축적한 귀인 게이지를<br>3단 연계의 마무리로 환전</small></article>
+    </section>
+  </main>
+  <footer>OBS 채팅 전용 하단 15% · 빠른 액션 텍스트와 겹치지 않음</footer>
+</body>
+</html>

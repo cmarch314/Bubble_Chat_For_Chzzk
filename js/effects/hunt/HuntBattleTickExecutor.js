@@ -145,15 +145,9 @@ class HuntBattleTickExecutor {
                     w.cartRecoveryTicks = 10;
                     w.atb = 0;
                     if (typeof engine.resupplyHunterAtCamp === 'function') engine.resupplyHunterAtCamp(w);
-                    else w.potions = 10;
-                    if (w.id === 'charge_blade') {
-                        w.phials = 0;
-                        w.shieldChargeDuration = 0;
-                    }
-                    if (w.id === 'gunlance') w.overheatDuration = 0;
-                    if (w.id === 'insect_glaive') {
-                        w.extractBuffs = { red: 0, white: 0, orange: 0 };
-                        w.extractDuration = 0;
+                    else {
+                        w.potions = 10;
+                        if (typeof engine.resetHunterSpecialWeaponStates === 'function') engine.resetHunterSpecialWeaponStates(w);
                     }
                     engine.restoreBorder(w.index);
                     engine.playSFX('hunter_cart_voice', null, { hunterIndex: w.index, action: 'cart' });

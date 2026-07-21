@@ -3835,3 +3835,16 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         }
     ]
 };
+
+// Chat voice clips staged in SFX/Add. The `_짧` suffix is an asset variant
+// marker, not something viewers should need to type.
+Object.assign(window.HIVE_SOUND_CONFIG, {
+    "겁쟁이 종합병원": { "src": "Add/겁쟁이 종합병원_짧.mp3", "volume": 0.7 },
+    "고인물 썩은물": { "src": "Add/고인물 썩은물.mp3", "volume": 0.7 },
+    "공명의함정": { "src": "Add/공명의함정.mp3", "volume": 0.7 },
+    "구닥다리 유머": { "src": "Add/구닥다리 유머.mp3", "volume": 0.7 },
+    "난 되던데": { "src": "Add/난 되던데_짧.mp3", "volume": 0.7 },
+    "내가 졌다": { "src": "Add/내가 졌다_짧.mp3", "volume": 0.7 },
+    "못맞": { "src": "Add/못맞.mp3", "volume": 0.7 },
+    "쭈쭈박스": { "src": "Add/쭈쭈박스_짧.mp3", "volume": 0.7 }
+});

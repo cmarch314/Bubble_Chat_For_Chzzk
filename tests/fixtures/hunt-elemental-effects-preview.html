@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hunt Elemental Effects Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: radial-gradient(circle at 50% 20%, #342419, #090706 72%); }
+    .game-overlay-container { display: flex; align-items: flex-start; justify-content: center; height: 85vh; }
+    .hunt-combat-board { min-height: 820px; margin-top: 22px; }
+    .game-hunt-monster-showcase { height: 340px; margin: 0 0 18px; padding: 0; overflow: visible; }
+    .game-hunt-monster-img { width: 270px; height: 270px; object-fit: contain; }
+    .game-hunt-weapons-grid { margin-top: 0 !important; }
+    .game-hunt-weapon-card { min-height: 176px; }
+    .game-hunt-weapon-img-container { position: relative; width: 115px; height: 115px; }
+    .game-hunt-weapon-img { width: 115px; height: 115px; margin: 0; }
+    .preview-title { position: absolute; left: 38px; top: 28px; z-index: 5; color: #ffe0a3; font: 1000 28px/1 sans-serif; text-shadow: 0 3px 7px #000; }
+    .preview-chat-reserve { position: fixed; inset: auto 0 0; height: 15vh; display: grid; place-items: center; border-top: 2px dashed rgba(0,255,170,.45); background: rgba(0,0,0,.55); color: rgba(255,255,255,.62); font: 800 23px/1 sans-serif; }
+  </style>
+</head>
+<body>
+  <main class="game-overlay-container">
+    <section class="game-hunt-card hunt-combat-board" id="preview-board">
+      <div class="preview-title">겁염의 브레스 · 속성 이펙트 1920×1080 검사</div>
+      <div class="game-hunt-monster-showcase" id="monster-showcase-panel">
+        <img class="game-hunt-monster-img" id="fight-monster-img" src="../../img/monsters/fatalis.png" alt="밀라보레아스">
+      </div>
+      <div class="game-hunt-weapons-grid">
+        <article class="game-hunt-weapon-card" id="fight-card-0"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt="대검"></div><div class="hunt-combat-info"><div class="game-hunt-weapon-name">최마치</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:72%"></div><div class="game-hunt-hp-text">72 / 100</div></div></div></article>
+        <article class="game-hunt-weapon-card" id="fight-card-1"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt="수렵피리"></div><div class="hunt-combat-info"><div class="game-hunt-weapon-name">피리헌터</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:88%"></div><div class="game-hunt-hp-text">88 / 100</div></div></div></article>
+        <article class="game-hunt-weapon-card" id="fight-card-2"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/lance.svg" alt="랜스"></div><div class="hunt-combat-info"><div class="game-hunt-weapon-name">방패헌터</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:94%"></div><div class="game-hunt-hp-text">94 / 100</div></div></div></article>
+        <article class="game-hunt-weapon-card" id="fight-card-3"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/bow.svg" alt="활"></div><div class="hunt-combat-info"><div class="game-hunt-weapon-name">회피헌터</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:66%"></div><div class="game-hunt-hp-text">66 / 100</div></div></div></article>
+      </div>
+    </section>
+  </main>
+  <footer class="preview-chat-reserve">OBS 채팅 전용 하단 15%</footer>
+  <script src="../../js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
+  <script>
+    const owner = {
+      card: document.getElementById('preview-board'),
+      animationTimers: { timeout(fn, ms) { return setTimeout(fn, ms); } }
+    };
+    const animator = new HuntMonsterAttackAnimator(owner, () => {});
+    function playPreview() {
+      animator.triggerMonsterAttack('elemental', '🔥', [
+        { index: 0, result: 'hit' }, { index: 1, result: 'hit' },
+        { index: 2, result: 'hit' }, { index: 3, result: 'dodge' }
+      ], '겁염의 브레스');
+    }
+    window.addEventListener('load', () => { playPreview(); setInterval(playPreview, 2300); });
+  </script>
+</body>
+</html>

@@ -32,6 +32,16 @@ class HuntParticipantParser {
         return tokens[0] === '참가' ? { join: true } : null;
     }
 
+    parseReady(message) {
+        const normalized = String(message || '').normalize('NFKC').trim().toLowerCase();
+        return /^!\s*준비$/.test(normalized) ? { ready: true } : null;
+    }
+
+    parsePerkReroll(message) {
+        const normalized = String(message || '').normalize('NFKC').trim().toLowerCase();
+        return /^!\s*(?:리롤|퍽리롤)$/.test(normalized) ? { reroll: true } : null;
+    }
+
     parseLoadout(message) {
         if (!/[!！]/.test(String(message || ''))) return null;
         const tokens = this._tokens(message);

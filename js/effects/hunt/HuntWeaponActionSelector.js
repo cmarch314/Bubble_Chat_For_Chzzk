@@ -1,6 +1,7 @@
 class HuntWeaponActionSelector {
-    constructor(random = Math.random) {
+    constructor(random = Math.random, mechanics = null) {
         this.random = random;
+        this.mechanics = mechanics;
     }
 
     isEligible(hunter, action) {
@@ -13,15 +14,24 @@ class HuntWeaponActionSelector {
         if (req.tripleExtract && !(hunter.extractDuration > 0)) return false;
         if (req.shieldCharged && !(hunter.shieldChargeDuration > 0)) return false;
         if (req.notOverheated && hunter.overheatDuration > 0) return false;
+        if (this.mechanics && !this.mechanics.isEligible(hunter, action)) return false;
         return true;
     }
 
     select(hunter, actions, context = {}) {
         if (!actions || actions.length === 0) return { action: null, index: -1 };
+        if (this.mechanics && this.mechanics.setContext) this.mechanics.setContext(hunter, context);
         const eligible = actions
             .map((action, index) => ({ action, index }))
             .filter(entry => this.isEligible(hunter, entry.action));
         if (!eligible.length) return { action: actions[0], index: 0 };
+
+        if (this.mechanics) {
+            const mechanicIndex = this.mechanics.selectAction(hunter, actions, context);
+            if (mechanicIndex >= 0 && this.isEligible(hunter, actions[mechanicIndex])) {
+                return { action: actions[mechanicIndex], index: mechanicIndex };
+            }
+        }
 
         if (context.monsterDowned) {
             return eligible.reduce((best, entry) =>

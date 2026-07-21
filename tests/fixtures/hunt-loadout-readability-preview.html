@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <base href="../../">
+  <title>Hunt Loadout Readability Preview</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #19130f; }
+    #safe-marker { position: fixed; z-index: 9999; left: 0; right: 0; bottom: 0; height: 15vh; box-sizing: border-box; border-top: 2px dashed #38ffc7; background: rgba(0,0,0,.5); color: #aaffdf; display: grid; place-items: center; font: 700 22px sans-serif; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div id="safe-marker">OBS 채팅 전용 하단 15%</div>
+  <script src="js/runtime/SafeContent.js"></script>
+  <script src="js/runtime/ManagedTimers.js"></script>
+  <script src="js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
+  <script src="js/effects/hunt/HuntWeaponAnimationCatalog.js"></script>
+  <script src="js/effects/hunt/HuntCombatAnimator.js"></script>
+  <script src="js/effects/hunt/HuntNotificationRenderer.js"></script>
+  <script src="js/effects/hunt/HuntRenderer.js"></script>
+  <script>
+    const perkSets = [
+      [['겁쟁이','겁은 발보다 빠르다. 회피를 탐하지만 칼끝은 망설인다.','mobility'],['도전자','분노한 짐승 앞에서만 심장이 제 박자를 찾는다.','burst'],['회피 성능','죽음과 옷깃을 스치고도 한 걸음이 남는다.','mobility'],['앙심','상처가 깊을수록 원한은 날카롭게 벼려진다.','sever'],['배고픔','빈 위장은 어떤 작전보다도 강한 명령을 내린다.','status']],
+      [['가드 강화','막을 수 없다는 말은 방패를 들지 않은 자의 변명이다.','guard'],['공세','완벽한 방어의 끝에는 언제나 한 번의 잔혹한 대답이 있다.','burst'],['버섯 애호가','길드가 금한 식재료일수록 이상하게 손이 간다.','support'],['토끼손','생각보다 손이 먼저 움직인다. 대가는 발이 치른다.','mobility'],['정령의 가호','보이지 않는 손이 가끔은 수레의 방향을 돌려놓는다.','guard']],
+      [['KO술','머리를 노리는 버릇은 대화보다 빠른 결론을 만든다.','blunt'],['피리 명인','좋은 연주는 동료를 살리고 나쁜 연주는 몬스터를 화나게 한다.','support'],['광역화','나눈 약은 희미해져도 나눈 용기는 오래 남는다.','support'],['불굴','수레 자국 위에서 다시 선 자는 전보다 무겁다.','guard'],['재난대처능력','벼랑 끝은 언제나 가장 훌륭한 발판이었다.','burst']],
+      [['탄도 강화','먼 거리의 침묵도 결국 하나의 탄환으로 끝난다.','ranged'],['특수 사격 강화','아껴 둔 한 발에는 지나치게 많은 기대가 실린다.','ranged'],['완전 충전','상처 없는 몸은 오만할 만큼 정확하게 움직인다.','burst'],['체술','숨을 아낀 자만이 마지막 화살까지 당길 수 있다.','mobility'],['심안','단단함을 핑계 삼지 않는 칼끝은 결국 틈을 찾는다.','sever']]
+    ];
+    const weapons = [
+      ['insect_glaive','조충곤','insect_glaive.svg','길드 헌터 1','#7fd8ff','support'],
+      ['charge_blade','차지액스','charge_blade.svg','길드 헌터 2','#ffd27a','defensive'],
+      ['hunting_horn','수렵피리','hunting_horn.svg','길드 헌터 3','#8cff9c','support'],
+      ['heavy_bowgun','헤비보우건','heavy_bowgun.svg','길드 헌터 4','#ff8e8e','offensive']
+    ];
+    const selectedWeapons = weapons.map((row,index) => ({
+      index, id:row[0], name:row[1], filename:row[2], hunterName:row[3], hunterColor:row[4], personality:row[5], isNpc:false,
+      perks:perkSets[index].map(([name,description,affinity]) => ({name,description,affinities:[affinity],modifiers:{attackRate:1.03}}))
+    }));
+    const renderer = new HuntRenderer();
+    renderer.createContainer();
+    renderer.renderLoadout({selectedMonster:{nameKO:'리오레우스'},selectedWeapons,timeLeft:60});
+    document.body.dataset.previewReady = 'true';
+  </script>
+</body>
+</html>

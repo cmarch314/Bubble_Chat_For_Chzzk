@@ -145,7 +145,7 @@ instance.selectedWeapons = instance.WEAPONS.map((w, index) => {
     };
 });
 
-console.log('🧪 Testing shakeWeapon Animation Selection Logic...');
+console.log('🧪 Legacy CSS animation fallback smoke test (semantic coverage lives in tests/hunt-weapon-animation-catalog.test.js)...');
 
 // Let's mock a simple function representing shakeWeapon's inner dispatcher
 const getAnimationDetails = (w, moveName = null) => {

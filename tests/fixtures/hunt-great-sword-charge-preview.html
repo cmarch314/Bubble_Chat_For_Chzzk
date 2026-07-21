@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Great Sword Charge Aura Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: radial-gradient(circle at 50% 25%, #463727, #100d0b 70%); }
+    main { position: absolute; inset: 0 0 15vh; display: grid; place-content: center; }
+    h1 { margin: 0 0 90px; color: #f2d18b; text-align: center; font: 900 38px/1 sans-serif; letter-spacing: .08em; }
+    .charge-grid { display: grid; grid-template-columns: repeat(4, 310px); gap: 38px; }
+    .charge-card { height: 300px; display: grid; place-items: center; align-content: center; gap: 30px; border: 2px solid #8f713d; border-radius: 18px; background: rgba(17,14,12,.9); box-shadow: 0 10px 30px #000; }
+    .game-hunt-weapon-img-container { position: relative; width: 150px; height: 150px; --weapon-facing: 1; }
+    .game-hunt-weapon-img, .weapon-charge-aura { width: 150px; height: 150px; }
+    .game-hunt-weapon-img { position: relative; z-index: 3; }
+    .stage-label { color: #fff; font: 900 27px/1 sans-serif; text-shadow: 0 2px 4px #000; }
+    .stage-note { color: #baa98c; font: 700 16px/1 sans-serif; }
+    footer { position: absolute; inset: auto 0 0; height: 15vh; display: grid; place-items: center; border-top: 2px dashed rgba(0,255,170,.45); background: rgba(0,0,0,.42); color: rgba(255,255,255,.58); font: 700 23px/1 sans-serif; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>GREAT SWORD · CHARGE SILHOUETTE AUDIT</h1>
+    <section class="charge-grid">
+      <article class="charge-card"><div class="game-hunt-weapon-img-container weapon-great_sword weapon-charge-stage-0"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt=""><div class="weapon-charge-aura" style="mask-image:url('../../img/weapons/great_sword.svg');-webkit-mask-image:url('../../img/weapons/great_sword.svg')"></div></div><div class="stage-label">차징 시작 전</div><div class="stage-note">원본 색상</div></article>
+      <article class="charge-card"><div class="game-hunt-weapon-img-container weapon-great_sword weapon-charge-stage-1"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt=""><div class="weapon-charge-aura" style="mask-image:url('../../img/weapons/great_sword.svg');-webkit-mask-image:url('../../img/weapons/great_sword.svg')"></div></div><div class="stage-label">1차지</div><div class="stage-note">백은색 호흡</div></article>
+      <article class="charge-card"><div class="game-hunt-weapon-img-container weapon-great_sword weapon-charge-stage-2"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt=""><div class="weapon-charge-aura" style="mask-image:url('../../img/weapons/great_sword.svg');-webkit-mask-image:url('../../img/weapons/great_sword.svg')"></div></div><div class="stage-label">2차지</div><div class="stage-note">금빛 압축</div></article>
+      <article class="charge-card"><div class="game-hunt-weapon-img-container weapon-great_sword weapon-charge-stage-3"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt=""><div class="weapon-charge-aura" style="mask-image:url('../../img/weapons/great_sword.svg');-webkit-mask-image:url('../../img/weapons/great_sword.svg')"></div></div><div class="stage-label">3차지</div><div class="stage-note">주홍빛 최대 차지</div></article>
+    </section>
+  </main>
+  <footer>OBS 채팅 전용 하단 15%</footer>
+</body>
+</html>

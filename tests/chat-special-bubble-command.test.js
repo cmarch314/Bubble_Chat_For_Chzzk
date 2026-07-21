@@ -45,6 +45,6 @@ assert.strictEqual(normalA.removed, true);
 assert.strictEqual(normalB.removed, true);
 
 const cssSource = fs.readFileSync(path.resolve(__dirname, '../style.css'), 'utf8');
-assert.match(cssSource, /광대\.jpg'\) right 14px center \/ 112% auto no-repeat/);
+assert.match(cssSource, /광대\.jpg'\) center center \/ cover no-repeat/);
 
 console.log('[test] Special clown chat bubble command passed.');

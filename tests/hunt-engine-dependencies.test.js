@@ -7,6 +7,7 @@ const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntEngine.js');
 const context = vm.createContext({ console, window: {}, setTimeout });
 const rulesPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterRules.js');
 const actionStatePath = path.resolve(__dirname, '../js/effects/hunt/HuntActionStateMachine.js');
+const weaponMechanicsPath = path.resolve(__dirname, '../js/effects/hunt/HuntWeaponMechanics.js');
 const actionSelectorPath = path.resolve(__dirname, '../js/effects/hunt/HuntWeaponActionSelector.js');
 const monsterCatalogPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterPatternCatalog.js');
 const monsterSelectorPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterPatternSelector.js');
@@ -17,6 +18,7 @@ const monsterTurnPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterT
 const hunterTurnPath = path.resolve(__dirname, '../js/effects/hunt/HuntHunterTurnExecutor.js');
 vm.runInContext(fs.readFileSync(rulesPath, 'utf8'), context, { filename: rulesPath });
 vm.runInContext(fs.readFileSync(actionStatePath, 'utf8'), context, { filename: actionStatePath });
+vm.runInContext(fs.readFileSync(weaponMechanicsPath, 'utf8'), context, { filename: weaponMechanicsPath });
 vm.runInContext(fs.readFileSync(actionSelectorPath, 'utf8'), context, { filename: actionSelectorPath });
 vm.runInContext(fs.readFileSync(monsterCatalogPath, 'utf8'), context, { filename: monsterCatalogPath });
 vm.runInContext(fs.readFileSync(monsterSelectorPath, 'utf8'), context, { filename: monsterSelectorPath });
@@ -42,11 +44,20 @@ const engine = new context.HuntEngine({
     callbacks: {}
 });
 
+assert.strictEqual(engine.timeLimit, 480, 'default hunt time limit must be eight minutes');
+assert.strictEqual(engine.selectedWeapons.every(hunter => hunter.farcasterUsed === false), true,
+    'each battle must begin with exactly one Farcaster opportunity per hunter');
+assert.strictEqual(engine.combatGatherLimit, 3, 'the whole party must share exactly three combat gathering opportunities');
+assert.deepStrictEqual([
+    engine.tryConsumeCombatGather(), engine.tryConsumeCombatGather(), engine.tryConsumeCombatGather(), engine.tryConsumeCombatGather()
+], [true, true, true, false], 'the fourth party combat-gather attempt must be rejected');
+engine.combatGatherCount = 0;
 assert.strictEqual(engine.random, random);
 assert.strictEqual(engine.schedule, schedule);
 assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntBattleTickExecutor\.execute\(this\)/);
 assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntValstraxExecutor\.executeChargeSuccess\(this\)/);
-assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntMonsterTurnExecutor\.execute\(this\)/);
+assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntMonsterTurnExecutor\.prepare\(this\)/);
+assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntMonsterTurnExecutor\.execute\(this, pattern\)/);
 assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntHunterTurnExecutor\.execute\(this, w\)/);
 assert.doesNotMatch(
     fs.readFileSync(valstraxPath, 'utf8'),
@@ -58,6 +69,8 @@ assert.doesNotMatch(
     /\bthis\./,
     'battle tick executor must receive engine state explicitly'
 );
+assert.doesNotMatch(fs.readFileSync(battleTickPath, 'utf8'), /w\.speedGroup\s*===/,
+    'weapon speed groups must not compound motion-value-derived action occupancy');
 assert.doesNotMatch(
     fs.readFileSync(monsterTurnPath, 'utf8'),
     /\bthis\./,
@@ -68,12 +81,69 @@ assert.doesNotMatch(
     /\bthis\./,
     'hunter turn executor must receive engine state explicitly'
 );
+assert.strictEqual(
+    vm.runInContext("HuntHunterTurnExecutor.preparationAudioCue({ id: 'insect_glaive.extract_red', audioCue: 'none' })", context),
+    'kinsect_extract'
+);
+assert.strictEqual(
+    vm.runInContext("HuntHunterTurnExecutor.preparationAudioCue({ id: 'light_bowgun.reload', audioCue: 'none' })", context),
+    'reload'
+);
+assert.strictEqual(
+    vm.runInContext("HuntHunterTurnExecutor.preparationAudioCue({ id: 'great_sword.charge_1', audioCue: 'none' })", context),
+    'weapon_charge'
+);
+assert.deepStrictEqual(
+    JSON.parse(vm.runInContext("JSON.stringify([0.12, 0.34, 0.62].map(value => HuntHunterTurnExecutor.combatGatherFind(() => value).kind))", context)),
+    ['ore', 'mushroom', 'insect'],
+    'combat gathering must include ore, mushroom, and insect nodes'
+);
+assert.deepStrictEqual(
+    JSON.parse(vm.runInContext("JSON.stringify([0, 0.35, 0.699].map(value => HuntHunterTurnExecutor.combatGatherFind(() => value, 'support').kind))", context)),
+    ['herb', 'herb', 'herb'],
+    'only support hunters should receive the 70% herb-gathering priority'
+);
+assert.notStrictEqual(
+    vm.runInContext("HuntHunterTurnExecutor.combatGatherFind(() => 0.71, 'support').kind", context),
+    'herb',
+    'support herb priority must remain weighted rather than guaranteed'
+);
+assert.strictEqual(vm.runInContext("HuntHunterTurnExecutor.applyGatherReward(globalThis.__flashHunter = {}, { item: '광충' })", context), ' · 섬광탄 1개 조제');
+assert.strictEqual(vm.runInContext("globalThis.__flashHunter.flashPods", context), 1, 'gathered Flashbugs must craft one usable flash pod');
+assert.strictEqual(vm.runInContext("HuntHunterTurnExecutor.applyGatherReward(globalThis.__thunderHunter = {}, { item: '뇌광충' })", context), ' · 마비함정 1개 조제');
+assert.strictEqual(vm.runInContext("globalThis.__thunderHunter.shockTraps", context), 1, 'gathered Thunderbugs must craft one usable shock trap');
+assert.deepStrictEqual([
+    engine.consumeTrapDuration(40), engine.consumeTrapDuration(40), engine.consumeTrapDuration(40), engine.consumeTrapDuration(40)
+], [40, 28, 18, 10], 'repeated traps must rapidly shorten as monster resistance accumulates');
+engine.monsterTrapUseCount = 0;
+assert.match(fs.readFileSync(hunterTurnPath, 'utf8'), /action: 'weapon_preparation'/,
+    'non-damaging weapon mechanics must still route a same-weapon preparation layer');
 assert.strictEqual(engine.getPreviousMonsterMaterial('화룡'), '화룡의 비늘');
 assert.strictEqual(engine.getPreviousMonsterMaterial('화룡'), '화룡의 꼬리뼈');
 
 engine.schedule(() => {}, 2500);
 assert.strictEqual(scheduled.length, 1);
 assert.strictEqual(scheduled[0].delay, 2500);
+
+{
+    const deathEvents = [];
+    const cartHunter = {
+        index: 0, id: 'great_sword', name: '대검', hunterName: 'Cart Tester', status: 'alive',
+        hp: 10, maxHp: 100, atb: 100, potions: 10, sharpness: 100, perks: []
+    };
+    const cartEngine = new context.HuntEngine({
+        selectedWeapons: [cartHunter],
+        selectedMonster: { id: 'rathalos', nameKO: '리오레우스' },
+        random: () => 0.99,
+        MONSTER_ATTACKS: { default: ['공격'] },
+        COMBO_LIST: {},
+        callbacks: { onTriggerDeathTag: (...args) => deathEvents.push(args) }
+    });
+    assert.strictEqual(cartEngine.triggerHunterCart(cartHunter), true);
+    assert.deepStrictEqual(deathEvents, [[0, 5]], 'cart presentation must fire immediately with its real recovery time');
+    assert.strictEqual(cartEngine.triggerHunterCart(cartHunter), false, 'the same faint must not create duplicate cart animations');
+    assert.strictEqual(deathEvents.length, 1);
+}
 
 const directGlobalCalls = fs.readFileSync(sourcePath, 'utf8')
     .replace(/config\.random \|\| Math\.random/, '')

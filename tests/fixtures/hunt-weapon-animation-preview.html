@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hunt Weapon Animation Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: radial-gradient(circle at 50% 28%, #413326, #120f0d 68%); color: #fff; font-family: Arial, sans-serif; }
+    .preview-safe { position: absolute; inset: 0 0 162px; border-bottom: 2px dashed rgba(0,255,170,.5); }
+    .preview-title { position: absolute; top: 26px; width: 100%; text-align: center; font-size: 34px; letter-spacing: 3px; color: #e8c783; }
+    .preview-monster { position: absolute; left: 760px; top: 150px; width: 400px; height: 400px; object-fit: contain; filter: drop-shadow(0 18px 25px #000); }
+    .preview-grid { position: absolute; left: 80px; right: 80px; bottom: 190px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+    .preview-card { position: relative; height: 310px; border: 2px solid #8f713d; border-radius: 20px; background: rgba(15,12,10,.88); box-shadow: 0 8px 28px #000; text-align: center; overflow: visible; }
+    .preview-card .game-hunt-weapon-img-container { position: relative; width: 115px; height: 115px; margin: 26px auto 14px; }
+    .preview-card .game-hunt-weapon-img { width: 115px; height: 115px; object-fit: contain; position: relative; z-index: 3; }
+    .preview-card .ig-kinsect { z-index: 4; }
+    .preview-weapon { font-size: 24px; font-weight: 800; color: #f1d69e; }
+    .preview-action { margin: 10px 18px 0; min-height: 66px; display: grid; place-items: center; border-radius: 10px; background: rgba(197,160,89,.13); font-size: 22px; font-weight: 800; color: #fff; }
+    .preview-motion { margin-top: 8px; font-size: 15px; color: #a9e8d0; letter-spacing: 1px; }
+    .preview-chat-reserve { position: absolute; bottom: 0; width: 100%; height: 162px; display: grid; place-items: center; color: rgba(255,255,255,.55); font-size: 24px; background: rgba(0,0,0,.35); }
+  </style>
+</head>
+<body>
+  <main class="preview-safe" data-testid="animation-preview">
+    <h1 class="preview-title">WILDS ACTION-ID ANIMATION AUDIT</h1>
+    <img class="preview-monster" src="../../img/monsters/rathalos.png" alt="몬스터 기준점">
+    <section class="preview-grid" id="preview-grid"></section>
+  </main>
+  <footer class="preview-chat-reserve">OBS 채팅 전용 하단 15% — 무기 연출 침범 금지선</footer>
+  <script src="../../js/effects/hunt/HuntWeaponAnimationCatalog.js"></script>
+  <script>
+    const demonstrations = [
+      ['long_sword', '기인베기 III', 'long_sword.spirit_slash_3', 'long_sword.svg'],
+      ['long_sword', '기인대회전베기', 'long_sword.spirit_roundslash', 'long_sword.svg'],
+      ['long_sword', '특수납도', 'long_sword.special_sheathe', 'long_sword.svg'],
+      ['long_sword', '거합베기 · 성공!', 'long_sword.iai_counter_success', 'long_sword.svg'],
+      ['long_sword', '기인해방베기', 'long_sword.spirit_release_slash', 'long_sword.svg'],
+      ['great_sword', '참 모아베기', 'great_sword.true_charged_slash', 'great_sword.svg'],
+      ['long_sword', '기인투구깨기', 'long_sword.helm_breaker', 'long_sword.svg'],
+      ['hammer', '혼신 모아 내려치기', 'hammer.mighty_charge_slam', 'hammer.svg'],
+      ['lance', '중단찌르기 I', 'lance.mid_thrust_1', 'lance.svg'],
+      ['gunlance', '용격포', 'gunlance.wyvern_fire', 'gunlance.svg'],
+      ['switch_axe', '변형베기: 도끼→검', 'switch_axe.morph_to_sword', 'switch_axe.svg'],
+      ['charge_blade', '초고출력 속성해방베기', 'charge_blade.saed', 'charge_blade.svg'],
+      ['insect_glaive', '벌레 발사 · 빨강 진액', 'insect_glaive.extract_red', 'insect_glaive.svg'],
+      ['light_bowgun', '관통탄 속사', 'light_bowgun.pierce_burst', 'light_bowgun.svg'],
+      ['heavy_bowgun', '저격용탄', 'heavy_bowgun.wyvernsnipe', 'heavy_bowgun.svg'],
+      ['bow', '유도 용의 일시', 'bow.tracer_dragon_piercer', 'bow.svg'],
+      ['dual_blades', '귀인난무', 'dual_blades.blade_dance', 'dual_blades.svg'],
+      ['sword_shield', '저스트 러시 피니시', 'sword_shield.perfect_rush_finisher', 'sword_shield.svg'],
+      ['hunting_horn', '연주 · 자기강화', 'hunting_horn.recital', 'hunting_horn.svg'],
+      ['insect_glaive', '급습찌르기', 'insect_glaive.descending_thrust', 'insect_glaive.svg'],
+      ['gunlance', '퀵 리로드', 'gunlance.quick_reload', 'gunlance.svg']
+    ];
+    const weaponLabels = { great_sword:'대검', long_sword:'태도', hammer:'해머', lance:'랜스', gunlance:'건랜스', switch_axe:'슬래시액스', charge_blade:'차지액스', insect_glaive:'조충곤', light_bowgun:'라이트보우건', heavy_bowgun:'헤비보우건', bow:'활', dual_blades:'쌍검', sword_shield:'한손검', hunting_horn:'수렵피리' };
+    const grid = document.getElementById('preview-grid');
+    let page = 0;
+    function renderBatch() {
+      const batch = demonstrations.slice(page * 4, page * 4 + 4);
+      grid.replaceChildren(...batch.map(([weaponId, actionName, actionId, filename], index) => {
+        const card = document.createElement('article');
+        card.className = 'preview-card';
+        card.dataset.actionId = actionId;
+        const vectors = [['174px','-150px'],['68px','-184px'],['-68px','-184px'],['-174px','-150px']];
+        card.style.setProperty('--attack-x', vectors[index][0]);
+        card.style.setProperty('--attack-y', vectors[index][1]);
+        const isGlaive = weaponId === 'insect_glaive';
+        card.innerHTML = `<div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/${filename}" alt="">${isGlaive ? '<img class="ig-kinsect" src="../../img/weapons/kinsect.svg" alt="">' : ''}</div><div class="preview-weapon">${weaponLabels[weaponId]}</div><div class="preview-action">${actionName}</div><div class="preview-motion"></div>`;
+        const profile = HuntWeaponAnimationCatalog.PROFILES[actionId];
+        card.querySelector('.preview-motion').textContent = profile.motion + (profile.effect === 'none' ? ' · 준비/상태 행동' : ` · ${profile.effect}`);
+        requestAnimationFrame(() => {
+          if (profile.animateWeapon) card.querySelector('.game-hunt-weapon-img').animate(HuntWeaponAnimationCatalog.keyframes(profile, index), { duration: profile.durationMs, easing: 'ease-in-out', iterations: 2 });
+          const kinsect = card.querySelector('.ig-kinsect');
+          if (kinsect) kinsect.classList.add(profile.kinsect === 'extract' ? 'ig-kinsect-extract' : 'ig-kinsect-assault');
+        });
+        return card;
+      }));
+      document.body.dataset.previewPage = String(page + 1);
+      page = (page + 1) % Math.ceil(demonstrations.length / 4);
+    }
+    renderBatch();
+    setInterval(renderBatch, 3000);
+  </script>
+</body>
+</html>

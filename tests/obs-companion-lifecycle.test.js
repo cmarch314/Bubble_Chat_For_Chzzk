@@ -14,5 +14,7 @@ assert.match(controller, /ProcessName -ne 'node'/);
 assert.doesNotMatch(controller, /Get-CimInstance/);
 assert.match(controller, /--obs-parent/);
 assert.match(controller, /-WindowStyle Hidden/);
+const companion = fs.readFileSync(path.join(root, 'tools/chzzk-companion.js'), 'utf8');
+assert.match(companion, /process\.platform === 'win32'\) return null/);
 
 console.log('OBS companion lifecycle contract passed');

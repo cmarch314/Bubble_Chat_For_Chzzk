@@ -14,7 +14,14 @@ require('../js/effects/hunt/HuntData.js');
 window.HUNT_MONSTER_PATTERN_OVERRIDES = require('../js/effects/hunt/HuntMonsterProfiles.js');
 
 global.HuntActionStateMachine = require('../js/effects/hunt/HuntActionStateMachine.js');
+global.HUNT_WILDS_MOTION_VALUES = require('../js/effects/hunt/data/WildsMotionValues.generated.js');
+global.HUNT_WILDS_RUNTIME_MOTION_TIMINGS = require('../js/effects/hunt/data/WildsRuntimeMotionTimings.generated.js');
+global.HuntMotionValueCatalog = require('../js/effects/hunt/HuntMotionValueCatalog.js');
+global.HuntWeaponMechanics = require('../js/effects/hunt/HuntWeaponMechanics.js');
+global.HuntPerkRuntime = require('../js/effects/hunt/HuntPerkRuntime.js');
+global.HuntHunterCommandQueue = require('../js/effects/hunt/HuntHunterCommandQueue.js');
 global.HuntWeaponActionSelector = require('../js/effects/hunt/HuntWeaponActionSelector.js');
+global.HuntMonsterFlightRuntime = require('../js/effects/hunt/HuntMonsterFlightRuntime.js');
 global.HuntMonsterPatternCatalog = require('../js/effects/hunt/HuntMonsterPatternCatalog.js');
 global.HuntMonsterPatternSelector = require('../js/effects/hunt/HuntMonsterPatternSelector.js');
 global.HuntBalanceTelemetry = require('../js/effects/hunt/HuntBalanceTelemetry.js');
@@ -31,7 +38,7 @@ const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
 
 const runs = Math.max(1, Number(process.argv[2] || 200));
 const comboList = HuntWeaponCatalog.build(window.HUNT_COMBO_LIST);
-const monsterPatterns = HuntMonsterPatternCatalog.build(window.MONSTER_ATTACKS);
+const monsterPatterns = HuntMonsterPatternCatalog.build(window.MONSTER_ATTACKS, window.MONSTER_DATA);
 const weapons = window.HUNT_WEAPONS;
 const monsters = window.MONSTER_DATA.filter(monster => monsterPatterns[monster.id.replace(/-/g, '_')]);
 
@@ -79,21 +86,21 @@ function run(seed) {
         random,
         schedule: callback => callback(),
         monsterTier: 'normal',
-        monsterHp: 12000,
-        monsterMaxHp: 12000,
+        monsterHp: 15600,
+        monsterMaxHp: 15600,
         monsterSpeed: 2.2,
         monsterDamageMod: 0.9,
-        monsterStunThreshold: 300,
+        monsterStunThreshold: 390,
         MONSTER_ATTACKS: window.MONSTER_ATTACKS,
         MONSTER_PATTERNS: monsterPatterns,
         COMBO_LIST: comboList,
-        timeLimit: 180,
+        timeLimit: 480,
         callbacks: {
             onGameEnd: result => { ended = true; victory = result; }
         }
     });
 
-    while (!ended && engine.battleTime < 1800) engine.processTick();
+    while (!ended && engine.battleTime < 4800) engine.processTick();
     return {
         victory,
         monsterId: monster.id,

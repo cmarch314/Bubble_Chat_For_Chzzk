@@ -1,30 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kinsect">
-  <defs>
-    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#fff4bf"/>
-      <stop offset=".45" stop-color="#d8b453"/>
-      <stop offset="1" stop-color="#765323"/>
-    </linearGradient>
-    <linearGradient id="wing" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#d9fff6" stop-opacity=".96"/>
-      <stop offset="1" stop-color="#46cbb3" stop-opacity=".42"/>
-    </linearGradient>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="1.5" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-  <g stroke="#291f15" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)">
-    <path d="M27 25C18 13 8 14 6 20c6 0 11 4 17 12z" fill="url(#wing)"/>
-    <path d="M37 25c9-12 19-11 21-5-6 0-11 4-17 12z" fill="url(#wing)"/>
-    <path d="M24 34C13 29 7 33 8 40c6-3 11-1 18 1z" fill="url(#wing)"/>
-    <path d="M40 34c11-5 17-1 16 6-6-3-11-1-18 1z" fill="url(#wing)"/>
-    <ellipse cx="32" cy="35" rx="10" ry="15" fill="url(#body)"/>
-    <path d="M25 31h14M24 38h16M27 45h10" fill="none" opacity=".7"/>
-    <circle cx="32" cy="19" r="7" fill="#b98736"/>
-    <circle cx="29.5" cy="18" r="1.4" fill="#58ffe0" stroke="none"/>
-    <circle cx="34.5" cy="18" r="1.4" fill="#58ffe0" stroke="none"/>
-    <path d="M28 14 23 8M36 14l5-6M22 30l-9-5M42 30l9-5M23 43l-9 7M41 43l9 7" fill="none"/>
-    <path d="M31 50v7M33 50v7" fill="none"/>
-  </g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" height="100%" viewBox="0 0 64 64" version="1.1" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,0,-640)">
+        <g transform="matrix(1,0,0,1,0,-544)">
+            <g id="Insect_Glaive_Kinsect" transform="matrix(1,0,0,1,-640,224)">
+                <path id="background" d="M650,980C650,980 653,976.5 653,974C653,971.172 659,971 659,971C659,971 665,971.172 665,974C665,976 668,980 668,980L650,980Z" style="fill-opacity:0.77;"/>
+                <path id="color_04" d="M651,980L667,980L667,988L660,996L658,996L651,988L651,980Z" style="fill:rgb(26,26,26);"/>
+                <path id="color_03" d="M666,977C666,975.343 662.866,974 659,974C655.134,974 652,975.343 652,977L666,977ZM653,972C653.552,972 654,972.448 654,973C654,973.552 653.552,974 653,974C652.448,974 652,973.552 652,973C652,972.448 652.448,972 653,972ZM665,972C665.552,972 666,972.448 666,973C666,973.552 665.552,974 665,974C664.448,974 664,973.552 664,973C664,972.448 664.448,972 665,972ZM659,966C659,966 661,969 661,970C661,971 660,972 659,972C658,972 657,971 657,970C657,969 659,966 659,966Z" style="fill:rgb(118,118,118);"/>
+                <path id="color_02" d="M649,980L651,980L658,988L658,996C658,996 653,996 651,994C649,992 649,990 649,990L649,980ZM669,980L667,980L660,988L660,996C660,996 665,996 667,994C669,992 669,990 669,990L669,980Z" style="fill:rgb(144,144,144);"/>
+                <path id="color_01" d="M654,980L659,985L664,980L654,980Z" style="fill:rgb(181,181,181);"/>
+            </g>
+        </g>
+    </g>
 </svg>

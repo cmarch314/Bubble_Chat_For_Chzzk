@@ -14,43 +14,83 @@ class HuntAudioManager {
         this.lastBgmResolution = null;
         this.localAudioEntries = [];
         this.localAudioByCategory = new Map();
+        this.localAudioGamePriority = ['wilds', 'world', 'rise'];
+        this.hunterVoiceGamePriority = ['rise', 'wilds', 'world'];
         this.localAudioGain = 0.8;
         this.huntVolumeGain = 2;
         this.hunterVoiceProfiles = new Map();
         this.hunterVoiceCooldowns = new Map();
+        this.hunterVoiceRecentPaths = new Map();
         this.hunterVoiceRoster = [];
         this.voiceProfileCatalog = [];
         this.cmcVoiceProfile = null;
         this.lastCharacterDialogueAt = 0;
+        // CMC is a chat catalog feature and must remain available even when a
+        // private extracted game manifest is absent or still loading.
+        this.buildHunterVoiceProfileCatalog();
         this.localAudioReady = this.loadLocalAudioManifest();
     }
 
     async loadLocalAudioManifest() {
+        const embeddedLibraries = globalThis.HUNT_LOCAL_AUDIO_MANIFESTS
+            || (typeof window !== 'undefined' && window.HUNT_LOCAL_AUDIO_MANIFESTS);
+        if (embeddedLibraries && typeof embeddedLibraries === 'object') {
+            const libraries = this.localAudioGamePriority
+                .map(game => embeddedLibraries[game] ? { game, manifest: embeddedLibraries[game] } : null)
+                .filter(Boolean);
+            if (libraries.length) return this.installLocalAudioLibraries(libraries, 'OBS runtime catalog');
+        }
         if (typeof fetch !== 'function') return false;
         try {
-            const response = await fetch('local_assets/monster_hunter/rise/manifest.json', { cache: 'no-store' });
-            if (!response.ok) return false;
-            const manifest = await response.json();
-            this.localAudioGain = Number(manifest.defaultGain || 0.8);
-            this.localAudioEntries = Array.isArray(manifest.entries) ? manifest.entries : [];
-            this.localAudioByCategory.clear();
-            this.localAudioEntries.forEach(entry => {
-                if (!this.localAudioByCategory.has(entry.category)) this.localAudioByCategory.set(entry.category, []);
-                this.localAudioByCategory.get(entry.category).push(entry);
-            });
-            this.buildHunterVoiceProfileCatalog();
-            if (this.hunterVoiceRoster.length) this.assignHunterVoiceProfiles(this.hunterVoiceRoster);
-            console.info(`[HuntAudio] Local Rise library ready: ${this.localAudioEntries.length} clips`);
-            return this.localAudioEntries.length > 0;
+            const libraries = await Promise.all(this.localAudioGamePriority.map(async game => {
+                try {
+                    const response = await fetch(`local_assets/monster_hunter/${game}/manifest.json`, { cache: 'no-store' });
+                    if (!response.ok) return null;
+                    const manifest = await response.json();
+                    return { game, manifest };
+                } catch (error) {
+                    return null;
+                }
+            }));
+            const available = libraries.filter(Boolean);
+            if (!available.length) return false;
+            return this.installLocalAudioLibraries(available, 'manifest fetch');
         } catch (error) {
-            console.info('[HuntAudio] Local Rise library unavailable; using fallback SFX.');
+            console.info('[HuntAudio] Local MH library unavailable; using fallback SFX.');
             return false;
         }
+    }
+
+    installLocalAudioLibraries(libraries, source = 'catalog') {
+        this.localAudioGain = Math.max(...libraries.map(item => Number(item.manifest.defaultGain || 0.8)));
+        this.localAudioEntries = libraries.flatMap(({ game, manifest }) =>
+            (Array.isArray(manifest.entries) ? manifest.entries : []).map(entry => ({ ...entry, game: entry.game || game }))
+        );
+        this.localAudioByCategory.clear();
+        this.localAudioEntries.forEach(entry => {
+            if (!this.localAudioByCategory.has(entry.category)) this.localAudioByCategory.set(entry.category, []);
+            this.localAudioByCategory.get(entry.category).push(entry);
+        });
+        this.buildHunterVoiceProfileCatalog();
+        if (this.hunterVoiceRoster.length) this.assignHunterVoiceProfiles(this.hunterVoiceRoster);
+        console.info(`[HuntAudio] Local MH library ready via ${source}: ${this.localAudioEntries.length} clips (${libraries.map(item => item.game).join(', ')})`);
+        return this.localAudioEntries.length > 0;
     }
 
     selectLocalAudio(category, options = {}) {
         let pool = this.localAudioByCategory.get(category) || [];
         if (options.group) pool = pool.filter(entry => entry.group === options.group);
+        if (options.weaponId) pool = pool.filter(entry => entry.weaponId === options.weaponId || entry.group === options.weaponId);
+        if (options.monsterIds && options.monsterIds.length) pool = pool.filter(entry => options.monsterIds.some(id =>
+            String(entry.monsterId || entry.group || '').toLowerCase().startsWith(String(id).toLowerCase())
+        ));
+        if (options.monsterVariants && options.monsterVariants.length) pool = pool.filter(entry => options.monsterVariants.some(id =>
+            String(entry.monsterVariant || entry.monsterId || entry.group || '').toLowerCase().startsWith(String(id).toLowerCase())
+        ));
+        if (options.purposes && options.purposes.length) pool = pool.filter(entry => options.purposes.includes(entry.purpose));
+        if (options.actionFamilies && options.actionFamilies.length) pool = pool.filter(entry => options.actionFamilies.includes(entry.actionFamily));
+        if (options.semanticOnly) pool = pool.filter(entry => entry.semanticEvidence && entry.semanticEvidence.actionFamily !== 'unknown');
+        if (options.bankEvidenceOnly) pool = pool.filter(entry => entry.bankEvidence && ['medium', 'high'].includes(entry.bankEvidence.level));
         if (options.groups && options.groups.length) pool = pool.filter(entry => options.groups.includes(entry.group));
         if (options.groupPrefixes && options.groupPrefixes.length) {
             pool = pool.filter(entry => options.groupPrefixes.some(prefix => String(entry.group || '').startsWith(prefix)));
@@ -59,12 +99,20 @@ class HuntAudioManager {
             const needle = String(options.sourceIncludes).toLowerCase();
             pool = pool.filter(entry => String(entry.sourceBank || '').toLowerCase().includes(needle));
         }
+        if (options.excludeSourceIncludes && options.excludeSourceIncludes.length) {
+            pool = pool.filter(entry => !options.excludeSourceIncludes.some(needle => String(entry.sourceBank || '').toLowerCase().includes(String(needle).toLowerCase())));
+        }
         if (options.languages && options.languages.length) {
             const preferred = pool.filter(entry => options.languages.includes(entry.language));
             if (preferred.length) pool = preferred;
         }
         if (options.maxDuration) pool = pool.filter(entry => Number(entry.duration || 0) <= options.maxDuration);
         if (options.minDuration) pool = pool.filter(entry => Number(entry.duration || 0) >= options.minDuration);
+        if (options.preferGames !== false && pool.length) {
+            const priority = options.preferGames || this.localAudioGamePriority;
+            const best = priority.find(game => pool.some(entry => entry.game === game));
+            if (best) pool = pool.filter(entry => entry.game === best);
+        }
         if (!pool.length) return null;
         return pool[Math.floor(Math.random() * pool.length)];
     }
@@ -107,17 +155,25 @@ class HuntAudioManager {
         }
     }
 
+    isHunterActionVoiceEntry(entry) {
+        const bank = String(entry?.sourceBank || '');
+        if (/PL_Dia_|clb_npc|clb_Gesture/i.test(bank)) return false;
+        return /Player_ActVoice_|pl_act_vo_|pl_voice_[a-z]_[0-9]+_(?:(?:event(?:_khk)?|sv)_)?media/i.test(bank);
+    }
+
     buildHunterVoiceProfileCatalog() {
         const profiles = new Map();
         (this.localAudioByCategory.get('hunter_voice') || []).forEach(entry => {
             const duration = Number(entry.duration || 0);
             if (!duration || duration > 7 || /\[pre\]/i.test(String(entry.sourceStream || ''))) return;
+            const game = String(entry.game || 'rise');
             const language = String(entry.language || 'neutral');
             const group = String(entry.group || 'common');
-            const key = `${language}:${group}`;
+            const key = `${game}:${language}:${group}`;
             if (!profiles.has(key)) {
                 profiles.set(key, {
                     key,
+                    game,
                     language,
                     group,
                     isDlc: /^(?:d|c|s)_/i.test(group),
@@ -128,27 +184,46 @@ class HuntAudioManager {
         });
         const languageRank = { ja: 0, fc: 1, en: 2, neutral: 3 };
         const candidates = [...profiles.values()];
-        const combatReady = candidates.filter(profile =>
-            profile.entries.length >= 40 && profile.entries.filter(entry => Number(entry.duration || 0) <= 1.55).length >= 10
-        );
+        const combatReady = candidates.filter(profile => profile.entries.some(entry =>
+            (entry.semanticEvidence && entry.semanticEvidence.actionFamily !== 'unknown')
+            || this.isHunterActionVoiceEntry(entry)
+        ));
         this.voiceProfileCatalog = (combatReady.length ? combatReady : candidates).sort((a, b) =>
-            (languageRank[a.language] ?? 9) - (languageRank[b.language] ?? 9) || a.group.localeCompare(b.group)
+            this.hunterVoiceGamePriority.indexOf(a.game) - this.hunterVoiceGamePriority.indexOf(b.game)
+            || (languageRank[a.language] ?? 9) - (languageRank[b.language] ?? 9)
+            || a.group.localeCompare(b.group)
         );
         const globalScope = typeof window !== 'undefined' ? window : globalThis;
-        const cmcEntries = (globalScope.HIVE_CMC_FILES || []).map(cueName => {
-            const path = `AI CMC/${cueName}.mp4`;
-            return {
-                path,
-                category: 'cmc_voice',
-                group: 'cmc',
-                language: 'ko',
-                duration: Number(globalScope.HIVE_AUDIO_LEVELS?.[path]?.duration || 2),
-                cueName,
-                isCmc: true
-            };
+        const cmcEntries = (globalScope.HIVE_CMC_VOICE_COMMANDS || []).flatMap(cueName => {
+            const configured = globalScope.HIVE_SOUND_CONFIG?.[cueName];
+            const variants = Array.isArray(configured) ? configured : configured ? [configured] : [];
+            return variants.filter(variant => variant?.src).map((variant, variantIndex) => {
+                const path = String(variant.src).startsWith('SFX/')
+                    ? String(variant.src)
+                    : `SFX/${variant.src}`;
+                return {
+                    path,
+                    category: 'cmc_voice',
+                    group: 'cmc',
+                    language: 'ko',
+                    duration: Number(globalScope.HIVE_AUDIO_LEVELS?.[path]?.duration || 0),
+                    volume: Number(variant.volume ?? 0.7),
+                    cueName,
+                    variantIndex,
+                    isCmc: true
+                };
+            });
         });
         this.cmcVoiceProfile = cmcEntries.length
-            ? { key: 'ko:cmc', language: 'ko', group: 'cmc', isCmc: true, entries: cmcEntries }
+            ? {
+                key: 'chat:cmc',
+                game: 'chat-catalog',
+                language: 'ko',
+                group: 'cmc',
+                source: 'HIVE_CMC_VOICE_COMMANDS',
+                isCmc: true,
+                entries: cmcEntries
+            }
             : null;
         return this.voiceProfileCatalog;
     }
@@ -166,12 +241,19 @@ class HuntAudioManager {
         this.hunterVoiceRoster = hunters;
         this.hunterVoiceProfiles.clear();
         this.hunterVoiceCooldowns.clear();
-        if (!this.voiceProfileCatalog.length) return false;
+        this.hunterVoiceRecentPaths.clear();
+        if (!this.voiceProfileCatalog.length && !this.cmcVoiceProfile) return false;
 
         const japanese = this.voiceProfileCatalog.filter(profile => profile.language === 'ja');
-        const available = japanese.length >= hunters.length ? japanese : this.voiceProfileCatalog;
-        const dlc = available.filter(profile => profile.isDlc);
-        const standard = available.filter(profile => !profile.isDlc);
+        const hunterCount = hunters.length;
+        const localized = japanese.length >= hunterCount ? japanese : this.voiceProfileCatalog;
+        const preferredGame = this.hunterVoiceGamePriority.find(game =>
+            localized.filter(profile => profile.game === game).length >= hunterCount
+        );
+        const gameProfiles = preferredGame
+            ? localized.filter(profile => profile.game === preferredGame)
+            : localized;
+        const available = this.cmcVoiceProfile ? [...gameProfiles, this.cmcVoiceProfile] : gameProfiles;
         const used = new Set();
 
         const pick = (pool, seed) => {
@@ -185,17 +267,19 @@ class HuntAudioManager {
         };
 
         hunters.forEach((hunter, position) => {
-            const preferredPool = position % 2 === 0 ? dlc : standard;
-            const profile = pick(preferredPool, `${hunter.hunterName || 'hunter'}:${hunter.index ?? position}`);
+            const index = Number(hunter.index ?? position);
+            const profile = pick(available, `${hunter.hunterName || 'hunter'}:${hunter.index ?? position}`);
             if (!profile) return;
             used.add(profile.key);
-            const index = Number(hunter.index ?? position);
             this.hunterVoiceProfiles.set(index, profile);
             hunter.voiceProfile = {
                 key: profile.key,
+                game: profile.game,
                 language: profile.language,
                 group: profile.group,
-                isDlc: profile.isDlc
+                source: profile.source,
+                isDlc: profile.isDlc,
+                isCmc: Boolean(profile.isCmc)
             };
         });
         return this.hunterVoiceProfiles.size > 0;
@@ -207,64 +291,139 @@ class HuntAudioManager {
         return this.localAudioReady.then(() => this.assignHunterVoiceProfiles(hunters));
     }
 
-    selectHunterActionVoice(hunterIndex, action = 'attack') {
+    selectHunterActionVoice(hunterIndex, action = 'attack', options = {}) {
         if (!this.hunterVoiceProfiles.has(Number(hunterIndex)) && this.hunterVoiceRoster.length && this.voiceProfileCatalog.length) {
             this.assignHunterVoiceProfiles(this.hunterVoiceRoster);
         }
         const profile = this.hunterVoiceProfiles.get(Number(hunterIndex));
-        if (!profile) return null;
-        const rules = {
-            attack: [0.12, 1.55],
-            attack_heavy: [0.2, 2.2],
-            hit: [0.12, 1.15],
-            evade: [0.12, 1.05],
-            guard: [0.15, 1.4],
-            item: [0.75, 2.8],
-            cart: [1.1, 4.8],
-            victory: [1.2, 6],
-            support: [0.7, 2.8]
+        if (!profile || profile.isCmc) return null;
+        const families = {
+            attack: ['attack_effort', 'short_combat_call'],
+            attack_heavy: ['heavy_attack_effort', 'attack_effort', 'short_combat_call'],
+            hit: ['hit_reaction', 'pain_reaction'],
+            evade: ['evade_call'],
+            guard: ['guard_call', 'hit_reaction'],
+            item: ['item_call'],
+            cart: ['cart_call', 'pain_reaction'],
+            victory: ['victory_call'],
+            support: ['support_call', 'item_call'],
+            ready: ['support_call', 'victory_call', 'short_combat_call'],
+            loadout: ['short_combat_call', 'support_call', 'victory_call', 'attack_effort', 'heavy_attack_effort', 'guard_call', 'evade_call', 'item_call']
         };
-        const [minDuration, maxDuration] = rules[action] || rules.attack;
-        const actionPool = profile.entries.filter(entry => {
-            const duration = Number(entry.duration || 0);
-            return duration >= minDuration && duration <= maxDuration;
-        });
-        const pool = actionPool.length ? actionPool : profile.entries;
-        return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+        const wanted = families[action] || families.attack;
+        const pool = profile.entries.filter(entry => wanted.includes(entry.semanticEvidence?.actionFamily));
+        if (options.preferLong) {
+            const longEnough = entry => Number(entry.duration || 0) >= Number(options.minDuration || 0.9);
+            const wantedLong = pool.filter(longEnough);
+            if (wantedLong.length) return this.pickHunterVoiceEntry(hunterIndex, wantedLong);
+            const anyLongActionVoice = profile.entries.filter(entry => longEnough(entry) && (
+                (entry.semanticEvidence?.actionFamily && entry.semanticEvidence.actionFamily !== 'unknown')
+                || this.isHunterActionVoiceEntry(entry)
+            ));
+            if (anyLongActionVoice.length) return this.pickHunterVoiceEntry(hunterIndex, anyLongActionVoice);
+        }
+        if (pool.length) return this.pickHunterVoiceEntry(hunterIndex, pool);
+
+        // The extracted banks currently prove the actor and that these are
+        // player action voices, but most individual WEM events are not yet
+        // labelled by purpose. Keep the actor fixed and allow that proven
+        // action-voice bank as an unclassified fallback instead of muting the
+        // hunter. Explicit dialogue, NPC and gesture banks remain excluded.
+        const actionVoicePool = profile.entries.filter(entry => this.isHunterActionVoiceEntry(entry));
+        return actionVoicePool.length ? this.pickHunterVoiceEntry(hunterIndex, actionVoicePool) : null;
     }
 
-    selectCmcActionVoice(action = 'attack') {
+    pickHunterVoiceEntry(hunterIndex, pool = []) {
+        if (!pool.length) return null;
+        const key = Number(hunterIndex);
+        const recent = this.hunterVoiceRecentPaths.get(key) || [];
+        const fresh = pool.filter(entry => !recent.includes(entry.path));
+        const choices = fresh.length ? fresh : pool;
+        const selected = choices[Math.floor(Math.random() * choices.length)] || null;
+        if (selected?.path) {
+            this.hunterVoiceRecentPaths.set(key, [...recent, selected.path].slice(-8));
+        }
+        return selected;
+    }
+
+    selectCmcActionVoice(action = 'attack', options = {}) {
         if (!this.cmcVoiceProfile) return null;
         const cuePools = {
-            attack: ['에라이', '으루아', '십자베기', '올려칠', '신기술', '빨리잡', '빨리해'],
-            attack_heavy: ['으루아', '오오오', '천재지변', '역대급', '드디어고룡'],
-            hit: ['아제발요', '환장', '너무 아쉽네요', '할말없', '퉤'],
-            cart: ['아제발요', '늙어죽', '할말없', '환장'],
-            evade: ['어라', '어디가', '끄덕', '뭐'],
-            guard: ['어라', '끄덕', '뭐'],
-            item: ['고치라코소', '저도그렇게', '조금만더보여'],
-            support: ['고치라코소', '저도그렇게', '조금만더보여'],
-            victory: ['굉장해', '끝내주', '스고이', '멋져', '와우', '우와', '캬', '짝짝짝', '정말대단']
+            attack: ['야!', '가자', '따사!', '조룡!', '발차기!', '아스아!'],
+            attack_heavy: ['아스아!', '기폭용항', '수면참!', '다단히트!', '아주강력해'],
+            hit: ['아야!', '으악!', '윽!', '살려조', '죽겠는데'],
+            cart: ['죽는다', '죽겠는데', '아이고~', '안 돼!'],
+            evade: ['회피', '도망쳐', '어디가냐', '내려와!'],
+            guard: ['가드성공', '가드만', '팅!'],
+            item: ['아이템박스', '밥먹어', '밥먹자', '야무지게먹어'],
+            support: ['가자', '나이스', '걱정마'],
+            ready: ['가자', '나이스', '걱정마', '성공!', '아주강력해'],
+            victory: ['나이스', '성공!', '갓겜', '기쁨이폭발', '존잼']
         };
         const preferred = cuePools[action] || cuePools.attack;
         const semanticPool = this.cmcVoiceProfile.entries.filter(entry => preferred.some(cue => String(entry.cueName || '').startsWith(cue)));
-        const pool = semanticPool.length ? semanticPool : this.cmcVoiceProfile.entries;
+        let pool = semanticPool.length ? semanticPool : this.cmcVoiceProfile.entries;
+        if (options.preferLong) {
+            const longPool = pool.filter(entry => Number(entry.duration || 0) >= Number(options.minDuration || 0.9));
+            const anyLong = this.cmcVoiceProfile.entries.filter(entry => Number(entry.duration || 0) >= Number(options.minDuration || 0.9));
+            pool = longPool.length ? longPool : (anyLong.length ? anyLong : pool);
+        }
         return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
     }
 
     playHunterActionVoice(hunterIndex, action = 'attack', options = {}) {
         if (hunterIndex === undefined || hunterIndex === null) return false;
-        if (!options.force && Math.random() > Number(options.chance ?? 1)) return false;
-        const now = Date.now();
         const key = Number(hunterIndex);
+        if (!this.hunterVoiceProfiles.has(key) && this.hunterVoiceRoster.length) {
+            this.assignHunterVoiceProfiles(this.hunterVoiceRoster);
+        }
+        const profile = this.hunterVoiceProfiles.get(key);
+        // Generic combat voices are deliberately sparse, but applying their
+        // low chance unchanged can leave the owner profile silent for too long.
+        const requestedChance = Number(options.chance ?? 1);
+        const chance = profile?.isCmc && !options.force ? Math.max(requestedChance, .72) : requestedChance;
+        if (!options.force && Math.random() > chance) return false;
+        const now = Date.now();
         if (!options.force && now < Number(this.hunterVoiceCooldowns.get(key) || 0)) return false;
-        const cmcChance = Math.min(1, Math.max(0, Number(options.cmcChance ?? 0.14)));
-        const useCmc = !options.disableCmc && this.cmcVoiceProfile && Math.random() < cmcChance;
-        const entry = useCmc ? this.selectCmcActionVoice(action) : this.selectHunterActionVoice(key, action);
+        const entry = profile?.isCmc
+            ? this.selectCmcActionVoice(action, options)
+            : this.selectHunterActionVoice(key, action, options);
         if (!entry) return false;
-        const played = this.playLocalEntry(entry, { volume: options.volume ?? 0.56 });
-        if (played) this.hunterVoiceCooldowns.set(key, now + Number(options.cooldownMs ?? 1100));
+        const played = this.playLocalEntry(entry, { volume: options.volume ?? entry.volume ?? 0.56 });
+        if (played) this.hunterVoiceCooldowns.set(key, now + Number(options.cooldownMs ?? (profile?.isCmc ? 850 : 1100)));
         return played;
+    }
+
+    playLoadoutConfirmationVoice(hunter, change = {}) {
+        if (!hunter || hunter.index === undefined || hunter.index === null) return false;
+        const personalityActions = {
+            defensive: 'guard',
+            support: 'support',
+            offensive: 'attack_heavy',
+            veteran: 'attack',
+            newbie: 'attack',
+            normal: 'attack'
+        };
+        const heavyWeapons = new Set(['great_sword', 'hammer', 'hunting_horn', 'gunlance', 'heavy_bowgun', 'charge_blade']);
+        const action = change.personalityChanged
+            ? (personalityActions[hunter.personality] || 'attack')
+            : (heavyWeapons.has(hunter.id) ? 'attack_heavy' : 'attack');
+        const options = {
+            force: true,
+            cooldownMs: 850,
+            volume: 0.54,
+            preferLong: true,
+            minDuration: 0.9
+        };
+        if (this.playHunterActionVoice(hunter.index, action, options)) return true;
+        return this.playHunterActionVoice(hunter.index, 'loadout', options);
+    }
+
+    playReadyConfirmationVoice(hunter) {
+        if (!hunter || hunter.index === undefined || hunter.index === null) return false;
+        const options = { force: true, cooldownMs: 1100, volume: 0.56, preferLong: true, minDuration: 0.9 };
+        if (this.playHunterActionVoice(hunter.index, 'ready', options)) return true;
+        return this.playHunterActionVoice(hunter.index, 'loadout', options);
     }
 
     weaponGroup(weaponId) {
@@ -280,52 +439,163 @@ class HuntAudioManager {
         return group ? `pl_wp_${group}_com_media` : null;
     }
 
-    playWeaponAction(weaponId, cue = 'attack') {
+    verifiedWeaponCue(weaponId, cue) {
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const variants = globalScope.HUNT_VERIFIED_LOCAL_WEAPON_CUES?.[`${weaponId}:${cue}`];
+        if (!Array.isArray(variants) || !variants.length) return null;
+        return variants[Math.floor(Math.random() * variants.length)] || null;
+    }
+
+    playVerifiedWeaponCue(weaponId, cue) {
+        const variant = this.verifiedWeaponCue(weaponId, cue);
+        return this.playVerifiedLayers(variant);
+    }
+
+    playVerifiedItemCue(cue) {
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const variants = globalScope.HUNT_VERIFIED_LOCAL_ITEM_CUES?.[cue];
+        if (!Array.isArray(variants) || !variants.length) return false;
+        return this.playVerifiedLayers(variants[Math.floor(Math.random() * variants.length)]);
+    }
+
+    playVerifiedLayers(variant) {
+        if (!variant || !Array.isArray(variant.layers) || !variant.layers.length) return false;
+        let scheduled = false;
+        variant.layers.forEach(([path, volume = 0.65, delayMs = 0]) => {
+            if (!path) return;
+            const play = () => this.playLocalEntry({ path }, { volume });
+            if (Number(delayMs) > 0) this.timers.timeout(play, Number(delayMs));
+            else play();
+            scheduled = true;
+        });
+        return scheduled;
+    }
+
+    verifiedMonsterCue(monster, kind = 'attack', options = {}) {
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const catalog = globalScope.HUNT_VERIFIED_LOCAL_MONSTER_CUES || {};
+        const monsterId = String(monster && monster.id ? monster.id : monster || '')
+            .toLowerCase()
+            .replace(/[-']/g, '_');
+        if (!monsterId) return null;
+        const normalizedKind = String(kind || 'attack').toLowerCase();
+        const roarRoutes = globalScope.HUNT_ROAR_ROUTE || {};
+        const routedMonsterId = normalizedKind === 'roar' ? roarRoutes[monsterId] : null;
+        const routeKeys = [`${monsterId}:${normalizedKind}`];
+        if (routedMonsterId && routedMonsterId !== monsterId) routeKeys.push(`${routedMonsterId}:${normalizedKind}`);
+        if (normalizedKind !== 'roar' && normalizedKind !== 'attack') routeKeys.push(`${monsterId}:attack`);
+        const variants = routeKeys.flatMap(key => Array.isArray(catalog[key]) ? catalog[key] : []);
+        if (!variants.length) return null;
+        const patternText = [options.patternId, options.patternName, options.patternType, normalizedKind]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+        const matched = variants.filter(variant => {
+            if (!Array.isArray(variant.patternKeywords) || !variant.patternKeywords.length) return true;
+            return variant.patternKeywords.some(keyword => patternText.includes(String(keyword).toLowerCase()));
+        });
+        if (!matched.length) return null;
+        return matched[Math.floor(Math.random() * matched.length)] || null;
+    }
+
+    playVerifiedMonsterCue(monster, kind = 'attack', options = {}) {
+        const variant = this.verifiedMonsterCue(monster, kind, options);
+        // A roar is one creature voice event. Layering a second VO/SE clip here
+        // sounds like unrelated ambience under the roar and can linger after it.
+        if (String(kind).toLowerCase() === 'roar' && Array.isArray(variant?.layers)) {
+            return this.playVerifiedLayers({ ...variant, layers: variant.layers.slice(0, 1) });
+        }
+        return this.playVerifiedLayers(variant);
+    }
+
+    playEvidenceRankedWeaponAction(weaponId, actionId) {
+        if (!actionId || !String(actionId).startsWith(`${weaponId}.`)) return false;
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const variants = globalScope.HUNT_LOCAL_WEAPON_ACTION_ROUTES?.[actionId];
+        if (!Array.isArray(variants) || !variants.length) return false;
+        const bestScore = Math.max(...variants.map(variant => Number(variant.score || 0)));
+        const strongest = variants.filter(variant => Number(variant.score || 0) >= bestScore - 12);
+        const selected = strongest[Math.floor(Math.random() * strongest.length)];
+        return this.playLocalEntry(selected, { volume: 0.64 });
+    }
+
+    playWeaponAction(weaponId, cue = 'attack', context = {}) {
         const group = this.weaponGroup(weaponId);
-        const sourceIncludes = this.weaponCommonBank(weaponId);
-        if (!group || !sourceIncludes) return false;
-        const profiles = {
-            bow_shot: [0.24, 0.85],
-            bowgun_shot: [0.2, 1.1],
-            dragon_piercer: [0.9, 1.4],
-            slash_heavy: [0.7, 2.7],
-            blunt_heavy: [0.7, 2.7],
-            explosive_heavy: [0.75, 2.7],
-            mechanical_transform: [0.45, 2.4],
-            attack_heavy: [0.7, 2.7]
-        };
-        const [minDuration, maxDuration] = profiles[cue] || [0.18, 1.1];
-        const options = { group, sourceIncludes, minDuration, maxDuration, maxDurationFallback: 3, volume: cue === 'dragon_piercer' ? 0.72 : 0.64 };
-        if (this.playLocalAudio('weapon', options)) return true;
-        return this.playLocalAudio('weapon', { group, sourceIncludes, maxDuration: 3, volume: options.volume });
+        if (!group) return false;
+
+        // Exact labelled actions remain authoritative. When an action-specific
+        // event has not been mapped yet, use only audio proven to belong to the
+        // same weapon. This keeps combat audible without borrowing unrelated
+        // clicks, lasers, chat sounds, or another weapon's bank.
+        if (this.playVerifiedWeaponCue(weaponId, cue)) return true;
+        if (this.playEvidenceRankedWeaponAction(weaponId, context.actionId)) return true;
+
+        if (this.playLocalAudio('weapon', {
+            weaponId,
+            actionFamilies: [cue, 'weapon_action'],
+            semanticOnly: true,
+            excludeSourceIncludes: ['gimmick'],
+            preferGames: ['world', 'rise'],
+            volume: 0.64
+        })) return true;
+
+        return this.playLocalAudio('weapon', {
+            weaponId,
+            bankEvidenceOnly: true,
+            excludeSourceIncludes: ['gimmick'],
+            preferGames: ['world', 'rise'],
+            volume: 0.58
+        });
     }
 
     monsterGroup(monsterId) {
         const clean = String(monsterId || '').toLowerCase();
+        // Internal IDs are stable Capcom enemy-file identities. Variant suffixes
+        // are retained so a subspecies never borrows the base monster by accident.
         const routes = {
-            rathian: 'em001', rathalos: 'em002', diablos: 'em007', rajang: 'em023', furious_rajang: 'em023',
+            ancient_leshen: 'em127_01', leshen: 'em127', anjanath: 'em100', fulgur_anjanath: 'em100_01',
+            barroth: 'em044', bazelgeuse: 'em118', seething_bazelgeuse: 'em118_05', behemoth: 'em121',
+            deviljho: 'em043', savage_deviljho: 'em043_05', dodogama: 'em116', great_girros: 'em112',
+            great_jagras: 'em101', jyuratodus: 'em108', kirin: 'em011', kulu_ya_ku: 'em107',
+            kulve_taroth: 'em117', lavasioth: 'em036', legiana: 'em111', shrieking_legiana: 'em111_05',
+            lunastra: 'em026', nergigante: 'em103', ruiner_nergigante: 'em103_05', odogaron: 'em113',
+            ebony_odogaron: 'em113_01', paolumu: 'em110', nightshade_paolumu: 'em110_01',
+            pukei_pukei: 'em102', coral_pukei_pukei: 'em102_01', radobaan: 'em114', tzitzi_ya_ku: 'em120',
+            uragaan: 'em045', vaal_hazak: 'em115', blackveil_vaal_hazak: 'em115_05', xeno_jiiva: 'em105',
+            zorah_magdaros: 'em106', alatreon: 'em050', banbaro: 'em123', beotodus: 'em122',
+            namielle: 'em125', shara_ishvalda: 'em126', safi_jiiva: 'em104', yian_garuga: 'em018',
+            scarred_yian_garuga: 'em018_05',
+            pink_rathian: 'em001_01', gold_rathian: 'em001_02', rathian: 'em001',
+            azure_rathalos: 'em002_01', silver_rathalos: 'em002_02', rathalos: 'em002',
+            black_diablos: 'em007_01', diablos: 'em007', rajang: 'em023', furious_rajang: 'em023_05',
             kushala_daora: 'em024', chameleos: 'em025', teostra: 'em027', tigrex: 'em032', nargacuga: 'em037',
             barioth: 'em042', royal_ludroth: 'em047', zinogre: 'em057', amatsu: 'em058', brachydios: 'em063',
             gore_magala: 'em071', shagaru_magala: 'em072', seregios: 'em077', glavenus: 'em080',
             mizutsune: 'em082', valstrax: 'em086', crimson_glow_valstrax: 'em086', velkhana: 'em124'
         };
-        const direct = routes[clean];
+        const normalized = clean.replace(/[-']/g, '_');
+        const direct = routes[normalized];
         if (direct) return direct;
-        const family = Object.keys(routes).find(id => clean.includes(id));
+        const family = Object.keys(routes).find(id => normalized.includes(id));
         return family ? routes[family] : null;
     }
 
-    playMonsterAction(monster, kind = 'attack') {
-        const group = this.monsterGroup(monster && monster.id ? monster.id : monster);
+    playMonsterAction(monster, kind = 'attack', options = {}) {
+        if (this.playVerifiedMonsterCue(monster, kind, options)) return true;
+        if (String(kind).toLowerCase() === 'roar') return false;
+        const monsterId = monster && monster.id ? monster.id : monster;
+        const group = this.monsterGroup(monsterId);
         if (!group) return false;
-        const sourceIncludes = kind === 'roar' ? '_vo_' : '_fx_';
-        const minDuration = kind === 'roar' ? 0.55 : 0.65;
-        if (this.playLocalAudio('monster', { group, sourceIncludes, volume: kind === 'roar' ? 0.78 : 0.64, minDuration, maxDuration: kind === 'roar' ? 8 : 5 })) return true;
-        if (kind === 'attack') {
-            if (this.playLocalAudio('monster', { group, sourceIncludes: '_se_', volume: 0.64, minDuration, maxDuration: 5 })) return true;
-            return this.playLocalAudio('monster', { group, volume: 0.6, minDuration, maxDuration: 5 });
-        }
-        return false;
+        // An unlabeled VO clip could be pain, idle, death, or a roar and is never
+        // safe. A same-monster SE bank is allowed only as a generic body/action
+        // layer; it is not presented as an exact move match.
+        return this.playLocalAudio('monster', {
+            monsterIds: [group],
+            sourceIncludes: `${group.split('_')[0]}_se`,
+            bankEvidenceOnly: true,
+            preferGames: ['world', 'rise'],
+            volume: 0.62
+        });
     }
 
     playHunterVoice(options = {}) {
@@ -379,8 +649,6 @@ class HuntAudioManager {
         }
         const monsterName = typeof monster === 'string' ? monster : (monster && (monster.nameKO || monster.nameEN)) || '';
         const name = (monsterName || "").toLowerCase();
-        if (name.includes('진오우거') || name.includes('zinogre')) return 'BGM/MHW_Zinogre.mp3';
-        if (name.includes('타마미츠네') || name.includes('mizutsune')) return 'BGM/MHR_Mizutsune.mp3';
         if (name.includes('벨카나') || name.includes('velkhana')) return 'BGM/MHW_Velkhana.mp3';
         if (name.includes('네르기간테') || name.includes('nergigante')) return 'BGM/MHW_Nergigante.mp3';
         if (name.includes('이블조') || name.includes('deviljho')) return 'BGM/MHW_Deviljho.mp3';
@@ -388,7 +656,6 @@ class HuntAudioManager {
         if (name.includes('나르가') || name.includes('nargacuga')) return 'BGM/MHW_Nargacuga.mp3';
         if (name.includes('디노발드') || name.includes('glavenus')) return 'BGM/MHW_Glavenus.mp3';
         if (name.includes('브라키') || name.includes('brachydios')) return 'BGM/MHW_Brachydios.mp3';
-        if (name.includes('밀라보레아스') || name.includes('fatalis')) return 'BGM/MHW_Fatalis.mp3';
         if (name.includes('아마츠') || name.includes('amatsu')) return 'BGM/MHR_Amatsu.mp3';
         if (name.includes('샤가르') || name.includes('샤갈') || name.includes('shagaru')) return 'BGM/MH4_Shagaru_Magala.mp3';
         if (name.includes('노산룡') || name.includes('lao_shan')) return 'BGM/MH_Lao_Shan_Lung.mp3';
@@ -449,132 +716,80 @@ class HuntAudioManager {
     playMonsterRoar(monster) {
         if (!monster) return;
         if (this.playMonsterAction(monster, 'roar')) return;
-        
-        // 1. ID Normalization (lowercase and replace hyphens/apostrophes with underscores)
-        const cleanId = monster.id.toLowerCase().replace(/[-']/g, '_');
-        
-        // 2. Subspecies and Variant Routing Dictionary
-        const routingMap = window.HUNT_ROAR_ROUTE || {
-            // Rathalos Family
-            'azure_rathalos': 'rathalos',
-            'silver_rathalos': 'rathalos',
-            
-            // Rathian Family (now correctly routes to rathian roar, not rathalos!)
-            'rathian': 'rathian',
-            'pink_rathian': 'rathian',
-            'gold_rathian': 'rathian',
-            
-            // Diablos Family
-            'black_diablos': 'diablos',
-            
-            // Zinogre Family
-            'stygian_zinogre': 'zinogre',
-            
-            // Nergigante Family
-            'ruiner_nergigante': 'nergigante',
-            
-            // Deviljho Family
-            'savage_deviljho': 'deviljho',
-            
-            // Brachydios Family
-            'raging_brachydios': 'brachydios',
-            
-            // Glavenus Family
-            'acidic_glavenus': 'glavenus',
-            
-            // Rajang Family
-            'furious_rajang': 'rajang',
-            
-            // Bazelgeuse Family
-            'seething_bazelgeuse': 'bazelgeuse',
-            
-            // Barioth Family
-            'frostfang_barioth': 'barioth',
-            
-            // Legiana Family
-            'shrieking_legiana': 'legiana',
-            
-            // Valstrax Family
-            'crimson_glow_valstrax': 'valstrax',
-            
-            // Malzeno Family
-            'primordial_malzeno': 'malzeno',
-            
-            // Yian Garuga Family
-            'scarred_yian_garuga': 'yian_garuga',
-            
-            // Anjanath Family
-            'fulgur_anjanath': 'anjanath',
-            
-            // Paolumu Family
-            'nightshade_paolumu': 'paolumu',
-            
-            // Tobi-Kadachi Family
-            'viper_tobi_kadachi': 'tobi_kadachi',
-            
-            // Pukei-Pukei Family
-            'coral_pukei_pukei': 'pukei_pukei'
-        };
-        
-        // Determine final filename ID
-        const finalId = routingMap[cleanId] || cleanId;
-
-        const dedicatedPath = `SFX/MonsterHunter_Roars/roar_${finalId}.mp3`;
-        const defaultPath = `SFX/MonsterHunter_Roars/roar_default.mp3`;
-        const audio = this.director.audioManager.createNativeAudio(dedicatedPath, {
-            type: 'sfx', baseVolume: this.huntVolume(0.7)
-        });
-        audio.play().catch(() => {
-            const defaultAudio = this.director.audioManager.createNativeAudio(defaultPath, {
-                type: 'sfx', baseVolume: this.huntVolume(0.7)
-            });
-            defaultAudio.play().catch(() => {
-                this.playConfiguredSound(this.config.getSoundConfig()['포효'] || '포효');
-            });
-        });
+        // Old downloaded roar files contain several misidentified/non-MH clips.
+        // Silence is safer than assigning the wrong creature while the verified
+        // extracted catalog is still being expanded.
+        return false;
     }
 
     playMHAsset(fileName, fallbackKey, context = {}) {
-        if (fileName === 'monster_attack' && this.playMonsterAction(context.monsterId, 'attack')) return;
-        if (fileName === 'dragon_piercer') {
-            const played = this.playWeaponAction('bow', 'dragon_piercer');
-            this.playHunterActionVoice(context.hunterIndex, 'attack_heavy', { chance: 0.5, volume: 0.58 });
-            if (played) {
-                this.timers.timeout(() => this.playLocalAudio('hit', { group: 'monster', minDuration: 0.42, maxDuration: 1.25, volume: 0.52 }), 70);
-            }
+        if (context.hunterStunned === true || context.action === 'stun' || /(?:hunter|mh)_stun/i.test(fileName || '')) {
+            // Hunter stun is intentionally silent; keep only its UI/state presentation.
             return;
         }
-        const weaponGroup = this.weaponGroup(context.weaponId);
+        if (fileName === 'monster_attack') {
+            this.playMonsterAction(context.monsterId, context.patternType || 'attack', context);
+            return;
+        }
+        if (fileName === 'dragon_piercer') {
+            this.playWeaponAction('bow', 'dragon_piercer', context);
+            this.playHunterActionVoice(context.hunterIndex, 'attack_heavy', { chance: 0.5, volume: 0.58 });
+            return;
+        }
+        if (fileName === 'lifepowder') {
+            this.playVerifiedItemCue('lifepowder');
+            this.playHunterActionVoice(context.hunterIndex, 'support', { chance: 0.3, volume: 0.52 });
+            return;
+        }
+        const rosterHunter = this.hunterVoiceRoster.find(hunter => Number(hunter.index) === Number(context.hunterIndex));
+        const effectiveWeaponId = context.weaponId || rosterHunter?.id;
+        if (/mh_reload|reload/i.test(fileName || '')) {
+            if (effectiveWeaponId && this.playWeaponAction(effectiveWeaponId, 'reload', context)) {
+                this.playHunterActionVoice(context.hunterIndex, 'item', { chance: 0.2, volume: 0.5 });
+            }
+            // A missing exact reload is preferable to the old unrelated click.
+            return;
+        }
+        if (/mh_heavy_hit|heavy_hit/i.test(fileName || '')) {
+            // No action-labelled standalone heavy impact is verified yet.
+            return;
+        }
+        const weaponGroup = this.weaponGroup(effectiveWeaponId);
         if (weaponGroup) {
-            const played = this.playWeaponAction(context.weaponId, fileName || 'attack');
+            const played = this.playWeaponAction(effectiveWeaponId, fileName || 'attack', context);
             const voiceAction = /heavy|explosive|charge/i.test(fileName || '') ? 'attack_heavy' : 'attack';
             if (played) {
                 this.playHunterActionVoice(context.hunterIndex, voiceAction, { chance: 0.32, volume: 0.56 });
-                this.timers.timeout(() => this.playLocalAudio('hit', { group: 'monster', maxDuration: 3, volume: 0.48 }), 35);
             }
             // A weapon-context action must never spill into another weapon's bank.
             return;
         }
         if (/mh_hit|hunter_hit/i.test(fileName || '')) {
-            const played = this.playLocalAudio('hit', {
-                group: 'hunter', sourceIncludes: 'hit_pl_', minDuration: 0.42, maxDuration: 1.6, volume: 0.62
-            });
             this.playHunterActionVoice(context.hunterIndex, 'hit', { chance: 0.68, volume: 0.58 });
-            // Never fall back to the old generic "click" impact. If the local Rise
-            // bank is still loading, the voice layer is preferable to a wrong SFX.
-            return played;
+            // The old hit bank produced the unrelated hard "click". A fixed
+            // actor reaction is the only proven hunter-hit layer for now.
+            return;
         }
-        if (/mh_guard|guard/i.test(fileName || '')) {
+        if (/mh_guard|hunter_guard|guard/i.test(fileName || '')) {
             this.playHunterActionVoice(context.hunterIndex, 'guard', { chance: 0.38, volume: 0.54 });
+            return;
         }
-        if (/mh_dodge|dodge|evade/i.test(fileName || '')) {
+        if (/mh_dodge|hunter_evade|dodge|evade/i.test(fileName || '')) {
             this.playHunterActionVoice(context.hunterIndex, 'evade', { chance: 0.42, volume: 0.54 });
+            return;
         }
-        if (/mh_cart|mh_aibo/i.test(fileName || '')) {
-            if (this.playHunterActionVoice(context.hunterIndex, 'cart', { chance: 0.78, volume: 0.62 })) return;
+        if (/mh_cart|mh_aibo|hunter_cart_voice/i.test(fileName || '')) {
+            this.playHunterActionVoice(context.hunterIndex, 'cart', { chance: 0.78, volume: 0.62 });
+            return;
         }
-        if (/mh_potion|item|chest/i.test(fileName || '') && this.playLocalAudio('item', { maxDuration: 5, volume: 0.6 })) return;
-        if (fileName && this.playWeaponCue(fileName)) return;
+        if (/mh_potion/i.test(fileName || '')) {
+            this.playMHAudioFile('Unified_SFX/Potion Drink.mp3');
+            return;
+        }
+        if (/item|chest/i.test(fileName || '')) {
+            this.playMHAudioFile('Unified_SFX/MH - Item Found.mp3');
+            return;
+        }
 
         const soundConfig = this.config.getSoundConfig();
         if (fallbackKey && soundConfig[fallbackKey]) {
@@ -582,10 +797,8 @@ class HuntAudioManager {
             return;
         }
         if (fileName) {
-            const hasAudioExtension = /\.(mp3|wav|ogg|m4a|aac|webm|flac)$/i.test(fileName);
-            if (hasAudioExtension) {
-                this.playMHAudioFile(fileName);
-            }
+            const protectedClassic = new Set((typeof window !== 'undefined' && window.HUNT_PROTECTED_CLASSIC_AUDIO) || []);
+            if (protectedClassic.has(fileName)) this.playMHAudioFile(fileName);
         }
     }
 
@@ -605,6 +818,7 @@ class HuntAudioManager {
 
     playMHAudioFile(subPath, durationLimitMs = null, volumeMultiplier = 1.0, context = {}) {
         const filePath = `MonsterHunter_Soundtracks/${subPath}`;
+        const isItemFoundCue = /MH - Item Found(?: \(|\.mp3)/i.test(subPath || '');
         if (context.hunterIndex !== undefined && context.action) {
             this.playHunterActionVoice(context.hunterIndex, context.action, {
                 chance: context.voiceChance ?? 0.55,
@@ -615,7 +829,8 @@ class HuntAudioManager {
             // Native playback is required for OBS file:// compatibility. Loudness
             // compensation is supplied by AudioManager's measured level profile.
             const audio = this.director.audioManager.createNativeAudio(filePath, {
-                type: 'sfx', baseVolume: this.huntVolume(0.75 * volumeMultiplier)
+                type: 'sfx',
+                baseVolume: this.huntVolume(0.75 * volumeMultiplier) * (isItemFoundCue ? 0.7 : 1)
             });
             audio.play().then(() => {
                 if (durationLimitMs) {

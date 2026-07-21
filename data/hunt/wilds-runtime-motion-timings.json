@@ -1,0 +1,267 @@
+{
+  "version": 1,
+  "game": "Monster Hunter Wilds",
+  "evidencePolicy": "Only a live action-class observation paired with an installed motlist motion ID may set runtime timing.",
+  "captureSource": "game_extracts/tools/wilds-motion-captures.ndjson",
+  "actions": {},
+  "unresolved": [
+    {
+      "weaponId": "great_sword",
+      "runtimeActionId": "great_sword.tackle",
+      "actionClass": "cTackle",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "great_sword",
+      "runtimeActionId": "great_sword.rising_slash",
+      "actionClass": "cUpSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "great_sword",
+      "runtimeActionId": "great_sword.wide_slash",
+      "actionClass": "cSideSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "long_sword",
+      "runtimeActionId": "long_sword.thrust",
+      "actionClass": "cStub",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "long_sword",
+      "runtimeActionId": "long_sword.foresight",
+      "actionClass": "cMikiriSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "long_sword",
+      "runtimeActionId": "long_sword.spirit_roundslash",
+      "actionClass": "cKijinSlashRound",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "long_sword",
+      "runtimeActionId": "long_sword.iai_spirit",
+      "actionClass": "cIaiKijinSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "sword_shield",
+      "runtimeActionId": "sword_shield.lateral_slash",
+      "actionClass": "cHorizontalSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "sword_shield",
+      "runtimeActionId": "sword_shield.roundslash",
+      "actionClass": "cSpinSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "sword_shield",
+      "runtimeActionId": "sword_shield.backstep",
+      "actionClass": "cBackStepCharge",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "sword_shield",
+      "runtimeActionId": "sword_shield.perfect_rush",
+      "actionClass": "cJustRushCombo1",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "dual_blades",
+      "runtimeActionId": "dual_blades.double_slash",
+      "actionClass": "cTwiceSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "dual_blades",
+      "runtimeActionId": "dual_blades.demon_fang",
+      "actionClass": "cKijinChain1NoCombo",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "dual_blades",
+      "runtimeActionId": "dual_blades.blade_dance_2",
+      "actionClass": "cRanbu2",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "hammer",
+      "runtimeActionId": "hammer.side_smash",
+      "actionClass": "cSSwing",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "hammer",
+      "runtimeActionId": "hammer.upswing",
+      "actionClass": "cCharge2Swing",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "hunting_horn",
+      "runtimeActionId": "hunting_horn.left_swing",
+      "actionClass": "cLeftAttack",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "hunting_horn",
+      "runtimeActionId": "hunting_horn.backward_strike",
+      "actionClass": "cBackAttack",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "lance",
+      "runtimeActionId": "lance.triple_thrust",
+      "actionClass": "cStab1",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "lance",
+      "runtimeActionId": "lance.counter_thrust",
+      "actionClass": "cCounterAttack",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "lance",
+      "runtimeActionId": "lance.power_guard",
+      "actionClass": "cSuperGuardStart",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "lance",
+      "runtimeActionId": "lance.leaping_thrust",
+      "actionClass": "cRushJumpStab",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "gunlance",
+      "runtimeActionId": "gunlance.rising_slash",
+      "actionClass": "cUpperSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "gunlance",
+      "runtimeActionId": "gunlance.slam",
+      "actionClass": "cVerticalSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "gunlance",
+      "runtimeActionId": "gunlance.wyrmstake",
+      "actionClass": "cAimDrillFinish",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "gunlance",
+      "runtimeActionId": "gunlance.reload",
+      "actionClass": "cQuickReload",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "switch_axe",
+      "runtimeActionId": "switch_axe.wild_swing",
+      "actionClass": "cAxeDempsey",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "switch_axe",
+      "runtimeActionId": "switch_axe.heavy_slam",
+      "actionClass": "cAxeDempseyFinish",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "switch_axe",
+      "runtimeActionId": "switch_axe.heavenward",
+      "actionClass": "cAxeUSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "switch_axe",
+      "runtimeActionId": "switch_axe.zero_sum",
+      "actionClass": "cSwordDischargeStabFinish",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "charge_blade",
+      "runtimeActionId": "charge_blade.element_discharge_2",
+      "actionClass": "cAxeAttributeSlash2",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "charge_blade",
+      "runtimeActionId": "charge_blade.savage_axe",
+      "actionClass": "cAxeEnhanceAttack",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "charge_blade",
+      "runtimeActionId": "charge_blade.guard_point",
+      "actionClass": "cChangeSwordToAxeAttack",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "insect_glaive",
+      "runtimeActionId": "insect_glaive.rising_slash",
+      "actionClass": "cBatonVSlash",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "insect_glaive",
+      "runtimeActionId": "insect_glaive.tornado_slash",
+      "actionClass": "cBatonSpinSlashSuper",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "insect_glaive",
+      "runtimeActionId": "insect_glaive.vault",
+      "actionClass": "cSelfJumpNoCombo",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "insect_glaive",
+      "runtimeActionId": "insect_glaive.descending_thrust",
+      "actionClass": "cBatonJDiveAttack",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "bow",
+      "runtimeActionId": "bow.quick_shot",
+      "actionClass": "cQuickShot",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "bow",
+      "runtimeActionId": "bow.power_shot",
+      "actionClass": "cGoushaShot",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "bow",
+      "runtimeActionId": "bow.tracer",
+      "actionClass": "cTsugiyaSet",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "bow",
+      "runtimeActionId": "bow.arc_shot",
+      "actionClass": "cKyokushaShot",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "heavy_bowgun",
+      "runtimeActionId": "heavy_bowgun.wyvernsnipe",
+      "actionClass": "cWeakPointSnipeShot",
+      "reason": "not-observed"
+    },
+    {
+      "weaponId": "heavy_bowgun",
+      "runtimeActionId": "heavy_bowgun.guard",
+      "actionClass": "cGuard",
+      "reason": "not-observed"
+    }
+  ]
+}

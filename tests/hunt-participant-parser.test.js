@@ -2,6 +2,14 @@ const assert = require('assert');
 const HuntParticipantParser = require('../js/effects/hunt/HuntParticipantParser.js');
 
 const parser = new HuntParticipantParser();
+assert.deepStrictEqual(parser.parseReady('!준비'), { ready: true });
+assert.deepStrictEqual(parser.parseReady('！ 준비'), { ready: true });
+assert.strictEqual(parser.parseReady('준비'), null, 'ready must remain an explicit command');
+assert.strictEqual(parser.parseReady('!준비 대검'), null, 'ready cannot be mixed with a loadout mutation');
+assert.deepStrictEqual(parser.parsePerkReroll('!리롤'), { reroll: true });
+assert.deepStrictEqual(parser.parsePerkReroll('！ 퍽리롤'), { reroll: true });
+assert.strictEqual(parser.parsePerkReroll('!리롤 대검'), null, 'perk reroll must be a standalone loadout command');
+assert.strictEqual(parser.parsePerkReroll('리롤'), null, 'perk reroll must remain an explicit command');
 assert.strictEqual(parser.parseRecruitment('hello'), null);
 assert.deepStrictEqual(parser.parseRecruitment('!참가'), { join: true });
 assert.deepStrictEqual(parser.parseRecruitment('！참가'), { join: true });

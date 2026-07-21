@@ -33,6 +33,10 @@ assert.strictEqual(Object.keys(generated).length, 1421, 'every runtime audio/vid
 assert.strictEqual(generated['SFX/MonsterHunter_Hunters/mh_reload.mp3'].silent, true);
 assert.strictEqual(generated['Video/GodGame.mp4'].measurement, 'silence');
 assert.strictEqual(generated['SFX/Chzzk_Signatures/DDuk.mp3'].measurement, 'volume-fallback');
-assert.strictEqual(generated['SFX/Chzzk_Signatures/샀어.mp3'].gainDb, 2.8);
+assert.strictEqual(generated['SFX/Chzzk_Signatures/DDuk.mp3'].category, 'chat_voice');
+assert.strictEqual(generated['SFX/Chzzk_Signatures/DDuk.mp3'].policyVersion, 2);
+assert.ok(generated['SFX/Chzzk_Signatures/DDuk.mp3'].meanDb + generated['SFX/Chzzk_Signatures/DDuk.mp3'].gainDb <= -19.9,
+    'sub-400ms chat clips need a quieter transient target');
+assert.strictEqual(generated['SFX/Chzzk_Signatures/샀어.mp3'].gainDb, -0.8);
 
 console.log('[test] AudioLevelProfile measured-gain contract passed.');

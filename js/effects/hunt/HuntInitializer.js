@@ -1,6 +1,9 @@
 class HuntInitializer {
     constructor(options = {}) {
         this.random = options.random || Math.random;
+        this.weaponInstanceCatalog = typeof HuntWeaponInstanceCatalog !== 'undefined'
+            ? new HuntWeaponInstanceCatalog(typeof HUNT_WILDS_WEAPON_INSTANCES !== 'undefined' ? HUNT_WILDS_WEAPON_INSTANCES : [], this.random)
+            : null;
         this.WEAPONS = window.HUNT_WEAPONS || [
             { id: 'great_sword', name: '대검', filename: 'great_sword.svg', type: 'shield', speedGroup: 'slow' },
             { id: 'long_sword', name: '태도', filename: 'long_sword.svg', type: 'melee', speedGroup: 'fast' },
@@ -34,7 +37,7 @@ class HuntInitializer {
             velkhana: ["빙룡의 포효", "빙벽 생성 강타", "얼음 브레스 방출", "고리형 절대영도 폭발", "꼬리 얼음칼 찌르기"],
             default: ["포효 위협", "몸통 박치기", "꼬리 후려치기", "성난 돌진 공격"]
         };
-        this.MONSTER_PATTERNS = HuntMonsterPatternCatalog.build(this.MONSTER_ATTACKS);
+        this.MONSTER_PATTERNS = HuntMonsterPatternCatalog.build(this.MONSTER_ATTACKS, this.fallbackMonsters);
         const patternErrors = HuntMonsterPatternCatalog.validate(this.MONSTER_PATTERNS);
         if (patternErrors.length) console.warn('[HuntMonsterPatternCatalog] Invalid patterns:', patternErrors);
 
@@ -116,12 +119,30 @@ class HuntInitializer {
                 '샤갈': '샤가르마가라',
                 '고어': '고어-마가라'
             };
-            const searchName = nicknameMap[targetMonsterName] || targetMonsterName;
-            const matched = monsters.find(m => 
-                m.nameKO.includes(searchName) || 
-                m.nameEN.toLowerCase().includes(searchName.toLowerCase()) ||
-                m.id.toLowerCase().includes(searchName.toLowerCase())
-            );
+            const stableAliases = {
+                '레우스': '리오레우스',
+                '레우스 아종': '리오레우스 아종',
+                '창화룡': '리오레우스 아종',
+                '은화룡': '리오레우스 희소종',
+                '레이아': '리오레이아',
+                '레이아 아종': '리오레이아 아종',
+                '앵화룡': '리오레이아 아종',
+                '금화룡': '리오레이아 희소종'
+            };
+            const searchName = stableAliases[targetMonsterName] || nicknameMap[targetMonsterName] || targetMonsterName;
+            const normalizedSearch = String(searchName).trim().toLowerCase();
+            const scoreMonsterMatch = monster => {
+                const names = [monster.nameKO, monster.nameEN, monster.id]
+                    .filter(Boolean).map(value => String(value).trim().toLowerCase());
+                if (names.some(value => value === normalizedSearch)) return 300;
+                if (names.some(value => value.startsWith(normalizedSearch))) return 200;
+                if (names.some(value => value.includes(normalizedSearch))) return 100;
+                return 0;
+            };
+            const matched = monsters
+                .map((monster, index) => ({ monster, index, score: scoreMonsterMatch(monster) }))
+                .filter(candidate => candidate.score > 0)
+                .sort((a, b) => b.score - a.score || a.index - b.index)[0]?.monster;
             if (matched) {
                 selectedMonster = matched;
             } else {
@@ -141,6 +162,18 @@ class HuntInitializer {
         };
     }
 
+    initialTrapCount(personality) {
+        if (personality === 'support') return 2;
+        if (personality === 'veteran') return 1;
+        return 0;
+    }
+
+    syncLoadoutItems(hunter) {
+        if (!hunter) return hunter;
+        hunter.shockTraps = this.initialTrapCount(hunter.personality);
+        return hunter;
+    }
+
     buildSelectedWeapons(chosenWeaponIds) {
         const selected = [];
         const chosen = chosenWeaponIds || [];
@@ -156,7 +189,7 @@ class HuntInitializer {
 
         const personalities = ['offensive', 'offensive', 'normal', 'normal', 'defensive', 'veteran', 'support', 'newbie'];
         return selected.map((w, index) => {
-            const initialSpeedGroup = w.id === 'charge_blade' ? 'very_fast' : w.speedGroup;
+            const initialSpeedGroup = w.speedGroup;
             const personality = personalities[Math.floor(this.random() * personalities.length)];
             const perks = typeof HuntPerkCatalog !== 'undefined' ? HuntPerkCatalog.roll(this.random) : [];
             const hunter = {
@@ -174,9 +207,12 @@ class HuntInitializer {
                 respawnTimer: 0,
                 personality,
                 perks,
+                perkRerollCount: 0,
                 perkModifiers: typeof HuntPerkCatalog !== 'undefined' ? HuntPerkCatalog.aggregate(perks) : {},
                 potions: 10,
                 lifepowders: 1,
+                shockTraps: this.initialTrapCount(personality),
+                bombs: 1,
                 spiritLevel: 0,
                 demonModeDuration: 0,
                 phials: w.id === 'charge_blade' ? 0 : 5,
@@ -185,6 +221,7 @@ class HuntInitializer {
                 extractBuffs: { red: 0, white: 0, orange: 0 },
                 extractDuration: 0
             };
+            if (this.weaponInstanceCatalog) this.weaponInstanceCatalog.apply(hunter);
             return hunter;
         });
     }
@@ -199,9 +236,12 @@ class HuntInitializer {
             personality: hunter.personality,
             perks: hunter.perks || [],
             perkModifiers: hunter.perkModifiers || {},
-            isNpc: Boolean(hunter.isNpc)
+            isNpc: Boolean(hunter.isNpc),
+            loadoutReady: Boolean(hunter.loadoutReady),
+            perkRerolled: Boolean(hunter.perkRerolled),
+            perkRerollCount: Number(hunter.perkRerollCount || (hunter.perkRerolled ? 1 : 0))
         };
-        const initialSpeedGroup = matchedWeapon.id === 'charge_blade' ? 'very_fast' : matchedWeapon.speedGroup;
+        const initialSpeedGroup = matchedWeapon.speedGroup;
         Object.assign(hunter, {
             ...matchedWeapon,
             ...preserved,
@@ -217,6 +257,8 @@ class HuntInitializer {
             respawnTimer: 0,
             potions: 10,
             lifepowders: 1,
+            shockTraps: this.initialTrapCount(preserved.personality),
+            bombs: 1,
             spiritLevel: 0,
             demonModeDuration: 0,
             phials: matchedWeapon.id === 'charge_blade' ? 0 : 5,
@@ -225,7 +267,41 @@ class HuntInitializer {
             extractBuffs: { red: 0, white: 0, orange: 0 },
             extractDuration: 0
         });
+        if (this.weaponInstanceCatalog) this.weaponInstanceCatalog.apply(hunter);
         return true;
+    }
+
+    rerollHunterPerks(hunter) {
+        if (!hunter || typeof HuntPerkCatalog === 'undefined') return false;
+        const signature = perks => (perks || []).map(perk => perk.id).sort().join('|');
+        const previous = signature(hunter.perks);
+        let next = HuntPerkCatalog.roll(this.random);
+        for (let attempt = 0; attempt < 7 && signature(next) === previous; attempt++) {
+            next = HuntPerkCatalog.roll(this.random);
+        }
+        if (signature(next) === previous) {
+            const alternative = HuntPerkCatalog.all().find(perk =>
+                perk.name !== '빈 수첩' && perk.name !== '똥'
+                && !(hunter.perks || []).some(current => current.id === perk.id)
+            );
+            if (alternative) next = next.length ? [...next.slice(0, -1), alternative] : [alternative];
+        }
+        hunter.perks = next;
+        hunter.perkModifiers = HuntPerkCatalog.aggregate(next);
+        return signature(next) !== previous;
+    }
+
+    materializeBattleStartPerks(hunters = []) {
+        if (typeof HuntPerkCatalog === 'undefined') return [];
+        const dung = HuntPerkCatalog.all().find(perk => perk.name === '똥');
+        if (!dung) return [];
+        return hunters.filter(hunter => {
+            if (!hunter || (hunter.perks || []).length > 0 || this.random() >= .1) return false;
+            hunter.perks = [dung];
+            hunter.perkModifiers = HuntPerkCatalog.aggregate(hunter.perks);
+            hunter.dungAwakened = true;
+            return true;
+        });
     }
 
     getMonsterTier(monster) {
@@ -262,7 +338,7 @@ class HuntInitializer {
 
         const elderIds = [
             'ancient_leshen', 'alatreon', 'blackveil_vaal_hazak',
-            'crimson_glow_valstrax', 'furious_rajang', 'kirin', 
+            'chameleos', 'crimson_glow_valstrax', 'furious_rajang', 'kirin',
             'kushala_daora', 'lunastra', 'malzeno', 'namielle', 
             'nergigante', 'primordial_malzeno', 'ruiner_nergigante', 
             'teostra', 'vaal_hazak', 'valstrax', 'velkhana', 

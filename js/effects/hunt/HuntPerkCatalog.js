@@ -10,7 +10,11 @@ class HuntPerkCatalog {
             '은신','발도술','특수납도 중독','귀인화 체질','선율 강박','포격 낭만','병 수집벽','영거리 집착','삼색 탐닉','용화살 신봉',
             '상태이상 공격 강화','독사','마비 사냥꾼','잠재우는 손','폭파광','덫 장인','포획 명인','섬광 조제사','광역 분진','우애',
             '만족할 줄 모름','절약가','야생의 치료사','영웅의 증표','희생 방패','혈기','신속 교체','무모한 준비','완벽주의','임기응변',
-            '길치','고양이 혀','물욕 센서','수레 애호가','훈타','벌꿀 주세요','캠프 수호자','한 대만','빈 수첩','새벽의 생존자'
+            '길치','고양이 혀','물욕 센서','수레 애호가','훈타','벌꿀 주세요','캠프 수호자','한 대만','빈 수첩','새벽의 생존자',
+            '선봉장','신중한 관찰자','유리 대포','돌다리 전문가','철벽주의','박자감각','성급한 손','숨 고르기','바람잡이','몸빵 담당',
+            '고독한 사냥꾼','낙관주의','비관주의','생존 우선','공격 중독','재정비 전문가','날쌘 보급','묵직한 손','민첩한 발','위기관리반',
+            '꼬리 사냥꾼','뿔 수집가','공중 추적자','넘어진 김에','막타 욕심','복수의 일격','불길한 예감','보급관','폭탄 배달부','응급 배급',
+            '수레 단골','오늘의 주인공','외로운 늑대','분위기 메이커','끝까지 함께','첫 수는 크게','지상주의자','부위 개척자','약점 집착','퇴근 본능','똥'
         ];
     }
 
@@ -20,7 +24,8 @@ class HuntPerkCatalog {
             name,
             description: this._description(name),
             affinities: this._affinities(name),
-            modifiers: this._modifiers(name)
+            modifiers: this._modifiers(name),
+            hooks: this._hooks(name)
         }));
     }
 
@@ -28,7 +33,7 @@ class HuntPerkCatalog {
         const countTable = [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5];
         const count = countTable[Math.floor(random() * countTable.length)];
         if (count === 0) return [];
-        const pool = this.all().filter(perk => perk.name !== '빈 수첩');
+        const pool = this.all().filter(perk => perk.name !== '빈 수첩' && perk.name !== '똥');
         for (let i = pool.length - 1; i > 0; i--) {
             const j = Math.floor(random() * (i + 1));
             [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -51,60 +56,70 @@ class HuntPerkCatalog {
     static _modifiers(name) {
         const exact = {
             '겁쟁이': { evadeChance: 0.12, evadePower: 0.08, attackRate: 0.96 },
-            '앙심': { lowHpAttack: 1.22, healBias: -0.18 },
             '토끼손': { atbRate: 1.15, evadeChance: -0.10 },
-            '도전자': { enragedAttack: 1.18 },
             '공격': { attackRate: 1.08, guardChance: -0.04 },
-            '방어': { attackRate: 0.96, guardChance: 0.10, guardPower: 0.08 },
+            '방어': { attackRate: 0.96 },
             '회피 성능': { evadeChance: 0.10, evadePower: 0.08 },
             '가드 성능': { guardChance: 0.10, guardPower: 0.10 },
-            '완전 충전': { attackRate: 1.05 },
-            '재난대처능력': { lowHpAttack: 1.28, healBias: -0.20 },
             '빨리 먹기': { healBias: 0.10 },
-            '정령의 가호': { guardPower: 0.06 },
-            '약점 특효': { attackRate: 1.06 },
-            '간파': { attackRate: 1.04 },
-            '연격': { atbRate: 1.06 },
             '철벽': { attackRate: 0.95, guardChance: 0.14, guardPower: 0.12 },
-            '은신': { attackRate: 1.04, guardChance: -0.06 },
-            '신속 교체': { atbRate: 1.08 },
-            '무모한 준비': { attackRate: 1.10, evadeChance: -0.08 },
-            '캠프 수호자': { attackRate: 0.88, evadeChance: 0.14, guardPower: 0.10 },
-            '한 대만': { attackRate: 1.12, atbRate: 0.94 },
-            '새벽의 생존자': { guardPower: 0.08, healBias: 0.06 }
+            '선봉장': { attackRate: 1.08, guardChance: -0.05 },
+            '신중한 관찰자': { atbRate: 0.92, evadeChance: 0.08 },
+            '유리 대포': { attackRate: 1.16, guardChance: -0.12 },
+            '돌다리 전문가': { attackRate: 0.94, evadeChance: 0.07, guardChance: 0.05 },
+            '철벽주의': { attackRate: 0.92, guardChance: 0.16, guardPower: 0.12 },
+            '박자감각': { atbRate: 1.08, evadeChance: 0.03 },
+            '성급한 손': { atbRate: 1.12, guardChance: -0.06 },
+            '숨 고르기': { atbRate: 0.95, evadeChance: 0.07 },
+            '바람잡이': { atbRate: 1.07, attackRate: 1.03 },
+            '몸빵 담당': { attackRate: 0.93, guardChance: 0.12, guardPower: 0.08 },
+            '고독한 사냥꾼': { attackRate: 1.07, healBias: -0.05 },
+            '낙관주의': { attackRate: 1.04, evadeChance: -0.03 },
+            '비관주의': { attackRate: 0.97, evadeChance: 0.06 },
+            '생존 우선': { attackRate: 0.91, evadeChance: 0.10 },
+            '공격 중독': { attackRate: 1.11, guardChance: -0.08 },
+            '재정비 전문가': { atbRate: 0.97, healBias: 0.14 },
+            '날쌘 보급': { atbRate: 1.06, healBias: 0.08 },
+            '묵직한 손': { attackRate: 1.09, atbRate: 0.93 },
+            '민첩한 발': { atbRate: 1.08, evadeChance: 0.06, attackRate: 0.97 },
+            '위기관리반': { attackRate: 0.96, guardChance: 0.07, healBias: 0.09 },
+            '똥': { attackRate: 1.35, atbRate: 1.35, evadeChance: 0.25, evadePower: 0.20, guardChance: 0.25, guardPower: 0.20, healBias: 0.25 }
         };
-        if (exact[name]) return exact[name];
-        if (name === '빈 수첩') return {};
+        return exact[name] || {};
+    }
 
-        const affinities = this._affinities(name);
-        const inferred = {};
-        if (affinities.includes('guard')) {
-            inferred.guardChance = 0.04;
-            inferred.guardPower = 0.03;
-        }
-        if (affinities.includes('mobility')) {
-            inferred.atbRate = 1.025;
-            inferred.evadeChance = 0.03;
-        }
-        if (affinities.includes('support')) inferred.healBias = 0.06;
-        if (affinities.includes('burst')) inferred.attackRate = 1.04;
-        if (affinities.includes('sever') || affinities.includes('blunt') || affinities.includes('ranged') || affinities.includes('explosive')) {
-            inferred.attackRate = Math.max(Number(inferred.attackRate || 1), 1.03);
-        }
-        if (affinities.includes('status')) inferred.atbRate = Math.max(Number(inferred.atbRate || 1), 1.02);
-
-        if (/절약|완벽주의|캠프|길치/.test(name)) inferred.atbRate = 0.96;
-        if (/물욕|수레|훈타/.test(name)) {
-            inferred.attackRate = 1.05;
-            inferred.evadeChance = -0.04;
-        }
-        if (/벌꿀|만족|애호가/.test(name)) inferred.healBias = 0.08;
-        if (/내성|귀마개|풍압|내진|가호|체력 증강/.test(name)) inferred.guardPower = 0.04;
-        if (/예리|숫돌|장인|명검|강화 지속|집중/.test(name)) inferred.atbRate = Math.max(Number(inferred.atbRate || 1), 1.025);
-
-        // Every rolled perk must affect the autobattle. Unclassified quirks use a tiny tempo bias.
-        if (!Object.keys(inferred).length) inferred.atbRate = this.names.indexOf(name) % 2 === 0 ? 1.015 : 0.985;
-        return inferred;
+    static _hooks(name) {
+        if (name === '빈 수첩') return [];
+        const groups = [
+            [['겁쟁이','토끼손','회피 거리 UP','회피 성능','연마술 예'], 'evade'],
+            [['앙심','전화위복','돌파구','공세적 방어','연격'], 'temporary-buff'],
+            [['도전자','공격','완전 충전','역전','불굴','재난대처능력','심안','약점 특효','간파','슈퍼회심','힘의 해방','혼신','완벽주의','임기응변','한 대만'], 'damage-condition'],
+            [['방어','가드 성능','가드 강화','정령의 가호','철벽','영웅의 증표','희생 방패','새벽의 생존자'], 'incoming-hit'],
+            [['버섯 애호가','빨리 먹기','만족감','광역화','체력 회복량 UP','광역 분진','우애','만족할 줄 모름','절약가','야생의 치료사','벌꿀 주세요','고양이 혀'], 'item'],
+            [['체력 증강','장인','포탄 장전'], 'initial-state'],
+            [['기절 내성','귀마개','풍압 내성','내진'], 'ailment-resist'],
+            [['납도술','숫돌 사용 고속화','집중','신속 교체'], 'action-duration'],
+            [['칼날 연마','명검','탄환 절약','명검의 가르침'], 'resource-cost'],
+            [['강화 지속','귀인화 체질','선율 강박','삼색 탐닉'], 'buff-duration'],
+            [['포술','특수 사격 강화','통상탄 강화','관통탄 강화','산탄 강화','집중 포화','발도술','특수납도 중독','포격 낭만','병 수집벽','영거리 집착','용화살 신봉'], 'action-specific'],
+            [['KO술','스태미나 탈취'], 'monster-control'],
+            [['파괴왕','꼬리 수집가','두개골 측량사','날개 꺾기'], 'part-damage'],
+            [['도발','은신'], 'targeting'],
+            [['상태이상 공격 강화','독사','마비 사냥꾼','잠재우는 손','폭파광'], 'monster-status'],
+            [['덫 장인','포획 명인','섬광 조제사'], 'support-action'],
+            [['혈기'], 'lifesteal'],
+            [['무모한 준비','길치','캠프 수호자'], 'battle-entry'],
+            [['물욕 센서','수레 애호가','훈타','수레 단골'], 'quirk'],
+            [['선봉장','유리 대포','바람잡이','고독한 사냥꾼','낙관주의','공격 중독','묵직한 손','공중 추적자','넘어진 김에','막타 욕심','복수의 일격','외로운 늑대','끝까지 함께','첫 수는 크게','퇴근 본능'], 'damage-condition'],
+            [['신중한 관찰자','돌다리 전문가','박자감각','성급한 손','숨 고르기','생존 우선','민첩한 발'], 'evade'],
+            [['철벽주의','몸빵 담당','비관주의','위기관리반','불길한 예감','지상주의자'], 'incoming-hit'],
+            [['재정비 전문가','날쌘 보급'], 'item'],
+            [['꼬리 사냥꾼','뿔 수집가','부위 개척자','약점 집착'], 'part-damage'],
+            [['보급관','폭탄 배달부','응급 배급','분위기 메이커'], 'support-action'],
+            [['오늘의 주인공'], 'targeting'],
+            [['똥'], 'quirk']
+        ];
+        return groups.filter(([names]) => names.includes(name)).map(([, hook]) => hook);
     }
 
     static _affinities(name) {
@@ -197,7 +212,7 @@ class HuntPerkCatalog {
             '독사': '칼끝의 초록빛은 승리를 서두르지 않는다.',
             '마비 사냥꾼': '움직임이 멎은 찰나, 사냥은 처형으로 이름을 바꾼다.',
             '잠재우는 손': '고요한 숨결 뒤에는 가장 시끄러운 일격이 기다린다.',
-            '폭파광': '그는 문제를 해결하지 않는다. 흔적째 폭파한다.',
+            '폭파광': '대형나무통폭탄을 2개 더 챙기며 폭탄 피해가 50% 증가한다.',
             '덫 장인': '괴물이 밟는 순간까지 땅은 아무 비밀도 말하지 않는다.',
             '포획 명인': '죽이는 것보다 살려 묶는 일이 때로 더 냉혹하다.',
             '섬광 조제사': '한 줌의 빛이 하늘의 폭군에게 밤을 선물한다.',
@@ -222,7 +237,48 @@ class HuntPerkCatalog {
             '캠프 수호자': '누군가는 천막을 지켜야 한다. 아무도 부탁하지 않았지만.',
             '한 대만': '단 한 번이면 된다는 말은 대개 두 번째 공격 전에 나온다.',
             '빈 수첩': '아무것도 쓰이지 않았다. 아직은.',
-            '새벽의 생존자': '밤이 끝날 때까지 버틴 자만이 아침을 전리품이라 부른다.'
+            '새벽의 생존자': '밤이 끝날 때까지 버틴 자만이 아침을 전리품이라 부른다.',
+            '선봉장': '첫 발자국은 언제나 가장 깊은 발톱 자국을 부른다.',
+            '신중한 관찰자': '늦게 움직이는 눈은 대신 모든 빈틈을 기억한다.',
+            '유리 대포': '깨지기 전에 부수면 약점은 존재하지 않는다.',
+            '돌다리 전문가': '돌다리도 두드리다 사냥이 끝날 때가 있다.',
+            '철벽주의': '공격보다 중요한 것은 오늘도 멀쩡한 방패다.',
+            '박자감각': '괴물의 발소리에도 다음 박자는 숨어 있다.',
+            '성급한 손': '결론은 칼끝이 내리고 생각은 나중에 따라온다.',
+            '숨 고르기': '한 번의 깊은 숨이 세 번의 구르기를 만든다.',
+            '바람잡이': '누군가 달리기 시작하면 사냥터 전체가 달린다.',
+            '몸빵 담당': '상처의 수는 동료가 살아 있다는 영수증이다.',
+            '고독한 사냥꾼': '혼자 선 자리에서 칼날은 가장 솔직해진다.',
+            '낙관주의': '이번 공격은 맞을 것이다. 아마도, 분명히.',
+            '비관주의': '최악을 기다린 자는 보통 한 발 먼저 구른다.',
+            '생존 우선': '승리보다 중요한 것은 승리 화면에 서는 일이다.',
+            '공격 중독': '멈춘 칼은 녹슬고 멈춘 헌터는 불안해진다.',
+            '재정비 전문가': '잘 싸우는 법보다 다시 싸우는 법을 안다.',
+            '날쌘 보급': '마개를 여는 순간 이미 다음 물약을 찾는다.',
+            '묵직한 손': '느린 손끝에는 한 번으로 끝낼 무게가 실린다.',
+            '민첩한 발': '발이 빠르면 실수도 재빨리 과거가 된다.',
+            '위기관리반': '큰일은 막고 작은 일은 보고서에 남긴다.',
+            '꼬리 사냥꾼': '시선은 얼굴이 아니라 돌아가는 꼬리를 좇는다.',
+            '뿔 수집가': '부러진 뿔 하나가 백 마디 자랑보다 무겁다.',
+            '공중 추적자': '하늘은 도망칠 곳이 아니라 더 큰 표적이다.',
+            '넘어진 김에': '쓰러진 괴물 앞에서 예의는 칼집에 넣는다.',
+            '막타 욕심': '마지막 한 칼의 주인은 기록에도 오래 남는다.',
+            '복수의 일격': '방금의 상처가 다음 칼끝의 방향을 정한다.',
+            '불길한 예감': '큰일이 오기 전에는 늘 먼저 등이 서늘해진다.',
+            '보급관': '가방 속 한 칸은 언제나 동료의 몫이다.',
+            '폭탄 배달부': '쓰러진 괴물에게 가장 급한 배송은 화약이다.',
+            '응급 배급': '내 몫을 나누는 순간 네 목숨도 내 몫이 된다.',
+            '수레 단골': '캠프 가는 길은 이제 눈을 감고도 찾는다.',
+            '오늘의 주인공': '괴물도 이상하게 이 얼굴부터 기억한다.',
+            '외로운 늑대': '동료와 떨어질수록 자신의 호흡은 선명해진다.',
+            '분위기 메이커': '한 번의 멋진 일격이 네 사람의 발을 재촉한다.',
+            '끝까지 함께': '빈자리가 늘수록 남은 어깨는 더 가까워진다.',
+            '첫 수는 크게': '첫인상은 두 번째 칼질로 고칠 수 없다.',
+            '지상주의자': '날아다니는 적 아래에서는 방패가 하늘이 된다.',
+            '부위 개척자': '아무도 치지 않은 곳에 첫 균열을 새긴다.',
+            '약점 집착': '금이 간 곳은 결국 부서질 때까지 바라본다.',
+            '퇴근 본능': '마감이 보이면 사람은 놀랍도록 강해진다.',
+            '똥': '비어 있던 운명이 황금빛으로 지독하게 폭주한다.'
         };
         return descriptions[name] || '길드의 기록에서 이 성정에 관한 장은 찢겨 나갔다.';
     }

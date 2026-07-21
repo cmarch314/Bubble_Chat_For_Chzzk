@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hunt Hunting Horn Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: radial-gradient(circle at 50% 20%, #42351f, #100d0b 68%); }
+    .game-overlay-container { display: flex; align-items: center; justify-content: center; }
+    .hunt-combat-board { min-height: 760px; }
+    .game-hunt-weapon-img-container { position: relative; width: 115px; height: 115px; }
+    .game-hunt-weapon-img { width: 115px; height: 115px; margin: 0; }
+    .preview-heading { color: #f2d18b; text-align: center; font: 900 32px/1 sans-serif; letter-spacing: .08em; }
+    .preview-monster { height: 300px; display: grid; place-items: center; color: #fff; font: 900 38px/1 sans-serif; text-shadow: 0 3px 8px #000; }
+    .preview-chat-reserve { position: fixed; inset: auto 0 0; height: 15vh; display: grid; place-items: center; border-top: 2px dashed rgba(0,255,170,.45); background: rgba(0,0,0,.4); color: rgba(255,255,255,.6); font: 700 23px/1 sans-serif; }
+  </style>
+</head>
+<body>
+  <main class="game-overlay-container" data-testid="horn-combat-preview">
+    <section class="game-hunt-card hunt-combat-board">
+      <h1 class="preview-heading">HUNTING HORN · 3-NOTE / 3-SCORE AUDIT</h1>
+      <div class="preview-monster">리오레이아 · 연주 기회 포착</div>
+      <div class="game-hunt-weapons-grid">
+        <article class="game-hunt-weapon-card">
+          <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt="수렵피리"><div class="weapon-icon-resource-glyph resource-note"><b>악보</b><div class="weapon-resource-meter"><div class="horn-note-strip"><i class="horn-note note-red">♪</i><i class="horn-note note-blue">♪</i><i class="horn-note note-empty">♪</i></div><div class="horn-score-strip"><i class="horn-score">♬</i><i class="horn-score">♬</i><i class="horn-score">♬</i></div><div class="weapon-resource-mini-track"><i style="width:18%"></i></div></div></div></div>
+          <div class="hunt-combat-info"><div class="game-hunt-weapon-name">음색 조합 중</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:82%;background:#2eff7b"></div><div class="game-hunt-hp-text">82 / 100</div></div><div>빨강 · 파랑 · 다음 음표</div></div>
+        </article>
+        <article class="game-hunt-weapon-card">
+          <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt="수렵피리"><div class="weapon-icon-resource-glyph resource-note"><b>악보</b><div class="weapon-resource-meter"><div class="horn-note-strip"><i class="horn-note note-green">♪</i><i class="horn-note note-empty">♪</i><i class="horn-note note-empty">♪</i></div><div class="horn-score-strip"><i class="horn-score active">♬</i><i class="horn-score">♬</i><i class="horn-score">♬</i></div><div class="weapon-resource-mini-track"><i style="width:38%"></i></div></div></div></div>
+          <div class="hunt-combat-info"><div class="game-hunt-weapon-name">악보 1장 충전</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:70%;background:#2eff7b"></div><div class="game-hunt-hp-text">70 / 100</div></div><div>즉시 연주 가능</div></div>
+        </article>
+        <article class="game-hunt-weapon-card">
+          <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt="수렵피리"><div class="weapon-icon-resource-glyph resource-note"><b>악보</b><div class="weapon-resource-meter"><div class="horn-note-strip"><i class="horn-note note-empty">♪</i><i class="horn-note note-empty">♪</i><i class="horn-note note-empty">♪</i></div><div class="horn-score-strip"><i class="horn-score active">♬</i><i class="horn-score active">♬</i><i class="horn-score active">♬</i></div><div class="weapon-resource-mini-track"><i style="width:72%"></i></div></div></div></div>
+          <div class="hunt-combat-info"><div class="game-hunt-weapon-name">악보 3장 충전</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:64%;background:#2eff7b"></div><div class="game-hunt-hp-text">64 / 100</div></div><div>연속 연주 준비 완료</div></div>
+        </article>
+        <article class="game-hunt-weapon-card">
+          <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt="수렵피리"><div class="weapon-icon-resource-glyph resource-note"><b>연주</b><div class="weapon-resource-meter"><div class="horn-note-strip"><i class="horn-note note-red">♪</i><i class="horn-note note-blue">♪</i><i class="horn-note note-green">♪</i></div><div class="horn-score-strip"><i class="horn-score active">♬</i><i class="horn-score active">♬</i><i class="horn-score">♬</i></div><div class="weapon-resource-mini-track"><i style="width:84%"></i></div></div></div></div>
+          <div class="hunt-combat-info"><div class="game-hunt-weapon-name">♬ 공격력 강화!</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:76%;background:#2eff7b"></div><div class="game-hunt-hp-text">76 / 100</div></div><div>악보 한 장 소비 · 연주 타격</div></div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer class="preview-chat-reserve">OBS 채팅 전용 하단 15%</footer>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hunt Combat Resource Layout Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: radial-gradient(circle at 50% 20%, #433423, #100d0b 66%); }
+    .game-overlay-container { display: flex; align-items: center; justify-content: center; }
+    .hunt-combat-board { min-height: 760px; }
+    .game-hunt-weapon-img-container { position: relative; width: 115px; height: 115px; }
+    .game-hunt-weapon-img { width: 115px; height: 115px; margin: 0; }
+    .preview-heading { color: #f2d18b; text-align: center; font: 900 32px/1 sans-serif; letter-spacing: .08em; }
+    .preview-monster { height: 300px; display: grid; place-items: center; color: #fff; font: 900 38px/1 sans-serif; text-shadow: 0 3px 8px #000; }
+    .preview-chat-reserve { position: fixed; inset: auto 0 0; height: 15vh; display: grid; place-items: center; border-top: 2px dashed rgba(0,255,170,.45); background: rgba(0,0,0,.4); color: rgba(255,255,255,.6); font: 700 23px/1 sans-serif; }
+  </style>
+</head>
+<body>
+  <main class="game-overlay-container">
+    <section class="game-hunt-card hunt-combat-board">
+      <h1 class="preview-heading">WEAPON RESOURCE LAYOUT AUDIT</h1>
+      <div class="preview-monster">리오레우스 · 전투 진행 중</div>
+      <div class="game-hunt-weapons-grid">
+        <article class="game-hunt-weapon-card">
+          <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/switch_axe.svg" alt="슬래시액스"><div class="weapon-icon-resource-glyph resource-switch"><b>斬</b><div class="weapon-resource-meter"><div class="weapon-resource-mini-track"><i style="width:62%"></i></div><div class="weapon-resource-mini-track secondary"><i style="width:38%"></i></div></div></div></div>
+          <div class="hunt-combat-info">
+            <div class="game-hunt-weapon-name">길드 헌터 1</div>
+            <div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:78%;background:#2eff7b"></div><div class="game-hunt-hp-text">78 / 100</div></div>
+            <div id="personality-tag-0">⚔️ 공격형 · 🧪 2</div><div class="hunt-combat-perks"><span class="hunt-perk-bubble hunt-perk-bubble--compact">도전자</span></div>
+          </div>
+        </article>
+        <article class="game-hunt-weapon-card">
+          <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hammer.svg" alt="해머"></div>
+          <div class="hunt-combat-info">
+            <div class="game-hunt-weapon-name">길드 헌터 2</div>
+            <div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:61%;background:#2eff7b"></div><div class="game-hunt-hp-text">61 / 100</div></div>
+            <div id="personality-tag-1">🛡️ 지원형 · 🧪 1</div><div class="hunt-combat-perks"><span class="hunt-perk-bubble hunt-perk-bubble--compact">집중</span></div>
+          </div>
+        </article>
+        <article class="game-hunt-weapon-card">
+          <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/charge_blade.svg" alt="차지액스"><div class="weapon-icon-resource-glyph resource-phial"><b>瓶</b><div class="weapon-resource-meter"><div class="weapon-resource-segments"><i class="weapon-resource-segment active"></i><i class="weapon-resource-segment active"></i><i class="weapon-resource-segment active"></i><i class="weapon-resource-segment"></i><i class="weapon-resource-segment"></i></div></div></div></div>
+          <div class="hunt-combat-info">
+            <div class="game-hunt-weapon-name">길드 헌터 3</div>
+            <div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:43%;background:#ff9500"></div><div class="game-hunt-hp-text">43 / 100</div></div>
+            <div id="personality-tag-2">⚡ 속공형 · 🧪 3</div><div class="hunt-combat-perks"><span class="hunt-perk-bubble hunt-perk-bubble--compact">포술</span></div>
+          </div>
+        </article>
+        <article class="game-hunt-weapon-card">
+          <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/insect_glaive.svg" alt="조충곤"><img class="ig-kinsect" src="../../img/weapons/kinsect.svg" alt=""><div class="weapon-icon-resource-glyph resource-extract"><b>蟲</b><div class="weapon-resource-meter"><div class="weapon-resource-segments"><i class="weapon-resource-segment segment-0 active"></i><i class="weapon-resource-segment segment-1 active"></i><i class="weapon-resource-segment segment-2"></i></div></div></div></div>
+          <div class="hunt-combat-info">
+            <div class="game-hunt-weapon-name">길드 헌터 4</div>
+            <div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:92%;background:#2eff7b"></div><div class="game-hunt-hp-text">92 / 100</div></div>
+            <div id="personality-tag-3">🎯 공격형 · 🧪 2</div><div class="hunt-combat-perks"><span class="hunt-perk-bubble hunt-perk-bubble--compact">강화 지속</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <footer class="preview-chat-reserve">OBS 채팅 전용 하단 15%</footer>
+</body>
+</html>

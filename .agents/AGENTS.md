@@ -34,7 +34,9 @@ d:/BubbleChat/
 │       │   ├── HuntMonsterAttackAnimator.js # Monster attack movement/projectile presentation
 │       │   ├── HuntData.js
 │       │   ├── HuntWeaponCatalog.js # Normalized 14-weapon action catalog and audio/timing metadata
+│       │   ├── HuntWeaponMechanics.js # Stateful weapon modes, gauges, charge stages, and action consequences
 │       │   ├── HuntWeaponActionSelector.js # Conditional action eligibility and combo routing
+│       │   ├── HuntWeaponAnimationCatalog.js # Stable action ID to OBS motion/effect presentation profiles
 │       │   ├── HuntActionStateMachine.js # Windup/active/recovery action lock and cancel windows
 │       │   ├── HuntMonsterPatternCatalog.js # Typed monster pattern timing/damage schema
 │       │   ├── HuntMonsterPatternSelector.js # Cooldown, state, and repeat-aware pattern selection
@@ -172,7 +174,7 @@ d:/BubbleChat/
 
 ### Rule 14: Feature Data, Rules, Presentation, and Notifications Stay Separate
 * Racing data lives in `RacingData.js`, deterministic selection and lookup rules in `RacingRules.js`, the active simulation loop in `RacingRunner.js`, and racing presentation styles in `styles/racing.css`.
-* Hunt monster calculations live in `HuntMonsterRules.js`; monster and weapon turns execute through `HuntMonsterTurnExecutor.js` and `HuntHunterTurnExecutor.js`. Combat animations live in `HuntCombatAnimator.js`; chat, lobby, and material popups live in `HuntNotificationRenderer.js`. `HuntRenderer` owns and delegates to both render helpers.
+* Hunt monster calculations live in `HuntMonsterRules.js`; monster and weapon turns execute through `HuntMonsterTurnExecutor.js` and `HuntHunterTurnExecutor.js`. Stable weapon action IDs map to motion/effect profiles in `HuntWeaponAnimationCatalog.js`, while `HuntCombatAnimator.js` executes and lifecycle-cleans those animations; chat, lobby, and material popups live in `HuntNotificationRenderer.js`. `HuntRenderer` owns and delegates to both render helpers.
 * Per-frame battle state advances through `HuntBattleTickExecutor.js`; Valstrax-only charge and ambush behavior lives in `HuntValstraxExecutor.js`. `HuntEngine` coordinates these modules and exposes callbacks, but must not absorb their implementations again.
 * Hunt victory, defeat, rewards, and consecutive-hunt transitions render through `HuntResultPresenter.js`; keep phase control and chat commands in `HuntEffect.js`.
 * Chat input cleanup must pass through `ChatMessageNormalizer` before `ChatRenderer` creates DOM. Do not reintroduce duplicate inline data tables or dynamic feature CSS.
@@ -190,6 +192,8 @@ d:/BubbleChat/
 ### Rule 17: Hunt Combat Is Data-Driven and Timeline-Locked
 * `HuntData.js` is the only runtime owner of the legacy-compatible base weapon action list. `MonsterData.js` may retain a migration snapshot only under `HUNT_LEGACY_COMBO_LIST`; it must never overwrite `HUNT_COMBO_LIST`.
 * Every hunter action is normalized by `HuntWeaponCatalog` and selected through `HuntWeaponActionSelector`. Conditions, motion-value reference fields, gameplay damage, timing, tags, and audio cues must stay explicit; do not add more combo-index/name branching when a catalog field can express the rule.
+* Weapon identity comes from causality, not move-name rotation. Stateful modes, gauges, staged charges, buffs, resource spend/recovery, interruption, and finisher unlocks belong in `HuntWeaponMechanics`; the selector consumes those states and the executor applies their consequences. A preparation action may rapidly refund ATB, but its timeline must still lock the hunter and a clean hit may interrupt the buildup.
+* All fourteen weapons must retain a canonical state-machine action set. `npm run audit:hunt` cross-checks every `wilds-action-class` and `wilds-action-class-candidate` reference against the private installed-game ActionGuide graph when it is available; unresolved links must say `unresolved` instead of inventing a plausible class name.
 * An attack owns its hunter until `HuntActionStateMachine` reaches an allowed cancel window. Monster attacks and roars must call `canEvade`, `canGuard`, or `canCounter`; never roll an unrelated dodge during an active weapon animation.
 * Monster moves are pattern objects, not bare random strings. Selection must honor cooldowns, repeat protection, required state, HP gates, target count, windup, recovery, and damage ratio. Curated overrides belong in `HuntMonsterProfiles.js`.
 * Battle BGM selection is dedicated-theme first. Without a verified dedicated theme, `HuntBgmResolver` selects a weighted habitat and then a non-repeating track from that habitat pool. Do not restore name-substring routing as the primary path.
@@ -207,3 +211,11 @@ d:/BubbleChat/
 * The canonical quest flow is `quest_board → loadout → fighting → results`. `!참여` only registers a unique viewer at the quest board. Exactly four entrants are selected with seeded, auditable randomness when loadout begins; missing seats are filled by guild NPCs.
 * A selected hunter receives a random initial weapon, one existing personality, and zero to five immutable random perks. During loadout they may change weapon/personality repeatedly. Combined messages such as `!대검 지원가` and `!지원가 대검` are valid, and separate messages such as `!지원가` followed later by `!대검` must preserve and accumulate both choices. `!추천` selects a suitable weapon. Perks cannot be selected or rerolled.
 * Perks describe one hunt's quirks, not permanent account progression. Their combat modifiers belong in `HuntPerkCatalog`, must be composable and capped, and may never bypass action locks or monster immunities. Weapon recommendation belongs in `HuntLoadoutAdvisor`; recruitment and selection belong in `HuntLobbyRoster`.
+
+### Rule 19: Local Monster Hunter Audio Keeps Provenance
+* `scripts/mh-audio-taxonomy.js` owns cross-game bank classification; do not duplicate Rise, World, or Wilds filename rules in runtime managers.
+* Private extracted media remains under ignored `game_extracts/` and `local_assets/monster_hunter/<game>/` roots and must never be staged or published.
+* Every generated clip must retain its game, original bank, Wwise event/stream IDs when recoverable, semantic purpose, evidence, and confidence. Runtime routing prefers exact monster/weapon/voice identity and high-confidence purpose before duration-only fallbacks.
+* Combat playback is fail-closed. `HuntAudioCatalog` may route a monster attack, roar, or weapon action only when a recovered event label identifies that exact meaning; the correct monster/weapon bank alone is insufficient. Unresolved combat audio remains silent instead of sampling an arbitrary official clip.
+* CMC hunt voices come only from the chat MP3 group `window.HIVE_CMC_VOICE_COMMANDS` resolved through `window.HIVE_SOUND_CONFIG`; `AI CMC/` video audio is never a hunt voice source. The CMC fixed-actor profile participates in the same random assignment pool as game actors for streamer, viewer, and NPC hunters; once selected it never mixes with another actor during that hunt.
+* Extracted motion duration is not an action timing until ActionParam/BTable/MCT or equally strong evidence links the runtime action to its motion ID. Estimated action occupancy must retain an explicit `estimated` evidence label and must never masquerade as measured Wilds timing.

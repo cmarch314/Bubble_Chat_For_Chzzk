@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "evidence": "curated exact matches between runtime action meaning and installed-game ActionParam class names",
+  "actions": {
+    "great_sword": {
+      "great_sword.tackle": "cTackle",
+      "great_sword.rising_slash": "cUpSlash",
+      "great_sword.wide_slash": "cSideSlash"
+    },
+    "long_sword": {
+      "long_sword.thrust": "cStub",
+      "long_sword.foresight": "cMikiriSlash",
+      "long_sword.spirit_roundslash": "cKijinSlashRound",
+      "long_sword.iai_spirit": "cIaiKijinSlash"
+    },
+    "sword_shield": {
+      "sword_shield.lateral_slash": "cHorizontalSlash",
+      "sword_shield.roundslash": "cSpinSlash",
+      "sword_shield.backstep": "cBackStepCharge",
+      "sword_shield.perfect_rush": "cJustRushCombo1"
+    },
+    "dual_blades": {
+      "dual_blades.double_slash": "cTwiceSlash",
+      "dual_blades.demon_fang": "cKijinChain1NoCombo",
+      "dual_blades.blade_dance_2": "cRanbu2"
+    },
+    "hammer": {
+      "hammer.side_smash": "cSSwing",
+      "hammer.upswing": "cCharge2Swing"
+    },
+    "hunting_horn": {
+      "hunting_horn.left_swing": "cLeftAttack",
+      "hunting_horn.backward_strike": "cBackAttack"
+    },
+    "lance": {
+      "lance.triple_thrust": "cStab1",
+      "lance.counter_thrust": "cCounterAttack",
+      "lance.power_guard": "cSuperGuardStart",
+      "lance.leaping_thrust": "cRushJumpStab"
+    },
+    "gunlance": {
+      "gunlance.rising_slash": "cUpperSlash",
+      "gunlance.slam": "cVerticalSlash",
+      "gunlance.wyrmstake": "cAimDrillFinish",
+      "gunlance.reload": "cQuickReload"
+    },
+    "switch_axe": {
+      "switch_axe.wild_swing": "cAxeDempsey",
+      "switch_axe.heavy_slam": "cAxeDempseyFinish",
+      "switch_axe.heavenward": "cAxeUSlash",
+      "switch_axe.zero_sum": "cSwordDischargeStabFinish"
+    },
+    "charge_blade": {
+      "charge_blade.element_discharge_2": "cAxeAttributeSlash2",
+      "charge_blade.savage_axe": "cAxeEnhanceAttack",
+      "charge_blade.guard_point": "cChangeSwordToAxeAttack"
+    },
+    "insect_glaive": {
+      "insect_glaive.rising_slash": "cBatonVSlash",
+      "insect_glaive.tornado_slash": "cBatonSpinSlashSuper",
+      "insect_glaive.vault": "cSelfJumpNoCombo",
+      "insect_glaive.descending_thrust": "cBatonJDiveAttack"
+    },
+    "bow": {
+      "bow.quick_shot": "cQuickShot",
+      "bow.power_shot": "cGoushaShot",
+      "bow.tracer": "cTsugiyaSet",
+      "bow.arc_shot": "cKyokushaShot"
+    },
+    "heavy_bowgun": {
+      "heavy_bowgun.wyvernsnipe": "cWeakPointSnipeShot",
+      "heavy_bowgun.guard": "cGuard"
+    }
+  }
+}

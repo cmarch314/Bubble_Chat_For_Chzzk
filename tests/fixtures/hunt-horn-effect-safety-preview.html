@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hunt Horn and Effect Safety Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: #17120d; }
+    body { display: grid; place-items: start center; }
+    .hunt-combat-board { margin-top: 28px; min-height: 850px; }
+    #monster-showcase-panel { position: relative; height: 430px; display: grid; place-items: center; }
+    #fight-monster-img { width: 350px; height: 350px; }
+    .game-hunt-weapons-grid { grid-template-columns: repeat(4, 1fr); }
+    .game-hunt-weapon-img-container { position: relative; width: 115px; height: 115px; }
+    .hunt-action-effect { opacity: .9 !important; animation: none !important; transform: translate(-50%, -50%) scale(1.2) !important; }
+    .chat-safe { position: fixed; inset: auto 0 0; height: 15vh; border-top: 2px dashed #00ffaa; background: rgba(0,0,0,.7); }
+  </style>
+</head>
+<body>
+  <main class="game-hunt-card hunt-combat-board" data-testid="combat-preview">
+    <div id="monster-showcase-panel">
+      <img id="fight-monster-img" src="../../img/monsters/rathalos.png" alt="몬스터">
+      <span class="hunt-action-effect hunt-action-effect-explosive" aria-hidden="true"></span>
+    </div>
+    <div class="game-hunt-weapons-grid">
+      <article class="game-hunt-weapon-card" id="fight-card-0">
+        <div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt="수렵피리"><div class="weapon-resource-dock weapon-resource-dock-horn"><div class="weapon-icon-resource-glyph resource-note"><div class="weapon-resource-meter"><div class="horn-note-strip"><i class="horn-note note-red">♪</i><i class="horn-note note-blue">♪</i><i class="horn-note note-green">♪</i></div><div class="horn-score-strip"><i class="horn-score active">♬</i><i class="horn-score active">♬</i><i class="horn-score">♬</i></div><div class="weapon-resource-mini-track"><i style="width:72%"></i></div></div></div></div></div>
+        <div class="hunt-combat-info"><div class="game-hunt-weapon-name">수렵피리</div><div class="game-hunt-hp-wrapper"><div class="game-hunt-hp-fill" style="width:82%"></div><div class="game-hunt-hp-text">82 / 100</div></div></div>
+      </article>
+      <article class="game-hunt-weapon-card"></article><article class="game-hunt-weapon-card"></article><article class="game-hunt-weapon-card"></article>
+    </div>
+  </main>
+  <div class="chat-safe" aria-label="채팅 안전 영역"></div>
+</body>
+</html>

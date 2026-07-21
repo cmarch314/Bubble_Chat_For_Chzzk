@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "game": "Monster Hunter Wilds",
+  "evidence": "installed-game ActionParam class families and weapon-specific bank names",
+  "codes": {
+    "Wp00": "great_sword",
+    "Wp01": "sword_shield",
+    "Wp02": "dual_blades",
+    "Wp03": "long_sword",
+    "Wp04": "hammer",
+    "Wp05": "hunting_horn",
+    "Wp06": "lance",
+    "Wp07": "gunlance",
+    "Wp08": "switch_axe",
+    "Wp09": "charge_blade",
+    "Wp10": "insect_glaive",
+    "Wp11": "bow",
+    "Wp12": "heavy_bowgun",
+    "Wp13": "light_bowgun"
+  }
+}

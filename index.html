@@ -23,9 +23,11 @@
   <link rel="stylesheet" href="./styles/racing.css?v=20260715">
   <link rel="stylesheet" href="./styles/game-effects.css?v=20260715">
   <script src="./config.js?v=20260201"></script>
-  <script src="./config/sound-catalog.js?v=20260715"></script>
+  <script src="./config/sound-catalog.js?v=20260718"></script>
   <script src="./config/visual-config.js?v=20260715"></script>
-  <script src="./config/cmc-catalog.js?v=20260715"></script>
+  <script src="./config/cmc-catalog.js?v=20260718b"></script>
+  <!-- Generated from ignored private game extracts; avoids file:// JSON fetch failures in OBS. -->
+  <script src="./local_assets/monster_hunter/runtime-catalog.js?v=20260718b"></script>
   <!-- [Refactor] Load separated modules -->
   <script src="./js/twemoji.min.js" defer></script>
   <script src="./js/runtime/SafeContent.js" defer></script>
@@ -69,6 +71,15 @@
   <script src="./js/runtime/ManagedTimers.js" defer></script>
   <script src="./js/runtime/GameEffectRuntime.js" defer></script>
   <script src="./js/effects/hunt/HuntData.js" defer></script>
+  <script src="./js/effects/hunt/data/WildsMotionValues.generated.js" defer></script>
+  <script src="./js/effects/hunt/data/WildsRuntimeMotionTimings.generated.js" defer></script>
+  <script src="./js/effects/hunt/data/WildsMonsterAnatomy.generated.js" defer></script>
+  <script src="./js/effects/hunt/data/WildsComboLinks.generated.js" defer></script>
+  <script src="./js/effects/hunt/data/WildsWeaponInstances.generated.js" defer></script>
+  <script src="./js/effects/hunt/HuntMonsterAnatomyCatalog.js" defer></script>
+  <script src="./js/effects/hunt/HuntMotionValueCatalog.js" defer></script>
+  <script src="./js/effects/hunt/HuntWeaponMechanics.js" defer></script>
+  <script src="./js/effects/hunt/HuntWeaponInstanceCatalog.js" defer></script>
   <script src="./js/effects/hunt/HuntWeaponCatalog.js" defer></script>
   <script src="./js/effects/hunt/HuntWeaponActionSelector.js" defer></script>
   <script src="./js/effects/hunt/HuntActionStateMachine.js" defer></script>
@@ -77,23 +88,31 @@
   <script src="./js/effects/hunt/HuntBgmCatalog.js" defer></script>
   <script src="./js/effects/hunt/HuntBgmResolver.js" defer></script>
   <script src="./js/effects/hunt/HuntAudioCatalog.js" defer></script>
+  <script src="./js/effects/hunt/HuntMonsterFlightRuntime.js" defer></script>
   <script src="./js/effects/hunt/HuntMonsterProfiles.js" defer></script>
   <script src="./js/effects/hunt/HuntMonsterPatternCatalog.js" defer></script>
   <script src="./js/effects/hunt/HuntMonsterPatternSelector.js" defer></script>
   <script src="./js/effects/hunt/HuntLifecycle.js" defer></script>
   <script src="./js/effects/hunt/HuntPerkCatalog.js" defer></script>
+  <script src="./js/effects/hunt/HuntPerkSynergyCatalog.js" defer></script>
+  <script src="./js/effects/hunt/HuntPerkRuntime.js" defer></script>
+  <script src="./js/effects/hunt/HuntHunterBlightRuntime.js" defer></script>
   <script src="./js/effects/hunt/HuntLobbyRoster.js" defer></script>
   <script src="./js/effects/hunt/HuntLoadoutAdvisor.js" defer></script>
   <script src="./js/effects/hunt/HuntTierRules.js" defer></script>
   <script src="./js/effects/hunt/HuntMonsterRules.js" defer></script>
   <script src="./js/effects/hunt/HuntParticipantParser.js" defer></script>
+  <script src="./js/effects/hunt/HuntHunterCommandQueue.js" defer></script>
   <script src="./js/effects/hunt/HuntChatTactics.js" defer></script>
   <script src="./js/effects/hunt/HuntBattleTickExecutor.js" defer></script>
   <script src="./js/effects/hunt/HuntValstraxExecutor.js" defer></script>
+  <script src="./js/effects/hunt/HuntSmallMonsterSwarm.js" defer></script>
   <script src="./js/effects/hunt/HuntMonsterTurnExecutor.js" defer></script>
   <script src="./js/effects/hunt/HuntHunterTurnExecutor.js" defer></script>
   <script src="./js/effects/hunt/HuntEngine.js" defer></script>
-  <script src="./js/effects/hunt/HuntMonsterAttackAnimator.js" defer></script>
+    <script src="./js/effects/hunt/HuntMonsterAnimationCatalog.js" defer></script>
+    <script src="./js/effects/hunt/HuntMonsterAttackAnimator.js" defer></script>
+  <script src="./js/effects/hunt/HuntWeaponAnimationCatalog.js" defer></script>
   <script src="./js/effects/hunt/HuntCombatAnimator.js" defer></script>
   <script src="./js/effects/hunt/HuntNotificationRenderer.js" defer></script>
   <script src="./js/effects/hunt/HuntRenderer.js" defer></script>

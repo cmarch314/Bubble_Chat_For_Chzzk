@@ -9,17 +9,26 @@ class FakeAudioContext {
         this.destination = {};
         this.currentTime = 0;
         this.closed = false;
+        this.compressors = [];
     }
 
     createDynamicsCompressor() {
-        return {
+        const compressor = {
             threshold: {}, knee: {}, ratio: {}, attack: {}, release: {},
-            connect() {}
+            target: null,
+            connect(target) { this.target = target; }
         };
+        this.compressors.push(compressor);
+        return compressor;
     }
 
     createGain() {
-        return { gain: { value: 0, setTargetAtTime() {} }, connect() {}, disconnect() {} };
+        return {
+            gain: { value: 0, setTargetAtTime() {} },
+            target: null,
+            connect(target) { this.target = target; },
+            disconnect() {}
+        };
     }
 
     close() {
@@ -72,6 +81,10 @@ const config = {
 };
 const bus = new context.Exports.EventBus();
 const audio = new context.Exports.AudioManager(config, bus);
+assert.strictEqual(audio.outputLimiter.threshold.value, -1);
+assert.strictEqual(audio.outputLimiter.ratio.value, 20);
+assert.strictEqual(audio.masterGain.target, audio.outputLimiter, 'master boost must feed the final peak limiter');
+assert.strictEqual(audio.outputLimiter.target, audio.audioCtx.destination, 'no gain stage may bypass the final limiter');
 const media = {
     src: 'file:///D:/BubbleChat/Video/test.mp4',
     paused: false,

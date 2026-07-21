@@ -20,7 +20,6 @@ const HUNT_DEDICATED_THEMES = {
     // Zinogre is intentionally routed through habitat music until a verified
     // dedicated file is supplied; the previous file duplicated Proof of a Hero.
     magnamalo: ['BGM/MHR_Magnamalo.mp3'],
-    mizutsune: ['BGM/MHR_Mizutsune.mp3'],
     velkhana: ['BGM/MHW_Velkhana.mp3'],
     nergigante: ['BGM/MHW_Nergigante.mp3'],
     ruiner_nergigante: ['BGM/MHW_Nergigante.mp3'],
@@ -33,7 +32,6 @@ const HUNT_DEDICATED_THEMES = {
     acidic_glavenus: ['BGM/MHW_Glavenus.mp3'],
     brachydios: ['BGM/MHW_Brachydios.mp3'],
     raging_brachydios: ['BGM/MHW_Brachydios.mp3'],
-    fatalis: ['BGM/MHW_Fatalis.mp3'],
     amatsu: ['BGM/MHR_Amatsu.mp3'],
     shagaru_magala: ['BGM/MH4_Shagaru_Magala.mp3'],
     lao_shan_lung: ['BGM/MH_Lao_Shan_Lung.mp3'],
@@ -87,6 +85,24 @@ registerHuntHabitats([
     'alatreon', 'fatalis', 'safi_jiiva', 'shara_ishvalda', 'behemoth'
 ], ['arena'], 'world_iceborne');
 registerHuntHabitats(['aptonoth', 'vespoid'], ['ancient_forest', 'wildspire_waste'], 'latest_available');
+registerHuntHabitats(['ancient_leshen', 'leshen', 'tobi_kadachi', 'yian_garuga', 'scarred_yian_garuga'], ['ancient_forest'], 'world_iceborne');
+registerHuntHabitats(['jyuratodus'], ['wildspire_waste'], 'world_iceborne');
+registerHuntHabitats(['kirin', 'paolumu'], ['coral_highlands'], 'world_iceborne');
+registerHuntHabitats(['radobaan', 'vaal_hazak', 'blackveil_vaal_hazak'], ['rotten_vale'], 'world_iceborne');
+registerHuntHabitats(['lavasioth', 'uragaan'], ['elders_recess'], 'world_iceborne');
+registerHuntHabitats(['kulve_taroth', 'xeno_jiiva', "xeno'jiiva", 'zorah_magdaros', 'safi_jiiva', "safi'jiiva"], ['arena'], 'world_iceborne');
+registerHuntHabitats(['fulgur_anjanath'], ['hoarfrost_reach', 'ancient_forest'], 'iceborne');
+registerHuntHabitats(['nightshade_paolumu'], ['wildspire_waste', 'coral_highlands'], 'iceborne');
+registerHuntHabitats(['shrieking_legiana', 'viper_tobi_kadachi'], ['hoarfrost_reach'], 'iceborne');
+registerHuntHabitats(['apceros', 'kestodon', 'kestodon_female', 'noios'], ['wildspire_waste'], 'world_iceborne');
+registerHuntHabitats(['barnos', 'gastodon'], ['elders_recess'], 'world_iceborne');
+registerHuntHabitats(['gajau', 'jagras', 'mosswine', 'mernos', 'felyne', 'grimalkyne'], ['ancient_forest'], 'world_iceborne');
+registerHuntHabitats(['gajalaka', 'dodogama'], ['elders_recess'], 'world_iceborne');
+registerHuntHabitats(['girros', 'hornetaur', 'shamos'], ['rotten_vale'], 'world_iceborne');
+registerHuntHabitats(['kelbi', 'anteka', 'popo'], ['hoarfrost_reach', 'old_world'], 'latest_available');
+registerHuntHabitats(['boaboa', 'cortos', 'wulg'], ['hoarfrost_reach'], 'iceborne');
+registerHuntHabitats(['raphinos'], ['coral_highlands', 'rotten_vale'], 'world_iceborne');
+registerHuntHabitats(['unknown_monster'], ['arena'], 'safe_fallback');
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { HUNT_BGM_LOCALES, HUNT_HABITAT_LABELS, HUNT_DEDICATED_THEMES, HUNT_MONSTER_HABITATS };

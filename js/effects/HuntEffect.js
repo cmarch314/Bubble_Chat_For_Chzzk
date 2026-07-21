@@ -196,9 +196,49 @@ class HuntEffect extends BaseEffect {
             }
         } else if (this.phase === 'loadout') {
             const hunter = this.selectedWeapons.find(item => !item.isNpc && item.hunterName === msgData.nickname);
+            const ready = hunter ? this.participantParser.parseReady(msg) : null;
+            if (hunter && ready) {
+                if (!hunter.loadoutReady) {
+                    hunter.loadoutReady = true;
+                    this.renderer.updateLoadoutCard(hunter);
+                    this.renderer.spawnCombatChatBubble(hunter.index, '✅ 준비 · 🔒');
+                    this.audioManager.playReadyConfirmationVoice(hunter);
+                    this.departWhenLoadoutReady();
+                } else {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '✅ 준비됨');
+                }
+                return true;
+            }
+            const perkReroll = hunter ? this.participantParser.parsePerkReroll(msg) : null;
+            if (hunter && perkReroll) {
+                if (hunter.loadoutReady) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🔒 준비됨');
+                    return true;
+                }
+                const rerollCount = Number(hunter.perkRerollCount || (hunter.perkRerolled ? 1 : 0));
+                if (rerollCount >= 2) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🎲 2/2 완료');
+                    return true;
+                }
+                if (this.initializer.rerollHunterPerks(hunter)) {
+                    hunter.perkRerollCount = rerollCount + 1;
+                    hunter.perkRerolled = hunter.perkRerollCount >= 2;
+                    this.renderer.updateLoadoutCard(hunter);
+                    this.renderer.spawnCombatChatBubble(hunter.index, `🎲 ${hunter.perkRerollCount}/2`);
+                    this.audioManager.playLoadoutConfirmationVoice(hunter, { perkRerolled: true });
+                }
+                return true;
+            }
             const change = hunter ? this.participantParser.parseLoadout(msg) : null;
             if (hunter && change) {
+                if (hunter.loadoutReady) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🔒 준비됨');
+                    return true;
+                }
+                const previousWeaponId = hunter.id;
+                const previousPersonality = hunter.personality;
                 if (change.personality) hunter.personality = change.personality;
+                if (change.personality) this.initializer.syncLoadoutItems(hunter);
                 let weaponId = change.weaponId;
                 if (!weaponId && change.recommend) {
                     const recommendation = this.loadoutAdvisor.recommend(hunter, this.selectedMonster, this.selectedWeapons);
@@ -208,6 +248,11 @@ class HuntEffect extends BaseEffect {
                 this.renderer.updateLoadoutCard(hunter);
                 const label = this.renderer.getPersonalityLabel(hunter.personality);
                 this.renderer.spawnCombatChatBubble(hunter.index, `✅ ${hunter.name} · ${label}`);
+                const weaponChanged = hunter.id !== previousWeaponId;
+                const personalityChanged = hunter.personality !== previousPersonality;
+                if (weaponChanged || personalityChanged) {
+                    this.audioManager.playLoadoutConfirmationVoice(hunter, { weaponChanged, personalityChanged });
+                }
                 return true;
             }
             if (hunter && msg) {
@@ -219,7 +264,7 @@ class HuntEffect extends BaseEffect {
                 const tacticalResult = this.chatTactics.handle(this.engine, msgData, msg);
                 if (tacticalResult.handled) {
                     const tacticalHunter = this.selectedWeapons.find(w => w.hunterName === msgData.nickname);
-                    if (tacticalHunter) this.renderer.spawnCombatChatBubble(tacticalHunter.index, tacticalResult.feedback);
+                    if (tacticalHunter && !tacticalResult.suppressBubble) this.renderer.spawnCombatChatBubble(tacticalHunter.index, tacticalResult.feedback);
                     return true;
                 }
             }
@@ -245,8 +290,19 @@ class HuntEffect extends BaseEffect {
             const entrant = selected[index];
             hunter.hunterName = entrant.nickname;
             hunter.hunterColor = entrant.color || '#cccccc';
+            hunter.participantUid = entrant.uid || null;
+            hunter.isStreamer = Boolean(entrant.isStreamer);
             hunter.isNpc = Boolean(entrant.isNpc);
-            this.bets[hunter.hunterName] = { index, color: hunter.hunterColor, isNpc: hunter.isNpc };
+            hunter.loadoutReady = hunter.isNpc;
+            hunter.perkRerolled = hunter.isNpc;
+            hunter.perkRerollCount = hunter.isNpc ? 2 : 0;
+            this.bets[hunter.hunterName] = {
+                index,
+                color: hunter.hunterColor,
+                participantUid: hunter.participantUid,
+                isStreamer: hunter.isStreamer,
+                isNpc: hunter.isNpc
+            };
         });
         this.audioManager.prepareHunterVoiceProfiles(this.selectedWeapons);
 
@@ -255,6 +311,8 @@ class HuntEffect extends BaseEffect {
             selectedWeapons: this.selectedWeapons,
             timeLeft: 60
         });
+
+        if (this.departWhenLoadoutReady()) return;
 
         let timeLeft = 60;
         this.gameTimer = this.timers.interval(() => {
@@ -269,8 +327,20 @@ class HuntEffect extends BaseEffect {
         }, 1000);
     }
 
+    departWhenLoadoutReady() {
+        if (this.phase !== 'loadout' || !this.selectedWeapons.length) return false;
+        if (!this.selectedWeapons.every(hunter => Boolean(hunter.loadoutReady))) return false;
+        if (this.gameTimer) this.timers.clear(this.gameTimer);
+        this.gameTimer = null;
+        this.startFight(this.renderer.container);
+        return true;
+    }
+
     startFight(container) {
         this.renderer.clearLobbyTimer();
+        if (this.phase !== 'loadout') return;
+        if (this.gameTimer) this.timers.clear(this.gameTimer);
+        this.gameTimer = null;
         this.phase = 'fighting';
         document.body.classList.add('in-hunt');
 
@@ -327,6 +397,7 @@ class HuntEffect extends BaseEffect {
         this.monsterDamageMod = tierRules.damageMod;
         this.monsterAtbSpeedMod = tierRules.atbSpeedMod;
         this.tierLabel = tierRules.label;
+        this.smallMonsterCount = this.monsterTier === 'small' ? 3 + Math.floor(this.initializer.random() * 3) : 0;
 
         this.cartCount = 0;
 
@@ -337,13 +408,22 @@ class HuntEffect extends BaseEffect {
             ? `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO}${habitatSuffix} [체력]`
             : `👾 [${this.tierLabel}] ${this.selectedMonster.nameKO}${habitatSuffix} [체력]`;
 
-        const timeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 180;
+        const timeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 480;
+        const dungAwakenedHunters = this.initializer.materializeBattleStartPerks(this.selectedWeapons);
+        const cartLimit = 3 + this.selectedWeapons.filter(hunter =>
+            (hunter.perks || []).some(perk => perk.name === '수레 애호가')
+        ).length;
         this.renderer.renderFight({
             hpLabelText,
             selectedMonster: this.selectedMonster,
             selectedWeapons: this.selectedWeapons,
             showMonsterHp: this.SHOW_MONSTER_HP,
-            timeLimit: timeLimitVal
+            timeLimit: timeLimitVal,
+            smallMonsterCount: this.smallMonsterCount,
+            cartLimit
+        });
+        dungAwakenedHunters.forEach(hunter => {
+            this.renderer.spawnCombatChatBubble(hunter.index, '💩🌈 똥 퍽 발현!');
         });
 
         // Initialize pure Simulation Engine
@@ -357,11 +437,13 @@ class HuntEffect extends BaseEffect {
             monsterTier: this.monsterTier,
             monsterHp: baseHp,
             monsterMaxHp: baseHp,
+            smallMonsterCount: this.smallMonsterCount,
             monsterSpeed: 2.2 * this.monsterAtbSpeedMod,
             monsterState: 'normal',
             monsterDamageMod: this.monsterDamageMod,
             monsterAtbSpeedMod: this.monsterAtbSpeedMod,
             monsterStunThreshold: baseStunThreshold,
+            cartLimit,
             tierLabel: this.tierLabel,
             MONSTER_ATTACKS: this.initializer.MONSTER_ATTACKS,
             MONSTER_PATTERNS: this.initializer.MONSTER_PATTERNS,
@@ -374,9 +456,9 @@ class HuntEffect extends BaseEffect {
                 onLog: (text, color) => this.addCombatLog(text, color),
                 onPlaySFX: (fileName, fallbackKey, context) => this.audioManager.playMHAsset(fileName, fallbackKey, context),
                 onPlayAudioFile: (subPath, durationLimitMs, volumeMultiplier, audioContext) => this.audioManager.playMHAudioFile(subPath, durationLimitMs, volumeMultiplier, audioContext),
-                onShakeWeapon: (idx, borderClr, isAttack, moveName, isDodge = false) => {
+                onShakeWeapon: (idx, borderClr, isAttack, actionOrName, isDodge = false) => {
                     const w = this.selectedWeapons[idx];
-                    this.renderer.shakeWeapon(idx, w, borderClr, isAttack, moveName, isDodge);
+                    this.renderer.shakeWeapon(idx, w, borderClr, isAttack, actionOrName, isDodge);
                 },
                 onShakeMonster: () => this.renderer.shakeMonster(),
                 onRestoreBorder: (idx) => {
@@ -385,19 +467,27 @@ class HuntEffect extends BaseEffect {
                 },
                 onUpdateHpUI: (w) => this.renderer.updateHpUI(w),
                 onUpdateMonsterHpUI: (hp, maxHp) => this.renderer.updateMonsterHpUI(hp, maxHp),
+                onUpdateSmallMonsterSwarmUI: (state) => this.renderer.updateSmallMonsterSwarmUI(state),
                 onUpdateWeaponAtbUI: (idx, atb) => {
                     const w = this.selectedWeapons[idx];
                     this.renderer.updateWeaponAtbUI(idx, atb, w);
                 },
+                onUpdateSharpnessUI: (idx, hunter) => this.renderer.updateSharpnessUI(idx, hunter),
                 onUpdateMonsterAtbUI: (atb) => this.renderer.updateMonsterAtbUI(atb),
                 onUpdateMonsterStateUI: (stateName, title, colorInfo) => this.renderer.updateMonsterStateUI(stateName, title, colorInfo),
+                onUpdateMonsterFlightUI: (airborne, progress, damage, threshold, remainingTicks) =>
+                    this.renderer.updateMonsterFlightUI(airborne, progress, damage, threshold, remainingTicks),
+                onUpdateTailSeverUI: (visible, carved, displayName) => this.renderer.updateTailSeverUI(visible, carved, displayName),
+                onUpdateHunterCommandQueueUI: (hunter) => this.renderer.updateHunterCommandQueueUI(hunter),
                 onUpdatePotionCountUI: (idx, count) => this.renderer.updatePotionCountUI(idx, count),
+                onUpdateHunterItemUI: (hunter) => this.renderer.updateHunterItemUI(hunter),
                 onUpdateOverheatUI: (idx, duration) => this.renderer.updateOverheatUI(idx, duration),
                 onUpdatePhialsUI: (idx, phials) => this.renderer.updatePhialsUI(idx, phials),
                 onUpdateExtractsUI: (idx, buffs) => this.renderer.updateExtractsUI(idx, buffs),
-                onUpdateCartUI: (carts) => {
+                onUpdateHunterBlightUI: (idx, blights) => this.renderer.updateHunterBlightUI(idx, blights),
+                onUpdateCartUI: (carts, limit) => {
                     this.cartCount = carts;
-                    this.renderer.updateCartUI(carts);
+                    this.renderer.updateCartUI(carts, limit);
                 },
                 onUpdateTimerUI: (timeSec) => this.renderer.updateTimerUI(timeSec),
                 onShowSkillBubble: (idxOrMonster, text) => this.renderer.showSkillBubble(idxOrMonster, text),
@@ -407,8 +497,8 @@ class HuntEffect extends BaseEffect {
                     this.audioManager.playMonsterRoar(monster);
                 },
                 onTriggerMonsterCharge: () => this.renderer.triggerMonsterCharge(),
-                onTriggerMonsterAttack: (type, emoji, targets, attackName) => {
-                    this.renderer.triggerMonsterAttack(type, emoji, targets, attackName);
+                onTriggerMonsterAttack: (type, emoji, targets, attackName, pattern) => {
+                    this.renderer.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
                 },
                 onTriggerGuardShake: (idx) => {
                     if (this.renderer.card) {
@@ -426,36 +516,75 @@ class HuntEffect extends BaseEffect {
                         }
                     }
                 },
+                onInterruptWeaponVisual: (idx) => {
+                    const w = this.selectedWeapons[idx];
+                    this.renderer.combatAnimator.interruptWeaponVisual(idx, w);
+                },
                 onTriggerRollAnimation: (idx) => this.renderer.triggerRollAnimation(idx),
+                onTriggerInvincibleJump: (idx, active) => this.renderer.triggerInvincibleJump(idx, active),
                 onTriggerHitAnimation: (idx, damage) => {
                     const w = this.selectedWeapons[idx];
                     this.renderer.triggerHitAnimation(idx, w, damage);
                 },
-                onTriggerDeathTag: (idx) => {
+                onTriggerDeathTag: (idx, timerSeconds) => {
                     const w = this.selectedWeapons[idx];
-                    this.renderer.triggerDeathTag(idx, w, 5);
+                    this.renderer.triggerDeathTag(idx, w, timerSeconds || 5);
+                    this.triggerCartAnimation(w);
                 },
                 onTriggerStunUI: (idx, isStunned) => this.renderer.triggerStunUI(idx, isStunned),
                 onTriggerRoarStun: (idx, isStunned) => this.renderer.triggerRoarStun(idx, isStunned),
                 onTriggerMonsterKnockdownAnim: () => this.renderer.triggerMonsterKnockdownAnim(),
+                onTriggerEnvironmentEffect: (kind) => this.renderer.triggerEnvironmentEffect(kind),
                 onGameEnd: (victory, winner) => this.endGame(container, victory, winner),
                 onNextConsecutive: () => this.spawnNextConsecutiveMonster(container),
                 onTriggerValstraxAmbush: () => {
-                    this.director.trigger('valstrax');
+                    this.renderer.triggerValstraxAmbushWarning();
                 }
             }
         });
 
+        // The loadout DOM is replaced before HuntEngine applies entry perks.
+        // Synchronize once immediately so camp/normal cards never spend the
+        // opening frame with stale pregame presentation.
+        this.selectedWeapons.forEach(w => {
+            this.renderer.updateHpUI(w);
+            this.renderer.updateWeaponAtbUI(w.index, w.atb, w);
+        });
+
         // Set initial UI states
         this.renderer.updateCartUI(0);
-        const initialLimit = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 120;
+        const initialLimit = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 480;
         this.renderer.updateTimerUI(initialLimit);
 
         // Tick loop (Process through HuntEngine)
         this.fightInterval = this.timers.interval(() => {
             if (this.phase !== 'fighting') return;
-            this.engine.processTick();
+            this.processFightTickSafely();
         }, 100);
+    }
+
+    processFightTickSafely() {
+        try {
+            this.engine.processTick();
+            this.consecutiveFightTickErrors = 0;
+        } catch (error) {
+            this.consecutiveFightTickErrors = Number(this.consecutiveFightTickErrors || 0) + 1;
+            console.error('[HuntEffect] Combat tick recovered', error);
+            const engine = this.engine;
+            if (!engine) return;
+            engine.pendingMonsterAction = null;
+            engine.monsterAtb = 0;
+            engine.selectedWeapons.forEach(hunter => {
+                if (!Number.isFinite(hunter.atb)) hunter.atb = 0;
+                if (!Number.isFinite(hunter.attackDuration) || hunter.attackDuration < 0) hunter.attackDuration = 0;
+                if (hunter.atb >= 100 && hunter.attackDuration <= 0) hunter.atb = 92;
+                engine.updateWeaponAtbUI(hunter.index, hunter.atb);
+            });
+            engine.updateMonsterAtbUI(0);
+            if (this.consecutiveFightTickErrors === 1) {
+                engine.addLog('⚠️ [전투 자동복구] 전투 루프 오류를 격리하고 즉시 재개합니다.', '#ffcf70');
+            }
+        }
     }
 
     addCombatLog(text, color) {
@@ -523,6 +652,7 @@ class HuntEffect extends BaseEffect {
     }
 
     triggerCartAnimation(weapon) {
+        if (!weapon) return;
         const container = document.createElement('div');
         container.className = 'game-hunt-cart-container';
         container.innerHTML = `
@@ -577,13 +707,24 @@ class HuntEffect extends BaseEffect {
         this.monsterDamageMod = tierRules.damageMod;
         this.monsterAtbSpeedMod = tierRules.atbSpeedMod;
         this.tierLabel = tierRules.label;
+        this.smallMonsterCount = this.monsterTier === 'small' ? 3 + Math.floor(this.initializer.random() * 3) : 0;
 
         // Apply new values to existing engine
         this.engine.selectedMonster = this.selectedMonster;
+        this.engine.severedTail = {
+            available: false,
+            carved: false,
+            material: `${this.selectedMonster.nameKO}의 꼬리`,
+            displayName: `${this.selectedMonster.nameKO} 꼬리`
+        };
         this.engine.currentConsecutiveIndex = this.currentConsecutiveIndex;
+        this.engine.selectedWeapons.forEach(hunter => { hunter.farcasterUsed = false; });
         this.engine.monsterTier = this.monsterTier;
         this.engine.monsterHp = baseHp;
         this.engine.monsterMaxHp = baseHp;
+        this.engine.smallMonsterSwarm = this.monsterTier === 'small' && typeof HuntSmallMonsterSwarm !== 'undefined'
+            ? new HuntSmallMonsterSwarm(this.smallMonsterCount, baseHp)
+            : null;
         this.engine.battleTime = 0; // Reset countdown timer for each monster!
         this.engine.monsterAtb = 0;
         this.engine.monsterState = 'normal';
@@ -595,6 +736,7 @@ class HuntEffect extends BaseEffect {
         this.engine.monsterStunThreshold = baseStunThreshold;
         this.engine.monsterStunDuration = 0;
         this.engine.monsterKnockdownDuration = 0;
+        this.engine.monsterTrapUseCount = 0;
         this.engine.monsterKnockdownTriggered = { 80: false, 60: false, 40: false, 20: false };
 
         if (this.selectedMonster.id.includes('valstrax')) {
@@ -629,17 +771,19 @@ class HuntEffect extends BaseEffect {
         const habitatLabel = this.audioManager.getSelectedHabitatLabel();
         const habitatSuffix = habitatLabel ? ` · 🗺️ ${habitatLabel}` : '';
         const hpLabelText = `👾 [연속 ${actionLabel} ${this.currentConsecutiveIndex + 1}/${this.consecutiveTotal}] [${this.tierLabel}] ${this.selectedMonster.nameKO}${habitatSuffix} [체력]`;
-        const resumeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 180;
+        const resumeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 480;
         this.renderer.renderFight({
             hpLabelText,
             selectedMonster: this.selectedMonster,
             selectedWeapons: this.selectedWeapons,
             showMonsterHp: this.SHOW_MONSTER_HP,
-            timeLimit: resumeLimitVal
+            timeLimit: resumeLimitVal,
+            smallMonsterCount: this.smallMonsterCount
         });
 
         // Restore actual UI states for monster HP, timer, and hunter HP
         this.renderer.updateMonsterHpUI(this.engine.monsterHp, this.engine.monsterMaxHp);
+        if (this.engine.smallMonsterSwarm) this.renderer.updateSmallMonsterSwarmUI(this.engine.smallMonsterSwarm.snapshot());
         this.renderer.updateTimerUI(this.engine.getRemainingSeconds());
         this.selectedWeapons.forEach(w => this.renderer.updateHpUI(w));
         this.renderer.updateCartUI(this.engine.cartCount);
@@ -650,7 +794,7 @@ class HuntEffect extends BaseEffect {
         // Restart Tick loop (Process through HuntEngine)
         this.fightInterval = this.timers.interval(() => {
             if (this.phase !== 'fighting') return;
-            this.engine.processTick();
+            this.processFightTickSafely();
         }, 100);
     }
 

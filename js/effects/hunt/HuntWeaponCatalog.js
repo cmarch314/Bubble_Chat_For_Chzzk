@@ -11,7 +11,7 @@ class HuntWeaponCatalog {
                 { id: 'long_sword.thrust', name: '찌르기', dmg: 70, motionValue: 18, sourceGame: 'wilds' },
                 { id: 'long_sword.foresight', name: '간파베기', dmg: 110, motionValue: 28, tags: ['sever', 'counter', 'foresight'], next: ['long_sword.spirit_roundslash'], sourceGame: 'wilds' },
                 { id: 'long_sword.spirit_roundslash', name: '기인대회전베기', dmg: 240, motionValue: 60, effects: { spiritGain: 1 }, sourceGame: 'wilds' },
-                { id: 'long_sword.iai_spirit', name: '앉아발도기인베기', dmg: 360, motionValue: 90, requirements: { minSpirit: 1 }, tags: ['sever', 'counter'], sourceGame: 'wilds' }
+                { id: 'long_sword.iai_spirit', name: '거합베기', dmg: 360, motionValue: 90, requirements: { minSpirit: 1 }, tags: ['sever', 'counter'], next: ['long_sword.helm_breaker'], sourceGame: 'wilds' }
             ],
             sword_shield: [
                 { id: 'sword_shield.lateral_slash', name: '수평베기', dmg: 75, motionValue: 20, sourceGame: 'wilds' },
@@ -96,6 +96,13 @@ class HuntWeaponCatalog {
     }
 
     static timingFor(weaponId, action) {
+        if (Number(action.durationTicks) > 0) {
+            const durationTicks = Math.max(3, Number(action.durationTicks));
+            const windupTicks = Math.max(1, Number(action.windupTicks || Math.round(durationTicks * 0.32)));
+            const activeTicks = Math.max(1, Number(action.activeTicks || Math.round(durationTicks * 0.18)));
+            const recoveryTicks = Math.max(1, Number(action.recoveryTicks || durationTicks - windupTicks - activeTicks));
+            return { windupTicks, activeTicks, recoveryTicks, durationTicks };
+        }
         const name = action.name || '';
         const heavy = /참모아|초고출력|고출력|용격포|투구깨기|난무|용의 화살|기관용탄 난사|회전 회오리/.test(name);
         const quick = /발차기|병충전|진액 추출|귀인화|가드 대시|기폭용탄 설치/.test(name);
@@ -124,8 +131,18 @@ class HuntWeaponCatalog {
 
     static audioFor(weaponId, action) {
         const tags = HuntWeaponCatalog.tagsFor(weaponId, action);
-        if (weaponId === 'bow' && /용의 화살/.test(action.name || '')) return 'dragon_piercer';
-        if (/용격|초고출력|풀버스트/.test(action.name || '')) return 'explosive_heavy';
+        const name = action.name || '';
+        if (weaponId === 'great_sword' && /참모아/.test(name)) return 'true_charged_slash';
+        if (weaponId === 'sword_shield' && /모아베기/.test(name)) return 'charged_slash';
+        if (weaponId === 'long_sword' && /간파/.test(name)) return 'counter';
+        if (weaponId === 'hammer' && /모아|차지/.test(name)) {
+            return Number(action.dmg || 0) >= 300 ? 'charged_swing_heavy' : 'charged_swing_light';
+        }
+        if (weaponId === 'switch_axe' && /속성해방/.test(name)) return 'explosive_heavy';
+        if (weaponId === 'switch_axe' && /검|비천/.test(name)) return 'sword_slash';
+        if (weaponId === 'insect_glaive' && /진액 추출/.test(name)) return 'kinsect_extract';
+        if (weaponId === 'bow' && /용의 화살/.test(name)) return 'dragon_piercer';
+        if (/용격|초고출력|풀버스트/.test(name)) return 'explosive_heavy';
         if (tags.includes('ranged')) return weaponId === 'bow' ? 'bow_shot' : 'bowgun_shot';
         if (tags.includes('blunt')) return Number(action.dmg || 0) >= 300 ? 'blunt_heavy' : 'blunt_light';
         if (tags.includes('transform')) return 'mechanical_transform';
@@ -137,20 +154,41 @@ class HuntWeaponCatalog {
         const supplemental = HuntWeaponCatalog.supplementalActions();
         const weaponIds = new Set([...Object.keys(comboList), ...Object.keys(supplemental)]);
         weaponIds.forEach(weaponId => {
-            const base = comboList[weaponId] || [];
+            const canonical = typeof HuntWeaponMechanics !== 'undefined'
+                ? HuntWeaponMechanics.actionsFor(weaponId)
+                : null;
+            const base = canonical || comboList[weaponId] || [];
             const existingNames = new Set(base.map(action => action.name));
-            const actions = [...base, ...(supplemental[weaponId] || []).filter(action => !existingNames.has(action.name))];
+            const actions = canonical
+                ? base
+                : [...base, ...(supplemental[weaponId] || []).filter(action => !existingNames.has(action.name))];
             catalog[weaponId] = actions.map((action, index) => {
-                const timing = HuntWeaponCatalog.timingFor(weaponId, action);
-                return {
+                const identified = {
                     ...action,
-                    id: action.id || `${weaponId}.${index}.${HuntWeaponCatalog.slug(action.name)}`,
-                    motionValue: Number(action.motionValue || action.dmg || 0),
-                    hits: Array.isArray(action.hits) ? action.hits : [100],
-                    tags: action.tags || HuntWeaponCatalog.tagsFor(weaponId, action),
-                    audioCue: action.audioCue || HuntWeaponCatalog.audioFor(weaponId, action),
-                    sourceGame: action.sourceGame || 'mixed_reference',
-                    confidence: action.confidence || (action.sourceUrl ? 'reference-derived' : action.sourceGame ? 'approximate' : 'legacy-unverified'),
+                    id: action.id || `${weaponId}.${index}.${HuntWeaponCatalog.slug(action.name)}`
+                };
+                const enriched = typeof HuntMotionValueCatalog !== 'undefined'
+                    ? HuntMotionValueCatalog.enrich(weaponId, identified)
+                    : identified;
+                const fallbackTiming = HuntWeaponCatalog.timingFor(weaponId, enriched);
+                const timing = typeof HuntMotionValueCatalog !== 'undefined'
+                    ? HuntMotionValueCatalog.timingFor(weaponId, enriched, fallbackTiming)
+                    : { ...fallbackTiming, atbOccupancyTicks: fallbackTiming.durationTicks, timingEvidence: 'estimated' };
+                const verifiedLink = typeof HUNT_WILDS_COMBO_LINKS !== 'undefined'
+                    ? HUNT_WILDS_COMBO_LINKS.weapons?.[weaponId]?.[identified.id]
+                    : null;
+                const verifiedNext = Array.isArray(verifiedLink?.next) ? verifiedLink.next : [];
+                return {
+                    ...enriched,
+                    gameActionClass: verifiedLink?.gameActionClass || enriched.gameActionClass || null,
+                    next: [...new Set([...(enriched.next || []), ...verifiedNext])],
+                    comboEvidence: verifiedLink?.evidence || enriched.comboEvidence || 'unverified-runtime-order',
+                    motionValue: Number(enriched.motionValue || enriched.dmg || 0),
+                    hits: Array.isArray(enriched.hits) ? enriched.hits : [100],
+                    tags: enriched.tags || HuntWeaponCatalog.tagsFor(weaponId, enriched),
+                    audioCue: enriched.audioCue || HuntWeaponCatalog.audioFor(weaponId, enriched),
+                    sourceGame: enriched.sourceGame || 'mixed_reference',
+                    confidence: enriched.confidence || (enriched.sourceUrl ? 'reference-derived' : enriched.sourceGame ? 'approximate' : 'legacy-unverified'),
                     ...timing
                 };
             });

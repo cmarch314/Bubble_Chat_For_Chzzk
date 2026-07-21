@@ -192,6 +192,11 @@ function readNumericOption(args, name) {
 
 function bindToParentProcess(server, parentPid, intervalMs = 5000) {
     if (!parentPid) return null;
+    // On Windows, process.kill(pid, 0) can report a false negative for OBS
+    // depending on how OBS and the hidden child were launched. The Lua owner
+    // already calls the controller's stop action on script/OBS unload, so a
+    // second watchdog here must not tear down a healthy overlay server.
+    if (process.platform === 'win32') return null;
     const monitor = setInterval(() => {
         try {
             process.kill(parentPid, 0);
