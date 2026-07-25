@@ -1491,29 +1491,36 @@ window.HIVE_SFX_RENAMES = ${JSON.stringify(sfxRenames, null, 4)};`;
             }
         }
 
+        function buildSafeFileOpsCommand() {
+            const operations = {
+                deletePaths: excludedSfx.map(relativePath => `SFX/${relativePath}`),
+                renames: renameQueue.map(operation => ({
+                    oldPath: `SFX/${operation.oldPath}`,
+                    newPath: `SFX/${operation.newPath}`
+                }))
+            };
+            const bytes = new TextEncoder().encode(JSON.stringify(operations));
+            let binary = '';
+            bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+            const payload = btoa(binary);
+            const program = [
+                "const fs=require('fs'),path=require('path')",
+                `const ops=JSON.parse(Buffer.from('${payload}','base64').toString('utf8'))`,
+                "const root=fs.realpathSync.native(path.resolve('SFX'))",
+                "const safe=p=>{const target=path.resolve(p),parent=fs.realpathSync.native(path.dirname(target));if(parent!==root&&!parent.startsWith(root+path.sep))throw new Error('Refusing path outside SFX');return target}",
+                "for(const p of ops.deletePaths){const target=safe(p);if(fs.existsSync(target))fs.unlinkSync(target)}",
+                "for(const op of ops.renames){const from=safe(op.oldPath),to=safe(op.newPath);if(fs.existsSync(from))fs.renameSync(from,to)}",
+                "console.log('Successfully applied file operations.')",
+                "require('./scripts/generate_sfx_catalog.js')"
+            ].join(';');
+            return `node -e "${program}"`;
+        }
+
         function copyDeleteCommand() {
             const totalOps = excludedSfx.length + renameQueue.length;
             if (totalOps === 0) return;
             
-            let cmdParts = [];
-            
-            if (excludedSfx.length > 0) {
-                const deletePaths = excludedSfx.map(p => `SFX/${p}`);
-                cmdParts.push(`${JSON.stringify(deletePaths)}.forEach(f => fs.existsSync(f) && fs.unlinkSync(f));`);
-            }
-            
-            if (renameQueue.length > 0) {
-                renameQueue.forEach(op => {
-                    cmdParts.push(`fs.existsSync('SFX/${op.oldPath}') && fs.renameSync('SFX/${op.oldPath}', 'SFX/${op.newPath}');`);
-                });
-            }
-            
-            // Clean up excludedSfx list after deletion
-            if (excludedSfx.length > 0) {
-                cmdParts.push(`console.log('Clearing web exclusion list...');`);
-            }
-            
-            const cmd = `node -e "const fs=require('fs'); ${cmdParts.join(' ')} console.log('Successfully applied file operations.'); require('./scripts/generate_sfx_catalog.js');"`;
+            const cmd = buildSafeFileOpsCommand();
             
             navigator.clipboard.writeText(cmd).then(() => {
                 alert("이름 변경 및 디스크 완전 삭제 명령어가 클립보드에 복사되었습니다!\n\n터미널(Terminal/PowerShell)에 붙여넣고 엔터를 치면 즉시 적용됩니다.");
@@ -1537,34 +1544,9 @@ window.HIVE_SFX_RENAMES = ${JSON.stringify(sfxRenames, null, 4)};`;
                 ""
             ];
             
-            if (excludedSfx.length > 0) {
-                lines.push("echo Deleting excluded files from disk...");
-                excludedSfx.forEach(p => {
-                    const winPath = `SFX\\${p.replace(/\//g, '\\')}`;
-                    lines.push(`if exist "${winPath}" (`);
-                    lines.push(`  del /f /q "${winPath}"`);
-                    lines.push(`  echo Deleted: ${winPath}`);
-                    lines.push(`)`);
-                });
-                lines.push("");
-            }
+            lines.push(buildSafeFileOpsCommand());
+            lines.push("");
             
-            if (renameQueue.length > 0) {
-                lines.push("echo Renaming files...");
-                renameQueue.forEach(op => {
-                    const oldWinPath = `SFX\\${op.oldPath.replace(/\//g, '\\')}`;
-                    const newWinPath = `SFX\\${op.newPath.replace(/\//g, '\\')}`;
-                    lines.push(`if exist "${oldWinPath}" (`);
-                    lines.push(`  move /y "${oldWinPath}" "${newWinPath}"`);
-                    lines.push(`  echo Renamed: ${oldWinPath} to ${newWinPath}`);
-                    lines.push(`)`);
-                });
-                lines.push("");
-            }
-            
-            lines.push("echo.");
-            lines.push("echo Rebuilding catalog...");
-            lines.push("node scripts/generate_sfx_catalog.js");
             lines.push("echo.");
             lines.push("echo Operations complete. This script will now self-destruct.");
             lines.push("pause");

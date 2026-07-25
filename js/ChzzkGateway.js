@@ -451,47 +451,25 @@ class ChzzkGateway {
     _transportCandidates(targetUrl) {
         return [
             { id: 'companion', run: () => this._fetchCompanion(targetUrl) },
-            { id: 'direct', run: () => this._fetchDirect(targetUrl) },
-            { id: 'allorigins', run: () => this._fetchAllOrigins(targetUrl) },
-            { id: 'cors-lol', run: () => this._fetchStandardProxy('https://api.cors.lol/?url=', targetUrl, true) },
-            { id: 'corsfix', run: () => this._fetchStandardProxy('https://proxy.corsfix.com/', targetUrl, false) },
-            { id: 'thingproxy', run: () => this._fetchStandardProxy('https://thingproxy.freeboard.io/fetch/', targetUrl, false) },
-            { id: 'corsproxy-io', run: () => this._fetchStandardProxy('https://corsproxy.io/?', targetUrl, true) },
-            { id: 'codetabs', run: () => this._fetchStandardProxy('https://api.codetabs.com/v1/proxy?quest=', targetUrl, true) }
+            { id: 'direct', run: () => this._fetchDirect(targetUrl) }
         ];
     }
 
     async _fetchWithProxy(url) {
         const targetUrl = this._prepareUrl(url);
         const candidates = this._transportCandidates(targetUrl);
-
-        if (this.preferredTransport) {
-            const preferred = candidates.find(candidate => candidate.id === this.preferredTransport);
-            if (preferred) {
-                try {
-                    return await preferred.run();
-                } catch (error) {
-                    this.config.log(`Preferred transport ${preferred.id} failed: ${error.message}`);
-                    this.preferredTransport = null;
-                }
+        let lastError = null;
+        for (const candidate of candidates) {
+            try {
+                const data = await candidate.run();
+                this.preferredTransport = candidate.id;
+                return data;
+            } catch (error) {
+                lastError = error;
+                this.config.log(`Transport ${candidate.id} failed: ${error.message}`);
             }
         }
-
-        const primary = candidates.slice(0, 4);
-        try {
-            return await this._raceTransports(primary);
-        } catch (primaryError) {
-            return this._raceTransports(candidates.slice(4));
-        }
-    }
-
-    async _raceTransports(candidates) {
-        const result = await Promise.any(candidates.map(async candidate => ({
-            id: candidate.id,
-            data: await candidate.run()
-        })));
-        this.preferredTransport = result.id;
-        return result.data;
+        throw lastError || new Error('No Chzzk transport is available');
     }
 
     async _fetchDirect(targetUrl) {
@@ -500,29 +478,15 @@ class ChzzkGateway {
     }
 
     async _fetchCompanion(targetUrl) {
+        const companionUrl = typeof LocalCompanionEndpoint !== 'undefined'
+            ? LocalCompanionEndpoint.url('/api/chzzk', { url: targetUrl })
+            : `http://127.0.0.1:17890/api/chzzk?url=${encodeURIComponent(targetUrl)}`;
         const response = await this._fetchWithTimeout(
-            `http://127.0.0.1:17890/api/chzzk?url=${encodeURIComponent(targetUrl)}`,
+            companionUrl,
             {},
             2500
         );
         return this._parseApiResponse(response, 'Local companion');
-    }
-
-    async _fetchAllOrigins(targetUrl) {
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-        const response = await this._fetchWithTimeout(proxyUrl);
-        if (!response.ok) throw new Error(`AllOrigins HTTP ${response.status}`);
-        const wrapper = await response.json();
-        if (!wrapper?.contents) throw new Error('AllOrigins returned no content');
-        const data = JSON.parse(wrapper.contents);
-        this._validateApiData(data, 'AllOrigins');
-        return data;
-    }
-
-    async _fetchStandardProxy(prefix, targetUrl, encode = true) {
-        const fullUrl = prefix + (encode ? encodeURIComponent(targetUrl) : targetUrl);
-        const response = await this._fetchWithTimeout(fullUrl);
-        return this._parseApiResponse(response, prefix);
     }
 
     async _parseApiResponse(response, source) {

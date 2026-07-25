@@ -58,6 +58,7 @@ const timers = {
 };
 
 const sourcePath = path.resolve(__dirname, '../js/ChzzkGateway.js');
+const companionEndpointPath = path.resolve(__dirname, '../js/runtime/LocalCompanionEndpoint.js');
 const context = vm.createContext({
     console,
     WebSocket: FakeWebSocket,
@@ -74,7 +75,7 @@ const context = vm.createContext({
     document: { getElementById: () => null },
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} }
 });
-const source = `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.ChzzkGateway = ChzzkGateway;`;
+const source = `${fs.readFileSync(companionEndpointPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.ChzzkGateway = ChzzkGateway;`;
 vm.runInContext(source, context, { filename: sourcePath });
 
 const states = [];
@@ -91,6 +92,12 @@ const config = {
 };
 const gateway = new context.ChzzkGateway(config, eventBus, null, timers);
 assert.strictEqual(gateway._transportCandidates('https://example.invalid')[0].id, 'companion');
+assert.deepStrictEqual(
+    Array.from(gateway._transportCandidates('https://example.invalid'), candidate => candidate.id),
+    ['companion', 'direct'],
+    'chat credentials must never transit public CORS proxies'
+);
+assert.doesNotMatch(source, /allorigins|cors\.lol|corsfix|thingproxy|corsproxy|codetabs/i);
 
 gateway._connectSocket('chat-1', 'token-1');
 const first = sockets[0];

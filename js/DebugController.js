@@ -15,7 +15,8 @@ class DebugController {
 
         // URL 파라미터를 통해 직접 구동 여부 판단
         const urlParams = new URLSearchParams(window.location.search);
-        this.debugMode = urlParams.has('debug');
+        const debugEnabledByHost = globalThis.BUBBLECHAT_ENABLE_DEBUG === true;
+        this.debugMode = debugEnabledByHost && urlParams.has('debug');
 
         if (this.debugMode) {
             console.warn("🛠️ [DebugController] Debug Mode ON. Exposing global test methods.");
