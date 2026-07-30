@@ -34,13 +34,23 @@ all.filter(perk => perk.name !== '빈 수첩' && Object.keys(perk.modifiers).len
 for (let seed = 1; seed <= 100; seed++) {
     const rng = new HuntSeededRandom(seed);
     const rolled = HuntPerkCatalog.roll(() => rng.next());
-    assert.ok(rolled.length >= 0 && rolled.length <= 5);
+    assert.ok(rolled.length >= 0 && rolled.length <= 4);
     assert.strictEqual(new Set(rolled.map(perk => perk.id)).size, rolled.length);
 }
 const emptyLoadoutRoll = HuntPerkCatalog.roll(() => 0);
 assert.deepStrictEqual(emptyLoadoutRoll, [], 'empty rolls must stay hidden until the battle-start manifestation check');
-const dung = all.find(perk => perk.name === '똥');
-assert.ok(dung.modifiers.attackRate > 1 && dung.modifiers.atbRate > 1
-    && dung.modifiers.evadeChance > 0 && dung.modifiers.guardChance > 0 && dung.modifiers.healBias > 0,
-    'Dung must boost every core action and probability family instead of being cosmetic');
+const dung = all.find(perk => perk.name === '💩');
+assert.strictEqual(dung.id, HuntPerkCatalog.DUNG_PERK_ID);
+assert.strictEqual(dung.description, '아들아... 네가 태어나던 날, 온 세상이 코를...');
+assert.deepStrictEqual(dung.modifiers, {
+    hitChance: 0.09,
+    critChance: 0.60,
+    evadeChance: 0.35,
+    guardChance: 0.35,
+    counterChance: 0.25
+}, 'Dung must dramatically boost probability rolls without changing ATB, damage, recovery, or action duration');
+const dungAggregate = HuntPerkCatalog.aggregate([dung]);
+assert.strictEqual(dungAggregate.atbRate, 1, 'Dung must leave ATB recovery exactly unchanged');
+assert.strictEqual(dungAggregate.attackRate, 1, 'Dung must leave fixed attack power exactly unchanged');
+assert.strictEqual(dungAggregate.healBias, 0, 'Dung must leave fixed healing behavior exactly unchanged');
 console.log('[test] Hunt 141-perk random assignment and empty-roll jackpot contract passed.');

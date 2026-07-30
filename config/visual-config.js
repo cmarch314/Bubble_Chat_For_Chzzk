@@ -66,6 +66,7 @@ window.HIVE_VISUAL_CONFIG = window.HIVE_VISUAL_CONFIG || {
     "dolphin": {
         "duration": 7000,
         "soundKey": "돌핀",
+        "preloadAudio": true,
         "dolphinDelay": 1400,
         "surferStartOffset": 1000,
         "creatureCount": 30,

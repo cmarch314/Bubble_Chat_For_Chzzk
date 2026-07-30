@@ -15,7 +15,8 @@ const inputs = {
     itemActions: path.join(root, 'game_extracts', 'tools', 'wilds-item-actions.json'),
     itemParameters: path.join(root, 'game_extracts', 'tools', 'wilds-item-parameters.json'),
     monsterPatterns: path.join(root, 'game_extracts', 'tools', 'wilds-monster-patterns.json'),
-    monsterAudioTriggers: path.join(root, 'game_extracts', 'tools', 'wilds-monster-audio-triggers.json')
+    monsterAudioTriggers: path.join(root, 'game_extracts', 'tools', 'wilds-monster-audio-triggers.json'),
+    weaponAudioEvents: path.join(root, 'game_extracts', 'tools', 'wilds-weapon-audio-events.json')
 };
 inputs.enemyRcol = path.join(root, 'game_extracts', 'tools', 'mhws-rcol-record', 'Enemy');
 inputs.monsterIdentifiers = path.join(root, 'game_extracts', 'tools', 'wilds-monster-identifiers.json');
@@ -66,6 +67,7 @@ function buildDatabase(destination = outputPath) {
     const itemParameters = load(inputs.itemParameters);
     const monsterPatterns = load(inputs.monsterPatterns);
     const monsterAudioTriggers = load(inputs.monsterAudioTriggers);
+    const weaponAudioEvents = load(inputs.weaponAudioEvents);
     const monsterIdentifiers = load(inputs.monsterIdentifiers);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     const temporary = `${destination}.tmp`;
@@ -164,6 +166,15 @@ function buildDatabase(destination = outputPath) {
         );
         CREATE INDEX idx_monster_audio_event ON monster_audio_triggers(monster_code, event_id);
         CREATE INDEX idx_monster_audio_action ON monster_audio_triggers(action_family, monster_code);
+        CREATE TABLE weapon_audio_triggers (
+            weapon_id TEXT NOT NULL, role TEXT NOT NULL, trigger_id INTEGER NOT NULL,
+            event_id INTEGER NOT NULL, bank_reference TEXT, source_ids_json TEXT NOT NULL,
+            event_banks_json TEXT NOT NULL, hirc_nodes_json TEXT NOT NULL,
+            motion_contexts_json TEXT NOT NULL, evidence TEXT NOT NULL,
+            PRIMARY KEY(weapon_id, role, trigger_id, event_id)
+        );
+        CREATE INDEX idx_weapon_audio_event ON weapon_audio_triggers(weapon_id, event_id);
+        CREATE INDEX idx_weapon_audio_source ON weapon_audio_triggers(weapon_id, source_ids_json);
         CREATE TABLE monster_attack_colliders (
             monster_code TEXT NOT NULL, rsid INTEGER NOT NULL, rs_name TEXT, group_name TEXT,
             collision_name TEXT, damage_type TEXT, attack REAL, fixed_attack REAL,
@@ -186,7 +197,7 @@ function buildDatabase(destination = outputPath) {
     `);
 
     const meta = db.prepare('INSERT INTO metadata(key, value) VALUES (?, ?)');
-    meta.run('schema_version', '1');
+    meta.run('schema_version', '2');
     meta.run('built_at', new Date().toISOString());
     meta.run('game_reference_source', json(game.source));
     meta.run('rank_policy', game.rankPolicy);
@@ -256,6 +267,13 @@ function buildDatabase(destination = outputPath) {
         typeof row.bankReference === 'string' ? row.bankReference : json(row.bankReference),
         row.offsetJointHash ?? null, row.actionFamily || null, json(row.motionNames),
         row.semanticEvidence || row.motionEvidence || null, row.sourcePath
+    );
+    const addWeaponAudioTrigger = db.prepare('INSERT OR REPLACE INTO weapon_audio_triggers VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    for (const row of weaponAudioEvents?.triggerLinks || []) addWeaponAudioTrigger.run(
+        row.weaponId, row.role || 'unknown', row.triggerId, row.eventId,
+        typeof row.bankReference === 'string' ? row.bankReference : json(row.bankReference),
+        json(row.sourceIds || []), json(row.eventBanks || []), json(row.hircNodes || []),
+        json(row.motionContexts || []), row.evidence || 'installed-trigger+event'
     );
     const addCollider = db.prepare('INSERT OR IGNORE INTO monster_attack_colliders VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
     if (fs.existsSync(inputs.enemyRcol)) {

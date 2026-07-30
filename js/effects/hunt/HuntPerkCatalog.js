@@ -1,4 +1,12 @@
 class HuntPerkCatalog {
+    static MAX_PERKS = 4;
+    static DUNG_PERK_ID = 'perk_141';
+    static DUNG_PERK_NAME = '💩';
+
+    static isDung(perk) {
+        return perk?.id === this.DUNG_PERK_ID || perk?.name === this.DUNG_PERK_NAME || perk?.name === '똥';
+    }
+
     static get names() {
         return [
             '겁쟁이','앙심','토끼손','도전자','공격','방어','회피 거리 UP','회피 성능','가드 성능','가드 강화',
@@ -14,7 +22,7 @@ class HuntPerkCatalog {
             '선봉장','신중한 관찰자','유리 대포','돌다리 전문가','철벽주의','박자감각','성급한 손','숨 고르기','바람잡이','몸빵 담당',
             '고독한 사냥꾼','낙관주의','비관주의','생존 우선','공격 중독','재정비 전문가','날쌘 보급','묵직한 손','민첩한 발','위기관리반',
             '꼬리 사냥꾼','뿔 수집가','공중 추적자','넘어진 김에','막타 욕심','복수의 일격','불길한 예감','보급관','폭탄 배달부','응급 배급',
-            '수레 단골','오늘의 주인공','외로운 늑대','분위기 메이커','끝까지 함께','첫 수는 크게','지상주의자','부위 개척자','약점 집착','퇴근 본능','똥'
+            '수레 단골','오늘의 주인공','외로운 늑대','분위기 메이커','끝까지 함께','첫 수는 크게','지상주의자','부위 개척자','약점 집착','퇴근 본능','💩'
         ];
     }
 
@@ -30,19 +38,32 @@ class HuntPerkCatalog {
     }
 
     static roll(random = Math.random) {
-        const countTable = [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 5];
+        const countTable = [0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4];
         const count = countTable[Math.floor(random() * countTable.length)];
         if (count === 0) return [];
-        const pool = this.all().filter(perk => perk.name !== '빈 수첩' && perk.name !== '똥');
+        const pool = this.all().filter(perk => perk.name !== '빈 수첩' && !this.isDung(perk));
         for (let i = pool.length - 1; i > 0; i--) {
             const j = Math.floor(random() * (i + 1));
             [pool[i], pool[j]] = [pool[j], pool[i]];
         }
-        return pool.slice(0, count);
+        return pool.slice(0, Math.min(count, this.MAX_PERKS));
     }
 
     static aggregate(perks = []) {
-        const total = { attackRate: 1, atbRate: 1, evadeChance: 0, evadePower: 0, guardChance: 0, guardPower: 0, healBias: 0, lowHpAttack: 1, enragedAttack: 1 };
+        const total = {
+            attackRate: 1,
+            atbRate: 1,
+            hitChance: 0,
+            critChance: 0,
+            evadeChance: 0,
+            evadePower: 0,
+            guardChance: 0,
+            guardPower: 0,
+            counterChance: 0,
+            healBias: 0,
+            lowHpAttack: 1,
+            enragedAttack: 1
+        };
         perks.forEach(perk => {
             const modifiers = perk && perk.modifiers ? perk.modifiers : {};
             Object.entries(modifiers).forEach(([key, value]) => {
@@ -83,7 +104,7 @@ class HuntPerkCatalog {
             '묵직한 손': { attackRate: 1.09, atbRate: 0.93 },
             '민첩한 발': { atbRate: 1.08, evadeChance: 0.06, attackRate: 0.97 },
             '위기관리반': { attackRate: 0.96, guardChance: 0.07, healBias: 0.09 },
-            '똥': { attackRate: 1.35, atbRate: 1.35, evadeChance: 0.25, evadePower: 0.20, guardChance: 0.25, guardPower: 0.20, healBias: 0.25 }
+            '💩': { hitChance: 0.09, critChance: 0.60, evadeChance: 0.35, guardChance: 0.35, counterChance: 0.25 }
         };
         return exact[name] || {};
     }
@@ -117,7 +138,7 @@ class HuntPerkCatalog {
             [['꼬리 사냥꾼','뿔 수집가','부위 개척자','약점 집착'], 'part-damage'],
             [['보급관','폭탄 배달부','응급 배급','분위기 메이커'], 'support-action'],
             [['오늘의 주인공'], 'targeting'],
-            [['똥'], 'quirk']
+            [['💩'], 'quirk']
         ];
         return groups.filter(([names]) => names.includes(name)).map(([, hook]) => hook);
     }
@@ -278,7 +299,7 @@ class HuntPerkCatalog {
             '부위 개척자': '아무도 치지 않은 곳에 첫 균열을 새긴다.',
             '약점 집착': '금이 간 곳은 결국 부서질 때까지 바라본다.',
             '퇴근 본능': '마감이 보이면 사람은 놀랍도록 강해진다.',
-            '똥': '비어 있던 운명이 황금빛으로 지독하게 폭주한다.'
+            '💩': '아들아... 네가 태어나던 날, 온 세상이 코를...'
         };
         return descriptions[name] || '길드의 기록에서 이 성정에 관한 장은 찢겨 나갔다.';
     }

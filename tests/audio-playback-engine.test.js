@@ -25,6 +25,23 @@ assert.doesNotMatch(engineSource, /\bthis\./, 'playback engine must receive mana
 assert.match(managerSource, /return AudioPlaybackEngine\.play\(this, input, options\)/);
 assert.doesNotMatch(managerSource, /createBufferSource\(|decodeAudioData\(/);
 
+const cappedManager = {
+    bufferCache: new Map(),
+    visualAudioPaths: new Set()
+};
+for (let index = 0; index < 100; index++) {
+    const key = `visual-${index}`;
+    cappedManager.bufferCache.set(key, { index });
+    cappedManager.visualAudioPaths.add(key);
+}
+context.AudioPlaybackEngine.trimBufferCache(cappedManager, 80);
+assert.strictEqual(cappedManager.bufferCache.size, 80,
+    'even protected visual clips must obey the decoded-buffer hard cap');
+assert.strictEqual(cappedManager.bufferCache.has('visual-0'), false,
+    'the hard-cap fallback must evict the oldest protected entry');
+assert.strictEqual(cappedManager.bufferCache.has('visual-99'), true,
+    'the newest protected entry should survive LRU trimming');
+
 (async () => {
     assert.strictEqual(await context.AudioPlaybackEngine.play(manager, 'not-an-audio-command'), undefined);
     manager.enabled = false;

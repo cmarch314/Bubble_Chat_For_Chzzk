@@ -21,10 +21,12 @@ class HuntAudioManager {
         this.hunterVoiceProfiles = new Map();
         this.hunterVoiceCooldowns = new Map();
         this.hunterVoiceRecentPaths = new Map();
+        this.whetstoneCueGenerations = new Map();
         this.hunterVoiceRoster = [];
         this.voiceProfileCatalog = [];
         this.cmcVoiceProfile = null;
         this.lastCharacterDialogueAt = 0;
+        this.activeTransientAudios = new Set();
         // CMC is a chat catalog feature and must remain available even when a
         // private extracted game manifest is absent or still loading.
         this.buildHunterVoiceProfileCatalog();
@@ -32,8 +34,15 @@ class HuntAudioManager {
     }
 
     async loadLocalAudioManifest() {
-        const embeddedLibraries = globalThis.HUNT_LOCAL_AUDIO_MANIFESTS
+        let embeddedLibraries = globalThis.HUNT_LOCAL_AUDIO_MANIFESTS
             || (typeof window !== 'undefined' && window.HUNT_LOCAL_AUDIO_MANIFESTS);
+        if (!embeddedLibraries
+            && typeof HuntRuntimeLoader !== 'undefined'
+            && typeof HuntRuntimeLoader.loadAudioCatalog === 'function') {
+            await HuntRuntimeLoader.loadAudioCatalog();
+            embeddedLibraries = globalThis.HUNT_LOCAL_AUDIO_MANIFESTS
+                || (typeof window !== 'undefined' && window.HUNT_LOCAL_AUDIO_MANIFESTS);
+        }
         if (embeddedLibraries && typeof embeddedLibraries === 'object') {
             const libraries = this.localAudioGamePriority
                 .map(game => embeddedLibraries[game] ? { game, manifest: embeddedLibraries[game] } : null)
@@ -64,7 +73,10 @@ class HuntAudioManager {
     installLocalAudioLibraries(libraries, source = 'catalog') {
         this.localAudioGain = Math.max(...libraries.map(item => Number(item.manifest.defaultGain || 0.8)));
         this.localAudioEntries = libraries.flatMap(({ game, manifest }) =>
-            (Array.isArray(manifest.entries) ? manifest.entries : []).map(entry => ({ ...entry, game: entry.game || game }))
+            (Array.isArray(manifest.entries) ? manifest.entries : []).map(entry => {
+                if (!entry.game && Object.isExtensible(entry)) entry.game = game;
+                return entry.game ? entry : { ...entry, game };
+            })
         );
         this.localAudioByCategory.clear();
         this.localAudioEntries.forEach(entry => {
@@ -458,6 +470,53 @@ class HuntAudioManager {
         return this.playVerifiedLayers(variants[Math.floor(Math.random() * variants.length)]);
     }
 
+    playItemSurrogateCue(cue) {
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const variants = globalScope.HUNT_LOCAL_ITEM_SURROGATE_CUES?.[cue];
+        if (!Array.isArray(variants) || !variants.length) return false;
+        return this.playVerifiedLayers(variants[Math.floor(Math.random() * variants.length)]);
+    }
+
+    playWhetstoneCue(context = {}) {
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const variants = globalScope.HUNT_VERIFIED_LOCAL_ITEM_CUES?.whetstone_stroke;
+        if (!Array.isArray(variants) || !variants.length) return false;
+        const variant = variants[Math.floor(Math.random() * variants.length)];
+        const layers = Array.isArray(variant?.layers) ? variant.layers : [];
+        if (!layers.length) return false;
+
+        // Combat ticks run at 100 ms. Fit the three confirmed sharpening strokes
+        // across the actual item lock. The separate completion glint is fired by
+        // HuntBattleTickExecutor only after sharpness is successfully restored.
+        const strokeDurationMs = 544;
+        const durationMs = Math.max(strokeDurationMs, Number(context.durationTicks || 30) * 100);
+        const cadenceWindowMs = Math.max(0, durationMs - strokeDurationMs);
+        const hunterKey = String(context.hunterIndex ?? 'global');
+        const generation = Number(this.whetstoneCueGenerations.get(hunterKey) || 0) + 1;
+        this.whetstoneCueGenerations.set(hunterKey, generation);
+        let scheduled = false;
+        layers.forEach(([path, volume = 0.85], index) => {
+            if (!path) return;
+            const delayMs = layers.length > 1
+                ? Math.round(cadenceWindowMs * index / (layers.length - 1))
+                : 0;
+            const play = () => {
+                if (this.whetstoneCueGenerations.get(hunterKey) !== generation) return;
+                this.playLocalEntry({ path }, { volume });
+            };
+            if (delayMs > 0) this.timers.timeout(play, delayMs);
+            else play();
+            scheduled = true;
+        });
+        return scheduled;
+    }
+
+    cancelWhetstoneCue(hunterIndex) {
+        const hunterKey = String(hunterIndex ?? 'global');
+        const generation = Number(this.whetstoneCueGenerations.get(hunterKey) || 0) + 1;
+        this.whetstoneCueGenerations.set(hunterKey, generation);
+    }
+
     playVerifiedHitCue(cueKey) {
         const globalScope = typeof window !== 'undefined' ? window : globalThis;
         const variants = globalScope.HUNT_VERIFIED_HIT_CUES?.[cueKey];
@@ -490,8 +549,15 @@ class HuntAudioManager {
         const routedMonsterId = normalizedKind === 'roar' ? roarRoutes[monsterId] : null;
         const routeKeys = [`${monsterId}:${normalizedKind}`];
         if (routedMonsterId && routedMonsterId !== monsterId) routeKeys.push(`${routedMonsterId}:${normalizedKind}`);
-        if (normalizedKind !== 'roar' && normalizedKind !== 'attack') routeKeys.push(`${monsterId}:attack`);
-        const variants = routeKeys.flatMap(key => Array.isArray(catalog[key]) ? catalog[key] : []);
+        let variants = routeKeys.flatMap(key => Array.isArray(catalog[key]) ? catalog[key] : []);
+        // Exact semantic routes win as a set. Mixing the broad attack pool into
+        // an existing telegraph/reaction route made confirmed release voices
+        // randomly lose to generic aerial or body sounds.
+        if (!variants.length && normalizedKind !== 'roar' && normalizedKind !== 'attack') {
+            variants = Array.isArray(catalog[`${monsterId}:attack`])
+                ? catalog[`${monsterId}:attack`]
+                : [];
+        }
         if (!variants.length) return null;
         const patternText = [options.patternId, options.patternName, options.patternType, normalizedKind]
             .filter(Boolean)
@@ -511,6 +577,16 @@ class HuntAudioManager {
         // sounds like unrelated ambience under the roar and can linger after it.
         if (String(kind).toLowerCase() === 'roar' && Array.isArray(variant?.layers)) {
             return this.playVerifiedLayers({ ...variant, layers: variant.layers.slice(0, 1) });
+        }
+        if (String(kind).toLowerCase() === 'telegraph'
+            && Array.isArray(variant?.layers)
+            && Array.isArray(variant.telegraphReleaseLayerIndices)) {
+            const telegraphMs = Math.max(100, Number(options.durationTicks || 1) * 100);
+            const releaseAt = Math.max(0, telegraphMs - Number(variant.telegraphReleaseLeadMs || 150));
+            const releaseIndices = new Set(variant.telegraphReleaseLayerIndices.map(Number));
+            const layers = variant.layers.map((layer, index) =>
+                releaseIndices.has(index) ? [layer[0], layer[1], releaseAt] : layer);
+            return this.playVerifiedLayers({ ...variant, layers });
         }
         return this.playVerifiedLayers(variant);
     }
@@ -598,22 +674,82 @@ class HuntAudioManager {
         return family ? routes[family] : null;
     }
 
+    normalizedMonsterAudioKind(kind) {
+        const normalized = String(kind || 'attack').toLowerCase();
+        return new Set([
+            'attack', 'roar', 'telegraph', 'death', 'flinch',
+            'knockdown', 'trap', 'ultimate', 'burrow'
+        ]).has(normalized) ? normalized : 'attack';
+    }
+
+    monsterSeFallbackTag(kind, options = {}) {
+        if (this.normalizedMonsterAudioKind(kind) !== 'attack') return null;
+        const text = [
+            options.patternId,
+            options.patternName,
+            options.patternType,
+            kind
+        ].filter(Boolean).join(' ').toLowerCase();
+        if (/(?:air|aerial|flight|fly|glide|wing|비행|날개|활공)/.test(text)) return 'wing_flap';
+        if (/(?:breath|fireball|projectile|laser|beam|gas|tornado|thunder|element|브레스|화염|투사체|가스|회오리|번개)/.test(text)) {
+            return null;
+        }
+        if (/(?:impact|hit|slam|stomp|charge|rush|tackle|tail|bite|claw|kick|sweep|physical|body|돌진|충돌|내려찍|몸통|박치기|꼬리|깨물|발톱|후려|휘두)/.test(text)) {
+            return 'physical_impact';
+        }
+        return 'physical_attack';
+    }
+
+    playGenericMonsterSeFallback(kind, options = {}) {
+        const tag = this.monsterSeFallbackTag(kind, options);
+        if (!tag) return false;
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const variants = globalScope.HUNT_VERIFIED_GENERIC_MONSTER_SE_CUES?.[tag];
+        if (!Array.isArray(variants) || !variants.length) return false;
+        const selected = variants[Math.floor(Math.random() * variants.length)];
+        if ((selected.layers || []).some(([audioPath]) => String(audioPath).includes('_vo_'))) return false;
+        return this.playVerifiedLayers(selected);
+    }
+
     playMonsterAction(monster, kind = 'attack', options = {}) {
-        if (this.playVerifiedMonsterCue(monster, kind, options)) return true;
-        if (String(kind).toLowerCase() === 'roar') return false;
+        const actionKind = this.normalizedMonsterAudioKind(kind);
         const monsterId = monster && monster.id ? monster.id : monster;
-        const group = this.monsterGroup(monsterId);
+        const normalizedMonsterId = String(monsterId || '').toLowerCase().replace(/[-']/g, '_');
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const silentVoiceIds = new Set(globalScope.HUNT_WORLD_MONSTER_SILENT_VOICE_IDS || []);
+        const routedVoiceId = (globalScope.HUNT_ROAR_ROUTE || {})[normalizedMonsterId] || normalizedMonsterId;
+        if (silentVoiceIds.has(normalizedMonsterId) || silentVoiceIds.has(routedVoiceId)) {
+            if (['roar', 'telegraph', 'death', 'flinch', 'knockdown', 'trap'].includes(actionKind)) return false;
+        }
+        if (actionKind === 'roar'
+            && monster && typeof monster === 'object'
+            && monster.roar?.status
+            && monster.roar.status !== 'verified-present') return false;
+        if (this.playVerifiedMonsterCue(monster, actionKind, options)) return true;
+        if (this.playGenericMonsterSeFallback(actionKind, options)) return true;
+        if (['telegraph', 'death', 'flinch', 'knockdown', 'trap'].includes(actionKind)) {
+            // These semantic moments are VO-sensitive. Silence is safer than
+            // substituting an arbitrary same-bank pain, idle, death, or roar clip.
+            return false;
+        }
+        const routedMonsterId = actionKind === 'roar'
+            ? ((globalScope.HUNT_ROAR_ROUTE || {})[String(monsterId || '').replace(/[-']/g, '_')] || monsterId)
+            : monsterId;
+        const group = this.monsterGroup(routedMonsterId);
         if (!group) return false;
-        // An unlabeled VO clip could be pain, idle, death, or a roar and is never
-        // safe. A same-monster SE bank is allowed only as a generic body/action
-        // layer; it is not presented as an exact move match.
-        return this.playLocalAudio('monster', {
-            monsterIds: [group],
-            sourceIncludes: `${group.split('_')[0]}_se`,
-            bankEvidenceOnly: true,
-            preferGames: ['world', 'rise'],
-            volume: 0.62
-        });
+        if (actionKind === 'roar') {
+            return this.playLocalAudio('monster', {
+                monsterIds: [group],
+                actionFamilies: ['monster_roar'],
+                semanticOnly: true,
+                preferGames: ['world'],
+                volume: 0.78
+            });
+        }
+        // Do not replace an unresolved semantic slot with an arbitrary same-bank
+        // clip. Only the audition-confirmed generic SE families above may cross
+        // species; creature voices never do.
+        return false;
     }
 
     playHunterVoice(options = {}) {
@@ -670,6 +806,7 @@ class HuntAudioManager {
         if (name.includes('벨카나') || name.includes('velkhana')) return 'BGM/MHW_Velkhana.mp3';
         if (name.includes('네르기간테') || name.includes('nergigante')) return 'BGM/MHW_Nergigante.mp3';
         if (name.includes('이블조') || name.includes('deviljho')) return 'BGM/MHW_Deviljho.mp3';
+        if (name.includes('바젤') || name.includes('bazelgeuse')) return 'BGM/MHW_Bazelgeuse.mp3';
         if (name.includes('티가렉스') || name.includes('tigrex')) return 'BGM/MHW_Tigrex.mp3';
         if (name.includes('나르가') || name.includes('nargacuga')) return 'BGM/MHW_Nargacuga.mp3';
         if (name.includes('디노발드') || name.includes('glavenus')) return 'BGM/MHW_Glavenus.mp3';
@@ -749,6 +886,15 @@ class HuntAudioManager {
             this.playMonsterAction(context.monsterId, context.patternType || 'attack', context);
             return;
         }
+        if (fileName === 'monster_telegraph') {
+            this.playMonsterAction(context.monsterId, 'telegraph', context);
+            return;
+        }
+        if (fileName === 'monster_death' || fileName === 'monster_knockdown'
+            || fileName === 'monster_trap' || fileName === 'monster_flinch') {
+            this.playMonsterAction(context.monsterId, fileName.replace('monster_', ''), context);
+            return;
+        }
         if (fileName === 'dragon_piercer') {
             this.playWeaponAction('bow', 'dragon_piercer', context);
             this.playHunterActionVoice(context.hunterIndex, 'attack_heavy', { chance: 0.5, volume: 0.58 });
@@ -759,20 +905,45 @@ class HuntAudioManager {
             this.playHunterActionVoice(context.hunterIndex, 'support', { chance: 0.3, volume: 0.52 });
             return;
         }
+        if (fileName === 'flash_pod' || context.item === 'flash-pod') {
+            this.playVerifiedItemCue('flash_pod');
+            return;
+        }
+        if (fileName === 'whetstone' || context.item === 'whetstone') {
+            this.playWhetstoneCue(context);
+            return;
+        }
+        if (fileName === 'whetstone_finish') {
+            this.playVerifiedItemCue('whetstone_finish');
+            return;
+        }
+        if (fileName === 'bomb_fuse' || context.item === 'fuse') {
+            this.playItemSurrogateCue('bomb_fuse');
+            return;
+        }
         if (fileName === 'barrel_bomb' || context.item === 'large-barrel-bomb') {
-            this.playVerifiedItemCue('barrel_bomb');
+            this.playItemSurrogateCue('barrel_bomb');
             this.playHunterActionVoice(context.hunterIndex, 'item', { chance: 0.4, volume: 0.54 });
             return;
         }
         if (fileName === 'hit_impact' || context.action === 'hit_impact') {
-            const weaponType = context.weaponType || 'sever';
+            const hitFamily = {
+                projectile: 'ranged',
+                ranged: 'ranged',
+                explosive: 'ranged',
+                counter: 'sever',
+                blunt: 'blunt',
+                sever: 'sever'
+            }[context.weaponType] || 'sever';
             const hitzoneVal = Number(context.hitzoneValue ?? 45);
             const isWeakspot = hitzoneVal >= 45;
-            const isBounce = hitzoneVal < 25;
+            const isBounce = context.bounced === true || hitzoneVal < 25;
             const cueKey = isBounce
                 ? 'bounce_hard'
-                : `${weaponType}_${isWeakspot ? 'weakspot' : 'normal'}`;
-            this.playVerifiedHitCue(cueKey);
+                : `${hitFamily}_${isWeakspot ? 'weakspot' : 'normal'}`;
+            if (!this.playVerifiedHitCue(cueKey) && hitFamily === 'ranged') {
+                this.playVerifiedHitCue('ranged_weakspot');
+            }
             return;
         }
         const rosterHunter = this.hunterVoiceRoster.find(hunter => Number(hunter.index) === Number(context.hunterIndex));
@@ -866,6 +1037,12 @@ class HuntAudioManager {
                 type: 'sfx',
                 baseVolume: this.huntVolume(0.75 * volumeMultiplier) * (isItemFoundCue ? 0.7 : 1)
             });
+            this.activeTransientAudios.add(audio);
+            const release = () => {
+                this.activeTransientAudios.delete(audio);
+                this.director.audioManager.releaseMediaElement?.(audio);
+            };
+            if (typeof audio.addEventListener === 'function') audio.addEventListener('ended', release, { once: true });
             audio.play().then(() => {
                 if (durationLimitMs) {
                     this.timers.timeout(() => {
@@ -879,13 +1056,14 @@ class HuntAudioManager {
                                 this.timers.clear(timer);
                                 audio.pause();
                                 audio.volume = 0;
+                                release();
                             } else {
                                 audio.volume = Math.max(0, originalVol * (1 - elapsed / fadeDuration));
                             }
                         }, fadeInterval);
                     }, durationLimitMs - 500 > 0 ? durationLimitMs - 500 : 0);
                 }
-            }).catch(e => console.warn(`Failed to play MH audio: ${filePath}`, e));
+            }).catch(e => { release(); console.warn(`Failed to play MH audio: ${filePath}`, e); });
         } catch(e) {
             console.warn(`Error loading MH audio: ${filePath}`, e);
         }
@@ -902,6 +1080,7 @@ class HuntAudioManager {
                         bgm.muted = true;
                         bgm.src = '';
                         bgm.load();
+                        this.director.audioManager.releaseMediaElement?.(bgm);
                     } catch(e){}
                 };
                 if (promise) {
@@ -914,12 +1093,34 @@ class HuntAudioManager {
         stop(this.lobbyBgm, this.lobbyBgmPromise);
         stop(this.battleBgm, this.battleBgmPromise);
         stop(this.winBgm, this.winBgmPromise);
+        for (const audio of this.activeTransientAudios) {
+            try {
+                audio.pause();
+                audio.volume = 0;
+                audio.src = '';
+                audio.load?.();
+                this.director.audioManager.releaseMediaElement?.(audio);
+            } catch (error) {}
+        }
+        this.activeTransientAudios.clear();
         this.lobbyBgm = null;
         this.lobbyBgmPromise = null;
         this.battleBgm = null;
         this.battleBgmPromise = null;
         this.winBgm = null;
         this.winBgmPromise = null;
+    }
+
+    dispose() {
+        this.stopBgms();
+        this.localAudioEntries = [];
+        this.localAudioByCategory.clear();
+        this.hunterVoiceProfiles.clear();
+        this.hunterVoiceCooldowns.clear();
+        this.hunterVoiceRecentPaths.clear();
+        this.hunterVoiceRoster = [];
+        this.voiceProfileCatalog = [];
+        this.cmcVoiceProfile = null;
     }
 }
 

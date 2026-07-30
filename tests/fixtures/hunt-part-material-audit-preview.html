@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Monster Part Material Audit</title>
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{margin:0;min-height:100%;background:#080a0b;color:#f8ecd1;font-family:"Malgun Gothic",sans-serif}
+    main{box-sizing:border-box;width:100%;height:918px;padding:28px 64px;overflow:hidden}
+    h1{margin:0 0 6px;font-size:34px} p{margin:0 0 16px;color:#c8b994;font-size:18px}
+    .audit-row{display:grid;grid-template-columns:190px repeat(6,168px);gap:12px;align-items:center;margin:8px 0}
+    .audit-name{font-size:26px;font-weight:900}.audit-cell{display:grid;grid-template-columns:72px 1fr;grid-template-rows:1fr auto;align-items:center;gap:2px 8px;height:126px;box-sizing:border-box;padding:8px;border:2px solid #9b7a43;border-radius:14px;background:#19150f}
+    .audit-cell .hunt-monster-part{grid-row:1 / 3}.audit-cell b{font-size:18px}.audit-cell code{font-size:11px;color:#c9b992}
+    .hunt-monster-part{margin:0}
+    footer{position:fixed;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa66;background:#000c;display:grid;place-items:center;color:#929b96;font-size:20px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>흰색 기준 소재 → 몬스터 색상 필터 검수</h1>
+  <p>멜제나 원본 4종의 형태와 해시를 고정하고 같은 원본에 색상만 적용한다.</p>
+  <div id="audit"></div>
+</main>
+<footer>OBS 채팅 전용 하단 15%</footer>
+<script src="../../js/effects/hunt/HuntMonsterPartMaterialCatalog.js"></script>
+<script>
+  const monsters = [
+    { id: 'neutral', name: '흰색 원본' },
+    { id: 'rathalos', name: '리오레우스' },
+    { id: 'diablos', name: '디아블로스' },
+    { id: 'black_diablos', name: '흑디아블로스' }
+  ];
+  const kinds = ['head', 'back', 'leg', 'left-wing', 'right-wing', 'tail'];
+  const audit = document.querySelector('#audit');
+  monsters.forEach(monster => {
+    const row = document.createElement('section');
+    row.className = 'audit-row';
+    row.innerHTML = `<div class="audit-name">${monster.name}</div>`;
+    kinds.forEach(kind => {
+      const material = HuntMonsterPartMaterialCatalog.resolve(monster, { kind });
+      const cell = document.createElement('div');
+      cell.className = 'audit-cell';
+      cell.innerHTML = `<span class="hunt-monster-part" data-material-kind="${material.kind}" data-material-side="${material.side}"><img class="hunt-monster-part-image" src="../../${material.path}" style="--hunt-part-tint:${material.tint}" alt=""></span><b>${material.label}</b><code>${material.sourceId} · ${material.shapeFamily}</code>`;
+      row.appendChild(cell);
+    });
+    audit.appendChild(row);
+  });
+</script>
+</body>
+</html>

@@ -29,7 +29,7 @@ vm.runInNewContext(
     { window: generatedWindow }
 );
 const generated = generatedWindow.HIVE_AUDIO_LEVELS;
-assert.strictEqual(Object.keys(generated).length, 1421, 'every runtime audio/video file needs a profile');
+assert.strictEqual(Object.keys(generated).length, 1698, 'every runtime audio/video file needs a profile');
 assert.strictEqual(generated['SFX/MonsterHunter_Hunters/mh_reload.mp3'].silent, true);
 assert.strictEqual(generated['Video/GodGame.mp4'].measurement, 'silence');
 assert.strictEqual(generated['SFX/Chzzk_Signatures/DDuk.mp3'].measurement, 'volume-fallback');
@@ -38,5 +38,17 @@ assert.strictEqual(generated['SFX/Chzzk_Signatures/DDuk.mp3'].policyVersion, 2);
 assert.ok(generated['SFX/Chzzk_Signatures/DDuk.mp3'].meanDb + generated['SFX/Chzzk_Signatures/DDuk.mp3'].gainDb <= -19.9,
     'sub-400ms chat clips need a quieter transient target');
 assert.strictEqual(generated['SFX/Chzzk_Signatures/샀어.mp3'].gainDb, -0.8);
+
+const runtimeWindow = {};
+vm.runInNewContext(
+    fs.readFileSync(path.resolve(__dirname, '../js/audio-gains.runtime.js'), 'utf8'),
+    { window: runtimeWindow }
+);
+assert.strictEqual(Object.keys(runtimeWindow.HIVE_AUDIO_GAINS).length, Object.keys(generated).length);
+assert.strictEqual(
+    runtimeWindow.HIVE_AUDIO_GAINS['SFX/Chzzk_Signatures/샀어.mp3'],
+    generated['SFX/Chzzk_Signatures/샀어.mp3'].gainDb,
+    'the compact startup table must preserve measured gain exactly'
+);
 
 console.log('[test] AudioLevelProfile measured-gain contract passed.');

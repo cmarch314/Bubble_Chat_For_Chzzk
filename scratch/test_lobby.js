@@ -57,10 +57,19 @@ eval(chatTacticsCode + "; globalThis.HuntChatTactics = HuntChatTactics;");
 
 const huntDataCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntData.js'), 'utf8');
 eval(huntDataCode);
+const companionEndpointCode = fs.readFileSync(path.join(__dirname, '../js/runtime/LocalCompanionEndpoint.js'), 'utf8');
+eval(companionEndpointCode + "; globalThis.LocalCompanionEndpoint = LocalCompanionEndpoint;");
+const huntCommandCatalogCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntCommandCatalog.js'), 'utf8');
+eval(huntCommandCatalogCode + "; globalThis.HuntCommandCatalog = HuntCommandCatalog;");
+const huntProfileContractCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntProfileContract.js'), 'utf8');
+eval(huntProfileContractCode + "; globalThis.HuntProfileContract = HuntProfileContract;");
 const weaponCatalogCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntWeaponCatalog.js'), 'utf8');
 eval(weaponCatalogCode + "; globalThis.HuntWeaponCatalog = HuntWeaponCatalog;");
 const monsterPatternCatalogCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntMonsterPatternCatalog.js'), 'utf8');
 eval(monsterPatternCatalogCode + "; globalThis.HuntMonsterPatternCatalog = HuntMonsterPatternCatalog;");
+
+const huntSupportItemPolicyCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntSupportItemPolicy.js'), 'utf8');
+eval(huntSupportItemPolicyCode + "; globalThis.HuntSupportItemPolicy = HuntSupportItemPolicy;");
 
 const huntInitializerCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntInitializer.js'), 'utf8');
 eval(huntInitializerCode + "; globalThis.HuntInitializer = HuntInitializer;");

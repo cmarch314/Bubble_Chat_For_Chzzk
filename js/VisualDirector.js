@@ -17,7 +17,7 @@ class VisualDirector {
         this.enabled = false; // [Default] OFF (Manual trigger keywords)
         this.alertsEnabled = true; // [Default] ON (Sub/Donation Alerts)
         this.activeGame = null; // [New] Currently running chat game
-        if (options.initializeOverlays !== false) this._initOverlays();
+        if (options.initializeOverlays === true) this._initOverlays();
         this.registry = options.registry || this._buildRegistry();
 
         if (this.eventBus) {
@@ -104,6 +104,13 @@ class VisualDirector {
     }
 
     _initOverlays() {
+        [
+            'skull', 'usho', 'couple', 'bangjong', 'dango', 'king',
+            'godsong', 'gazabu', 'mulsulsan', 'random_dance'
+        ].forEach(key => this._ensureEffectOverlays(key));
+    }
+
+    _ensureEffectOverlays(effectKey) {
         const create = (id, templateId) => {
             if (document.getElementById(id)) return;
             const div = document.createElement('div'); div.id = id;
@@ -114,17 +121,22 @@ class VisualDirector {
             }
             document.body.appendChild(div);
         };
-        create('skull-overlay', 'tmpl-skull-overlay');
-        create('usho-overlay', 'tmpl-usho-overlay');
-        create('heart-overlay', 'tmpl-heart-overlay');
-        create('flashback-overlay'); // No template needed
-        create('bangjong-overlay', 'tmpl-bangjong-overlay');
-        create('dango-overlay', 'tmpl-dango-overlay');
-        create('king-overlay', 'tmpl-king-overlay');
-        create('god-overlay', 'tmpl-god-overlay');
-        create('gazabu-overlay', 'tmpl-gazabu-overlay');
-        create('mulsulsan-overlay', 'tmpl-mulsulsan-overlay');
-        create('random-dance-overlay', 'tmpl-random-dance-overlay');
+        const overlays = {
+            skull: [['skull-overlay', 'tmpl-skull-overlay']],
+            usho: [['usho-overlay', 'tmpl-usho-overlay']],
+            couple: [
+                ['heart-overlay', 'tmpl-heart-overlay'],
+                ['flashback-overlay', null]
+            ],
+            bangjong: [['bangjong-overlay', 'tmpl-bangjong-overlay']],
+            dango: [['dango-overlay', 'tmpl-dango-overlay']],
+            king: [['king-overlay', 'tmpl-king-overlay']],
+            godsong: [['god-overlay', 'tmpl-god-overlay']],
+            gazabu: [['gazabu-overlay', 'tmpl-gazabu-overlay']],
+            mulsulsan: [['mulsulsan-overlay', 'tmpl-mulsulsan-overlay']],
+            random_dance: [['random-dance-overlay', 'tmpl-random-dance-overlay']]
+        };
+        (overlays[effectKey] || []).forEach(([id, templateId]) => create(id, templateId));
     }
 
     _buildRegistry() {

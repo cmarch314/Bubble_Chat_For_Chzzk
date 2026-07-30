@@ -17,6 +17,7 @@ const motionLinksOnly = process.argv.includes('--motion-links');
 const monsterActionsOnly = process.argv.includes('--monster-actions');
 const referenceDataOnly = process.argv.includes('--reference-data');
 const soundReferenceOnly = process.argv.includes('--sound-reference');
+const uiReferenceOnly = process.argv.includes('--ui-reference');
 
 function run(command, args, options = {}) {
     const result = spawnSync(command, args, { stdio: 'inherit', ...options });
@@ -42,8 +43,9 @@ function extractWilds() {
     const tool = path.join(root, 'game_extracts', 'tools', 'MonsterHunterRiseModding', 'files', 'REtool.exe');
     const sourceList = path.join(root, 'game_extracts', 'tools', 'MonsterHunterWildsModding', 'files', 'MHWs.list');
     const out = path.join(root, 'game_extracts', 'wilds');
-    const profile = soundReferenceOnly ? 'sound-reference' : referenceDataOnly ? 'reference-data' : monsterActionsOnly ? 'monster-actions' : motionLinksOnly ? 'motion-links' : motionOnly ? 'motion' : 'audio';
+    const profile = uiReferenceOnly ? 'ui-reference' : soundReferenceOnly ? 'sound-reference' : referenceDataOnly ? 'reference-data' : monsterActionsOnly ? 'monster-actions' : motionLinksOnly ? 'motion-links' : motionOnly ? 'motion' : 'audio';
     const profileFiles = {
+        'ui-reference': ['ui_reference.list', 'ui-reference-extraction-state.json'],
         'sound-reference': ['monster_sound_reference.list', 'monster-sound-reference-extraction-state.json'],
         'reference-data': ['game_reference.list', 'reference-data-extraction-state.json'],
         'monster-actions': ['monster_actions.list', 'monster-actions-extraction-state.json'],
@@ -56,6 +58,9 @@ function extractWilds() {
     if (![install, tool, sourceList].every(fs.existsSync)) throw new Error('Wilds install or extractor prerequisites are missing.');
     fs.mkdirSync(out, { recursive: true });
     const selected = fs.readFileSync(sourceList, 'utf8').split(/\r?\n/).filter(line => {
+        if (uiReferenceOnly) {
+            return /^natives\/STM\/GUI\/.+\.gui\.\d+$/i.test(line);
+        }
         if (soundReferenceOnly) {
             return /^natives\/STM\/Sound\/UserData\/(?:02_Container|11_TriggerInfoList)\/Enemy\/.+\.user\.3$/i.test(line);
         }
@@ -81,6 +86,8 @@ function extractWilds() {
                 || /^natives\/STM\/GameDesign\/Player\/ActionData\/Common\/GlobalParam\/PlayerItemParam\.user\.\d+$/i.test(line)
                 || /^natives\/STM\/Motion\/Player\/Common\/plc_ItemUse(?:_tree)?\/.+\.(?:motlist\.\d+|user\.\d+)$/i.test(line)
                 || /^natives\/STM\/Sound\/UserData\/(?:11_TriggerInfoList\/Hunter\/(?:Shell\/)?HunterItem|39_Shell\/Hunter\/ItemThorow_).+\.user\.\d+$/i.test(line)
+                || /^natives\/STM\/Sound\/UserData\/11_TriggerInfoList\/(?:Weapon\/.+|Hit\/Wp\d{2}_Hit_TriggerInfoListData)\.user\.\d+$/i.test(line)
+                || /^natives\/STM\/Sound\/UserData\/02_Container\/(?:Hunter\/HunterWeapon_ContainerListData|Weapon\/Wp\d{2}.+)\.user\.\d+$/i.test(line)
                 || /^natives\/STM\/GameDesign\/Enemy\/Em\d{4}\/\d{2}\/Data\/Em\d{4}_\d{2}_Param_(?:Parts|PartsBreakReward|PartsEffect|PartsLost)\.user\.\d+$/i.test(line)
                 || /^natives\/STM\/Motion\/Player\/Weapon\/Wp\d{2}\/.+_(?:mct|mex|mcb|meb)\.user\.\d+$/i.test(line);
         }
@@ -108,7 +115,7 @@ function extractWilds() {
         state.selectedPaths = selected.length;
         fs.writeFileSync(statePath, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
     }
-    const label = soundReferenceOnly ? 'monster sound trigger/container reference' : referenceDataOnly ? 'game reference' : monsterActionsOnly ? 'monster action/pattern/motion' : motionLinksOnly ? 'weapon action/motion-link' : motionOnly ? 'weapon motion' : 'neutral/Japanese bank';
+    const label = uiReferenceOnly ? 'GUI layout/resource reference' : soundReferenceOnly ? 'monster sound trigger/container reference' : referenceDataOnly ? 'game reference' : monsterActionsOnly ? 'monster action/pattern/motion' : motionLinksOnly ? 'weapon action/motion-link' : motionOnly ? 'weapon motion' : 'neutral/Japanese bank';
     console.log(`[mh-extract] Wilds complete: ${selected.length} ${label} paths.`);
 }
 

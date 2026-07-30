@@ -32,6 +32,9 @@ const orthodoxGreatSwordTrace = [
     'great_sword.strong_charge_1', 'great_sword.strong_charge_2', 'great_sword.strong_charge_3', 'great_sword.strong_charged_slash',
     'great_sword.true_charge_1', 'great_sword.true_charge_2', 'great_sword.true_charge_3', 'great_sword.true_charged_slash'
 ];
+greatSwordActions
+    .filter(action => /^great_sword\.(?:strong_|true_)?charge_[123]$/.test(action.id))
+    .forEach(action => assert.strictEqual(action.durationTicks, 10, `${action.id} must use the shared one-second charge stage`));
 orthodoxGreatSwordTrace.forEach(expected => {
     const selected = selector.select(greatSword, greatSwordActions, { monsterDowned: true, monsterAtb: 0 }).action;
     assert.strictEqual(selected.id, expected, 'Great Sword must complete all three charge stages in every orthodox combo tier');
@@ -111,6 +114,12 @@ assert.strictEqual(
 );
 
 const hammerActions = HuntWeaponMechanics.actionsFor('hammer');
+hammerActions
+    .filter(action => /^hammer\.(?:charge_[123]|mighty_charge)$/.test(action.id))
+    .forEach(action => {
+        assert.strictEqual(action.durationTicks, 10, `${action.id} must use the shared one-second charge stage`);
+        assert.strictEqual(action.atbCostSeconds, 0.5, `${action.id} must recover its ATB inside that one-second stage`);
+    });
 const hammer = { id: 'hammer', hunterName: 'HAM' };
 mechanics.initialize(hammer);
 for (const expected of ['hammer.charge_1', 'hammer.charge_2', 'hammer.charge_3', 'hammer.mighty_charge', 'hammer.mighty_charge_slam']) {
@@ -186,9 +195,20 @@ assert.deepStrictEqual(mechanics.presentationFor(swordShield, swordShieldActions
 const dualBladeActions = HuntWeaponMechanics.actionsFor('dual_blades');
 const dualBlades = { id: 'dual_blades', hunterName: 'DB', hp: 100, maxHp: 100 };
 mechanics.initialize(dualBlades);
+for (const expected of ['dual_blades.double_slash', 'dual_blades.double_slash_return', 'dual_blades.circle_slash']) {
+    const selected = selector.select(dualBlades, dualBladeActions).action;
+    assert.strictEqual(selected.id, expected, 'normal Dual Blades attacks must build the red Demon Gauge in sequence');
+    mechanics.applyAction(engine, dualBlades, selected);
+    dualBlades.lastActionId = selected.id;
+}
+assert.strictEqual(dualBlades.archdemonGauge, 90);
+let selected = selector.select(dualBlades, dualBladeActions).action;
+mechanics.applyAction(engine, dualBlades, selected);
+dualBlades.lastActionId = selected.id;
+assert.strictEqual(dualBlades.archdemonGauge, 100, 'normal attacks must cap the red Demon Gauge at 100');
 assert.strictEqual(selector.select(dualBlades, dualBladeActions).action.id, 'dual_blades.enter_demon');
 mechanics.applyAction(engine, dualBlades, dualBladeActions.find(row => row.id === 'dual_blades.enter_demon'));
-assert.strictEqual(dualBlades.demonModeMinTicks, 60, 'Demon Mode must remain committed for six seconds after entry');
+assert.strictEqual(dualBlades.demonModeMinTicks, 0, 'Demon Mode lifetime must be owned by the red gauge, not a hidden timer');
 for (const expected of [
     'dual_blades.demon_fang', 'dual_blades.demon_double_slash',
     'dual_blades.demon_flurry', 'dual_blades.demon_roundslash'
@@ -198,7 +218,8 @@ for (const expected of [
     mechanics.applyAction(engine, dualBlades, selected);
     dualBlades.lastActionId = selected.id;
 }
-dualBlades.demonStamina = 70;
+assert.strictEqual(dualBlades.archdemonGauge, 40, 'Demon attacks must consume rather than generate the red Demon Gauge');
+dualBlades.archdemonGauge = 100;
 for (const expected of ['dual_blades.blade_dance_1', 'dual_blades.blade_dance_2', 'dual_blades.blade_dance']) {
     const selected = selector.select(dualBlades, dualBladeActions, { monsterDowned: true }).action;
     assert.strictEqual(selected.id, expected, 'a downed opening must build visibly through Demon Dance I, II and III');
@@ -206,18 +227,17 @@ for (const expected of ['dual_blades.blade_dance_1', 'dual_blades.blade_dance_2'
     dualBlades.lastActionId = selected.id;
 }
 assert.strictEqual(dualBlades.demonDanceStep, 0);
-dualBlades.demonStamina = 8;
-dualBlades.demonModeMinTicks = 0;
+assert.strictEqual(dualBlades.archdemonGauge, 34, 'Demon Dance must cash out 66 points of Demon Gauge');
+dualBlades.archdemonGauge = 10;
 const demonExit = selector.select(dualBlades, dualBladeActions).action;
-assert.strictEqual(demonExit.id, 'dual_blades.exit_demon', 'low stamina must cause an explicit Demon Mode exit');
+assert.strictEqual(demonExit.id, 'dual_blades.exit_demon', 'insufficient Demon Gauge must cause an explicit Demon Mode exit');
 mechanics.applyAction(engine, dualBlades, demonExit);
 assert.strictEqual(dualBlades.demonToggleCooldown, 100, 'Demon Mode exit must open a real re-entry cooldown');
-dualBlades.demonStamina = 100;
+dualBlades.archdemonGauge = 100;
 dualBlades.dualChain = 0;
 dualBlades.lastActionId = '';
 assert.notStrictEqual(selector.select(dualBlades, dualBladeActions).action.id, 'dual_blades.enter_demon',
-    'full stamina must not cause an immediate Demon Mode bounce during the toggle cooldown');
-dualBlades.archdemonGauge = 0;
+    'a full Demon Gauge must not cause an immediate mode bounce during the toggle cooldown');
 for (let tick = 0; tick < 99; tick++) mechanics.tick(dualBlades);
 assert.notStrictEqual(selector.select(dualBlades, dualBladeActions).action.id, 'dual_blades.enter_demon',
     'Demon Mode must remain locked until the full cooldown has elapsed');
@@ -225,14 +245,7 @@ mechanics.tick(dualBlades);
 dualBlades.dualChain = 0;
 dualBlades.lastActionId = '';
 assert.strictEqual(selector.select(dualBlades, dualBladeActions).action.id, 'dual_blades.enter_demon',
-    'Demon Mode may resume after cooldown only with the higher stamina reserve');
-dualBlades.archdemonGauge = 70;
-for (const expected of ['dual_blades.archdemon_rush', 'dual_blades.archdemon_flurry', 'dual_blades.archdemon_slash']) {
-    const selected = selector.select(dualBlades, dualBladeActions).action;
-    assert.strictEqual(selected.id, expected, 'Archdemon Mode must spend its gauge through a coherent three-action chain');
-    mechanics.applyAction(engine, dualBlades, selected);
-    dualBlades.lastActionId = selected.id;
-}
+    'Demon Mode may resume only after cooldown with a completely filled red gauge');
 assert.deepStrictEqual(mechanics.presentationFor(dualBlades, dualBladeActions.find(row => row.id === 'dual_blades.demon_flurry')), { label: '쌍검 연계', bubble: false, log: false });
 assert.deepStrictEqual(mechanics.presentationFor(dualBlades, dualBladeActions.find(row => row.id === 'dual_blades.blade_dance')), { label: '귀인난무 III!', bubble: true, log: true });
 
@@ -285,9 +298,58 @@ for (const expected of [
     const selected = selector.select(longSword, longSwordActions, { monsterAtb: 20 }).action;
     assert.strictEqual(selected.id, expected, 'Long Sword must preserve the full spirit I→II→III→roundslash route');
     mechanics.applyAction(engine, longSword, selected);
+    mechanics.onConfirmedHit(engine, longSword, selected);
     longSword.lastActionId = selected.id;
 }
 assert.strictEqual(longSword.spiritLevel, 1, 'only the roundslash payoff may raise spirit color');
+
+{
+    const roundslash = longSwordActions.find(action => action.id === 'long_sword.spirit_roundslash');
+    const missedRoundslash = {
+        id: 'long_sword',
+        hunterName: 'MISS LS',
+        hp: 100,
+        maxHp: 100,
+        spiritGauge: 100,
+        spiritLevel: 2,
+        spiritRoundslashReady: true
+    };
+    mechanics.initialize(missedRoundslash);
+    mechanics.applyAction(engine, missedRoundslash, roundslash);
+    assert.strictEqual(missedRoundslash.spiritLevel, 2,
+        'starting Roundslash must not raise spirit level before hit confirmation');
+    mechanics.onAttackMiss(engine, missedRoundslash, roundslash);
+    assert.strictEqual(missedRoundslash.spiritLevel, 2,
+        'a missed Roundslash must fail the level-up without lowering an existing level');
+    assert.strictEqual(missedRoundslash.spiritGauge, 0,
+        'a missed Roundslash must empty the spirit gauge');
+}
+
+assert.strictEqual(HuntWeaponMechanics.longSwordSpecialSheatheChance(0), 0);
+assert.strictEqual(HuntWeaponMechanics.longSwordSpecialSheatheChance(1), 0.10);
+assert.strictEqual(HuntWeaponMechanics.longSwordSpecialSheatheChance(2), 0.20);
+assert.strictEqual(HuntWeaponMechanics.longSwordSpecialSheatheChance(3), 1);
+{
+    const selectedUnderPressure = (level, roll) => {
+        const probabilityMechanics = new HuntWeaponMechanics(() => roll);
+        const hunter = {
+            id: 'long_sword',
+            hunterName: 'CHANCE LS',
+            hp: 100,
+            maxHp: 100,
+            spiritGauge: 0,
+            spiritLevel: level,
+            _mechanicMonsterPressure: true
+        };
+        probabilityMechanics.initialize(hunter);
+        const index = probabilityMechanics.selectAction(hunter, longSwordActions, { monsterAtb: 80 });
+        return longSwordActions[index]?.id;
+    };
+    assert.strictEqual(selectedUnderPressure(1, 0.099), 'long_sword.special_sheathe');
+    assert.notStrictEqual(selectedUnderPressure(1, 0.10), 'long_sword.special_sheathe');
+    assert.strictEqual(selectedUnderPressure(2, 0.199), 'long_sword.special_sheathe');
+    assert.notStrictEqual(selectedUnderPressure(2, 0.20), 'long_sword.special_sheathe');
+}
 
 longSword.spiritLevel = 2;
 longSword.spiritGauge = 70;
@@ -382,6 +444,32 @@ const expectedWeapons = [
     'great_sword', 'long_sword', 'sword_shield', 'dual_blades', 'hammer', 'hunting_horn', 'lance',
     'gunlance', 'switch_axe', 'charge_blade', 'insect_glaive', 'light_bowgun', 'heavy_bowgun', 'bow'
 ];
+
+const interruptedStates = {
+    great_sword: { set: { greatSwordCharge: 3, greatSwordChain: 2, greatSwordChargeLocked: true }, cleared: ['greatSwordCharge', 'greatSwordChain', 'greatSwordChargeLocked'] },
+    long_sword: { set: { specialSheatheReady: true, spiritReleaseReady: true }, cleared: ['specialSheatheReady', 'spiritReleaseReady'] },
+    sword_shield: { set: { snsChain: 3, perfectRushStep: 2, snsAerialReady: true }, cleared: ['snsChain', 'perfectRushStep', 'snsAerialReady'] },
+    dual_blades: { set: { dualChain: 2, demonChain: 3, demonDanceStep: 2, archdemonStep: 1 }, cleared: ['dualChain', 'demonChain', 'demonDanceStep', 'archdemonStep'] },
+    hammer: { set: { hammerChargeLevel: 3, hammerBigBangStep: 4, hammerOffsetWaiting: true }, cleared: ['hammerChargeLevel', 'hammerBigBangStep', 'hammerOffsetWaiting'] },
+    hunting_horn: { set: { recitalActive: true, recitalPlayed: 2, recitalStartCount: 3 }, cleared: ['recitalActive', 'recitalPlayed', 'recitalStartCount'] },
+    lance: { set: { lanceDashStep: 2, powerGuardWaiting: true, powerGuardReady: true, powerGuardCharge: 3 }, cleared: ['lanceDashStep', 'powerGuardWaiting', 'powerGuardReady', 'powerGuardCharge'] },
+    gunlance: { set: { gunlanceStep: 5, shellStep: 2, wyvernFireCharging: true }, cleared: ['gunlanceStep', 'shellStep', 'wyvernFireCharging'] },
+    switch_axe: { set: { switchCounterWaiting: true, switchCounterReady: true }, cleared: ['switchCounterWaiting', 'switchCounterReady'] },
+    charge_blade: { set: { cbSwordStep: 3, cbAxeStep: 2, cbGuardWaiting: true, cbGuardReady: true }, cleared: ['cbSwordStep', 'cbAxeStep', 'cbGuardWaiting', 'cbGuardReady'] },
+    insect_glaive: { set: { glaiveStep: 2, glaiveCharge: 2, airborne: true }, cleared: ['glaiveStep', 'glaiveCharge', 'airborne'] },
+    light_bowgun: { set: {}, cleared: [] },
+    heavy_bowgun: { set: { wyvernheartStep: 2, hbgCounterWaiting: true, hbgCounterReady: true }, cleared: ['wyvernheartStep', 'hbgCounterWaiting', 'hbgCounterReady'] },
+    bow: { set: { bowCharge: 3, bowPowerStep: 2 }, cleared: ['bowCharge', 'bowPowerStep'] }
+};
+for (const [weaponId, contract] of Object.entries(interruptedStates)) {
+    const hunter = { id: weaponId, hunterName: `HIT-${weaponId}`, lastActionId: `${weaponId}.internal_step` };
+    mechanics.initialize(hunter);
+    Object.assign(hunter, contract.set);
+    mechanics.onHit(hunter);
+    assert.strictEqual(hunter.lastActionId, null, `${weaponId} must not resume a linked action after being hit`);
+    contract.cleared.forEach(key => assert.ok(!hunter[key], `${weaponId}.${key} must clear on interruption`));
+}
+
 const traces = {};
 expectedWeapons.forEach(weaponId => {
     const actions = HuntWeaponMechanics.actionsFor(weaponId);

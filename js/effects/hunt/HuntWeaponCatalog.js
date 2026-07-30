@@ -10,7 +10,7 @@ class HuntWeaponCatalog {
             long_sword: [
                 { id: 'long_sword.thrust', name: '찌르기', dmg: 70, motionValue: 18, sourceGame: 'wilds' },
                 { id: 'long_sword.foresight', name: '간파베기', dmg: 110, motionValue: 28, tags: ['sever', 'counter', 'foresight'], next: ['long_sword.spirit_roundslash'], sourceGame: 'wilds' },
-                { id: 'long_sword.spirit_roundslash', name: '기인대회전베기', dmg: 240, motionValue: 60, effects: { spiritGain: 1 }, sourceGame: 'wilds' },
+                { id: 'long_sword.spirit_roundslash', name: '대회전베기', dmg: 240, motionValue: 60, effects: { spiritGain: 1 }, sourceGame: 'wilds' },
                 { id: 'long_sword.iai_spirit', name: '거합베기', dmg: 360, motionValue: 90, requirements: { minSpirit: 1 }, tags: ['sever', 'counter'], next: ['long_sword.helm_breaker'], sourceGame: 'wilds' }
             ],
             sword_shield: [

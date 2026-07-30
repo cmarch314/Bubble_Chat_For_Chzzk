@@ -62,7 +62,8 @@ class HuntActionStateMachine {
     }
 
     canEvade(hunter) {
-        if (!hunter || hunter.status !== 'alive' || hunter.roarStunned) return false;
+        if (!hunter || hunter.status !== 'alive' || hunter.roarStunned || hunter.interference) return false;
+        if (hunter.pendingSharpnessRestore) return false;
         const action = hunter.currentAction;
         if (!action) return true;
         if (action.tags.includes('counter') || action.tags.includes('guard-point')) return false;
@@ -70,7 +71,8 @@ class HuntActionStateMachine {
     }
 
     canGuard(hunter) {
-        if (!hunter || hunter.status !== 'alive' || hunter.roarStunned) return false;
+        if (!hunter || hunter.status !== 'alive' || (hunter.roarStunned && !hunter.interference)) return false;
+        if (hunter.pendingSharpnessRestore) return false;
         const action = hunter.currentAction;
         if (!action) return true;
         if (action.tags.includes('guard-point')) return true;

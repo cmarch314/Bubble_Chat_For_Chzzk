@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,initial-scale=1">
+  <title>몬스터 패턴 시범 · 오나즈치 독무</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:radial-gradient(circle at 50% 20%,#283227,#080b09 72%)}
+    #pilot-board{position:relative;width:1848px;height:880px;margin:24px 36px;color:#fff;overflow:visible}
+    .pilot-title{position:absolute;z-index:20;top:18px;left:28px;font:1000 30px/1 sans-serif;color:#d9ff93;text-shadow:0 3px 9px #000}
+    .pilot-source{position:absolute;z-index:20;top:58px;left:30px;font:800 18px/1 sans-serif;color:#b9c8b7}
+    #monster-showcase-panel{position:relative;height:480px;display:grid;place-items:center;overflow:visible}
+    #fight-monster-img{width:380px;height:380px;object-fit:contain;filter:drop-shadow(0 20px 24px #000)}
+    .game-hunt-weapons-grid{position:absolute;left:36px;right:36px;bottom:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .game-hunt-weapon-card{position:relative;height:260px;border:3px solid #8f713d;border-radius:14px;background:#111e;padding:8px;display:grid;place-items:center;overflow:visible}
+    .game-hunt-weapon-img-container{position:relative;width:128px;height:128px}
+    .game-hunt-weapon-img{width:128px;height:128px;object-fit:contain}
+    .pilot-hunter{font:900 23px/1 sans-serif;color:#f2d8a5}
+    .chat-safe{position:fixed;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa88;background:#000b;display:grid;place-items:center;color:#77d8b5;font:900 22px/1 sans-serif}
+  </style>
+</head>
+<body>
+  <main id="pilot-board" class="game-hunt-card hunt-combat-board">
+    <div class="pilot-title">오나즈치 · 직선 독무 / 부채꼴 독무</div>
+    <div class="pilot-source">독무는 레이저가 아닌 가스형 범위 공격으로 렌더링</div>
+    <div id="monster-showcase-panel" class="game-hunt-monster-showcase hunt-monster-motion-stage">
+      <div class="hunt-monster-attack-motion">
+        <img id="fight-monster-img" class="game-hunt-monster-img" src="../../img/monsters/chameleos.png" alt="오나즈치">
+      </div>
+    </div>
+    <section class="game-hunt-weapons-grid">
+      <article id="fight-card-0" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt=""></div><div class="pilot-hunter">대검</div></article>
+      <article id="fight-card-1" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/lance.svg" alt=""></div><div class="pilot-hunter">랜스</div></article>
+      <article id="fight-card-2" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt=""></div><div class="pilot-hunter">수렵피리</div></article>
+      <article id="fight-card-3" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/bow.svg" alt=""></div><div class="pilot-hunter">활</div></article>
+    </section>
+  </main>
+  <footer class="chat-safe">OBS 채팅 안전영역 · 하단 15%</footer>
+  <script src="../../js/effects/hunt/HuntMonsterAnimationCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
+  <script>
+    const owner={card:document.getElementById('pilot-board'),selectedMonster:{id:'chameleos',nameKO:'오나즈치',species:'elder dragon'},animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)}}};
+    const animator=new HuntMonsterAttackAnimator(owner,()=>{});
+    const pattern={id:'chameleos.poison_fan',name:'부채꼴 독무',type:'area',delivery:'gas',sourceMoveNameJA:'扇状毒霧',tags:['area','poison','mist']};
+    function play(){animator.triggerMonsterAttack('elemental','☠️',[{index:0,result:'hit'},{index:1,result:'hit'},{index:2,result:'hit'},{index:3,result:'dodge'}],pattern.name,pattern)}
+    addEventListener('load',()=>{setTimeout(play,250);setInterval(play,2300)});
+  </script>
+</body>
+</html>

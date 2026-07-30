@@ -4,9 +4,10 @@ const path = require('path');
 const vm = require('vm');
 
 const gameMatcherPath = path.resolve(__dirname, '../js/routing/GameCommandMatcher.js');
+const huntCommandCatalogPath = path.resolve(__dirname, '../js/effects/hunt/HuntCommandCatalog.js');
 const matcherPath = path.resolve(__dirname, '../js/routing/VisualCommandMatcher.js');
 const sourcePath = path.resolve(__dirname, '../js/MessageRouter.js');
-const source = `${fs.readFileSync(gameMatcherPath, 'utf8')}\n${fs.readFileSync(matcherPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.MessageRouter = MessageRouter;`;
+const source = `${fs.readFileSync(huntCommandCatalogPath, 'utf8')}\n${fs.readFileSync(gameMatcherPath, 'utf8')}\n${fs.readFileSync(matcherPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.MessageRouter = MessageRouter;`;
 const context = vm.createContext({ console, performance: { now: () => 0 } });
 vm.runInContext(source, context, { filename: sourcePath });
 const MessageRouter = context.MessageRouter;
@@ -70,6 +71,14 @@ function fixture(overrides = {}) {
     router.route(message({ isStreamer: true, message: '!수렵 3' }));
     assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'visual']);
     assert.strictEqual(calls[1][1], 'hunt');
+}
+
+{
+    const { calls, router } = fixture();
+    router.route(message({ isStreamer: true, message: '!몬헌' }));
+    assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'visual']);
+    assert.strictEqual(calls[1][1], 'hunt');
+    assert.strictEqual(calls[1][2].message, '!몬헌');
 }
 
 {

@@ -20,9 +20,15 @@ for (const file of files) {
 assert.strictEqual(window.HIVE_VOLUME_CONFIG.master, 1.5);
 assert.strictEqual(window.HIVE_VOLUME_CONFIG.visual, 1);
 assert.strictEqual(window.HIVE_VOLUME_CONFIG.sfx, 1);
+assert.strictEqual(window.BUBBLECHAT_COMPANION_ORIGIN, '');
 assert.ok(Object.keys(window.HIVE_SOUND_CONFIG).length > 700, 'sound catalog must remain complete');
 assert.ok(Object.keys(window.HIVE_VISUAL_CONFIG).length >= 15, 'visual config must remain complete');
-assert.strictEqual(window.HIVE_CMC_FILES.length, 78, 'chat video catalog must remain complete');
+assert.strictEqual(window.HIVE_CMC_FILES.length, 354, 'chat video catalog must remain complete');
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['거짓말']), ['거짓말', '거짓말3']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['진짜?']), ['진짜(물음표)', '진짜(물음표)2']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['헐']), ['헐', '헐2']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['나루호도']), ['나루호도', '나루호도2']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['소나노']), ['소나노', '소나노2']);
 assert.ok(window.HIVE_CMC_VOICE_COMMANDS.length >= 400, 'live CMC chat voice group must remain substantially complete');
 assert.ok(window.HIVE_CMC_VOICE_COMMANDS.every(command => window.HIVE_SOUND_CONFIG[command]),
     'every CMC voice command must resolve through the live chat sound catalog');

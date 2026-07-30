@@ -5,37 +5,58 @@ class HuntMonsterFlightRuntime {
     static FLIGHT_DURATION_TICKS = 600;
     static NORMAL_KNOCKDOWN_TICKS = 70;
     static AERIAL_KNOCKDOWN_MULTIPLIER = 1.5;
-    static CAPABLE = new Set([
-        'rathalos', 'azure_rathalos', 'silver_rathalos', 'rathian', 'pink_rathian', 'gold_rathian',
-        'seregios', 'legiana', 'shrieking_legiana', 'paolumu', 'nightshade_paolumu',
-        'bazelgeuse', 'seething_bazelgeuse', 'pukei_pukei', 'coral_pukei_pukei',
-        'kushala_daora', 'namielle', 'alatreon', 'fatalis', 'astalos',
-        'valstrax', 'crimson_glow_valstrax'
-    ]);
 
-    constructor(random = Math.random) { this.random = random; }
-    static normalize(id) { return String(id || '').toLowerCase().replace(/[-']/g, '_'); }
-    static isCapable(monster) { return this.CAPABLE.has(this.normalize(monster?.id)); }
+    constructor(random = Math.random) {
+        this.random = random;
+    }
+
+    static archetypes() {
+        if (typeof HuntMonsterArchetypeCatalog !== 'undefined') return HuntMonsterArchetypeCatalog;
+        if (typeof require === 'function') return require('./HuntMonsterArchetypeCatalog.js');
+        return null;
+    }
+
+    static normalize(id) {
+        return String(id || '').toLowerCase().replace(/[-']/g, '_');
+    }
+
+    static flightConfig(monster) {
+        return this.archetypes()?.flight(monster) || null;
+    }
+
+    static isCapable(monster) {
+        return Boolean(this.flightConfig(monster));
+    }
 
     static decoratePattern(monsterId, pattern) {
-        if (!this.CAPABLE.has(this.normalize(monsterId))) return pattern;
+        if (!this.isCapable({ id: monsterId })) return pattern;
         const evidenceText = `${pattern?.sourceActionClass || ''} ${pattern?.name || ''}`;
-        const flightOnly = /Fly|Air|Aerial|공중|급강하|활공|비상|낙하 강타|서머솔트/i.test(evidenceText);
+        const flightOnly = /Fly|Air|Aerial|공중|급강하|비상|활공/i.test(evidenceText);
         const airCompatible = flightOnly || pattern?.tags?.includes('projectile') || pattern?.type === 'roar';
-        return { ...pattern,
-            tags: [...new Set([...(pattern.tags || []), flightOnly && 'flight-only', airCompatible && 'air-compatible'].filter(Boolean))],
-            flightEvidence: flightOnly ? (pattern.sourceActionClass ? `installed-action:${pattern.sourceActionClass}` : `named-pattern:${pattern.name}`) : undefined
+        return {
+            ...pattern,
+            tags: [...new Set([
+                ...(pattern.tags || []),
+                flightOnly && 'flight-only',
+                airCompatible && 'air-compatible'
+            ].filter(Boolean))],
+            flightEvidence: flightOnly
+                ? (pattern.sourceActionClass ? `installed-action:${pattern.sourceActionClass}` : `named-pattern:${pattern.name}`)
+                : undefined
         };
     }
 
     initialize(engine) {
-        engine.monsterCanFly = HuntMonsterFlightRuntime.isCapable(engine.selectedMonster);
+        engine.monsterArchetype = HuntMonsterFlightRuntime.archetypes()?.resolve(engine.selectedMonster) || null;
+        engine.monsterBehavior = HuntMonsterFlightRuntime.archetypes()?.behavior(engine.selectedMonster) || {};
+        engine.monsterCanFly = Boolean(engine.monsterArchetype?.flight);
         engine.monsterFlightState = 'grounded';
-        engine.monsterFlightDamage = 0;
         engine.monsterFlightTicksRemaining = 0;
         engine.monsterFlightTurns = 0;
         engine.monsterGroundTurns = 0;
         engine.monsterFlightCooldown = 0;
+        engine.monsterJustTookOff = false;
+        engine.monsterExhaustedFlightWobble = false;
     }
 
     tick(engine) {
@@ -43,72 +64,332 @@ class HuntMonsterFlightRuntime {
         if (engine.monsterFlightState !== 'airborne') return;
         engine.monsterFlightTicksRemaining = Math.max(0, Number(engine.monsterFlightTicksRemaining || 0) - 1);
         this.updateFlightUI(engine);
-        if (engine.monsterFlightTicksRemaining <= 0) this.land(engine, false);
+        if (engine.monsterFlightTicksRemaining <= 0) {
+            if (engine.monsterExhaustedFlightWobble) {
+                const landingStagger = Math.max(1, Number(
+                    engine.monsterBehavior?.exhaustedFlightLandingStaggerTicks || 30
+                ));
+                engine.monsterExhaustedFlightWobble = false;
+                this.land(engine, false);
+                engine.monsterRecoveryDuration = Math.max(
+                    Number(engine.monsterRecoveryDuration || 0),
+                    landingStagger
+                );
+                this.playFlightReaction(engine, 'exhausted-landing-stagger', landingStagger);
+                engine.showSkillBubble?.('monster', '💫 착지 후 휘청임');
+                engine.addLog?.(`💫 [탈진 착지] ${engine.selectedMonster.nameKO}가 착지한 뒤 균형을 잃고 비틀거립니다!`, '#9ed7e8');
+                return;
+            }
+            const landingPatternId = engine.monsterBehavior?.naturalLandingPatternId;
+            if (landingPatternId && engine.monsterState !== 'exhausted') {
+                if (!engine.monsterLandingPending) {
+                    engine.monsterLandingPending = true;
+                    engine.forcedMonsterPatternId = landingPatternId;
+                    engine.monsterAtb = 100;
+                    engine.updateMonsterAtbUI?.(100);
+                } else if (!engine.pendingMonsterAction
+                    && !engine.pendingMonsterImpact
+                    && !engine.forcedMonsterPatternId) {
+                    engine.forcedMonsterPatternId = landingPatternId;
+                }
+            } else {
+                this.land(engine, false);
+            }
+        }
     }
 
     updateFlightUI(engine) {
-        const threshold = Math.max(300, Number(engine.monsterMaxHp || 1) * .1);
-        const damage = Math.max(0, Number(engine.monsterFlightDamage || 0));
-        engine.updateMonsterFlightUI(engine.monsterFlightState === 'airborne', Math.min(1, damage / threshold), damage, threshold, Number(engine.monsterFlightTicksRemaining || 0));
+        engine.updateMonsterFlightUI(
+            engine.monsterFlightState === 'airborne',
+            0,
+            0,
+            0,
+            Number(engine.monsterFlightTicksRemaining || 0)
+        );
     }
 
     shouldEvade(engine) {
-        return engine?.monsterFlightState === 'airborne' && this.random() < HuntMonsterFlightRuntime.AIRBORNE_EVADE_CHANCE;
+        const chance = HuntMonsterFlightRuntime.flightConfig(engine?.selectedMonster)?.airborneEvadeChance
+            ?? HuntMonsterFlightRuntime.AIRBORNE_EVADE_CHANCE;
+        return engine?.monsterFlightState === 'airborne' && this.random() < chance;
     }
 
     beforeTurn(engine, patterns = []) {
-        if (!engine.monsterCanFly || engine.monsterFlightCooldown > 0 || engine.monsterFlightState === 'airborne') return;
-        if (['knocked_down', 'stunned', 'exhausted'].includes(engine.monsterState)) return;
-        if (!patterns.some(pattern => pattern.tags?.includes('flight-only'))) return;
+        if (!engine.monsterCanFly || engine.monsterFlightCooldown > 0 || engine.monsterFlightState === 'airborne') return true;
+        if (['knocked_down', 'stunned'].includes(engine.monsterState)) return true;
+        if (!patterns.some(pattern => pattern.tags?.includes('flight-only'))) return true;
+        if (engine.monsterTraitRuntime?.canEnterFlight?.(engine) === false) return true;
+        if (engine.monsterBehavior?.flightMode === 'short-chain') {
+            const chance = Math.max(0, Math.min(1, Number(engine.monsterBehavior.flightAttemptChance || 0)));
+            if (this.random() >= chance) return true;
+            const result = this.attemptTakeOff(engine);
+            if (result === 'failed') return false;
+            if (engine.monsterState === 'exhausted') {
+                const wobbleTicks = Math.max(1, Number(
+                    engine.monsterBehavior.exhaustedFlightWobbleTicks || 30
+                ));
+                engine.monsterAtb = 0;
+                engine.updateMonsterAtbUI?.(0);
+                engine.monsterExhaustedFlightWobble = true;
+                engine.monsterFlightTicksRemaining = wobbleTicks;
+                this.playFlightReaction(engine, 'exhausted-flight-wobble', wobbleTicks);
+                engine.showSkillBubble?.('monster', '💫 탈진 비행');
+                engine.addLog?.(`💫 [탈진 비행] ${engine.selectedMonster.nameKO}가 간신히 날아올랐지만 공중에서 비틀거립니다!`, '#9ed7e8');
+                return false;
+            }
+            return true;
+        }
+        if (engine.monsterState === 'exhausted') return true;
         engine.monsterGroundTurns++;
         const chance = engine.monsterState === 'enraged' ? .58 : .34;
-        if (engine.monsterGroundTurns >= 2 && this.random() < chance) this.takeOff(engine);
+        if (engine.monsterGroundTurns >= 2 && this.random() < chance) {
+            return this.attemptTakeOff(engine) !== 'failed';
+        }
+        return true;
+    }
+
+    recoverNoEligibleAirAction(engine) {
+        if (engine.monsterFlightState !== 'airborne') return false;
+        this.land(engine, true);
+        engine.monsterJustTookOff = false;
+        engine.monsterAtb = Math.min(100, Number(engine.monsterAtb || 0));
+        engine.updateMonsterAtbUI?.(engine.monsterAtb);
+        engine.monsterActionGateDiagnostics = [
+            ...(engine.monsterActionGateDiagnostics || []),
+            {
+                tick: Number(engine.battleTime || 0),
+                monsterId: engine.selectedMonster?.id || 'unknown',
+                reason: 'no-eligible-air-action',
+                recoveredTo: 'grounded'
+            }
+        ].slice(-24);
+        console.warn?.('[Hunt] Recovered an airborne action-selection stall.', {
+            monsterId: engine.selectedMonster?.id,
+            battleTick: engine.battleTime
+        });
+        return true;
+    }
+
+    failureChance(engine) {
+        const chances = engine.monsterBehavior?.flightFailureChanceByBrokenWings;
+        if (!Array.isArray(chances)) return 0;
+        const broken = Math.max(0, Math.min(2,
+            HuntMonsterFlightRuntime.archetypes()?.brokenWingCount(engine.monsterPartState) || 0));
+        return Math.max(0, Math.min(1, Number(chances[broken] || 0)));
+    }
+
+    attemptTakeOff(engine) {
+        if (this.random() < this.failureChance(engine)) {
+            this.failTakeoff(engine);
+            return 'failed';
+        }
+        this.takeOff(engine);
+        return 'airborne';
+    }
+
+    failTakeoff(engine) {
+        const staggerTicks = Math.max(1, Number(engine.monsterBehavior?.flightFailureStaggerTicks || 50));
+        engine.monsterFlightState = 'grounded';
+        engine.monsterFlightTicksRemaining = 0;
+        engine.monsterJustTookOff = false;
+        engine.monsterAtb = 0;
+        engine.monsterRecoveryDuration = Math.max(Number(engine.monsterRecoveryDuration || 0), staggerTicks);
+        engine.updateMonsterAtbUI?.(0);
+        this.updateFlightUI(engine);
+        this.playFlightReaction(engine, 'takeoff-failure', staggerTicks);
+        engine.showSkillBubble?.('monster', '💫 비행 실패!');
+        engine.addLog?.(`💫 [비행 실패] ${engine.selectedMonster.nameKO}의 손상된 날개가 꺾여 이륙에 실패했습니다!`, '#ffd27f');
+    }
+
+    playFlightReaction(engine, kind, durationTicks) {
+        const target = (engine.selectedWeapons || []).find(hunter => hunter?.status === 'alive');
+        if (!target) return;
+        const profile = kind === 'exhausted-flight-wobble'
+            ? 'rath-flight-wobble'
+            : 'rath-flight-stagger';
+        engine.callbacks?.onTriggerMonsterAttack?.(
+            'physical',
+            '💫',
+            [{ index: target.index, result: 'pending' }],
+            kind,
+            {
+                id: `flight.${kind}`,
+                name: kind,
+                type: 'physical',
+                damageRatio: 0,
+                tags: ['no-impact', 'flight-reaction'],
+                animationProfile: profile,
+                animationDurationMs: Math.max(100, Number(durationTicks || 1) * 100),
+                attachedFx: { emoji: '💫', className: 'flight-stagger', durationMs: Math.max(100, Number(durationTicks || 1) * 100) }
+            }
+        );
     }
 
     takeOff(engine) {
+        const config = HuntMonsterFlightRuntime.flightConfig(engine.selectedMonster) || {};
+        const behaviorDuration = Number(engine.monsterBehavior?.shortFlightDurationTicks || 0);
         engine.monsterFlightState = 'airborne';
-        engine.monsterFlightDamage = 0;
-        engine.monsterFlightTicksRemaining = HuntMonsterFlightRuntime.FLIGHT_DURATION_TICKS;
+        engine.monsterFlightTicksRemaining = behaviorDuration
+            || Number(config.durationTicks || HuntMonsterFlightRuntime.FLIGHT_DURATION_TICKS);
         engine.monsterFlightTurns = 0;
         engine.monsterGroundTurns = 0;
-        engine.addLog(`🪽 [비행] ${engine.selectedMonster.nameKO}이(가) 체력바 높이까지 날아올라 60초간 공중 패턴을 사용합니다!`, '#8fdcff');
-        engine.showSkillBubble('monster', '🪽 비행 상태 · 60초');
+        engine.monsterJustTookOff = true;
+        engine.addLog(`🪽 [비행] ${engine.selectedMonster.nameKO}(이)가 공중 패턴에 돌입합니다.`, '#8fdcff');
+        engine.showSkillBubble('monster', '🪽 비행');
         this.updateFlightUI(engine);
     }
 
-    afterAction(engine) {
+    afterAction(engine, pattern = {}) {
+        if (pattern.runtimeImpactTimelineEvent && pattern.runtimeImpactTimelineFinal !== true) return;
+        if (pattern.flightTransition === 'takeoff' && engine.monsterFlightState === 'grounded') {
+            this.takeOff(engine);
+            return;
+        }
+        if (pattern.flightTransition === 'land' && engine.monsterFlightState === 'airborne') {
+            this.land(engine, false);
+            return;
+        }
+        if (engine.monsterBehavior?.flightMode === 'short-chain'
+            && engine.monsterFlightState === 'airborne'
+            && pattern.tags?.includes('flight-only')) {
+            this.land(engine, false);
+            return;
+        }
         if (engine.monsterFlightState === 'airborne') engine.monsterFlightTurns++;
+    }
+
+    cooldownTicks(engine) {
+        const catalog = HuntMonsterFlightRuntime.archetypes();
+        return catalog
+            ? catalog.flightCooldownTicks(engine.selectedMonster, engine.monsterPartState)
+            : 0;
     }
 
     land(engine, forced = false) {
         if (engine.monsterFlightState !== 'airborne') return;
         engine.monsterFlightState = 'grounded';
-        engine.monsterFlightDamage = 0;
+        engine.monsterLandingPending = false;
         engine.monsterFlightTicksRemaining = 0;
         engine.monsterFlightTurns = 0;
-        engine.monsterFlightCooldown = forced ? 220 : 90;
+        engine.monsterJustTookOff = false;
+        engine.monsterFlightCooldown = this.cooldownTicks(engine);
         this.updateFlightUI(engine);
-        if (!forced) engine.addLog(`🪽 [착지] ${engine.selectedMonster.nameKO}이(가) 60초의 비행을 마치고 지상으로 내려옵니다.`, '#d7e8ef');
+        this.triggerLandingTrap(engine);
+        if (!forced) engine.addLog(`🪽 [착지] ${engine.selectedMonster.nameKO}(이)가 지상으로 돌아옵니다.`, '#d7e8ef');
     }
 
-    onHunterDamage(engine, hunter, damage) {
-        if (engine.monsterFlightState !== 'airborne' || damage <= 0) return false;
-        engine.monsterFlightDamage += Number(damage) * (hunter?.type === 'ranged' ? 1.2 : .75);
-        const threshold = Math.max(300, Number(engine.monsterMaxHp || 1) * .1);
-        this.updateFlightUI(engine);
-        if (engine.monsterFlightDamage < threshold) return false;
-        this.land(engine, true);
-        engine.pendingMonsterAction = null;
-        engine.monsterAtb = 0;
-        const aerialKnockdownTicks = Math.ceil(HuntMonsterFlightRuntime.NORMAL_KNOCKDOWN_TICKS * HuntMonsterFlightRuntime.AERIAL_KNOCKDOWN_MULTIPLIER);
+    triggerLandingTrap(engine) {
+        const pendingTrap = engine.pendingLandingTrap;
+        if (!pendingTrap) return false;
+        engine.pendingLandingTrap = null;
+        const trapTicks = engine.consumeTrapDuration?.(40) || 40;
         engine.monsterState = 'knocked_down';
-        engine.monsterKnockdownDuration = Math.max(Number(engine.monsterKnockdownDuration || 0), aerialKnockdownTicks);
-        engine.updateMonsterAtbUI(0);
-        engine.updateMonsterStateUI('격추 대경직', `💥 격추된 ${engine.selectedMonster.nameKO} 💥`, { color: '#8fdcff', bg: 'rgba(80,180,255,.16)' });
-        engine.addLog(`💥 [격추!] 공중 누적 피해로 ${engine.selectedMonster.nameKO}이(가) 추락해 대경직에 빠졌습니다!`, '#8fdcff');
+        engine.monsterKnockdownDuration = Math.max(
+            Number(engine.monsterKnockdownDuration || 0),
+            trapTicks
+        );
+        engine.monsterAtb = 0;
+        engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
+        engine.updateMonsterAtbUI?.(0);
+        engine.triggerEnvironmentEffect?.('shocktrap', pendingTrap.hunterIndex);
+        engine.callbacks?.onTriggerMonsterKnockdownAnim?.();
+        engine.addLog?.(`🪤 [착지 함정] ${engine.selectedMonster.nameKO}(이)가 설치된 함정을 밟았습니다!`, '#ffe66d');
+        return true;
+    }
+
+    groundForStatus(engine, status = 'status') {
+        const airborne = engine?.monsterFlightState === 'airborne'
+            || engine?.monsterState === 'valstrax_flying';
+        if (!airborne) return false;
+        if (engine.monsterFlightState === 'airborne') this.land(engine, true);
+        else {
+            engine.monsterFlightState = 'grounded';
+            engine.monsterFlightTicksRemaining = 0;
+            engine.monsterFlightCooldown = this.cooldownTicks(engine);
+            this.updateFlightUI(engine);
+        }
+        return true;
+    }
+
+    forceLanding(engine, reason = 'knockdown', durationTicks = null, options = {}) {
+        const airborne = engine?.monsterFlightState === 'airborne' || engine?.monsterState === 'valstrax_flying';
+        if (!airborne) return false;
+        engine.forcedMonsterPatternId = null;
+        engine.monsterLandingPending = false;
+        const config = HuntMonsterFlightRuntime.flightConfig(engine.selectedMonster) || {};
+        const aerialTicks = Number(durationTicks) || Math.ceil(
+            HuntMonsterFlightRuntime.NORMAL_KNOCKDOWN_TICKS
+            * Number(config.forcedLandingMultiplier || HuntMonsterFlightRuntime.AERIAL_KNOCKDOWN_MULTIPLIER)
+        );
+
+        if (engine.monsterFlightState === 'airborne') this.land(engine, true);
+        else {
+            engine.monsterFlightState = 'grounded';
+            engine.monsterFlightTicksRemaining = 0;
+            engine.monsterFlightCooldown = this.cooldownTicks(engine);
+            this.updateFlightUI(engine);
+        }
+        if (engine.interruptMonsterMovement) engine.interruptMonsterMovement(`forced-landing:${reason}`);
+        else {
+            engine.pendingMonsterAction = null;
+            engine.pendingMonsterImpact = null;
+        }
+        engine.monsterAtb = Number.isFinite(options.retainedAtb)
+            ? Math.max(0, Math.min(100, Number(options.retainedAtb)))
+            : 0;
+        engine.monsterState = 'knocked_down';
+        engine.monsterKnockdownDuration = Math.max(Number(engine.monsterKnockdownDuration || 0), aerialTicks);
+        engine.playSFX?.('monster_knockdown', null, { monsterId: engine.selectedMonster.id });
+        engine.updateMonsterAtbUI(engine.monsterAtb);
+        engine.updateMonsterStateUI('격추 대경직', `💥 격추된 ${engine.selectedMonster.nameKO} 💥`, {
+            color: '#8fdcff',
+            bg: 'rgba(80,180,255,.16)'
+        });
+        engine.addLog(`💥 [격추] ${engine.selectedMonster.nameKO}(이)가 추락해 대경직에 빠집니다!`, '#8fdcff');
         engine.showSkillBubble('monster', '💥 격추 대경직!');
+        const partReactionKind = options.partReactionKind || null;
+        if (partReactionKind && engine.callbacks?.onTriggerMonsterPartBreakReaction) {
+            engine.monsterPartReactionKind = partReactionKind;
+            engine.callbacks.onTriggerMonsterPartBreakReaction(
+                partReactionKind,
+                aerialTicks,
+                options.partKind || null
+            );
+        } else {
+            engine.callbacks?.onTriggerMonsterKnockdownAnim?.();
+        }
         engine.shakeMonster();
         return true;
+    }
+
+    promoteAirborneKnockdown(engine) {
+        const airborne = engine?.monsterFlightState === 'airborne' || engine?.monsterState === 'valstrax_flying';
+        const hasKnockdown = Number(engine?.monsterKnockdownDuration || 0) > 0 || engine?.monsterState === 'knocked_down';
+        if (!airborne || !hasKnockdown) return false;
+        return this.forceLanding(engine, 'knockdown');
+    }
+
+    onPartBreak(engine, part, reaction = null, options = {}) {
+        const config = HuntMonsterFlightRuntime.flightConfig(engine?.selectedMonster);
+        if (!config?.partBreakForcesLanding || !part) return false;
+        const partReactionKind = reaction?.visualType
+            || (part.severed ? 'tail_sever_roll' : 'part_break_topple');
+        return this.forceLanding(
+            engine,
+            `part-break:${part.kind || 'unknown'}`,
+            Number(reaction?.durationTicks || 0) || null,
+            {
+                partReactionKind,
+                partKind: part.kind || null,
+                retainedAtb: options.retainedAtb
+            }
+        );
+    }
+
+    // Direct damage does not fill an invented aerial-topple gauge. Forced
+    // landings come from authored reactions: part break, KO, status or flash.
+    onHunterDamage() {
+        return false;
     }
 }
 

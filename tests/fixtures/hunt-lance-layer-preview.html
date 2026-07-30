@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,initial-scale=1">
+  <title>랜스 분리 레이어 검수</title>
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,
+    body {
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      overflow: hidden;
+      background: #0b0907;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      color: #fff;
+    }
+
+    .hunt-combat-board {
+      position: relative;
+      width: 760px;
+      height: 620px;
+      display: grid;
+      place-items: center;
+      border: 3px solid #a58145;
+      border-radius: 18px;
+      background: radial-gradient(circle, #33291d, #100d09 72%);
+    }
+
+    .hunt-combat-board .game-hunt-weapon-img-container {
+      transform: scale(2.5);
+    }
+
+    h1 {
+      position: absolute;
+      top: 42px;
+      margin: 0;
+      color: #f2d89b;
+      font: 900 30px/1 sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <main class="hunt-combat-board">
+    <h1>랜스 분리 레이어 검수</h1>
+    <div class="game-hunt-weapon-img-container">
+      <img class="game-hunt-weapon-img hunt-split-weapon hunt-split-weapon--lance"
+           src="../../img/weapons/lance.svg" alt="랜스">
+      <img class="hunt-split-shield hunt-split-shield--lance"
+           src="../../img/weapons/lance.svg" alt="방패">
+    </div>
+  </main>
+</body>
+</html>

@@ -55,6 +55,7 @@ class AudioCommandMatcher {
             });
         };
         Object.values(visualConfig).forEach(effect => {
+            if (effect?.preloadAudio !== true) return;
             if (effect?.soundKey) addKey(effect.soundKey);
             if (effect?.audioOverride) addKey(effect.audioOverride);
         });

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,initial-scale=1">
+  <title>Monster Hunter 포효 청음 검수</title>
+  <style>
+    :root{color-scheme:dark;--gold:#e4b968;--ink:#0d0c0a;--panel:#191611;--muted:#a89d8b;--ok:#67d49a;--warn:#ffca63;--bad:#ff7a73}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(circle at 50% 0,#40331f 0,#17130e 35%,#090807 100%);color:#f7ead0;font-family:"Noto Sans KR","Malgun Gothic",sans-serif}
+    body{padding:28px 34px 70px}.top{position:sticky;z-index:50;top:0;padding:18px 22px;margin-bottom:20px;border:2px solid #7f6337;background:#12100df2;box-shadow:0 10px 30px #000b}
+    h1{margin:0;font-size:34px;color:#ffe0a1}.summary{display:flex;gap:14px;align-items:center;margin-top:10px;color:#d5c7aa;font-size:18px}.pill{padding:6px 12px;border:1px solid #876d43;border-radius:8px;background:#241d13}
+    .filters{display:flex;gap:10px;margin-left:auto}.filters button,.copy{border:1px solid #9d7c45;border-radius:7px;background:#2b2115;color:#ffe3ab;padding:8px 12px;font-weight:800;cursor:pointer}.filters button.active{background:#7e5620;color:#fff}
+    .notice{margin:0 0 20px;padding:14px 18px;border-left:5px solid var(--warn);background:#211b12;font-size:17px;line-height:1.55}
+    #grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.card{border:2px solid #594a32;border-radius:10px;background:linear-gradient(145deg,#201b14,#100e0b);padding:17px;min-width:0;box-shadow:0 8px 22px #0008}.card.confirmed{border-color:#3e9b69;box-shadow:0 0 20px #2be47c24}.card.missing{border-color:#8b4540}
+    .card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}.monster{font-size:23px;font-weight:1000;color:#ffdda0}.bank{font-family:Consolas,monospace;color:#ad9d82}.status{margin-left:auto;padding:5px 9px;border-radius:6px;font-size:14px;font-weight:900;background:#3c3020;color:var(--warn)}.confirmed .status{background:#173f2c;color:var(--ok)}.missing .status{background:#45211e;color:var(--bad)}
+    .candidate{margin-top:10px;padding:11px;border:1px solid #4b4030;border-radius:8px;background:#0d0c0a}.candidate-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.suffix{font:900 19px Consolas;color:#fff0ba}.basis{font-size:13px;color:#cfb785;background:#2b2318;padding:3px 7px;border-radius:5px}.event{font:13px Consolas;color:#9fc1aa}
+    audio{width:100%;height:38px;margin:9px 0 7px}.path{display:block;overflow-wrap:anywhere;color:#aaa092;font:12px/1.45 Consolas}.copy{margin-top:8px;padding:5px 9px;font-size:13px}.empty{color:#d79288;padding:12px 0}.notes{margin-top:12px;color:#c6b89e;font-size:14px;line-height:1.5}.auditions{margin-top:28px}.auditions h2{font-size:27px;color:#f2c979}.audition-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.audition{border:1px solid #675338;border-radius:8px;background:#15110d;padding:13px}.audition strong{color:#ffd88c}.audition code{display:block;margin-top:7px;color:#aaa092;overflow-wrap:anywhere}
+    @media(max-width:1300px){#grid{grid-template-columns:repeat(2,1fr)}.audition-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:800px){#grid,.audition-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <h1>🔊 몬스터 포효 청음 검수실</h1>
+    <div class="summary">
+      <span class="pill" id="confirmed-count">확정 0</span>
+      <span class="pill" id="review-count">청음 필요 0</span>
+      <span class="pill" id="missing-count">추출·연결 누락 0</span>
+      <nav class="filters">
+        <button class="active" data-filter="all">전체</button>
+        <button data-filter="confirmed">확정</button>
+        <button data-filter="review">청음 필요</button>
+        <button data-filter="missing">누락</button>
+      </nav>
+    </div>
+  </header>
+  <p class="notice">
+    ▶ 재생 버튼으로 직접 비교하세요. 같은 표 번호가 서로 다른 파일로 해석될 수 있어 <b>직접 stream 번호</b>와
+    <b>디코드 목록 index</b>를 모두 표시합니다. 정답을 찾으면 파일명의 마지막 숫자 몇 자리만 알려줘도 됩니다.
+    한 음원을 재생하면 이전 음원은 자동 정지합니다.
+  </p>
+  <main id="grid"></main>
+  <section class="auditions">
+    <h2>디아블로스 사용자 청음 메모</h2>
+    <div class="audition-grid" id="audition-grid"></div>
+  </section>
+  <script src="../../js/effects/hunt/data/WorldMonsterRoarRoutes.generated.js"></script>
+  <script>
+    const names={
+      rathian:'리오레이아',rathalos:'리오레우스',diablos:'디아블로스',kirin:'키린',rajang:'라잔',
+      kushala_daora:'크샬다오라',lunastra:'나나 테스카토리',teostra:'테오 테스카토르',
+      jyuratodus:'쥬라토도스',lavasioth:'볼가노스',nargacuga:'나르가쿠르가',deviljho:'이블조',
+      barroth:'볼보로스',uragaan:'우라간킨',radobaan:'라도발킨',pukei_pukei:'푸케푸케',
+      nergigante:'네르기간테',safi_jiiva:'무페토 지바',zorah_magdaros:'조라 마그다라오스',
+      kulu_ya_ku:'쿠루루야크',tobi_kadachi:'토비카가치',paolumu:'파오우르무',
+      legiana:'레이기에나',great_girros:'도스기르오스',odogaron:'오도가론',tzitzi_ya_ku:'치치야크'
+    };
+    const basisLabel={ 'direct-decoded-stream':'표 번호 = stream', 'zero-based-decoded-index':'표 번호 = decoded index' };
+    const review=window.HUNT_WORLD_MONSTER_ROAR_REVIEW||[];
+    const grid=document.getElementById('grid');
+    const stopOthers=current=>document.querySelectorAll('audio').forEach(audio=>{if(audio!==current){audio.pause();audio.currentTime=0}});
+    function text(tag,className,value){const node=document.createElement(tag);node.className=className;node.textContent=value;return node}
+    review.forEach(entry=>{
+      const state=entry.status==='user-confirmed'?'confirmed':entry.candidates.length?'review':'missing';
+      const card=document.createElement('article');card.className=`card ${state}`;card.dataset.state=state;
+      const head=document.createElement('div');head.className='card-head';
+      head.append(text('div','monster',entry.monsterIds.map(id=>names[id]||id).join(' · ')));
+      head.append(text('div','bank',entry.bank));
+      head.append(text('span','status',state==='confirmed'?'✓ 확정':state==='review'?'? 청음 필요':'! 누락'));
+      card.append(head);
+      if(!entry.candidates.length) card.append(text('div','empty','재생 가능한 후보가 없습니다. 원본 은행 재추출 또는 이벤트 연결 복구가 필요합니다.'));
+      entry.candidates.forEach(candidate=>{
+        const box=document.createElement('div');box.className='candidate';
+        const top=document.createElement('div');top.className='candidate-top';
+        top.append(text('span','suffix',`…${candidate.sourceStream.slice(-4)}`));
+        candidate.mappingBases.forEach(basis=>top.append(text('span','basis',basisLabel[basis]||basis)));
+        top.append(text('span','event',`stream ${candidate.decodedStream} · event ${candidate.eventIds.join(', ')}`));
+        box.append(top);
+        const audio=document.createElement('audio');audio.controls=true;audio.preload='metadata';audio.src=`../../${candidate.path}`;audio.addEventListener('play',()=>stopOthers(audio));box.append(audio);
+        box.append(text('code','path',candidate.path));
+        const copy=document.createElement('button');copy.className='copy';copy.textContent='경로 복사';copy.onclick=()=>navigator.clipboard.writeText(candidate.path);box.append(copy);
+        card.append(box);
+      });
+      grid.append(card);
+    });
+    const counts={
+      confirmed:review.filter(entry=>entry.status==='user-confirmed').length,
+      review:review.filter(entry=>entry.status!=='user-confirmed'&&entry.candidates.length).length,
+      missing:review.filter(entry=>!entry.candidates.length).length
+    };
+    document.getElementById('confirmed-count').textContent=`확정 ${counts.confirmed}`;
+    document.getElementById('review-count').textContent=`청음 필요 ${counts.review}`;
+    document.getElementById('missing-count').textContent=`추출·연결 누락 ${counts.missing}`;
+    document.querySelectorAll('[data-filter]').forEach(button=>button.onclick=()=>{
+      document.querySelectorAll('[data-filter]').forEach(item=>item.classList.toggle('active',item===button));
+      document.querySelectorAll('.card').forEach(card=>card.hidden=button.dataset.filter!=='all'&&card.dataset.state!==button.dataset.filter);
+    });
+    fetch('../../data/hunt/world-monster-audio-auditions.json').then(response=>response.json()).then(data=>{
+      const target=document.getElementById('audition-grid');
+      data.entries.forEach(entry=>{
+        const box=document.createElement('div');box.className='audition';
+        box.append(text('strong','',`…${entry.sourceStream.slice(-4)} · stream ${entry.decodedStream}`));
+        box.append(text('div','notes',entry.audition));
+        const audio=document.createElement('audio');audio.controls=true;audio.preload='metadata';audio.src=`../../${entry.path}`;audio.addEventListener('play',()=>stopOthers(audio));box.append(audio);
+        box.append(text('code','',entry.path));target.append(box);
+      });
+    });
+  </script>
+</body>
+</html>

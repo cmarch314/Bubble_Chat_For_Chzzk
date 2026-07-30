@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "chameleos",
+  "nameKO": "오나즈치",
+  "canonicalEdition": "rise-sunbreak",
+  "variantOf": null,
+  "release": {
+    "stage": "released",
+    "order": 20,
+    "reviewId": "pilot-2026-07-25",
+    "reviewedAt": "2026-07-25",
+    "gates": { "evidence": true, "patterns": true, "anatomy": true, "animation": true, "audio": true, "preview": true, "simulation": true }
+  },
+  "runtime": { "profileId": "chameleos", "mechanicModules": ["common", "elder", "mist"] },
+  "evidenceRefs": [
+    { "kind": "review-standard", "path": "data/hunt/monster-implementation-standard.md" },
+    { "kind": "pattern-audit", "path": "data/hunt/monster-pattern-pilot-report.md" }
+  ]
+}

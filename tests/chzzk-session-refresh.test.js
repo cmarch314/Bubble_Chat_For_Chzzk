@@ -4,6 +4,7 @@ const path = require('path');
 const vm = require('vm');
 
 const sourcePath = path.resolve(__dirname, '../js/ChzzkGateway.js');
+const companionEndpointPath = path.resolve(__dirname, '../js/runtime/LocalCompanionEndpoint.js');
 const context = vm.createContext({
     console,
     WebSocket: class { static OPEN = 1; },
@@ -21,7 +22,7 @@ const context = vm.createContext({
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} }
 });
 vm.runInContext(
-    `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.ChzzkGateway = ChzzkGateway;`,
+    `${fs.readFileSync(companionEndpointPath, 'utf8')}\n${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.ChzzkGateway = ChzzkGateway;`,
     context,
     { filename: sourcePath }
 );

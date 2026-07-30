@@ -13,6 +13,8 @@ class FakeAudio {
     }
     addEventListener(name, callback) { this.listeners[name] = callback; }
     pause() { this.paused = true; }
+    removeAttribute(name) { if (name === 'src') this.src = ''; }
+    load() { this.loaded = true; }
 }
 
 const windowObject = { location: { protocol: 'file:' } };
@@ -85,6 +87,7 @@ const nativeAudio = stager.createNativeAudio('BGM/quiet.mp3', {
 });
 assert.strictEqual(nativeAudio.volume, 0.2);
 assert.strictEqual(nativeAudio.loop, true);
+assert.strictEqual(stager.nativeEntries.some(item => item.el === nativeAudio), true);
 
 windowObject.location.protocol = 'https:';
 const webMedia = {
@@ -101,10 +104,17 @@ volume.visual = 0.4;
 stager.updateVolumes();
 assert.strictEqual(gainNodes[0].gain.value, 0.2);
 
-stager.dispose();
-assert.strictEqual(localMedia.paused, true);
-assert.strictEqual(nativeAudio.paused, true);
+assert.strictEqual(stager.releaseMediaElement(webMedia), true);
 assert.strictEqual(sourceNodes[0].disconnected, true);
 assert.strictEqual(gainNodes[0].disconnected, true);
+assert.strictEqual(stager.webAudioEntries.length, 0);
+
+assert.strictEqual(stager.releaseMediaElement(nativeAudio, { pause: true, unload: true }), true);
+assert.strictEqual(nativeAudio.paused, true);
+assert.strictEqual(nativeAudio.src, '');
+assert.strictEqual(stager.nativeEntries.some(item => item.el === nativeAudio), false);
+
+stager.dispose();
+assert.strictEqual(localMedia.paused, true);
 
 console.log('[test] Audio media staging protocol and volume contract passed.');

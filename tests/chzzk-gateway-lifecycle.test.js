@@ -91,6 +91,8 @@ const config = {
     loadHistory: false
 };
 const gateway = new context.ChzzkGateway(config, eventBus, null, timers);
+assert.ok(gateway.companionTimeoutMs > 5000,
+    'browser timeout must outlive the companion upstream timeout');
 assert.strictEqual(gateway._transportCandidates('https://example.invalid')[0].id, 'companion');
 assert.deepStrictEqual(
     Array.from(gateway._transportCandidates('https://example.invalid'), candidate => candidate.id),

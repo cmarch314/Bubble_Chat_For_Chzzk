@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>디아블로스 전투 애니메이션 프리뷰</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#111}
+    body{font-family:"Noto Sans KR",sans-serif}
+    #preview-viewport{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+    #diablos-board{position:relative;width:1848px;height:880px;margin:22px 36px;color:#fff;overflow:visible;background:radial-gradient(circle at 50% 36%,#57452f 0,#211c18 42%,#090909 82%);border:2px solid #8b6a3b}
+    .preview-title{position:absolute;left:28px;top:18px;z-index:80;font-size:28px;font-weight:900;color:#ffe3a0}
+    .preview-controls{position:absolute;right:24px;top:16px;z-index:90;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;width:980px}
+    .preview-controls button{padding:9px 15px;border:1px solid #d9ad63;border-radius:7px;color:#fff;background:#342617;font-size:17px;font-weight:800;cursor:pointer}
+    .hunt-monster-vitals{position:absolute;left:50%;top:72px;z-index:62;width:570px;transform:translateX(-50%);text-align:center}
+    .hunt-monster-vitals strong{font-size:30px}.monster-hp{height:13px;margin-top:5px;background:#281414;border:2px solid #a67842}.monster-hp i{display:block;width:73%;height:100%;background:#d63f31}
+    .hunt-monster-atb-track{width:50%;height:8px;margin:6px auto;background:#2d2816;border:1px solid #756a32}.hunt-monster-atb-track i{display:block;height:100%;background:#ffd13f}
+    #monster-showcase-panel{position:absolute;left:184px;right:184px;top:120px;height:440px;z-index:45;overflow:visible}
+    .hunt-monster-attack-motion{position:absolute;left:50%;top:16px;width:430px;height:400px;margin-left:-215px;z-index:48}
+    #fight-monster-img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 14px #000c)}
+    .game-hunt-weapons-grid{position:absolute;left:64px;right:64px;bottom:50px;height:280px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+    .game-hunt-weapon-card{position:relative;border:2px solid #7f6848;background:#171512d9;overflow:visible}
+    .game-hunt-weapon-img-container{position:absolute;left:50%;top:-26px;width:260px;height:230px;transform:translateX(-50%);z-index:70}
+    .game-hunt-weapon-img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 7px #000c)}
+    .hunter-name{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:24px;font-weight:900}
+    .chat-safe{position:absolute;left:0;right:0;bottom:0;height:162px;box-sizing:border-box;padding:42px;color:#cabca0;background:#080808;border-top:2px dashed #725d3e;text-align:center;font-size:22px}
+  </style>
+</head>
+<body>
+  <div id="preview-viewport">
+    <main id="diablos-board" class="game-hunt-card hunt-combat-board">
+      <div class="preview-title">디아블로스 · 직접 충돌 / 복귀 / 행동방해</div>
+      <nav class="preview-controls">
+        <button data-phase="enter">잠복</button>
+        <button data-phase="telegraph">급습 전조</button>
+        <button data-phase="emerge">지중 급습</button>
+        <button data-phase="uppercut">뿔 쳐올리기</button>
+        <button data-phase="tail">꼬리 휘두르기</button>
+        <button data-phase="rageTail">분노 꼬리 2회</button>
+        <button data-phase="tailRock">☁️ 🪨</button>
+        <button data-phase="sideTackle">💥 철산고</button>
+        <button data-phase="rageCharge">분노 왕복 돌진</button>
+      </nav>
+      <section class="hunt-monster-vitals">
+        <strong>디아블로스</strong>
+        <div class="monster-hp"><i></i></div>
+        <div class="hunt-monster-atb-track"><i style="width:64%"></i></div>
+      </section>
+      <div id="monster-showcase-panel" class="game-hunt-monster-showcase hunt-monster-motion-stage">
+        <div class="hunt-monster-attack-motion">
+          <img id="fight-monster-img" class="game-hunt-monster-img" src="../../img/monsters/diablos.png" alt="디아블로스">
+        </div>
+      </div>
+      <section class="game-hunt-weapons-grid">
+        <article id="fight-card-0" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt="대검"></div><div class="hunter-name">대검</div></article>
+        <article id="fight-card-1" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/lance.svg" alt="랜스"></div><div class="hunter-name">랜스</div></article>
+        <article id="fight-card-2" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt="수렵피리"></div><div class="hunter-name">수렵피리</div></article>
+        <article id="fight-card-3" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/bow.svg" alt="활"></div><div class="hunter-name">활</div></article>
+      </section>
+    </main>
+    <footer class="chat-safe">OBS 채팅 안전영역 · 하단 15%</footer>
+  </div>
+  <script src="../../js/effects/hunt/HuntAtbConfig.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAnimationCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
+  <script>
+    const viewport=document.getElementById('preview-viewport');
+    const fit=()=>{const scale=Math.min(innerWidth/1920,innerHeight/1080);viewport.style.transform=`scale(${scale})`};
+    addEventListener('resize',fit);fit();
+    const board=document.getElementById('diablos-board');
+    const owner={card:board,selectedMonster:{id:'diablos',nameKO:'디아블로스',species:'Flying Wyvern'},animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)},clear(id){clearTimeout(id)}}};
+    const animator=new HuntMonsterAttackAnimator(owner,()=>{});
+    const hit=index=>[{index,result:'hit'}];
+    function reset(){animator.triggerMonsterBurrowPhase('cancel')}
+    function previewPhase(phase){
+      reset();
+      if(phase==='enter') animator.triggerMonsterBurrowPhase('enter',null,1250);
+      if(phase==='telegraph'){board.classList.add('hunt-monster-underground');animator.triggerMonsterBurrowPhase('telegraph',2,1200)}
+      if(phase==='emerge'){board.classList.add('hunt-monster-underground');animator.triggerMonsterBurrowPhase('telegraph',2,1200);setTimeout(()=>animator.triggerMonsterBurrowPhase('emerge',2,1450),700)}
+      if(phase==='uppercut') animator.triggerMonsterAttack('physical','💥',hit(1),'뿔 쳐올리기',{id:'diablos.horn_uppercut',name:'뿔 쳐올리기',tags:['horn','target-contact']});
+      if(phase==='tail') animator.triggerMonsterAttack('physical','💥',[{index:1,result:'hit'},{index:2,result:'hit'}],'꼬리 휘두르기',{id:'diablos.tail_sweep',name:'꼬리 휘두르기',tags:['tail']});
+      if(phase==='rageTail') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'hit'},{index:1,result:'hit'},{index:2,result:'hit'}],'꼬리 휘두르기',{id:'diablos.tail_sweep',name:'꼬리 휘두르기',tags:['tail','double-sweep','multi-hit']});
+      if(phase==='tailRock') animator.triggerMonsterAttack('physical','💥',[{index:1,result:'hit'},{index:2,result:'hit'}],'꼬리 내려찍기·바위 날리기',{id:'diablos.tail_slam_rock',name:'꼬리 내려찍기·바위 날리기',type:'projectile',tags:['tail','tail-slam-rock','projectile'],delivery:'projectile',animationProfile:'tail-slam-rock'});
+      if(phase==='sideTackle') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'hit'},{index:1,result:'hit'}],'철산고',{id:'diablos.side_tackle',name:'철산고',tags:['physical','side-tackle','target-contact'],animationProfile:'side-tackle-contact'});
+      if(phase==='rageCharge') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'dodge'},{index:1,result:'hit'},{index:3,result:'dodge'}],'분노 연속 돌진',{id:'diablos.rage_charge',name:'분노 연속 돌진',type:'charge',tags:['charge','cross-charge','multi-hit'],animationProfile:'ground-charge-double',runtimeChargeAnchors:[0,3],runtimeChargePassSizes:[2,1]});
+    }
+    document.querySelectorAll('[data-phase]').forEach(button=>button.addEventListener('click',()=>previewPhase(button.dataset.phase)));
+    addEventListener('load',()=>previewPhase('tailRock'));
+  </script>
+</body>
+</html>

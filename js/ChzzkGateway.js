@@ -35,6 +35,7 @@ class ChzzkGateway {
         this.sessionCheckIntervalMs = timers.sessionCheckIntervalMs || 30000;
         this.authTimeoutMs = timers.authTimeoutMs || 8000;
         this.staleConnectionMs = timers.staleConnectionMs || 120000;
+        this.companionTimeoutMs = timers.companionTimeoutMs || 6500;
     }
 
     async connect(options = {}) {
@@ -484,7 +485,7 @@ class ChzzkGateway {
         const response = await this._fetchWithTimeout(
             companionUrl,
             {},
-            2500
+            this.companionTimeoutMs
         );
         return this._parseApiResponse(response, 'Local companion');
     }

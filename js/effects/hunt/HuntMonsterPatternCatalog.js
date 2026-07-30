@@ -1,4 +1,43 @@
+function huntPatternDependency(globalValue, modulePath, legacyEvalPath) {
+    if (globalValue) return globalValue;
+    if (typeof module === 'undefined' || !module.exports) return null;
+    try {
+        return require(modulePath);
+    } catch (error) {
+        if (error?.code !== 'MODULE_NOT_FOUND') throw error;
+        return require(legacyEvalPath);
+    }
+}
+
+const HUNT_MONSTER_EDITION_RESOLVER = huntPatternDependency(
+    globalThis.HuntMonsterEditionResolver,
+    './HuntMonsterEditionResolver.js',
+    '../js/effects/hunt/HuntMonsterEditionResolver.js'
+);
+const HUNT_MONSTER_RELEASE_MANIFEST_DATA = huntPatternDependency(
+    globalThis.HUNT_MONSTER_RELEASE_MANIFEST,
+    './data/MonsterReleaseManifest.generated.js',
+    '../js/effects/hunt/data/MonsterReleaseManifest.generated.js'
+);
+
 class HuntMonsterPatternCatalog {
+    static displayName(patternOrName, monster = {}) {
+        let value = String(patternOrName?.name || patternOrName || '').trim();
+        const aliases = [monster.nameKO, monster.nameEN, monster.name, monster.id]
+            .filter(Boolean)
+            .map(alias => String(alias).replace(/_/g, ' ').trim())
+            .sort((a, b) => b.length - a.length);
+        for (const alias of aliases) {
+            const escaped = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            value = value.replace(new RegExp(`^${escaped}(?:의)?[\\s·:：-]+`, 'i'), '');
+        }
+        // Curated profiles sometimes use a species epithet instead of the UI name
+        // (for example "화룡의 포효"). Strip only dragon-species title prefixes;
+        // ordinary move names such as "파멸의 일격" must remain intact.
+        value = value.replace(/^[가-힣]{1,10}룡(?:의[\s·:：-]*|[\s·:：-]+)/, '');
+        return value.trim() || String(patternOrName?.name || patternOrName || '').trim();
+    }
+
     static slug(value) {
         return String(value || '').replace(/[^a-zA-Z0-9가-힣]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase();
     }
@@ -45,7 +84,7 @@ class HuntMonsterPatternCatalog {
     static fallbackForMonster(monster = {}) {
         const id = String(monster.id || 'unknown_monster').replace(/[-']/g, '_');
         const name = monster.nameKO || monster.nameEN || id;
-        const small = /^(?:apceros|aptonoth|barnos|felyne|gajalaka|gajau|gastodon|girros|grimalkyne|hornetaur|jagras|kelbi|kestodon|mernos|mosswine|noios|popo|raphinos|shamos|vespoid|wulg|anteka|boaboa)$/.test(id);
+        const small = monster.tier === 'small' || /^(?:apceros|aptonoth|barnos|felyne|gajalaka|gajau|gastodon|girros|grimalkyne|hornetaur|jagras|kelbi|kestodon|mernos|mosswine|noios|popo|raphinos|shamos|vespoid|wulg|anteka|boaboa)$/.test(id);
         const flying = /rath|legiana|paolumu|bazel|tigrex|nargacuga|barioth|seregios|astalos|valstrax|pukei|kushala|teostra|lunastra/.test(id);
         const burrow = /diablos|jyuratodus|lavasioth|beotodus|barroth|radobaan|uragaan|shara|akantor|ukanlos/.test(id);
         const agile = /odogaron|tobi|zinogre|rajang|kirin|nargacuga|barioth|lunagaron/.test(id);
@@ -58,9 +97,9 @@ class HuntMonsterPatternCatalog {
             : ['충격', 'physical'];
         if (/great_girros|volvidon/.test(id)) elemental.splice(0, 2, '마비', 'paralysis');
         else if (/radobaan|nightshade_paolumu|somnacanth/.test(id)) elemental.splice(0, 2, '수면', 'sleep');
-        const evidence = 'web-reference:kiranico-species-attack-table';
+        const evidence = `species-archetype:${small ? 'small-pack' : flying ? 'flying-wyvern' : burrow ? 'burrowing' : agile ? 'agile' : 'grounded-body-plan'}`;
         const make = (suffix, label, type, damageRatio, options = {}) => ({
-            id: `${id}.${suffix}`, name: `${name} ${label}`, type, damageRatio,
+            id: `${id}.${suffix}`, name: label, type, damageRatio,
             windupTicks: options.windup || 5, activeTicks: options.active || 2, recoveryTicks: options.recovery || 8,
             minTargets: options.minTargets || 1, maxTargets: options.maxTargets || 1,
             cooldownTicks: options.cooldown || 30, weight: options.weight || 1,
@@ -85,10 +124,67 @@ class HuntMonsterPatternCatalog {
         const result = {};
         const scope = typeof window !== 'undefined' ? window : globalThis;
         const overrides = scope.HUNT_MONSTER_PATTERN_OVERRIDES || {};
+        const wildsEvidence = scope.HUNT_WILDS_MONSTER_BEHAVIOR || {};
+        const riseEvidence = scope.HUNT_RISE_MONSTER_BEHAVIOR || {};
+        const worldEvidence = scope.HUNT_WORLD_MONSTER_BEHAVIOR || {};
+        const worldShellEvidence = scope.HUNT_WORLD_SHELL_BEHAVIOR || {};
+        const mhxxEvidence = scope.HUNT_MHXX_MONSTER_BEHAVIOR || {};
+        const mhxxDbEvidence = scope.HUNT_MHXX_DB_MONSTER_BEHAVIOR || {};
+        const publishedEvidence = scope.HUNT_PUBLISHED_MONSTER_BEHAVIOR || {};
+        const releaseRecords = new Map(((scope.HUNT_MONSTER_RELEASE_MANIFEST
+            || HUNT_MONSTER_RELEASE_MANIFEST_DATA)?.records || [])
+            .map(record => [String(record.id || '').replace(/[-']/g, '_'), record]));
         const monsterById = new Map((monsters || []).map(monster => [String(monster.id || '').replace(/[-']/g, '_'), monster]));
-        const monsterIds = new Set([...Object.keys(monsterAttacks), ...Object.keys(overrides), ...monsterById.keys()]);
+        const monsterIds = new Set([
+            ...Object.keys(monsterAttacks),
+            ...Object.keys(overrides),
+            ...Object.keys(wildsEvidence),
+            ...Object.keys(riseEvidence),
+            ...Object.keys(worldEvidence),
+            ...Object.keys(worldShellEvidence),
+            ...Object.keys(mhxxEvidence),
+            ...Object.keys(mhxxDbEvidence),
+            ...Object.keys(publishedEvidence),
+            ...monsterById.keys()
+        ]);
         monsterIds.forEach(monsterId => {
             const attacks = monsterAttacks[monsterId] || [];
+            const exactOverride = overrides[monsterId]?.every(pattern =>
+                pattern.evidence === 'installed-game-action-class'
+                || pattern.evidence === 'verified-complete-action'
+                || pattern.evidence === 'world-installed-action+ja-web-review'
+                || pattern.evidence?.startsWith('world-variant-review:')
+                || pattern.runtimePolicy === 'reviewed-variant-kit');
+            if (exactOverride) {
+                result[monsterId] = overrides[monsterId].map(pattern => pattern.tags?.includes('ultimate') || pattern.type === 'ultimate'
+                    ? { ...pattern, type: 'ultimate', damageRatio: 0.90, minTargets: 4, maxTargets: 4, weight: 0.55,
+                        cooldownTicks: Math.max(450, Number(pattern.cooldownTicks || 0)),
+                        windupTicks: Math.max(14, Number(pattern.windupTicks || 0)), recoveryTicks: Math.max(18, Number(pattern.recoveryTicks || 0)),
+                        tags: [...new Set([...(pattern.tags || []), 'ultimate', 'all-target'])] }
+                    : { ...pattern });
+                return;
+            }
+            const releaseRecord = releaseRecords.get(monsterId) || null;
+            const resolvedEdition = HUNT_MONSTER_EDITION_RESOLVER?.resolve({
+                wilds: wildsEvidence[monsterId]?.patterns,
+                'rise-sunbreak': riseEvidence[monsterId]?.patterns,
+                'world-iceborne': worldEvidence[monsterId]?.patterns,
+                'world-shell': worldShellEvidence[monsterId]?.patterns,
+                'generations-ultimate-db': mhxxDbEvidence[monsterId]?.patterns,
+                'generations-ultimate': mhxxEvidence[monsterId]?.patterns,
+                published: publishedEvidence[monsterId]?.patterns
+            }, {
+                canonicalEdition: releaseRecord?.canonicalEdition,
+                strict: Boolean(releaseRecord)
+            });
+            if (resolvedEdition) {
+                result[monsterId] = resolvedEdition.patterns.map(pattern => ({ ...pattern }));
+                return;
+            }
+            if (releaseRecord) {
+                result[monsterId] = [];
+                return;
+            }
             if (overrides[monsterId]) {
                 result[monsterId] = overrides[monsterId].map(pattern => pattern.tags?.includes('ultimate') || pattern.type === 'ultimate'
                     ? { ...pattern, type: 'ultimate', damageRatio: 0.90, minTargets: 4, maxTargets: 4, weight: 0.55,
@@ -105,6 +201,12 @@ class HuntMonsterPatternCatalog {
             result[monsterId] = (attacks || []).map((attack, index) => typeof attack === 'string'
                 ? { ...HuntMonsterPatternCatalog.infer(attack, index), id: `${monsterId}.${HuntMonsterPatternCatalog.slug(attack)}` }
                 : { ...HuntMonsterPatternCatalog.infer(attack.name || attack.id, index), ...attack });
+        });
+        Object.entries(result).forEach(([monsterId, patterns]) => {
+            const monster = monsterById.get(monsterId);
+            if (monster?.roar?.status === 'verified-absent') {
+                result[monsterId] = patterns.filter(pattern => pattern.type !== 'roar' && !pattern.tags?.includes('roar'));
+            }
         });
         if (typeof HuntMonsterFlightRuntime !== 'undefined') {
             Object.entries(result).forEach(([monsterId, patterns]) => {
@@ -127,6 +229,20 @@ class HuntMonsterPatternCatalog {
             });
         });
         return errors;
+    }
+
+    static validateReleased(catalog = {}, manifest = HUNT_MONSTER_RELEASE_MANIFEST_DATA) {
+        const records = manifest?.records || [];
+        const hasCompleteReleaseScope = records.every(record =>
+            Object.prototype.hasOwnProperty.call(catalog, String(record.id || '').replace(/[-']/g, '_')));
+        if (!hasCompleteReleaseScope) return [];
+        return records.flatMap(record => {
+            const id = String(record.id || '').replace(/[-']/g, '_');
+            const patterns = catalog[id];
+            return Array.isArray(patterns) && patterns.length
+                ? []
+                : [`${record.id} released kit has no patterns for ${record.canonicalEdition}`];
+        });
     }
 }
 

@@ -1,4 +1,92 @@
 class HuntHunterTurnExecutor {
+    static BASE_HIT_CHANCE = 0.90;
+    static WHETSTONE_ITEM_VISUAL = Object.freeze({
+        type: 'item',
+        label: '숫돌',
+        imagePath: 'local_assets/monster_hunter/reference-icons/rise/item/426326752.png',
+        sourceId: '426326752',
+        sourceNameJa: '砥石'
+    });
+
+    static supportItemPolicy() {
+        if (typeof HuntSupportItemPolicy !== 'undefined') return HuntSupportItemPolicy;
+        if (typeof require === 'function') return require('./HuntSupportItemPolicy.js');
+        return null;
+    }
+
+    static completeAction(engine, hunter, action, context = {}) {
+        const {
+            attackTicks = 10,
+            continuingGreatSwordCharge = false,
+            actionStartingAtb = 100,
+            beganInDemonMode = false,
+            isKnockdownAttack = false,
+            combos = []
+        } = context;
+        const resolvedAction = { ...action };
+        resolvedAction.durationTicks = resolvedAction.atbOccupancyTicks || resolvedAction.durationTicks || attackTicks;
+        if (hunter.id === 'long_sword') {
+            const tags = Array.isArray(resolvedAction.tags) ? resolvedAction.tags : [];
+            hunter.longSwordForesightEligible = Number(resolvedAction.dmg || 0) > 0
+                && !tags.includes('reaction-only')
+                && !tags.includes('counter-fail');
+        }
+        if (engine.perkRuntime) {
+            resolvedAction.durationTicks = engine.perkRuntime.actionDuration(hunter, resolvedAction, resolvedAction.durationTicks);
+        }
+        if (engine.actionStateMachine) engine.actionStateMachine.begin(hunter, resolvedAction);
+        else hunter.attackDuration = attackTicks;
+        if (hunter.id === 'great_sword') {
+            const endsChargeSequence = resolvedAction.id === 'great_sword.true_charged_slash'
+                || resolvedAction.tags?.includes('tackle');
+            hunter.greatSwordChargeLocked = !endsChargeSequence
+                && (continuingGreatSwordCharge || resolvedAction.tags?.includes('charge-release'));
+        }
+        if (!continuingGreatSwordCharge) {
+            HuntHunterTurnExecutor.spendActionAtb(
+                hunter,
+                resolvedAction,
+                actionStartingAtb,
+                beganInDemonMode || Boolean(hunter.longSwordReactiveFollowup)
+            );
+        }
+        engine.updateWeaponAtbUI(hunter.index, hunter.atb);
+        if (!isKnockdownAttack) {
+            hunter.lastActionId = resolvedAction.id;
+            hunter.comboIndex = engine.weaponActionSelector
+                ? engine.weaponActionSelector.nextIndex(hunter, combos, resolvedAction)
+                : (hunter.comboIndex + 1) % combos.length;
+        }
+        if (resolvedAction.id === 'long_sword.spirit_roundslash') {
+            hunter.longSwordReactiveFollowup = false;
+            hunter.longSwordForesightChain = 0;
+        }
+        return resolvedAction;
+    }
+
+    static atbConfig() {
+        if (typeof HuntAtbConfig !== 'undefined') return HuntAtbConfig;
+        if (typeof require === 'function') return require('./HuntAtbConfig.js');
+        throw new Error('HuntAtbConfig is required before the hunter turn runtime');
+    }
+
+    static atbCostSeconds(action = {}) {
+        return HuntHunterTurnExecutor.atbConfig().actionCostSeconds(action);
+    }
+
+    static spendActionAtb(hunter, action = {}, startingAtb = 100, usePartialBudget = false) {
+        // One timing scale owns cadence. Legacy mechanic atbAfterAction values are
+        // state-machine hints only and must not override verified/proxy motion time.
+        const config = HuntHunterTurnExecutor.atbConfig();
+        const budget = usePartialBudget ? Number(startingAtb || 0) : config.GAUGE_MAX;
+        hunter.atb = Math.max(0, budget - config.actionCostGauge(action));
+        return hunter.atb;
+    }
+
+    static atbDamageScale(action = {}) {
+        return Math.max(0.15, HuntHunterTurnExecutor.atbConfig().normalizedActionCost(action) * 0.65);
+    }
+
     static combatGatherFind(random = Math.random, personality = 'normal') {
         const finds = [
             { kind: 'herb', node: '풀꽃', item: '약초', emoji: '🌿', color: '#aaffaa' },
@@ -7,7 +95,14 @@ class HuntHunterTurnExecutor {
             { kind: 'mushroom', node: '버섯 군락', item: '푸른버섯', emoji: '🍄', color: '#c59cff' },
             { kind: 'mushroom', node: '버섯 군락', item: '니트로버섯', emoji: '🍄', color: '#ff9b68' },
             { kind: 'insect', node: '곤충 채집 포인트', item: '뇌광충', emoji: '🪲', color: '#f5e96b' },
-            { kind: 'insect', node: '곤충 채집 포인트', item: '광충', emoji: '🦋', color: '#fff3a3' },
+            {
+                kind: 'insect',
+                node: '곤충 채집 포인트',
+                item: '광충',
+                emoji: '🪲',
+                color: '#ffe45c',
+                visualVariant: 'flashbug'
+            },
             { kind: 'bone', node: '뼈무덤', item: '용골【중】', emoji: '🦴', color: '#e8dfc5' },
             { kind: 'honey', node: '벌집', item: '벌꿀', emoji: '🍯', color: '#ffc857' }
         ];
@@ -31,9 +126,14 @@ class HuntHunterTurnExecutor {
     }
 
     static preparationAudioCue(action) {
-        if (action?.audioCue && action.audioCue !== 'none') return action.audioCue;
         const id = String(action?.id || '');
-        if (/^bow\.draw_/.test(id)) return null;
+        // Bow preparation is intentionally silent. Only the release/impact
+        // action may play bow audio; repeated draw and charge-step strings are
+        // fatiguing in an autonomous battle.
+        if (/^bow\./.test(id)) return null;
+        if (action?.audioCue && action.audioCue !== 'none') return action.audioCue;
+        const greatSwordChargeTier = id.match(/^great_sword\.(?:strong_|true_)?charge_([123])$/)?.[1];
+        if (greatSwordChargeTier) return `charge_tier_${greatSwordChargeTier}`;
         if (/extract_/.test(id)) return 'kinsect_extract';
         if (/reload|load_phials/.test(id)) return 'reload';
         if (/recital|melody|note/.test(id)) return 'hunting_horn_note';
@@ -53,23 +153,49 @@ class HuntHunterTurnExecutor {
             w.atb = 0;
             return;
         }
-        w.atb = 0;
+        const actionStartingAtb = Number(w.atb || 0);
+        const beganInDemonMode = w.id === 'dual_blades' && Boolean(w.demonMode);
+        const continuingGreatSwordCharge = w.id === 'great_sword' && Boolean(w.greatSwordChargeLocked);
+        let forceUntargetableWhiff = false;
+        if (!continuingGreatSwordCharge) w.atb = 0;
 
-        if (engine.hunterCommandQueue && engine.hunterCommandQueue.tryExecute(engine, w)) return;
-
+        if (!continuingGreatSwordCharge) {
         if (engine.perkRuntime && engine.perkRuntime.trySpecialAction(w)) return;
 
         const trapImmuneMonster = engine.isMonsterTrapImmune();
+        const supportItemPolicy = HuntHunterTurnExecutor.supportItemPolicy();
+        const shouldFlash = supportItemPolicy?.canUseFlash(engine, w, engine.random.bind(engine));
+        if (Number(w.shockTraps || 0) > 0
+            && !trapImmuneMonster
+            && engine.monsterFlightState === 'airborne'
+            && !shouldFlash
+            && !engine.pendingLandingTrap) {
+            w.shockTraps--;
+            w.itemDuration = 12;
+            engine.pendingLandingTrap = {
+                hunterIndex: w.index,
+                hunterName: w.hunterName
+            };
+            engine.updateHunterItemUI?.(w);
+            engine.triggerEnvironmentEffect('shocktrap-pending', w.index);
+            engine.addLog(`🪤 [함정 설치] ${w.hunterName}이(가) 착지 지점에 함정을 설치했습니다.`, '#ffe66d');
+            return;
+        }
         if (Number(w.shockTraps || 0) > 0 && !trapImmuneMonster && engine.monsterFlightState !== 'airborne'
             && engine.monsterState === 'normal' && engine.monsterAtb >= 60) {
             w.shockTraps--;
             engine.updateHunterItemUI?.(w);
             w.itemDuration = 12;
             const trapTicks = engine.consumeTrapDuration(40);
-            engine.pendingMonsterAction = null;
+            if (engine.interruptMonsterMovement) engine.interruptMonsterMovement('trap');
+            else {
+                engine.pendingMonsterAction = null;
+                engine.pendingMonsterImpact = null;
+            }
             engine.monsterState = 'knocked_down';
             engine.monsterKnockdownDuration = Math.max(Number(engine.monsterKnockdownDuration || 0), trapTicks);
             engine.monsterAtb = 0;
+            engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
             engine.updateMonsterAtbUI(0);
             engine.updateMonsterStateUI('마비함정', `⚡ 마비함정에 걸린 ${engine.selectedMonster.nameKO} ⚡`, { color: '#ffe66d', bg: 'rgba(255,230,80,.14)' });
             engine.triggerEnvironmentEffect('shocktrap', w.index);
@@ -78,24 +204,27 @@ class HuntHunterTurnExecutor {
             return;
         }
 
-        const shouldFlash = Number(w.flashPods || 0) > 0
-            && (engine.monsterFlightState === 'airborne' || engine.monsterAtb >= 80 || engine.pendingMonsterAction);
         if (shouldFlash) {
             w.flashPods--;
+            engine.monsterFlashUseCount = Number(engine.monsterFlashUseCount || 0) + 1;
             w.itemDuration = 8;
-            engine.pendingMonsterAction = null;
+            if (engine.interruptMonsterMovement) engine.interruptMonsterMovement('flash');
+            else {
+                engine.pendingMonsterAction = null;
+                engine.pendingMonsterImpact = null;
+            }
             engine.monsterAtb = 0;
             engine.updateMonsterAtbUI(0);
             const wasAirborne = engine.monsterFlightState === 'airborne';
             if (wasAirborne && engine.monsterFlightRuntime) {
-                engine.monsterFlightRuntime.land(engine, true);
-                engine.monsterState = 'knocked_down';
-                engine.monsterKnockdownDuration = Math.max(Number(engine.monsterKnockdownDuration || 0), 70);
-                engine.updateMonsterStateUI('섬광 격추', `✨ 섬광에 추락한 ${engine.selectedMonster.nameKO} ✨`, { color: '#fff3a3', bg: 'rgba(255,245,170,.14)' });
-                engine.callbacks?.onTriggerMonsterKnockdownAnim?.();
-            } else {
-                engine.monsterRecoveryDuration = Math.max(Number(engine.monsterRecoveryDuration || 0), 25);
+                engine.monsterFlightRuntime.forceLanding(engine, 'flash');
             }
+            engine.updateHunterItemUI?.(w);
+            engine.playSFX?.('flash_pod', null, {
+                hunterIndex: w.index,
+                action: 'support',
+                item: 'flash-pod'
+            });
             engine.triggerEnvironmentEffect('flash', w.index);
             engine.addLog(`✨ [섬광탄] ${w.hunterName}이(가) 광충으로 조제한 섬광탄을 사용해 ${wasAirborne ? '몬스터를 격추했습니다' : '몬스터의 공격을 끊었습니다'}! (남은 섬광 ${w.flashPods})`, '#fff3a3');
             engine.showSkillBubble(w.index, '✨ 섬광탄!');
@@ -138,7 +267,7 @@ class HuntHunterTurnExecutor {
                     engine.updateHunterItemUI?.(w);
                     engine.addLog(`${find.emoji} [몬린이 딴짓] ${w.hunterName} (${w.name})이(가) ${find.node}을(를) 채집하느라 한눈을 팝니다! (획득: ${find.item}${reward} · 파티 채집 ${engine.combatGatherCount}/3)`, find.color);
                     engine.playAudioFile('Unified_SFX/MH - Item Found.mp3', null, .7, { hunterIndex: w.index, action: 'item' });
-                    engine.spawnEmojiBubble(w.index, find.emoji);
+                    engine.spawnEmojiBubble(w.index, find.emoji, { variant: find.visualVariant });
                     engine.shakeWeapon(w.index, find.color);
                 }
                 return;
@@ -184,13 +313,17 @@ class HuntHunterTurnExecutor {
         if (w.personality === 'support') {
             // Trapping
             const trapImmune = engine.isMonsterTrapImmune();
-            if (!trapImmune && engine.monsterState === 'normal' && (!w.trapsUsed || w.trapsUsed < 2)) {
+            if (!trapImmune
+                && engine.monsterTraitRuntime?.canTriggerTrap?.(engine, 'pitfall') !== false
+                && engine.monsterState === 'normal'
+                && (!w.trapsUsed || w.trapsUsed < 2)) {
                 w.trapsUsed = (w.trapsUsed || 0) + 1;
                 w.itemDuration = 20;
                 const trapTicks = engine.consumeTrapDuration(40);
                 engine.monsterKnockdownDuration = trapTicks;
                 engine.monsterState = 'knocked_down';
                 engine.monsterAtb = 0;
+                engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
                 engine.updateMonsterAtbUI(0);
                 engine.updateMonsterStateUI('구멍함정 상태', `🕸️ 함정에 빠진 ${engine.selectedMonster.nameKO} 🕸`, { color: '#ff9500', bg: 'rgba(255,149,0,0.1)' });
                 
@@ -234,7 +367,7 @@ class HuntHunterTurnExecutor {
                 const result = find.kind === 'herb' ? ' · 지원 가루 1개 조제' : flashReward;
                 engine.addLog(`${find.emoji} [채집] ${w.hunterName}이(가) ${find.node}에서 ${find.item}을(를) 획득했습니다${result}! (파티 채집 ${engine.combatGatherCount}/3)`, find.color);
                 engine.playAudioFile('Unified_SFX/MH - Item Found (rare).mp3', null, .7, { hunterIndex: w.index, action: 'item' });
-                engine.spawnEmojiBubble(w.index, find.emoji);
+                engine.spawnEmojiBubble(w.index, find.emoji, { variant: find.visualVariant });
                 engine.shakeWeapon(w.index, find.color);
                 engine.schedule(() => { w.isGathering = false; }, 2500);
                 return;
@@ -285,14 +418,68 @@ class HuntHunterTurnExecutor {
             w.pendingSharpnessRestore = true;
             w.atb = 0;
             engine.addLog(`🪨 [숫돌질 시작] ${w.hunterName} (${w.name})이(가) 빈틈을 보고 숫돌을 꺼냅니다. (${prevSharpness}/${w.maxSharpness})`, '#c98534');
-            // No verified whetstone sound is mapped yet; a wrong combine-item
-            // jingle is more distracting than a deliberately silent action.
+            engine.playSFX('whetstone', null, {
+                hunterIndex: w.index,
+                action: 'item',
+                item: 'whetstone',
+                durationTicks: w.itemDuration
+            });
+            engine.showSkillBubble(w.index, {
+                ...HuntHunterTurnExecutor.WHETSTONE_ITEM_VISUAL,
+                durationMs: Math.max(500, Number(w.itemDuration || 0) * 100)
+            });
             engine.shakeWeapon(w.index, '#c98534');
             return;
         }
+        }
+
+        const monsterTargetable = engine.isMonsterTargetable
+            ? engine.isMonsterTargetable()
+            : !(engine.monsterBurrowState?.phase === 'underground'
+                || engine.monsterTraversalState?.untargetable
+                || engine.monsterState === 'valstrax_flying');
+        if (!monsterTargetable) {
+            const unavailableGeneration = Number(engine.monsterTraversalGeneration || 0);
+            if (w.personality === 'newbie'
+                && w.lastUnavailableQuestionGeneration !== unavailableGeneration
+                && engine.random() < 0.55) {
+                w.lastUnavailableQuestionGeneration = unavailableGeneration;
+                engine.spawnEmojiBubble(w.index, '❓');
+            }
+            if (continuingGreatSwordCharge || (w.id === 'gunlance' && w.wyvernFireCharging)) {
+                forceUntargetableWhiff = true;
+            } else if (w.id === 'hammer' && Number(w.hammerChargeLevel || 0) > 0) {
+                const holdChance = {
+                    offensive: 0.78, veteran: 0.74, balanced: 0.56,
+                    defensive: 0.38, support: 0.34, newbie: 0.50
+                }[w.personality] ?? 0.56;
+                if (engine.random() < holdChance) {
+                    w.atb = actionStartingAtb;
+                    engine.updateWeaponAtbUI(w.index, w.atb);
+                } else {
+                    w.hammerChargeLevel = 0;
+                    w.rollDuration = 6;
+                    engine.actionStateMachine?.cancel(w, 'evade');
+                    engine.callbacks?.onTriggerRollAnimation?.(w.index);
+                }
+                return;
+            } else if (w.id === 'long_sword' && w.specialSheatheReady) {
+                w.specialSheatheReady = false;
+                w.iaiHelmBreakerReady = false;
+                w.rollDuration = 6;
+                engine.actionStateMachine?.cancel(w, 'evade');
+                engine.callbacks?.onTriggerRollAnimation?.(w.index);
+                if (engine.expressHunterEmotion) engine.expressHunterEmotion(w, 'failure');
+                return;
+            } else {
+                w.atb = actionStartingAtb;
+                engine.updateWeaponAtbUI(w.index, w.atb);
+                return;
+            }
+        }
 
         // Check if Valstrax is flying (untargetable)
-        if (engine.selectedMonster.id.includes('valstrax') && engine.monsterState === 'valstrax_flying') {
+        if (!continuingGreatSwordCharge && engine.selectedMonster.id.includes('valstrax') && engine.monsterState === 'valstrax_flying') {
             engine.addLog(`💨 [공격 실패] 발파루크가 고공 비행 중이라 ${w.name}의 공격이 공중으로 헛돌았습니다!`, '#aaa');
             engine.shakeWeapon(w.index, '#aaa');
             return;
@@ -312,7 +499,22 @@ class HuntHunterTurnExecutor {
             : { action: combos[w.comboIndex], index: w.comboIndex };
         let currentCombo = selectedAction.action;
         if (w.id === 'great_sword' && currentCombo?.tags?.includes('charge-release')) {
-            currentCombo = { ...currentCombo, name: `${Math.max(1, Number(w.greatSwordCharge || 1))}차지 ${currentCombo.name}` };
+            const chargeVisualLevel = Math.max(1, Math.min(3, Number(w.greatSwordCharge || 1)));
+            currentCombo = {
+                ...currentCombo,
+                name: `${chargeVisualLevel}차지 ${currentCombo.name}`,
+                // Mechanics consume greatSwordCharge before the slash is rendered.
+                // Preserve only the presentation stage through the release animation.
+                chargeVisualLevel
+            };
+        }
+        if (w.id === 'hammer' && currentCombo?.tags?.includes('charge-release')) {
+            currentCombo = {
+                ...currentCombo,
+                // Hammer mechanics consume the stored charge before rendering.
+                // Keep the presentation tier on the released swing just like Great Sword.
+                chargeVisualLevel: Math.max(1, Math.min(3, Number(w.hammerChargeLevel || 1)))
+            };
         }
         if (selectedAction.index >= 0) w.comboIndex = selectedAction.index;
         let isKnockdownAttack = false;
@@ -415,6 +617,7 @@ class HuntHunterTurnExecutor {
         }
 
         if (currentCombo && engine.weaponMechanics && engine.weaponMechanics.isPreparation(currentCombo)) {
+            if (w.id === 'long_sword') w.longSwordForesightEligible = false;
             if (engine.perkRuntime) currentCombo = engine.perkRuntime.prepareActionEconomy(w, currentCombo);
             const presentation = engine.weaponMechanics.presentationFor?.(w, currentCombo);
             const mechanicResult = engine.weaponMechanics.applyAction(engine, w, currentCombo);
@@ -439,7 +642,10 @@ class HuntHunterTurnExecutor {
             if (engine.perkRuntime) currentCombo.durationTicks = engine.perkRuntime.actionDuration(w, currentCombo, currentCombo.durationTicks);
             if (engine.actionStateMachine) engine.actionStateMachine.begin(w, currentCombo);
             else w.attackDuration = currentCombo.durationTicks;
-            w.atb = Math.max(w.atb, Number(mechanicResult.atbAfterAction || 0));
+            if (w.id === 'great_sword') w.greatSwordChargeLocked = true;
+            if (!continuingGreatSwordCharge) {
+                HuntHunterTurnExecutor.spendActionAtb(w, currentCombo, actionStartingAtb, beganInDemonMode);
+            }
             engine.updateWeaponAtbUI(w.index, w.atb);
             w.lastActionId = currentCombo.id;
             w.comboIndex = engine.weaponActionSelector
@@ -582,6 +788,11 @@ class HuntHunterTurnExecutor {
             if (engine.monsterState === 'enraged') damage = Math.floor(damage * Number(perkModifiers.enragedAttack || 1));
             if (engine.perkRuntime) damage = engine.perkRuntime.outgoingDamage(w, currentCombo, damage);
 
+            // Motion values were authored for the former one-action-per-full-gauge
+            // cadence. Normalize damage by ATB commitment so a 0.5-second jab
+            // cannot gain ten times the DPS merely by recycling ten times faster.
+            damage = Math.max(1, Math.floor(damage * HuntHunterTurnExecutor.atbDamageScale(currentCombo)));
+
             if (w.sharpnessProfile && typeof HuntWeaponInstanceCatalog !== 'undefined') {
                 damage = Math.max(1, Math.floor(damage * HuntWeaponInstanceCatalog.rawMultiplier(w)));
             }
@@ -601,7 +812,33 @@ class HuntHunterTurnExecutor {
                 w.sharpness = Math.max(0, w.sharpness - sharpnessCost);
             }
 
+            if (forceUntargetableWhiff) {
+                engine.weaponMechanics?.onAttackMiss?.(engine, w, currentCombo);
+                engine.playSFX(currentCombo.audioCue || 'slash_light', null, {
+                    weaponId: w.id,
+                    hunterIndex: w.index,
+                    action: 'miss',
+                    actionId: currentCombo.id,
+                    actionName: currentCombo.name,
+                    actionTags: currentCombo.tags || []
+                });
+                engine.shakeWeapon(w.index, '#a9b8c7', true, currentCombo);
+                if (engine.expressHunterEmotion) engine.expressHunterEmotion(w, 'failure', currentCombo);
+                if (engine.telemetry) engine.telemetry.recordHunterAction(w.id, currentCombo, 0);
+                engine.updateSharpnessUI(w.index, w);
+                HuntHunterTurnExecutor.completeAction(engine, w, currentCombo, {
+                    attackTicks: Number(currentCombo.durationTicks || 10),
+                    continuingGreatSwordCharge,
+                    actionStartingAtb,
+                    beganInDemonMode,
+                    isKnockdownAttack,
+                    combos
+                });
+                return;
+            }
+
             if (engine.monsterFlightRuntime?.shouldEvade(engine, w, currentCombo)) {
+                engine.weaponMechanics?.onAttackMiss?.(engine, w, currentCombo);
                 engine.addLog(`🪽 [공중 회피] ${engine.selectedMonster.nameKO}이(가) 비행 기동으로 ${w.hunterName}의 공격을 피했습니다!`, '#8fdcff');
                 engine.showSkillBubble('monster', '🪽 공중 회피!');
                 engine.shakeWeapon(w.index, '#8fdcff');
@@ -611,6 +848,27 @@ class HuntHunterTurnExecutor {
                 return;
             }
 
+            const hitChance = Math.min(0.99,
+                HuntHunterTurnExecutor.BASE_HIT_CHANCE + Number(w.perkModifiers?.hitChance || 0));
+            if (engine.random() >= hitChance) {
+                engine.weaponMechanics?.onAttackMiss?.(engine, w, currentCombo);
+                engine.addLog(`💨 [빗나감] ${w.hunterName}의 ${presentation?.label || currentCombo.name}이(가) 빗나갔습니다!`, '#a9b8c7');
+                engine.showSkillBubble(w.index, '💨 빗나감!');
+                engine.shakeWeapon(w.index, '#a9b8c7', true, currentCombo);
+                if (engine.expressHunterEmotion) engine.expressHunterEmotion(w, 'failure', currentCombo);
+                if (engine.telemetry) engine.telemetry.recordHunterAction(w.id, currentCombo, 0);
+                HuntHunterTurnExecutor.completeAction(engine, w, currentCombo, {
+                    attackTicks: Number(currentCombo.durationTicks || 10),
+                    continuingGreatSwordCharge,
+                    actionStartingAtb,
+                    beganInDemonMode,
+                    isKnockdownAttack,
+                    combos
+                });
+                return;
+            }
+
+            engine.weaponMechanics?.onConfirmedHit?.(engine, w, currentCombo);
             const partResult = engine.recordMonsterPartDamage ? engine.recordMonsterPartDamage(w, damage, currentCombo) : null;
             const bounce = partResult && typeof HuntWeaponInstanceCatalog !== 'undefined'
                 ? HuntWeaponInstanceCatalog.bounceCheck(w, partResult.hitzone, currentCombo)
@@ -627,8 +885,9 @@ class HuntHunterTurnExecutor {
             }
 
             // Apply Damage to Monster
+            let targetUnit = null;
             if (engine.smallMonsterSwarm) {
-                const targetUnit = engine.smallMonsterSwarm.currentTarget();
+                targetUnit = engine.smallMonsterSwarm.currentTarget();
                 if (targetUnit) damage = Math.min(damage, targetUnit.hp);
             }
             engine.monsterHp = Math.max(0, engine.monsterHp - damage);
@@ -674,7 +933,15 @@ class HuntHunterTurnExecutor {
             if (!presentation || presentation.bubble) engine.showSkillBubble(w.index, presentation?.label || currentCombo.name);
 
             engine.shakeMonster();
-            engine.shakeWeapon(w.index, '#ff9500', true, currentCombo);
+            engine.shakeWeapon(w.index, '#ff9500', true, currentCombo, false, {
+                resolved: true,
+                hitzoneValue: Number(partResult?.hitzone ?? 45),
+                weaponType: w.type === 'ranged' ? 'ranged' : undefined,
+                bounced: bounce.bounced === true,
+                damage,
+                partKind: partResult?.part?.kind || null,
+                targetUnitIndex: Number.isInteger(targetUnit?.index) ? targetUnit.index : null
+            });
             if (!bounce.bounced && engine.expressHunterEmotion) {
                 engine.expressHunterEmotion(w, 'success', currentCombo);
             }
@@ -695,23 +962,19 @@ class HuntHunterTurnExecutor {
             )) {
                 attackTicks = 18; // Special/heavy attacks take 1.8s
             }
-            // The action timeline is part of the ATB cycle: ATB remains paused for
-            // the measured/estimated occupancy before it can begin filling again.
-            currentCombo = { ...currentCombo };
-            currentCombo.durationTicks = currentCombo.atbOccupancyTicks || currentCombo.durationTicks || attackTicks;
-            if (engine.perkRuntime) currentCombo.durationTicks = engine.perkRuntime.actionDuration(w, currentCombo, currentCombo.durationTicks);
-            if (engine.actionStateMachine) engine.actionStateMachine.begin(w, currentCombo);
-            else w.attackDuration = attackTicks;
-            w.atb = Math.max(w.atb, Number(mechanicResult.atbAfterAction || 0));
-            engine.updateWeaponAtbUI(w.index, w.atb);
-
-            // Advance combo index (except during knockdown)
-            if (!isKnockdownAttack) {
-                w.lastActionId = currentCombo.id;
-                w.comboIndex = engine.weaponActionSelector
-                    ? engine.weaponActionSelector.nextIndex(w, combos, currentCombo)
-                    : (w.comboIndex + 1) % combos.length;
-            }
+            // Animation ownership and ATB recovery are independent: the motion
+            // still has to finish, while the spent shared ATB budget recovers.
+            currentCombo = HuntHunterTurnExecutor.completeAction(engine, w, currentCombo, {
+                attackTicks,
+                continuingGreatSwordCharge,
+                actionStartingAtb,
+                beganInDemonMode,
+                isKnockdownAttack,
+                combos
+            });
         }
     }
 }
+
+if (typeof module !== 'undefined' && module.exports) module.exports = HuntHunterTurnExecutor;
+else if (typeof window !== 'undefined') window.HuntHunterTurnExecutor = HuntHunterTurnExecutor;

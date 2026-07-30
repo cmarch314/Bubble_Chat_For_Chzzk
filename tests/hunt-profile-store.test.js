@@ -2,6 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { DatabaseSync } = require('node:sqlite');
 const { HuntProfileStore, identityKey, sanitizeProfile } = require('../tools/hunt-profile-store');
 
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'bubblechat-hunt-profile-'));
@@ -19,9 +20,6 @@ try {
         perkIds: ['perk_001', 'perk_001', 'invalid', 'perk_002'],
         lockedPerkId: 'invalid'
     }), {
-        weaponId: null,
-        weaponInstanceId: null,
-        personality: null,
         perkIds: ['perk_001', 'perk_002'],
         lockedPerkId: null
     });
@@ -34,26 +32,63 @@ try {
         perkIds: ['perk_001', 'perk_002'],
         lockedPerkId: 'perk_002'
     });
-    assert.strictEqual(first.weaponId, 'long_sword');
-    assert.strictEqual(first.schemaVersion, 1);
-    assert.strictEqual(first.weaponInstanceId, 123);
+    assert.strictEqual(first.schemaVersion, 2);
+    assert.strictEqual(first.weaponId, undefined);
+    assert.strictEqual(first.personality, undefined);
     assert.deepStrictEqual(first.perkIds, ['perk_001', 'perk_002']);
     assert.strictEqual(first.revision, 1);
 
-    const second = store.upsert(identity, { ...first, weaponId: 'great_sword' });
-    assert.strictEqual(second.weaponId, 'great_sword');
+    const second = store.upsert(identity, { ...first, weaponId: 'great_sword', personality: 'support' });
+    assert.strictEqual(second.weaponId, undefined);
     assert.strictEqual(second.revision, 2);
     assert.strictEqual(store.get({ uid: 'missing' }), null);
     const schemaVersion = store.db.prepare('PRAGMA user_version').get().user_version;
-    assert.strictEqual(schemaVersion, 2, 'profile schema changes require an explicit SQLite migration version');
+    assert.strictEqual(schemaVersion, 3, 'profile schema changes require an explicit SQLite migration version');
+    const columns = store.db.prepare('PRAGMA table_info(hunt_profiles)').all().map(column => column.name);
+    assert.deepStrictEqual(columns, ['profile_key', 'perk_ids', 'locked_perk_id', 'revision', 'updated_at']);
 } finally {
     store.close();
     fs.rmSync(tempRoot, { recursive: true, force: true });
 }
 
+const legacyRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'bubblechat-hunt-profile-v2-'));
+const legacyPath = path.join(legacyRoot, 'profiles.sqlite');
+const legacyDb = new DatabaseSync(legacyPath);
+legacyDb.exec(`
+    CREATE TABLE hunt_profiles (
+        profile_key TEXT PRIMARY KEY,
+        weapon_id TEXT,
+        weapon_instance_id INTEGER,
+        personality TEXT,
+        perk_ids TEXT NOT NULL DEFAULT '[]',
+        locked_perk_id TEXT,
+        revision INTEGER NOT NULL DEFAULT 1,
+        updated_at INTEGER NOT NULL
+    ) WITHOUT ROWID;
+    PRAGMA user_version = 2;
+`);
+const legacyIdentity = { uid: 'legacy-viewer' };
+legacyDb.prepare(`
+    INSERT INTO hunt_profiles VALUES (?, 'great_sword', 77, 'offensive', ?, 'perk_002', 4, 1234)
+`).run(identityKey(legacyIdentity), JSON.stringify(['perk_001', 'perk_002']));
+legacyDb.close();
+const migratedStore = new HuntProfileStore(legacyPath);
+assert.deepStrictEqual(migratedStore.get(legacyIdentity), {
+    schemaVersion: 2,
+    perkIds: ['perk_001', 'perk_002'],
+    lockedPerkId: 'perk_002',
+    revision: 4,
+    updatedAt: 1234
+}, 'v2 profiles must preserve perks while deleting weapon and personality persistence');
+assert.deepStrictEqual(
+    migratedStore.db.prepare('PRAGMA table_info(hunt_profiles)').all().map(column => column.name),
+    ['profile_key', 'perk_ids', 'locked_perk_id', 'revision', 'updated_at']
+);
+migratedStore.close();
+fs.rmSync(legacyRoot, { recursive: true, force: true });
+
 const futureRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'bubblechat-hunt-profile-future-'));
 const futurePath = path.join(futureRoot, 'profiles.sqlite');
-const { DatabaseSync } = require('node:sqlite');
 const futureDb = new DatabaseSync(futurePath);
 futureDb.exec('PRAGMA user_version = 999;');
 futureDb.close();

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,initial-scale=1">
+  <title>헌터 피격 레이어 시범</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:radial-gradient(circle at 50% 16%,#38271c,#080706 70%)}
+    #preview-board{position:relative;width:1848px;height:880px;margin:24px 36px;border:3px solid #8f713d;border-radius:18px;background:#17120ee8;color:#fff;overflow:visible}
+    h1{margin:30px 38px 8px;color:#f0d496;font:1000 34px/1 sans-serif}
+    p{margin:0 40px;color:#c6b89d;font:800 20px/1 sans-serif}
+    .game-hunt-weapons-grid{position:absolute;left:38px;right:38px;bottom:80px;display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+    .game-hunt-weapon-card{height:370px;padding:16px;border:3px solid #8f713d;border-radius:14px;background:#111e;display:grid;place-items:center;overflow:visible}
+    .game-hunt-weapon-img-container{position:relative;width:170px;height:190px;display:grid;place-items:center}
+    .game-hunt-weapon-img,.hunt-split-shield{position:absolute;width:145px;height:145px;object-fit:contain}
+    .hunt-split-shield{width:92px;height:92px;left:104px;top:86px}
+    .label{font:1000 25px/1 sans-serif;color:#f4dcad}
+    .hp{width:86%;height:14px;border:2px solid #584328;background:#241b12;border-radius:8px;overflow:hidden}.hp i{display:block;width:62%;height:100%;background:#70d06c}
+    .chat-safe{position:fixed;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa88;background:#000b;display:grid;place-items:center;color:#77d8b5;font:900 22px/1 sans-serif}
+  </style>
+</head>
+<body>
+  <main id="preview-board" class="game-hunt-card hunt-combat-board">
+    <h1>피격 레이어 시범</h1>
+    <p>카드는 제자리에서 짧게 흔들리고, 무기와 방패 이미지만 충격 방향으로 튕겨 나갑니다.</p>
+    <section class="game-hunt-weapons-grid">
+      <article id="fight-card-0" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt=""></div><div class="label">대검 · 강피격</div><div class="hp"><i></i></div></article>
+      <article id="fight-card-1" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/lance.svg" alt=""><img class="hunt-split-shield" src="../../img/weapons/sword_shield.svg" alt=""></div><div class="label">랜스 · 강피격</div><div class="hp"><i></i></div></article>
+      <article id="fight-card-2" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt=""></div><div class="label">수렵피리 · 약피격</div><div class="hp"><i></i></div></article>
+      <article id="fight-card-3" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/bow.svg" alt=""></div><div class="label">활 · 약피격</div><div class="hp"><i></i></div></article>
+    </section>
+  </main>
+  <footer class="chat-safe">OBS 채팅 안전영역 · 하단 15%</footer>
+  <script src="../../js/effects/hunt/HuntMonsterAnimationCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
+  <script src="../../js/effects/hunt/HuntCombatAnimator.js"></script>
+  <script>
+    const owner={card:document.getElementById('preview-board'),animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)}},updateWeaponChargeAuraUI(){}};
+    const animator=new HuntCombatAnimator(owner);
+    const hunters=[
+      {index:0,id:'great_sword',hp:70,status:'alive'},
+      {index:1,id:'lance',hp:70,status:'alive'},
+      {index:2,id:'hunting_horn',hp:70,status:'alive'},
+      {index:3,id:'bow',hp:70,status:'alive'}
+    ];
+    function play(){hunters.forEach((hunter,index)=>animator.triggerHitAnimation(index,hunter,index<2
+      ?{kind:'strong',durationTicks:40,knockbackDirection:-1}
+      :{kind:'weak',durationTicks:15,knockbackDirection:1}))}
+    addEventListener('load',()=>{setTimeout(play,300);setInterval(play,5200)});
+  </script>
+</body>
+</html>

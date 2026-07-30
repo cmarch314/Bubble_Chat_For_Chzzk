@@ -13,7 +13,7 @@ vm.runInContext(
 
 const config = {
     getVisualConfig: () => ({
-        boom: { soundKey: 'visualPing' },
+        boom: { soundKey: 'visualPing', preloadAudio: true },
         flash: { audioOverride: 'visualOverride' }
     }),
     getSoundConfig: () => ({
@@ -45,7 +45,7 @@ assert.deepStrictEqual(Array.from(matcher.match('')), []);
 const visualPaths = matcher.buildVisualAudioPaths(source => `resolved:${source}`);
 assert.deepStrictEqual(
     Array.from(visualPaths).sort(),
-    ['resolved:visual/override.mp3', 'resolved:visual/ping.mp3']
+    ['resolved:visual/ping.mp3']
 );
 
 console.log('[test] Audio command matcher behavior contract passed.');

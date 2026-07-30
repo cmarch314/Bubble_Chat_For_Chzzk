@@ -1,0 +1,317 @@
+{
+  "version": 1,
+  "bankReviews": {
+    "em007_vo": {
+      "auditionSummary": "별도 기록된 포효·대경직/덫·사망 후보 외에는 대부분 의미 불명의 잡다한 음성으로 들림",
+      "defaultDisposition": "unmapped",
+      "actionRoutingApproved": false
+    },
+    "em007_se": {
+      "auditionSummary": "별도 기록된 지면 울림 후보 외에는 현재 동작 의미를 확정할 만한 청음 증거가 없음",
+      "defaultDisposition": "unmapped",
+      "actionRoutingApproved": false
+    },
+    "em001_vo": {
+      "auditionSummary": "레우스/레이아의 포효, 전조, 공격, 경직, 사망 음성을 사용자 청음으로 분류",
+      "defaultDisposition": "unmapped",
+      "actionRoutingApproved": false
+    },
+    "em001_se": {
+      "auditionSummary": "레우스 비행 날개짓과 바닥 화염음을 사용자 청음으로 분류",
+      "defaultDisposition": "unmapped",
+      "actionRoutingApproved": false
+    }
+  },
+  "entries": [
+    {
+      "monsterId": "diablos",
+      "bank": "em007_vo",
+      "decodedStream": 59,
+      "sourceStream": "562342054",
+      "eventIds": ["714162119"],
+      "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_059_562342054.mp3",
+      "audition": "대경직 상태의 신음처럼 들림",
+      "semanticCandidates": ["knockdown_vocal", "incapacitated_vocal"],
+      "evidenceType": "user-audition-review-hint",
+      "actionRoutingApproved": false
+    },
+    {
+      "monsterId": "diablos",
+      "bank": "em007_vo",
+      "decodedStream": 62,
+      "sourceStream": "616362085",
+      "eventIds": ["1962714898"],
+      "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_062_616362085.mp3",
+      "audition": "대경직 또는 덫에 빠진 상태의 신음처럼 들림",
+      "semanticCandidates": ["knockdown_vocal", "trapped_vocal", "incapacitated_vocal"],
+      "evidenceType": "user-audition-review-hint",
+      "actionRoutingApproved": false
+    },
+    {
+      "monsterId": "diablos",
+      "bank": "em007_vo",
+      "decodedStream": 95,
+      "sourceStream": "961748875",
+      "eventIds": ["1962714898"],
+      "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_095_961748875.mp3",
+      "audition": "사망할 때의 신음처럼 들림",
+      "semanticCandidates": ["death_vocal"],
+      "evidenceType": "user-audition-review-hint",
+      "actionRoutingApproved": false
+    },
+    {
+      "monsterId": "diablos",
+      "bank": "em007_se",
+      "decodedStream": 56,
+      "sourceStream": "205431218",
+      "eventIds": ["1307224038"],
+      "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_056_205431218.mp3",
+      "audition": "땅이 울리는 소리",
+      "semanticCandidates": ["ground_rumble", "burrow_ground_rumble"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathian",
+      "bank": "em001_vo",
+      "decodedStream": 27,
+      "sourceStream": "137441638",
+      "eventIds": ["2838412660"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_027_137441638.mp3",
+      "audition": "레이아 서머솔트 음성 1",
+      "semanticCandidates": ["somersault_telegraph"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathian",
+      "bank": "em001_vo",
+      "decodedStream": 47,
+      "sourceStream": "287664299",
+      "eventIds": [],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_047_287664299.mp3",
+      "audition": "레이아 서머솔트 음성 2",
+      "semanticCandidates": ["somersault_telegraph"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rath-family",
+      "bank": "em001_vo",
+      "decodedStream": 49,
+      "sourceStream": "291684548",
+      "eventIds": ["136239482"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_049_291684548.mp3",
+      "audition": "공중 공격 음성",
+      "semanticCandidates": ["aerial_attack_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rath-family",
+      "bank": "em001_vo",
+      "decodedStream": 42,
+      "sourceStream": "249895042",
+      "eventIds": ["2592557649"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_042_249895042.mp3",
+      "audition": "깨무는 소리",
+      "semanticCandidates": ["bite_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 44,
+      "sourceStream": "259426345",
+      "eventIds": ["2555311887"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_044_259426345.mp3",
+      "audition": "대경직 및 덫에서 끙끙대는 소리 1회",
+      "semanticCandidates": ["knockdown_vocal", "trapped_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 45,
+      "sourceStream": "265716738",
+      "eventIds": ["2715097414"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_045_265716738.mp3",
+      "audition": "죽었을 때 소리",
+      "semanticCandidates": ["death_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 91,
+      "sourceStream": "721725382",
+      "eventIds": ["1991097789"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_091_721725382.mp3",
+      "audition": "레우스 포효",
+      "semanticCandidates": ["monster_roar"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 107,
+      "sourceStream": "840416626",
+      "eventIds": ["384260573"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_107_840416626.mp3",
+      "audition": "비행 공격 중 나는 소리",
+      "semanticCandidates": ["aerial_attack_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 46,
+      "sourceStream": "267272460",
+      "eventIds": ["384260573"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_046_267272460.mp3",
+      "audition": "Confirmed aerial attack event sibling selected for the aerial random pool",
+      "semanticCandidates": ["aerial_attack_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 105,
+      "sourceStream": "829711342",
+      "eventIds": ["1698407987"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_105_829711342.mp3",
+      "audition": "User-selected nearby Rathalos voice for the aerial random pool",
+      "semanticCandidates": ["aerial_attack_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 109,
+      "sourceStream": "846481219",
+      "eventIds": ["1698407987"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_109_846481219.mp3",
+      "audition": "User-selected nearby Rathalos voice for the aerial random pool",
+      "semanticCandidates": ["aerial_attack_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 117,
+      "sourceStream": "897645699",
+      "eventIds": ["1196173475"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_117_897645699.mp3",
+      "audition": "브레스 모으는 소리",
+      "semanticCandidates": ["breath_charge"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_vo",
+      "decodedStream": 121,
+      "sourceStream": "930577735",
+      "eventIds": ["352531268"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_121_930577735.mp3",
+      "audition": "소경직 소리",
+      "semanticCandidates": ["small_flinch_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rath-family",
+      "bank": "em001_vo",
+      "decodedStream": 124,
+      "sourceStream": "948696462",
+      "eventIds": ["2592557649"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_124_948696462.mp3",
+      "audition": "깨무는 소리 랜덤 후보",
+      "semanticCandidates": ["bite_vocal"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_se",
+      "decodedStream": 9,
+      "sourceStream": "36906213",
+      "eventIds": ["3881085820"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_009_36906213.mp3",
+      "audition": "공중 날개짓 1회",
+      "semanticCandidates": ["wing_flap"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_se",
+      "decodedStream": 12,
+      "sourceStream": "44522100",
+      "eventIds": ["1279237267"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_012_44522100.mp3",
+      "audition": "바닥에 불이 타오르는 소리",
+      "semanticCandidates": ["ground_fire"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_se",
+      "decodedStream": 14,
+      "sourceStream": "53232238",
+      "eventIds": ["1356580382"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_014_53232238.mp3",
+      "audition": "공중 날개짓 1회",
+      "semanticCandidates": ["wing_flap"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_se",
+      "decodedStream": 13,
+      "sourceStream": "50067497",
+      "eventIds": ["89529990"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_013_50067497.mp3",
+      "audition": "날개짓 1회",
+      "semanticCandidates": ["wing_flap"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    },
+    {
+      "monsterId": "rathalos",
+      "bank": "em001_se",
+      "decodedStream": 277,
+      "sourceStream": "1063210653",
+      "eventIds": ["3153292616"],
+      "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_277_1063210653.mp3",
+      "audition": "날개짓 1회",
+      "semanticCandidates": ["wing_flap"],
+      "evidenceType": "user-audition-confirmed-action-family",
+      "actionRoutingApproved": true
+    }
+  ],
+  "unresolvedSourceSuffixes": [
+    {
+      "suffix": "82684",
+      "audition": "날개짓 1회",
+      "status": "decoded-source-missing",
+      "actionRoutingApproved": false
+    },
+    {
+      "suffix": "29851",
+      "audition": "브레스",
+      "status": "decoded-source-missing",
+      "actionRoutingApproved": false
+    }
+  ]
+}

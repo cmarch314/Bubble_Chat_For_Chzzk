@@ -1,4 +1,9 @@
 class HuntPerkRuntime {
+    static CAMP_STAY_TICKS = Object.freeze({
+        guardian: 320,
+        lost: 100
+    });
+
     constructor(engine) { this.engine = engine; }
 
     static names(hunter) {
@@ -9,7 +14,7 @@ class HuntPerkRuntime {
         const perks = hunter.perks || null;
         if (hunter._perkNamesSource !== perks) {
             hunter._perkNamesSource = perks;
-            hunter._perkNames = new Set((perks || []).map(perk => perk.name));
+            hunter._perkNames = new Set((perks || []).map(perk => perk.name === '똥' ? '💩' : perk.name));
         }
         return hunter._perkNames;
     }
@@ -32,7 +37,9 @@ class HuntPerkRuntime {
             if (hunter.id === 'gunlance') hunter.shells = hunter.maxShells = Math.max(7, Number(hunter.maxShells || 0));
         }
         if (names.has('캠프 수호자') || names.has('길치')) {
-            hunter.perkCampTicks = names.has('캠프 수호자') ? 80 : 25;
+            hunter.perkCampTicks = names.has('캠프 수호자')
+                ? HuntPerkRuntime.CAMP_STAY_TICKS.guardian
+                : HuntPerkRuntime.CAMP_STAY_TICKS.lost;
             hunter.isAtCamp = true;
             hunter.campReason = names.has('캠프 수호자') ? '보급품을 끝까지 챙기는 중' : '출발 길을 잘못 든 상태';
             hunter.atb = 0;
@@ -49,12 +56,6 @@ class HuntPerkRuntime {
         if (names.has('첫 수는 크게')) hunter.firstStrikeReady = true;
         if (names.has('보급관')) hunter.lifepowders = Number(hunter.lifepowders || 0) + 1;
         if (names.has('폭탄 배달부')) hunter.bombs = Number(hunter.bombs || 0) + 1;
-        if (names.has('똥')) {
-            hunter.potions = Number(hunter.potions || 0) + 3;
-            hunter.lifepowders = Number(hunter.lifepowders || 0) + 1;
-            hunter.bombs = Number(hunter.bombs || 0) + 2;
-            hunter.shockTraps = Number(hunter.shockTraps || 0) + 1;
-        }
     }
 
     tick(hunter) {
@@ -71,7 +72,7 @@ class HuntPerkRuntime {
                 if (Number(hunter[key] || 0) > 0) hunter[key]++;
             });
             if (names.has('삼색 탐닉') && Number(hunter.extractDuration || 0) > 0) hunter.extractDuration++;
-            if (names.has('귀인화 체질') && hunter.demonMode) hunter.demonStamina = Math.min(100, Number(hunter.demonStamina || 0) + .16);
+            if (names.has('귀인화 체질') && hunter.demonMode) hunter.archdemonGauge = Math.min(100, Number(hunter.archdemonGauge || 0) + .16);
         }
         if (!hunter?.isAtCamp) return;
         hunter.atb = 0;
@@ -113,12 +114,10 @@ class HuntPerkRuntime {
         if (names.has('집중') && (tags.has('charge') || tags.has('preparation') || /charge|draw/.test(id))) rate *= .72;
         if (names.has('납도술') && /sheathe|draw/.test(id)) rate *= .65;
         if (names.has('신속 교체') && /morph|change|switch/.test(id)) rate *= .7;
-        if (names.has('똥')) rate *= .65;
         return Math.max(1, Math.ceil(Number(ticks || 1) * rate));
     }
 
     whetstoneDuration(hunter, ticks) {
-        if (HuntPerkRuntime.has(hunter, '똥')) return Math.max(1, Math.ceil(ticks * .35));
         return HuntPerkRuntime.has(hunter, '숫돌 사용 고속화') ? Math.max(1, Math.ceil(ticks * .4)) : ticks;
     }
 
@@ -148,7 +147,10 @@ class HuntPerkRuntime {
         if (names.has('혼신') && Number(hunter.atb || 0) <= 5) value *= 1.12;
         if (names.has('연격')) value *= 1 + Math.min(.15, Number(hunter.perkComboHits || 0) * .03);
         hunter.perkComboHits = Number(hunter.perkComboHits || 0) + 1;
-        const affinity = (names.has('간파') ? .18 : 0) + (names.has('약점 특효') && (this.engine.monsterWoundOpen || this.engine.monsterState === 'stunned') ? .3 : 0);
+        const weaponAffinity = Math.max(0, Number(hunter.weaponInstance?.affinity ?? hunter.affinity ?? 0)) / 100;
+        const affinity = Math.min(.95, weaponAffinity + Number(hunter.perkModifiers?.critChance || (names.has('💩') ? .6 : 0))
+            + (names.has('간파') ? .18 : 0)
+            + (names.has('약점 특효') && (this.engine.monsterWoundOpen || this.engine.monsterState === 'stunned') ? .3 : 0));
         if (affinity > 0 && this.engine.random() < affinity) value *= names.has('슈퍼회심') ? 1.4 : 1.25;
         if (names.has('한 대만') && hunter.oneHitReady) { value *= 1.8; hunter.oneHitReady = false; }
         if (names.has('훈타') && this.engine.random() < .12) value = 0;
@@ -203,13 +205,23 @@ class HuntPerkRuntime {
             this.engine.addLog(`☠️ [독] ${hunter.hunterName}의 독이 축적되어 몬스터가 중독됐습니다!`, '#9bea64');
         }
         if (this.engine.monsterParalysisBuild >= 100) {
-            this.engine.monsterParalysisBuild = 0; this.engine.monsterKnockdownDuration = Math.max(this.engine.monsterKnockdownDuration, 35);
-            this.engine.monsterState = 'knocked_down'; this.engine.monsterAtb = 0;
+            this.engine.monsterParalysisBuild = 0;
+            if (this.engine.enterMonsterControlState) {
+                this.engine.enterMonsterControlState('paralysis', 35, { source: 'status-build' });
+            } else {
+                this.engine.monsterKnockdownDuration = Math.max(this.engine.monsterKnockdownDuration, 35);
+                this.engine.monsterState = 'paralyzed'; this.engine.monsterAtb = 0;
+            }
             this.engine.addLog(`⚡ [마비] ${hunter.hunterName}의 마비가 축적되어 몬스터의 움직임이 멎었습니다!`, '#ffe66d');
         }
         if (this.engine.monsterSleepBuild >= 100) {
-            this.engine.monsterSleepBuild = 0; this.engine.monsterKnockdownDuration = Math.max(this.engine.monsterKnockdownDuration, 50);
-            this.engine.monsterState = 'knocked_down'; this.engine.monsterAtb = 0;
+            this.engine.monsterSleepBuild = 0;
+            if (this.engine.enterMonsterControlState) {
+                this.engine.enterMonsterControlState('sleep', 50, { source: 'status-build' });
+            } else {
+                this.engine.monsterKnockdownDuration = Math.max(this.engine.monsterKnockdownDuration, 50);
+                this.engine.monsterState = 'sleeping'; this.engine.monsterAtb = 0;
+            }
             this.engine.addLog(`💤 [수면] ${hunter.hunterName}의 수면치가 축적되어 몬스터가 잠들었습니다!`, '#8fd7ff');
         }
         if (this.engine.monsterBlastBuild >= 100) {
@@ -243,19 +255,18 @@ class HuntPerkRuntime {
         if (names.has('뿔 수집가') && (hunter.id === 'hammer' || hunter.id === 'hunting_horn')) rate *= 1.18;
         if (names.has('부위 개척자') && !(this.engine.monsterPartState || []).some(part => Number(part.damageAccumulated || 0) > 0)) rate *= 1.25;
         if (names.has('약점 집착') && (this.engine.monsterPartState || []).some(part => Number(part.health || 0) <= Number(part.maxHealth || 0) * .4)) rate *= 1.18;
-        if (names.has('똥')) rate *= 1.35;
         return damage * rate;
     }
 
     stunValue(hunter, stun) {
         const names = HuntPerkRuntime.names(hunter);
-        return Math.round(stun * (names.has('KO술') ? 1.3 : 1) * (names.has('똥') ? 1.5 : 1));
+        return Math.round(stun * (names.has('KO술') ? 1.3 : 1));
     }
 
     sharpnessCost(hunter, cost) {
         const names = HuntPerkRuntime.names(hunter);
         if (names.has('명검') || names.has('명검의 가르침')) return this.engine.random() < .35 ? 0 : cost;
-        if (names.has('똥')) return this.engine.random() < .6 ? 0 : Math.ceil(cost * .5);
+        if (names.has('💩')) return this.engine.random() < .6 ? 0 : cost;
         if (names.has('칼날 연마')) return Math.ceil(cost * .65);
         return cost;
     }
@@ -263,7 +274,7 @@ class HuntPerkRuntime {
     ammoCost(hunter, cost) {
         const names = HuntPerkRuntime.names(hunter);
         if (names.has('탄환 절약') || names.has('명검의 가르침')) return this.engine.random() < .3 ? 0 : cost;
-        if (names.has('똥')) return this.engine.random() < .6 ? 0 : cost;
+        if (names.has('💩')) return this.engine.random() < .6 ? 0 : cost;
         return cost;
     }
 
@@ -283,20 +294,18 @@ class HuntPerkRuntime {
         let rate = names.has('체력 회복량 UP') ? 1.25 : 1;
         if (names.has('버섯 애호가')) rate *= 1.1;
         if (names.has('야생의 치료사')) rate *= 1.12;
-        if (names.has('똥')) rate *= 1.35;
         return Math.round(amount * rate);
     }
 
     itemDuration(hunter, ticks) {
         let rate = HuntPerkRuntime.has(hunter, '빨리 먹기') ? .55 : 1;
         if (HuntPerkRuntime.has(hunter, '고양이 혀')) rate *= 1.35;
-        if (HuntPerkRuntime.has(hunter, '똥')) rate *= .55;
         return Math.max(1, Math.ceil(ticks * rate));
     }
 
     shouldConsumeItem(hunter) {
         const names = HuntPerkRuntime.names(hunter);
-        if (names.has('똥')) return this.engine.random() >= .6;
+        if (names.has('💩')) return this.engine.random() >= .6;
         return !(names.has('만족감') || names.has('만족할 줄 모름') || names.has('절약가')) || this.engine.random() >= .3;
     }
 
@@ -314,17 +323,37 @@ class HuntPerkRuntime {
         this.engine.showSkillBubble(hunter.index, `🤝 동료 회복 +${share}`);
     }
 
+    useBomb(hunter, source = '아이템') {
+        const engine = this.engine;
+        if (Number(hunter?.bombs || 0) <= 0 || Number(engine?.monsterHp || 0) <= 0) return false;
+        const hasBombardier = HuntPerkRuntime.has(hunter, '폭파광');
+        const baseDamage = Math.max(60, Math.floor(Number(engine.monsterMaxHp || 0) * .04));
+        let damage = Math.floor(baseDamage * (hasBombardier ? 1.5 : 1));
+        if (this.shouldConsumeItem(hunter)) hunter.bombs--;
+        if (engine.smallMonsterSwarm) {
+            const target = engine.smallMonsterSwarm.randomTarget(engine.random);
+            if (target) damage = Math.min(damage, target.hp);
+        }
+        hunter.itemDuration = this.itemDuration(hunter, 18);
+        engine.monsterHp = Math.max(0, engine.monsterHp - damage);
+        engine.updateMonsterHpUI();
+        engine.updateHunterItemUI?.(hunter);
+        engine.triggerEnvironmentEffect?.('bomb');
+        engine.playSFX?.('barrel_bomb', null, { hunterIndex: hunter.index, action: 'item', item: 'large-barrel-bomb' });
+        engine.addLog(`💣 [${source}] ${hunter.hunterName}이(가) 대형나무통폭탄을 폭발시켰습니다! (-${damage} HP${hasBombardier ? ' · 폭파광 1.5배' : ''})`, '#ff9f43');
+        engine.showSkillBubble(hunter.index, hasBombardier ? '💥 폭파광 대폭발!' : '💣 대형나무통폭탄!');
+        return true;
+    }
+
     trySpecialAction(hunter) {
         const names = HuntPerkRuntime.names(hunter);
         if (names.has('폭탄 배달부') && Number(hunter.bombs || 0) > 0
-            && Number(this.engine.monsterKnockdownDuration || 0) > 0
-            && this.engine.hunterCommandQueue?.useBomb) {
-            return this.engine.hunterCommandQueue.useBomb(this.engine, hunter, '폭탄 배달부');
+            && Number(this.engine.monsterKnockdownDuration || 0) > 0) {
+            return this.useBomb(hunter, '폭탄 배달부');
         }
         if (names.has('폭파광') && Number(hunter.bombs || 0) > 0
-            && Number(this.engine.monsterKnockdownDuration || 0) > 0
-            && this.engine.hunterCommandQueue?.useBomb) {
-            return this.engine.hunterCommandQueue.useBomb(this.engine, hunter, '폭파광');
+            && Number(this.engine.monsterKnockdownDuration || 0) > 0) {
+            return this.useBomb(hunter, '폭파광');
         }
         if (names.has('꼬리 수집가') && this.engine.severedTail?.available && !this.engine.severedTail.carved
             && this.engine.tryConsumeCombatGather?.()) {
@@ -356,10 +385,24 @@ class HuntPerkRuntime {
             this.engine.addLog(`🕸️ [덫 장인] ${hunter.hunterName}이(가) 신속하게 함정을 설치해 몬스터를 ${(trapTicks / 10).toFixed(1)}초 구속했습니다!`, '#e0ffa3');
             return true;
         }
-        if (names.has('섬광 조제사') && hunter.perkFlashes > 0 && this.engine.monsterAtb >= 70) {
+        const flashPolicy = typeof HuntSupportItemPolicy !== 'undefined'
+            ? HuntSupportItemPolicy
+            : (typeof require === 'function' ? require('./HuntSupportItemPolicy.js') : null);
+        if (names.has('섬광 조제사') && hunter.perkFlashes > 0
+            && this.engine.monsterAtb >= 70 && flashPolicy?.isFlashEffective(this.engine)) {
             hunter.perkFlashes--;
+            this.engine.monsterFlashUseCount = Number(this.engine.monsterFlashUseCount || 0) + 1;
             this.engine.monsterAtb = 0; this.engine.monsterRecoveryDuration = Math.max(this.engine.monsterRecoveryDuration, 25);
             hunter.itemDuration = 8;
+            if (this.engine.monsterFlightState === 'airborne') {
+                this.engine.monsterFlightRuntime?.forceLanding(this.engine, 'perk-flash');
+            }
+            this.engine.playSFX?.('flash_pod', null, {
+                hunterIndex: hunter.index,
+                action: 'support',
+                item: 'flash-pod'
+            });
+            this.engine.triggerEnvironmentEffect?.('flash', hunter.index);
             this.engine.addLog(`✨ [섬광 조제사] ${hunter.hunterName}이(가) 섬광탄으로 몬스터의 공격을 끊었습니다!`, '#fff3a3');
             return true;
         }
@@ -382,7 +425,6 @@ class HuntPerkRuntime {
         if (value > 0 && names.has('복수의 일격')) hunter.revengeReady = true;
         if (names.has('불길한 예감') && context.isUltimate) value *= .72;
         if (names.has('지상주의자') && (this.engine.monsterFlightState === 'airborne' || this.engine.monsterState === 'valstrax_flying')) value *= .85;
-        if (names.has('똥')) value *= .65;
         return Math.max(0, Math.floor(value));
     }
 
@@ -421,7 +463,6 @@ class HuntPerkRuntime {
     }
 
     cartRecoveryTicks(hunter, ticks) {
-        if (HuntPerkRuntime.has(hunter, '똥')) return Math.max(15, Math.ceil(ticks * .4));
         if (HuntPerkRuntime.has(hunter, '수레 단골')) return Math.max(18, Math.ceil(ticks * .45));
         return HuntPerkRuntime.has(hunter, '수레 애호가') ? Math.max(20, Math.ceil(ticks * .55)) : ticks;
     }

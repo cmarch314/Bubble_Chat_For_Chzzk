@@ -20,7 +20,8 @@ assert.strictEqual(camper.hp, 120);
 assert.strictEqual(camper.maxSharpness, 120);
 assert.strictEqual(runtime.canAct(camper), false);
 assert.strictEqual(runtime.isTargetable(camper), false);
-for (let tick = 0; tick < 80; tick++) runtime.tick(camper);
+assert.strictEqual(camper.perkCampTicks, 320, 'camp guardian must spend a dramatic 32 seconds resupplying');
+for (let tick = 0; tick < 320; tick++) runtime.tick(camper);
 assert.strictEqual(camper.isAtCamp, false);
 assert.strictEqual(camper.hp, 120);
 assert.strictEqual(camper.atb, 70);
@@ -29,11 +30,18 @@ assert.strictEqual(runtime.ammoCost({ perks: [{ name: '탄환 절약' }] }, 1), 
 assert.strictEqual(runtime.stunValue({ perks: [{ name: 'KO술' }] }, 100), 130);
 assert.strictEqual(runtime.roarDuration({ perks: [{ name: '귀마개' }] }, 45), 0);
 assert.strictEqual(runtime.healAmount({ perks: [{ name: '체력 회복량 UP' }] }, 40), 50);
+const affinityHunter = {
+    id: 'long_sword', hp: 100, maxHp: 100, atb: 0,
+    weaponInstance: { affinity: 20 }, perks: []
+};
+assert.strictEqual(runtime.outgoingDamage(affinityHunter, {}, 100), 125,
+    'weapon affinity must drive the same real critical-hit chance shown in the hunter HUD');
 
 const lost = { index: 1, hunterName: 'LOST', hp: 100, maxHp: 100, potions: 10, sharpness: 100, atb: 0, perks: [{ name: '길치' }] };
 runtime.initialize(lost);
 assert.strictEqual(lost.isAtCamp, true);
-for (let tick = 0; tick < 25; tick++) runtime.tick(lost);
+assert.strictEqual(lost.perkCampTicks, 100, 'lost hunters must remain absent for the four-times-longer camp delay');
+for (let tick = 0; tick < 100; tick++) runtime.tick(lost);
 assert.strictEqual(lost.isAtCamp, false);
 assert.ok(events.some(text => text.includes('길치 합류')));
 
@@ -67,15 +75,21 @@ assert.strictEqual(expandedHunter.firstStrikeReady, false);
 assert.strictEqual(expandedHunter.revengeReady, false);
 const dungHunter = {
     id: 'hammer', hp: 100, maxHp: 100, potions: 10, lifepowders: 1, bombs: 1, shockTraps: 0,
-    perks: [{ name: '똥' }]
+    perks: [{ name: '💩' }],
+    perkModifiers: { critChance: .6 }
 };
+assert.ok(HuntPerkRuntime.names({ perks: [{ name: '똥' }] }).has('💩'),
+    'legacy in-memory Dung records must migrate to the emoji runtime name');
 runtime.initialize(dungHunter);
-assert.deepStrictEqual([dungHunter.potions, dungHunter.lifepowders, dungHunter.bombs, dungHunter.shockTraps], [13, 2, 3, 1]);
-assert.strictEqual(runtime.actionDuration(dungHunter, {}, 20), 13);
-assert.strictEqual(runtime.incomingDamage(dungHunter, 100), 65);
-assert.strictEqual(runtime.stunValue(dungHunter, 100), 150);
-assert.strictEqual(runtime.healAmount(dungHunter, 40), 54);
+assert.deepStrictEqual([dungHunter.potions, dungHunter.lifepowders, dungHunter.bombs, dungHunter.shockTraps], [10, 1, 1, 0]);
+assert.strictEqual(runtime.actionDuration(dungHunter, {}, 20), 20, 'Dung must not shorten actions or alter ATB pacing');
+assert.strictEqual(runtime.whetstoneDuration(dungHunter, 20), 20, 'Dung must not accelerate whetstone actions');
+assert.strictEqual(runtime.itemDuration(dungHunter, 20), 20, 'Dung must not accelerate item actions');
+assert.strictEqual(runtime.incomingDamage(dungHunter, 100), 100, 'Dung must not provide fixed damage reduction');
+assert.strictEqual(runtime.stunValue(dungHunter, 100), 100, 'Dung must not provide fixed stun multipliers');
+assert.strictEqual(runtime.healAmount(dungHunter, 40), 40, 'Dung must not provide fixed healing multipliers');
+assert.strictEqual(runtime.outgoingDamage(dungHunter, {}, 100), 125, 'Dung critical chance must affect the real critical roll');
 assert.strictEqual(runtime.sharpnessCost(dungHunter, 4), 0);
 assert.strictEqual(runtime.ammoCost(dungHunter, 1), 0);
-assert.strictEqual(runtime.cartRecoveryTicks(dungHunter, 50), 20);
+assert.strictEqual(runtime.cartRecoveryTicks(dungHunter, 50), 50, 'Dung must not accelerate cart recovery');
 console.log('[test] Hunt perk event runtime and real camp absence passed.');

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Guard Impact 1920×1080 Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(circle at 50% 35%,#24313a,#07090b 72%)}
+    main{height:918px;box-sizing:border-box;display:grid;place-items:center;color:#fff}
+    .preview-row{display:flex;gap:90px}.preview-card{width:360px;height:310px;border:3px solid #947442;border-radius:16px;background:#101318dd;display:grid;place-items:center}
+    .preview-card b{font-size:27px}.preview-card .game-hunt-weapon-img-container{transform:scale(1.35)}
+    footer{position:absolute;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa66;background:#0009;display:grid;place-items:center;color:#aaa;font:800 22px/1 sans-serif}
+  </style>
+</head>
+<body>
+<main class="hunt-combat-board">
+  <section class="preview-row">
+    <article class="preview-card">
+      <div class="game-hunt-weapon-img-container">
+        <img class="hunt-split-weapon hunt-split-weapon--lance" src="../../img/weapons/lance.svg" alt="">
+        <img class="hunt-split-shield hunt-split-shield--lance" src="../../img/weapons/lance.svg" alt="">
+        <span class="hunt-guard-impact is-split-shield" aria-hidden="true">🛡️</span>
+      </div>
+      <b>랜스 · 분리 방패 기준</b>
+    </article>
+    <article class="preview-card">
+      <div class="game-hunt-weapon-img-container">
+        <img class="game-hunt-weapon-img" src="../../img/weapons/heavy_bowgun.svg" alt="">
+        <span class="hunt-guard-impact is-weapon-fallback" aria-hidden="true">🛡️</span>
+      </div>
+      <b>분리 방패 없음 · 중앙 대체</b>
+    </article>
+  </section>
+</main>
+<footer>OBS 채팅 전용 하단 15%</footer>
+<script>
+  setInterval(() => {
+    document.querySelectorAll('.hunt-guard-impact').forEach(old => {
+      const next = old.cloneNode(true);
+      old.replaceWith(next);
+    });
+  }, 1100);
+</script>
+</body>
+</html>

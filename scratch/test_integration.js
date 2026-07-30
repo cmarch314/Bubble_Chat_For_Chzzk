@@ -153,10 +153,12 @@ globalThis.fetch = async (url, options) => {
 
 // 2. Load EventBus and ChzzkGateway code
 const eventBusCode = fs.readFileSync(path.join(__dirname, '../js/EventBus.js'), 'utf8');
+const companionEndpointCode = fs.readFileSync(path.join(__dirname, '../js/runtime/LocalCompanionEndpoint.js'), 'utf8');
 const gatewayCode = fs.readFileSync(path.join(__dirname, '../js/ChzzkGateway.js'), 'utf8');
 
 // Evaluate code in global context and assign to globalThis
 eval(eventBusCode + "; globalThis.EventBus = EventBus;");
+eval(companionEndpointCode + "; globalThis.LocalCompanionEndpoint = LocalCompanionEndpoint;");
 eval(gatewayCode + "; globalThis.ChzzkGateway = ChzzkGateway;");
 
 const eventBus = new EventBus();

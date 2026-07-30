@@ -1,6 +1,6 @@
 class HuntRunState {
     static SCHEMA_VERSION = 4;
-    static CATALOG_VERSION = 4;
+    static CATALOG_VERSION = 5;
     static NODE_COUNT = 15;
     static MAX_BYTES = 32 * 1024;
     static ENDPOINT_PATH = '/api/hunt-run';

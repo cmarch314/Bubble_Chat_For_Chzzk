@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "bazelgeuse",
+  "nameKO": "바젤기우스",
+  "canonicalEdition": "world-iceborne",
+  "variantOf": null,
+  "release": {
+    "stage": "released",
+    "order": 10,
+    "reviewId": "pilot-2026-07-25",
+    "reviewedAt": "2026-07-25",
+    "gates": { "evidence": true, "patterns": true, "anatomy": true, "animation": true, "audio": true, "preview": true, "simulation": true }
+  },
+  "runtime": { "profileId": "bazelgeuse", "mechanicModules": ["common", "flight", "blast-scales"] },
+  "evidenceRefs": [
+    { "kind": "review-standard", "path": "data/hunt/monster-implementation-standard.md" },
+    { "kind": "pattern-audit", "path": "data/hunt/monster-pattern-pilot-report.md" },
+    { "kind": "world-flying-review", "path": "data/hunt/research/world-iceborne-flying-wyverns.json" }
+  ]
+}

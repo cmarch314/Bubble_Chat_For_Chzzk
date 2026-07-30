@@ -1,0 +1,1611 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-25T05:51:18.773Z",
+  "sources": [
+    "https://mhrise.kiranico.com/data/monsters?view=lg",
+    "https://mhrise.kiranico.com/data/monsters?view=sm",
+    "https://mhworld.kiranico.com/en/monsters"
+  ],
+  "monsters": [
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1301934382",
+      "iconCode": "em132_05",
+      "nameEN": "Primordial Malzeno",
+      "nameKO": "원초를 새기는 멜-제나",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2084266193",
+      "iconCode": "em091_00",
+      "nameEN": "Aknosom",
+      "nameKO": "아케노시름",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2040569941",
+      "iconCode": "em095_00",
+      "nameEN": "Almudron",
+      "nameKO": "오로미도로",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1446526160",
+      "iconCode": "em058_00",
+      "nameEN": "Amatsu",
+      "nameKO": "아마츠마가츠치",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1743214542",
+      "iconCode": "em100_00",
+      "nameEN": "Anjanath",
+      "nameKO": "안쟈나프",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1192999830",
+      "iconCode": "em060_07",
+      "nameEN": "Apex Arzuros",
+      "nameKO": "주인 아오아시라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "36049421",
+      "iconCode": "em007_07",
+      "nameEN": "Apex Diablos",
+      "nameKO": "주인 디아블로스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2043189560",
+      "iconCode": "em082_07",
+      "nameEN": "Apex Mizutsune",
+      "nameKO": "주인 타마미츠네",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "99050216",
+      "iconCode": "em002_07",
+      "nameEN": "Apex Rathalos",
+      "nameKO": "주인 리오레우스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "453915339",
+      "iconCode": "em001_07",
+      "nameEN": "Apex Rathian",
+      "nameKO": "주인 리오레이아",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1150792755",
+      "iconCode": "em057_07",
+      "nameEN": "Apex Zinogre",
+      "nameKO": "주인 진오우거",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1374346390",
+      "iconCode": "em060_00",
+      "nameEN": "Arzuros",
+      "nameKO": "아오아시라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1237729819",
+      "iconCode": "em081_00",
+      "nameEN": "Astalos",
+      "nameKO": "라이젝스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "88482199",
+      "iconCode": "em093_01",
+      "nameEN": "Aurora Somnacanth",
+      "nameKO": "이소네미쿠니 아종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "614678208",
+      "iconCode": "em042_00",
+      "nameEN": "Barioth",
+      "nameKO": "벨리오로스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "643686022",
+      "iconCode": "em044_00",
+      "nameEN": "Barroth",
+      "nameKO": "볼보로스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "274815918",
+      "iconCode": "em004_00",
+      "nameEN": "Basarios",
+      "nameKO": "바살모스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "321844636",
+      "iconCode": "em118_00",
+      "nameEN": "Bazelgeuse",
+      "nameKO": "바젤기우스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1935814960",
+      "iconCode": "em090_00",
+      "nameEN": "Bishaten",
+      "nameKO": "비슈텐고",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "447894064",
+      "iconCode": "em090_01",
+      "nameEN": "Blood Orange Bishaten",
+      "nameKO": "비슈텐고 아종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "138201299",
+      "iconCode": "em025_00",
+      "nameEN": "Chameleos",
+      "nameKO": "오나즈치",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "131188813",
+      "iconCode": "em071_05",
+      "nameEN": "Chaotic Gore Magala",
+      "nameKO": "혼돈에 신음하는 고어-마가라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "815111868",
+      "iconCode": "em086_05",
+      "nameEN": "Crimson Glow Valstrax",
+      "nameKO": "영묘한 광채의 발파루크",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "19196313",
+      "iconCode": "em019_00",
+      "nameEN": "Daimyo Hermitaur",
+      "nameKO": "다이묘자자미",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "485829389",
+      "iconCode": "em007_00",
+      "nameEN": "Diablos",
+      "nameKO": "디아블로스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "141986722",
+      "iconCode": "em136_00",
+      "nameEN": "Espinas",
+      "nameKO": "에스피나스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1472640162",
+      "iconCode": "em136_01",
+      "nameEN": "Flaming Espinas",
+      "nameKO": "에스피나스 아종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1326634525",
+      "iconCode": "em023_05",
+      "nameEN": "Furious Rajang",
+      "nameKO": "격앙 라잔",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "261970829",
+      "iconCode": "em135_00",
+      "nameEN": "Gaismagorm",
+      "nameKO": "가이아델름",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "247196652",
+      "iconCode": "em134_00",
+      "nameEN": "Garangolm",
+      "nameKO": "가란고르무",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1518179787",
+      "iconCode": "em001_02",
+      "nameEN": "Gold Rathian",
+      "nameKO": "리오레이아 희소종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1161896781",
+      "iconCode": "em071_00",
+      "nameEN": "Gore Magala",
+      "nameKO": "고어-마가라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2069053547",
+      "iconCode": "em097_00",
+      "nameEN": "Goss Harag",
+      "nameKO": "고샤하기",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "718470492",
+      "iconCode": "em054_00",
+      "nameEN": "Great Baggi",
+      "nameKO": "도스바기",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1681174536",
+      "iconCode": "em098_00",
+      "nameEN": "Great Izuchi",
+      "nameKO": "오사이즈치",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1460759793",
+      "iconCode": "em059_00",
+      "nameEN": "Great Wroggi",
+      "nameKO": "도스프로기",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1755961030",
+      "iconCode": "em108_00",
+      "nameEN": "Jyuratodus",
+      "nameKO": "쥬라토도스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "395307913",
+      "iconCode": "em003_00",
+      "nameEN": "Khezu",
+      "nameKO": "푸루푸루",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1875928865",
+      "iconCode": "em107_00",
+      "nameEN": "Kulu-Ya-Ku",
+      "nameKO": "쿠루루야크",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "257661234",
+      "iconCode": "em024_00",
+      "nameEN": "Kushala Daora",
+      "nameKO": "크샬다오라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1389104311",
+      "iconCode": "em061_00",
+      "nameEN": "Lagombi",
+      "nameKO": "울크스스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1661782447",
+      "iconCode": "em037_02",
+      "nameEN": "Lucent Nargacuga",
+      "nameKO": "나르가쿠르가 희소종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "232963023",
+      "iconCode": "em133_00",
+      "nameEN": "Lunagaron",
+      "nameKO": "루나가론",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "15778133",
+      "iconCode": "em095_01",
+      "nameEN": "Magma Almudron",
+      "nameKO": "오로미도로 아종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1921564947",
+      "iconCode": "em089_00",
+      "nameEN": "Magnamalo",
+      "nameKO": "마가이마가도",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "50943022",
+      "iconCode": "em132_00",
+      "nameEN": "Malzeno",
+      "nameKO": "멜-제나",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1251979832",
+      "iconCode": "em082_00",
+      "nameEN": "Mizutsune",
+      "nameKO": "타마미츠네",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1047302063",
+      "iconCode": "em037_00",
+      "nameEN": "Nargacuga",
+      "nameKO": "나르가쿠르가",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "664702249",
+      "iconCode": "em099_05",
+      "nameEN": "Narwa the Allmother",
+      "nameKO": "백룡 연원 나루하타타히메",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1636956044",
+      "iconCode": "em102_00",
+      "nameEN": "Pukei-Pukei",
+      "nameKO": "푸케푸케",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "102732212",
+      "iconCode": "em094_01",
+      "nameEN": "Pyre Rakna-Kadaki",
+      "nameKO": "야츠카다키 아종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "243411229",
+      "iconCode": "em023_00",
+      "nameEN": "Rajang",
+      "nameKO": "라잔",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2026860724",
+      "iconCode": "em094_00",
+      "nameEN": "Rakna-Kadaki",
+      "nameKO": "야츠카다키",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "381074408",
+      "iconCode": "em002_00",
+      "nameEN": "Rathalos",
+      "nameKO": "리오레우스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "366824395",
+      "iconCode": "em001_00",
+      "nameEN": "Rathian",
+      "nameKO": "리오레이아",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1186844883",
+      "iconCode": "em025_08",
+      "nameEN": "Risen Chameleos",
+      "nameKO": "괴이 극복 오나즈치",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "210106812",
+      "iconCode": "em086_08",
+      "nameEN": "Risen Crimson Glow Valstrax",
+      "nameKO": "괴이 극복 발파루크",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1172594994",
+      "iconCode": "em024_08",
+      "nameEN": "Risen Kushala Daora",
+      "nameKO": "괴이 극복 크샬다오라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "479959906",
+      "iconCode": "em072_08",
+      "nameEN": "Risen Shagaru Magala",
+      "nameKO": "괴이 극복 샤가르마가라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1080586385",
+      "iconCode": "em027_08",
+      "nameEN": "Risen Teostra",
+      "nameKO": "괴이 극복 테오-테스카토르",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "585215589",
+      "iconCode": "em047_00",
+      "nameEN": "Royal Ludroth",
+      "nameKO": "로아루드로스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "857304595",
+      "iconCode": "em089_05",
+      "nameEN": "Scorned Magnamalo",
+      "nameKO": "원망 서린 마가이마가도",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1572835996",
+      "iconCode": "em118_05",
+      "nameEN": "Seething Bazelgeuse",
+      "nameKO": "홍련의 솟구치는 바젤기우스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1280901767",
+      "iconCode": "em077_00",
+      "nameEN": "Seregios",
+      "nameKO": "셀레기오스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1176146786",
+      "iconCode": "em072_00",
+      "nameEN": "Shagaru Magala",
+      "nameKO": "샤가르마가라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "67000766",
+      "iconCode": "em020_00",
+      "nameEN": "Shogun Ceanataur",
+      "nameKO": "쇼군기자미",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1532413416",
+      "iconCode": "em002_02",
+      "nameEN": "Silver Rathalos",
+      "nameKO": "리오레우스 희소종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2146828439",
+      "iconCode": "em093_00",
+      "nameEN": "Somnacanth",
+      "nameKO": "이소네미쿠니",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "200239249",
+      "iconCode": "em027_00",
+      "nameEN": "Teostra",
+      "nameKO": "테오-테스카토르",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2099040502",
+      "iconCode": "em092_00",
+      "nameEN": "Tetranadon",
+      "nameKO": "요츠미와두",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1695408169",
+      "iconCode": "em099_00",
+      "nameEN": "Thunder Serpent Narwa",
+      "nameKO": "나루하타타히메",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "808327178",
+      "iconCode": "em032_00",
+      "nameEN": "Tigrex",
+      "nameKO": "티가렉스",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1770194663",
+      "iconCode": "em109_00",
+      "nameEN": "Tobi-Kadachi",
+      "nameKO": "토비카가치",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "440849622",
+      "iconCode": "em124_00",
+      "nameEN": "Velkhana",
+      "nameKO": "이베르카나",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1061157944",
+      "iconCode": "em082_02",
+      "nameEN": "Violet Mizutsune",
+      "nameKO": "타마미츠네 희소종",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1403354196",
+      "iconCode": "em062_00",
+      "nameEN": "Volvidon",
+      "nameKO": "랑그로토라",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2054819914",
+      "iconCode": "em096_00",
+      "nameEN": "Wind Serpent Ibushi",
+      "nameKO": "이부시마키히코",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1432800563",
+      "iconCode": "em057_00",
+      "nameEN": "Zinogre",
+      "nameKO": "진오우거",
+      "kind": "large",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=lg",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "518617233",
+      "iconCode": "ems027_00",
+      "nameEN": "Altaroth",
+      "nameKO": "오르타로스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1771235898",
+      "iconCode": "ems016_00",
+      "nameEN": "Anteka",
+      "nameKO": "가우시카",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "9777038",
+      "iconCode": "ems036_00",
+      "nameEN": "Baggi",
+      "nameKO": "바기",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "470812912",
+      "iconCode": "ems026_00",
+      "nameEN": "Bnahabra",
+      "nameKO": "브나하브라",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1137262772",
+      "iconCode": "ems094_00",
+      "nameEN": "Boggi",
+      "nameKO": "올기",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1181483312",
+      "iconCode": "ems090_00",
+      "nameEN": "Bombadgy",
+      "nameKO": "분부지나",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1829706311",
+      "iconCode": "ems013_00",
+      "nameEN": "Bullfango",
+      "nameKO": "불팽고",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "399612255",
+      "iconCode": "ems021_00",
+      "nameEN": "Ceanataur",
+      "nameKO": "가미자미",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "38260556",
+      "iconCode": "ems038_00",
+      "nameEN": "Delex",
+      "nameKO": "델크스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1744255757",
+      "iconCode": "ems007_00",
+      "nameEN": "Felyne",
+      "nameKO": "아이루",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "413407319",
+      "iconCode": "ems029_00",
+      "nameEN": "Gajau",
+      "nameKO": "가쟈우",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "262999744",
+      "iconCode": "ems042_00",
+      "nameEN": "Gargwa",
+      "nameKO": "가구아",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1123029143",
+      "iconCode": "ems093_00",
+      "nameEN": "Gowngoat",
+      "nameKO": "메르크",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "385362366",
+      "iconCode": "ems020_00",
+      "nameEN": "Hermitaur",
+      "nameKO": "야오자미",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1682217807",
+      "iconCode": "ems005_00",
+      "nameEN": "Hornetaur",
+      "nameKO": "칸타로스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1195733201",
+      "iconCode": "ems091_00",
+      "nameEN": "Izuchi",
+      "nameKO": "이즈치",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "114986952",
+      "iconCode": "ems034_00",
+      "nameEN": "Jaggi",
+      "nameKO": "재기",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "129236969",
+      "iconCode": "ems035_00",
+      "nameEN": "Jaggia",
+      "nameKO": "재기노스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "933125691",
+      "iconCode": "ems049_00",
+      "nameEN": "Jagras",
+      "nameKO": "쟈그라스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "2055863177",
+      "iconCode": "ems003_00",
+      "nameEN": "Kelbi",
+      "nameKO": "켈비",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "826867193",
+      "iconCode": "ems051_00",
+      "nameEN": "Kestodon",
+      "nameKO": "케스토돈",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "51986285",
+      "iconCode": "ems039_00",
+      "nameEN": "Ludroth",
+      "nameKO": "루드로스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1623747362",
+      "iconCode": "ems008_00",
+      "nameEN": "Melynx",
+      "nameKO": "메라루",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1876970084",
+      "iconCode": "ems014_00",
+      "nameEN": "Popo",
+      "nameKO": "포포",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1869529590",
+      "iconCode": "ems092_01",
+      "nameEN": "Pyrantula",
+      "nameKO": "하제히바키",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1075749110",
+      "iconCode": "ems092_00",
+      "nameEN": "Rachnoid",
+      "nameKO": "츠케히바키",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "338098585",
+      "iconCode": "ems019_00",
+      "nameEN": "Remobra",
+      "nameKO": "가브라스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "322885843",
+      "iconCode": "ems025_00",
+      "nameEN": "Rhenoplos",
+      "nameKO": "리노프로스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "248241955",
+      "iconCode": "ems041_00",
+      "nameEN": "Slagtoth",
+      "nameKO": "즈와로포스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "233991938",
+      "iconCode": "ems040_00",
+      "nameEN": "Uroktor",
+      "nameKO": "우로코트르",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1637997251",
+      "iconCode": "ems009_00",
+      "nameEN": "Velociprey",
+      "nameKO": "람포스",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "1696451436",
+      "iconCode": "ems006_00",
+      "nameEN": "Vespoid",
+      "nameKO": "랑고스타",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "143032033",
+      "iconCode": "ems043_00",
+      "nameEN": "Wroggi",
+      "nameKO": "프로기",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "rise-sunbreak",
+      "sourceId": "157265542",
+      "iconCode": "ems044_00",
+      "nameEN": "Zamite",
+      "nameKO": "스쿠아길",
+      "kind": "small",
+      "sourceUrl": "https://mhrise.kiranico.com/data/monsters?view=sm",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "ErdcV",
+      "iconCode": "em050",
+      "nameEN": "Alatreon",
+      "nameKO": "알바트리온",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "ZqptN",
+      "iconCode": "em100",
+      "nameEN": "Anjanath",
+      "nameKO": "안쟈나프",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "6dJI8",
+      "iconCode": "em123",
+      "nameEN": "Banbaro",
+      "nameKO": "버프바로",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "4k2UP",
+      "iconCode": "em042",
+      "nameEN": "Barioth",
+      "nameKO": "벨리오로스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "Z9btN",
+      "iconCode": "em044",
+      "nameEN": "Barroth",
+      "nameKO": "볼보로스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "Xe7fm",
+      "iconCode": "em118",
+      "nameEN": "Bazelgeuse",
+      "nameKO": "바젤기우스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "yA8Ub",
+      "iconCode": "em121",
+      "nameEN": "Behemoth",
+      "nameKO": "베히모스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "OqOIX",
+      "iconCode": "em122",
+      "nameEN": "Beotodus",
+      "nameKO": "브란토도스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "qpVH8",
+      "iconCode": "em063",
+      "nameEN": "Brachydios",
+      "nameKO": "브라키디오스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "4rATd",
+      "iconCode": "em043",
+      "nameEN": "Deviljho",
+      "nameKO": "이블조",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "BYXHE",
+      "iconCode": "em007",
+      "nameEN": "Diablos",
+      "nameKO": "디아블로스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "DmeH0",
+      "iconCode": "em116",
+      "nameEN": "Dodogama",
+      "nameKO": "도도가마루",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "jA8SZ",
+      "iconCode": "em013",
+      "nameEN": "Fatalis",
+      "nameKO": "밀라보레아스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "Lk1ia",
+      "iconCode": "em080",
+      "nameEN": "Glavenus",
+      "nameKO": "디노발드",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "eMAHO",
+      "iconCode": "em112",
+      "nameEN": "Great Girros",
+      "nameKO": "도스기르오스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "zJ1Sb",
+      "iconCode": "em101",
+      "nameEN": "Great Jagras",
+      "nameKO": "도스쟈그라스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "oAyTx",
+      "iconCode": "em108",
+      "nameEN": "Jyuratodus",
+      "nameKO": "쥬라토도스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "BQruK",
+      "iconCode": "em011",
+      "nameEN": "Kirin",
+      "nameKO": "키린",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "YQ1FE",
+      "iconCode": "em107",
+      "nameEN": "Kulu-Ya-Ku",
+      "nameKO": "쿠루루야크",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "5xbCn",
+      "iconCode": "em117",
+      "nameEN": "Kulve Taroth",
+      "nameKO": "맘-타로트",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "jJxin",
+      "iconCode": "em024",
+      "nameEN": "Kushala Daora",
+      "nameKO": "크샬다오라",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "BL1ca",
+      "iconCode": "em036",
+      "nameEN": "Lavasioth",
+      "nameKO": "볼가노스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "QNYCK",
+      "iconCode": "em111",
+      "nameEN": "Legiana",
+      "nameKO": "레이기에나",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "GmYh0",
+      "iconCode": "em127",
+      "nameEN": "Leshen",
+      "nameKO": "레셴",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "j8gFA",
+      "iconCode": "em026",
+      "nameEN": "Lunastra",
+      "nameKO": "나나-테스카토리",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "Mzdfo",
+      "iconCode": "em125",
+      "nameEN": "Namielle",
+      "nameKO": "네로미에르",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "BKNIm",
+      "iconCode": "em037",
+      "nameEN": "Nargacuga",
+      "nameKO": "나르가쿠르가",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "aYaUV",
+      "iconCode": "em103",
+      "nameEN": "Nergigante",
+      "nameKO": "네르기간테",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "ADAfZ",
+      "iconCode": "em113",
+      "nameEN": "Odogaron",
+      "nameKO": "오도가론",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "2mnT3",
+      "iconCode": "em110",
+      "nameEN": "Paolumu",
+      "nameKO": "파오우르무",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "nebTX",
+      "iconCode": "em102",
+      "nameEN": "Pukei-Pukei",
+      "nameKO": "푸케푸케",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "v2OUJ",
+      "iconCode": "em114",
+      "nameEN": "Radobaan",
+      "nameKO": "라도발킨",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "jJZIO",
+      "iconCode": "em023",
+      "nameEN": "Rajang",
+      "nameKO": "라잔",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "BnetX",
+      "iconCode": "em002",
+      "nameEN": "Rathalos",
+      "nameKO": "리오레우스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "Rz9Tb",
+      "iconCode": "em001",
+      "nameEN": "Rathian",
+      "nameKO": "리오레이아",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "0kVsV",
+      "iconCode": "em104",
+      "nameEN": "Safi'jiiva",
+      "nameKO": "무페토-지바",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "8mvfA",
+      "iconCode": "em126",
+      "nameEN": "Shara Ishvalda",
+      "nameKO": "안-이슈왈다",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "jGeS0",
+      "iconCode": "em027",
+      "nameEN": "Teostra",
+      "nameKO": "테오-테스카토르",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "jVAhP",
+      "iconCode": "em032",
+      "nameEN": "Tigrex",
+      "nameKO": "티가렉스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "blDTZ",
+      "iconCode": "em109",
+      "nameEN": "Tobi-Kadachi",
+      "nameKO": "토비카가치",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "WQvu8",
+      "iconCode": "em120",
+      "nameEN": "Tzitzi-Ya-Ku",
+      "nameKO": "치치야크",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "z99fb",
+      "iconCode": "em045",
+      "nameEN": "Uragaan",
+      "nameKO": "우라간킨",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "9mMsb",
+      "iconCode": "em115",
+      "nameEN": "Vaal Hazak",
+      "nameKO": "발하자크",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "J1pFn",
+      "iconCode": "em124",
+      "nameEN": "Velkhana",
+      "nameKO": "이베르카나",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "wA8F8",
+      "iconCode": "em105",
+      "nameEN": "Xeno'jiiva",
+      "nameKO": "제노-지바",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "jXmhm",
+      "iconCode": "em018",
+      "nameEN": "Yian Garuga",
+      "nameKO": "얀가루루가",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "Ak8TZ",
+      "iconCode": "em057",
+      "nameEN": "Zinogre",
+      "nameKO": "진오우거",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    },
+    {
+      "game": "world-iceborne",
+      "sourceId": "EmVcV",
+      "iconCode": "em106",
+      "nameEN": "Zorah Magdaros",
+      "nameKO": "조라-마그다라오스",
+      "kind": "large",
+      "sourceUrl": "https://mhworld.kiranico.com/monsters",
+      "evidence": "kiranico-localized-id-and-icon-row"
+    }
+  ]
+}

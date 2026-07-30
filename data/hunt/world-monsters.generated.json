@@ -1,0 +1,965 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-25T06:52:43.111Z",
+  "source": {
+    "title": "Monster Hunter World Database API",
+    "url": "https://docs.mhw-db.com/",
+    "license": "MIT",
+    "repository": "https://github.com/LartTyler/MHWDB-API"
+  },
+  "counts": {
+    "monsters": 58,
+    "small": 16,
+    "large": 42,
+    "species": 12
+  },
+  "monsters": [
+    {
+      "sourceId": "1",
+      "nameEN": "Aptonoth",
+      "kind": "small",
+      "species": "herbivore",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Ancient Forest"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/1",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "2",
+      "nameEN": "Jagras",
+      "kind": "small",
+      "species": "fanged wyvern",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Ancient Forest"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/2",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "3",
+      "nameEN": "Mernos",
+      "kind": "small",
+      "species": "wingdrake",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Ancient Forest",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/3",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "4",
+      "nameEN": "Vespoid",
+      "kind": "small",
+      "species": "neopteron",
+      "elements": [],
+      "ailments": [
+        "Paralysis"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Coral Highlands",
+        "Wildspire Waste",
+        "Rotten Vale",
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/4",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "5",
+      "nameEN": "Mosswine",
+      "kind": "small",
+      "species": "herbivore",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Ancient Forest",
+        "Wildspire Waste",
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/5",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "6",
+      "nameEN": "Apceros",
+      "kind": "small",
+      "species": "herbivore",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/6",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "7",
+      "nameEN": "Kestodon",
+      "kind": "small",
+      "species": "herbivore",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Ancient Forest",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/7",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "8",
+      "nameEN": "Noios",
+      "kind": "small",
+      "species": "wingdrake",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/8",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "9",
+      "nameEN": "Gajau",
+      "kind": "small",
+      "species": "fish",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Ancient Forest",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/9",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "10",
+      "nameEN": "Kelbi",
+      "kind": "small",
+      "species": "herbivore",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Coral Highlands",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/10",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "11",
+      "nameEN": "Raphinos",
+      "kind": "small",
+      "species": "wingdrake",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Coral Highlands",
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/11",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "12",
+      "nameEN": "Shamos",
+      "kind": "small",
+      "species": "fanged wyvern",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Coral Highlands"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/12",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "13",
+      "nameEN": "Girros",
+      "kind": "small",
+      "species": "fanged wyvern",
+      "elements": [],
+      "ailments": [
+        "Paralysis"
+      ],
+      "locations": [
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/13",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "14",
+      "nameEN": "Hornetaur",
+      "kind": "small",
+      "species": "neopteron",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/14",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "15",
+      "nameEN": "Gastodon",
+      "kind": "small",
+      "species": "herbivore",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/15",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "16",
+      "nameEN": "Barnos",
+      "kind": "small",
+      "species": "wingdrake",
+      "elements": [],
+      "ailments": [
+        "Defense Down"
+      ],
+      "locations": [
+        "Elder's Recess",
+        "Great Ravine",
+        "Everstream"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/16",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "17",
+      "nameEN": "Great Jagras",
+      "kind": "large",
+      "species": "fanged wyvern",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Ancient Forest"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/17",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "18",
+      "nameEN": "Kulu-Ya-Ku",
+      "kind": "large",
+      "species": "bird wyvern",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Ancient Forest",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/18",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "19",
+      "nameEN": "Pukei-Pukei",
+      "kind": "large",
+      "species": "bird wyvern",
+      "elements": [],
+      "ailments": [
+        "Poison",
+        "Stun"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/19",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "20",
+      "nameEN": "Barroth",
+      "kind": "large",
+      "species": "brute wyvern",
+      "elements": [],
+      "ailments": [
+        "Waterblight",
+        "Muddy"
+      ],
+      "locations": [
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/20",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "21",
+      "nameEN": "Jyuratodus",
+      "kind": "large",
+      "species": "piscine wyvern",
+      "elements": [
+        "water"
+      ],
+      "ailments": [
+        "Waterblight",
+        "Muddy"
+      ],
+      "locations": [
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/21",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "22",
+      "nameEN": "Tobi-Kadachi",
+      "kind": "large",
+      "species": "fanged wyvern",
+      "elements": [
+        "thunder"
+      ],
+      "ailments": [
+        "Thunderblight"
+      ],
+      "locations": [
+        "Ancient Forest"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/22",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "23",
+      "nameEN": "Anjanath",
+      "kind": "large",
+      "species": "brute wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/23",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "24",
+      "nameEN": "Azure Rathalos",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight",
+        "Poison"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/24",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "25",
+      "nameEN": "Bazelgeuse",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Blastblight",
+        "Fireblight"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Coral Highlands",
+        "Wildspire Waste",
+        "Rotten Vale",
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/25",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "26",
+      "nameEN": "Behemoth",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "fire",
+        "thunder"
+      ],
+      "ailments": [
+        "Bleeding",
+        "Fireblight",
+        "Thunderblight"
+      ],
+      "locations": [
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/26",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "27",
+      "nameEN": "Deviljho",
+      "kind": "large",
+      "species": "brute wyvern",
+      "elements": [
+        "dragon"
+      ],
+      "ailments": [
+        "Dragonblight",
+        "Defense Down"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Coral Highlands",
+        "Wildspire Waste",
+        "Rotten Vale",
+        "Elder's Recess",
+        "Great Ravine",
+        "Confluence of Fates",
+        "Everstream",
+        "Caverns of El Dorado"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/27",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "28",
+      "nameEN": "Diablos",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [],
+      "ailments": [
+        "Stun"
+      ],
+      "locations": [
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/28",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "29",
+      "nameEN": "Black Diablos",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/29",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "30",
+      "nameEN": "Dodogama",
+      "kind": "large",
+      "species": "fanged wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Blastblight"
+      ],
+      "locations": [
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/30",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "31",
+      "nameEN": "Great Girros",
+      "kind": "large",
+      "species": "fanged wyvern",
+      "elements": [],
+      "ailments": [
+        "Paralysis"
+      ],
+      "locations": [
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/31",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "32",
+      "nameEN": "Kirin",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "thunder"
+      ],
+      "ailments": [
+        "Paralysis",
+        "Thunderblight"
+      ],
+      "locations": [
+        "Coral Highlands"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/32",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "33",
+      "nameEN": "Kulve Taroth",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight"
+      ],
+      "locations": [
+        "Caverns of El Dorado"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/33",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "34",
+      "nameEN": "Kushala Daora",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [],
+      "ailments": [
+        "Stun"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/34",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "35",
+      "nameEN": "Lavasioth",
+      "kind": "large",
+      "species": "piscine wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight"
+      ],
+      "locations": [
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/35",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "36",
+      "nameEN": "Legiana",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [
+        "ice"
+      ],
+      "ailments": [
+        "Iceblight"
+      ],
+      "locations": [
+        "Coral Highlands",
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/36",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "37",
+      "nameEN": "Lunastra",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight"
+      ],
+      "locations": [
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/37",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "38",
+      "nameEN": "Nergigante",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [],
+      "ailments": [],
+      "locations": [
+        "Wildspire Waste",
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/38",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "39",
+      "nameEN": "Odogaron",
+      "kind": "large",
+      "species": "fanged wyvern",
+      "elements": [],
+      "ailments": [
+        "Bleeding"
+      ],
+      "locations": [
+        "Coral Highlands",
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/39",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "40",
+      "nameEN": "Paolumu",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [],
+      "ailments": [
+        "Wind Pressure"
+      ],
+      "locations": [
+        "Coral Highlands"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/40",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "41",
+      "nameEN": "Radobaan",
+      "kind": "large",
+      "species": "brute wyvern",
+      "elements": [],
+      "ailments": [
+        "Sleep"
+      ],
+      "locations": [
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/41",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "42",
+      "nameEN": "Rathalos",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight",
+        "Poison",
+        "Stun"
+      ],
+      "locations": [
+        "Ancient Forest"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/42",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "43",
+      "nameEN": "Rathian",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight",
+        "Poison"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/43",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "44",
+      "nameEN": "Pink Rathian",
+      "kind": "large",
+      "species": "flying wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight",
+        "Poison"
+      ],
+      "locations": [
+        "Coral Highlands",
+        "Wildspire Waste"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/44",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "45",
+      "nameEN": "Teostra",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Blastblight",
+        "Fireblight"
+      ],
+      "locations": [
+        "Wildspire Waste",
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/45",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "48",
+      "nameEN": "Tzitzi-Ya-Ku",
+      "kind": "large",
+      "species": "bird wyvern",
+      "elements": [],
+      "ailments": [
+        "Stun"
+      ],
+      "locations": [
+        "Coral Highlands"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/48",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "49",
+      "nameEN": "Uragaan",
+      "kind": "large",
+      "species": "brute wyvern",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight",
+        "Sleep"
+      ],
+      "locations": [
+        "Elder's Recess"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/49",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "50",
+      "nameEN": "Vaal Hazak",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [],
+      "ailments": [
+        "Effluvial Buildup"
+      ],
+      "locations": [
+        "Rotten Vale"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/50",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "51",
+      "nameEN": "Xeno'jiiva",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "dragon"
+      ],
+      "ailments": [
+        "Dragonblight",
+        "Fireblight"
+      ],
+      "locations": [
+        "Confluence of Fates"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/51",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "52",
+      "nameEN": "Zorah Magdaros",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "fire"
+      ],
+      "ailments": [
+        "Fireblight"
+      ],
+      "locations": [
+        "Great Ravine",
+        "Everstream"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/52",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "53",
+      "nameEN": "Leshen",
+      "kind": "large",
+      "species": "relict",
+      "elements": [],
+      "ailments": [
+        "Bleeding"
+      ],
+      "locations": [
+        "Ancient Forest"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/53",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "54",
+      "nameEN": "Ancient Leshen",
+      "kind": "large",
+      "species": "relict",
+      "elements": [],
+      "ailments": [
+        "Bleeding"
+      ],
+      "locations": [
+        "Ancient Forest"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/54",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "55",
+      "nameEN": "Safi'jiiva",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "fire",
+        "dragon"
+      ],
+      "ailments": [
+        "Dragonblight",
+        "Fireblight"
+      ],
+      "locations": [
+        "Secluded Valley"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/55",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "56",
+      "nameEN": "Stygian Zinogre",
+      "kind": "large",
+      "species": "fanged wyvern",
+      "elements": [
+        "dragon"
+      ],
+      "ailments": [
+        "Dragonblight"
+      ],
+      "locations": [
+        "Guiding Lands"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/56",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "57",
+      "nameEN": "Rajang",
+      "kind": "large",
+      "species": "fanged beast",
+      "elements": [
+        "thunder"
+      ],
+      "ailments": [
+        "Thunderblight"
+      ],
+      "locations": [
+        "Guiding Lands"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/57",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "58",
+      "nameEN": "Viper Tobi-Kadachi",
+      "kind": "large",
+      "species": "fanged wyvern",
+      "elements": [],
+      "ailments": [
+        "Paralysis",
+        "Poison"
+      ],
+      "locations": [
+        "Hoarfrost Reach"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/58",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "59",
+      "nameEN": "Namielle",
+      "kind": "large",
+      "species": "elder dragon",
+      "elements": [
+        "water",
+        "thunder"
+      ],
+      "ailments": [
+        "Thunderblight",
+        "Waterblight"
+      ],
+      "locations": [
+        "Coral Highlands"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/59",
+      "evidence": "mhw-db-game-reference"
+    },
+    {
+      "sourceId": "60",
+      "nameEN": "Zinogre",
+      "kind": "large",
+      "species": "fanged wyvern",
+      "elements": [
+        "thunder"
+      ],
+      "ailments": [
+        "Thunderblight"
+      ],
+      "locations": [
+        "Ancient Forest",
+        "Coral Highlands",
+        "Guiding Lands"
+      ],
+      "sourceUrl": "https://mhw-db.com/monsters/60",
+      "evidence": "mhw-db-game-reference"
+    }
+  ]
+}

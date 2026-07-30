@@ -56,14 +56,19 @@ class HuntValstraxExecutor {
         });
         engine.shakeMonster();
 
-        const targets = engine.selectedWeapons.filter(w =>
-            (w.status === 'alive' || w.status === 'stunned') && Number(w.cartRecoveryTicks || 0) <= 0
-            && Number(w.jumpInvulnerableTicks || 0) <= 0
-            && (!engine.perkRuntime || engine.perkRuntime.isTargetable(w))
-        );
+        const Rules = typeof HuntMonsterRules !== 'undefined'
+            ? HuntMonsterRules
+            : (typeof require === 'function' ? require('./HuntMonsterRules.js') : null);
+        const targets = engine.selectedWeapons.filter(w => Rules
+            ? Rules.isHunterTargetable(engine, w)
+            : (w.status === 'alive' || w.status === 'stunned'));
         const attackResults = [];
 
         targets.forEach(target => {
+            if (Number(target.hitDuration || 0) > 0) {
+                attackResults.push({ index: target.index, result: 'invulnerable' });
+                return;
+            }
             // Signature Ambush is a 90%-max-HP whole-party strike before defenses.
             let damage = Math.max(1, Math.floor(target.maxHp * 0.90));
 
@@ -76,19 +81,19 @@ class HuntValstraxExecutor {
             const actionMachine = engine.actionStateMachine;
 
             const isStunned = target.status === 'stunned';
-            const hasShield = !isStunned && (target.type === 'shield' || target.id === 'heavy_bowgun');
+            const actionAllowsGuard = !actionMachine || actionMachine.canGuard(target);
+            const hasShield = !isStunned && actionAllowsGuard
+                && (target.type === 'shield' || target.id === 'heavy_bowgun');
             let guardProb = isStunned ? 0 : 0.85;
             let dodgeProb = isStunned ? 0 : 0.75;
 
-            let foresightProb = 0.70;
+            let foresightProb = HuntMonsterTurnExecutor.longSwordForesightChance(target);
             if (target.personality === 'veteran') {
                 guardProb = 0.90;
                 dodgeProb = 0.90;
-                foresightProb = 0.90;
             } else if (target.personality === 'newbie') {
                 guardProb = 0.45;
                 dodgeProb = 0.35;
-                foresightProb = 0.25;
             }
 
             const actionAllowsEvade = !actionMachine || actionMachine.canEvade(target);
@@ -97,7 +102,8 @@ class HuntValstraxExecutor {
             // separate iai window, so its iai success shares the foresight roll.
             const counter = HuntMonsterTurnExecutor.resolveHunterCounter(engine, target, damage, {
                 defendRoll, actionAllowsEvade, perkModifiers: target.perkModifiers,
-                iaiCounterProb: foresightProb, foresightProb, isStunned
+                iaiCounterProb: foresightProb, foresightProb, isStunned,
+                pattern: { id: 'valstrax.ambush_landing', tags: ['ultimate'] }
             });
             if (counter.handled) {
                 ({ damage, isGuard, isDodge, isForesightSlash, isIaiCounter } = counter);
@@ -110,6 +116,7 @@ class HuntValstraxExecutor {
             }
 
             if (damage > 0) {
+                if (!isGuard && !isDodge) engine.interruptHunterItemAction?.(target, 'hit');
                 // Moxie check
                 if (target.hp - damage <= 0 && target.hasMoxie && engine.random() < 0.75) {
                     target.hp = 1;
@@ -133,10 +140,13 @@ class HuntValstraxExecutor {
                         if (engine.weaponMechanics) engine.weaponMechanics.onHit(target);
                         target.atb = 0;
                         engine.updateWeaponAtbUI(target.index, 0);
-                        target.hitDuration = 25; // 피격 경직
+                        const hitReaction = { kind: 'strong', durationTicks: 40, knockbackDirection: target.index < 2 ? -1 : 1 };
+                        target.hitDuration = hitReaction.durationTicks;
+                        target.hitRecoveryTotalTicks = hitReaction.durationTicks;
+                        target.hitReactionKind = hitReaction.kind;
+                        target.hitKnockbackDirection = hitReaction.knockbackDirection;
                         engine.addLog(`💥 [피격] ${target.name}이(가) 혜성 습격 직격! 치명적인 데미지를 입었습니다. (-${damage} HP)`, '#ff5555');
-                        engine.shakeWeapon(target.index);
-                        engine.triggerHitAnimation(target.index, damage);
+                        engine.triggerHitAnimation(target.index, hitReaction);
                         attackResults.push({ index: target.index, result: 'hit' });
                     }
                 }

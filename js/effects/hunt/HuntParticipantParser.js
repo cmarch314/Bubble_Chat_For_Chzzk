@@ -42,6 +42,20 @@ class HuntParticipantParser {
         return /^!\s*(?:리롤|퍽리롤)$/.test(normalized) ? { reroll: true } : null;
     }
 
+    parsePerkLock(message) {
+        const normalized = String(message || '').normalize('NFKC').trim().toLowerCase();
+        const match = normalized.match(/^!\s*잠금\s+(\d+)$/);
+        if (!match) return null;
+        return { perkIndex: Number(match[1]) - 1 };
+    }
+
+    parsePerkUnlock(message) {
+        const normalized = String(message || '').normalize('NFKC').trim().toLowerCase();
+        const match = normalized.match(/^!\s*해제\s+(\d+)$/);
+        if (!match) return null;
+        return { perkIndex: Number(match[1]) - 1 };
+    }
+
     parseLoadout(message) {
         if (!/[!！]/.test(String(message || ''))) return null;
         const tokens = this._tokens(message);

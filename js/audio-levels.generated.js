@@ -9,6 +9,206 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 7116084,
     "mtimeMs": 1781045706619
   },
+  "AI CMC/C바1.mp4": {
+    "category": "visual",
+    "inputLufs": -11.81,
+    "truePeakDb": -0.33,
+    "gainDb": -6.19,
+    "measurement": "loudnorm",
+    "duration": 1.17,
+    "bytes": 3146499,
+    "mtimeMs": 1785160928812
+  },
+  "AI CMC/C바10.mp4": {
+    "category": "visual",
+    "inputLufs": -15.3,
+    "truePeakDb": -1.47,
+    "gainDb": -2.7,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2244980,
+    "mtimeMs": 1785161086823
+  },
+  "AI CMC/C바11.mp4": {
+    "category": "visual",
+    "inputLufs": -13.84,
+    "truePeakDb": -0.83,
+    "gainDb": -4.16,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2501134,
+    "mtimeMs": 1785161098082
+  },
+  "AI CMC/C바12.mp4": {
+    "category": "visual",
+    "inputLufs": -12.19,
+    "truePeakDb": -0.28,
+    "gainDb": -5.81,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 2850379,
+    "mtimeMs": 1785161075234
+  },
+  "AI CMC/C바2.mp4": {
+    "category": "visual",
+    "inputLufs": -13.46,
+    "truePeakDb": -2,
+    "gainDb": -4.54,
+    "measurement": "loudnorm",
+    "duration": 1.56,
+    "bytes": 4190564,
+    "mtimeMs": 1785160983215
+  },
+  "AI CMC/C바3.mp4": {
+    "category": "visual",
+    "inputLufs": -12.14,
+    "truePeakDb": -0.29,
+    "gainDb": -5.86,
+    "measurement": "loudnorm",
+    "duration": 1.28,
+    "bytes": 3491461,
+    "mtimeMs": 1785160999122
+  },
+  "AI CMC/C바4.mp4": {
+    "category": "visual",
+    "inputLufs": -15.08,
+    "truePeakDb": -2.24,
+    "gainDb": -2.92,
+    "measurement": "loudnorm",
+    "duration": 1.88,
+    "bytes": 4835496,
+    "mtimeMs": 1785161036313
+  },
+  "AI CMC/C바8.mp4": {
+    "category": "visual",
+    "inputLufs": -20.18,
+    "truePeakDb": -4.15,
+    "gainDb": 2.18,
+    "measurement": "loudnorm",
+    "duration": 2.84,
+    "bytes": 7299251,
+    "mtimeMs": 1785161143025
+  },
+  "AI CMC/C바9.mp4": {
+    "category": "visual",
+    "inputLufs": -13.48,
+    "truePeakDb": 0.01,
+    "gainDb": -4.52,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 3860909,
+    "mtimeMs": 1785161123320
+  },
+  "AI CMC/MDMF.mp4": {
+    "category": "visual",
+    "inputLufs": -17.35,
+    "truePeakDb": -1.29,
+    "gainDb": -0.65,
+    "measurement": "loudnorm",
+    "duration": 3.07,
+    "bytes": 7733085,
+    "mtimeMs": 1785281389248
+  },
+  "AI CMC/가보고싶.mp4": {
+    "category": "visual",
+    "inputLufs": -16.06,
+    "truePeakDb": -0.52,
+    "gainDb": -1.94,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2174505,
+    "mtimeMs": 1784873456086
+  },
+  "AI CMC/가코이.mp4": {
+    "category": "visual",
+    "inputLufs": -11.4,
+    "truePeakDb": -1.57,
+    "gainDb": -6.6,
+    "measurement": "loudnorm",
+    "duration": 0.96,
+    "bytes": 2477333,
+    "mtimeMs": 1784873690488
+  },
+  "AI CMC/감동.mp4": {
+    "category": "visual",
+    "inputLufs": -16.65,
+    "truePeakDb": -2.14,
+    "gainDb": -1.35,
+    "measurement": "loudnorm",
+    "duration": 1.41,
+    "bytes": 3606238,
+    "mtimeMs": 1785161227941
+  },
+  "AI CMC/감동이야.mp4": {
+    "category": "visual",
+    "inputLufs": -21.66,
+    "truePeakDb": -6.03,
+    "gainDb": 3.66,
+    "measurement": "loudnorm",
+    "duration": 2.43,
+    "bytes": 5892703,
+    "mtimeMs": 1784847493159
+  },
+  "AI CMC/갓겜1.mp4": {
+    "category": "visual",
+    "inputLufs": -11.55,
+    "truePeakDb": -0.67,
+    "gainDb": -6.45,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2420823,
+    "mtimeMs": 1785176544462
+  },
+  "AI CMC/갓겜2.mp4": {
+    "category": "visual",
+    "inputLufs": -12.73,
+    "truePeakDb": -0.28,
+    "gainDb": -5.27,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 2982633,
+    "mtimeMs": 1785176555852
+  },
+  "AI CMC/갓겜3.mp4": {
+    "category": "visual",
+    "inputLufs": -13.88,
+    "truePeakDb": -0.77,
+    "gainDb": -4.12,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2655043,
+    "mtimeMs": 1785176565686
+  },
+  "AI CMC/갓겜4.mp4": {
+    "category": "visual",
+    "inputLufs": -15.45,
+    "truePeakDb": -0.41,
+    "gainDb": -2.55,
+    "measurement": "loudnorm",
+    "duration": 1.24,
+    "bytes": 3144648,
+    "mtimeMs": 1785176587784
+  },
+  "AI CMC/갓겜5.mp4": {
+    "category": "visual",
+    "inputLufs": -15.75,
+    "truePeakDb": -2.28,
+    "gainDb": -2.25,
+    "measurement": "loudnorm",
+    "duration": 1.17,
+    "bytes": 2891855,
+    "mtimeMs": 1785176604081
+  },
+  "AI CMC/갓겜6.mp4": {
+    "category": "visual",
+    "inputLufs": -16.24,
+    "truePeakDb": -2.39,
+    "gainDb": -1.76,
+    "measurement": "loudnorm",
+    "duration": 1.28,
+    "bytes": 3393325,
+    "mtimeMs": 1785176615806
+  },
   "AI CMC/개발기간확장.mp4": {
     "category": "visual",
     "inputLufs": -15.9,
@@ -17,6 +217,56 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.41,
     "bytes": 3588950,
     "mtimeMs": 1781045999237
+  },
+  "AI CMC/거짓말.mp4": {
+    "category": "visual",
+    "inputLufs": -13.63,
+    "truePeakDb": -1.34,
+    "gainDb": -4.37,
+    "measurement": "loudnorm",
+    "duration": 1.07,
+    "bytes": 3008496,
+    "mtimeMs": 1784847641076
+  },
+  "AI CMC/거짓말3.mp4": {
+    "category": "visual",
+    "inputLufs": -16.16,
+    "truePeakDb": -2.32,
+    "gainDb": -1.84,
+    "measurement": "loudnorm",
+    "duration": 0.92,
+    "bytes": 2622160,
+    "mtimeMs": 1784847836132
+  },
+  "AI CMC/거짓말이지(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -16.18,
+    "truePeakDb": -2.42,
+    "gainDb": -1.82,
+    "measurement": "loudnorm",
+    "duration": 1.43,
+    "bytes": 3638094,
+    "mtimeMs": 1784846431738
+  },
+  "AI CMC/경배.mp4": {
+    "category": "visual",
+    "inputLufs": -13.83,
+    "truePeakDb": -1.87,
+    "gainDb": -4.17,
+    "measurement": "loudnorm",
+    "duration": 1.77,
+    "bytes": 4600926,
+    "mtimeMs": 1785424731174
+  },
+  "AI CMC/고룡화사회.mp4": {
+    "category": "visual",
+    "inputLufs": -14.69,
+    "truePeakDb": -0.08,
+    "gainDb": -3.31,
+    "measurement": "loudnorm",
+    "duration": 2.41,
+    "bytes": 6053226,
+    "mtimeMs": 1785281353379
   },
   "AI CMC/고민.mp4": {
     "category": "visual",
@@ -27,6 +277,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 5876247,
     "mtimeMs": 1781046850870
   },
+  "AI CMC/고생많.mp4": {
+    "category": "visual",
+    "inputLufs": -17.09,
+    "truePeakDb": -2.25,
+    "gainDb": -0.91,
+    "measurement": "loudnorm",
+    "duration": 2.03,
+    "bytes": 5435945,
+    "mtimeMs": 1785279617083
+  },
   "AI CMC/고치라코소.mp4": {
     "category": "visual",
     "inputLufs": -16.89,
@@ -35,6 +295,26 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.73,
     "bytes": 4399805,
     "mtimeMs": 1781045479670
+  },
+  "AI CMC/고한.mp4": {
+    "category": "visual",
+    "inputLufs": -16.46,
+    "truePeakDb": -0.03,
+    "gainDb": -1.54,
+    "measurement": "loudnorm",
+    "duration": 1.19,
+    "bytes": 3165721,
+    "mtimeMs": 1784874963452
+  },
+  "AI CMC/곤란.mp4": {
+    "category": "visual",
+    "inputLufs": -16.34,
+    "truePeakDb": -3.72,
+    "gainDb": -1.66,
+    "measurement": "loudnorm",
+    "duration": 1.15,
+    "bytes": 3038865,
+    "mtimeMs": 1785168278049
   },
   "AI CMC/굉장해.mp4": {
     "category": "visual",
@@ -45,6 +325,96 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3560968,
     "mtimeMs": 1781045490185
   },
+  "AI CMC/굉장해2.mp4": {
+    "category": "visual",
+    "inputLufs": -11.92,
+    "truePeakDb": -0.43,
+    "gainDb": -6.08,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3788695,
+    "mtimeMs": 1784846565898
+  },
+  "AI CMC/구독감사1.mp4": {
+    "category": "visual",
+    "inputLufs": -14.31,
+    "truePeakDb": -2.49,
+    "gainDb": -3.69,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 5215489,
+    "mtimeMs": 1785085489966
+  },
+  "AI CMC/구독감사2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.73,
+    "truePeakDb": -3.05,
+    "gainDb": -2.27,
+    "measurement": "loudnorm",
+    "duration": 1.62,
+    "bytes": 4271998,
+    "mtimeMs": 1785085510657
+  },
+  "AI CMC/구독감사3.mp4": {
+    "category": "visual",
+    "inputLufs": -16.77,
+    "truePeakDb": -1.71,
+    "gainDb": -1.23,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3820105,
+    "mtimeMs": 1785085532706
+  },
+  "AI CMC/구독감사4.mp4": {
+    "category": "visual",
+    "inputLufs": -16.31,
+    "truePeakDb": -1.74,
+    "gainDb": -1.69,
+    "measurement": "loudnorm",
+    "duration": 1.66,
+    "bytes": 4368140,
+    "mtimeMs": 1785085545047
+  },
+  "AI CMC/구독감사5.mp4": {
+    "category": "visual",
+    "inputLufs": -16.55,
+    "truePeakDb": -2.62,
+    "gainDb": -1.45,
+    "measurement": "loudnorm",
+    "duration": 1.56,
+    "bytes": 4205724,
+    "mtimeMs": 1785085559120
+  },
+  "AI CMC/귀여워.mp4": {
+    "category": "visual",
+    "inputLufs": -13.74,
+    "truePeakDb": -0.65,
+    "gainDb": -4.26,
+    "measurement": "loudnorm",
+    "duration": 1.94,
+    "bytes": 4963341,
+    "mtimeMs": 1784846581021
+  },
+  "AI CMC/그거야.mp4": {
+    "category": "visual",
+    "inputLufs": -12.35,
+    "truePeakDb": -1.08,
+    "gainDb": -5.65,
+    "measurement": "loudnorm",
+    "duration": 1.64,
+    "bytes": 4136053,
+    "mtimeMs": 1784846750373
+  },
+  "AI CMC/그게가능해(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -16.18,
+    "truePeakDb": -0.53,
+    "gainDb": -1.82,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 3659650,
+    "mtimeMs": 1784846476367
+  },
   "AI CMC/그래픽.mp4": {
     "category": "visual",
     "inputLufs": -19.14,
@@ -53,6 +423,46 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.17,
     "bytes": 3159729,
     "mtimeMs": 1781046510309
+  },
+  "AI CMC/그러니까말.mp4": {
+    "category": "visual",
+    "inputLufs": -15.62,
+    "truePeakDb": -0.99,
+    "gainDb": -2.38,
+    "measurement": "loudnorm",
+    "duration": 2.28,
+    "bytes": 6023951,
+    "mtimeMs": 1784846819020
+  },
+  "AI CMC/그렇구나.mp4": {
+    "category": "visual",
+    "inputLufs": -20.94,
+    "truePeakDb": -7.27,
+    "gainDb": 2.94,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 2876948,
+    "mtimeMs": 1784847423580
+  },
+  "AI CMC/그립다.mp4": {
+    "category": "visual",
+    "inputLufs": -19.38,
+    "truePeakDb": -4.48,
+    "gainDb": 1.38,
+    "measurement": "loudnorm",
+    "duration": 0.7,
+    "bytes": 1949312,
+    "mtimeMs": 1784873542061
+  },
+  "AI CMC/그만.mp4": {
+    "category": "visual",
+    "inputLufs": -11.22,
+    "truePeakDb": 0.04,
+    "gainDb": -6.78,
+    "measurement": "loudnorm",
+    "duration": 0.9,
+    "bytes": 3204406,
+    "mtimeMs": 1785168174388
   },
   "AI CMC/기대가되.mp4": {
     "category": "visual",
@@ -71,6 +481,26 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.83,
     "bytes": 2409564,
     "mtimeMs": 1781045576776
+  },
+  "AI CMC/기분좋.mp4": {
+    "category": "visual",
+    "inputLufs": -14.53,
+    "truePeakDb": -1.01,
+    "gainDb": -3.47,
+    "measurement": "loudnorm",
+    "duration": 1.58,
+    "bytes": 4313174,
+    "mtimeMs": 1785161159414
+  },
+  "AI CMC/깔깔.mp4": {
+    "category": "visual",
+    "inputLufs": -17.07,
+    "truePeakDb": -1.68,
+    "gainDb": -0.93,
+    "measurement": "loudnorm",
+    "duration": 2.01,
+    "bytes": 5097462,
+    "mtimeMs": 1785435760845
   },
   "AI CMC/끄덕.mp4": {
     "category": "visual",
@@ -99,14 +529,155 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2571993,
     "mtimeMs": 1781045560009
   },
-  "AI CMC/너무 아쉽네요.mp4": {
+  "AI CMC/나니소레.mp4": {
     "category": "visual",
-    "inputLufs": -14.65,
-    "truePeakDb": -0.46,
-    "gainDb": -3.35,
+    "inputLufs": -14.74,
+    "truePeakDb": -4.45,
+    "gainDb": -3.26,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2420058,
+    "mtimeMs": 1784873059128
+  },
+  "AI CMC/나니얏.mp4": {
+    "category": "visual",
+    "inputLufs": -13.33,
+    "truePeakDb": -1.4,
+    "gainDb": -4.67,
+    "measurement": "loudnorm",
+    "duration": 0.96,
+    "bytes": 3329850,
+    "mtimeMs": 1784874076127
+  },
+  "AI CMC/나도그래.mp4": {
+    "category": "visual",
+    "inputLufs": -15.34,
+    "truePeakDb": -1.9,
+    "gainDb": -2.66,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 3576809,
+    "mtimeMs": 1784846789390
+  },
+  "AI CMC/나루호도.mp4": {
+    "category": "visual",
+    "inputLufs": -16.13,
+    "truePeakDb": -3.49,
+    "gainDb": -1.87,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2407440,
+    "mtimeMs": 1784872315895
+  },
+  "AI CMC/나루호도2.mp4": {
+    "category": "visual",
+    "inputLufs": -14.35,
+    "truePeakDb": -2.07,
+    "gainDb": -3.65,
+    "measurement": "loudnorm",
+    "duration": 1.07,
+    "bytes": 2852346,
+    "mtimeMs": 1784872332160
+  },
+  "AI CMC/나쁜말.mp4": {
+    "category": "visual",
+    "inputLufs": -14.82,
+    "truePeakDb": -0.75,
+    "gainDb": -3.18,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3848590,
+    "mtimeMs": 1785275206275
+  },
+  "AI CMC/나세.mp4": {
+    "category": "visual",
+    "inputLufs": -15.38,
+    "truePeakDb": -1.13,
+    "gainDb": -2.62,
+    "measurement": "loudnorm",
+    "duration": 0.7,
+    "bytes": 1851494,
+    "mtimeMs": 1784873030363
+  },
+  "AI CMC/나츠카시.mp4": {
+    "category": "visual",
+    "inputLufs": -21.33,
+    "truePeakDb": -6.74,
+    "gainDb": 3.33,
+    "measurement": "loudnorm",
     "duration": 0.98,
-    "bytes": 2554363,
-    "mtimeMs": 1781045788413
+    "bytes": 2448428,
+    "mtimeMs": 1784902837769
+  },
+  "AI CMC/난데.mp4": {
+    "category": "visual",
+    "inputLufs": -12.32,
+    "truePeakDb": -1.18,
+    "gainDb": -5.68,
+    "measurement": "loudnorm",
+    "duration": 0.73,
+    "bytes": 1878833,
+    "mtimeMs": 1784872840376
+  },
+  "AI CMC/낫토쿠.mp4": {
+    "category": "visual",
+    "inputLufs": -19.52,
+    "truePeakDb": -5.36,
+    "gainDb": 1.52,
+    "measurement": "loudnorm",
+    "duration": 0.79,
+    "bytes": 2333228,
+    "mtimeMs": 1784872731513
+  },
+  "AI CMC/내놔.mp4": {
+    "category": "visual",
+    "inputLufs": -8.94,
+    "truePeakDb": 0.04,
+    "gainDb": -9.06,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2360268,
+    "mtimeMs": 1785167579144
+  },
+  "AI CMC/내놔1.mp4": {
+    "category": "visual",
+    "inputLufs": -14.74,
+    "truePeakDb": -1.34,
+    "gainDb": -3.26,
+    "measurement": "loudnorm",
+    "duration": 1.37,
+    "bytes": 3602279,
+    "mtimeMs": 1785259519868
+  },
+  "AI CMC/내놔2.mp4": {
+    "category": "visual",
+    "inputLufs": -10.15,
+    "truePeakDb": 0.08,
+    "gainDb": -7.85,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 4076210,
+    "mtimeMs": 1785259531815
+  },
+  "AI CMC/내놔3.mp4": {
+    "category": "visual",
+    "inputLufs": -16.35,
+    "truePeakDb": -3.05,
+    "gainDb": -1.65,
+    "measurement": "loudnorm",
+    "duration": 1.41,
+    "bytes": 3658080,
+    "mtimeMs": 1785259541258
+  },
+  "AI CMC/내돈.mp4": {
+    "category": "visual",
+    "inputLufs": -16.54,
+    "truePeakDb": -2.23,
+    "gainDb": -1.46,
+    "measurement": "loudnorm",
+    "duration": 1.79,
+    "bytes": 4665147,
+    "mtimeMs": 1785176918611
   },
   "AI CMC/너무기대.mp4": {
     "category": "visual",
@@ -116,6 +687,86 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.19,
     "bytes": 3223656,
     "mtimeMs": 1781046142278
+  },
+  "AI CMC/넘슬싸.mp4": {
+    "category": "visual",
+    "inputLufs": -14.61,
+    "truePeakDb": -2.05,
+    "gainDb": -3.39,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 4258647,
+    "mtimeMs": 1785082719925
+  },
+  "AI CMC/넘아쉽.mp4": {
+    "category": "visual",
+    "inputLufs": -14.65,
+    "truePeakDb": -0.46,
+    "gainDb": -3.35,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2554363,
+    "mtimeMs": 1781045788413
+  },
+  "AI CMC/넘웃1.mp4": {
+    "category": "visual",
+    "inputLufs": -15.48,
+    "truePeakDb": -2.63,
+    "gainDb": -2.52,
+    "measurement": "loudnorm",
+    "duration": 1.94,
+    "bytes": 6490617,
+    "mtimeMs": 1785092210242
+  },
+  "AI CMC/넘웃2.mp4": {
+    "category": "visual",
+    "inputLufs": -14.44,
+    "truePeakDb": -4.24,
+    "gainDb": -3.56,
+    "measurement": "loudnorm",
+    "duration": 1.9,
+    "bytes": 4840752,
+    "mtimeMs": 1785092228855
+  },
+  "AI CMC/넘웃3.mp4": {
+    "category": "visual",
+    "inputLufs": -13.03,
+    "truePeakDb": -2.18,
+    "gainDb": -4.97,
+    "measurement": "loudnorm",
+    "duration": 1.56,
+    "bytes": 4185861,
+    "mtimeMs": 1785092246114
+  },
+  "AI CMC/넘웃4.mp4": {
+    "category": "visual",
+    "inputLufs": -16.5,
+    "truePeakDb": -3.46,
+    "gainDb": -1.5,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 2898284,
+    "mtimeMs": 1785092259127
+  },
+  "AI CMC/넘좋싸.mp4": {
+    "category": "visual",
+    "inputLufs": -12.43,
+    "truePeakDb": -2.14,
+    "gainDb": -5.57,
+    "measurement": "loudnorm",
+    "duration": 1.15,
+    "bytes": 3183968,
+    "mtimeMs": 1785082734912
+  },
+  "AI CMC/노곤.mp4": {
+    "category": "visual",
+    "inputLufs": -16.59,
+    "truePeakDb": -4.85,
+    "gainDb": -1.41,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 2544314,
+    "mtimeMs": 1785167936212
   },
   "AI CMC/놀라워.mp4": {
     "category": "visual",
@@ -135,6 +786,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2068061,
     "mtimeMs": 1781046355354
   },
+  "AI CMC/누구야(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -15.13,
+    "truePeakDb": -0.13,
+    "gainDb": -2.87,
+    "measurement": "loudnorm",
+    "duration": 1.73,
+    "bytes": 4441203,
+    "mtimeMs": 1784847077802
+  },
   "AI CMC/늙어죽.mp4": {
     "category": "visual",
     "inputLufs": -14.11,
@@ -144,6 +805,26 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2584146,
     "mtimeMs": 1781046524567
   },
+  "AI CMC/다레토.mp4": {
+    "category": "visual",
+    "inputLufs": -14.62,
+    "truePeakDb": -1.76,
+    "gainDb": -3.38,
+    "measurement": "loudnorm",
+    "duration": 0.79,
+    "bytes": 2358827,
+    "mtimeMs": 1784872863361
+  },
+  "AI CMC/다스카타.mp4": {
+    "category": "visual",
+    "inputLufs": -24.54,
+    "truePeakDb": -7.78,
+    "gainDb": 6.54,
+    "measurement": "loudnorm",
+    "duration": 1.19,
+    "bytes": 3125364,
+    "mtimeMs": 1784902860120
+  },
   "AI CMC/다음내용.mp4": {
     "category": "visual",
     "inputLufs": -16.37,
@@ -152,6 +833,136 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.49,
     "bytes": 3735301,
     "mtimeMs": 1781046226956
+  },
+  "AI CMC/닥돈1.mp4": {
+    "category": "visual",
+    "inputLufs": -12.09,
+    "truePeakDb": -0.64,
+    "gainDb": -5.91,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 5419051,
+    "mtimeMs": 1785085223145
+  },
+  "AI CMC/닥돈2.mp4": {
+    "category": "visual",
+    "inputLufs": -12.54,
+    "truePeakDb": -0.39,
+    "gainDb": -5.46,
+    "measurement": "loudnorm",
+    "duration": 1.37,
+    "bytes": 3696719,
+    "mtimeMs": 1785085241554
+  },
+  "AI CMC/닥돈3.mp4": {
+    "category": "visual",
+    "inputLufs": -15.83,
+    "truePeakDb": -2.6,
+    "gainDb": -2.17,
+    "measurement": "loudnorm",
+    "duration": 1.24,
+    "bytes": 3214298,
+    "mtimeMs": 1785085267910
+  },
+  "AI CMC/닥돈4.mp4": {
+    "category": "visual",
+    "inputLufs": -15.18,
+    "truePeakDb": -1.6,
+    "gainDb": -2.82,
+    "measurement": "loudnorm",
+    "duration": 1.28,
+    "bytes": 3523759,
+    "mtimeMs": 1785085284701
+  },
+  "AI CMC/당생멋.mp4": {
+    "category": "visual",
+    "inputLufs": -18.88,
+    "truePeakDb": -3.75,
+    "gainDb": 0.88,
+    "measurement": "loudnorm",
+    "duration": 2.09,
+    "bytes": 5426669,
+    "mtimeMs": 1785279628840
+  },
+  "AI CMC/대단하다2.mp4": {
+    "category": "visual",
+    "inputLufs": -12.34,
+    "truePeakDb": -0.1,
+    "gainDb": -5.66,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 3793307,
+    "mtimeMs": 1784847814740
+  },
+  "AI CMC/대단해3.mp4": {
+    "category": "visual",
+    "inputLufs": -15.33,
+    "truePeakDb": -2.41,
+    "gainDb": -2.67,
+    "measurement": "loudnorm",
+    "duration": 1.09,
+    "bytes": 3019138,
+    "mtimeMs": 1784847790298
+  },
+  "AI CMC/더는못.mp4": {
+    "category": "visual",
+    "inputLufs": -18.95,
+    "truePeakDb": -2.51,
+    "gainDb": 0.95,
+    "measurement": "loudnorm",
+    "duration": 1.73,
+    "bytes": 4363090,
+    "mtimeMs": 1785168299067
+  },
+  "AI CMC/도오낫.mp4": {
+    "category": "visual",
+    "inputLufs": -12.91,
+    "truePeakDb": -1.36,
+    "gainDb": -5.09,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2474818,
+    "mtimeMs": 1784874089721
+  },
+  "AI CMC/도유코토.mp4": {
+    "category": "visual",
+    "inputLufs": -13.19,
+    "truePeakDb": -1.96,
+    "gainDb": -4.81,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2403033,
+    "mtimeMs": 1784872755904
+  },
+  "AI CMC/도코카.mp4": {
+    "category": "visual",
+    "inputLufs": -15.26,
+    "truePeakDb": -1.61,
+    "gainDb": -2.74,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2368847,
+    "mtimeMs": 1784873003490
+  },
+  "AI CMC/돈내놔1.mp4": {
+    "category": "visual",
+    "inputLufs": -16.82,
+    "truePeakDb": -4.23,
+    "gainDb": -1.18,
+    "measurement": "loudnorm",
+    "duration": 1.81,
+    "bytes": 4789800,
+    "mtimeMs": 1785259501810
+  },
+  "AI CMC/돈내놔2.mp4": {
+    "category": "visual",
+    "inputLufs": -16.5,
+    "truePeakDb": -0.83,
+    "gainDb": -1.5,
+    "measurement": "loudnorm",
+    "duration": 1.64,
+    "bytes": 4225889,
+    "mtimeMs": 1785259564116
   },
   "AI CMC/동공.mp4": {
     "category": "visual",
@@ -171,6 +982,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4126275,
     "mtimeMs": 1781045609988
   },
+  "AI CMC/또만나.mp4": {
+    "category": "visual",
+    "inputLufs": -12.21,
+    "truePeakDb": -0.14,
+    "gainDb": -5.79,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3674823,
+    "mtimeMs": 1785160942852
+  },
   "AI CMC/또크샬.mp4": {
     "category": "visual",
     "inputLufs": -15.64,
@@ -179,6 +1000,166 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.28,
     "bytes": 3526272,
     "mtimeMs": 1781045921975
+  },
+  "AI CMC/똑같아.mp4": {
+    "category": "visual",
+    "inputLufs": -19.9,
+    "truePeakDb": -2.69,
+    "gainDb": 1.69,
+    "measurement": "loudnorm",
+    "duration": 1.07,
+    "bytes": 2925218,
+    "mtimeMs": 1784846544417
+  },
+  "AI CMC/럭셔리하다.mp4": {
+    "category": "visual",
+    "inputLufs": -15.96,
+    "truePeakDb": -2.82,
+    "gainDb": -2.04,
+    "measurement": "loudnorm",
+    "duration": 1.37,
+    "bytes": 3531455,
+    "mtimeMs": 1784847467945
+  },
+  "AI CMC/마사카.mp4": {
+    "category": "visual",
+    "inputLufs": -17.59,
+    "truePeakDb": -2.65,
+    "gainDb": -0.41,
+    "measurement": "loudnorm",
+    "duration": 0.75,
+    "bytes": 1984508,
+    "mtimeMs": 1784873179303
+  },
+  "AI CMC/마지데.mp4": {
+    "category": "visual",
+    "inputLufs": -12.86,
+    "truePeakDb": -1.58,
+    "gainDb": -5.14,
+    "measurement": "loudnorm",
+    "duration": 0.7,
+    "bytes": 1689698,
+    "mtimeMs": 1784873068957
+  },
+  "AI CMC/마치가이나이.mp4": {
+    "category": "visual",
+    "inputLufs": -14.41,
+    "truePeakDb": -0.59,
+    "gainDb": -3.59,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3460514,
+    "mtimeMs": 1784873706563
+  },
+  "AI CMC/말도안되.mp4": {
+    "category": "visual",
+    "inputLufs": -12.6,
+    "truePeakDb": -1.28,
+    "gainDb": -5.4,
+    "measurement": "loudnorm",
+    "duration": 1.41,
+    "bytes": 3690146,
+    "mtimeMs": 1784846403130
+  },
+  "AI CMC/말도안되2.mp4": {
+    "category": "visual",
+    "inputLufs": -11.54,
+    "truePeakDb": -0.57,
+    "gainDb": -6.46,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2392495,
+    "mtimeMs": 1785169230116
+  },
+  "AI CMC/맛있겠다.mp4": {
+    "category": "visual",
+    "inputLufs": -13.46,
+    "truePeakDb": -1.92,
+    "gainDb": -4.54,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2602829,
+    "mtimeMs": 1784873246585
+  },
+  "AI CMC/맛있어.mp4": {
+    "category": "visual",
+    "inputLufs": -14.67,
+    "truePeakDb": -0.3,
+    "gainDb": -3.33,
+    "measurement": "loudnorm",
+    "duration": 0.83,
+    "bytes": 2413746,
+    "mtimeMs": 1784873257867
+  },
+  "AI CMC/망겜1.mp4": {
+    "category": "visual",
+    "inputLufs": -16.88,
+    "truePeakDb": -2.65,
+    "gainDb": -1.12,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 2854222,
+    "mtimeMs": 1785176852232
+  },
+  "AI CMC/망겜2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.58,
+    "truePeakDb": -2.82,
+    "gainDb": -2.42,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 3215340,
+    "mtimeMs": 1785176860412
+  },
+  "AI CMC/망했.mp4": {
+    "category": "visual",
+    "inputLufs": -19.72,
+    "truePeakDb": -6.05,
+    "gainDb": 1.72,
+    "measurement": "loudnorm",
+    "duration": 1.07,
+    "bytes": 3028183,
+    "mtimeMs": 1785176900087
+  },
+  "AI CMC/맞아맞아.mp4": {
+    "category": "visual",
+    "inputLufs": -18.01,
+    "truePeakDb": -2.43,
+    "gainDb": 0.01,
+    "measurement": "loudnorm",
+    "duration": 2.2,
+    "bytes": 5656961,
+    "mtimeMs": 1784846528773
+  },
+  "AI CMC/맞아요.mp4": {
+    "category": "visual",
+    "inputLufs": -12.84,
+    "truePeakDb": -1.35,
+    "gainDb": -5.16,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 3989244,
+    "mtimeMs": 1784846832649
+  },
+  "AI CMC/먹고싶다.mp4": {
+    "category": "visual",
+    "inputLufs": -19.35,
+    "truePeakDb": -5.18,
+    "gainDb": 1.35,
+    "measurement": "loudnorm",
+    "duration": 0.92,
+    "bytes": 2449044,
+    "mtimeMs": 1784873302231
+  },
+  "AI CMC/멈출수없.mp4": {
+    "category": "visual",
+    "inputLufs": -16.06,
+    "truePeakDb": -3.09,
+    "gainDb": -1.94,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2536153,
+    "mtimeMs": 1784873366692
   },
   "AI CMC/멋져.mp4": {
     "category": "visual",
@@ -198,6 +1179,76 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2476387,
     "mtimeMs": 1781046896083
   },
+  "AI CMC/멋지다.mp4": {
+    "category": "visual",
+    "inputLufs": -21.05,
+    "truePeakDb": -4.72,
+    "gainDb": 3.05,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3516803,
+    "mtimeMs": 1784846734318
+  },
+  "AI CMC/메메코.mp4": {
+    "category": "visual",
+    "inputLufs": -14.01,
+    "truePeakDb": -0.71,
+    "gainDb": -3.99,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3771870,
+    "mtimeMs": 1785167651385
+  },
+  "AI CMC/모두행.mp4": {
+    "category": "visual",
+    "inputLufs": -16.29,
+    "truePeakDb": -4.77,
+    "gainDb": -1.71,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3585274,
+    "mtimeMs": 1785161047160
+  },
+  "AI CMC/몬숱.mp4": {
+    "category": "visual",
+    "inputLufs": -16.39,
+    "truePeakDb": -1.1,
+    "gainDb": -1.61,
+    "measurement": "loudnorm",
+    "duration": 2.71,
+    "bytes": 6783244,
+    "mtimeMs": 1785281408921
+  },
+  "AI CMC/무슨.mp4": {
+    "category": "visual",
+    "inputLufs": -16.4,
+    "truePeakDb": -1.78,
+    "gainDb": -1.6,
+    "measurement": "loudnorm",
+    "duration": 1.56,
+    "bytes": 4194457,
+    "mtimeMs": 1785168250577
+  },
+  "AI CMC/무슨뜻.mp4": {
+    "category": "visual",
+    "inputLufs": -14.97,
+    "truePeakDb": -2.62,
+    "gainDb": -3.03,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 3684984,
+    "mtimeMs": 1784846874572
+  },
+  "AI CMC/무슨일이야(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -12.86,
+    "truePeakDb": -1.09,
+    "gainDb": -5.14,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2531716,
+    "mtimeMs": 1784847184381
+  },
   "AI CMC/뭐.mp4": {
     "category": "visual",
     "inputLufs": -16.26,
@@ -216,6 +1267,56 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2919908,
     "mtimeMs": 1781046816604
   },
+  "AI CMC/뭐야그게.mp4": {
+    "category": "visual",
+    "inputLufs": -13.8,
+    "truePeakDb": -0.18,
+    "gainDb": -4.2,
+    "measurement": "loudnorm",
+    "duration": 1.94,
+    "bytes": 5193775,
+    "mtimeMs": 1784847129157
+  },
+  "AI CMC/뭐지(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -18.33,
+    "truePeakDb": -4.63,
+    "gainDb": 0.33,
+    "measurement": "loudnorm",
+    "duration": 1.73,
+    "bytes": 4821961,
+    "mtimeMs": 1785169173328
+  },
+  "AI CMC/뭐하는거야.mp4": {
+    "category": "visual",
+    "inputLufs": -12.21,
+    "truePeakDb": -0.45,
+    "gainDb": -5.79,
+    "measurement": "loudnorm",
+    "duration": 1.41,
+    "bytes": 3609835,
+    "mtimeMs": 1784872079471
+  },
+  "AI CMC/뭔냄새.mp4": {
+    "category": "visual",
+    "inputLufs": -18.44,
+    "truePeakDb": -6.3,
+    "gainDb": 0.44,
+    "measurement": "loudnorm",
+    "duration": 1.41,
+    "bytes": 3625276,
+    "mtimeMs": 1785167690853
+  },
+  "AI CMC/뭔말알(느낌표).mp4": {
+    "category": "visual",
+    "inputLufs": -16.4,
+    "truePeakDb": -1.41,
+    "gainDb": -1.6,
+    "measurement": "loudnorm",
+    "duration": 1.62,
+    "bytes": 4214327,
+    "mtimeMs": 1784846805354
+  },
   "AI CMC/미나상곤니.mp4": {
     "category": "visual",
     "inputLufs": -15.64,
@@ -224,6 +1325,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.79,
     "bytes": 4649125,
     "mtimeMs": 1781046751864
+  },
+  "AI CMC/바삭하겠.mp4": {
+    "category": "visual",
+    "inputLufs": -19.22,
+    "truePeakDb": -4.69,
+    "gainDb": 1.22,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2377792,
+    "mtimeMs": 1784873312324
   },
   "AI CMC/박진감.mp4": {
     "category": "visual",
@@ -234,6 +1345,46 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3612734,
     "mtimeMs": 1781046029630
   },
+  "AI CMC/발매.mp4": {
+    "category": "visual",
+    "inputLufs": -16.35,
+    "truePeakDb": -2.12,
+    "gainDb": -1.65,
+    "measurement": "loudnorm",
+    "duration": 2.69,
+    "bytes": 6748425,
+    "mtimeMs": 1785281338499
+  },
+  "AI CMC/밥도둑.mp4": {
+    "category": "visual",
+    "inputLufs": -15.43,
+    "truePeakDb": -2.43,
+    "gainDb": -2.57,
+    "measurement": "loudnorm",
+    "duration": 0.79,
+    "bytes": 2286751,
+    "mtimeMs": 1784873419206
+  },
+  "AI CMC/배고파진다.mp4": {
+    "category": "visual",
+    "inputLufs": -19.51,
+    "truePeakDb": -6.64,
+    "gainDb": 1.51,
+    "measurement": "loudnorm",
+    "duration": 0.92,
+    "bytes": 2231604,
+    "mtimeMs": 1784873399149
+  },
+  "AI CMC/배타.mp4": {
+    "category": "visual",
+    "inputLufs": -16.54,
+    "truePeakDb": -2.32,
+    "gainDb": -1.46,
+    "measurement": "loudnorm",
+    "duration": 3.16,
+    "bytes": 8088754,
+    "mtimeMs": 1785281430472
+  },
   "AI CMC/벅차.mp4": {
     "category": "visual",
     "inputLufs": -17.49,
@@ -243,6 +1394,26 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4841721,
     "mtimeMs": 1781046272752
   },
+  "AI CMC/번창1.mp4": {
+    "category": "visual",
+    "inputLufs": -14.57,
+    "truePeakDb": -1.71,
+    "gainDb": -3.43,
+    "measurement": "loudnorm",
+    "duration": 1.62,
+    "bytes": 4245681,
+    "mtimeMs": 1785092035852
+  },
+  "AI CMC/번창2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.58,
+    "truePeakDb": -1.44,
+    "gainDb": -2.42,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3783464,
+    "mtimeMs": 1785092049163
+  },
   "AI CMC/벌써끝.mp4": {
     "category": "visual",
     "inputLufs": -17.52,
@@ -251,6 +1422,56 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.28,
     "bytes": 3404377,
     "mtimeMs": 1781045718353
+  },
+  "AI CMC/보기싫.mp4": {
+    "category": "visual",
+    "inputLufs": -15.28,
+    "truePeakDb": -2.96,
+    "gainDb": -2.72,
+    "measurement": "loudnorm",
+    "duration": 1.28,
+    "bytes": 3366413,
+    "mtimeMs": 1785168215125
+  },
+  "AI CMC/부드러워.mp4": {
+    "category": "visual",
+    "inputLufs": -12.45,
+    "truePeakDb": -2.54,
+    "gainDb": -5.55,
+    "measurement": "loudnorm",
+    "duration": 0.79,
+    "bytes": 2311092,
+    "mtimeMs": 1784873279139
+  },
+  "AI CMC/부러워.mp4": {
+    "category": "visual",
+    "inputLufs": -8.94,
+    "truePeakDb": 0.03,
+    "gainDb": -9.06,
+    "measurement": "loudnorm",
+    "duration": 0.7,
+    "bytes": 1729785,
+    "mtimeMs": 1784873438085
+  },
+  "AI CMC/비밀.mp4": {
+    "category": "visual",
+    "inputLufs": -18.12,
+    "truePeakDb": -3.35,
+    "gainDb": 0.12,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 3986492,
+    "mtimeMs": 1785161216489
+  },
+  "AI CMC/빠르다.mp4": {
+    "category": "visual",
+    "inputLufs": -14.37,
+    "truePeakDb": -1.78,
+    "gainDb": -3.63,
+    "measurement": "loudnorm",
+    "duration": 0.75,
+    "bytes": 2031736,
+    "mtimeMs": 1784872108680
   },
   "AI CMC/빨리잡.mp4": {
     "category": "visual",
@@ -288,6 +1509,236 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2268445,
     "mtimeMs": 1781045529900
   },
+  "AI CMC/사스가.mp4": {
+    "category": "visual",
+    "inputLufs": -17.68,
+    "truePeakDb": -1.24,
+    "gainDb": -0.32,
+    "measurement": "loudnorm",
+    "duration": 1.19,
+    "bytes": 3080716,
+    "mtimeMs": 1784872215495
+  },
+  "AI CMC/사이코.mp4": {
+    "category": "visual",
+    "inputLufs": -14.27,
+    "truePeakDb": -1.52,
+    "gainDb": -3.73,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2539420,
+    "mtimeMs": 1784872237007
+  },
+  "AI CMC/사쿠사쿠.mp4": {
+    "category": "visual",
+    "inputLufs": -17.05,
+    "truePeakDb": -2.58,
+    "gainDb": -0.95,
+    "measurement": "loudnorm",
+    "duration": 1,
+    "bytes": 2615626,
+    "mtimeMs": 1784874871801
+  },
+  "AI CMC/살았다.mp4": {
+    "category": "visual",
+    "inputLufs": -16.16,
+    "truePeakDb": -1.33,
+    "gainDb": -1.84,
+    "measurement": "loudnorm",
+    "duration": 0.7,
+    "bytes": 1784436,
+    "mtimeMs": 1784873566917
+  },
+  "AI CMC/설마.mp4": {
+    "category": "visual",
+    "inputLufs": -17.19,
+    "truePeakDb": -3.92,
+    "gainDb": -0.81,
+    "measurement": "loudnorm",
+    "duration": 2.28,
+    "bytes": 5771783,
+    "mtimeMs": 1784847203325
+  },
+  "AI CMC/설마2.mp4": {
+    "category": "visual",
+    "inputLufs": -16.08,
+    "truePeakDb": -1.91,
+    "gainDb": -1.92,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 4212099,
+    "mtimeMs": 1784847656537
+  },
+  "AI CMC/설마3.mp4": {
+    "category": "visual",
+    "inputLufs": -15.43,
+    "truePeakDb": -0.51,
+    "gainDb": -2.57,
+    "measurement": "loudnorm",
+    "duration": 1.41,
+    "bytes": 3785440,
+    "mtimeMs": 1784847849534
+  },
+  "AI CMC/세련.mp4": {
+    "category": "visual",
+    "inputLufs": -15.47,
+    "truePeakDb": -1.17,
+    "gainDb": -2.53,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3775083,
+    "mtimeMs": 1784846725645
+  },
+  "AI CMC/세타쿠.mp4": {
+    "category": "visual",
+    "inputLufs": -14.84,
+    "truePeakDb": -1.85,
+    "gainDb": -3.16,
+    "measurement": "loudnorm",
+    "duration": 0.9,
+    "bytes": 2452437,
+    "mtimeMs": 1784873729771
+  },
+  "AI CMC/소나노.mp4": {
+    "category": "visual",
+    "inputLufs": -16.86,
+    "truePeakDb": -3.5,
+    "gainDb": -1.14,
+    "measurement": "loudnorm",
+    "duration": 1.19,
+    "bytes": 3083040,
+    "mtimeMs": 1784872350616
+  },
+  "AI CMC/소나노2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.72,
+    "truePeakDb": -1.82,
+    "gainDb": -2.28,
+    "measurement": "loudnorm",
+    "duration": 1.07,
+    "bytes": 2977030,
+    "mtimeMs": 1784872359237
+  },
+  "AI CMC/소레데.mp4": {
+    "category": "visual",
+    "inputLufs": -10.38,
+    "truePeakDb": -0.35,
+    "gainDb": -7.62,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2146830,
+    "mtimeMs": 1784872382032
+  },
+  "AI CMC/소요네.mp4": {
+    "category": "visual",
+    "inputLufs": -14.3,
+    "truePeakDb": -3.5,
+    "gainDb": -3.7,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2364098,
+    "mtimeMs": 1784872431209
+  },
+  "AI CMC/소운다.mp4": {
+    "category": "visual",
+    "inputLufs": -14.39,
+    "truePeakDb": -2.9,
+    "gainDb": -3.61,
+    "measurement": "loudnorm",
+    "duration": 0.92,
+    "bytes": 2560416,
+    "mtimeMs": 1784872716007
+  },
+  "AI CMC/소통1.mp4": {
+    "category": "visual",
+    "inputLufs": -13.65,
+    "truePeakDb": -0.9,
+    "gainDb": -4.35,
+    "measurement": "loudnorm",
+    "duration": 1.94,
+    "bytes": 6738669,
+    "mtimeMs": 1785089701638
+  },
+  "AI CMC/소통2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.66,
+    "truePeakDb": -3.45,
+    "gainDb": -2.34,
+    "measurement": "loudnorm",
+    "duration": 1.94,
+    "bytes": 4732122,
+    "mtimeMs": 1785089715354
+  },
+  "AI CMC/소통3.mp4": {
+    "category": "visual",
+    "inputLufs": -10.5,
+    "truePeakDb": 0.03,
+    "gainDb": -7.5,
+    "measurement": "loudnorm",
+    "duration": 1.83,
+    "bytes": 4868579,
+    "mtimeMs": 1785089729147
+  },
+  "AI CMC/소통4.mp4": {
+    "category": "visual",
+    "inputLufs": -14.21,
+    "truePeakDb": -1.44,
+    "gainDb": -3.79,
+    "measurement": "loudnorm",
+    "duration": 1.83,
+    "bytes": 4765404,
+    "mtimeMs": 1785089745853
+  },
+  "AI CMC/소통5.mp4": {
+    "category": "visual",
+    "inputLufs": -15.7,
+    "truePeakDb": -3.46,
+    "gainDb": -2.3,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3743212,
+    "mtimeMs": 1785089762969
+  },
+  "AI CMC/손나코토.mp4": {
+    "category": "visual",
+    "inputLufs": -14,
+    "truePeakDb": -0.03,
+    "gainDb": -4,
+    "measurement": "loudnorm",
+    "duration": 1.43,
+    "bytes": 3669704,
+    "mtimeMs": 1784873229969
+  },
+  "AI CMC/수고하셨.mp4": {
+    "category": "visual",
+    "inputLufs": -13.89,
+    "truePeakDb": -0.89,
+    "gainDb": -4.11,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2253016,
+    "mtimeMs": 1784873603738
+  },
+  "AI CMC/수긍.mp4": {
+    "category": "visual",
+    "inputLufs": -19.57,
+    "truePeakDb": -6.42,
+    "gainDb": 1.57,
+    "measurement": "loudnorm",
+    "duration": 1.62,
+    "bytes": 4220931,
+    "mtimeMs": 1784847434739
+  },
+  "AI CMC/수상한데.mp4": {
+    "category": "visual",
+    "inputLufs": -18.37,
+    "truePeakDb": -5.04,
+    "gainDb": 0.37,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 2744842,
+    "mtimeMs": 1784872128735
+  },
   "AI CMC/수호룡삭제.mp4": {
     "category": "visual",
     "inputLufs": -14.32,
@@ -297,6 +1748,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4863980,
     "mtimeMs": 1781045909556
   },
+  "AI CMC/숭배.mp4": {
+    "category": "visual",
+    "inputLufs": -17.4,
+    "truePeakDb": -3.17,
+    "gainDb": -0.6,
+    "measurement": "loudnorm",
+    "duration": 4.12,
+    "bytes": 10674338,
+    "mtimeMs": 1785424780716
+  },
   "AI CMC/스고이.mp4": {
     "category": "visual",
     "inputLufs": -10.53,
@@ -305,6 +1766,76 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.66,
     "bytes": 1912014,
     "mtimeMs": 1781045591527
+  },
+  "AI CMC/스고이2.mp4": {
+    "category": "visual",
+    "inputLufs": -12.32,
+    "truePeakDb": -1.15,
+    "gainDb": -5.68,
+    "measurement": "loudnorm",
+    "duration": 0.79,
+    "bytes": 2138442,
+    "mtimeMs": 1784872161589
+  },
+  "AI CMC/스바라시.mp4": {
+    "category": "visual",
+    "inputLufs": -13.24,
+    "truePeakDb": -1.14,
+    "gainDb": -4.76,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2237930,
+    "mtimeMs": 1784873619471
+  },
+  "AI CMC/슥고이.mp4": {
+    "category": "visual",
+    "inputLufs": -13.95,
+    "truePeakDb": -1.32,
+    "gainDb": -4.05,
+    "measurement": "loudnorm",
+    "duration": 1.09,
+    "bytes": 2862905,
+    "mtimeMs": 1784872225864
+  },
+  "AI CMC/슬퍼.mp4": {
+    "category": "visual",
+    "inputLufs": -19.44,
+    "truePeakDb": -6.11,
+    "gainDb": 1.44,
+    "measurement": "loudnorm",
+    "duration": 0.7,
+    "bytes": 1876427,
+    "mtimeMs": 1784873527046
+  },
+  "AI CMC/슬픔.mp4": {
+    "category": "visual",
+    "inputLufs": -13.7,
+    "truePeakDb": -0.44,
+    "gainDb": -4.3,
+    "measurement": "loudnorm",
+    "duration": 3.56,
+    "bytes": 9241122,
+    "mtimeMs": 1785436911736
+  },
+  "AI CMC/슬픔2.mp4": {
+    "category": "visual",
+    "inputLufs": -11.78,
+    "truePeakDb": 0.03,
+    "gainDb": -6.22,
+    "measurement": "loudnorm",
+    "duration": 3.61,
+    "bytes": 9315031,
+    "mtimeMs": 1785436936023
+  },
+  "AI CMC/시무룩.mp4": {
+    "category": "visual",
+    "inputLufs": -39.56,
+    "truePeakDb": -28.95,
+    "gainDb": 12,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 2805917,
+    "mtimeMs": 1784873641447
   },
   "AI CMC/신규몬.mp4": {
     "category": "visual",
@@ -324,6 +1855,36 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4194500,
     "mtimeMs": 1781046309186
   },
+  "AI CMC/신기해.mp4": {
+    "category": "visual",
+    "inputLufs": -11.5,
+    "truePeakDb": -0.26,
+    "gainDb": -6.5,
+    "measurement": "loudnorm",
+    "duration": 1.41,
+    "bytes": 3661449,
+    "mtimeMs": 1785169215341
+  },
+  "AI CMC/신난다.mp4": {
+    "category": "visual",
+    "inputLufs": -11.87,
+    "truePeakDb": -2.7,
+    "gainDb": -6.13,
+    "measurement": "loudnorm",
+    "duration": 1.37,
+    "bytes": 3673811,
+    "mtimeMs": 1785167592452
+  },
+  "AI CMC/실망.mp4": {
+    "category": "visual",
+    "inputLufs": -17.47,
+    "truePeakDb": -5.07,
+    "gainDb": -0.53,
+    "measurement": "loudnorm",
+    "duration": 1.28,
+    "bytes": 3417069,
+    "mtimeMs": 1785168263208
+  },
   "AI CMC/십자베기.mp4": {
     "category": "visual",
     "inputLufs": -12.29,
@@ -332,6 +1893,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.19,
     "bytes": 3077935,
     "mtimeMs": 1781045821353
+  },
+  "AI CMC/싼다(느낌표).mp4": {
+    "category": "visual",
+    "inputLufs": -10.2,
+    "truePeakDb": -1.13,
+    "gainDb": -7.8,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3725586,
+    "mtimeMs": 1785082667636
   },
   "AI CMC/쓸모션.mp4": {
     "category": "visual",
@@ -342,6 +1913,66 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4639563,
     "mtimeMs": 1781046060496
   },
+  "AI CMC/아름다운말.mp4": {
+    "category": "visual",
+    "inputLufs": -15.13,
+    "truePeakDb": -0.61,
+    "gainDb": -2.87,
+    "measurement": "loudnorm",
+    "duration": 1.98,
+    "bytes": 5168995,
+    "mtimeMs": 1785275196823
+  },
+  "AI CMC/아름다운세상.mp4": {
+    "category": "visual",
+    "inputLufs": -15.61,
+    "truePeakDb": -1.14,
+    "gainDb": -2.39,
+    "measurement": "loudnorm",
+    "duration": 2.07,
+    "bytes": 5404592,
+    "mtimeMs": 1785275233919
+  },
+  "AI CMC/아바타비디오생성해줘.mp4": {
+    "category": "visual",
+    "inputLufs": -17.25,
+    "truePeakDb": -1.45,
+    "gainDb": -0.75,
+    "measurement": "loudnorm",
+    "duration": 1.98,
+    "bytes": 4839627,
+    "mtimeMs": 1784847878618
+  },
+  "AI CMC/아야시.mp4": {
+    "category": "visual",
+    "inputLufs": -15.62,
+    "truePeakDb": -4.28,
+    "gainDb": -2.38,
+    "measurement": "loudnorm",
+    "duration": 0.62,
+    "bytes": 1839708,
+    "mtimeMs": 1784874113612
+  },
+  "AI CMC/아와나이.mp4": {
+    "category": "visual",
+    "inputLufs": -15.62,
+    "truePeakDb": -3.7,
+    "gainDb": -2.38,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 3022855,
+    "mtimeMs": 1784874931131
+  },
+  "AI CMC/아이고.mp4": {
+    "category": "visual",
+    "inputLufs": -10.57,
+    "truePeakDb": 0.01,
+    "gainDb": -7.43,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2468825,
+    "mtimeMs": 1785085521980
+  },
   "AI CMC/아제발요.mp4": {
     "category": "visual",
     "inputLufs": -13.11,
@@ -350,6 +1981,146 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.58,
     "bytes": 4206818,
     "mtimeMs": 1781045545711
+  },
+  "AI CMC/안녕하세요1.mp4": {
+    "category": "visual",
+    "inputLufs": -12.04,
+    "truePeakDb": -1.36,
+    "gainDb": -5.96,
+    "measurement": "loudnorm",
+    "duration": 1.51,
+    "bytes": 4038471,
+    "mtimeMs": 1785160759987
+  },
+  "AI CMC/안녕하세요2.mp4": {
+    "category": "visual",
+    "inputLufs": -17.5,
+    "truePeakDb": -6.17,
+    "gainDb": -0.5,
+    "measurement": "loudnorm",
+    "duration": 1.71,
+    "bytes": 4347353,
+    "mtimeMs": 1785160780683
+  },
+  "AI CMC/안녕하세요3.mp4": {
+    "category": "visual",
+    "inputLufs": -10.46,
+    "truePeakDb": -0.06,
+    "gainDb": -7.54,
+    "measurement": "loudnorm",
+    "duration": 1.26,
+    "bytes": 3400336,
+    "mtimeMs": 1785160806547
+  },
+  "AI CMC/안녕하세요4.mp4": {
+    "category": "visual",
+    "inputLufs": -17.45,
+    "truePeakDb": -6.02,
+    "gainDb": -0.55,
+    "measurement": "loudnorm",
+    "duration": 1.58,
+    "bytes": 4180715,
+    "mtimeMs": 1785160837279
+  },
+  "AI CMC/안녕하세요5.mp4": {
+    "category": "visual",
+    "inputLufs": -14.29,
+    "truePeakDb": -3.05,
+    "gainDb": -3.71,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 2997978,
+    "mtimeMs": 1785160851558
+  },
+  "AI CMC/안녕하세요6.mp4": {
+    "category": "visual",
+    "inputLufs": -16.13,
+    "truePeakDb": -5.17,
+    "gainDb": -1.87,
+    "measurement": "loudnorm",
+    "duration": 1,
+    "bytes": 2641872,
+    "mtimeMs": 1785160874435
+  },
+  "AI CMC/안녕하세요7.mp4": {
+    "category": "visual",
+    "inputLufs": -13.01,
+    "truePeakDb": -1.1,
+    "gainDb": -4.99,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 3181440,
+    "mtimeMs": 1785160891233
+  },
+  "AI CMC/안녕하세요8.mp4": {
+    "category": "visual",
+    "inputLufs": -16.93,
+    "truePeakDb": -6.03,
+    "gainDb": -1.07,
+    "measurement": "loudnorm",
+    "duration": 1.28,
+    "bytes": 3455925,
+    "mtimeMs": 1785160904562
+  },
+  "AI CMC/안심.mp4": {
+    "category": "visual",
+    "inputLufs": -19.87,
+    "truePeakDb": -8.61,
+    "gainDb": 1.87,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2443526,
+    "mtimeMs": 1785167927281
+  },
+  "AI CMC/안진싸.mp4": {
+    "category": "visual",
+    "inputLufs": -13.31,
+    "truePeakDb": -0.98,
+    "gainDb": -4.69,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 4179501,
+    "mtimeMs": 1785082701618
+  },
+  "AI CMC/안타깝.mp4": {
+    "category": "visual",
+    "inputLufs": -26.98,
+    "truePeakDb": -9.02,
+    "gainDb": 8.02,
+    "measurement": "loudnorm",
+    "duration": 1.62,
+    "bytes": 4121631,
+    "mtimeMs": 1784847212756
+  },
+  "AI CMC/안타깝다.mp4": {
+    "category": "visual",
+    "inputLufs": -27.26,
+    "truePeakDb": -9.02,
+    "gainDb": 8.02,
+    "measurement": "loudnorm",
+    "duration": 1.71,
+    "bytes": 4208240,
+    "mtimeMs": 1784847328555
+  },
+  "AI CMC/알거같아.mp4": {
+    "category": "visual",
+    "inputLufs": -19.42,
+    "truePeakDb": -3.52,
+    "gainDb": 1.42,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3284606,
+    "mtimeMs": 1784846851780
+  },
+  "AI CMC/알거같애.mp4": {
+    "category": "visual",
+    "inputLufs": -17.15,
+    "truePeakDb": -2.96,
+    "gainDb": -0.85,
+    "measurement": "loudnorm",
+    "duration": 2.24,
+    "bytes": 5716187,
+    "mtimeMs": 1784846863559
   },
   "AI CMC/액션끝.mp4": {
     "category": "visual",
@@ -360,6 +2131,66 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4084637,
     "mtimeMs": 1781046037991
   },
+  "AI CMC/야바이.mp4": {
+    "category": "visual",
+    "inputLufs": -14.57,
+    "truePeakDb": 0.04,
+    "gainDb": -3.43,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 2816944,
+    "mtimeMs": 1784872179051
+  },
+  "AI CMC/야밧.mp4": {
+    "category": "visual",
+    "inputLufs": -15.03,
+    "truePeakDb": -3.09,
+    "gainDb": -2.97,
+    "measurement": "loudnorm",
+    "duration": 0.62,
+    "bytes": 1583005,
+    "mtimeMs": 1784873209295
+  },
+  "AI CMC/야빨쏴.mp4": {
+    "category": "visual",
+    "inputLufs": -11.14,
+    "truePeakDb": -0.69,
+    "gainDb": -6.86,
+    "measurement": "loudnorm",
+    "duration": 1.26,
+    "bytes": 3494921,
+    "mtimeMs": 1785082650485
+  },
+  "AI CMC/야호.mp4": {
+    "category": "visual",
+    "inputLufs": -14.42,
+    "truePeakDb": -0.53,
+    "gainDb": -3.58,
+    "measurement": "loudnorm",
+    "duration": 1.98,
+    "bytes": 4897729,
+    "mtimeMs": 1785080761762
+  },
+  "AI CMC/야호(느낌표).mp4": {
+    "category": "visual",
+    "inputLufs": -13.72,
+    "truePeakDb": -0.43,
+    "gainDb": -4.28,
+    "measurement": "loudnorm",
+    "duration": 1.73,
+    "bytes": 4610304,
+    "mtimeMs": 1785080778934
+  },
+  "AI CMC/얏바리.mp4": {
+    "category": "visual",
+    "inputLufs": -17.06,
+    "truePeakDb": -0.61,
+    "gainDb": -0.94,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2284998,
+    "mtimeMs": 1784872692484
+  },
   "AI CMC/어디가.mp4": {
     "category": "visual",
     "inputLufs": -15.87,
@@ -368,6 +2199,36 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.92,
     "bytes": 2460051,
     "mtimeMs": 1781046380377
+  },
+  "AI CMC/어디야(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -13.34,
+    "truePeakDb": -1.13,
+    "gainDb": -4.66,
+    "measurement": "loudnorm",
+    "duration": 1.09,
+    "bytes": 3057977,
+    "mtimeMs": 1784847093527
+  },
+  "AI CMC/어떤년.mp4": {
+    "category": "visual",
+    "inputLufs": -15.1,
+    "truePeakDb": -1.51,
+    "gainDb": -2.9,
+    "measurement": "loudnorm",
+    "duration": 1,
+    "bytes": 2661323,
+    "mtimeMs": 1784847142939
+  },
+  "AI CMC/어떻게된거.mp4": {
+    "category": "visual",
+    "inputLufs": -12.8,
+    "truePeakDb": -1.54,
+    "gainDb": -5.2,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 4066123,
+    "mtimeMs": 1784872091917
   },
   "AI CMC/어라.mp4": {
     "category": "visual",
@@ -396,6 +2257,46 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2926602,
     "mtimeMs": 1781046791866
   },
+  "AI CMC/어이없음.mp4": {
+    "category": "visual",
+    "inputLufs": -28.78,
+    "truePeakDb": -6.07,
+    "gainDb": 5.07,
+    "measurement": "loudnorm",
+    "duration": 2.58,
+    "bytes": 6559202,
+    "mtimeMs": 1784846493137
+  },
+  "AI CMC/어째서(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -16.4,
+    "truePeakDb": -2.39,
+    "gainDb": -1.6,
+    "measurement": "loudnorm",
+    "duration": 1.28,
+    "bytes": 2889909,
+    "mtimeMs": 1784847112728
+  },
+  "AI CMC/언제.mp4": {
+    "category": "visual",
+    "inputLufs": -13.05,
+    "truePeakDb": -1.14,
+    "gainDb": -4.95,
+    "measurement": "loudnorm",
+    "duration": 0.7,
+    "bytes": 1890208,
+    "mtimeMs": 1784847100721
+  },
+  "AI CMC/엄청나.mp4": {
+    "category": "visual",
+    "inputLufs": -17.22,
+    "truePeakDb": -1.82,
+    "gainDb": -0.78,
+    "measurement": "loudnorm",
+    "duration": 2.92,
+    "bytes": 7297338,
+    "mtimeMs": 1785169243572
+  },
   "AI CMC/에라이.mp4": {
     "category": "visual",
     "inputLufs": -17.78,
@@ -414,6 +2315,76 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4195144,
     "mtimeMs": 1781046236498
   },
+  "AI CMC/역시.mp4": {
+    "category": "visual",
+    "inputLufs": -18.88,
+    "truePeakDb": -2.91,
+    "gainDb": 0.88,
+    "measurement": "loudnorm",
+    "duration": 1.75,
+    "bytes": 4314601,
+    "mtimeMs": 1784847402911
+  },
+  "AI CMC/역시(느낌표).mp4": {
+    "category": "visual",
+    "inputLufs": -21.5,
+    "truePeakDb": -5.86,
+    "gainDb": 3.5,
+    "measurement": "loudnorm",
+    "duration": 1.88,
+    "bytes": 4809911,
+    "mtimeMs": 1784847754993
+  },
+  "AI CMC/역시2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.98,
+    "truePeakDb": -1.98,
+    "gainDb": -2.02,
+    "measurement": "loudnorm",
+    "duration": 1.62,
+    "bytes": 4225941,
+    "mtimeMs": 1785161248173
+  },
+  "AI CMC/예쁘다.mp4": {
+    "category": "visual",
+    "inputLufs": -15.84,
+    "truePeakDb": -1.62,
+    "gainDb": -2.16,
+    "measurement": "loudnorm",
+    "duration": 1.94,
+    "bytes": 4975827,
+    "mtimeMs": 1784847505842
+  },
+  "AI CMC/예쁜말.mp4": {
+    "category": "visual",
+    "inputLufs": -15.92,
+    "truePeakDb": -0.92,
+    "gainDb": -2.08,
+    "measurement": "loudnorm",
+    "duration": 1.71,
+    "bytes": 4347570,
+    "mtimeMs": 1785275217465
+  },
+  "AI CMC/오나카헷.mp4": {
+    "category": "visual",
+    "inputLufs": -17.49,
+    "truePeakDb": -0.28,
+    "gainDb": -0.72,
+    "measurement": "loudnorm",
+    "duration": 0.96,
+    "bytes": 2509878,
+    "mtimeMs": 1784874945662
+  },
+  "AI CMC/오샤레.mp4": {
+    "category": "visual",
+    "inputLufs": -15.55,
+    "truePeakDb": -2.51,
+    "gainDb": -2.45,
+    "measurement": "loudnorm",
+    "duration": 1.15,
+    "bytes": 3058188,
+    "mtimeMs": 1784873652602
+  },
   "AI CMC/오오오.mp4": {
     "category": "visual",
     "inputLufs": -10.47,
@@ -431,6 +2402,46 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.92,
     "bytes": 4687900,
     "mtimeMs": 1781046010927
+  },
+  "AI CMC/오와.mp4": {
+    "category": "visual",
+    "inputLufs": -10.22,
+    "truePeakDb": -1.43,
+    "gainDb": -7.78,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 3124876,
+    "mtimeMs": 1785082684832
+  },
+  "AI CMC/오이시.mp4": {
+    "category": "visual",
+    "inputLufs": -13.75,
+    "truePeakDb": -3.43,
+    "gainDb": -4.25,
+    "measurement": "loudnorm",
+    "duration": 0.66,
+    "bytes": 1909986,
+    "mtimeMs": 1784874154825
+  },
+  "AI CMC/오이시소.mp4": {
+    "category": "visual",
+    "inputLufs": -14.04,
+    "truePeakDb": -3.06,
+    "gainDb": -3.96,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2479032,
+    "mtimeMs": 1784874144652
+  },
+  "AI CMC/오츠카레.mp4": {
+    "category": "visual",
+    "inputLufs": -16.21,
+    "truePeakDb": -2.26,
+    "gainDb": -1.79,
+    "measurement": "loudnorm",
+    "duration": 1.15,
+    "bytes": 3044904,
+    "mtimeMs": 1784902872589
   },
   "AI CMC/오호.mp4": {
     "category": "visual",
@@ -459,6 +2470,26 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3087975,
     "mtimeMs": 1781046086054
   },
+  "AI CMC/와따시모.mp4": {
+    "category": "visual",
+    "inputLufs": -13.72,
+    "truePeakDb": -2.71,
+    "gainDb": -4.28,
+    "measurement": "loudnorm",
+    "duration": 0.75,
+    "bytes": 2019566,
+    "mtimeMs": 1784872399590
+  },
+  "AI CMC/와미쳤.mp4": {
+    "category": "visual",
+    "inputLufs": -16.33,
+    "truePeakDb": -0.85,
+    "gainDb": -1.67,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2379035,
+    "mtimeMs": 1784873383576
+  },
   "AI CMC/와우.mp4": {
     "category": "visual",
     "inputLufs": -13.6,
@@ -467,6 +2498,86 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.79,
     "bytes": 2366762,
     "mtimeMs": 1781046331461
+  },
+  "AI CMC/와카루.mp4": {
+    "category": "visual",
+    "inputLufs": -13.54,
+    "truePeakDb": -0.64,
+    "gainDb": -4.46,
+    "measurement": "loudnorm",
+    "duration": 0.66,
+    "bytes": 1873676,
+    "mtimeMs": 1784872297138
+  },
+  "AI CMC/와카루기.mp4": {
+    "category": "visual",
+    "inputLufs": -16.3,
+    "truePeakDb": -0.78,
+    "gainDb": -1.7,
+    "measurement": "loudnorm",
+    "duration": 1.07,
+    "bytes": 2963103,
+    "mtimeMs": 1784872418212
+  },
+  "AI CMC/와카루네.mp4": {
+    "category": "visual",
+    "inputLufs": -13.96,
+    "truePeakDb": -0.54,
+    "gainDb": -4.04,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2567851,
+    "mtimeMs": 1784872306400
+  },
+  "AI CMC/완벽해.mp4": {
+    "category": "visual",
+    "inputLufs": -14.57,
+    "truePeakDb": -0.51,
+    "gainDb": -3.43,
+    "measurement": "loudnorm",
+    "duration": 1.17,
+    "bytes": 3107591,
+    "mtimeMs": 1784847455080
+  },
+  "AI CMC/왜.mp4": {
+    "category": "visual",
+    "inputLufs": -11.75,
+    "truePeakDb": -1.45,
+    "gainDb": -6.25,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 3903530,
+    "mtimeMs": 1784846897872
+  },
+  "AI CMC/왜(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -16.03,
+    "truePeakDb": -1.9,
+    "gainDb": -1.97,
+    "measurement": "loudnorm",
+    "duration": 2.41,
+    "bytes": 5930511,
+    "mtimeMs": 1784846978575
+  },
+  "AI CMC/우라야마시.mp4": {
+    "category": "visual",
+    "inputLufs": -15.11,
+    "truePeakDb": -3.83,
+    "gainDb": -2.89,
+    "measurement": "loudnorm",
+    "duration": 1.15,
+    "bytes": 2936213,
+    "mtimeMs": 1784902763924
+  },
+  "AI CMC/우소데쇼.mp4": {
+    "category": "visual",
+    "inputLufs": -13.43,
+    "truePeakDb": -2.05,
+    "gainDb": -4.57,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2356954,
+    "mtimeMs": 1784873166535
   },
   "AI CMC/우와.mp4": {
     "category": "visual",
@@ -477,6 +2588,56 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2935943,
     "mtimeMs": 1781046390893
   },
+  "AI CMC/우와2.mp4": {
+    "category": "visual",
+    "inputLufs": -13.15,
+    "truePeakDb": -1.42,
+    "gainDb": -4.85,
+    "measurement": "loudnorm",
+    "duration": 1.81,
+    "bytes": 4753375,
+    "mtimeMs": 1784846446250
+  },
+  "AI CMC/우우와.mp4": {
+    "category": "visual",
+    "inputLufs": -17.18,
+    "truePeakDb": -1.33,
+    "gainDb": -0.82,
+    "measurement": "loudnorm",
+    "duration": 2.37,
+    "bytes": 5909642,
+    "mtimeMs": 1784873196828
+  },
+  "AI CMC/우케루.mp4": {
+    "category": "visual",
+    "inputLufs": -15.55,
+    "truePeakDb": -1.24,
+    "gainDb": -2.45,
+    "measurement": "loudnorm",
+    "duration": 1.56,
+    "bytes": 4165381,
+    "mtimeMs": 1784902809956
+  },
+  "AI CMC/웃겨.mp4": {
+    "category": "visual",
+    "inputLufs": -14.49,
+    "truePeakDb": -2.4,
+    "gainDb": -3.51,
+    "measurement": "loudnorm",
+    "duration": 0.58,
+    "bytes": 1466558,
+    "mtimeMs": 1784873465233
+  },
+  "AI CMC/위험해.mp4": {
+    "category": "visual",
+    "inputLufs": -11.73,
+    "truePeakDb": -0.22,
+    "gainDb": -6.27,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 3628564,
+    "mtimeMs": 1784846467367
+  },
   "AI CMC/으루아.mp4": {
     "category": "visual",
     "inputLufs": -15.62,
@@ -486,15 +2647,6 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2942797,
     "mtimeMs": 1781045739139
   },
-  "AI CMC/으하하.mp4": {
-    "category": "visual",
-    "inputLufs": -19.06,
-    "truePeakDb": -2.06,
-    "gainDb": 1.06,
-    "duration": 1.19,
-    "bytes": 3176017,
-    "mtimeMs": 1781045776631
-  },
   "AI CMC/이게게임.mp4": {
     "category": "visual",
     "inputLufs": -16.43,
@@ -503,6 +2655,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.9,
     "bytes": 2433457,
     "mtimeMs": 1781046460837
+  },
+  "AI CMC/이게아닌데.mp4": {
+    "category": "visual",
+    "inputLufs": -17.81,
+    "truePeakDb": -0.62,
+    "gainDb": -0.38,
+    "measurement": "loudnorm",
+    "duration": 3.11,
+    "bytes": 7917296,
+    "mtimeMs": 1785426319246
   },
   "AI CMC/이런일.mp4": {
     "category": "visual",
@@ -522,6 +2684,86 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2330828,
     "mtimeMs": 1781046018604
   },
+  "AI CMC/이야사레루.mp4": {
+    "category": "visual",
+    "inputLufs": -15.34,
+    "truePeakDb": -1.16,
+    "gainDb": -2.66,
+    "measurement": "loudnorm",
+    "duration": 1.09,
+    "bytes": 3053200,
+    "mtimeMs": 1784872745225
+  },
+  "AI CMC/이이니요이.mp4": {
+    "category": "visual",
+    "inputLufs": -14.34,
+    "truePeakDb": -4.81,
+    "gainDb": -3.66,
+    "measurement": "loudnorm",
+    "duration": 0.83,
+    "bytes": 2443422,
+    "mtimeMs": 1784874882594
+  },
+  "AI CMC/이좋.mp4": {
+    "category": "visual",
+    "inputLufs": -16.29,
+    "truePeakDb": -0.65,
+    "gainDb": -1.71,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3621982,
+    "mtimeMs": 1785167948358
+  },
+  "AI CMC/이츠가.mp4": {
+    "category": "visual",
+    "inputLufs": -15.82,
+    "truePeakDb": -0.62,
+    "gainDb": -2.18,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2325666,
+    "mtimeMs": 1784873019221
+  },
+  "AI CMC/이키따이.mp4": {
+    "category": "visual",
+    "inputLufs": -13.42,
+    "truePeakDb": -0.43,
+    "gainDb": -4.58,
+    "measurement": "loudnorm",
+    "duration": 0.64,
+    "bytes": 1859955,
+    "mtimeMs": 1784902775021
+  },
+  "AI CMC/잇쇼.mp4": {
+    "category": "visual",
+    "inputLufs": -15.72,
+    "truePeakDb": -1.92,
+    "gainDb": -2.28,
+    "measurement": "loudnorm",
+    "duration": 0.98,
+    "bytes": 2601315,
+    "mtimeMs": 1784872373018
+  },
+  "AI CMC/자극적이야.mp4": {
+    "category": "visual",
+    "inputLufs": -16.75,
+    "truePeakDb": -2.92,
+    "gainDb": -1.25,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 2968703,
+    "mtimeMs": 1784873269479
+  },
+  "AI CMC/잠시만.mp4": {
+    "category": "visual",
+    "inputLufs": -14.11,
+    "truePeakDb": 0.07,
+    "gainDb": -3.89,
+    "measurement": "loudnorm",
+    "duration": 1.56,
+    "bytes": 4024296,
+    "mtimeMs": 1784847167358
+  },
   "AI CMC/재밌는얘기.mp4": {
     "category": "visual",
     "inputLufs": -17.35,
@@ -539,6 +2781,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.11,
     "bytes": 2908447,
     "mtimeMs": 1781046205961
+  },
+  "AI CMC/점점커.mp4": {
+    "category": "visual",
+    "inputLufs": -14.26,
+    "truePeakDb": -1.76,
+    "gainDb": -3.74,
+    "measurement": "loudnorm",
+    "duration": 1.79,
+    "bytes": 4617065,
+    "mtimeMs": 1785169201014
   },
   "AI CMC/정말대단.mp4": {
     "category": "visual",
@@ -558,6 +2810,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3074311,
     "mtimeMs": 1781046094451
   },
+  "AI CMC/제발싸.mp4": {
+    "category": "visual",
+    "inputLufs": -11.65,
+    "truePeakDb": -1.12,
+    "gainDb": -6.35,
+    "measurement": "loudnorm",
+    "duration": 1.37,
+    "bytes": 3591346,
+    "mtimeMs": 1785082750054
+  },
   "AI CMC/조금만더보여.mp4": {
     "category": "visual",
     "inputLufs": -13.31,
@@ -567,6 +2829,96 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4369924,
     "mtimeMs": 1781046181195
   },
+  "AI CMC/존망겜.mp4": {
+    "category": "visual",
+    "inputLufs": -10.57,
+    "truePeakDb": 0.04,
+    "gainDb": -7.43,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3658257,
+    "mtimeMs": 1785176874459
+  },
+  "AI CMC/존망겜2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.23,
+    "truePeakDb": -1.33,
+    "gainDb": -2.77,
+    "measurement": "loudnorm",
+    "duration": 1.81,
+    "bytes": 4790587,
+    "mtimeMs": 1785176887487
+  },
+  "AI CMC/좋은냄새.mp4": {
+    "category": "visual",
+    "inputLufs": -15.92,
+    "truePeakDb": -4.31,
+    "gainDb": -2.08,
+    "measurement": "loudnorm",
+    "duration": 1.15,
+    "bytes": 2973650,
+    "mtimeMs": 1784873354030
+  },
+  "AI CMC/좋은말.mp4": {
+    "category": "visual",
+    "inputLufs": -13.35,
+    "truePeakDb": -0.51,
+    "gainDb": -4.65,
+    "measurement": "loudnorm",
+    "duration": 1.56,
+    "bytes": 4194839,
+    "mtimeMs": 1785275161056
+  },
+  "AI CMC/진심이야(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -13.03,
+    "truePeakDb": -1.13,
+    "gainDb": -4.97,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 4110515,
+    "mtimeMs": 1784846421892
+  },
+  "AI CMC/진짜(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -15.31,
+    "truePeakDb": -0.94,
+    "gainDb": -2.69,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 4269075,
+    "mtimeMs": 1784847612348
+  },
+  "AI CMC/진짜(물음표)2.mp4": {
+    "category": "visual",
+    "inputLufs": -14.71,
+    "truePeakDb": -0.57,
+    "gainDb": -3.29,
+    "measurement": "loudnorm",
+    "duration": 0.73,
+    "bytes": 1971475,
+    "mtimeMs": 1784847825398
+  },
+  "AI CMC/진짜로(물음표).mp4": {
+    "category": "visual",
+    "inputLufs": -12.45,
+    "truePeakDb": -0.4,
+    "gainDb": -5.55,
+    "measurement": "loudnorm",
+    "duration": 1.75,
+    "bytes": 4402554,
+    "mtimeMs": 1784847629489
+  },
+  "AI CMC/짜릿.mp4": {
+    "category": "visual",
+    "inputLufs": -14.07,
+    "truePeakDb": -1.24,
+    "gainDb": -3.93,
+    "measurement": "loudnorm",
+    "duration": 1.69,
+    "bytes": 4304633,
+    "mtimeMs": 1785161187861
+  },
   "AI CMC/짝짝짝.mp4": {
     "category": "visual",
     "inputLufs": -18.48,
@@ -575,6 +2927,46 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 2.54,
     "bytes": 6703049,
     "mtimeMs": 1781046260011
+  },
+  "AI CMC/차라리.mp4": {
+    "category": "visual",
+    "inputLufs": -16.44,
+    "truePeakDb": -2.97,
+    "gainDb": -1.56,
+    "measurement": "loudnorm",
+    "duration": 3.11,
+    "bytes": 7883545,
+    "mtimeMs": 1785426337406
+  },
+  "AI CMC/찬양.mp4": {
+    "category": "visual",
+    "inputLufs": -13.54,
+    "truePeakDb": -2.4,
+    "gainDb": -4.46,
+    "measurement": "loudnorm",
+    "duration": 1.79,
+    "bytes": 4826297,
+    "mtimeMs": 1785424752345
+  },
+  "AI CMC/천재다.mp4": {
+    "category": "visual",
+    "inputLufs": -14.38,
+    "truePeakDb": -1.08,
+    "gainDb": -3.62,
+    "measurement": "loudnorm",
+    "duration": 0.9,
+    "bytes": 2445658,
+    "mtimeMs": 1784872195779
+  },
+  "AI CMC/천재야.mp4": {
+    "category": "visual",
+    "inputLufs": -11.09,
+    "truePeakDb": 0.03,
+    "gainDb": -6.91,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3892876,
+    "mtimeMs": 1784847717875
   },
   "AI CMC/천재지변.mp4": {
     "category": "visual",
@@ -594,6 +2986,46 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2911047,
     "mtimeMs": 1781045986231
   },
+  "AI CMC/카나시.mp4": {
+    "category": "visual",
+    "inputLufs": -20.74,
+    "truePeakDb": -4.79,
+    "gainDb": 2.74,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 2876330,
+    "mtimeMs": 1784902821602
+  },
+  "AI CMC/카미다.mp4": {
+    "category": "visual",
+    "inputLufs": -19.1,
+    "truePeakDb": -6.82,
+    "gainDb": 1.1,
+    "measurement": "loudnorm",
+    "duration": 1.07,
+    "bytes": 2845173,
+    "mtimeMs": 1784872259076
+  },
+  "AI CMC/칸도네.mp4": {
+    "category": "visual",
+    "inputLufs": -14.83,
+    "truePeakDb": -2.07,
+    "gainDb": -3.17,
+    "measurement": "loudnorm",
+    "duration": 0.92,
+    "bytes": 2555417,
+    "mtimeMs": 1784873749952
+  },
+  "AI CMC/칸도스루.mp4": {
+    "category": "visual",
+    "inputLufs": -14.68,
+    "truePeakDb": -3.28,
+    "gainDb": -3.32,
+    "measurement": "loudnorm",
+    "duration": 0.9,
+    "bytes": 2462370,
+    "mtimeMs": 1784873740627
+  },
   "AI CMC/캬.mp4": {
     "category": "visual",
     "inputLufs": -14.25,
@@ -602,6 +3034,26 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.58,
     "bytes": 1522959,
     "mtimeMs": 1781046289380
+  },
+  "AI CMC/코와이.mp4": {
+    "category": "visual",
+    "inputLufs": -10.71,
+    "truePeakDb": -0.84,
+    "gainDb": -7.29,
+    "measurement": "loudnorm",
+    "duration": 1,
+    "bytes": 3418302,
+    "mtimeMs": 1784902748495
+  },
+  "AI CMC/코이시.mp4": {
+    "category": "visual",
+    "inputLufs": -12.25,
+    "truePeakDb": 0,
+    "gainDb": -5.75,
+    "measurement": "loudnorm",
+    "duration": 0.87,
+    "bytes": 2479538,
+    "mtimeMs": 1784874179194
   },
   "AI CMC/크샬좋.mp4": {
     "category": "visual",
@@ -612,6 +3064,36 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2898467,
     "mtimeMs": 1781046151973
   },
+  "AI CMC/타베타이.mp4": {
+    "category": "visual",
+    "inputLufs": -12.87,
+    "truePeakDb": -2.52,
+    "gainDb": -5.13,
+    "measurement": "loudnorm",
+    "duration": 0.9,
+    "bytes": 2419590,
+    "mtimeMs": 1784874860134
+  },
+  "AI CMC/타시카니.mp4": {
+    "category": "visual",
+    "inputLufs": -12.96,
+    "truePeakDb": 0.02,
+    "gainDb": -5.04,
+    "measurement": "loudnorm",
+    "duration": 1.09,
+    "bytes": 3012999,
+    "mtimeMs": 1784872285020
+  },
+  "AI CMC/토마라나이.mp4": {
+    "category": "visual",
+    "inputLufs": -14.42,
+    "truePeakDb": -3.8,
+    "gainDb": -3.58,
+    "measurement": "loudnorm",
+    "duration": 0.81,
+    "bytes": 2431683,
+    "mtimeMs": 1784874910807
+  },
   "AI CMC/퉤.mp4": {
     "category": "visual",
     "inputLufs": -22.95,
@@ -620,6 +3102,46 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.58,
     "bytes": 1789420,
     "mtimeMs": 1781045756884
+  },
+  "AI CMC/편안.mp4": {
+    "category": "visual",
+    "inputLufs": -18.67,
+    "truePeakDb": -4.02,
+    "gainDb": 0.67,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3544058,
+    "mtimeMs": 1785167970072
+  },
+  "AI CMC/평온.mp4": {
+    "category": "visual",
+    "inputLufs": -17.88,
+    "truePeakDb": -2.27,
+    "gainDb": -0.12,
+    "measurement": "loudnorm",
+    "duration": 1.15,
+    "bytes": 3039349,
+    "mtimeMs": 1785167913336
+  },
+  "AI CMC/평화.mp4": {
+    "category": "visual",
+    "inputLufs": -17.32,
+    "truePeakDb": -3.31,
+    "gainDb": -0.68,
+    "measurement": "loudnorm",
+    "duration": 1.54,
+    "bytes": 3979768,
+    "mtimeMs": 1785161204164
+  },
+  "AI CMC/피없즐.mp4": {
+    "category": "visual",
+    "inputLufs": -16.23,
+    "truePeakDb": -1.22,
+    "gainDb": -1.77,
+    "measurement": "loudnorm",
+    "duration": 1.64,
+    "bytes": 4175803,
+    "mtimeMs": 1785279950014
   },
   "AI CMC/하늘날.mp4": {
     "category": "visual",
@@ -639,11 +3161,72 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3692614,
     "mtimeMs": 1781046864685
   },
-  "AI CMC/하하하하.mp4": {
+  "AI CMC/하야이.mp4": {
+    "category": "visual",
+    "inputLufs": -12.04,
+    "truePeakDb": -1.22,
+    "gainDb": -5.96,
+    "measurement": "loudnorm",
+    "duration": 0.62,
+    "bytes": 1827047,
+    "mtimeMs": 1784874101585
+  },
+  "AI CMC/하하하.mp4": {
+    "category": "visual",
+    "inputLufs": -20.48,
+    "truePeakDb": 0,
+    "gainDb": -1,
+    "measurement": "loudnorm",
+    "duration": 3.03,
+    "bytes": 7907365,
+    "mtimeMs": 1785435795242
+  },
+  "AI CMC/하하하1.mp4": {
+    "category": "visual",
+    "inputLufs": -19.06,
+    "truePeakDb": -2.06,
+    "gainDb": 1.06,
+    "measurement": "loudnorm",
+    "duration": 1.19,
+    "bytes": 3176017,
+    "mtimeMs": 1781045776631
+  },
+  "AI CMC/하하하2.mp4": {
+    "category": "visual",
+    "inputLufs": -17.54,
+    "truePeakDb": -0.35,
+    "gainDb": -0.65,
+    "measurement": "loudnorm",
+    "duration": 2.11,
+    "bytes": 5488716,
+    "mtimeMs": 1785435809817
+  },
+  "AI CMC/하하하3.mp4": {
+    "category": "visual",
+    "inputLufs": -18.44,
+    "truePeakDb": -2.22,
+    "gainDb": 0.44,
+    "measurement": "loudnorm",
+    "duration": 3.48,
+    "bytes": 8855920,
+    "mtimeMs": 1785435823379
+  },
+  "AI CMC/하하하4.mp4": {
+    "category": "visual",
+    "inputLufs": -20.02,
+    "truePeakDb": 0.1,
+    "gainDb": -1.1,
+    "measurement": "loudnorm",
+    "duration": 2.2,
+    "bytes": 5541690,
+    "mtimeMs": 1785435847811
+  },
+  "AI CMC/하하하5.mp4": {
     "category": "visual",
     "inputLufs": -11.59,
     "truePeakDb": -0.03,
     "gainDb": -6.41,
+    "measurement": "loudnorm",
     "duration": 1.49,
     "bytes": 3730726,
     "mtimeMs": 1781045880940
@@ -657,6 +3240,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 5023970,
     "mtimeMs": 1781045932093
   },
+  "AI CMC/한숨돌.mp4": {
+    "category": "visual",
+    "inputLufs": -14.69,
+    "truePeakDb": -1.89,
+    "gainDb": -3.31,
+    "measurement": "loudnorm",
+    "duration": 1.26,
+    "bytes": 3438597,
+    "mtimeMs": 1785167884293
+  },
   "AI CMC/할말없.mp4": {
     "category": "visual",
     "inputLufs": -17.83,
@@ -666,6 +3259,66 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4328252,
     "mtimeMs": 1781046070627
   },
+  "AI CMC/행복해.mp4": {
+    "category": "visual",
+    "inputLufs": -18.81,
+    "truePeakDb": -6.39,
+    "gainDb": 0.81,
+    "measurement": "loudnorm",
+    "duration": 0.62,
+    "bytes": 1787793,
+    "mtimeMs": 1784873409616
+  },
+  "AI CMC/헐.mp4": {
+    "category": "visual",
+    "inputLufs": -14.79,
+    "truePeakDb": -0.03,
+    "gainDb": -3.21,
+    "measurement": "loudnorm",
+    "duration": 1.69,
+    "bytes": 4261174,
+    "mtimeMs": 1784846374483
+  },
+  "AI CMC/헐2.mp4": {
+    "category": "visual",
+    "inputLufs": -17.83,
+    "truePeakDb": -3.32,
+    "gainDb": -0.17,
+    "measurement": "loudnorm",
+    "duration": 2.2,
+    "bytes": 5198864,
+    "mtimeMs": 1784847780744
+  },
+  "AI CMC/헤헷.mp4": {
+    "category": "visual",
+    "inputLufs": -16.97,
+    "truePeakDb": -1.23,
+    "gainDb": -1.03,
+    "measurement": "loudnorm",
+    "duration": 0.62,
+    "bytes": 1775488,
+    "mtimeMs": 1784872151593
+  },
+  "AI CMC/현탐.mp4": {
+    "category": "visual",
+    "inputLufs": -18.86,
+    "truePeakDb": -1.11,
+    "gainDb": 0.11,
+    "measurement": "loudnorm",
+    "duration": 2.79,
+    "bytes": 7079005,
+    "mtimeMs": 1785426301790
+  },
+  "AI CMC/혼또.mp4": {
+    "category": "visual",
+    "inputLufs": -13.56,
+    "truePeakDb": -0.63,
+    "gainDb": -4.44,
+    "measurement": "loudnorm",
+    "duration": 0.96,
+    "bytes": 2327656,
+    "mtimeMs": 1784873157039
+  },
   "AI CMC/환장.mp4": {
     "category": "visual",
     "inputLufs": -16.02,
@@ -674,6 +3327,76 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.28,
     "bytes": 3339920,
     "mtimeMs": 1781045977276
+  },
+  "AI CMC/후시기.mp4": {
+    "category": "visual",
+    "inputLufs": -15.61,
+    "truePeakDb": -4.78,
+    "gainDb": -2.39,
+    "measurement": "loudnorm",
+    "duration": 1.02,
+    "bytes": 2871333,
+    "mtimeMs": 1784872271060
+  },
+  "AI CMC/후원감사1.mp4": {
+    "category": "visual",
+    "inputLufs": -13.75,
+    "truePeakDb": -1.48,
+    "gainDb": -4.25,
+    "measurement": "loudnorm",
+    "duration": 1.92,
+    "bytes": 6666398,
+    "mtimeMs": 1785086426692
+  },
+  "AI CMC/후원감사2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.49,
+    "truePeakDb": -3.31,
+    "gainDb": -2.51,
+    "measurement": "loudnorm",
+    "duration": 1.79,
+    "bytes": 4658462,
+    "mtimeMs": 1785086441930
+  },
+  "AI CMC/후원감사3.mp4": {
+    "category": "visual",
+    "inputLufs": -12.64,
+    "truePeakDb": 0,
+    "gainDb": -5.36,
+    "measurement": "loudnorm",
+    "duration": 1.62,
+    "bytes": 4328662,
+    "mtimeMs": 1785086457590
+  },
+  "AI CMC/후원감사4.mp4": {
+    "category": "visual",
+    "inputLufs": -17.02,
+    "truePeakDb": -4.1,
+    "gainDb": -0.98,
+    "measurement": "loudnorm",
+    "duration": 1.62,
+    "bytes": 4195941,
+    "mtimeMs": 1785086487299
+  },
+  "AI CMC/후원감사5.mp4": {
+    "category": "visual",
+    "inputLufs": -16.26,
+    "truePeakDb": -3.28,
+    "gainDb": -1.74,
+    "measurement": "loudnorm",
+    "duration": 1.75,
+    "bytes": 4478094,
+    "mtimeMs": 1785086497839
+  },
+  "AI CMC/흐뭇.mp4": {
+    "category": "visual",
+    "inputLufs": -37.4,
+    "truePeakDb": -27.25,
+    "gainDb": 12,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3484827,
+    "mtimeMs": 1784847361019
   },
   "AI CMC/흐하하.mp4": {
     "category": "visual",
@@ -693,6 +3416,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4497143,
     "mtimeMs": 1781046193534
   },
+  "AI CMC/희망.mp4": {
+    "category": "visual",
+    "inputLufs": -17.38,
+    "truePeakDb": -1.82,
+    "gainDb": -0.62,
+    "measurement": "loudnorm",
+    "duration": 1.07,
+    "bytes": 2978118,
+    "mtimeMs": 1785279964155
+  },
   "AI CMC/히로카리.mp4": {
     "category": "visual",
     "inputLufs": -16.79,
@@ -701,6 +3434,36 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.73,
     "bytes": 4267068,
     "mtimeMs": 1781046768946
+  },
+  "AI CMC/힐링.mp4": {
+    "category": "visual",
+    "inputLufs": -15.64,
+    "truePeakDb": -3.1,
+    "gainDb": -2.36,
+    "measurement": "loudnorm",
+    "duration": 1.41,
+    "bytes": 3515802,
+    "mtimeMs": 1784847444670
+  },
+  "AI CMC/힘든일.mp4": {
+    "category": "visual",
+    "inputLufs": -16.71,
+    "truePeakDb": -4.84,
+    "gainDb": -1.29,
+    "measurement": "loudnorm",
+    "duration": 1.88,
+    "bytes": 4871087,
+    "mtimeMs": 1785279643670
+  },
+  "AI CMC/힘들다.mp4": {
+    "category": "visual",
+    "inputLufs": -18.76,
+    "truePeakDb": -5.29,
+    "gainDb": 0.76,
+    "measurement": "loudnorm",
+    "duration": 1.79,
+    "bytes": 4658187,
+    "mtimeMs": 1785167672924
   },
   "BGM/MH_Bherna.mp3": {
     "category": "bgm",
@@ -891,6 +3654,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 230.6,
     "bytes": 3694674,
     "mtimeMs": 1780737793305
+  },
+  "BGM/MHW_Bazelgeuse.mp3": {
+    "category": "bgm",
+    "inputLufs": -20.19,
+    "truePeakDb": -4.46,
+    "gainDb": -1.81,
+    "measurement": "loudnorm",
+    "duration": 146.42,
+    "bytes": 3515373,
+    "mtimeMs": 1785436808391
   },
   "BGM/MHW_Brachydios.mp3": {
     "category": "bgm",

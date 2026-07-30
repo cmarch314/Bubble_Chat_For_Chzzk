@@ -23,6 +23,7 @@ class AssetPreloader {
 
         if (vConf) {
             Object.values(vConf).forEach(effect => {
+                if (!effect || effect.preload !== true) return;
                 if (effect.gifPath) mediaUrls.add(effect.gifPath);
                 if (effect.videoPath) mediaUrls.add(effect.videoPath);
                 if (effect.backgroundVideoPath) mediaUrls.add(effect.backgroundVideoPath);

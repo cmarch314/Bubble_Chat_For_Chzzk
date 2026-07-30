@@ -2,6 +2,13 @@ class HuntWeaponInstanceCatalog {
     static COLORS = Object.freeze(['red', 'orange', 'yellow', 'green', 'blue', 'white', 'purple']);
     static COLOR_HEX = Object.freeze({ red: '#e53b35', orange: '#ef7d26', yellow: '#f4d942', green: '#62c84b', blue: '#3487e8', white: '#f2f3ef', purple: '#b759de' });
     static RAW_MULTIPLIER = Object.freeze({ red: .5, orange: .75, yellow: 1, green: 1.05, blue: 1.2, white: 1.32, purple: 1.39 });
+    static SHARPEN_WEAR_RATIO = Object.freeze({
+        offensive: .20,
+        veteran: .25,
+        normal: .35,
+        support: .40,
+        defensive: .45
+    });
 
     constructor(entries, random = Math.random) {
         this.entries = Array.isArray(entries) ? entries : [];
@@ -53,25 +60,20 @@ class HuntWeaponInstanceCatalog {
 
     static sharpenThreshold(hunter) {
         if (!hunter?.sharpnessProfile) return 0;
-        // Yellow is the universal AI floor. Offensive and veteran hunters maintain
-        // combat readiness more strictly and sharpen as soon as the edge enters green.
-        const yellowFloor = ['red', 'orange', 'yellow']
-            .reduce((sum, color) => sum + Math.max(0, Number(hunter.sharpnessProfile[color] || 0)), 0);
-        const greenBand = Math.max(0, Number(hunter.sharpnessProfile.green || 0));
-        const earlyGreenByPersonality = {
-            offensive: 1,
-            veteran: 1
-        };
-        const earlyGreen = greenBand * (earlyGreenByPersonality[hunter.personality] || 0);
-        return Math.max(0, yellowFloor + earlyGreen);
+        const maximum = Math.max(0, Number(hunter.maxSharpness || this.total(hunter.sharpnessProfile)));
+        if (!maximum || hunter.personality === 'newbie') return 0;
+        const wearRatio = this.SHARPEN_WEAR_RATIO[hunter.personality]
+            ?? this.SHARPEN_WEAR_RATIO.normal;
+        return maximum * (1 - wearRatio);
     }
 
-    static shouldSharpen(hunter, random = Math.random) {
+    static shouldSharpen(hunter, _random = Math.random) {
         if (!hunter?.sharpnessProfile) return false;
         if (hunter.personality === 'newbie') return false;
-        if (Number(hunter.sharpness || 0) <= this.sharpenThreshold(hunter)) return true;
-        const color = this.colorAt(hunter.sharpnessProfile, hunter.sharpness);
-        return hunter.personality === 'offensive' && color === 'blue' && random() < .6;
+        const maximum = Math.max(0, Number(hunter.maxSharpness || this.total(hunter.sharpnessProfile)));
+        const current = Math.max(0, Math.min(maximum, Number(hunter.sharpness || 0)));
+        if (!maximum || current >= maximum) return false;
+        return current <= this.sharpenThreshold(hunter);
     }
 
     static colorHex(color) { return this.COLOR_HEX[color] || this.COLOR_HEX.red; }

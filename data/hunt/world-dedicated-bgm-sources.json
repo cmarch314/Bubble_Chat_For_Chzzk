@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "profiles": {
+    "bazelgeuse": {
+      "game": "world",
+      "monsterIds": [
+        "bazelgeuse",
+        "seething_bazelgeuse"
+      ],
+      "stateFiles": [
+        "chunkG0/sound/bgm/wwst/bgm_em118.wwst",
+        "chunkG0/sound/bgm/wwst/bgm_em118_sub.wwst"
+      ],
+      "eventBanks": [
+        "chunkG0/sound/wwise/Windows/Init.nbnk",
+        "chunkG0/sound/wwise/Windows/bgm_event_cmn.nbnk",
+        "chunkG0/sound/wwise/Windows/bgm_ingame_cmn.nbnk"
+      ],
+      "eventId": 3356566721,
+      "requiredGameSyncs": [
+        "2181107187=1239858980",
+        "3738383726=568627856"
+      ],
+      "mediaPackage": "chunkG0/sound/wwise/Windows/bgm_ingame.npck",
+      "expectedSourceIds": [
+        1047960118,
+        147414297
+      ],
+      "renderSourceId": 1047960118,
+      "renderMode": "primary-authored-four-channel-mix",
+      "output": "BGM/MHW_Bazelgeuse.mp3",
+      "evidence": "installed-game-wwst-to-hirc-to-akpk-wem",
+      "notes": "bgm_em118.wwst selects the Bazelgeuse battle state. The selected Wwise music-switch recipe references a complete 2:26 four-channel primary mix plus a short dynamic accent stem; the browser runtime uses the complete primary mix."
+    }
+  }
+}

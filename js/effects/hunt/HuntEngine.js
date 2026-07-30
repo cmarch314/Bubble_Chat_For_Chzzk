@@ -1,7 +1,8 @@
 class HuntEngine {
+    static CART_CAMP_TICKS = 300;
+
     constructor(config) {
         this.selectedWeapons = config.selectedWeapons;
-        this.selectedWeapons.forEach(hunter => { hunter.farcasterUsed = false; });
         this.selectedMonster = config.selectedMonster;
         this.bets = config.bets || {};
         this.consecutiveTotal = config.consecutiveTotal || 1;
@@ -20,7 +21,7 @@ class HuntEngine {
         this.weaponActionSelector = config.weaponActionSelector || new HuntWeaponActionSelector(this.random, this.weaponMechanics);
         this.monsterPatternSelector = config.monsterPatternSelector || new HuntMonsterPatternSelector(this.random);
         this.monsterFlightRuntime = config.monsterFlightRuntime || (typeof HuntMonsterFlightRuntime !== 'undefined' ? new HuntMonsterFlightRuntime(this.random) : null);
-        this.hunterCommandQueue = config.hunterCommandQueue || (typeof HuntHunterCommandQueue !== 'undefined' ? new HuntHunterCommandQueue() : null);
+        this.monsterTraitRuntime = config.monsterTraitRuntime || (typeof HuntMonsterTraitRuntime !== 'undefined' ? new HuntMonsterTraitRuntime(this.random) : null);
         this.teamTactic = config.teamTactic || 'balanced';
         this.telemetry = config.telemetry || new HuntBalanceTelemetry();
         
@@ -39,6 +40,9 @@ class HuntEngine {
         this.smallMonsterSwarm = this.monsterTier === 'small' && typeof HuntSmallMonsterSwarm !== 'undefined'
             ? new HuntSmallMonsterSwarm(config.smallMonsterCount || 3, this.monsterMaxHp)
             : null;
+        this.colossalPhaseRuntime = this.monsterTier === 'colossal' && typeof HuntColossalPhaseRuntime !== 'undefined'
+            ? new HuntColossalPhaseRuntime()
+            : null;
 
         this.cartCount = config.cartCount || 0;
         this.cartLimit = Math.max(3, Number(config.cartLimit || (3 + this.selectedWeapons.filter(hunter =>
@@ -49,10 +53,21 @@ class HuntEngine {
         this.monsterStunThreshold = config.monsterStunThreshold || 390;
         this.monsterStunDuration = config.monsterStunDuration || 0;
         this.monsterKnockdownDuration = config.monsterKnockdownDuration || 0;
+        this.monsterDeathCuePlayed = Boolean(config.monsterDeathCuePlayed);
         this.monsterTrapUseCount = Math.max(0, Number(config.monsterTrapUseCount || 0));
+        this.monsterFlashUseCount = Math.max(0, Number(config.monsterFlashUseCount || 0));
         this.monsterKnockdownTriggered = config.monsterKnockdownTriggered || { 80: false, 60: false, 40: false, 20: false };
         this.monsterRecoveryDuration = 0;
         this.pendingMonsterAction = config.pendingMonsterAction || null;
+        this.pendingMonsterImpact = config.pendingMonsterImpact || null;
+        this.monsterBurrowState = config.monsterBurrowState || null;
+        this.monsterActionLockTicks = Math.max(0, Number(config.monsterActionLockTicks || 0));
+        this.monsterActionGateDiagnostics = Array.isArray(config.monsterActionGateDiagnostics)
+            ? config.monsterActionGateDiagnostics.slice(-24)
+            : [];
+        this.monsterTraversalGeneration = Math.max(0, Number(config.monsterTraversalGeneration || 0));
+        this.monsterTraversalState = config.monsterTraversalState || null;
+        this.monsterRageOpenerRetryTicks = Math.max(0, Number(config.monsterRageOpenerRetryTicks || 0));
         this.monsterAnatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
             ? HuntMonsterAnatomyCatalog.find(this.selectedMonster)
             : null;
@@ -64,6 +79,7 @@ class HuntEngine {
         this.MONSTER_ATTACKS = config.MONSTER_ATTACKS;
         this.MONSTER_PATTERNS = config.MONSTER_PATTERNS || HuntMonsterPatternCatalog.build(config.MONSTER_ATTACKS || {});
         if (this.monsterFlightRuntime) this.monsterFlightRuntime.initialize(this);
+        if (this.monsterTraitRuntime) this.monsterTraitRuntime.initialize(this);
         this.COMBO_LIST = config.COMBO_LIST;
         this.SHOW_MONSTER_HP = config.SHOW_MONSTER_HP;
         this.hunterSpeedMultiplier = config.hunterSpeedMultiplier !== undefined ? config.hunterSpeedMultiplier : 1.15;
@@ -86,11 +102,76 @@ class HuntEngine {
             w.rollDuration = 0;
             w.guardDuration = 0;
             w.itemDuration = 0;
+            w.pendingSharpnessRestore = false;
             w.attackDuration = 0;
             w.currentAction = null;
             w.actionState = 'idle';
             w.isGathering = false;
         });
+        this.sharedSupply = config.sharedSupply && typeof HuntSharedSupply !== 'undefined'
+            ? HuntSharedSupply.bindHunters(this.selectedWeapons, config.sharedSupply)
+            : null;
+        this.updateMonsterPartsUI();
+    }
+
+    snapshotSharedSupply() {
+        return this.sharedSupply && typeof HuntSharedSupply !== 'undefined'
+            ? HuntSharedSupply.normalize(this.sharedSupply)
+            : null;
+    }
+
+    isMonsterTargetable() {
+        return typeof HuntMonsterRules !== 'undefined'
+            ? HuntMonsterRules.isTargetable(this)
+            : !this.monsterBurrowState && !this.monsterTraversalState?.untargetable;
+    }
+
+    beginMonsterTraversal(kind, ticks, options = {}) {
+        const generation = ++this.monsterTraversalGeneration;
+        this.monsterActionLockTicks = Math.max(
+            Number(this.monsterActionLockTicks || 0),
+            Math.max(1, Number(ticks || 1))
+        );
+        this.monsterTraversalState = {
+            kind: String(kind || 'movement'),
+            generation,
+            untargetable: Boolean(options.untargetable),
+            remainingTicks: Math.max(1, Number(ticks || 1))
+        };
+        return generation;
+    }
+
+    clearMonsterTraversal(reason = 'complete') {
+        const previous = this.monsterTraversalState;
+        this.monsterTraversalState = null;
+        this.monsterActionLockTicks = 0;
+        this.monsterTraversalGeneration++;
+        this.callbacks?.onResetMonsterMotion?.(reason);
+        return previous;
+    }
+
+    interruptMonsterMovement(reason = 'interrupted') {
+        const interrupted = {
+            pendingAction: this.pendingMonsterAction,
+            pendingImpact: this.pendingMonsterImpact,
+            burrow: this.monsterBurrowState,
+            traversal: this.monsterTraversalState
+        };
+        this.pendingMonsterAction = null;
+        this.pendingMonsterImpact = null;
+        const interruptedPattern = interrupted.pendingImpact?.pattern || interrupted.pendingAction?.pattern;
+        if (interruptedPattern?.tags?.includes('rage-opener')
+            && this.monsterFlightState !== 'airborne') {
+            this.monsterRageOpenerRetryTicks = Number(
+                this.monsterBehavior?.rageOpenerRetryTicks || 450
+            );
+        }
+        if (this.monsterBurrowState) {
+            this.monsterBurrowState = null;
+            this.callbacks?.onTriggerMonsterBurrowPhase?.('cancel', null, 0);
+        }
+        this.clearMonsterTraversal(reason);
+        return interrupted;
     }
 
     addLog(text, color) {
@@ -105,8 +186,10 @@ class HuntEngine {
         if (this.callbacks.onPlayAudioFile) this.callbacks.onPlayAudioFile(subPath, durationLimitMs, volumeMultiplier, context);
     }
 
-    shakeWeapon(idx, borderClr, isAttack, actionOrName, isDodge = false) {
-        if (this.callbacks.onShakeWeapon) this.callbacks.onShakeWeapon(idx, borderClr, isAttack, actionOrName, isDodge);
+    shakeWeapon(idx, borderClr, isAttack, actionOrName, isDodge = false, hitContext = null) {
+        if (this.callbacks.onShakeWeapon) {
+            this.callbacks.onShakeWeapon(idx, borderClr, isAttack, actionOrName, isDodge, hitContext);
+        }
     }
 
     shakeMonster() {
@@ -155,6 +238,11 @@ class HuntEngine {
         if (this.callbacks.onUpdateMonsterFlightUI) this.callbacks.onUpdateMonsterFlightUI(airborne, progress, damage, threshold, remainingTicks);
     }
 
+    updateMonsterPartsUI() {
+        if (!this.callbacks.onUpdateMonsterPartsUI || typeof HuntMonsterAnatomyCatalog === 'undefined') return;
+        this.callbacks.onUpdateMonsterPartsUI(HuntMonsterAnatomyCatalog.partDisplaySlots(this.monsterPartState));
+    }
+
     updatePotionCountUI(idx, count) {
         if (this.callbacks.onUpdatePotionCountUI) this.callbacks.onUpdatePotionCountUI(idx, count);
     }
@@ -192,8 +280,8 @@ class HuntEngine {
         if (this.callbacks.onShowSkillBubble) this.callbacks.onShowSkillBubble(idxOrMonster, text);
     }
 
-    spawnEmojiBubble(idx, emoji) {
-        if (this.callbacks.onSpawnEmojiBubble) this.callbacks.onSpawnEmojiBubble(idx, emoji);
+    spawnEmojiBubble(idx, emoji, options = {}) {
+        if (this.callbacks.onSpawnEmojiBubble) this.callbacks.onSpawnEmojiBubble(idx, emoji, options);
     }
 
     isStrongHunterAttack(hunter, action) {
@@ -260,24 +348,23 @@ class HuntEngine {
         const perks = new Set((hunter.perks || []).map(perk => perk?.name));
         const baseTraps = hunter.personality === 'support' ? 2 : hunter.personality === 'veteran' ? 1 : 0;
 
-        hunter.potions = 10
-            + (perks.has('버섯 애호가') ? 1 : 0)
-            + (perks.has('벌꿀 주세요') ? 2 : 0);
-        hunter.lifepowders = 1 + (perks.has('광역 분진') ? 1 : 0);
-        if (perks.has('보급관')) hunter.lifepowders++;
-        hunter.shockTraps = baseTraps;
-        hunter.bombs = 1 + (perks.has('폭파광') ? 2 : 0);
-        if (perks.has('폭탄 배달부')) hunter.bombs++;
-        if (perks.has('수레 단골')) hunter.potions++;
-        if (perks.has('똥')) {
-            hunter.potions += 3;
-            hunter.lifepowders += 1;
-            hunter.bombs += 2;
-            hunter.shockTraps += 1;
+        if (!this.sharedSupply) {
+            hunter.potions = 10
+                + (perks.has('버섯 애호가') ? 1 : 0)
+                + (perks.has('벌꿀 주세요') ? 2 : 0);
+            hunter.lifepowders = 1 + (perks.has('광역 분진') ? 1 : 0);
+            if (perks.has('보급관')) hunter.lifepowders++;
+            hunter.shockTraps = baseTraps;
+            hunter.bombs = 1 + (perks.has('폭파광') ? 2 : 0);
+            if (perks.has('폭탄 배달부')) hunter.bombs++;
+            if (perks.has('수레 단골')) hunter.potions++;
         }
         hunter.perkTraps = perks.has('덫 장인') ? 2 : 0;
         hunter.perkFlashes = perks.has('섬광 조제사') ? 2 : 0;
-        hunter.flashPods = 0;
+        const supportItemPolicy = typeof HuntSupportItemPolicy !== 'undefined'
+            ? HuntSupportItemPolicy
+            : (typeof require === 'function' ? require('./HuntSupportItemPolicy') : null);
+        hunter.flashPods = supportItemPolicy?.initialFlashCount(hunter.personality) || 0;
 
         if (hunter.sharpnessProfile) hunter.sharpness = Number(hunter.maxSharpness || 0);
         if (Number.isFinite(Number(hunter.maxMagazine))) hunter.magazine = Number(hunter.maxMagazine);
@@ -322,6 +409,7 @@ class HuntEngine {
 
     triggerHunterCart(target) {
         if (!target || target.status === 'dead') return false;
+        this.interruptHunterItemAction(target, 'cart', { log: false });
         if (this.actionStateMachine) this.actionStateMachine.cancel(target, 'cart');
         target.status = 'dead';
         target.hp = 0; // 체력을 명확하게 0으로 설정
@@ -333,6 +421,11 @@ class HuntEngine {
         target.stunDuration = 0; // 일반 기절 상태 해제
         if (this.callbacks.onTriggerStunUI) this.callbacks.onTriggerStunUI(target.index, false); // [FIX] 기절 UI 강제 해제
         target.hitDuration = 0; // 피격 경직 상태 해제
+        target.hitRecoveryTotalTicks = 0;
+        target.hitReactionKind = null;
+        target.hitKnockbackDirection = 0;
+        target.pendingStunDuration = 0;
+        this.callbacks.onCancelHitAnimation?.(target.index, 'cart');
         target.rollDuration = 0;
         target.guardDuration = 0;
         target.itemDuration = 0;
@@ -342,14 +435,18 @@ class HuntEngine {
         this.updateWeaponAtbUI(target.index, 0); // UI 게이지 초기화
         this.cartCount++;
         target.cartCount = Number(target.cartCount || 0) + 1;
-        target.cartTimer = this.perkRuntime ? this.perkRuntime.cartRecoveryTicks(target, 50) : 50;
+        const baseCartTicks = HuntEngine.CART_CAMP_TICKS;
+        target.cartTimer = this.perkRuntime
+            ? this.perkRuntime.cartRecoveryTicks(target, baseCartTicks)
+            : baseCartTicks;
         if (this.cartCount >= this.cartLimit) {
             this.questFailCinematicTicks = 36;
             this.pendingMonsterAction = null;
+            this.pendingMonsterImpact = null;
             this.monsterAtb = 0;
         }
         this.updateCartUI(this.cartCount, this.cartLimit);
-        this.addLog(`🚨 [수레행] ${target.name}이(가) 쓰러졌습니다! 5초 후 부활합니다. (현재 수레: ${this.cartCount}/${this.cartLimit})`, '#ff3b30');
+        this.addLog(`🚨 [수레행] ${target.name}이(가) 쓰러졌습니다! ${Math.ceil(target.cartTimer / 10)}초간 캠프로 이탈합니다. (현재 수레: ${this.cartCount}/${this.cartLimit})`, '#ff3b30');
         
         // 40% 확률로 사망 사운드 대신 "아이보!" 사운드 재생
         if (this.random() < 0.40) {
@@ -362,7 +459,21 @@ class HuntEngine {
         return true;
     }
 
+    interruptHunterItemAction(hunter, reason = 'interrupted', options = {}) {
+        if (!hunter?.pendingSharpnessRestore) return false;
+        hunter.pendingSharpnessRestore = false;
+        hunter.itemDuration = 0;
+        hunter.isGathering = false;
+        this.callbacks?.onCancelWhetstoneCue?.(hunter.index);
+        if (options.log !== false) {
+            const name = hunter.name || hunter.hunterName || '헌터';
+            this.addLog(`💥 [숫돌질 실패] ${name}의 숫돌질이 방해받아 중단되었습니다.`, '#ff9f43');
+        }
+        return true;
+    }
+
     processTick() {
+        this.colossalPhaseRuntime?.update(this);
         return HuntBattleTickExecutor.execute(this);
     }
 
@@ -370,33 +481,130 @@ class HuntEngine {
         return HuntMonsterTurnExecutor.prepare(this);
     }
 
-    executeMonsterTurn(pattern = null) {
-        return HuntMonsterTurnExecutor.execute(this, pattern);
+    executeMonsterTurn(pattern = null, attackerIndex = null, targetIndex = null) {
+        return HuntMonsterTurnExecutor.execute(this, pattern, attackerIndex, targetIndex);
     }
 
-    getMonsterAttackType(attackName) {
+    applyHunterInterference(hunter, kind, size = 'small') {
+        if (!hunter || hunter.status !== 'alive') return false;
+        const pattern = { name: kind === 'tremor' ? '지진' : kind === 'wind' ? '풍압' : '포효', type: kind };
+        const resistedBy = this.perkRuntime?.ignoresPattern?.(hunter, pattern)
+            || (kind === 'roar' && this.perkRuntime?.roarDuration?.(hunter, 1) === 0 ? '귀마개' : null);
+        if (resistedBy) {
+            this.showSkillBubble(hunter.index, `🛡️ ${resistedBy}`);
+            return false;
+        }
+        let foresightFailed = false;
+        if (!hunter.pendingSharpnessRestore
+            && hunter.id === 'long_sword'
+            && typeof HuntMonsterTurnExecutor !== 'undefined') {
+            const foresight = HuntMonsterTurnExecutor.resolveLongSwordForesight(this, hunter, 0, {
+                defendRoll: this.random(),
+                foresightProb: HuntMonsterTurnExecutor.longSwordForesightChance(hunter),
+                isStunned: false,
+                pattern: { id: `interference.${kind}`, type: kind, interference: { kind, size }, tags: ['interference'] }
+            });
+            if (foresight.success) {
+                this.addLog(`⚡ [간파베기] ${hunter.name}이(가) ${kind === 'tremor' ? '지진' : kind === 'wind' ? '풍압' : '포효'} 판정을 흘리고 대회전베기를 준비합니다!`, '#c98534');
+                this.playSFX('hunter_guard', null, { hunterIndex: hunter.index, action: 'counter' });
+                this.showSkillBubble(hunter.index, '간파베기!');
+                this.shakeWeapon(hunter.index, '#c98534', true, { id: 'long_sword.foresight' });
+                return false;
+            }
+            foresightFailed = foresight.attempted;
+        }
+        if (kind !== 'roar' && !foresightFailed) {
+            const actionAllowsGuard = !this.actionStateMachine || this.actionStateMachine.canGuard(hunter);
+            const isGreatSwordCharging = typeof HuntMonsterTurnExecutor !== 'undefined'
+                ? HuntMonsterTurnExecutor.isGreatSwordCharging(hunter)
+                : hunter.id === 'great_sword' && Number(hunter.greatSwordCharge || 0) > 0;
+            const hasShield = actionAllowsGuard && !isGreatSwordCharging
+                && (hunter.type === 'shield' || hunter.id === 'heavy_bowgun');
+            const baseGuard = hunter.personality === 'veteran' ? 0.78
+                : hunter.personality === 'newbie' ? 0.30 : 0.62;
+            const guardChance = Math.min(0.97, baseGuard + Number(hunter.perkModifiers?.guardChance || 0));
+            if (hasShield && this.random() < guardChance) {
+                this.actionStateMachine?.cancel(hunter, 'guard');
+                hunter.guardDuration = 6;
+                this.callbacks?.onTriggerGuardShake?.(hunter.index);
+                this.showSkillBubble(hunter.index, '🛡️ 가드');
+                this.playSFX('hunter_guard', null, { hunterIndex: hunter.index, action: 'guard' });
+                return false;
+            }
+        }
+        const config = typeof HuntAtbConfig !== 'undefined'
+            ? HuntAtbConfig
+            : (typeof require === 'function' ? require('./HuntAtbConfig.js') : null);
+        const cost = config ? config.interferenceCostGauge(size) : (size === 'large' ? 100 : 50);
+        this.interruptHunterItemAction(hunter, kind);
+        this.actionStateMachine?.cancel(hunter, `${kind}_stun`);
+        this.weaponMechanics?.onHit?.(hunter);
+        this.callbacks?.onInterruptWeaponVisual?.(hunter.index);
+        hunter.atb = Math.max(0, Number(hunter.atb || 0) - cost);
+        hunter.interference = { kind, size };
+        hunter.roarStunned = kind === 'roar';
+        hunter.roarStunDuration = 0;
+        this.updateWeaponAtbUI(hunter.index, hunter.atb);
+        this.callbacks?.onTriggerHunterInterference?.(hunter.index, kind, size, true);
+        return true;
+    }
+
+    clearHunterInterference(hunter) {
+        if (!hunter?.interference) return false;
+        const { kind, size } = hunter.interference;
+        hunter.interference = null;
+        hunter.roarStunned = false;
+        hunter.roarStunDuration = 0;
+        hunter.actionState = 'idle';
+        this.callbacks?.onTriggerHunterInterference?.(hunter.index, kind, size, false);
+        if (kind === 'roar') this.callbacks?.onTriggerRoarStun?.(hunter.index, false);
+        this.perkRuntime?.onRecovered?.(hunter);
+        return true;
+    }
+
+    getMonsterAttackType(attackName, pattern = null) {
         let type = 'physical';
         let emoji = '💥';
+        const tags = new Set(Array.isArray(pattern?.tags) ? pattern.tags : []);
+        const authoredType = String(pattern?.type || '').toLowerCase();
+        const delivery = String(pattern?.delivery || '').toLowerCase();
 
-        if (/브레스|화염|불꽃|폭염|용암|번개|벼락|뇌격|전격|절대영도|얼음|빙결|냉기|수류|수압|포말|레이저|용속성|광룡|독액|점균|폭발|폭풍|회오리|파편 발사|포효|위협/.test(attackName)) {
+        // Authored semantics beat legacy display-name inference. A party-wide
+        // roar must never become one elemental beam per targeted hunter.
+        if (authoredType === 'roar' || tags.has('roar')) {
+            return { type: 'roar', emoji: '📣' };
+        }
+
+        const authoredElemental = tags.has('elemental')
+            || ['projectile', 'beam', 'stream', 'gas', 'field', 'elemental'].includes(authoredType)
+            || ['projectile', 'beam', 'stream', 'gas', 'field'].includes(delivery);
+        if (authoredElemental
+            || /브레스|화염|불꽃|폭염|용암|번개|벼락|뇌격|전격|절대영도|얼음|빙결|냉기|수류|수압|포말|레이저|용속성|광룡|독액|점균|폭발|폭풍|회오리|파편 발사|포효|위협/.test(attackName)) {
             type = 'elemental';
         } else if (attackName.includes('독조강습') || attackName.includes('지중 급습') || attackName.includes('파멸의 일격') || attackName.includes('전뇌 펀치') || attackName.includes('등 찍기') || attackName.includes('빙벽 생성') || attackName.includes('얼음칼 찌르기')) {
             type = 'hybrid';
         }
 
-        if (attackName.includes('화염') || attackName.includes('화룡') || attackName.includes('화염구')) {
+        if (tags.has('fire') || pattern?.element === 'fire'
+            || attackName.includes('화염') || attackName.includes('화룡') || attackName.includes('화염구')) {
             emoji = '🔥';
-        } else if (attackName.includes('번개') || attackName.includes('뇌랑룡') || attackName.includes('전뇌') || attackName.includes('벼락')) {
+        } else if (tags.has('thunder') || pattern?.element === 'thunder'
+            || attackName.includes('번개') || attackName.includes('뇌랑룡') || attackName.includes('전뇌') || attackName.includes('벼락')) {
             emoji = '⚡';
-        } else if (attackName.includes('얼음') || attackName.includes('빙룡') || attackName.includes('빙벽') || attackName.includes('절대영도')) {
+        } else if (tags.has('ice') || pattern?.element === 'ice'
+            || attackName.includes('얼음') || attackName.includes('빙룡') || attackName.includes('빙벽') || attackName.includes('절대영도')) {
             emoji = '❄️';
-        } else if (attackName.includes('수류') || attackName.includes('수압') || attackName.includes('포말') || attackName.includes('물')) {
+        } else if (tags.has('water') || pattern?.element === 'water'
+            || attackName.includes('수류') || attackName.includes('수압') || attackName.includes('포말') || attackName.includes('물')) {
             emoji = '🌊';
-        } else if (attackName.includes('광룡') || attackName.includes('용속성')) {
+        } else if (tags.has('dragon') || pattern?.element === 'dragon'
+            || attackName.includes('광룡') || attackName.includes('용속성')) {
             emoji = '🐉';
-        } else if (attackName.includes('독조') || attackName.includes('독')) {
+        } else if (tags.has('poison') || pattern?.element === 'poison'
+            || attackName.includes('독조') || attackName.includes('독')) {
             emoji = '☠️';
-        } else if (attackName.includes('폭풍') || attackName.includes('회오리') || attackName.includes('바람')) {
+        } else if (tags.has('wind') || pattern?.element === 'wind'
+            || attackName.includes('폭풍') || attackName.includes('회오리') || attackName.includes('바람')) {
             emoji = '🌪️';
         } else if (attackName.includes('포효') || attackName.includes('위협') || attackName.includes('🔊')) {
             emoji = '🔊';
@@ -413,13 +621,20 @@ class HuntEngine {
 
     recordMonsterPartDamage(weapon, rawDamage, action = null) {
         if (!this.monsterAnatomy || !this.monsterPartState.length || typeof HuntMonsterAnatomyCatalog === 'undefined') return null;
-        const scale = Number(this.monsterAnatomy.baseHealth) > 0 && this.monsterMaxHp > 0
-            ? Number(this.monsterAnatomy.baseHealth) / this.monsterMaxHp
-            : 1;
+        const scale = HuntMonsterAnatomyCatalog.partDamageScale(
+            this.monsterPartState,
+            this.monsterMaxHp
+        );
         const perkDamage = this.perkRuntime ? this.perkRuntime.partDamage(weapon, rawDamage) : rawDamage;
         const strikeWeapon = action?.tags?.includes('blunt') ? { ...weapon, damageTypeOverride: 'blunt' } : weapon;
         const result = HuntMonsterAnatomyCatalog.applyPartDamage(this.monsterPartState, strikeWeapon, perkDamage, scale, this.random);
         if (result?.newlyBroken) {
+            const atbConfig = typeof HuntAtbConfig !== 'undefined'
+                ? HuntAtbConfig
+                : require('./HuntAtbConfig.js');
+            const partBreakAtb = atbConfig.monsterAtbAfterPartBreak(this.monsterAtb);
+            this.monsterTraitRuntime?.refresh?.(this);
+            this.updateMonsterPartsUI();
             if (result.newlySevered) {
                 this.severedTail.available = true;
                 this.addLog(`✂️ [꼬리 절단] ${this.selectedMonster.nameKO}의 꼬리가 잘려 전장 어딘가에 떨어졌습니다!`, '#ff8f70');
@@ -427,16 +642,54 @@ class HuntEngine {
             } else {
                 this.addLog(`⚔ [부위 파괴] ${this.selectedMonster.nameKO} · ${result.part.kind}`, '#ffb347');
             }
+            const airborne = this.monsterFlightState === 'airborne' || this.monsterState === 'valstrax_flying';
+            const reaction = HuntMonsterAnatomyCatalog.breakReaction(
+                this.selectedMonster.id,
+                result.part.kind,
+                airborne
+            );
+            if (airborne && this.monsterFlightRuntime?.onPartBreak(
+                this,
+                result.part,
+                reaction,
+                { retainedAtb: partBreakAtb }
+            )) {
+                result.reaction = reaction;
+                return result;
+            }
+            this.interruptMonsterMovement(`part-break:${result.part.kind}`);
+            this.monsterKnockdownDuration = Math.max(
+                Number(this.monsterKnockdownDuration || 0),
+                Number(reaction.durationTicks || 0)
+            );
+            this.monsterState = 'knocked_down';
+            this.monsterAtb = partBreakAtb;
+            this.monsterPartReactionKind = reaction.visualType || reaction.type;
+            this.playSFX?.(
+                result.newlySevered ? 'monster_knockdown' : 'monster_flinch',
+                null,
+                {
+                    monsterId: this.selectedMonster.id,
+                    sourcePart: result.part.kind
+                }
+            );
+            this.updateMonsterAtbUI(this.monsterAtb);
+            if (this.callbacks.onTriggerMonsterPartBreakReaction) {
+                this.callbacks.onTriggerMonsterPartBreakReaction(
+                    this.monsterPartReactionKind,
+                    Number(reaction.durationTicks || 0),
+                    result.part.kind
+                );
+            } else {
+                this.callbacks.onTriggerMonsterKnockdownAnim?.();
+            }
+            result.reaction = reaction;
         }
         return result;
     }
 
     updateTailSeverUI(visible, carved) {
         if (this.callbacks.onUpdateTailSeverUI) this.callbacks.onUpdateTailSeverUI(visible, carved, this.severedTail?.displayName || `${this.selectedMonster.nameKO} 꼬리`);
-    }
-
-    updateHunterCommandQueueUI(hunter) {
-        if (this.callbacks.onUpdateHunterCommandQueueUI) this.callbacks.onUpdateHunterCommandQueueUI(hunter);
     }
 
     consumeTrapDuration(baseTicks) {
@@ -450,8 +703,69 @@ class HuntEngine {
         return HuntMonsterRules.isTrapImmune(this.selectedMonster, this.monsterTier);
     }
 
-    triggerHitAnimation(idx, damage) {
-        if (this.callbacks.onTriggerHitAnimation) this.callbacks.onTriggerHitAnimation(idx, damage);
+    triggerHitAnimation(idx, reaction) {
+        if (this.callbacks.onTriggerHitAnimation) this.callbacks.onTriggerHitAnimation(idx, reaction);
+    }
+
+    cancelHunterHitRecovery(target, reason = 'cancelled') {
+        if (!target) return;
+        target.hitDuration = 0;
+        target.hitRecoveryTotalTicks = 0;
+        target.hitReactionKind = null;
+        target.hitKnockbackDirection = 0;
+        target.pendingStunDuration = 0;
+        this.callbacks.onCancelHitAnimation?.(target.index, reason);
+    }
+
+    enterMonsterControlState(kind, durationTicks, options = {}) {
+        const states = {
+            stun: {
+                state: 'stunned',
+                stateName: '기절 상태',
+                title: `💫 기절한 ${this.selectedMonster.nameKO} 💫`,
+                color: '#e58e26',
+                bg: 'rgba(229,142,38,.12)'
+            },
+            paralysis: {
+                state: 'paralyzed',
+                stateName: '마비 상태',
+                title: `⚡ 마비된 ${this.selectedMonster.nameKO} ⚡`,
+                color: '#ffe66d',
+                bg: 'rgba(255,230,109,.14)'
+            },
+            sleep: {
+                state: 'sleeping',
+                stateName: '수면 상태',
+                title: `💤 잠든 ${this.selectedMonster.nameKO} 💤`,
+                color: '#8fd7ff',
+                bg: 'rgba(143,215,255,.14)'
+            }
+        };
+        const config = states[kind];
+        if (!config || this.monsterHp <= 0) return false;
+        const duration = Math.max(1, Number(durationTicks || 1));
+        const wasAirborne = Boolean(this.monsterFlightRuntime?.groundForStatus(this, kind));
+
+        this.interruptMonsterMovement(`status:${kind}`);
+        this.monsterAtb = 0;
+        this.monsterControlStateKind = kind;
+        if (kind === 'stun') {
+            this.monsterStunDuration = Math.max(Number(this.monsterStunDuration || 0), duration);
+            this.monsterKnockdownDuration = 0;
+        } else {
+            this.monsterStunDuration = 0;
+            this.monsterKnockdownDuration = Math.max(Number(this.monsterKnockdownDuration || 0), duration);
+        }
+        this.monsterState = config.state;
+        this.updateMonsterAtbUI(0);
+        this.updateMonsterStateUI(config.stateName, config.title, {
+            color: config.color,
+            bg: config.bg
+        });
+        if (wasAirborne) {
+            this.addLog(`🪽 [강제 착지] ${this.selectedMonster.nameKO}(이)가 공중에서 ${config.stateName.replace(' 상태', '')}에 걸려 즉시 추락했습니다.`, config.color);
+        }
+        return true;
     }
 
     addMonsterStun(hunter, stunValue, partResult = null) {
@@ -461,41 +775,16 @@ class HuntEngine {
         const amount = this.perkRuntime ? this.perkRuntime.stunValue(hunter, stunValue) : Number(stunValue);
         this.monsterStunAccum = Math.max(0, Number(this.monsterStunAccum || 0) + amount);
         if (this.monsterStunDuration > 0 || this.monsterStunAccum < this.monsterStunThreshold) return false;
-        this.pendingMonsterAction = null;
-        this.monsterStunDuration = 60;
-        this.monsterState = 'stunned';
-        this.monsterAtb = 0;
-        this.updateMonsterAtbUI(0);
-        this.updateMonsterStateUI('기절 상태', `💫 기절한 ${this.selectedMonster.nameKO} 💫`, { color: '#e58e26', bg: 'rgba(229,142,38,0.1)' });
+        this.enterMonsterControlState('stun', 60, { source: 'head-damage' });
         this.showSkillBubble('monster', '💫 머리 타격 · 기절!');
         this.addLog(`💫 [기절] ${hunter.hunterName || hunter.name}의 머리 타격으로 기절치가 한계에 도달했습니다! (6초)`, '#e58e26');
         return true;
     }
 
     checkMonsterKnockdown() {
-        const crossedThresholds = HuntMonsterRules.crossedKnockdownThresholds(
-            this.monsterHp,
-            this.monsterMaxHp,
-            this.monsterKnockdownTriggered,
-            this.selectedMonster.id
-        );
-        crossedThresholds.forEach(threshold => {
-            this.monsterKnockdownTriggered[threshold] = true;
-        });
-
-        if (crossedThresholds.length) {
-            this.monsterKnockdownDuration = Math.max(Number(this.monsterKnockdownDuration || 0), 70);
-            this.monsterStunDuration = 0;
-            this.monsterState = 'knocked_down';
-            this.monsterAtb = 0;
-            this.updateMonsterAtbUI(0);
-            this.updateMonsterStateUI('대경직 상태', `💤 대경직에 쓰러진 ${this.selectedMonster.nameKO} 💤`, { color: '#ff9500', bg: 'rgba(255,149,0,0.1)' });
-            
-            if (this.callbacks.onTriggerMonsterKnockdownAnim) this.callbacks.onTriggerMonsterKnockdownAnim();
-            
-            // Verified monster-stun audio will be added when a labelled event is available.
-            this.addLog(`💤 [대경직] ${this.selectedMonster.nameKO}이(가) 큰 충격으로 대경직에 걸려 쓰러졌습니다! 행동 게이지가 초기화되며 7초간 무력화됩니다.`, '#ff9500');
-        }
+        // Compatibility entry point. HP thresholds no longer invent a
+        // knockdown; authored part breaks, KO, status, traps and patterns own it.
+        return false;
     }
 
     executeHunterTurn(w) {
@@ -519,7 +808,7 @@ class HuntEngine {
     }
 
     triggerMonsterRoarFlinch(isEncounter = false) {
-        if (this.monsterTier === 'small') {
+        if (this.monsterTier === 'small' || this.selectedMonster?.roar?.status !== 'verified-present') {
             this.monsterRoarDuration = 0;
             this.selectedWeapons.forEach(hunter => {
                 hunter.roarStunned = false;
@@ -531,15 +820,12 @@ class HuntEngine {
         this.triggerMonsterRoar(this.selectedMonster);
         
         // 포효 시전 중 몬스터도 멈춤 (느림 약 4.5초)
-        this.monsterRoarDuration = 45;
-        this.monsterAtb = 0;
+        this.monsterRoarDuration = 12;
         this.updateMonsterAtbUI(this.monsterAtb);
 
         if (isEncounter) {
-            this.playAudioFile('Unified_SFX/Encounter.mp3');
             this.addLog(`🔊 [조우 포효] ${this.selectedMonster.nameKO}이(가) 침입자를 발견하고 강력한 포효를 지릅니다!`, '#c98534');
         } else {
-            this.playAudioFile('Unified_SFX/Encounter.mp3');
             this.addLog(`😡 [분노 포효] 격노한 ${this.selectedMonster.nameKO}이(가) 대지진 포효를 내뿜으며 격렬하게 소리칩니다!`, '#ff3b30');
         }
 
@@ -565,15 +851,15 @@ class HuntEngine {
             let guardProb = actionAllowsGuard ? 0.62 : 0;
             let dodgeProb = actionAllowsEvade ? 0.48 : 0;
 
-            let foresightProb = 0.55;
+            let foresightProb = typeof HuntMonsterTurnExecutor !== 'undefined'
+                ? HuntMonsterTurnExecutor.longSwordForesightChance(w)
+                : 0.75;
             if (w.personality === 'veteran') {
                 guardProb = 0.78;
                 dodgeProb = 0.75;
-                foresightProb = 0.78;
             } else if (w.personality === 'newbie') {
                 guardProb = 0.30;
                 dodgeProb = 0.22;
-                foresightProb = 0.20;
             }
             const perkModifiers = w.perkModifiers || {};
             guardProb += Number(perkModifiers.guardChance || 0);
@@ -581,18 +867,24 @@ class HuntEngine {
             if (!actionAllowsGuard) guardProb = 0;
             if (!actionAllowsEvade) dodgeProb = 0;
 
-            const canForesight = this.actionStateMachine.canCounter(w, 'foresight');
             const ignoresRoar = this.perkRuntime && this.perkRuntime.roarDuration(w, 45) === 0;
+            const foresight = !ignoresRoar && w.id === 'long_sword' && typeof HuntMonsterTurnExecutor !== 'undefined'
+                ? HuntMonsterTurnExecutor.resolveLongSwordForesight(this, w, 0, {
+                    defendRoll,
+                    foresightProb,
+                    isStunned: false,
+                    pattern: { id: 'monster.roar', type: 'roar', tags: ['interference'] }
+                })
+                : { attempted: false, success: false };
             if (ignoresRoar) {
                 isDodge = true;
                 this.showSkillBubble(w.index, '🔇 귀마개');
-            } else if (w.id === 'long_sword' && canForesight && defendRoll < foresightProb) {
+            } else if (foresight.success) {
                 isDodge = true;
                 isForesightSlash = true;
-                w.spiritLevel = Math.min(3, (w.spiritLevel || 0) + 1);
-            } else if (hasShield && defendRoll < guardProb) {
+            } else if (!foresight.attempted && hasShield && defendRoll < guardProb) {
                 isGuard = true;
-            } else if (!hasShield && defendRoll < dodgeProb) {
+            } else if (!foresight.attempted && !hasShield && defendRoll < dodgeProb) {
                 isDodge = true;
             }
 
@@ -627,14 +919,12 @@ class HuntEngine {
                 if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(w.index);
                 w.rollDuration = 6;
             } else {
-                this.actionStateMachine.cancel(w, 'roar_stun');
-                // 대처 실패: 귀막기 경직 45틱 (4.5초)
-                w.roarStunned = true;
-                w.roarStunDuration = 45;
-                w.atb = 0;
-                this.updateWeaponAtbUI(w.index, 0);
-                this.addLog(`🙉 [귀막기 경직] ${w.name}이(가) 포효를 피하지 못해 귀를 막고 괴로워합니다! 행동 게이지가 초기화되며 4.5초간 행동 불능이 됩니다.`, '#ff3b30');
-                if (this.callbacks.onTriggerRoarStun) this.callbacks.onTriggerRoarStun(w.index, true);
+                this.applyHunterInterference(
+                    w,
+                    'roar',
+                    this.monsterBehavior?.roarSize === 'small' ? 'small' : 'large'
+                );
+                this.addLog(`🙉 [포효·대] ${w.name}이(가) 귀를 막고 괴로워합니다! ATB를 모두 잃고 회복할 때까지 행동할 수 없습니다.`, '#ff3b30');
             }
         });
         return true;

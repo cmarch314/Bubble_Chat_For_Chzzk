@@ -1,3 +1,7 @@
+const HuntMonsterReleaseRules = typeof HuntMonsterReleasePolicy !== 'undefined'
+    ? HuntMonsterReleasePolicy
+    : (typeof require === 'function' ? require('../js/effects/hunt/HuntMonsterReleasePolicy.js') : null);
+
 class HuntEffect extends BaseEffect {
     constructor(director) {
         super(director);
@@ -31,9 +35,22 @@ class HuntEffect extends BaseEffect {
         this.sessionRng = new SeededRandom(Date.now());
         this.random = () => this.sessionRng.next();
         this.initializer = new HuntInitializer({ random: this.random });
+        this.journeyWeaponGrowth = typeof HuntJourneyWeaponGrowth !== 'undefined'
+            ? new HuntJourneyWeaponGrowth(this.initializer.weaponInstanceCatalog) : null;
+        this.journeyEventCatalog = typeof HuntJourneyEventCatalog !== 'undefined' ? HuntJourneyEventCatalog.createDefault() : null;
+        if (this.journeyEventCatalog && typeof HuntJourneyCatalog !== 'undefined') {
+            HuntJourneyCatalog.validateEventCatalog(this.journeyEventCatalog);
+        }
         this.participantParser = new HuntParticipantParser();
         this.roster = new this.LobbyRoster(this.random);
         this.loadoutAdvisor = new LoadoutAdvisor(this.initializer.WEAPONS);
+        this.profileClient = typeof HuntProfileClient !== 'undefined' ? new HuntProfileClient() : null;
+        this.runClient = typeof HuntRunClient !== 'undefined' ? new HuntRunClient() : null;
+        this.runDirector = null;
+        this.journeyFlow = typeof HuntJourneyFlowController !== 'undefined' ? new HuntJourneyFlowController(this) : null;
+        this.journeyTravelShownNode = null;
+        this.journeyTravelResolve = null;
+        this.journeyTravelActive = false;
         this.chatTactics = new HuntChatTactics();
         this.engine = null;
 
@@ -80,23 +97,55 @@ class HuntEffect extends BaseEffect {
         this.audioManager.stopBgms();
 
         // Load monsters list
-        let monsters = this.initializer.fallbackMonsters;
+        let monsters = HuntMonsterReleaseRules.filter(this.initializer.fallbackMonsters);
         try {
             const response = await fetch('img/monsters/monsters.json');
             if (response.ok) {
                 const list = await response.json();
                 if (list && list.length > 0) {
-                    monsters = list;
+                    monsters = HuntMonsterReleaseRules.filter(list);
                 }
             }
         } catch (e) {
             console.warn("Failed to load monsters.json, using fallback monsters", e);
         }
+        if (!monsters.length) {
+            this.forceStopGame();
+            throw new Error('No reviewed monsters are available in the hunt catalog');
+        }
 
         const msgText = context ? context.message : "";
         this.monsters = monsters;
         const parsed = this.initializer.parseCommand(msgText, monsters);
+        if (parsed.requestedMonsterMatched === false) {
+            this.forceStopGame();
+            throw new Error(`Requested monster is not in the reviewed hunt roster: ${parsed.requestedMonsterName}`);
+        }
 
+        this.huntMode = parsed.huntMode;
+        this.journeyResultCommitted = false;
+        if (this.huntMode === 'journey') {
+            const coverage = HuntMonsterReleaseRules.journeyCoverage(
+                monsters,
+                monster => this.initializer.getMonsterTier(monster)
+            );
+            if (!coverage.ready) {
+                this.forceStopGame();
+                throw new Error(`Journey is locked until reviewed monster tiers are complete: ${coverage.missing.join(', ')}`);
+            }
+        }
+        if (this.huntMode === 'journey' && this.runClient && typeof HuntRunDirector !== 'undefined') {
+            const channelKey = this.config?.channelId || globalThis.CHZZK_CHANNEL_ID || 'bubblechat-local';
+            this.runDirector = new HuntRunDirector({ client: this.runClient, channelKey });
+            await this.runDirector.loadOrCreate(monsters, monster => this.initializer.getMonsterTier(monster), Date.now());
+            await this.journeyFlow.prepareCurrent(monsters);
+            if (!this.isActive) return;
+            parsed.selectedMonster = this.selectedMonster;
+            parsed.consecutiveQueue = [this.selectedMonster];
+            parsed.consecutiveTotal = 1;
+        } else {
+            this.runDirector = null;
+        }
         this.consecutiveTotal = parsed.consecutiveTotal;
         this.currentConsecutiveIndex = 0;
         this.consecutiveQueue = parsed.consecutiveQueue;
@@ -133,9 +182,17 @@ class HuntEffect extends BaseEffect {
         }
 
         const currentTier = this.initializer.getMonsterTier(this.selectedMonster);
+        const journeyOpening = this.huntMode === 'journey'
+            && Number(this.runDirector?.state?.nodeIndex || 0) === 0
+            && !(this.runDirector?.state?.party || []).length;
         const isElder = (currentTier === 'elder');
         let voteTitle = isElder ? "⚔️ 집회소 고룡 토벌 수주 ⚔️" : "⚔️ 집회소 수렵 퀘스트 수주 ⚔️";
         let voteSubtitle = "채팅에 !참가를 입력하세요. 모집 종료 후 4명의 헌터를 선발합니다.";
+        const modeCommand = HuntCommandCatalog.mode(this.huntMode);
+        if (modeCommand.lobbyTitle) {
+            voteTitle = modeCommand.lobbyTitle;
+            voteSubtitle = modeCommand.lobbySubtitle;
+        }
         if (this.consecutiveTotal > 1) {
             voteTitle = isElder 
                 ? `⚔️ 연속 토벌 모집! (1/${this.consecutiveTotal}) ⚔️` 
@@ -151,11 +208,35 @@ class HuntEffect extends BaseEffect {
             consecutiveQueue: this.consecutiveQueue,
             selectedMonster: this.selectedMonster,
             questTier: currentTier,
+            journey: this.huntMode === 'journey' ? {
+                stage: Number(this.runDirector?.state?.stageIndex || 0) + 1,
+                node: Number(this.runDirector?.state?.nodeIndex || 0) + 1,
+                carts: this.runDirector?.state?.carts ?? 3,
+                zenny: this.runDirector?.state?.zenny ?? 0,
+                lockLimit: this.runDirector?.state?.lockLimit ?? 1,
+                rerolls: this.runDirector?.state?.rerolls ?? 0,
+                lastEvent: this.runDirector?.state?.eventLog?.at(-1)?.summary || '',
+                totalNodes: HuntRunState.NODE_COUNT
+            } : null,
+            journeyChoices: this.journeyVote ? this.journeyCombatChoices : [],
+            journeyOpening,
+            journeyReward: this.huntMode === 'journey'
+                ? HuntJourneyRewardCatalog.coinFor(
+                    this.runDirector?.currentNode()?.tier || currentTier,
+                    Boolean(this.runDirector?.currentNode()?.isBoss)
+                )
+                : 0,
             participantCount: 0,
             participants: []
         });
 
-        let timeLeft = 30;
+        const resumedParty = this.huntMode === 'journey' ? (this.runDirector?.state?.party || []) : [];
+        if (resumedParty.length) this.renderer.updateRecruitmentUI(resumedParty);
+        let timeLeft = this.journeyVote ? HuntJourneyVoteRuntime.VOTE_DURATION_SECONDS : 30;
+        if (resumedParty.length && !this.journeyVote) timeLeft = 15;
+        const questBoardTimerLabel = this.journeyVote ? '투표 마감'
+            : (this.huntMode === 'journey' && !journeyOpening ? '출발 준비' : '모집 마감');
+        this.renderer.updatePhaseTimer(timeLeft, questBoardTimerLabel);
         return new Promise(resolve => {
             this.resolveGame = resolve;
             
@@ -166,23 +247,236 @@ class HuntEffect extends BaseEffect {
                     this.gameTimer = null;
                     this.beginLoadout();
                 } else {
-                    this.renderer.updatePhaseTimer(timeLeft, '모집 마감');
+                    this.renderer.updatePhaseTimer(timeLeft, questBoardTimerLabel);
                 }
             }, 1000);
         });
+    }
+
+    prepareJourneyCombatNode(node, monsters) {
+        const candidateIds = node?.monsterChoices?.length ? node.monsterChoices : [node?.monsterId];
+        const monster = monsters.find(item => item.id === (node.monsterId || candidateIds[0]));
+        if (!monster) throw new Error('The current journey combat node has no valid monster');
+        this.journeyVote = HuntJourneyVoteRuntime.shouldOpenCombatVote(this.runDirector.state, node)
+            ? new HuntJourneyVoteRuntime(this.runDirector.state.seed ^ this.runDirector.state.nodeIndex)
+            : null;
+        this.journeyVoteFinalized = false;
+        this.journeyCombatChoices = candidateIds.map(id => monsters.find(item => item.id === id)).filter(Boolean);
+        this.selectedMonster = monster;
+        this.consecutiveQueue = [monster];
+    }
+
+    joinNpcHunterDuringLoadout(msgData = {}) {
+        if (this.phase !== 'loadout' || !this.participantParser.parseRecruitment(msgData.message || '')) return false;
+        const nickname = String(msgData.nickname || '').trim();
+        const uid = msgData.uid || msgData.userIdHash || null;
+        if (!nickname) return true;
+        const normalize = value => this.LobbyRoster.normalizeNickname
+            ? this.LobbyRoster.normalizeNickname(value)
+            : String(value || '').trim().toLowerCase();
+        const normalized = normalize(nickname);
+        const alreadyJoined = this.selectedWeapons.find(hunter => !hunter.isNpc && (
+            (uid && hunter.participantUid === uid) || normalize(hunter.hunterName) === normalized
+        ));
+        if (alreadyJoined) {
+            this.renderer.spawnCombatChatBubble(alreadyJoined.index, '✅ 이미 참가 중');
+            return true;
+        }
+
+        const npc = this.selectedWeapons.find(hunter => hunter.isNpc);
+        if (!npc) return true;
+        const previousName = npc.hunterName;
+        delete this.bets[previousName];
+        npc.hunterName = nickname;
+        npc.hunterColor = msgData.color || '#ffffff';
+        npc.participantUid = uid;
+        npc.isStreamer = this.LobbyRoster.isStreamerParticipant
+            ? this.LobbyRoster.isStreamerParticipant(msgData, nickname)
+            : Boolean(msgData.isStreamer);
+        npc.isNpc = false;
+        npc.loadoutReady = false;
+        npc.perkRerolled = false;
+        npc.perkRerollCount = 0;
+        this.bets[nickname] = {
+            index: npc.index,
+            color: npc.hunterColor,
+            participantUid: npc.participantUid,
+            isStreamer: npc.isStreamer,
+            isNpc: false
+        };
+        this.roster.register?.(msgData);
+        this.participants = this.roster.list?.() || this.participants;
+        this.renderer.updateLoadoutCard(npc);
+        this.renderer.updateLoadoutJoinAvailability(this.selectedWeapons.some(hunter => hunter.isNpc));
+        this.renderer.spawnCombatChatBubble(npc.index, '👤 AI 교대 · 장비 선택');
+
+        const initialPerkSignature = (npc.perks || []).map(perk => perk.id).join('|');
+        const initialLockedPerkId = npc.lockedPerkId || null;
+        if (this.profileClient) {
+            this.profileClient.load(npc).then(profile => {
+                const stillOwnsSlot = this.phase === 'loadout'
+                    && !npc.isNpc
+                    && ((uid && npc.participantUid === uid) || normalize(npc.hunterName) === normalized);
+                const perksUnchanged = (npc.perks || []).map(perk => perk.id).join('|') === initialPerkSignature
+                    && (npc.lockedPerkId || null) === initialLockedPerkId;
+                if (!stillOwnsSlot || npc.loadoutReady || !perksUnchanged || !profile) return;
+                if (this.initializer.applyPersistentProfile(npc, profile)) this.renderer.updateLoadoutCard(npc);
+            }).catch(() => {});
+        }
+        if (this.huntMode === 'journey' && this.runDirector) {
+            this.runDirector.checkpoint({ party: HuntRunPartyAdapter.snapshot(this.selectedWeapons) })
+                .catch(error => console.warn('[HuntJourney] loadout join checkpoint failed', error));
+        }
+        return true;
+    }
+
+    joinNpcHunterDuringCombat(msgData = {}) {
+        if (this.phase !== 'fighting' || !this.participantParser.parseRecruitment(msgData.message || '')) return false;
+        const nickname = String(msgData.nickname || '').trim();
+        const uid = msgData.uid || msgData.userIdHash || null;
+        if (!nickname) return true;
+        const normalized = this.LobbyRoster.normalizeNickname
+            ? this.LobbyRoster.normalizeNickname(nickname)
+            : nickname.toLowerCase();
+        const alreadyJoined = this.selectedWeapons.some(hunter => !hunter.isNpc && (
+            (uid && hunter.participantUid === uid)
+            || (this.LobbyRoster.normalizeNickname
+                ? this.LobbyRoster.normalizeNickname(hunter.hunterName) === normalized
+                : String(hunter.hunterName || '').toLowerCase() === normalized)
+        ));
+        if (alreadyJoined) {
+            const hunter = this.selectedWeapons.find(item => !item.isNpc && (
+                (uid && item.participantUid === uid)
+                || String(item.hunterName || '').trim().toLowerCase() === nickname.toLowerCase()
+            ));
+            if (hunter) this.renderer.spawnCombatChatBubble(hunter.index, '✅ 이미 참가 중');
+            return true;
+        }
+        const npc = this.selectedWeapons.find(hunter => hunter.isNpc && hunter.status === 'alive')
+            || this.selectedWeapons.find(hunter => hunter.isNpc);
+        if (!npc) {
+            this.engine?.addLog(`👥 [참가 대기] ${nickname} · 교대 가능한 AI 헌터 자리가 없습니다.`, '#a9b8c7');
+            return true;
+        }
+
+        const previousName = npc.hunterName;
+        delete this.bets[previousName];
+        npc.hunterName = nickname;
+        npc.hunterColor = msgData.color || '#ffffff';
+        npc.participantUid = uid;
+        npc.isStreamer = this.LobbyRoster.isStreamerParticipant
+            ? this.LobbyRoster.isStreamerParticipant(msgData, nickname)
+            : Boolean(msgData.isStreamer);
+        npc.isNpc = false;
+        npc.loadoutReady = true;
+        this.bets[nickname] = {
+            index: npc.index,
+            color: npc.hunterColor,
+            participantUid: npc.participantUid,
+            isStreamer: npc.isStreamer,
+            isNpc: false
+        };
+        this.renderer.updateCombatHunterIdentity(npc, this.selectedWeapons.some(hunter => hunter.isNpc));
+        this.renderer.spawnCombatChatBubble(npc.index,
+            npc.status === 'alive' ? '🟢 AI 교대 참가!' : '⛺ 교대 참가 · 복귀 대기');
+        this.engine?.addLog(`👤 [난입 참가] ${nickname}이(가) ${previousName}의 자리를 이어받았습니다!`, npc.hunterColor);
+        if (this.huntMode === 'journey' && this.runDirector) {
+            this.runDirector.checkpoint({ party: HuntRunPartyAdapter.snapshot(this.selectedWeapons) })
+                .catch(error => console.warn('[HuntJourney] hot-join checkpoint failed', error));
+        }
+        return true;
+    }
+
+    async showJourneyTravelMap(node) {
+        if (this.huntMode !== 'journey' || !this.runDirector?.state || !node) return;
+        const nodeIndex = Number(this.runDirector.state.nodeIndex || 0);
+        if (this.journeyTravelShownNode === nodeIndex) return;
+        this.journeyTravelShownNode = nodeIndex;
+        this.journeyTravelActive = true;
+        const monstersById = new Map((this.monsters || []).map(monster => [monster.id, monster]));
+        const eventLog = new Map((this.runDirector.state.eventLog || []).map(entry => [entry.nodeId, entry.summary]));
+        const nodes = this.runDirector.state.nodes.map((entry, index) => {
+            const monsterId = entry.monsterId || entry.monsterChoices?.[0];
+            const monster = monstersById.get(monsterId);
+            return {
+                ...entry,
+                index,
+                label: entry.type === 'event'
+                    ? (eventLog.get(entry.id) || '랜덤 이벤트')
+                    : (monster?.nameKO || (entry.isBoss ? '스테이지 보스' : '사냥 후보'))
+            };
+        });
+        const travelDuration = HuntJourneyFlowController.TRAVEL_DURATION_SECONDS;
+        this.renderer.renderJourneyTravelMap({
+            nodes,
+            currentIndex: nodeIndex,
+            stage: Number(node.stageIndex || 0) + 1,
+            carts: this.runDirector.state.carts,
+            zenny: this.runDirector.state.zenny,
+            duration: travelDuration
+        });
+        await new Promise(resolve => {
+            this.journeyTravelResolve = resolve;
+            let timeLeft = travelDuration;
+            this.gameTimer = this.timers.interval(() => {
+                timeLeft--;
+                this.renderer.updateJourneyTravelTimer(timeLeft);
+                if (timeLeft <= 0) {
+                    this.timers.clear(this.gameTimer);
+                    this.gameTimer = null;
+                    this.journeyTravelResolve = null;
+                    resolve();
+                }
+            }, 1000);
+        });
+        this.journeyTravelActive = false;
     }
 
     handleChat(msgData) {
         if (!this.isActive) return false;
         const msg = (msgData.message || "").trim();
 
-        if (msgData.isStreamer && (msg === '!토벌 중단' || msg === '!중단' || msg === '!수렵 중단' || msg === '!토벌중단' || msg === '!수렵중단')) {
+        if (msgData.isStreamer && HuntCommandCatalog.isStop(msg)) {
             this.forceStopGame();
             return true;
         }
+        if (this.journeyTravelActive) return false;
 
         if (this.phase === 'quest_board') {
-            if (this.participantParser.parseRecruitment(msg)) {
+            if (this.journeyUpgradeVote) {
+                const voteIndex = HuntJourneyVoteRuntime.parse(msg);
+                if (voteIndex === null) return false;
+                const memberIndex = (this.runDirector?.state?.party || []).findIndex(item => item.nickname === msgData.nickname && !item.isNpc);
+                const choices = this.journeyUpgradeVote.choices[memberIndex] || [];
+                if (memberIndex >= 0 && voteIndex < choices.length) {
+                    this.journeyUpgradeVote.votes.set(memberIndex, voteIndex);
+                    this.renderer.updateJourneyUpgradeVoteUI(memberIndex, voteIndex);
+                    const pendingHumans = (this.runDirector?.state?.party || [])
+                        .map((member, index) => ({ member, index }))
+                        .filter(({ member, index }) => !member.isNpc && (this.journeyUpgradeVote.choices[index] || []).length);
+                    if (pendingHumans.every(({ index }) => this.journeyUpgradeVote.votes.has(index))) {
+                        this.finishJourneyTimedVote();
+                    }
+                }
+                return true;
+            }
+            if (this.journeyEventVote) {
+                const voteIndex = HuntJourneyVoteRuntime.parse(msg);
+                if (voteIndex === null) return false;
+                const member = (this.runDirector?.state?.party || []).find(item => item.nickname === msgData.nickname && !item.isNpc);
+                if (!member) return true;
+                const voterKey = member.uid || member.nickname;
+                const choiceCount = Number(this.journeyEventVote.choiceCount || this.journeyEventVote.node.eventChoices.length);
+                if (this.journeyEventVote.runtime.cast(voterKey, voteIndex, choiceCount)) {
+                    this.renderer.updateJourneyEventVoteUI(this.journeyEventVote.runtime.tally(choiceCount));
+                    if (HuntJourneyVoteRuntime.hasAllEligibleVotes(this.runDirector?.state, this.journeyEventVote.runtime)) {
+                        this.finishJourneyTimedVote();
+                    }
+                }
+                return true;
+            }
+            const hasJourneyParty = this.huntMode === 'journey' && (this.runDirector?.state?.party || []).length > 0;
+            if (!hasJourneyParty && this.participantParser.parseRecruitment(msg)) {
                 const registration = this.roster.register(msgData);
                 this.participants = this.roster.list();
                 this.renderer.updateRecruitmentUI(this.participants);
@@ -194,7 +488,26 @@ class HuntEffect extends BaseEffect {
                 }
                 return true;
             }
+            const voteIndex = this.journeyVote ? HuntJourneyVoteRuntime.parse(msg) : null;
+            if (voteIndex !== null) {
+                const participant = this.roster.list().find(item => item.nickname === msgData.nickname)
+                    || (this.runDirector?.state?.party || []).find(item => item.nickname === msgData.nickname && !item.isNpc);
+                if (!participant) return true;
+                const voterKey = participant.uid || participant.nickname;
+                if (this.journeyVote.cast(voterKey, voteIndex, this.journeyCombatChoices.length)) {
+                    this.renderer.updateJourneyVoteUI(this.journeyVote.tally(this.journeyCombatChoices.length));
+                    if (!this.journeyVoteFinalized
+                        && HuntJourneyVoteRuntime.hasAllEligibleVotes(this.runDirector?.state, this.journeyVote)) {
+                        this.journeyVoteFinalized = true;
+                        if (this.gameTimer) this.timers.clear(this.gameTimer);
+                        this.gameTimer = null;
+                        this.beginLoadout();
+                    }
+                }
+                return true;
+            }
         } else if (this.phase === 'loadout') {
+            if (this.joinNpcHunterDuringLoadout(msgData)) return true;
             const hunter = this.selectedWeapons.find(item => !item.isNpc && item.hunterName === msgData.nickname);
             const ready = hunter ? this.participantParser.parseReady(msg) : null;
             if (hunter && ready) {
@@ -210,6 +523,51 @@ class HuntEffect extends BaseEffect {
                 return true;
             }
             const perkReroll = hunter ? this.participantParser.parsePerkReroll(msg) : null;
+            const perkLock = hunter ? this.participantParser.parsePerkLock(msg) : null;
+            const perkUnlock = hunter ? this.participantParser.parsePerkUnlock(msg) : null;
+            if (hunter && perkUnlock) {
+                if (hunter.loadoutReady) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🔒 준비됨');
+                    return true;
+                }
+                if (!hunter.lockedPerkId) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🔓 0/1');
+                    return true;
+                }
+                const selectedPerk = (hunter.perks || [])[perkUnlock.perkIndex];
+                if (!selectedPerk || selectedPerk.id !== hunter.lockedPerkId) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🔓 잠긴 번호 확인');
+                    return true;
+                }
+                hunter.lockedPerkId = null;
+                hunter.perkModifiers = HuntPerkCatalog.aggregate(hunter.perks);
+                this.profileClient?.scheduleSave(hunter);
+                this.renderer.updateLoadoutCard(hunter);
+                this.renderer.spawnCombatChatBubble(hunter.index, `🔓 ${selectedPerk.name}`);
+                return true;
+            }
+            if (hunter && perkLock) {
+                if (hunter.loadoutReady) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🔒 준비됨');
+                    return true;
+                }
+                if (hunter.lockedPerkId) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🔒 1/1');
+                    return true;
+                }
+                const selectedPerk = (hunter.perks || [])[perkLock.perkIndex];
+                if (!selectedPerk) {
+                    this.renderer.spawnCombatChatBubble(hunter.index, '🔒 번호 확인');
+                    return true;
+                }
+                hunter.lockedPerkId = selectedPerk.id;
+                hunter.perks = [selectedPerk, ...hunter.perks.filter(perk => perk.id !== selectedPerk.id)];
+                hunter.perkModifiers = HuntPerkCatalog.aggregate(hunter.perks);
+                this.profileClient?.scheduleSave(hunter);
+                this.renderer.updateLoadoutCard(hunter);
+                this.renderer.spawnCombatChatBubble(hunter.index, `🔒 ${selectedPerk.name}`);
+                return true;
+            }
             if (hunter && perkReroll) {
                 if (hunter.loadoutReady) {
                     this.renderer.spawnCombatChatBubble(hunter.index, '🔒 준비됨');
@@ -223,6 +581,7 @@ class HuntEffect extends BaseEffect {
                 if (this.initializer.rerollHunterPerks(hunter)) {
                     hunter.perkRerollCount = rerollCount + 1;
                     hunter.perkRerolled = hunter.perkRerollCount >= 2;
+                    this.profileClient?.scheduleSave(hunter);
                     this.renderer.updateLoadoutCard(hunter);
                     this.renderer.spawnCombatChatBubble(hunter.index, `🎲 ${hunter.perkRerollCount}/2`);
                     this.audioManager.playLoadoutConfirmationVoice(hunter, { perkRerolled: true });
@@ -261,6 +620,7 @@ class HuntEffect extends BaseEffect {
             }
         } else if (this.phase === 'fighting' || this.phase === 'results') {
             if (this.phase === 'fighting') {
+                if (this.joinNpcHunterDuringCombat(msgData)) return true;
                 const tacticalResult = this.chatTactics.handle(this.engine, msgData, msg);
                 if (tacticalResult.handled) {
                     const tacticalHunter = this.selectedWeapons.find(w => w.hunterName === msgData.nickname);
@@ -277,12 +637,138 @@ class HuntEffect extends BaseEffect {
         return false;
     }
 
-    beginLoadout() {
+    async runJourneyEventChoices() {
+        while (this.runDirector?.currentNode()?.type === 'event') {
+            const node = this.runDirector.currentNode();
+            const engine = new HuntJourneyEventEngine(this.journeyEventCatalog);
+            const collectVote = async ({ choices, scope, seed, scene = null, defaultIndex = undefined }) => {
+                const runtime = new HuntJourneyVoteRuntime(seed);
+                this.journeyEventVote = { node, runtime, choiceCount: choices.length, scene: scene?.id || 'destination' };
+                this.renderer.renderJourneyEventBoard({
+                    stage: node.stageIndex + 1, scope, choices, scene,
+                    title: scene ? `${scene.icon} ${scene.label}` : '다음 행선지를 정한다'
+                });
+                await new Promise(resolve => {
+                    this.journeyEventResolve = resolve;
+                    let timeLeft = HuntJourneyVoteRuntime.VOTE_DURATION_SECONDS;
+                    this.renderer.updatePhaseTimer(timeLeft, scene ? '행동 선택' : '행선지 투표');
+                    this.gameTimer = this.timers.interval(() => {
+                        timeLeft--;
+                        this.renderer.updatePhaseTimer(timeLeft, scene ? '행동 선택' : '행선지 투표');
+                        if (timeLeft <= 0) {
+                            this.timers.clear(this.gameTimer);
+                            this.gameTimer = null;
+                            this.journeyEventResolve = null;
+                            resolve();
+                        }
+                    }, 1000);
+                });
+                if (scope === 'party') {
+                    return [runtime.resolve(choices.length, this.runDirector.state.nodeIndex, defaultIndex).index];
+                }
+                return (this.runDirector.state.party || []).map(member => {
+                    const key = member.uid || member.nickname;
+                    return runtime.votes.has(key) ? runtime.votes.get(key) : defaultIndex;
+                });
+            };
+
+            const destinations = node.eventChoices.map(id => this.journeyEventCatalog?.get(id) || { id, icon: '❔', label: id });
+            const destinationVotes = await collectVote({
+                choices: destinations, scope: 'party',
+                seed: this.runDirector.state.seed ^ this.runDirector.state.nodeIndex
+            });
+            const destination = destinations[destinationVotes[0]] || destinations[0];
+            const actions = destination.actions || [];
+            if (!actions.length) throw new Error(`Journey destination has no actions: ${destination.id}`);
+            const actionVotes = await collectVote({
+                choices: actions, scope: destination.scope, scene: destination,
+                seed: this.runDirector.state.seed ^ this.runDirector.state.nodeIndex ^ 0xa5a5,
+                defaultIndex: destination.defaultActionId
+                    ? actions.findIndex(action => action.id === destination.defaultActionId)
+                    : null
+            });
+            const patch = engine.resolveEventActions(this.runDirector.state, destination.id, actionVotes);
+            const summary = patch.summary;
+            delete patch.summary;
+            patch.eventLog = [...(this.runDirector.state.eventLog || []), { nodeId: node.id, eventId: patch.lastEvent, summary }].slice(-7);
+            if (patch.ambushHook && typeof HuntJourneyInvasionCatalog !== 'undefined') {
+                const ambushRandom = HuntJourneyCatalog.random(this.runDirector.state.seed ^ (this.runDirector.state.nodeIndex << 8));
+                const invader = ambushRandom() < Number(patch.ambushHook.chance || 0)
+                    ? HuntJourneyInvasionCatalog.pick(this.monsters, node.stageIndex, this.runDirector.state.seed ^ this.runDirector.state.nodeIndex)
+                    : null;
+                if (invader) {
+                    const nodes = this.runDirector.state.nodes.map((entry, index) => index === this.runDirector.state.nodeIndex
+                        ? { ...entry, type: 'combat', tier: invader.tier, monsterId: invader.id,
+                            monsterChoices: [invader.id], eventChoices: [], eventId: null, eventScope: 'party', isBoss: false }
+                        : entry);
+                    delete patch.ambushHook;
+                    await this.runDirector.checkpoint({ ...patch, nodes });
+                    this.journeyEventVote = null;
+                    return;
+                }
+            }
+            delete patch.ambushHook;
+            await this.runDirector.completeCurrentNode(patch);
+            this.journeyEventVote = null;
+        }
+    }
+
+    async runJourneyWeaponUpgrade() {
+        const stage = this.runDirector?.state?.upgradePendingStage;
+        if (!stage || !this.journeyWeaponGrowth) return false;
+        const party = this.runDirector.state.party || [];
+        const choices = party.map((member, index) => this.journeyWeaponGrowth.candidates(member, stage,
+            this.runDirector.state.seed ^ this.runDirector.state.nodeIndex ^ index, 2, this.runDirector.state.seals));
+        if (!choices.some(list => list.length)) {
+            await this.runDirector.checkpoint({ upgradePendingStage: null });
+            return true;
+        }
+        this.journeyUpgradeVote = { choices, votes: new Map() };
+        this.renderer.renderJourneyUpgradeBoard({ stage: stage + 1, party, choices });
+        await new Promise(resolve => {
+            let timeLeft = HuntJourneyVoteRuntime.VOTE_DURATION_SECONDS;
+            this.renderer.updatePhaseTimer(timeLeft, '강화 선택');
+            this.journeyEventResolve = resolve;
+            this.gameTimer = this.timers.interval(() => {
+                timeLeft--;
+                this.renderer.updatePhaseTimer(timeLeft, '강화 선택');
+                if (timeLeft <= 0) {
+                    this.timers.clear(this.gameTimer);
+                    this.gameTimer = null;
+                    this.journeyEventResolve = null;
+                    resolve();
+                }
+            }, 1000);
+        });
+        const random = HuntJourneyCatalog.random(this.runDirector.state.seed ^ (stage << 20));
+        party.forEach((member, index) => {
+            const list = choices[index];
+            if (!list.length) return;
+            const selectedIndex = this.journeyUpgradeVote.votes.has(index)
+                ? this.journeyUpgradeVote.votes.get(index) : Math.floor(random() * list.length);
+            this.journeyWeaponGrowth.apply(member, list[selectedIndex].key || list[selectedIndex].id);
+        });
+        this.journeyUpgradeVote = null;
+        await this.runDirector.checkpoint({ party, upgradePendingStage: null });
+        return true;
+    }
+
+    async beginLoadout() {
         if (this.phase !== 'quest_board') return;
+        await this.finalizeJourneyCombatVote();
         this.renderer.clearLobbyTimer();
         this.phase = 'loadout';
         this.audioManager.playMHAudioFile('Unified_SFX/MH - Open Chest.mp3');
-        const selected = this.roster.selectFour();
+        const savedParty = this.huntMode === 'journey' ? (this.runDirector?.state?.party || []) : [];
+        const selected = savedParty.length
+            ? savedParty.map(member => ({
+                nickname: member.nickname,
+                color: member.color || '#cccccc',
+                uid: member.uid,
+                isStreamer: Boolean(member.isStreamer),
+                isNpc: Boolean(member.isNpc)
+            }))
+            : this.roster.selectFour();
         this.selectedWeapons = this.initializer.buildSelectedWeapons([]);
         this.bets = {};
 
@@ -304,6 +790,26 @@ class HuntEffect extends BaseEffect {
                 isNpc: hunter.isNpc
             };
         });
+
+        if (this.profileClient) {
+            await Promise.all(this.selectedWeapons.map(async hunter => {
+                if (hunter.isNpc) return;
+                const profile = await this.profileClient.load(hunter);
+                if (profile) this.initializer.applyPersistentProfile(hunter, profile);
+            }));
+        }
+        if (savedParty.length) {
+            this.selectedWeapons.forEach((hunter, index) => HuntRunPartyAdapter.restore(hunter, savedParty[index], this.initializer));
+        } else if (this.huntMode === 'journey' && this.journeyWeaponGrowth) {
+            this.selectedWeapons.forEach((hunter, index) => {
+                const starter = this.journeyWeaponGrowth.starter(hunter.id, this.runDirector.state.seed ^ index);
+                if (starter) {
+                    this.initializer.weaponInstanceCatalog.apply(hunter, starter);
+                    hunter.weaponProgressionKey = starter.key || null;
+                }
+                hunter.weaponTier = Number(starter?.tier || starter?.rarity || 1);
+            });
+        }
         this.audioManager.prepareHunterVoiceProfiles(this.selectedWeapons);
 
         this.renderer.renderLoadout({
@@ -327,6 +833,29 @@ class HuntEffect extends BaseEffect {
         }, 1000);
     }
 
+    finishJourneyTimedVote() {
+        if (!this.journeyEventResolve) return false;
+        const resolve = this.journeyEventResolve;
+        this.journeyEventResolve = null;
+        if (this.gameTimer) this.timers.clear(this.gameTimer);
+        this.gameTimer = null;
+        resolve();
+        return true;
+    }
+
+    async finalizeJourneyCombatVote() {
+        if (!this.journeyVote || !this.runDirector) return;
+        const node = this.runDirector.currentNode();
+        const result = this.journeyVote.resolve(this.journeyCombatChoices.length, this.runDirector.state.nodeIndex);
+        const selected = this.journeyCombatChoices[result.index];
+        if (!selected) return;
+        node.monsterId = selected.id;
+        this.selectedMonster = selected;
+        this.consecutiveQueue = [selected];
+        await this.runDirector.checkpoint({ nodes: this.runDirector.state.nodes });
+        this.journeyVote = null;
+    }
+
     departWhenLoadoutReady() {
         if (this.phase !== 'loadout' || !this.selectedWeapons.length) return false;
         if (!this.selectedWeapons.every(hunter => Boolean(hunter.loadoutReady))) return false;
@@ -342,6 +871,7 @@ class HuntEffect extends BaseEffect {
         if (this.gameTimer) this.timers.clear(this.gameTimer);
         this.gameTimer = null;
         this.phase = 'fighting';
+        this.selectedWeapons.forEach(hunter => this.profileClient?.saveNow(hunter));
         document.body.classList.add('in-hunt');
 
         // Handle Unknown Monster random reveal upon hunt start
@@ -410,9 +940,21 @@ class HuntEffect extends BaseEffect {
 
         const timeLimitVal = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 480;
         const dungAwakenedHunters = this.initializer.materializeBattleStartPerks(this.selectedWeapons);
-        const cartLimit = 3 + this.selectedWeapons.filter(hunter =>
+        const journeySupply = this.huntMode === 'journey' && this.runDirector
+            ? { ...this.runDirector.state.supply }
+            : null;
+        if (journeySupply) this.selectedWeapons.forEach(hunter => {
+            hunter.potions = journeySupply.potions;
+            hunter.lifepowders = journeySupply.lifepowders;
+            hunter.shockTraps = journeySupply.shockTraps;
+            hunter.bombs = journeySupply.bombs;
+        });
+        const defaultCartLimit = 3 + this.selectedWeapons.filter(hunter =>
             (hunter.perks || []).some(perk => perk.name === '수레 애호가')
         ).length;
+        const cartLimit = this.huntMode === 'journey' && this.runDirector?.state?.party?.length
+            ? Math.max(1, Number(this.runDirector.state.carts || 1))
+            : defaultCartLimit;
         this.renderer.renderFight({
             hpLabelText,
             selectedMonster: this.selectedMonster,
@@ -420,10 +962,12 @@ class HuntEffect extends BaseEffect {
             showMonsterHp: this.SHOW_MONSTER_HP,
             timeLimit: timeLimitVal,
             smallMonsterCount: this.smallMonsterCount,
-            cartLimit
+            cartLimit,
+            sharedSupply: journeySupply
         });
         dungAwakenedHunters.forEach(hunter => {
-            this.renderer.spawnCombatChatBubble(hunter.index, '💩🌈 똥 퍽 발현!');
+            this.profileClient?.saveNow(hunter).catch(() => {});
+            this.renderer.spawnCombatChatBubble(hunter.index, '💩🌈 퍽 발현!');
         });
 
         // Initialize pure Simulation Engine
@@ -438,7 +982,7 @@ class HuntEffect extends BaseEffect {
             monsterHp: baseHp,
             monsterMaxHp: baseHp,
             smallMonsterCount: this.smallMonsterCount,
-            monsterSpeed: 2.2 * this.monsterAtbSpeedMod,
+            monsterSpeed: HuntAtbConfig.FILL_PER_TICK * this.monsterAtbSpeedMod,
             monsterState: 'normal',
             monsterDamageMod: this.monsterDamageMod,
             monsterAtbSpeedMod: this.monsterAtbSpeedMod,
@@ -452,13 +996,15 @@ class HuntEffect extends BaseEffect {
             hunterSpeedMultiplier: this.config.getHuntConfig()?.hunterSpeedMultiplier !== undefined ? this.config.getHuntConfig().hunterSpeedMultiplier : 1.15,
             monsterSpeedMultiplier: this.config.getHuntConfig()?.monsterSpeedMultiplier !== undefined ? this.config.getHuntConfig().monsterSpeedMultiplier : 1.0,
             timeLimit: timeLimitVal,
+            sharedSupply: journeySupply,
             callbacks: {
                 onLog: (text, color) => this.addCombatLog(text, color),
                 onPlaySFX: (fileName, fallbackKey, context) => this.audioManager.playMHAsset(fileName, fallbackKey, context),
+                onCancelWhetstoneCue: hunterIndex => this.audioManager.cancelWhetstoneCue(hunterIndex),
                 onPlayAudioFile: (subPath, durationLimitMs, volumeMultiplier, audioContext) => this.audioManager.playMHAudioFile(subPath, durationLimitMs, volumeMultiplier, audioContext),
-                onShakeWeapon: (idx, borderClr, isAttack, actionOrName, isDodge = false) => {
+                onShakeWeapon: (idx, borderClr, isAttack, actionOrName, isDodge = false, hitContext = null) => {
                     const w = this.selectedWeapons[idx];
-                    this.renderer.shakeWeapon(idx, w, borderClr, isAttack, actionOrName, isDodge);
+                    this.renderer.shakeWeapon(idx, w, borderClr, isAttack, actionOrName, isDodge, hitContext);
                 },
                 onShakeMonster: () => this.renderer.shakeMonster(),
                 onRestoreBorder: (idx) => {
@@ -477,8 +1023,9 @@ class HuntEffect extends BaseEffect {
                 onUpdateMonsterStateUI: (stateName, title, colorInfo) => this.renderer.updateMonsterStateUI(stateName, title, colorInfo),
                 onUpdateMonsterFlightUI: (airborne, progress, damage, threshold, remainingTicks) =>
                     this.renderer.updateMonsterFlightUI(airborne, progress, damage, threshold, remainingTicks),
+                onUpdateMonsterTraitVisual: traits => this.renderer.updateMonsterTraitVisual(traits),
+                onUpdateMonsterPartsUI: parts => this.renderer.updateMonsterPartsUI(parts),
                 onUpdateTailSeverUI: (visible, carved, displayName) => this.renderer.updateTailSeverUI(visible, carved, displayName),
-                onUpdateHunterCommandQueueUI: (hunter) => this.renderer.updateHunterCommandQueueUI(hunter),
                 onUpdatePotionCountUI: (idx, count) => this.renderer.updatePotionCountUI(idx, count),
                 onUpdateHunterItemUI: (hunter) => this.renderer.updateHunterItemUI(hunter),
                 onUpdateOverheatUI: (idx, duration) => this.renderer.updateOverheatUI(idx, duration),
@@ -491,7 +1038,7 @@ class HuntEffect extends BaseEffect {
                 },
                 onUpdateTimerUI: (timeSec) => this.renderer.updateTimerUI(timeSec),
                 onShowSkillBubble: (idxOrMonster, text) => this.renderer.showSkillBubble(idxOrMonster, text),
-                onSpawnEmojiBubble: (idx, emoji) => this.renderer.spawnVictoryEmoji(idx, emoji),
+                onSpawnEmojiBubble: (idx, emoji, options) => this.renderer.spawnVictoryEmoji(idx, emoji, options),
                 onTriggerMonsterRoar: (monster) => {
                     this.renderer.triggerMonsterRoar();
                     this.audioManager.playMonsterRoar(monster);
@@ -500,21 +1047,19 @@ class HuntEffect extends BaseEffect {
                 onTriggerMonsterAttack: (type, emoji, targets, attackName, pattern) => {
                     this.renderer.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
                 },
+                onResolveMonsterImpactTimeline: (pattern, targetIndices) =>
+                    this.renderer.resolveMonsterImpactTimeline(pattern, targetIndices),
+                onTriggerMonsterBurrowPhase: (phase, targetIndex, durationMs) => {
+                    this.renderer.combatAnimator.triggerMonsterBurrowPhase(phase, targetIndex, durationMs);
+                },
+                onResetMonsterMotion: reason => {
+                    this.renderer.combatAnimator.monsterAttackAnimator?.clearMonsterMotion?.(reason);
+                },
+                onTriggerHunterInterference: (idx, kind, size, active) => {
+                    this.renderer.combatAnimator.triggerHunterInterference(idx, kind, size, active);
+                },
                 onTriggerGuardShake: (idx) => {
-                    if (this.renderer.card) {
-                        const weaponCard = this.renderer.card.querySelector(`#fight-card-${idx}`);
-                        if (weaponCard) {
-                            weaponCard.classList.remove('guard-shake-anim');
-                            void weaponCard.offsetWidth;
-                            weaponCard.classList.add('guard-shake-anim');
-                            const w = this.selectedWeapons[idx];
-                            this.timers.timeout(() => {
-                                if (w && w.status !== 'dead') {
-                                    weaponCard.classList.remove('guard-shake-anim');
-                                }
-                            }, 300);
-                        }
-                    }
+                    this.renderer.combatAnimator.triggerGuardImpact(idx);
                 },
                 onInterruptWeaponVisual: (idx) => {
                     const w = this.selectedWeapons[idx];
@@ -522,10 +1067,11 @@ class HuntEffect extends BaseEffect {
                 },
                 onTriggerRollAnimation: (idx) => this.renderer.triggerRollAnimation(idx),
                 onTriggerInvincibleJump: (idx, active) => this.renderer.triggerInvincibleJump(idx, active),
-                onTriggerHitAnimation: (idx, damage) => {
+                onTriggerHitAnimation: (idx, reaction) => {
                     const w = this.selectedWeapons[idx];
-                    this.renderer.triggerHitAnimation(idx, w, damage);
+                    this.renderer.triggerHitAnimation(idx, w, reaction);
                 },
+                onCancelHitAnimation: (idx) => this.renderer.cancelHitAnimation(idx),
                 onTriggerDeathTag: (idx, timerSeconds) => {
                     const w = this.selectedWeapons[idx];
                     this.renderer.triggerDeathTag(idx, w, timerSeconds || 5);
@@ -533,7 +1079,28 @@ class HuntEffect extends BaseEffect {
                 },
                 onTriggerStunUI: (idx, isStunned) => this.renderer.triggerStunUI(idx, isStunned),
                 onTriggerRoarStun: (idx, isStunned) => this.renderer.triggerRoarStun(idx, isStunned),
-                onTriggerMonsterKnockdownAnim: () => this.renderer.triggerMonsterKnockdownAnim(),
+                onTriggerMonsterKnockdownAnim: () => {
+                    // Traps, perks, and forced landings can trigger knockdown
+                    // outside HuntEngine.checkMonsterKnockdown().
+                    if (this.engine?.pendingMonsterAction
+                        || this.engine?.monsterBurrowState
+                        || this.engine?.monsterTraversalState
+                        || Number(this.engine?.monsterActionLockTicks || 0) > 0) {
+                        this.engine.interruptMonsterMovement?.('knockdown');
+                    }
+                    this.renderer.triggerMonsterKnockdownAnim();
+                },
+                onTriggerMonsterPartBreakReaction: (kind, durationTicks, partKind) => {
+                    if (this.engine?.pendingMonsterAction
+                        || this.engine?.monsterBurrowState
+                        || this.engine?.monsterTraversalState
+                        || Number(this.engine?.monsterActionLockTicks || 0) > 0) {
+                        this.engine.interruptMonsterMovement?.(`part-break:${partKind || 'unknown'}`);
+                    }
+                    this.renderer.triggerMonsterPartBreakReaction(kind, durationTicks, partKind);
+                },
+                onTriggerMonsterTraitReaction: (kind, durationTicks) =>
+                    this.renderer.triggerMonsterTraitReaction(kind, durationTicks),
                 onTriggerEnvironmentEffect: (kind) => this.renderer.triggerEnvironmentEffect(kind),
                 onGameEnd: (victory, winner) => this.endGame(container, victory, winner),
                 onNextConsecutive: () => this.spawnNextConsecutiveMonster(container),
@@ -542,6 +1109,7 @@ class HuntEffect extends BaseEffect {
                 }
             }
         });
+        if (this.engine.sharedSupply) this.selectedWeapons.forEach(hunter => this.renderer.updateHunterItemUI(hunter));
 
         // The loadout DOM is replaced before HuntEngine applies entry perks.
         // Synchronize once immediately so camp/normal cards never spend the
@@ -561,6 +1129,13 @@ class HuntEffect extends BaseEffect {
             if (this.phase !== 'fighting') return;
             this.processFightTickSafely();
         }, 100);
+        if (this.huntMode === 'journey' && this.runDirector) {
+            this.runDirector.checkpoint({
+                party: HuntRunPartyAdapter.snapshot(this.selectedWeapons),
+                supply: this.engine.snapshotSharedSupply(),
+                carts: cartLimit
+            }).catch(error => console.warn('[HuntJourney] combat-start checkpoint failed', error));
+        }
     }
 
     processFightTickSafely() {
@@ -718,7 +1293,6 @@ class HuntEffect extends BaseEffect {
             displayName: `${this.selectedMonster.nameKO} 꼬리`
         };
         this.engine.currentConsecutiveIndex = this.currentConsecutiveIndex;
-        this.engine.selectedWeapons.forEach(hunter => { hunter.farcasterUsed = false; });
         this.engine.monsterTier = this.monsterTier;
         this.engine.monsterHp = baseHp;
         this.engine.monsterMaxHp = baseHp;
@@ -728,7 +1302,7 @@ class HuntEffect extends BaseEffect {
         this.engine.battleTime = 0; // Reset countdown timer for each monster!
         this.engine.monsterAtb = 0;
         this.engine.monsterState = 'normal';
-        this.engine.monsterSpeed = 2.2 * this.monsterAtbSpeedMod;
+        this.engine.monsterSpeed = HuntAtbConfig.FILL_PER_TICK * this.monsterAtbSpeedMod;
         this.engine.monsterDamageMod = this.monsterDamageMod;
         this.engine.monsterAtbSpeedMod = this.monsterAtbSpeedMod;
         this.engine.tierLabel = this.tierLabel;
@@ -736,6 +1310,7 @@ class HuntEffect extends BaseEffect {
         this.engine.monsterStunThreshold = baseStunThreshold;
         this.engine.monsterStunDuration = 0;
         this.engine.monsterKnockdownDuration = 0;
+        this.engine.monsterDeathCuePlayed = false;
         this.engine.monsterTrapUseCount = 0;
         this.engine.monsterKnockdownTriggered = { 80: false, 60: false, 40: false, 20: false };
 
@@ -799,6 +1374,26 @@ class HuntEffect extends BaseEffect {
     }
 
     endGame(container, isVictory, winner = null) {
+        if (this.huntMode === 'journey' && this.runDirector && !this.journeyResultCommitted) {
+            this.journeyResultCommitted = true;
+            const remainingCarts = Math.max(0, Number(this.engine?.cartLimit || 3) - Number(this.engine?.cartCount || 0));
+            const currentNode = this.runDirector.currentNode();
+            const patch = {
+                party: HuntRunPartyAdapter.snapshot(this.selectedWeapons),
+                supply: this.engine?.snapshotSharedSupply?.() || this.runDirector.state.supply,
+                carts: remainingCarts
+            };
+            if (isVictory && currentNode?.type === 'combat' && typeof HuntJourneyRewardCatalog !== 'undefined') {
+                const reward = HuntJourneyRewardCatalog.award(this.runDirector.state.seals, currentNode.monsterId, currentNode.tier);
+                patch.seals = reward.seals;
+                patch.zenny = HuntJourneyEconomy.clampZenny(Number(this.runDirector.state.zenny || 0)
+                    + HuntJourneyRewardCatalog.coinFor(currentNode.tier, currentNode.isBoss));
+            }
+            if (isVictory && currentNode?.isBoss && currentNode.stageIndex < 2) patch.upgradePendingStage = currentNode.stageIndex + 1;
+            this.journeySettlementPromise = isVictory
+                ? this.runDirector.completeCurrentNode(patch)
+                : this.runDirector.fail(patch);
+        }
         return HuntResultPresenter.show(this, container, isVictory, winner);
     }
 
@@ -814,6 +1409,17 @@ class HuntEffect extends BaseEffect {
         }
 
         this.clearAllTimers();
+        if (this.journeyEventResolve) {
+            const resolveEvent = this.journeyEventResolve;
+            this.journeyEventResolve = null;
+            resolveEvent();
+        }
+        if (this.journeyTravelResolve) {
+            const resolveTravel = this.journeyTravelResolve;
+            this.journeyTravelResolve = null;
+            this.journeyTravelActive = false;
+            resolveTravel();
+        }
 
         this.audioManager.stopBgms();
         this.renderer.removeContainer();
@@ -824,4 +1430,25 @@ class HuntEffect extends BaseEffect {
             this.resolveGame = null;
         }
     }
+
+    dispose() {
+        if (this.isActive || this.resolveGame) {
+            this.forceStopGame();
+        } else {
+            this.clearAllTimers();
+            this.renderer.removeContainer();
+        }
+        this.profileClient?.dispose?.();
+        this.audioManager?.dispose?.();
+        this.participants = [];
+        this.selectedWeapons = [];
+        this.monsters = [];
+        this.selectedMonster = null;
+        this.engine = null;
+        this.runDirector = null;
+        this.journeyFlow = null;
+        super.dispose();
+    }
 }
+
+if (typeof window !== 'undefined') window.HuntEffect = HuntEffect;

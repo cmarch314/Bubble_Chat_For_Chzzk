@@ -188,25 +188,26 @@ function pSBC(p, c0, c1, l) {
 
 // [New] Global helper to parse and find CMC video commands in a chat message
 function findCMCVideosInMessage(message) {
-    const CMC_FILES = window.HIVE_CMC_FILES || [];
-    if (!message || CMC_FILES.length === 0) return [];
+    const commandGroups = window.HIVE_CMC_COMMAND_GROUPS || {};
+    const CMC_COMMANDS = Object.keys(commandGroups);
+    if (!message || CMC_COMMANDS.length === 0) return [];
 
     const findBestMatch = (term) => {
         term = term.toLowerCase().trim();
         // 1. Exact match
-        let match = CMC_FILES.find(f => f.toLowerCase() === term);
+        let match = CMC_COMMANDS.find(f => f.toLowerCase() === term);
         if (match) return match;
         // 2. Starts with / Ends with / Includes
-        match = CMC_FILES.find(f => f.toLowerCase().startsWith(term));
+        match = CMC_COMMANDS.find(f => f.toLowerCase().startsWith(term));
         if (match) return match;
-        match = CMC_FILES.find(f => term.startsWith(f.toLowerCase()));
+        match = CMC_COMMANDS.find(f => term.startsWith(f.toLowerCase()));
         if (match) return match;
-        match = CMC_FILES.find(f => f.toLowerCase().includes(term));
+        match = CMC_COMMANDS.find(f => f.toLowerCase().includes(term));
         if (match) return match;
-        match = CMC_FILES.find(f => term.includes(f.toLowerCase()));
+        match = CMC_COMMANDS.find(f => term.includes(f.toLowerCase()));
         if (match) return match;
         // 3. Common substring of length >= 2
-        match = CMC_FILES.find(f => {
+        match = CMC_COMMANDS.find(f => {
             const fLower = f.toLowerCase();
             for (let len = Math.min(fLower.length, term.length); len >= 2; len--) {
                 for (let i = 0; i <= fLower.length - len; i++) {
@@ -230,7 +231,8 @@ function findCMCVideosInMessage(message) {
                 const indexInOriginal = message.indexOf(token, searchPos);
                 videoQueue.push({
                     type: 'video',
-                    name: matchedFile,
+                    command: matchedFile,
+                    files: commandGroups[matchedFile],
                     startIndex: indexInOriginal !== -1 ? indexInOriginal : 0,
                     length: token.length
                 });

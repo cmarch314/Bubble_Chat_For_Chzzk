@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "batchId": "world-iceborne-batch-01",
+  "stage": "evidence-ready",
+  "canonicalEdition": "world-iceborne",
+  "researchPriority": ["ja", "en", "ko"],
+  "releaseBlocked": true,
+  "monsters": [
+    {
+      "id": "anjanath",
+      "sources": [
+        {"language": "ja", "url": "https://www.mhworld.jp/m/d/1", "kind": "named-attack-guide"},
+        {"language": "local", "path": "js/effects/hunt/data/WorldShellBehavior.generated.js", "kind": "installed-action-class-candidate"}
+      ],
+      "findings": ["rage-only straight and sweeping fire breath", "bite and horn-lift charge may repeat", "leap, tackle, rear-leg scratch, and tail attack"],
+      "candidateModules": ["common", "rage-gated-breath", "charge-chain"],
+      "openGates": ["pattern-timing", "part-break-effects", "audio", "preview", "simulation"]
+    },
+    {
+      "id": "great_jagras",
+      "sources": [
+        {"language": "ja", "url": "https://mhworld.jp/m/d/2/", "kind": "named-attack-guide"},
+        {"language": "local", "path": "js/effects/hunt/data/WorldShellBehavior.generated.js", "kind": "installed-action-class-candidate"}
+      ],
+      "findings": ["feeding creates an inflated-belly state", "belly slam and digestive spit require inflated belly", "belly damage can force a long knockdown", "enraged bite may repeat twice"],
+      "candidateModules": ["common", "fed-state", "small-monster-pack"],
+      "openGates": ["pattern-timing", "fed-state-runtime", "audio", "preview", "simulation"]
+    },
+    {
+      "id": "kulu-ya-ku",
+      "sources": [
+        {"language": "ja", "url": "https://mhworld.jp/m/d/9", "kind": "named-attack-guide"},
+        {"language": "ja", "url": "https://gamewith.jp/mhrize/article/show/273488", "kind": "cross-title-motion-guide"},
+        {"language": "local", "path": "js/effects/hunt/data/WorldShellBehavior.generated.js", "kind": "installed-action-class-candidate"}
+      ],
+      "findings": ["carried rock adds attacks and frontal deflection", "sufficient rock damage forces a drop", "peck, scratch, running scratch, and jump attacks are distinct"],
+      "candidateModules": ["common", "carried-object-guard"],
+      "openGates": ["world-only-pattern-trim", "rock-runtime", "audio", "preview", "simulation"]
+    },
+    {
+      "id": "pukei-pukei",
+      "sources": [
+        {"language": "ja", "url": "https://mhworld.jp/m/d/14/", "kind": "named-attack-guide"},
+        {"language": "local", "path": "js/effects/hunt/data/WorldShellBehavior.generated.js", "kind": "installed-action-class-candidate"}
+      ],
+      "findings": ["poison breath is a spread rather than a laser", "long tongue, pounce, and aerial attacks are distinct", "tail is severable"],
+      "candidateModules": ["common", "flight", "poison", "breath-projectile"],
+      "openGates": ["breath-geometry", "part-break-effects", "audio", "preview", "simulation"]
+    },
+    {
+      "id": "barroth",
+      "sources": [
+        {"language": "ja", "url": "https://mhworld.gameconductor.com/m/d/6", "kind": "state-and-attack-guide"},
+        {"language": "local", "path": "js/effects/hunt/data/WorldShellBehavior.generated.js", "kind": "installed-action-class-candidate"}
+      ],
+      "findings": ["mud armor changes elemental hit response", "part flinches remove local mud armor", "mud scatter applies movement interference"],
+      "candidateModules": ["common", "mud-armor", "mud-field", "charge"],
+      "openGates": ["mud-runtime", "pattern-timing", "audio", "preview", "simulation"]
+    },
+    {
+      "id": "jyuratodus",
+      "sources": [
+        {"language": "ja", "url": "https://mhworld.jp/m/d/8/", "kind": "named-attack-and-state-guide"},
+        {"language": "local", "path": "js/effects/hunt/data/WorldShellBehavior.generated.js", "kind": "installed-action-class-candidate"}
+      ],
+      "findings": ["mud coat changes elemental hit response and can be renewed", "mud projectiles leave slowing terrain and inflict waterblight", "tail rotation is a two-pass attack", "submerged emergence is distinct from ground movement"],
+      "candidateModules": ["common", "mud-armor", "mud-field", "burrow", "waterblight"],
+      "openGates": ["mud-runtime", "submerged-state", "audio", "preview", "simulation"]
+    },
+    {
+      "id": "tobi-kadachi",
+      "sources": [
+        {"language": "ja", "url": "https://www.mhworld.jp/m/d/19", "kind": "named-attack-and-state-guide"},
+        {"language": "local", "path": "js/effects/hunt/data/WorldShellBehavior.generated.js", "kind": "installed-action-class-candidate"}
+      ],
+      "findings": ["charge buildup increases attack frequency and adds thunder to attacks", "flinch, knockdown, status, trap, falling rock, and watermoss reduce charge", "tree glide, aerial spinning tail, pounce, bite, and tail slam are distinct"],
+      "candidateModules": ["common", "charge-state", "tree-glide", "thunderblight"],
+      "openGates": ["charge-runtime", "tree-anchor-animation", "audio", "preview", "simulation"]
+    },
+    {
+      "id": "tzitzi-ya-ku",
+      "sources": [
+        {"language": "ja", "url": "https://mhworld.jp/m/d/15/", "kind": "named-attack-guide"},
+        {"language": "ja", "url": "https://gamewith.jp/mhw/87037", "kind": "combat-guide"}
+      ],
+      "findings": ["the flash is a frontal fan-shaped interference attack rather than a projectile", "ordinary physical attacks remain deliberately modest"],
+      "candidateModules": ["common", "frontal-flash"],
+      "openGates": ["installed-action-map", "head-break-effect", "audio", "preview", "simulation"]
+    }
+  ]
+}

@@ -21,6 +21,13 @@ assert.strictEqual(hunter.actionState, 'idle');
 assert.strictEqual(hunter.currentAction, null);
 assert.strictEqual(machine.canEvade(hunter), true);
 
+hunter.pendingSharpnessRestore = true;
+hunter.itemDuration = 20;
+assert.strictEqual(machine.canEvade(hunter), false, 'sharpening must not roll through an incoming attack');
+assert.strictEqual(machine.canGuard(hunter), false, 'sharpening must not guard an incoming attack');
+hunter.pendingSharpnessRestore = false;
+hunter.itemDuration = 0;
+
 machine.begin(hunter, {
     id: 'long_sword.foresight_slash',
     name: '간파베기',

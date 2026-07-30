@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,height=1080,initial-scale=1">
+  <title>!몬헌 여정 캔버스</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:radial-gradient(circle at 50% 32%,#27342e,#090c0b 72%)}
+    body{color:#fff}
+    .preview-chat-safe{position:fixed;z-index:2147483639;inset:auto 0 0;height:162px;border-top:2px dashed rgba(66,255,184,.72);background:rgba(0,0,0,.52);display:grid;place-items:center;color:#79dcb8;font:900 20px/1 sans-serif;letter-spacing:2px}
+    .preview-result{position:fixed;z-index:2147483647;top:8px;right:12px;padding:8px 13px;border:2px solid #4effaa;background:#06150fe8;color:#7dffb7;font:900 16px/1 sans-serif}
+    .preview-result.fail{border-color:#ff665c;color:#ff8b84;background:#210706e8}
+  </style>
+</head>
+<body>
+  <div id="hunt-preview-container" class="game-overlay-container"></div>
+  <div id="preview-result" class="preview-result">검사 준비</div>
+  <div class="preview-chat-safe">OBS 채팅 안전영역 · 하단 15%</div>
+  <script src="../../js/effects/hunt/HuntRenderer.js"></script>
+  <script>
+    (() => {
+      const monsters = {
+        jagras:{id:'great_jagras',nameKO:'도스쟈그라스',filename:'great_jagras.png'},
+        anjanath:{id:'anjanath',nameKO:'안쟈나프',filename:'anjanath.png'},
+        rathalos:{id:'rathalos',nameKO:'리오레우스',filename:'rathalos.png'}
+      };
+      const participants = [
+        {nickname:'헌터 하나',color:'#ffcf66'},{nickname:'방패장인',color:'#75b9ff'},
+        {nickname:'피리명인',color:'#80ef9d'},{nickname:'활쟁이',color:'#ff8db8'}
+      ];
+      const nodes = [
+        {index:0,stageIndex:0,type:'combat',tier:'small',label:'소형 몬스터'},
+        {index:1,stageIndex:0,type:'event',label:'랜덤 이벤트'},
+        {index:2,stageIndex:0,type:'combat',tier:'medium',label:'중형 몬스터'},
+        {index:3,stageIndex:0,type:'event',label:'랜덤 이벤트'},
+        {index:4,stageIndex:0,type:'combat',tier:'normal',isBoss:true,label:'1스테이지 보스'},
+        {index:5,stageIndex:1,type:'combat',tier:'medium',label:'중형 몬스터'},
+        {index:6,stageIndex:1,type:'event',label:'랜덤 이벤트'},
+        {index:7,stageIndex:1,type:'combat',tier:'normal',label:'대형 몬스터'},
+        {index:8,stageIndex:1,type:'event',label:'랜덤 이벤트'},
+        {index:9,stageIndex:1,type:'combat',tier:'elder',isBoss:true,label:'고룡급 보스'},
+        {index:10,stageIndex:2,type:'combat',tier:'normal',label:'대형 몬스터'},
+        {index:11,stageIndex:2,type:'event',label:'랜덤 이벤트'},
+        {index:12,stageIndex:2,type:'combat',tier:'elder',label:'고룡급 몬스터'},
+        {index:13,stageIndex:2,type:'event',label:'랜덤 이벤트'},
+        {index:14,stageIndex:2,type:'combat',tier:'colossal',isBoss:true,label:'초대형 결전'}
+      ];
+      const timers = {clearAll(){},timeout(fn){fn();return 0;}};
+      const renderer = Object.create(HuntRenderer.prototype);
+      Object.assign(renderer,{container:document.getElementById('hunt-preview-container'),card:null,
+        lobbyTimers:timers,animationTimers:timers,lobbyTimer:null,lobbyTimeouts:[],
+        combatAnimator:{clearWeaponAnimations(){}},notifications:{}});
+
+      const scenes = {
+        opening(){
+          renderer.renderJourneyQuestBoard({journeyOpening:true,selectedMonster:monsters.jagras,journeyReward:1,
+            journey:{stage:1,node:1,totalNodes:15,carts:3,zenny:0,lockLimit:1,rerolls:0}});
+          renderer.updateRecruitmentUI([]);
+        },
+        vote(){
+          renderer.renderJourneyQuestBoard({journeyChoices:[monsters.anjanath,monsters.rathalos],selectedMonster:monsters.anjanath,
+            journeyReward:2,journey:{stage:1,node:3,totalNodes:15,carts:3,zenny:2,lockLimit:1,rerolls:1}});
+          renderer.updateRecruitmentUI(participants);
+          renderer.updateJourneyVoteUI([2,1]);
+        },
+        travel(){
+          renderer.renderJourneyTravelMap({nodes,currentIndex:6,stage:2,carts:3,zenny:4,duration:10});
+        },
+        event(){
+          renderer.renderJourneyEventBoard({stage:2,scope:'party',title:'🔨 대장간에서 무엇을 할까?',
+            scene:{narrative:'불꽃과 망치 소리 사이에서 장인이 오늘 한 번만 손을 봐주겠다고 한다.'},
+            choices:[
+              {icon:'🔥',label:'담금질',description:'💰1 · 파티 리롤 +1'},
+              {icon:'🛠️',label:'야전 정비',description:'전원 체력 20% 회복'},
+              {icon:'🎲',label:'수상한 흥정',description:'코인 +1 · 전원 체력 5% 손실'}
+            ]});
+          renderer.updateJourneyEventVoteUI([1,2,0]);
+        },
+        upgrade(){
+          const choices = participants.map((_,index) => [
+            {nameKo:`비룡 철제 무기 ${index+1}`,seal:'flying',rarity:3,raw:120+index*4,affinity:5,sharpness:{blue:20}},
+            {nameKo:`아룡 골제 무기 ${index+1}`,seal:'fanged',rarity:3,raw:128+index*4,affinity:0,sharpness:{green:35}}
+          ]);
+          renderer.renderJourneyUpgradeBoard({stage:2,party:participants,choices});
+        }
+      };
+
+      function inspect(name){
+        const card=renderer.card;
+        const box=card.getBoundingClientRect();
+        const checks=[
+          ['카드 렌더링',Boolean(card)],
+          ['장면 식별',name==='opening'?card.textContent.includes('!참가'):name==='vote'?card.textContent.includes('!1'):
+            name==='travel'?card.textContent.includes('도착까지 10초'):name==='event'?card.textContent.includes('담금질'):
+              card.textContent.includes('무기 강화 선택')],
+          ['하단 15% 미침범',box.bottom<=918.5],
+          ['가로 오버플로 없음',card.scrollWidth<=card.clientWidth+1],
+          ['세로 오버플로 없음',card.scrollHeight<=card.clientHeight+1]
+        ];
+        if(name==='opening')checks.push(['헌터 슬롯 4개',card.querySelectorAll('.hunt-rise-recruit-slot').length===4]);
+        if(name==='vote')checks.push(['투표 카드 2개',card.querySelectorAll('[data-journey-choice]').length===2]);
+        if(name==='travel')checks.push(['여정 노드 15개',card.querySelectorAll('[data-journey-map-node]').length===15]);
+        const failed=checks.filter(([,pass])=>!pass).map(([label])=>label);
+        const result=document.getElementById('preview-result');
+        result.className=`preview-result${failed.length?' fail':''}`;
+        result.textContent=failed.length?`FAIL · ${failed.join(', ')}`:`PASS · ${name}`;
+        window.__HUNT_JOURNEY_PREVIEW_RESULT__={scene:name,pass:failed.length===0,checks:Object.fromEntries(checks),
+          bounds:{left:box.left,top:box.top,right:box.right,bottom:box.bottom,width:box.width,height:box.height}};
+        parent.postMessage({type:'hunt-journey-preview-result',result:window.__HUNT_JOURNEY_PREVIEW_RESULT__},'*');
+      }
+      window.renderJourneyScene=name=>{
+        const selected=name in scenes?name:'opening';
+        scenes[selected]();
+        requestAnimationFrame(()=>inspect(selected));
+      };
+      window.renderJourneyScene(new URLSearchParams(location.search).get('scene')||'opening');
+    })();
+  </script>
+</body>
+</html>

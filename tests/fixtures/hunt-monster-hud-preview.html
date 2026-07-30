@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Monster HUD 1920×1080 Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(circle at 50% 35%,#29332d,#090b0a 70%)}
+    .preview-board{position:absolute;inset:24px 36px 162px;color:#fff}
+    .preview-hunters{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:10px}
+    .preview-hunter{height:150px;border:2px solid #8f713d;border-radius:14px;background:#111d;display:grid;place-items:center;font:900 22px/1 sans-serif;color:#e9d9b5}
+    .preview-chat{position:absolute;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa66;background:#0008;display:grid;place-items:center;color:#aaa;font:800 22px/1 sans-serif}
+  </style>
+</head>
+<body>
+  <main class="preview-board hunt-combat-board" data-testid="monster-hud-preview">
+    <div id="game-hunt-top-panel" class="hunt-monster-vitals">
+      <div class="game-hunt-monster-hp-container">
+        <div class="game-hunt-monster-hp-wrapper">
+          <div id="monster-hp-fill" style="width:68%"></div>
+          <div id="monster-hp-center-text" class="monster-hp-center-text">
+            <span id="monster-state-icon" class="monster-state-icon">😡</span>
+            <span id="monster-name-text">리오레우스</span><span id="monster-hp-values">(8160 / 12000)</span>
+          </div>
+        </div>
+        <div class="hunt-monster-atb-track"><i id="monster-atb-fill" style="width:56%"></i></div>
+      </div>
+    </div>
+    <div class="hunt-monster-aux-rail" aria-label="몬스터 전투 정보">
+      <section class="hunt-monster-aux-panel hunt-monster-parts-panel" id="hunt-monster-parts-panel">
+        <div class="hunt-monster-parts" id="hunt-monster-parts">
+          <span class="hunt-monster-part"><img class="hunt-monster-part-image" style="--hunt-part-tint:sepia(.68) saturate(4.6) hue-rotate(326deg)" src="../../local_assets/monster_hunter/reference-icons/rise/item/1671799227.png" alt=""><small class="hunt-monster-part-label">머리</small></span>
+          <span class="hunt-monster-part"><img class="hunt-monster-part-image" style="--hunt-part-tint:sepia(.68) saturate(4.6) hue-rotate(326deg)" src="../../local_assets/monster_hunter/reference-icons/rise/item/1120665075.png" alt=""><small class="hunt-monster-part-label">좌익</small></span>
+          <span class="hunt-monster-part is-broken"><img class="hunt-monster-part-image" style="--hunt-part-tint:sepia(.68) saturate(4.6) hue-rotate(326deg)" src="../../local_assets/monster_hunter/reference-icons/rise/item/1120665075.png" alt=""><small class="hunt-monster-part-label">우익</small></span>
+          <span class="hunt-monster-part"><img class="hunt-monster-part-image" style="--hunt-part-tint:sepia(.68) saturate(4.6) hue-rotate(326deg)" src="../../local_assets/monster_hunter/reference-icons/rise/item/1283890609.png" alt=""><small class="hunt-monster-part-label">꼬리</small></span>
+        </div>
+      </section>
+      <section class="hunt-monster-aux-panel hunt-monster-utility-panel">
+        <div class="hunt-monster-corner-hud"><span class="hunt-monster-hud-chip hunt-cart-chip">🛒 2</span><span class="hunt-monster-hud-chip hunt-timer-chip">⏱️ 06:42</span></div>
+      </section>
+    </div>
+    <div id="monster-showcase-panel" style="display:flex;align-items:center;justify-content:center;width:100%;margin:20px auto 24px;position:relative;overflow:visible;box-sizing:border-box">
+      <div class="hunt-monster-motion-stage" style="width:min(1320px,82vw);height:380px;display:flex;align-items:center;justify-content:center;position:relative">
+        <img class="game-hunt-monster-img" src="../../img/monsters/rathalos.png" style="width:380px;height:380px;object-fit:contain;filter:drop-shadow(0 10px 20px #000d)">
+      </div>
+    </div>
+    <section class="preview-hunters"><div class="preview-hunter">⚔️ 헌터 1</div><div class="preview-hunter">🛡️ 헌터 2</div><div class="preview-hunter">🎺 헌터 3</div><div class="preview-hunter">🏹 헌터 4</div></section>
+  </main>
+  <footer class="preview-chat">OBS 채팅 전용 하단 15%</footer>
+  <script>
+    const previewParams = new URLSearchParams(location.search);
+    const previewMonster = document.querySelector('.game-hunt-monster-img');
+    const previewRig = previewParams.get('rig');
+    const previewMotion = previewParams.get('motion');
+    if (previewRig) previewMonster.dataset.monsterRig = previewRig;
+    if (previewMotion) {
+      previewMonster.classList.add(`monster-motion-${previewMotion}`);
+      previewMonster.style.setProperty('--monster-motion-duration', '2200ms');
+      previewMonster.style.setProperty('--monster-attack-x', '-360px');
+      previewMonster.style.setProperty('--monster-attack-y', '8px');
+      previewMonster.style.setProperty('--monster-lane-x', '820px');
+      previewMonster.style.setProperty('--monster-charge-bottom', '720px');
+      previewMonster.style.setProperty('--monster-charge-top', '520px');
+    }
+  </script>
+</body>
+</html>

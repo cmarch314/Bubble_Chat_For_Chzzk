@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "profileId": "journey-light-v1",
+  "sourcePolicy": {
+    "preserveAllSourceFields": true,
+    "sourceRankAffectsProgression": false,
+    "sourceGameAffectsPower": false
+  },
+  "projection": {
+    "tierCount": 4,
+    "stageTierCaps": [2, 3, 4],
+    "weights": {
+      "rarity": 0.45,
+      "raw": 0.35,
+      "sharpness": 0.15,
+      "affinity": 0.05
+    },
+    "sharpnessWeights": {
+      "red": 0,
+      "orange": 1,
+      "yellow": 2,
+      "green": 3,
+      "blue": 4,
+      "white": 5,
+      "purple": 6
+    },
+    "maxChoicesPerReward": 3,
+    "keepDistinctSeries": true
+  },
+  "overrides": {}
+}

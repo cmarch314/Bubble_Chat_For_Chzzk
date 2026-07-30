@@ -6,9 +6,11 @@ const path = require('path');
 const vm = require('vm');
 const HuntActionStateMachine = require('../js/effects/hunt/HuntActionStateMachine.js');
 const HuntWeaponMechanics = require('../js/effects/hunt/HuntWeaponMechanics.js');
+const HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
+const HuntMonsterActionPolicy = require('../js/effects/hunt/HuntMonsterActionPolicy.js');
 
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterTurnExecutor.js');
-const context = vm.createContext({ console });
+const context = vm.createContext({ console, HuntAtbConfig, HuntMonsterActionPolicy });
 vm.runInContext(
     `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntMonsterTurnExecutor = HuntMonsterTurnExecutor;`,
     context,
@@ -28,6 +30,8 @@ function createScenario(randomValue, action) {
         sharpness: 100,
         spiritGauge: 70,
         spiritLevel: 2,
+        atb: 100,
+        longSwordForesightEligible: true,
         specialSheatheReady: true,
         currentAction: action
     };
@@ -36,7 +40,7 @@ function createScenario(randomValue, action) {
         selectedWeapons: [hunter],
         selectedMonster: { id: 'test_monster', nameKO: '훈련용 몬스터' },
         MONSTER_PATTERNS: {
-            test_monster: [{ id: 'test.hit', name: '훈련 타격', type: 'melee', damageRatio: 0.2, minTargets: 1, maxTargets: 1, recoveryTicks: 7 }]
+            test_monster: [{ id: 'test.hit', name: '훈련 타격', type: 'melee', damageRatio: 0.2, minTargets: 1, maxTargets: 1, recoveryTicks: 7, runtimeImpactCommit: true }]
         },
         monsterPatternSelector: null,
         random: () => randomValue,
@@ -98,14 +102,16 @@ const iaiAction = {
 }
 
 {
-    const foresightAction = { id: 'long_sword.foresight_slash', phase: 'active', tags: ['counter', 'foresight'] };
+    const foresightAction = { id: 'long_sword.overhead_slash', phase: 'recovery', tags: ['sever'] };
     const { engine, hunter } = createScenario(0, foresightAction);
     hunter.specialSheatheReady = false;
     context.HuntMonsterTurnExecutor.execute(engine);
     assert.strictEqual(hunter.hp, 100);
-    assert.strictEqual(hunter.spiritLevel, 3, 'a successful foresight slash must immediately raise one spirit level');
+    assert.strictEqual(hunter.spiritLevel, 2, 'Foresight itself must not raise spirit level');
     assert.strictEqual(hunter.spiritGauge, 100);
-    assert.strictEqual(hunter.spiritRoundslashReady, false, 'the immediate level reward must not also open a duplicate roundslash level-up');
+    assert.strictEqual(hunter.spiritRoundslashReady, true, 'success must open the Roundslash level-up follow-up');
+    assert.strictEqual(hunter.longSwordReactiveFollowup, true, 'Roundslash must be allowed to start even with empty ATB');
+    assert.ok(engine.monsterHp < 1000, 'Foresight must retain its low counter damage');
 }
 
 {
@@ -113,8 +119,8 @@ const iaiAction = {
     hunter.spiritLevel = 0;
     hunter.specialSheatheReady = false;
     context.HuntMonsterTurnExecutor.execute(engine);
-    assert.strictEqual(hunter.hp, 100, 'an idle Long Sword hunter must be able to react with Foresight Slash');
-    assert.strictEqual(hunter.spiritLevel, 1, 'reactive Foresight Slash must build the first spirit level');
+    assert.strictEqual(hunter.hp, 100, 'post-attack recovery may react even after the action object has cleared');
+    assert.strictEqual(hunter.spiritLevel, 0, 'reactive Foresight must wait for Roundslash to build the first level');
     assert.ok(calls.animations.includes('long_sword.foresight'), 'reactive Foresight Slash must use its counter animation');
 }
 
@@ -128,6 +134,41 @@ const iaiAction = {
     context.HuntMonsterTurnExecutor.execute(engine);
     assert.strictEqual(hunter.spiritLevel, 2, 'Foresight Slash must not bypass an attack action lock');
     assert.ok(!calls.animations.includes('long_sword.foresight'));
+}
+
+{
+    const { engine, hunter } = createScenario(0.80, null);
+    hunter.personality = 'normal';
+    hunter.specialSheatheReady = false;
+    context.HuntMonsterTurnExecutor.execute(engine);
+    assert.strictEqual(hunter.hp, 80, 'a failed 75% balanced Foresight decision must not fall back to a generic dodge');
+    assert.strictEqual(hunter.spiritGauge, 0);
+    assert.strictEqual(hunter.lastActionId, null, 'being hit after a failed Foresight must reset the combo');
+}
+
+{
+    const rolls = [0.1, 0.2, 0.3];
+    const { engine, hunter } = createScenario(0, null);
+    engine.random = () => rolls.shift() ?? 0;
+    hunter.specialSheatheReady = false;
+    const result = context.HuntMonsterTurnExecutor.resolveLongSwordForesight(engine, hunter, 40, {
+        defendRoll: 0.1,
+        foresightProb: 0.75,
+        pattern: { hits: [1, 1, 1], tags: ['multi-hit'] }
+    });
+    assert.strictEqual(result.success, true);
+    assert.strictEqual(result.hitCount, 3, 'multi-hit attacks must be recognized per hit');
+    assert.strictEqual(hunter.longSwordForesightChain, 3, 'the internal response must model Foresight → thrust → Foresight');
+}
+
+for (const [personality, expected] of Object.entries({
+    normal: 0.75, support: 0.75, offensive: 0.80, veteran: 0.80, defensive: 0.85, newbie: 0.50
+})) {
+    assert.strictEqual(
+        context.HuntMonsterTurnExecutor.longSwordForesightChance({ personality }),
+        expected,
+        `${personality} Foresight decision rate`
+    );
 }
 
 {

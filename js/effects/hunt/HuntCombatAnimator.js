@@ -2,6 +2,7 @@ class HuntCombatAnimator {
     constructor(owner) {
         this.owner = owner;
         this.activeWeaponAnimations = new Map();
+        this.weaponAnimationGenerations = new Map();
         this.monsterAttackAnimator = new HuntMonsterAttackAnimator(
             owner,
             () => this.triggerMonsterRoar()
@@ -12,24 +13,88 @@ class HuntCombatAnimator {
 
     get animationTimers() { return this.owner.animationTimers; }
 
+    visualDuration(durationMs) {
+        return typeof HuntAtbConfig !== 'undefined' && HuntAtbConfig.scaleVisualDurationMs
+            ? HuntAtbConfig.scaleVisualDurationMs(durationMs)
+            : Number(durationMs || 0);
+    }
+
     clearWeaponAnimations() {
         this.activeWeaponAnimations.forEach(animation => {
             try { animation.cancel(); } catch (_) { /* detached OBS node */ }
         });
         this.activeWeaponAnimations.clear();
+        this.weaponAnimationGenerations.clear();
         if (!this.card?.querySelectorAll) return;
         this.card.querySelectorAll('.game-hunt-weapon-img').forEach(weaponImg => {
             this.cancelWeaponAnimation(weaponImg);
             weaponImg.style.removeProperty('transform');
         });
+        this.card.querySelectorAll('.hunt-split-shield').forEach(shieldImg => {
+            this.cancelWeaponAnimation(shieldImg);
+            shieldImg.style.removeProperty('transform');
+        });
+        this.card.querySelectorAll(
+            '.game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
+        ).forEach(layer => layer.classList.remove('large-hit-anim', 'small-hit-anim'));
         this.card.querySelectorAll('.hunt-action-effect').forEach(effect => effect.remove());
         this.card.querySelectorAll('.hunt-environment-effect').forEach(effect => effect.remove());
+        this.card.querySelectorAll('.hunt-damage-number').forEach(number => number.remove());
+        this.card.querySelectorAll('.hunt-guard-impact').forEach(effect => effect.remove());
         this.card.querySelectorAll('.ig-kinsect').forEach(kinsect => {
             kinsect.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
         });
     }
 
-    showSkillBubble(idxOrMonster, text) {
+    clearMonsterAnimations(reason = 'renderer-clear') {
+        this.monsterAttackAnimator?.clearMonsterMotion(reason);
+    }
+
+    getMonsterMotionTrace() {
+        return this.monsterAttackAnimator?.getMonsterMotionTrace() || [];
+    }
+
+    resolveMonsterImpactTimeline(pattern, targetIndices) {
+        return this.monsterAttackAnimator?.resolveScreenCrossImpactTimeline(pattern, targetIndices) || null;
+    }
+
+    showDamageAtImpact(monsterImg, damage, hitzoneValue = 45, partKind = null) {
+        const stage = this.card?.querySelector?.('#monster-showcase-panel');
+        const amount = Math.max(0, Math.round(Number(damage) || 0));
+        if (!stage || !monsterImg || amount <= 0) return;
+
+        const number = document.createElement('div');
+        number.className = `hunt-damage-number${hitzoneValue >= 65 ? ' is-weakpoint' : ''}`;
+        number.textContent = String(amount);
+        number.setAttribute('aria-label', `피해 ${amount}`);
+
+        const stageRect = stage.getBoundingClientRect?.();
+        const targetRect = monsterImg.getBoundingClientRect?.();
+        const hasMeasuredPosition = stageRect && targetRect && targetRect.width > 0 && targetRect.height > 0;
+        const sequence = Number(stage.dataset.damageSequence || 0) + 1;
+        stage.dataset.damageSequence = String(sequence);
+        const spreadX = ((sequence % 5) - 2) * 13;
+        const spreadY = ((sequence % 3) - 1) * 9;
+
+        const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
+            ? HuntMonsterAnatomyCatalog
+            : null;
+        const partPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, partKind, sequence);
+        if (hasMeasuredPosition) {
+            const localX = Number(partPoint?.x ?? .55);
+            const localY = Number(partPoint?.y ?? .36);
+            number.style.left = `${targetRect.left - stageRect.left + targetRect.width * localX + spreadX}px`;
+            number.style.top = `${targetRect.top - stageRect.top + targetRect.height * localY + spreadY}px`;
+        } else {
+            number.style.left = `calc(50% + ${spreadX}px)`;
+            number.style.top = `calc(42% + ${spreadY}px)`;
+        }
+
+        stage.appendChild(number);
+        this.animationTimers.timeout(() => number.remove(), 1050);
+    }
+
+    showSkillBubble(idxOrMonster, content) {
         if (!this.card) return;
         let targetEl = null;
         if (idxOrMonster === 'monster') {
@@ -47,8 +112,21 @@ class HuntCombatAnimator {
         bubble.className = idxOrMonster === 'monster'
             ? 'skill-bubble monster-skill-bubble'
             : 'skill-bubble hunter-skill-bubble';
-        bubble.textContent = text;
+        const descriptor = content && typeof content === 'object' ? content : null;
+        if (descriptor?.type === 'item' && descriptor.imagePath) {
+            bubble.classList.add('skill-bubble--item');
+            bubble.setAttribute('aria-label', descriptor.label || '아이템 사용');
+            const image = document.createElement('img');
+            image.className = 'skill-bubble-item-image';
+            image.src = descriptor.imagePath;
+            image.alt = '';
+            image.dataset.itemSourceId = descriptor.sourceId || '';
+            bubble.appendChild(image);
+        } else {
+            bubble.textContent = String(content || '');
+        }
         targetEl.appendChild(bubble);
+        const visibleDuration = Math.max(500, Number(descriptor?.durationMs || 2500));
 
         this.animationTimers.timeout(() => {
             bubble.style.opacity = '1';
@@ -59,7 +137,23 @@ class HuntCombatAnimator {
             bubble.style.opacity = '0';
             bubble.style.transform = 'translateX(-50%) translateY(-30px)';
             this.animationTimers.timeout(() => bubble.remove(), 400);
-        }, 2500);
+        }, visibleDuration);
+    }
+
+    triggerGuardImpact(idx) {
+        if (!this.card || typeof document === 'undefined') return;
+        const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
+        const container = weaponCard?.querySelector('.game-hunt-weapon-img-container');
+        if (!container) return;
+
+        container.querySelectorAll('.hunt-guard-impact').forEach(effect => effect.remove());
+        const hasSplitShield = Boolean(container.querySelector('.hunt-split-shield'));
+        const impact = document.createElement('span');
+        impact.className = `hunt-guard-impact${hasSplitShield ? ' is-split-shield' : ' is-weapon-fallback'}`;
+        impact.textContent = '🛡️';
+        impact.setAttribute('aria-hidden', 'true');
+        container.appendChild(impact);
+        this.animationTimers.timeout(() => impact.remove(), 620);
     }
 
     triggerMonsterRoar() {
@@ -117,92 +211,127 @@ class HuntCombatAnimator {
     triggerMonsterAttack(type, emoji, targets, attackName = '', pattern = null) {
         return this.monsterAttackAnimator.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
     }
-    triggerHitAnimation(idx, w, damage) {
-        if (!this.card) return;
+
+    triggerMonsterBurrowPhase(phase, targetIndex, durationMs) {
+        return this.monsterAttackAnimator.triggerMonsterBurrowPhase(phase, targetIndex, durationMs);
+    }
+
+    triggerHunterInterference(idx, kind, size, active) {
+        const card = this.card?.querySelector?.(`#fight-card-${idx}`);
+        const container = card?.querySelector?.('.game-hunt-weapon-img-container');
+        if (!card || !container) return;
+        card.classList.toggle('hunter-interference-active', Boolean(active));
+        card.dataset.interferenceKind = active ? kind : '';
+        card.dataset.interferenceSize = active ? size : '';
+        container.querySelector('.hunter-interference-overlay')?.remove();
+        if (!active) return;
+        const overlay = document.createElement('div');
+        overlay.className = `hunter-interference-overlay is-${kind} is-${size}`;
+        overlay.textContent = kind === 'tremor' ? '〰️' : kind === 'wind' ? '🌪️' : '🙉';
+        container.appendChild(overlay);
+    }
+    triggerHitAnimation(idx, w, reaction = {}) {
+        if (!this.card || !w || w.hp <= 0) return;
         this.interruptWeaponVisual(idx, w);
+        this.cancelHitAnimation(idx);
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
-        if (weaponCard && w.hp > 0) {
-            if (damage >= 30) {
-                weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
-                void weaponCard.offsetWidth; // reflow
-                weaponCard.classList.add('large-hit-anim');
+        const weaponLayers = weaponCard?.querySelectorAll(
+            '.game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
+        ) || [];
+        if (!weaponCard) return;
 
-                const tag = this.card.querySelector(`#status-tag-${idx}`);
-                if (tag) {
-                    tag.textContent = '🥴';
-                    tag.className = 'game-hunt-status-tag fainted';
-                }
+        const kind = reaction.kind === 'weak' ? 'weak' : 'strong';
+        const hitClass = kind === 'weak' ? 'small-hit-anim' : 'large-hit-anim';
+        const cardShakeClass = kind === 'weak' ? 'hunter-card-small-shake' : 'hunter-card-large-shake';
+        const durationMs = kind === 'weak' ? 1500 : 4000;
+        const direction = Number(reaction.knockbackDirection || w.hitKnockbackDirection || (idx < 2 ? -1 : 1)) < 0 ? -1 : 1;
+        const generation = Number(this.weaponAnimationGenerations.get(weaponCard) || 0);
 
-                this.animationTimers.timeout(() => {
-                    if (!this.card) return; // [FIX] 강제 중단 시 TypeError 방지
-                    if (w && w.status !== 'dead') {
-                        weaponCard.classList.remove('large-hit-anim');
-                        if (w.status === 'alive' && w.hp > 0) {
-                            const currentTag = this.card.querySelector(`#status-tag-${idx}`);
-                            if (currentTag) {
-                                currentTag.textContent = '⚔️';
-                                currentTag.className = 'game-hunt-status-tag active';
-                            }
-                        }
-                    }
-                }, 2500);
-            } else {
-                weaponCard.classList.remove('large-hit-anim', 'small-hit-anim');
-                void weaponCard.offsetWidth; // reflow
-                weaponCard.classList.add('small-hit-anim');
+        weaponLayers.forEach(layer => {
+            layer.classList.remove('large-hit-anim', 'small-hit-anim', 'weapon-carted-out');
+            layer.style.setProperty('--hunter-hit-direction', String(direction));
+            const isShield = layer.classList.contains('hunt-split-shield');
+            layer.style.setProperty('--hunter-hit-strong-x', `${direction * (isShield ? 185 : 210)}px`);
+            layer.style.setProperty('--hunter-hit-weak-x', `${direction * (isShield ? 34 : 42)}px`);
+            layer.style.setProperty('--hunter-hit-angle-offset', isShield ? `${direction * -16}deg` : '0deg');
+            layer.style.setProperty('--hunter-hit-y-offset', isShield ? '-7px' : '0px');
+        });
+        void weaponCard.offsetWidth;
+        weaponCard.classList.add(cardShakeClass);
+        weaponLayers.forEach(layer => layer.classList.add(hitClass));
 
-                const tag = this.card.querySelector(`#status-tag-${idx}`);
-                if (tag) {
-                    tag.textContent = '💫';
-                    tag.className = 'game-hunt-status-tag stunned';
-                }
+        this.animationTimers.timeout(() => {
+            if (this.weaponAnimationGenerations.get(weaponCard) !== generation) return;
+            weaponCard.classList.remove(cardShakeClass);
+        }, kind === 'weak' ? 340 : 460);
+        this.animationTimers.timeout(() => {
+            if (this.weaponAnimationGenerations.get(weaponCard) !== generation || w.status === 'dead') return;
+            this.cancelHitAnimation(idx);
+        }, durationMs);
+    }
 
-                this.animationTimers.timeout(() => {
-                    if (!this.card) return; // [FIX] 강제 중단 시 TypeError 방지
-                    if (w && w.status !== 'dead') {
-                        weaponCard.classList.remove('small-hit-anim');
-                        if (w.status === 'alive' && w.hp > 0) {
-                            const currentTag = this.card.querySelector(`#status-tag-${idx}`);
-                            if (currentTag) {
-                                currentTag.textContent = '⚔️';
-                                currentTag.className = 'game-hunt-status-tag active';
-                            }
-                        }
-                    }
-                }, 1000);
-            }
-        }
+    cancelHitAnimation(idx) {
+        const weaponCard = this.card?.querySelector?.(`#fight-card-${idx}`);
+        if (!weaponCard) return;
+        weaponCard.classList.remove('hunter-card-large-shake', 'hunter-card-small-shake');
+        weaponCard.querySelectorAll(
+            '.game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
+        ).forEach(layer => {
+            layer.classList.remove('large-hit-anim', 'small-hit-anim');
+            layer.style.removeProperty('--hunter-hit-direction');
+            layer.style.removeProperty('--hunter-hit-strong-x');
+            layer.style.removeProperty('--hunter-hit-weak-x');
+            layer.style.removeProperty('--hunter-hit-angle-offset');
+            layer.style.removeProperty('--hunter-hit-y-offset');
+        });
     }
 
     interruptWeaponVisual(idx, w) {
         const weaponCard = this.card?.querySelector(`#fight-card-${idx}`);
         const weaponImg = weaponCard?.querySelector('.game-hunt-weapon-img');
+        const shieldImg = weaponCard?.querySelector('.hunt-split-shield');
+        const weaponContainer = weaponCard?.querySelector('.game-hunt-weapon-img-container');
+        if (weaponCard) {
+            this.weaponAnimationGenerations.set(
+                weaponCard,
+                Number(this.weaponAnimationGenerations.get(weaponCard) || 0) + 1
+            );
+        }
         if (weaponImg) {
             this.cancelWeaponAnimation(weaponImg);
             weaponImg.style.removeProperty('transform');
         }
-        if (w?.id === 'great_sword') this.owner.updateWeaponChargeAuraUI(idx, w);
+        if (shieldImg) {
+            this.cancelWeaponAnimation(shieldImg);
+            shieldImg.style.removeProperty('transform');
+        }
+        if (['great_sword', 'hammer'].includes(w?.id)) {
+            if (weaponContainer?.dataset) delete weaponContainer.dataset.weaponChargeReleaseStage;
+            this.owner.updateWeaponChargeAuraUI(idx, w);
+        }
     }
 
     triggerRollAnimation(idx) {
         if (!this.card) return;
-        const weaponImg = this.card.querySelector(`#fight-card-${idx} .game-hunt-weapon-img`);
-        if (weaponImg) {
-            this.cancelWeaponAnimation(weaponImg);
-            weaponImg.classList.remove('roll-anim');
-            void weaponImg.offsetWidth; // trigger reflow
-            weaponImg.classList.add('roll-anim');
-            this.animationTimers.timeout(() => weaponImg.classList.remove('roll-anim'), 600);
-        }
+        const layers = this.card.querySelectorAll(`#fight-card-${idx} .game-hunt-weapon-img, #fight-card-${idx} .hunt-split-shield`);
+        layers.forEach(layer => {
+            this.cancelWeaponAnimation(layer);
+            layer.classList.remove('roll-anim');
+            void layer.offsetWidth;
+            layer.classList.add('roll-anim');
+            this.animationTimers.timeout(() => layer.classList.remove('roll-anim'), 600);
+        });
     }
 
     triggerInvincibleJump(idx, active) {
         if (!this.card) return;
-        const weaponImg = this.card.querySelector(`#fight-card-${idx} .game-hunt-weapon-img`);
-        if (!weaponImg) return;
-        this.cancelWeaponAnimation(weaponImg);
-        weaponImg.style.removeProperty('transform');
-        weaponImg.classList.toggle('hunter-invincible-jump', Boolean(active));
+        const layers = this.card.querySelectorAll(`#fight-card-${idx} .game-hunt-weapon-img, #fight-card-${idx} .hunt-split-shield`);
+        if (!layers.length) return;
+        layers.forEach(layer => {
+            this.cancelWeaponAnimation(layer);
+            layer.style.removeProperty('transform');
+            layer.classList.toggle('hunter-invincible-jump', Boolean(active));
+        });
     }
 
     triggerStunUI(idx, isStunned) {
@@ -211,9 +340,14 @@ class HuntCombatAnimator {
         const imgContainer = weaponCard?.querySelector('.game-hunt-weapon-img-container');
         if (isStunned) {
             const weaponImg = weaponCard?.querySelector('.game-hunt-weapon-img');
+            const shieldImg = weaponCard?.querySelector('.hunt-split-shield');
             if (weaponImg) {
                 this.cancelWeaponAnimation(weaponImg);
                 weaponImg.style.removeProperty('transform');
+            }
+            if (shieldImg) {
+                this.cancelWeaponAnimation(shieldImg);
+                shieldImg.style.removeProperty('transform');
             }
             if (weaponCard) weaponCard.classList.add('stunned');
             if (imgContainer && !imgContainer.querySelector('.hunter-stun-orbit')) {
@@ -243,7 +377,11 @@ class HuntCombatAnimator {
             if (!this.card) return;
             const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
             if (weaponCard) {
-                weaponCard.classList.remove('stunned', 'roar-stunned', 'large-hit-anim', 'small-hit-anim');
+                weaponCard.classList.remove(
+                    'stunned', 'roar-stunned',
+                    'large-hit-anim', 'small-hit-anim',
+                    'hunter-card-large-shake', 'hunter-card-small-shake'
+                );
                 const imgContainer = weaponCard.querySelector('.game-hunt-weapon-img-container');
                 if (imgContainer) {
                     const roarOverlay = imgContainer.querySelector('.roar-stun-overlay');
@@ -258,21 +396,19 @@ class HuntCombatAnimator {
                         // Double check status: if they revived during these 180ms, do not animate
                         if (w.status !== 'dead') return;
 
-                        // Add dead class to card and deactivate weapon image filter
+                        // Keep the hunter HUD anchored. Only the weapon layers are
+                        // knocked out of the card when the hunter carts.
                         weaponCard.classList.add('dead');
-                        weaponImg.style.transition = 'filter 0.3s ease';
-                        weaponImg.style.filter = 'grayscale(0.5)';
-                        
-                        // Clear previous inline transform/animation/transition first to ensure clean state
-                        weaponCard.style.transform = '';
-                        weaponCard.style.borderColor = '';
-                        weaponCard.style.boxShadow = '';
-                        weaponCard.style.transition = 'none';
-                        weaponCard.style.animation = 'none';
-                        void weaponCard.offsetWidth; // Force reflow
-                        
-                        // Animate the weapon card itself down-left
-                        weaponCard.style.animation = 'cart-card-slide-out 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards';
+                        weaponCard.classList.add('hunter-card-large-shake');
+                        const layers = weaponCard.querySelectorAll('.game-hunt-weapon-img, .hunt-split-shield');
+                        layers.forEach(layer => {
+                            this.cancelWeaponAnimation(layer);
+                            layer.classList.remove('large-hit-anim', 'small-hit-anim', 'weapon-carted-out');
+                            layer.style.setProperty('--hunter-hit-direction', idx < 2 ? '-1' : '1');
+                        });
+                        void weaponCard.offsetWidth;
+                        layers.forEach(layer => layer.classList.add('weapon-carted-out'));
+                        this.animationTimers.timeout(() => weaponCard?.classList.remove('hunter-card-large-shake'), 520);
                         
                         // Remove any existing faint cart overlay first
                         const oldOverlay = weaponCard.querySelector('.faint-cart-overlay');
@@ -288,12 +424,54 @@ class HuntCombatAnimator {
 
     triggerMonsterKnockdownAnim() {
         if (!this.card) return;
+        // Travel belongs to the outer wrapper, while knockdown belongs to the
+        // image. Return the wrapper home before laying the monster down.
+        this.clearMonsterAnimations('knockdown');
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
         if (monsterImg) {
+            monsterImg.dataset.partBreakReactionGeneration = String(
+                Number(monsterImg.dataset.partBreakReactionGeneration || 0) + 1
+            );
+            monsterImg.classList.remove('monster-part-break-topple', 'monster-tail-sever-roll');
+            monsterImg.style.removeProperty('--monster-part-reaction-duration');
             monsterImg.classList.remove('enraged');
             monsterImg.classList.remove('stunned_monster');
             monsterImg.classList.add('monster-knockdown-anim');
         }
+    }
+
+    triggerMonsterPartBreakReaction(kind, durationTicks, partKind = null) {
+        if (!this.card) return;
+        this.clearMonsterAnimations(`part-break:${partKind || 'unknown'}`);
+        const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted')
+            || this.card.querySelector('#fight-monster-img');
+        if (!monsterImg) return;
+
+        const reactionClass = kind === 'tail_sever_roll'
+            ? 'monster-tail-sever-roll'
+            : 'monster-part-break-topple';
+        const durationMs = Math.max(900, Number(durationTicks || 1) * 100);
+        const generation = Number(monsterImg.dataset.partBreakReactionGeneration || 0) + 1;
+        monsterImg.dataset.partBreakReactionGeneration = String(generation);
+        monsterImg.dataset.partBreakReaction = kind || 'part_break_topple';
+        if (partKind) monsterImg.dataset.partBreakKind = String(partKind);
+        else delete monsterImg.dataset.partBreakKind;
+        monsterImg.classList.remove(
+            'monster-knockdown-anim',
+            'monster-part-break-topple',
+            'monster-tail-sever-roll'
+        );
+        monsterImg.style.setProperty('--monster-part-reaction-duration', `${durationMs}ms`);
+        void monsterImg.offsetWidth;
+        monsterImg.classList.add(reactionClass);
+
+        this.animationTimers.timeout(() => {
+            if (Number(monsterImg.dataset.partBreakReactionGeneration || 0) !== generation) return;
+            monsterImg.classList.remove(reactionClass);
+            monsterImg.style.removeProperty('--monster-part-reaction-duration');
+            delete monsterImg.dataset.partBreakReaction;
+            delete monsterImg.dataset.partBreakKind;
+        }, durationMs + 80);
     }
 
     restoreBorder(wIndex, w) {
@@ -302,8 +480,12 @@ class HuntCombatAnimator {
         const weaponCard = this.card.querySelector(`#fight-card-${w.index}`);
         if (weaponCard) {
             // Remove all custom classes and animations from card
-            weaponCard.classList.remove('dead', 'ls-spirit-1', 'ls-spirit-2', 'ls-spirit-3', 'db-demon-mode', 'cb-shield-charged', 'ig-3-extracts');
-            weaponCard.style.animation = 'none';
+            weaponCard.classList.remove(
+                'dead', 'ls-spirit-1', 'ls-spirit-2', 'ls-spirit-3',
+                'db-demon-mode', 'cb-shield-charged', 'ig-3-extracts',
+                'hunter-card-large-shake', 'hunter-card-small-shake'
+            );
+            weaponCard.style.removeProperty('animation');
             weaponCard.style.transform = '';
             weaponCard.style.borderColor = '';
             weaponCard.style.boxShadow = '';
@@ -312,18 +494,6 @@ class HuntCombatAnimator {
             const cartOverlay = weaponCard.querySelector('.faint-cart-overlay');
             if (cartOverlay) {
                 cartOverlay.remove();
-            }
-
-            // Handle Weapon Image Overlays
-            const spiritOverlay = this.card.querySelector(`#spirit-overlay-${w.index}`);
-            if (spiritOverlay) {
-                spiritOverlay.style.opacity = '0';
-                spiritOverlay.style.animation = 'none';
-            }
-
-            const shieldOverlay = this.card.querySelector(`#shield-overlay-${w.index}`);
-            if (shieldOverlay) {
-                shieldOverlay.style.opacity = '0';
             }
 
             // Handle Long Sword Image Border & Glow on Container
@@ -347,31 +517,18 @@ class HuntCombatAnimator {
                     weaponImg.classList.add('cb-shield-charged-img');
                 }
             }
+            weaponCard.querySelectorAll('.game-hunt-weapon-img, .hunt-split-shield').forEach(layer => {
+                layer.classList.remove('large-hit-anim', 'small-hit-anim', 'weapon-carted-out');
+                layer.style.removeProperty('--hunter-hit-direction');
+                layer.style.removeProperty('filter');
+                layer.style.removeProperty('opacity');
+            });
 
-            if (w.id === 'long_sword' && w.spiritLevel > 0) {
-                if (spiritOverlay) {
-                    if (w.spiritLevel === 1) {
-                        spiritOverlay.style.backgroundColor = '#ffffff';
-                        spiritOverlay.style.opacity = '0.5';
-                    } else if (w.spiritLevel === 2) {
-                        spiritOverlay.style.backgroundColor = '#f1c40f';
-                        spiritOverlay.style.opacity = '0.6';
-                    } else if (w.spiritLevel === 3) {
-                        spiritOverlay.style.backgroundColor = '#e74c3c';
-                        spiritOverlay.style.opacity = '0.75';
-                        spiritOverlay.style.animation = 'ls-spirit-image-pulse 1s infinite alternate';
-                    }
-                }
-            }
             if (w.id === 'dual_blades' && w.demonModeDuration > 0) {
                 weaponCard.classList.add('db-demon-mode');
             }
             if (w.id === 'charge_blade' && w.shieldChargeDuration > 0) {
-                // Charge Blade shield charge activates overlay
                 weaponCard.classList.add('cb-shield-charged');
-                if (shieldOverlay) {
-                    shieldOverlay.style.opacity = '0.75';
-                }
             }
             if (w.id === 'insect_glaive' && w.extractDuration > 0) {
                 weaponCard.classList.add('ig-3-extracts');
@@ -391,41 +548,62 @@ class HuntCombatAnimator {
         }
     }
 
-    shakeWeapon(idx, w, borderClr = '#ff3b30', isAttack = false, actionOrName = null, isDodge = false) {
+    shakeWeapon(idx, w, borderClr = '#ff3b30', isAttack = false, actionOrName = null, isDodge = false, hitContext = null) {
         if (!this.card) return;
         if (w && w.status === 'dead' && !isAttack) return;
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         if (!weaponCard) return;
         const weaponImg = weaponCard.querySelector('.game-hunt-weapon-img');
+        const shieldImg = weaponCard.querySelector('.hunt-split-shield');
         const kinsectImg = weaponCard.querySelector('.ig-kinsect');
 
         if (isAttack) {
-            const profile = HuntWeaponAnimationCatalog.resolve(w?.id, actionOrName);
-            const actionEffect = this.createActionEffect(profile);
-            const impactDelay = Math.floor(profile.durationMs * 0.52);
+            const animationGeneration = Number(this.weaponAnimationGenerations.get(weaponCard) || 0) + 1;
+            this.weaponAnimationGenerations.set(weaponCard, animationGeneration);
+            const resolvedProfile = HuntWeaponAnimationCatalog.resolve(w?.id, actionOrName);
+            const profile = {
+                ...resolvedProfile,
+                chargeVisualLevel: Math.min(3, Math.max(0, Number(actionOrName?.chargeVisualLevel) || 0)),
+                durationMs: this.visualDuration(resolvedProfile.durationMs),
+                impactDelayMs: Number.isFinite(resolvedProfile.impactDelayMs)
+                    ? this.visualDuration(resolvedProfile.impactDelayMs)
+                    : resolvedProfile.impactDelayMs
+            };
+            const impactDelay = Number.isFinite(profile.impactDelayMs)
+                ? Math.max(0, Math.floor(profile.impactDelayMs))
+                : Math.floor(profile.durationMs * Number(profile.impactRatio || 0.52));
+            const reservedSmallTarget = Number.isInteger(hitContext?.targetUnitIndex)
+                ? this.card.querySelector(`.hunt-small-monster[data-small-monster-index="${hitContext.targetUnitIndex}"]`)
+                : null;
+            const impactTarget = reservedSmallTarget || this.card.querySelector('.hunt-small-monster.is-targeted')
+                || this.card.querySelector('#fight-monster-img');
+            const impactStage = this.card.querySelector('#monster-showcase-panel');
+            const actionEffect = this.createActionEffect(profile, impactStage, impactTarget);
 
             if (actionEffect) {
-                const impactStage = this.card.querySelector('#monster-showcase-panel');
                 (impactStage || weaponCard).appendChild(actionEffect);
                 this.animationTimers.timeout(() => actionEffect.remove(), Math.min(1200, profile.durationMs));
             }
 
-            // Frame-synchronized hit SFX & impact feedback
-            this.animationTimers.timeout(() => {
+            // Only resolved strikes get impact feedback. Preparation motions still animate,
+            // but cannot manufacture a hit sound or shake before damage is dealt.
+            if (profile.impact && hitContext?.resolved) this.animationTimers.timeout(() => {
                 if (!this.card) return;
-                const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
-                const weaponType = profile.effect || 'sever';
-                const hitzoneVal = Number(this.owner.currentHitzone ?? 45);
+                const monsterImg = impactTarget?.isConnected === false ? null : impactTarget;
+                const weaponType = hitContext.weaponType || profile.effect || 'sever';
+                const hitzoneVal = Number(hitContext.hitzoneValue ?? 45);
 
                 this.owner.playSFX?.('hit_impact', null, {
                     hunterIndex: idx,
                     weaponId: w?.id,
                     weaponType,
                     hitzoneValue: hitzoneVal,
+                    bounced: hitContext.bounced === true,
                     action: 'hit_impact'
                 });
 
                 if (monsterImg && profile.impact) {
+                    this.showDamageAtImpact(monsterImg, hitContext.damage, hitzoneVal, hitContext.partKind);
                     monsterImg.classList.remove('small-hit-anim', 'large-hit-anim');
                     void monsterImg.offsetWidth;
                     monsterImg.classList.add(hitzoneVal >= 45 ? 'large-hit-anim' : 'small-hit-anim');
@@ -438,7 +616,31 @@ class HuntCombatAnimator {
             let animDuration = profile.durationMs;
             weaponCard.dataset.huntActionId = profile.actionId;
             weaponCard.dataset.huntMotion = profile.motion;
-            if (weaponImg && profile.animateWeapon) this.playWeaponAnimation(weaponImg, w?.id, idx, profile);
+            if (profile.releaseChargePose) {
+                const weaponContainer = weaponImg?.closest?.('.game-hunt-weapon-img-container');
+                if (weaponContainer) {
+                    // The mechanic state is already consumed. Pin only its visual
+                    // stage while Web Animations owns the slash transform.
+                    const releaseStage = Math.max(1, profile.chargeVisualLevel || 1);
+                    weaponContainer.dataset.weaponChargeReleaseStage = String(releaseStage);
+                    weaponContainer.classList.remove(
+                        'weapon-charge-stage-0',
+                        'weapon-charge-stage-1',
+                        'weapon-charge-stage-2',
+                        'weapon-charge-stage-3'
+                    );
+                    weaponContainer.classList.add(`weapon-charge-stage-${releaseStage}`);
+                    weaponImg?.style?.removeProperty('transform');
+                    if (weaponImg) void weaponImg.offsetWidth;
+                }
+            }
+            if (weaponImg && profile.animateWeapon) {
+                this.playWeaponAnimation(weaponImg, w?.id, idx, profile, impactTarget);
+            }
+            const shieldMotion = HuntWeaponAnimationCatalog.shieldMotion(profile);
+            if (shieldImg && shieldMotion) {
+                this.playWeaponAnimation(shieldImg, w?.id, idx, { ...profile, motion: shieldMotion });
+            }
 
             if (kinsectImg && w?.id === 'insect_glaive') {
                 kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
@@ -450,25 +652,28 @@ class HuntCombatAnimator {
             }
 
             weaponCard.style.borderColor = borderClr;
-            weaponCard.style.zIndex = '10';
             this.animationTimers.timeout(() => {
+                // Charge stages overlap slightly for visual continuity. A cleanup
+                // timer from an older stage must never cancel the following release.
+                if (this.weaponAnimationGenerations.get(weaponCard) !== animationGeneration) return;
                 if (w && w.status !== 'dead') {
                     if (weaponImg) this.cancelWeaponAnimation(weaponImg);
+                    if (shieldImg) this.cancelWeaponAnimation(shieldImg);
                     if (kinsectImg) kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
+                    if (['great_sword', 'hammer'].includes(w.id)) {
+                        const weaponContainer = weaponImg?.closest?.('.game-hunt-weapon-img-container');
+                        if (weaponContainer?.dataset) delete weaponContainer.dataset.weaponChargeReleaseStage;
+                        this.owner.updateWeaponChargeAuraUI(idx, w);
+                    }
                     this.restoreBorder(idx, w);
-                    weaponCard.style.zIndex = '';
                 }
             }, animDuration);
             return;
         }
 
-        if (!isDodge) {
-            weaponCard.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px) scale(0.95)`;
-        }
         weaponCard.style.borderColor = borderClr;
         this.animationTimers.timeout(() => {
             if (w && w.status !== 'dead') {
-                if (!isDodge) weaponCard.style.transform = '';
                 this.restoreBorder(idx, w);
             }
         }, 150);
@@ -478,14 +683,18 @@ class HuntCombatAnimator {
         if (!this.card) return;
         const showcase = this.card.querySelector('#monster-showcase-panel');
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
-        if (!showcase || !monsterImg || !['pitfall', 'rockfall', 'flash', 'shocktrap', 'bomb'].includes(kind)) return;
+        if (!showcase || !monsterImg || !['pitfall', 'rockfall', 'flash', 'shocktrap', 'shocktrap-pending', 'bomb'].includes(kind)) return;
 
         showcase.querySelectorAll('.hunt-environment-effect').forEach(effect => effect.remove());
         const effect = document.createElement('div');
         effect.className = `hunt-environment-effect environment-${kind}`;
         effect.setAttribute('aria-hidden', 'true');
 
-        if (kind === 'bomb') {
+        if (kind === 'shocktrap-pending') {
+            effect.innerHTML = '<div class="hunt-shock-trap-pending hunt-ground-web"><i></i></div>';
+            showcase.appendChild(effect);
+            return;
+        } else if (kind === 'bomb') {
             effect.innerHTML = '<div class="hunt-barrel-bomb">💣</div><div class="hunt-bomb-blast">💥</div><strong>대형나무통폭탄!</strong>';
             showcase.appendChild(effect);
 
@@ -509,7 +718,7 @@ class HuntCombatAnimator {
             }, 1800);
             return;
         } else if (kind === 'shocktrap') {
-            effect.innerHTML = '<div class="hunt-shock-trap">⚡🪤⚡</div><strong>마비함정!</strong>';
+            effect.innerHTML = '<div class="hunt-shock-trap hunt-ground-web is-triggered"><i></i></div>';
             monsterImg.classList.remove('monster-flash-hit');
             void monsterImg.offsetWidth;
             monsterImg.classList.add('monster-flash-hit');
@@ -526,10 +735,14 @@ class HuntCombatAnimator {
                 <div class="pitfall-net">🕸️</div>
                 ${Array.from({ length: 12 }, (_, index) => `<i class="pitfall-dirt" style="--i:${index}"></i>`).join('')}
                 <strong>🪤 구멍함정!</strong>`;
-            monsterImg.classList.remove('monster-pitfall-caught');
+            monsterImg.classList.remove('monster-pitfall-caught', 'monster-pitfall-struggling');
             void monsterImg.offsetWidth;
             monsterImg.classList.add('monster-pitfall-caught');
-            this.animationTimers.timeout(() => monsterImg.classList.remove('monster-pitfall-caught'), 2200);
+            this.animationTimers.timeout(() => {
+                if (monsterImg.classList.contains('monster-pitfall-caught')) {
+                    monsterImg.classList.add('monster-pitfall-struggling');
+                }
+            }, 650);
         } else {
             effect.innerHTML = `
                 <div class="rockfall-warning">⚠️</div>
@@ -550,11 +763,24 @@ class HuntCombatAnimator {
         this.animationTimers.timeout(() => effect.remove(), kind === 'flash' ? 1400 : (kind === 'pitfall' ? 2500 : 2300));
     }
 
-    playWeaponAnimation(weaponImg, weaponId, idx, profile) {
+    resolveWeaponTargetVector(weaponImg, target) {
+        const weaponRect = weaponImg?.getBoundingClientRect?.();
+        const targetRect = target?.getBoundingClientRect?.();
+        if (!weaponRect?.width || !targetRect?.width) return null;
+        return {
+            x: targetRect.left + targetRect.width / 2 - (weaponRect.left + weaponRect.width / 2),
+            y: targetRect.top + targetRect.height / 2 - (weaponRect.top + weaponRect.height / 2)
+        };
+    }
+
+    playWeaponAnimation(weaponImg, weaponId, idx, profile, target = null) {
         this.cancelWeaponAnimation(weaponImg);
         if (typeof weaponImg.animate === 'function') {
+            const targetVector = profile.trackTarget
+                ? this.resolveWeaponTargetVector(weaponImg, target)
+                : null;
             const animation = weaponImg.animate(
-                HuntWeaponAnimationCatalog.keyframes(profile, idx),
+                HuntWeaponAnimationCatalog.keyframes(profile, idx, targetVector),
                 { duration: profile.durationMs, easing: 'ease-in-out', iterations: 1 }
             );
             this.activeWeaponAnimations.set(weaponImg, animation);
@@ -602,12 +828,24 @@ class HuntCombatAnimator {
         }
     }
 
-    createActionEffect(profile) {
+    createActionEffect(profile, stage = null, target = null) {
         if (typeof document === 'undefined') return null;
         const kind = profile?.effect;
         if (!kind || kind === 'none') return null;
         const effect = document.createElement('span');
         effect.className = `hunt-action-effect hunt-action-effect-${kind}`;
+        effect.dataset.actionId = String(profile.actionId || '');
+        const stageRect = stage?.getBoundingClientRect?.();
+        const targetRect = target?.getBoundingClientRect?.();
+        if (stageRect?.width > 0 && targetRect?.width > 0) {
+            const actionId = String(profile.actionId || '');
+            const spectacleScale = /(?:saed|wyvern_fire|full_release|focus_blast|zero_sum)/.test(actionId) ? 1.25 : 1;
+            const targetSpan = Math.max(targetRect.width, targetRect.height);
+            const size = Math.max(68, Math.min(220, targetSpan * .62 * spectacleScale));
+            effect.style.left = `${targetRect.left - stageRect.left + targetRect.width / 2}px`;
+            effect.style.top = `${targetRect.top - stageRect.top + targetRect.height / 2}px`;
+            effect.style.setProperty('--hunt-action-effect-size', `${Math.round(size)}px`);
+        }
         effect.setAttribute('aria-hidden', 'true');
         return effect;
     }
@@ -622,58 +860,24 @@ class HuntCombatAnimator {
     }
 
     triggerRoarStun(idx, isStunned) {
-        if (!this.card) return;
-        const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
-        const tag = this.card.querySelector(`#status-tag-${idx}`);
-        if (isStunned) {
-            if (weaponCard) {
-                weaponCard.classList.add('roar-stunned');
-                
-                const imgContainer = weaponCard.querySelector('.game-hunt-weapon-img-container');
-                if (imgContainer) {
-                    let roarOverlay = imgContainer.querySelector('.roar-stun-overlay');
-                    if (!roarOverlay) {
-                        roarOverlay = document.createElement('div');
-                        roarOverlay.className = 'roar-stun-overlay';
-                        roarOverlay.textContent = '🙉';
-                        imgContainer.appendChild(roarOverlay);
-                    }
-                }
-            }
-            if (tag) {
-                tag.textContent = '🙉';
-                tag.className = 'game-hunt-status-tag stunned';
-            }
-        } else {
-            if (weaponCard) {
-                weaponCard.classList.remove('roar-stunned');
-                
-                const imgContainer = weaponCard.querySelector('.game-hunt-weapon-img-container');
-                if (imgContainer) {
-                    const roarOverlay = imgContainer.querySelector('.roar-stun-overlay');
-                    if (roarOverlay) {
-                        roarOverlay.remove();
-                    }
-                }
-            }
-            if (tag) {
-                tag.textContent = '⚔️';
-                tag.className = 'game-hunt-status-tag active';
-            }
-        }
+        // Legacy roar callbacks share the same weapon-anchored interference layer
+        // as wind and tremor so no second status badge can drift over the card.
+        this.triggerHunterInterference(idx, 'roar', 'large', isStunned);
     }
 
-    spawnVictoryEmoji(idx, emoji) {
+    spawnVictoryEmoji(idx, emoji, options = {}) {
         if (!this.card) return;
-        const targetEl = this.card.querySelector(`#fight-card-${idx}`);
+        const targetEl = this.card.querySelector(`#weapon-img-container-${idx}`);
         if (!targetEl) return;
 
         const emojiEl = document.createElement('div');
-        emojiEl.className = 'victory-emoji-bubble';
+        emojiEl.className = 'victory-emoji-bubble hunter-weapon-emotion';
+        if (options.variant === 'flashbug') emojiEl.classList.add('hunt-gather-flashbug');
         emojiEl.textContent = emoji;
         targetEl.appendChild(emojiEl);
 
-        // Animate up and fade out (starts from weapon image center and floats up higher)
+        // Keep reactions anchored to the static weapon container. Only the image
+        // itself receives attack/evasion transforms, so the emoji stays readable.
         this.animationTimers.timeout(() => {
             emojiEl.style.opacity = '1';
             emojiEl.style.transform = 'translate(-50%, -80px) scale(1.3)';
@@ -686,4 +890,7 @@ class HuntCombatAnimator {
         }, 2200);
     }
 }
+
+if (typeof module !== 'undefined' && module.exports) module.exports = HuntCombatAnimator;
+else globalThis.HuntCombatAnimator = HuntCombatAnimator;
 

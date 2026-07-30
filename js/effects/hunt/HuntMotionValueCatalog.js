@@ -33,10 +33,14 @@ class HuntMotionValueCatalog {
 
     static motionValueTiming(action, reference = null) {
         if (Number(action?.motionValue) === 0 || action?.tags?.includes('preparation')) return null;
-        const motionValue = Number(reference?.motionValueTotal ?? action?.motionValue ?? 0);
+        // Keep a stronger authored multi-hit total when the fuzzy sheet match
+        // lands on one unavailable/partial level row (notably True Charged Slash).
+        const motionValue = Math.max(Number(reference?.motionValueTotal || 0), Number(action?.motionValue || 0));
         if (!(motionValue > 0)) return null;
-        // Autobattler proxy: MV 0 keeps its authored preparation timing; damaging moves scale linearly.
-        const ticks = Math.max(3, Math.min(24, Math.round(4 + motionValue * 0.10)));
+        // Authoring-scale cadence proxy: tiny hits remain quick, while a TCS-class
+        // motion value (~190) occupies a complete budget. HuntAtbConfig converts
+        // this stable five-second authoring scale to the current live duration.
+        const ticks = Math.max(5, Math.min(50, Math.round(2 + motionValue * 0.25)));
         return {
             seconds: ticks / 10,
             ticks,

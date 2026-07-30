@@ -3,6 +3,15 @@ const fs = require('fs');
 const path = require('path');
 
 const source = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntEngine.js'), 'utf8');
+const animatorSource = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntCombatAnimator.js'), 'utf8');
+assert(
+    animatorSource.includes('querySelector(`#weapon-img-container-${idx}`)'),
+    'hunter emotion bubbles must anchor to the weapon image container, not the hunter card/nameplate'
+);
+assert(
+    animatorSource.includes("emojiEl.className = 'victory-emoji-bubble hunter-weapon-emotion'"),
+    'weapon-anchored hunter emotion bubbles need their dedicated placement class'
+);
 assert(source.includes('great_sword: 70') && source.includes('bow: 55'), 'strong-hit thresholds must be weapon-specific');
 assert(source.includes("success: ['😆'") && source.includes("failure: ['😡'") && source.includes("hurt: ['😵'"), 'emotion outcomes need distinct random emoji pools');
 

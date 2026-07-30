@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>리오레우스 전투 계약 프리뷰</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#080b0d}
+    body{font-family:"Noto Sans KR",sans-serif}
+    #preview-viewport{position:absolute;inset:0;width:1920px;height:1080px;transform-origin:0 0}
+    #board{position:relative!important;left:auto!important;top:auto!important;width:1848px;height:880px;margin:22px 36px;color:#fff;overflow:visible;background:radial-gradient(circle at 50% 33%,#5f2a22 0,#221713 42%,#08090a 82%);border:2px solid #a05e38;animation:none!important;transform:none!important;opacity:1!important}
+    .preview-title{position:absolute;left:28px;top:18px;z-index:80;font-size:28px;font-weight:900;color:#ffd0a0}
+    .preview-controls{position:absolute;right:24px;top:14px;z-index:90;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;width:1300px}
+    button{padding:8px 12px;border:1px solid #d97d52;border-radius:7px;color:#fff;background:#3a1e17;font-size:15px;font-weight:800;cursor:pointer}
+    button.support{border-color:#ffe45b;background:#3a3212;color:#fff5a6}
+    .hunt-monster-vitals{position:absolute;left:50%;top:76px;z-index:62;width:570px;transform:translateX(-50%);text-align:center}
+    .hunt-monster-vitals strong{font-size:30px}.monster-hp{height:13px;margin-top:5px;background:#281414;border:2px solid #a67842}.monster-hp i{display:block;width:73%;height:100%;background:#d63f31}
+    .hunt-monster-atb-track{width:50%;height:8px;margin:6px auto;background:#2d2816;border:1px solid #756a32}.hunt-monster-atb-track i{display:block;width:64%;height:100%;background:#ffd13f}
+    .hunt-monster-parts{position:absolute;left:12px;bottom:-48px;display:flex;gap:10px}.hunt-monster-part{position:relative;width:42px;height:42px;opacity:1;filter:sepia(.68) saturate(4.6) hue-rotate(326deg) brightness(1.18) contrast(1.08) drop-shadow(0 0 7px #ff8c52)}.hunt-monster-part img{width:100%;height:100%;object-fit:contain}.hunt-monster-part.is-broken{filter:grayscale(.7) brightness(.85) drop-shadow(0 0 7px #ffb347)}.hunt-monster-part.is-broken::after{content:"";position:absolute;left:1px;top:19px;width:42px;height:5px;background:#ff543d;transform:rotate(-42deg)}
+    #monster-showcase-panel{position:absolute;left:184px;right:184px;top:120px;height:440px;z-index:45;overflow:visible}
+    .hunt-monster-attack-motion{position:absolute;left:50%;top:16px;width:430px;height:400px;margin-left:-215px;z-index:48}
+    #fight-monster-img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 14px #000c)}
+    .game-hunt-weapons-grid{position:absolute;left:64px;right:64px;bottom:50px;height:280px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+    .game-hunt-weapon-card{position:relative;border:2px solid #7f6848;background:#171512d9;overflow:visible}
+    .game-hunt-weapon-img-container{position:absolute;left:50%;top:-26px;width:260px;height:230px;transform:translateX(-50%);z-index:70}
+    .game-hunt-weapon-img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 7px #000c)}
+    .hunter-items{position:absolute;left:16px;top:20px;z-index:10;font-size:27px;font-weight:1000;color:#fff;text-shadow:0 2px 4px #000,0 0 6px #000}
+    .hunter-name{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:24px;font-weight:900}
+    .chat-safe{position:absolute;left:0;right:0;bottom:0;height:162px;box-sizing:border-box;padding:42px;color:#cabca0;background:#080808;border-top:2px dashed #725d3e;text-align:center;font-size:22px}
+  </style>
+</head>
+<body>
+  <div id="preview-viewport">
+    <main id="board" class="game-hunt-card hunt-combat-board">
+      <div class="preview-title">리오레우스 · 월드 원종 계약</div>
+      <nav class="preview-controls" aria-label="패턴 프리뷰">
+        <button data-profile="roar">포효[소]</button>
+        <button data-profile="bite">물어뜯기</button>
+        <button data-profile="rush">돌진</button>
+        <button data-profile="fireball">단발 화염구</button>
+        <button data-profile="aerial-fireball">공중 화염구</button>
+        <button data-profile="backstep">백스텝 브레스→비행</button>
+        <button data-profile="claw">독조 강습</button>
+        <button data-profile="tail">꼬리치기</button>
+        <button data-profile="aerial-tail">공중 꼬리치기</button>
+        <button data-profile="hop-stomp">도약 내려찍기</button>
+        <button data-profile="stomp">착지 내려찍기</button>
+        <button data-profile="glide">저공 활공</button>
+        <button class="support" data-support="trap">덫 설치</button>
+        <button class="support" data-support="flash">섬광 격추</button>
+      </nav>
+      <section class="hunt-monster-vitals">
+        <strong>리오레우스 🔥 🪽</strong>
+        <div class="monster-hp"><i></i></div><div class="hunt-monster-atb-track"><i></i></div>
+        <div class="hunt-monster-parts" aria-label="머리, 등, 왼쪽 날개, 오른쪽 날개, 꼬리">
+          <span class="hunt-monster-part" title="머리"><img src="../../local_assets/monster_hunter/reference-icons/rise/item/1671799227.png" alt="머리"></span>
+          <span class="hunt-monster-part" title="등"><img src="../../local_assets/monster_hunter/reference-icons/rise/item/1106415058.png" alt="등"></span>
+          <span class="hunt-monster-part" title="왼쪽 날개"><img src="../../local_assets/monster_hunter/reference-icons/rise/item/1120665075.png" alt="왼쪽 날개"></span>
+          <span class="hunt-monster-part is-broken" title="오른쪽 날개 파괴"><img src="../../local_assets/monster_hunter/reference-icons/rise/item/1120665075.png" alt="오른쪽 날개 파괴"></span>
+          <span class="hunt-monster-part" title="꼬리"><img src="../../local_assets/monster_hunter/reference-icons/rise/item/1283890609.png" alt="꼬리"></span>
+        </div>
+      </section>
+      <div id="monster-showcase-panel" class="game-hunt-monster-showcase hunt-monster-motion-stage">
+        <div class="hunt-monster-attack-motion"><div class="hunt-monster-facing-layer"><img id="fight-monster-img" class="game-hunt-monster-img" src="../../img/monsters/rathalos.png" alt="리오레우스"></div></div>
+      </div>
+      <section class="game-hunt-weapons-grid">
+        <article id="fight-card-0" class="game-hunt-weapon-card"><div class="hunter-items">🧪 2<br>💚 1<br>✨ 0</div><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt=""></div><div class="hunter-name">⚔️ 공격형</div></article>
+        <article id="fight-card-1" class="game-hunt-weapon-card"><div class="hunter-items">🧪 2<br>💚 1<br>✨ 1</div><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/lance.svg" alt=""></div><div class="hunter-name">🛡️ 수비형</div></article>
+        <article id="fight-card-2" class="game-hunt-weapon-card"><div class="hunter-items">🧪 2<br>💚 2<br>✨ 2</div><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt=""></div><div class="hunter-name">💚 지원형</div></article>
+        <article id="fight-card-3" class="game-hunt-weapon-card"><div class="hunter-items">🧪 2<br>💚 1<br>✨ 1</div><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/bow.svg" alt=""></div><div class="hunter-name">🎯 베테랑</div></article>
+      </section>
+    </main>
+    <footer class="chat-safe">OBS 채팅 안전영역 · 하단 15%</footer>
+  </div>
+  <script src="../../js/effects/hunt/HuntAtbConfig.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAnatomyCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAnimationCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
+  <script src="../../js/effects/hunt/HuntCombatAnimator.js"></script>
+  <script>
+    const viewport=document.getElementById('preview-viewport');
+    const fit=()=>viewport.style.transform=`scale(${Math.min(innerWidth/1920,innerHeight/1080)})`;
+    addEventListener('resize',fit);fit();
+    const board=document.getElementById('board');
+    const owner={card:board,selectedMonster:{id:'rathalos',nameKO:'리오레우스',species:'Flying Wyvern'},animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)},clear(id){clearTimeout(id)}},playSFX(){}};
+    const combatAnimator=new HuntCombatAnimator(owner);
+    const animator=combatAnimator.monsterAttackAnimator;
+    const patterns={
+      roar:{type:'roar',emoji:'🗣️',name:'포효[소]',tags:['roar'],profile:'roar'},
+      bite:{type:'physical',emoji:'🦷',name:'물어뜯기',tags:['target-contact'],profile:'bite'},
+      rush:{type:'physical',emoji:'💨',name:'돌진',tags:['charge','target-contact'],profile:'charge'},
+      fireball:{type:'elemental',emoji:'🔥',name:'단발 화염구',tags:['projectile','fire'],profile:'projectile',delivery:'projectile'},
+      'aerial-fireball':{type:'elemental',emoji:'🔥',name:'공중 화염구',tags:['projectile','fire','flight-only'],profile:'projectile',delivery:'projectile'},
+      backstep:{type:'elemental',emoji:'🔥',name:'백스텝 브레스',tags:['projectile','fire','takeoff'],profile:'backstep-fireball',delivery:'projectile'},
+      claw:{type:'physical',emoji:'☠️',name:'독조 강습',tags:['poison','target-contact','flight-only'],profile:'aerial-claw'},
+      tail:{type:'physical',emoji:'🌀',name:'꼬리치기',tags:['tail','target-contact'],profile:'tail-sweep'},
+      'aerial-tail':{type:'physical',emoji:'🌀',name:'공중 꼬리치기',tags:['tail','target-contact','flight-only'],profile:'tail-sweep'},
+      'hop-stomp':{type:'physical',emoji:'💥',name:'도약 내려찍기',tags:['target-contact','ground-only'],profile:'stomp'},
+      stomp:{type:'physical',emoji:'💥',name:'착지 내려찍기',tags:['landing-only','target-contact'],profile:'stomp'},
+      glide:{type:'physical',emoji:'💨',name:'저공 활공',tags:['charge','flight-only','wide-charge','screen-crossing'],profile:'aerial-charge-cross',wide:true}
+    };
+    function play(key){
+      const p=patterns[key]; if(!p)return;
+      const results=p.wide?[0,1,2,3].map(index=>({index,result:'hit'})):[{index:1,result:'hit'}];
+      animator.triggerMonsterAttack(p.type,p.emoji,results,p.name,{id:`rathalos.${key}`,name:p.name,tags:p.tags,delivery:p.delivery||null,chargeMode:p.wide?'wide':null,animationProfile:p.profile,runtimeSweepDirection:p.wide?'left-to-right':null,runtimeImpactPending:p.type==='elemental',runtimeImpactDelayTicks:8});
+    }
+    document.querySelectorAll('[data-profile]').forEach(button=>button.addEventListener('click',()=>play(button.dataset.profile)));
+    document.querySelector('[data-support="trap"]').addEventListener('click',()=>combatAnimator.triggerEnvironmentEffect('shocktrap-pending'));
+    document.querySelector('[data-support="flash"]').addEventListener('click',()=>combatAnimator.triggerEnvironmentEffect('flash'));
+    addEventListener('load',()=>play('glide'));
+  </script>
+</body>
+</html>

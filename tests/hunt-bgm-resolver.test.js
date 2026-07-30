@@ -3,7 +3,21 @@ const HuntBgmResolver = require('../js/effects/hunt/HuntBgmResolver.js');
 const catalog = require('../js/effects/hunt/HuntBgmCatalog.js');
 
 assert.deepStrictEqual(catalog.HUNT_DEDICATED_THEMES.magnamalo, ['BGM/MHR_Magnamalo.mp3']);
+assert.deepStrictEqual(catalog.HUNT_DEDICATED_THEMES.bazelgeuse, ['BGM/MHW_Bazelgeuse.mp3']);
+assert.deepStrictEqual(catalog.HUNT_DEDICATED_THEMES.seething_bazelgeuse, ['BGM/MHW_Bazelgeuse.mp3']);
 assert.ok(!catalog.HUNT_BGM_LOCALES.kamura.includes('BGM/MHR_Kamura.mp3'), 'village lobby music must never be used as a hunt-area fallback');
+
+const catalogResolver = new HuntBgmResolver({
+    random: () => 0,
+    locales: catalog.HUNT_BGM_LOCALES,
+    themes: catalog.HUNT_DEDICATED_THEMES,
+    habitats: catalog.HUNT_MONSTER_HABITATS
+});
+assert.deepStrictEqual(
+    ['bazelgeuse', 'seething_bazelgeuse'].map(id => catalogResolver.resolve({ id }).track),
+    ['BGM/MHW_Bazelgeuse.mp3', 'BGM/MHW_Bazelgeuse.mp3'],
+    'both Bazelgeuse forms must prefer their verified dedicated theme'
+);
 
 const resolver = new HuntBgmResolver({
     random: () => 0,

@@ -25,6 +25,8 @@ const HUNT_DEDICATED_THEMES = {
     ruiner_nergigante: ['BGM/MHW_Nergigante.mp3'],
     deviljho: ['BGM/MHW_Deviljho.mp3'],
     savage_deviljho: ['BGM/MHW_Deviljho.mp3'],
+    bazelgeuse: ['BGM/MHW_Bazelgeuse.mp3'],
+    seething_bazelgeuse: ['BGM/MHW_Bazelgeuse.mp3'],
     tigrex: ['BGM/MHW_Tigrex.mp3'],
     brute_tigrex: ['BGM/MHW_Tigrex.mp3'],
     nargacuga: ['BGM/MHW_Nargacuga.mp3'],
@@ -41,7 +43,10 @@ const HUNT_DEDICATED_THEMES = {
     lunastra: ['BGM/MHW_Teostra.mp3']
 };
 
-const HUNT_MONSTER_HABITATS = {};
+const HUNT_GENERATED_HABITATS = typeof HUNT_GENERATED_MONSTER_HABITATS !== 'undefined'
+    ? HUNT_GENERATED_MONSTER_HABITATS
+    : (typeof require === 'function' ? require('./data/HuntMonsterHabitats.generated.js') : {});
+const HUNT_MONSTER_HABITATS = { ...HUNT_GENERATED_HABITATS };
 
 function registerHuntHabitats(ids, habitats, latestAppearance = 'mixed') {
     ids.forEach(id => {

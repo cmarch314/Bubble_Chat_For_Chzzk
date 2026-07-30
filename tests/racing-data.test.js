@@ -27,8 +27,10 @@ assert.doesNotMatch(effectSource + runnerSource, /const INTRO_TEXTS\s*=\s*\{/);
 assert.doesNotMatch(effectSource, /_injectStyles|style\.innerHTML/);
 
 const indexSource = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
+const featureLoaderSource = fs.readFileSync(path.resolve(__dirname, '../js/runtime/FeatureRuntimeLoader.js'), 'utf8');
 assert.match(indexSource, /styles\/racing\.css/);
-assert.match(indexSource, /RacingRunner\.js/);
+assert.doesNotMatch(indexSource, /RacingRunner\.js/);
+assert.match(featureLoaderSource, /RacingData\.js[\s\S]*RacingRules\.js[\s\S]*RacingRunner\.js[\s\S]*RacingEffect\.js/);
 assert.ok(fs.existsSync(path.resolve(__dirname, '../styles/racing.css')));
 
 console.log('[test] Racing data single-source contract passed.');

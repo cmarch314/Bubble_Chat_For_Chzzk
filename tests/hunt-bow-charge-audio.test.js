@@ -10,9 +10,11 @@ const HuntHunterTurnExecutor = context.Executor;
 assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'bow.draw_1' }), null);
 assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'bow.draw_2' }), null);
 assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'bow.draw_3' }), null);
-assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'great_sword.charge_1' }), 'weapon_charge',
-    'removing the disliked bow draw sound must not mute other weapon charge cues');
-assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'bow.recover_stamina' }), 'weapon_recover',
-    'non-draw bow preparation cues remain independently routed');
+assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'bow.charging_sidestep' }), null);
+assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'bow.recover_stamina' }), null);
+assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'great_sword.charge_1' }), 'charge_tier_1');
+assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'great_sword.strong_charge_2' }), 'charge_tier_2');
+assert.strictEqual(HuntHunterTurnExecutor.preparationAudioCue({ id: 'great_sword.true_charge_3' }), 'charge_tier_3',
+    'great sword charge stages must use their exact labelled World events instead of a random weapon-bank fallback');
 
-console.log('[test] Bow draw preparation is silent without muting bow shots or other weapon charges.');
+console.log('[test] Bow preparation stays silent and Great Sword charge tiers retain exact labelled cues.');

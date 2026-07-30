@@ -29,6 +29,63 @@ function loadAudioEvidenceDatabase() {
     }]));
 }
 
+function loadWildsWeaponEventEvidence() {
+    const file = path.join(ROOT, 'game_extracts', 'tools', 'wilds-weapon-audio-events.json');
+    if (!fs.existsSync(file)) return new Map();
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const index = new Map();
+    for (const link of data.triggerLinks || []) {
+        for (const sourceId of link.sourceIds || []) {
+            const key = `${link.weaponId}:${sourceId}`;
+            if (!index.has(key)) index.set(key, []);
+            index.get(key).push(link);
+        }
+    }
+    return index;
+}
+
+function probableRoleFit(action, roles) {
+    const text = `${action?.id || ''} ${action?.audioCue || ''}`.toLowerCase();
+    const set = new Set(roles || []);
+    const projectile = /shell|burst|wyvern|wyrmstake|discharge|phial|shot|volley|piercer|tracer|kinsect|extract|explos/.test(text);
+    const mechanical = /reload|load_phials|morph|sheathe|guard|counter|charge|draw/.test(text);
+    let score = 0;
+    if (projectile && (set.has('effect') || set.has('shell') || set.has('insect') || set.has('insect-effect'))) score += 34;
+    if (!projectile && set.has('motion')) score += 18;
+    if (mechanical && (set.has('motion') || set.has('sub'))) score += 12;
+    if (projectile && set.size === 1 && set.has('motion')) score -= 8;
+    return score;
+}
+
+function installedWildsEvidence(action, entry, evidenceIndex) {
+    if (entry?.game !== 'wilds' || !entry.weaponId || !Array.isArray(entry.wwiseSourceIds)) return null;
+    const links = entry.wwiseSourceIds.flatMap(sourceId =>
+        evidenceIndex.get(`${entry.weaponId}:${sourceId}`) || []
+    );
+    if (!links.length) return null;
+    const roles = [...new Set(links.map(link => link.role).filter(Boolean))];
+    const motionLinks = links.filter(link => Array.isArray(link.motionContexts) && link.motionContexts.length);
+    const smallestMotionSet = motionLinks.length
+        ? Math.min(...motionLinks.map(link => link.motionContexts.length))
+        : 0;
+    return {
+        score: 72 + probableRoleFit(action, roles)
+            + (motionLinks.length ? 10 : 0)
+            + (smallestMotionSet ? Math.max(0, 12 - Math.min(12, smallestMotionSet - 1)) : 0),
+        confidence: motionLinks.length ? 'probable' : 'family',
+        evidence: motionLinks.length
+            ? 'installed-motion-trigger+wwise-event+hirc+source'
+            : 'installed-trigger+wwise-event+hirc+source',
+        roles,
+        triggerIds: [...new Set(links.map(link => link.triggerId))],
+        eventIds: [...new Set(links.map(link => String(link.eventId)))],
+        sourceIds: [...new Set(links.flatMap(link => link.sourceIds || []).map(String))],
+        motionContexts: [...new Map(motionLinks.flatMap(link => link.motionContexts).map(context => [
+            `${context.motionList}:${context.motionId}:${context.motionName}`, context
+        ])).values()].slice(0, 12)
+    };
+}
+
 function actionLabelPatterns(action) {
     const id = String(action?.id || '').toLowerCase();
     const cue = String(action?.audioCue || '').toLowerCase();
@@ -88,7 +145,7 @@ function actionLabelPatterns(action) {
     return patterns;
 }
 
-function scoreWeaponActionEntry(action, entry) {
+function scoreWeaponActionEntry(action, entry, wildsEvidenceIndex = new Map()) {
     if (!action || !entry || action.id.split('.')[0] !== entry.weaponId) return -Infinity;
     const label = String(entry.semanticEvidence?.label || '').toLowerCase();
     const bank = String(entry.sourceBank || '').toLowerCase();
@@ -98,9 +155,10 @@ function scoreWeaponActionEntry(action, entry) {
     if (cue && cue !== 'none' && family === cue) score += 120;
     if (family === 'weapon_action') score += 8;
 
-    // Favor weapon effect/action banks (epvsp) over common banks (com/cmn)
+    // World/Rise common banks are broad fallbacks. Wilds WpXX_Cmn is instead
+    // the weapon's real action media bank and is ranked by installed trigger evidence below.
     if (/_epvsp_|_ep_/.test(bank)) score += 50;
-    if (/_com_|_cmn_|_cmn\./.test(bank)) score -= 120;
+    if (entry.game !== 'wilds' && /_com_|_cmn_|_cmn\./.test(bank)) score -= 120;
 
     const patterns = actionLabelPatterns(action);
     const matches = patterns.filter(pattern => pattern.test(label)).length;
@@ -114,6 +172,8 @@ function scoreWeaponActionEntry(action, entry) {
     if (/miss|bad timing|clutch|mount attack|hits? (?:ground|water|dirt|wall)/.test(label)) score -= 70;
     if (entry.semanticEvidence?.confidence === 'high') score += 12;
     else if (entry.semanticEvidence?.confidence === 'medium') score += 5;
+    const installed = installedWildsEvidence(action, entry, wildsEvidenceIndex);
+    if (installed) score += installed.score;
     return score;
 }
 
@@ -179,12 +239,18 @@ function generate() {
 
     const HuntWeaponMechanics = require(path.join(ROOT, 'js', 'effects', 'hunt', 'HuntWeaponMechanics.js'));
     const databaseEvidence = loadAudioEvidenceDatabase();
+    const wildsEvidenceIndex = loadWildsWeaponEventEvidence();
     const weaponEntries = Object.values(catalogs).flatMap(catalog => catalog.entries).filter(entry => entry.category === 'weapon');
     const actionRoutes = {};
     WEAPONS.forEach(weaponId => {
         HuntWeaponMechanics.actionsFor(weaponId).forEach(action => {
+            if (String(action.audioCue || '').toLowerCase() === 'none') return;
             const ranked = weaponEntries
-                .map(entry => ({ entry, score: scoreWeaponActionEntry(action, entry) }))
+                .map(entry => ({
+                    entry,
+                    installed: installedWildsEvidence(action, entry, wildsEvidenceIndex),
+                    score: scoreWeaponActionEntry(action, entry, wildsEvidenceIndex)
+                }))
                 .filter(item => item.score >= 45)
                 .sort((a, b) => b.score - a.score);
             if (!ranked.length) return;
@@ -197,28 +263,50 @@ function generate() {
                 score: item.score,
                 label: item.entry.semanticEvidence?.label || null,
                 game: item.entry.game,
-                eventIds: dbEvidence?.eventIds || item.entry.wwiseEventIds || [],
-                sourceIds: dbEvidence?.sourceIds || item.entry.wwiseSourceIds || [],
-                confidence: dbEvidence?.confidence || item.entry.semanticEvidence?.confidence || item.entry.bankEvidence?.level || 'unknown',
-                evidence: dbEvidence
+                eventIds: item.installed?.eventIds || dbEvidence?.eventIds || item.entry.wwiseEventIds || [],
+                sourceIds: item.installed?.sourceIds || dbEvidence?.sourceIds || item.entry.wwiseSourceIds || [],
+                confidence: item.installed?.confidence || dbEvidence?.confidence || item.entry.semanticEvidence?.confidence || item.entry.bankEvidence?.level || 'unknown',
+                evidence: item.installed?.evidence || (dbEvidence
                     ? 'mh-wilds.sqlite/audio_evidence'
-                    : (item.entry.semanticEvidence?.label ? 'manifest/labelled-event' : 'manifest/bank-role')
+                    : (item.entry.semanticEvidence?.label ? 'manifest/labelled-event' : 'manifest/bank-role')),
+                ...(item.installed ? {
+                    roles: item.installed.roles,
+                    triggerIds: item.installed.triggerIds,
+                    motionContexts: item.installed.motionContexts
+                } : {})
             };
             });
         });
     });
 
-    const outputPath = path.join(ROOT, 'local_assets', 'monster_hunter', 'runtime-catalog.js');
-    const payload = `'use strict';\n// Generated private runtime catalog. Do not publish.\nglobalThis.HUNT_LOCAL_AUDIO_MANIFESTS=${JSON.stringify(catalogs)};\nglobalThis.HUNT_LOCAL_WEAPON_ACTION_ROUTES=${JSON.stringify(actionRoutes)};\n`;
-    fs.writeFileSync(outputPath, payload, 'utf8');
+    const outputDir = path.join(ROOT, 'local_assets', 'monster_hunter');
+    const manifestOutputPath = path.join(outputDir, 'runtime-audio-manifests.js');
+    const routeOutputPath = path.join(outputDir, 'runtime-action-routes.js');
+    const manifestPayload = `'use strict';\n// Generated private runtime audio manifests. Do not publish.\nglobalThis.HUNT_LOCAL_AUDIO_MANIFESTS=${JSON.stringify(catalogs)};\n`;
+    const routePayload = `'use strict';\n// Generated private evidence-ranked weapon routes. Do not publish.\nglobalThis.HUNT_LOCAL_WEAPON_ACTION_ROUTES=${JSON.stringify(actionRoutes)};\n`;
+    fs.writeFileSync(manifestOutputPath, manifestPayload, 'utf8');
+    fs.writeFileSync(routeOutputPath, routePayload, 'utf8');
 
     const total = Object.values(catalogs).reduce((sum, catalog) => sum + catalog.entries.length, 0);
-    console.log(`[hunt-audio-runtime] ${total} clips, ${(Buffer.byteLength(payload) / 1024 / 1024).toFixed(2)} MiB`);
+    const totalBytes = Buffer.byteLength(manifestPayload) + Buffer.byteLength(routePayload);
+    console.log(`[hunt-audio-runtime] ${total} clips, ${(totalBytes / 1024 / 1024).toFixed(2)} MiB`);
     console.log(`[hunt-audio-runtime] weapon candidates: ${WEAPONS.map(id => `${id}=${weaponCounts[id]}`).join(', ')}`);
     console.log(`[hunt-audio-runtime] evidence-ranked action routes: ${Object.keys(actionRoutes).length}`);
-    return { outputPath, total, weaponCounts, catalogs, actionRoutes };
+    return {
+        outputPath: manifestOutputPath,
+        manifestOutputPath,
+        routeOutputPath,
+        total,
+        weaponCounts,
+        catalogs,
+        actionRoutes
+    };
 }
 
 if (require.main === module) generate();
 
-module.exports = { GAMES, WEAPONS, includeEntry, compactEntry, actionLabelPatterns, scoreWeaponActionEntry, loadAudioEvidenceDatabase, generate };
+module.exports = {
+    GAMES, WEAPONS, includeEntry, compactEntry, actionLabelPatterns, probableRoleFit,
+    installedWildsEvidence, scoreWeaponActionEntry, loadAudioEvidenceDatabase,
+    loadWildsWeaponEventEvidence, generate
+};

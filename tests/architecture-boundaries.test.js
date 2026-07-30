@@ -4,6 +4,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const huntRuntimeLoader = fs.readFileSync(path.join(root, 'js/effects/hunt/HuntRuntimeLoader.js'), 'utf8');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 
 function assertLoadedBefore(dependency, consumer) {
@@ -19,8 +20,16 @@ assertLoadedBefore('js/audio/AudioMediaStager.js', 'js/AudioManager.js');
 assertLoadedBefore('js/audio/AudioPlaybackEngine.js', 'js/AudioManager.js');
 assertLoadedBefore('js/chat/ChatMediaBubbleController.js', 'js/ChatRenderer.js');
 assertLoadedBefore('js/chat/ChatSpecialBubbleCommand.js', 'js/ChatRenderer.js');
-assertLoadedBefore('js/effects/hunt/HuntMonsterAttackAnimator.js', 'js/effects/hunt/HuntCombatAnimator.js');
-assertLoadedBefore('js/effects/hunt/HuntWeaponAnimationCatalog.js', 'js/effects/hunt/HuntCombatAnimator.js');
+assert.ok(
+    huntRuntimeLoader.indexOf('js/effects/hunt/HuntMonsterAttackAnimator.js')
+        < huntRuntimeLoader.indexOf('js/effects/hunt/HuntCombatAnimator.js'),
+    'HuntMonsterAttackAnimator must lazy-load before HuntCombatAnimator'
+);
+assert.ok(
+    huntRuntimeLoader.indexOf('js/effects/hunt/HuntWeaponAnimationCatalog.js')
+        < huntRuntimeLoader.indexOf('js/effects/hunt/HuntCombatAnimator.js'),
+    'HuntWeaponAnimationCatalog must lazy-load before HuntCombatAnimator'
+);
 
 const jsRoot = path.join(root, 'js');
 const productFiles = [];
@@ -53,3 +62,4 @@ assert.doesNotMatch(read('js/ChzzkGateway.js'), /location\.reload\s*\(/);
 assert.doesNotMatch(read('RENEWAL_REPORT.md'), /방송 전 `START_OBS_OVERLAY\.bat` 실행을 기본 운영 절차/);
 
 console.log('[test] Final architecture boundary contract passed.');
+require('./feature-runtime-lazy-loader.test.js');

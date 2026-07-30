@@ -37,9 +37,10 @@ class HuntHunterBlightRuntime {
         this.initialize(hunter);
         hunter.elementalBlights[type] = Math.max(Number(hunter.elementalBlights[type] || 0), duration || def.ticks);
         if (def.actionLock) {
+            this.engine.cancelHunterHitRecovery?.(hunter, type);
+            this.engine.interruptHunterItemAction?.(hunter, type);
             hunter.atb = 0;
             hunter.isGathering = false;
-            hunter.pendingSharpnessRestore = false;
             this.engine.actionStateMachine?.cancel(hunter, type);
             this.engine.updateWeaponAtbUI?.(hunter.index, 0);
         }

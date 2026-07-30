@@ -4,6 +4,10 @@ class HuntResultPresenter {
         effect.phase = 'results';
         effect.director.activeGame = null;
 
+        // Remove timer-owned combat overlays before cancelling their cleanup
+        // callbacks. Otherwise carts and emotion/status emoji remain stranded
+        // in the result layout, where they collapse into the lower-left corner.
+        effect.renderer.clearCombatTransientVisuals();
         effect.clearAllTimers();
 
         effect.audioManager.stopBgms();
@@ -373,14 +377,26 @@ class HuntResultPresenter {
             });
         }
  
-        const displayDuration = isVictory ? 30000 : 15000;
+        if (effect.huntMode === 'journey' && topPanel) {
+            const state = effect.runDirector?.state;
+            const summary = document.createElement('div');
+            summary.className = 'hunt-journey-result-summary';
+            summary.textContent = `${state?.status === 'completed' ? '여정 완주' : `여정 ${Math.min(17, Number(state?.nodeIndex || 0))}/17`}  ·  🛒 ${Number(state?.carts || 0)}  ·  💰 ${Number(state?.zenny || 0)}  ·  🔒 ${Number(state?.lockLimit || 1)}/3`;
+            topPanel.appendChild(summary);
+        }
+        const displayDuration = isVictory && effect.huntMode === 'journey' ? 8000 : (isVictory ? 30000 : 15000);
         // [FIX] 이전 수렵 UI 파괴 버그 방지를 위해 멤버 변수로 타이머 추적
         effect.endGameFadeoutTimer = effect.timers.timeout(() => {
             container.style.animation = "game-fade-out 0.5s ease-in forwards";
-            effect.endGameFadeoutTimer = effect.timers.timeout(() => {
+            effect.endGameFadeoutTimer = effect.timers.timeout(async () => {
                 effect.renderer.removeContainer();
                 document.body.classList.remove('in-hunt');
                 effect.audioManager.stopBgms();
+                const continued = await effect.journeyFlow?.continueAfterResult(isVictory);
+                if (continued) {
+                    effect.endGameFadeoutTimer = null;
+                    return;
+                }
                 if (effect.resolveGame) {
                     effect.resolveGame();
                     effect.resolveGame = null;

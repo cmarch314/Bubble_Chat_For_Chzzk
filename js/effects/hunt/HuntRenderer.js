@@ -2,6 +2,7 @@ class HuntRenderer {
     constructor(options = {}) {
         this.container = null;
         this.card = null;
+        this.selectedMonster = null;
         this.lobbyTimer = null;
         this.lobbyTimeouts = [];
         this.lobbyTimers = options.lobbyTimers || new ManagedTimers();
@@ -33,7 +34,43 @@ class HuntRenderer {
 
     clearAnimationTimers() {
         this.combatAnimator?.clearWeaponAnimations();
+        this.combatAnimator?.clearMonsterAnimations('renderer-clear');
         this.animationTimers.clearAll();
+    }
+
+    clearCombatTransientVisuals() {
+        this.clearAnimationTimers();
+        const selectors = [
+            '.game-hunt-cart-container',
+            '.game-hunt-cart-local',
+            '.victory-emoji-bubble',
+            '.skill-bubble',
+            '.monster-skill-bubble',
+            '.hunter-stun-orbit',
+            '.roar-stun-overlay',
+            '.roar-speaker-emoji',
+            '.roar-wave-ring',
+            '.monster-hybrid-emoji-left',
+            '.monster-hybrid-emoji-right',
+            '.monster-local-action-fx',
+            '.monster-charge-track',
+            '.monster-burrow-dust'
+        ];
+        this.container?.querySelectorAll?.(selectors.join(','))?.forEach(node => node.remove());
+        // Cart overlays normally belong to the hunt container, but the guarded
+        // fallback path can attach one to body before renderer ownership exists.
+        if (typeof document !== 'undefined') {
+            document.querySelectorAll?.('.game-hunt-cart-container,.game-hunt-cart-local')
+                ?.forEach(node => node.remove());
+        }
+        this.card?.classList?.remove?.(
+            'monster-charge-rumble',
+            'monster-ultimate-board-shake',
+            'hunt-valstrax-impact',
+            'card-heavy-shake-anim',
+            'hunt-bomb-shake',
+            'hunt-rockfall-shake'
+        );
     }
 
     removeContainer() {
@@ -44,6 +81,7 @@ class HuntRenderer {
         }
         this.container = null;
         this.card = null;
+        this.selectedMonster = null;
     }
 
     getPersonalityStyle(personality) {
@@ -60,6 +98,65 @@ class HuntRenderer {
 
     getPersonalityLabel(personality) { return this.getPersonalityStyle(personality).label; }
 
+    monsterImagePath(monster = {}) {
+        const explicit = String(monster.imagePath || '').trim();
+        if (/^(?:local_assets\/monster_hunter\/reference-icons\/|img\/monsters\/)/.test(explicit)) return explicit;
+        return `img/monsters/${String(monster.filename || 'rathalos.png').replace(/^\/+/, '')}`;
+    }
+
+    getPersonalityIcon(personality) {
+        return ({ veteran: '🏆', support: '💚', newbie: '🐣', offensive: '💥', defensive: '🛡️', normal: '⚖️' })[personality] || '⚖️';
+    }
+
+    renderHunterProbabilityBadges(hunter = {}) {
+        const modifiers = hunter.perkModifiers || {};
+        const personality = hunter.personality || 'normal';
+        const perkNames = new Set((hunter.perks || []).map(perk => perk?.name));
+        const base = personality === 'veteran'
+            ? { evade: .75, guard: .78, foresight: .80, iai: .82 }
+            : personality === 'newbie'
+                ? { evade: .22, guard: .30, foresight: .50, iai: .22 }
+                : personality === 'defensive'
+                    ? { evade: .48, guard: .62, foresight: .85, iai: .58 }
+                    : personality === 'offensive'
+                        ? { evade: .48, guard: .62, foresight: .80, iai: .58 }
+                        : { evade: .48, guard: .62, foresight: .75, iai: .58 };
+        const percent = value => Math.round(Math.max(0, Math.min(.97, Number(value) || 0)) * 100);
+        const weaponAffinity = Math.max(0, Number(hunter.weaponInstance?.affinity ?? hunter.affinity ?? 0)) / 100;
+        const affinity = weaponAffinity + Number(modifiers.critChance || 0) + (perkNames.has('간파') ? .18 : 0);
+        const badges = [
+            { icon: '🎯', value: percent(.90 + Number(modifiers.hitChance || 0)), label: '적중률' },
+            { icon: '💥', value: percent(affinity), label: '회심률' },
+            { icon: '💨', value: percent(base.evade + Number(modifiers.evadeChance || 0)), label: '회피율' }
+        ];
+        const usesGuard = hunter.type === 'shield' || hunter.id === 'heavy_bowgun';
+
+        if (usesGuard) {
+            badges.push({ icon: '🛡️', value: percent(base.guard + Number(modifiers.guardChance || 0)), label: '가드율' });
+        }
+
+        const specials = {
+            great_sword: [{ icon: '🦬', value: .42, label: '태클 선택률' }],
+            long_sword: [
+                { icon: '👁️', value: base.foresight, label: '간파베기 성공률' },
+                { icon: '⚡', value: base.iai, label: '거합베기 성공률' }
+            ],
+            sword_shield: [
+                { icon: '↩️', value: .22, label: '백스텝 선택률' },
+                { icon: '✨', value: .42, label: '퍼펙트 가드 선택률' }
+            ],
+            hammer: [{ icon: '🔨', value: .32, label: '상쇄 자세 선택률' }],
+            lance: [{ icon: '🔱', value: .65, label: '카운터 자세 선택률' }],
+            switch_axe: [{ icon: '⚔️', value: .38, label: '검 카운터 선택률' }],
+            charge_blade: [{ icon: '🛡️⚡', value: .32, label: '가드 포인트 선택률' }],
+            heavy_bowgun: [{ icon: '💣', value: .40, label: '용열 카운터 선택률' }],
+            bow: [{ icon: '🪽', value: .40, label: '차지 스텝 선택률' }]
+        };
+        (specials[hunter.id] || []).forEach(stat => badges.push({ ...stat, value: percent(stat.value) }));
+
+        return badges.map(stat => `<span class="hunt-probability-badge" title="${stat.label} ${stat.value}%" aria-label="${stat.label} ${stat.value}%"><b>${stat.icon}</b>${stat.value}%</span>`).join('');
+    }
+
     escapeHTML(value) {
         if (typeof SafeContent !== 'undefined' && SafeContent.escapeHTML) return SafeContent.escapeHTML(String(value || ''));
         return String(value || '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
@@ -70,7 +167,7 @@ class HuntRenderer {
     }
 
     getPerkVisual(perk = {}) {
-        if (perk.name === '똥') return { icon: '💩', tone: 'twisted', affinity: 'neutral' };
+        if (perk.name === '💩' || perk.name === '똥') return { icon: '💩', tone: 'twisted', affinity: 'neutral' };
         const affinities = Array.isArray(perk.affinities) ? perk.affinities : [];
         const iconByAffinity = {
             guard: '⛨', mobility: '➤', support: '✚', burst: '◆', status: '◈',
@@ -89,7 +186,7 @@ class HuntRenderer {
         return { icon: iconByAffinity[affinity] || '✦', tone, affinity: affinity || 'neutral' };
     }
 
-    renderPerkBubbles(perks = [], compact = false) {
+    renderPerkBubbles(perks = [], compact = false, lockedPerkId = null) {
         if (!perks.length) {
             return '<span class="hunt-perk-bubble hunt-perk-bubble--empty"><span class="hunt-perk-icon">◇</span><span class="hunt-perk-name">백지의 기록</span></span>';
         }
@@ -98,12 +195,23 @@ class HuntRenderer {
             const description = perk.description || '길드의 기록에는 이유가 적혀 있지 않다.';
             const lore = compact ? '' : `<span class="hunt-perk-lore">${this.escapeHTML(description)}</span>`;
             const comboClass = synergy ? ' hunt-perk-bubble--synergy' : '';
-            const dungClass = perk.name === '똥' ? ' hunt-perk-bubble--dung' : '';
-            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone} hunt-perk-bubble--skill-${visual.affinity}${compact ? ' hunt-perk-bubble--compact' : ''}${comboClass}${dungClass}" title="${this.escapeHTML(`${perk.name}: ${description}`)}"><span class="hunt-perk-icon">${synergy?.icon || visual.icon}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${lore}</span></span>`;
+            const dungClass = (perk.name === '💩' || perk.name === '똥') ? ' hunt-perk-bubble--dung' : '';
+            const locked = perk.id === lockedPerkId;
+            const lockClass = locked ? ' hunt-perk-bubble--locked' : '';
+            return `<span class="hunt-perk-bubble hunt-perk-bubble--${visual.tone} hunt-perk-bubble--skill-${visual.affinity}${compact ? ' hunt-perk-bubble--compact' : ''}${comboClass}${dungClass}${lockClass}" title="${this.escapeHTML(`${perk.name}: ${description}`)}"><span class="hunt-perk-icon">${synergy?.icon || visual.icon}${locked ? '<span class="hunt-perk-lock" aria-label="잠금">🔒</span>' : ''}</span><span class="hunt-perk-copy"><span class="hunt-perk-name">${this.escapeHTML(perk.name)}</span>${lore}</span></span>`;
         };
-        const groups = typeof HuntPerkSynergyCatalog !== 'undefined'
+        let groups = typeof HuntPerkSynergyCatalog !== 'undefined'
             ? HuntPerkSynergyCatalog.group(perks)
             : perks.map((perk, order) => ({ synergy: null, perks: [perk], order }));
+        if (lockedPerkId) {
+            groups = groups.map(group => ({
+                ...group,
+                perks: [...group.perks].sort((a, b) => Number(b.id === lockedPerkId) - Number(a.id === lockedPerkId))
+            })).sort((a, b) =>
+                Number(b.perks.some(perk => perk.id === lockedPerkId))
+                - Number(a.perks.some(perk => perk.id === lockedPerkId))
+            );
+        }
         return groups.map(group => {
             if (!group.synergy) return renderBubble(group.perks[0]);
             const synergy = group.synergy;
@@ -125,7 +233,78 @@ class HuntRenderer {
         return unique.length > 1 ? `${unique.slice(0, 2).join(' · ')} 외` : (unique[0] || '결전장');
     }
 
+    renderJourneyQuestBoard(data) {
+        this.clearAnimationTimers();
+        if (!this.container) this.createContainer();
+        this.clearLobbyTimer();
+        this.container.classList?.add('hunt-pregame-overlay');
+        const voting = Array.isArray(data.journeyChoices) && data.journeyChoices.length > 0;
+        const recruiting = Boolean(data.journeyOpening);
+        const choices = (voting ? data.journeyChoices : [data.selectedMonster]).filter(Boolean).slice(0, 3);
+        const reward = Math.max(0, Number(data.journeyReward || 0));
+        const waitingSlots = Array.from({ length: 4 }, (_, index) => `
+            <div class="hunt-rise-recruit-slot"><b>${index + 1}</b><span>참가 대기</span></div>`).join('');
+        const questCards = choices.map((monster, index) => `
+            <article class="hunt-journey-quest-card${choices.length === 1 ? ' is-single' : ''}"
+                ${voting ? `data-journey-choice="${index}"` : ''}>
+                ${voting ? `<strong class="hunt-journey-quest-command">!${index + 1}</strong>` : ''}
+                <img src="${this.escapeHTML(this.monsterImagePath(monster))}"
+                    onerror="this.src='img/monsters/rathalos.png';" alt="" />
+                <h2>${this.escapeHTML(monster.nameKO || monster.id || '미확인 몬스터')}</h2>
+                <p><span>보상</span><b>💰 ${reward}</b></p>
+                ${voting ? '<em>0</em>' : ''}
+            </article>`).join('');
+        const journey = data.journey || {};
+        this.container.innerHTML = `
+            <div class="game-hunt-card game-hunt-pregame-card hunt-journey-quest-board entry-anim">
+                <header class="hunt-journey-quest-heading">
+                    <div><small>HUNTER JOURNEY</small><strong>${recruiting ? '퀘스트 수주' : (voting ? '다음 사냥감 투표' : '다음 퀘스트')}</strong></div>
+                    <span>STAGE ${Number(journey.stage || 1)}/3</span>
+                </header>
+                <div class="hunt-journey-progress" aria-label="여정 진행 상황">
+                    <span>${Number(journey.node || 1)}/${Number(journey.totalNodes || 15)}</span>
+                    <span>🛒 ${Number(journey.carts ?? 3)}</span><span>💰 ${Number(journey.zenny || 0)}</span>
+                    <span>🔒 ${Number(journey.lockLimit || 1)}</span><span>🎲 ${Number(journey.rerolls || 0)}</span>
+                    ${journey.lastEvent ? `<em>${this.escapeHTML(journey.lastEvent)}</em>` : ''}
+                </div>
+                <main class="hunt-journey-quest-cards" style="--journey-choice-count:${Math.max(1, choices.length)}">${questCards}</main>
+                <section class="hunt-journey-party-strip">
+                    <div class="hunt-journey-party-title">
+                        <b>${recruiting ? '참가 헌터' : '원정대'}</b>
+                        <span><strong id="hunt-recruit-count">0</strong> / 4</span>
+                    </div>
+                    <div id="hunt-recruit-names" class="hunt-rise-recruit-slots">${waitingSlots}</div>
+                    <div class="hunt-journey-quest-action">
+                        ${voting
+                            ? `<small>사냥감 선택</small><strong>!1${choices.length > 1 ? ` ~ !${choices.length}` : ''}</strong>`
+                            : recruiting
+                                ? '<small>채팅 입력</small><strong>!참가</strong>'
+                                : '<small>사냥감 확정</small><strong>자동 출발</strong>'}
+                    </div>
+                    <div id="hunt-recruit-feed" class="hunt-rise-recruit-feed">${
+                        recruiting ? '수주 희망자를 기다리는 중입니다.'
+                            : voting ? '원정대의 투표를 기다리는 중입니다.'
+                                : '확정된 사냥감으로 출발을 준비합니다.'
+                    }</div>
+                </section>
+                <footer class="hunt-rise-footer">
+                    <span>${recruiting ? '4명 충원 시 즉시 장비 설정으로 이동합니다.'
+                        : voting ? '최다 득표 사냥감으로 출발합니다.'
+                            : '원정대 구성은 유지됩니다.'}</span>
+                    <div class="game-timer">${recruiting ? '모집 마감 30초 · 4명 충원 시 즉시 수주'
+                        : voting ? '투표 마감 60초 · 전원 투표 시 즉시 확정'
+                            : '출발 준비 15초'}</div>
+                </footer>
+            </div>`;
+        this.card = this.container.querySelector('.game-hunt-card');
+        this.lobbyTimers.timeout(() => this.card && this.card.classList.remove('entry-anim'), 600);
+    }
+
     renderQuestBoard(data) {
+        if (data.journey) {
+            this.renderJourneyQuestBoard(data);
+            return;
+        }
         this.clearAnimationTimers();
         if (!this.container) this.createContainer();
         this.clearLobbyTimer();
@@ -144,7 +323,7 @@ class HuntRenderer {
         const targetCards = questMonsters.map((item, index) => `
             <div class="hunt-rise-target${index === 0 ? ' hunt-rise-target--primary' : ''}">
                 <span class="hunt-rise-target-number">${index + 1}</span>
-                <img src="img/monsters/${this.escapeHTML(item.filename || 'rathalos.png')}" onerror="this.src='img/monsters/rathalos.png';" alt="" />
+                <img src="${this.escapeHTML(this.monsterImagePath(item))}" onerror="this.src='img/monsters/rathalos.png';" alt="" />
                 <span class="hunt-rise-target-name">${this.escapeHTML(item.nameKO || '미확인 몬스터')}</span>
             </div>`).join('');
         const waitingSlots = Array.from({ length: 4 }, (_, index) => `
@@ -193,6 +372,98 @@ class HuntRenderer {
         this.lobbyTimers.timeout(() => this.card && this.card.classList.remove('entry-anim'), 600);
     }
 
+    renderJourneyEventBoard(data) {
+        this.clearAnimationTimers();
+        if (!this.container) this.createContainer();
+        this.container.classList?.add('hunt-pregame-overlay');
+        this.container.innerHTML = `<div class="game-hunt-card game-hunt-pregame-card hunt-journey-event-board">
+            <header><small>STAGE ${Number(data.stage)}/3 · ${data.scene ? 'ENCOUNTER' : 'EVENT'}</small>
+                <strong>${this.escapeHTML(data.title || (data.scope === 'individual' ? '각자 행동을 선택' : '파티의 다음 행선지를 투표'))}</strong>
+                ${data.scene?.narrative ? `<p>${this.escapeHTML(data.scene.narrative)}</p>` : ''}</header>
+            <div class="hunt-journey-event-choices">${data.choices.map((choice, index) => {
+                return `<div data-journey-event-choice="${index}"><b>!${index + 1}</b><i>${this.escapeHTML(choice.icon)}</i>
+                    <strong>${this.escapeHTML(choice.label)}</strong>${choice.description ? `<small>${this.escapeHTML(choice.description)}</small>` : ''}<em>0</em></div>`;
+            }).join('')}</div>
+            <footer><span>${data.scope === 'individual' ? '헌터별 행동 · 코인이 부족하면 거래 실패 · 무응답 자동 선택' : '파티 공동 행동 · 동표는 시드 선택'}</span><div class="game-timer">선택 마감 60초 · 전원 선택 시 즉시 확정</div></footer>
+        </div>`;
+        this.card = this.container.querySelector('.game-hunt-card');
+    }
+
+    renderJourneyTravelMap(data) {
+        this.clearAnimationTimers();
+        if (!this.container) this.createContainer();
+        this.container.classList?.add('hunt-pregame-overlay');
+        const iconFor = node => node.type === 'event' ? '❔'
+            : node.isBoss ? '👑'
+                : ({ small: '🐾', medium: '🐲', normal: '🐉', elder: '🌌', colossal: '🏔️' })[node.tier] || '⚔️';
+        const stages = [0, 1, 2].map(stageIndex => {
+            const stageNodes = data.nodes.filter(node => Number(node.stageIndex) === stageIndex);
+            return `<section class="hunt-journey-map-stage hunt-journey-map-stage--${stageIndex + 1}">
+                <header><b>STAGE ${stageIndex + 1}</b><span>${stageIndex === 0 ? '야생의 길' : stageIndex === 1 ? '강자의 영역' : '최후의 경계'}</span></header>
+                <div class="hunt-journey-map-route">${stageNodes.map(node => {
+                    const state = node.index < data.currentIndex ? 'is-complete'
+                        : node.index === data.currentIndex ? 'is-current' : 'is-future';
+                    return `<div class="hunt-journey-map-node ${state}${node.type === 'event' ? ' is-event' : ''}" data-journey-map-node="${node.index}">
+                        <i>${iconFor(node)}</i><small>${this.escapeHTML(node.label)}</small>
+                        ${node.index === data.currentIndex ? '<em>🚶</em>' : node.index < data.currentIndex ? '<em>✓</em>' : ''}
+                    </div>`;
+                }).join('')}</div>
+            </section>`;
+        }).join('');
+        const current = data.nodes[data.currentIndex];
+        const previous = data.nodes[data.currentIndex - 1];
+        this.container.innerHTML = `<div class="game-hunt-card game-hunt-pregame-card hunt-journey-travel-map">
+            <header class="hunt-journey-map-heading">
+                <small>HUNTER'S ROUTE · STAGE ${Number(data.stage)}/3</small>
+                <strong>🗺️ 다음 목적지로 이동 중</strong>
+                <p>${previous ? `${this.escapeHTML(previous.label)}에서 ` : '거점에서 '}${this.escapeHTML(current?.label || '미지의 목적지')} 방향으로 향합니다.</p>
+            </header>
+            <div class="hunt-journey-map-canvas">${stages}</div>
+            <footer><span>🛒 ${Number(data.carts || 0)}　💰 ${Number(data.zenny || 0)}　길 위에서는 전투 명령을 받지 않습니다.</span>
+                <div class="game-timer" data-journey-travel-timer>도착까지 ${Number(data.duration || 10)}초</div></footer>
+        </div>`;
+        this.card = this.container.querySelector('.game-hunt-card');
+    }
+
+    updateJourneyTravelTimer(seconds) {
+        const timer = this.card?.querySelector('[data-journey-travel-timer]');
+        if (timer) timer.textContent = `도착까지 ${Math.max(0, Number(seconds || 0))}초`;
+    }
+
+    renderJourneyUpgradeBoard(data) {
+        this.clearAnimationTimers();
+        if (!this.container) this.createContainer();
+        this.container.classList?.add('hunt-pregame-overlay');
+        const sealEmoji = { iron: '⛓️', bone: '🦴', small: '🐛', bird: '🐦', fanged: '🐾', flying: '🐉',
+            aquatic: '🌊', brute: '🦬', elder: '🌌', temnoceran: '🕷️', cephalopod: '🐙', special: '✨' };
+        const sharpnessColor = item => ['purple', 'white', 'blue', 'green', 'yellow', 'orange', 'red']
+            .find(color => Number(item?.sharpness?.[color] || 0) > 0) || 'red';
+        this.container.innerHTML = `<div class="game-hunt-card game-hunt-pregame-card hunt-journey-upgrade-board">
+            <header><small>STAGE ${Number(data.stage)} · FORGE</small><strong>🔨 무기 강화 선택</strong></header>
+            <div class="hunt-journey-upgrade-list">${data.party.map((member, memberIndex) => `<section data-upgrade-member="${memberIndex}">
+                <b>${this.escapeHTML(member.nickname)}</b><div>${(data.choices[memberIndex] || []).map((item, choiceIndex) =>
+                    `<span data-upgrade-choice="${choiceIndex}" data-weapon-seal="${this.escapeHTML(item.seal || 'special')}"><strong>!${choiceIndex + 1}</strong>
+                    <i>${sealEmoji[item.seal] || '⚒️'}</i>${this.escapeHTML(item.nameKo || item.name || `R${item.rarity}`)}
+                    <small>공격 ${Number(item.raw || 0)} · 회심 ${Number(item.affinity || 0)}%</small>
+                    <b class="hunt-upgrade-sharpness" style="--edge:${sharpnessColor(item)}"></b><em>R${Number(item.rarity || 1)}</em></span>`).join('') || '<span>강화 후보 없음</span>'}</div>
+            </section>`).join('')}</div>
+            <footer><span>헌터별 선택 · 무응답/NPC 자동 추천</span><div class="game-timer">강화 선택 60초 · 전원 선택 시 즉시 확정</div></footer>
+        </div>`;
+        this.card = this.container.querySelector('.game-hunt-card');
+    }
+
+    updateJourneyUpgradeVoteUI(memberIndex, choiceIndex) {
+        const row = this.card?.querySelector(`[data-upgrade-member="${memberIndex}"]`);
+        row?.querySelectorAll('[data-upgrade-choice]').forEach(item => item.classList.toggle('selected', Number(item.dataset.upgradeChoice) === choiceIndex));
+    }
+
+    updateJourneyEventVoteUI(counts = []) {
+        counts.forEach((count, index) => {
+            const target = this.card?.querySelector(`[data-journey-event-choice="${index}"] em`);
+            if (target) target.textContent = String(count);
+        });
+    }
+
     updateRecruitmentUI(participants = []) {
         if (!this.card) return;
         const count = this.card.querySelector('#hunt-recruit-count');
@@ -214,6 +485,13 @@ class HuntRenderer {
                 names.appendChild(slot);
             }
         }
+    }
+
+    updateJourneyVoteUI(counts = []) {
+        counts.forEach((count, index) => {
+            const target = this.card?.querySelector(`[data-journey-choice="${index}"] em`);
+            if (target) target.textContent = String(count);
+        });
     }
 
     spawnRecruitmentNotification(nickname) {
@@ -238,11 +516,18 @@ class HuntRenderer {
                 </div>
                 <div class="hunt-loadout-guide" aria-label="로드아웃 채팅 명령어">
                     <b class="hunt-loadout-guide-label">채팅 명령어</b>
-                    <span>!대검 지원가</span><span>!차액</span><span>!추천</span><span class="hunt-loadout-reroll">🎲 !리롤 ×2</span><span class="hunt-loadout-ready-command">!준비</span>
+                    ${(data.selectedWeapons || []).some(hunter => hunter.isNpc) ? '<span class="hunt-loadout-join-command" id="hunt-loadout-join-command">👤 !참가</span>' : ''}
+                    <span>!대검 지원가</span><span>!차액</span><span>!추천</span><span class="hunt-loadout-lock-command">🔒 !잠금 1</span><span class="hunt-loadout-unlock-command">🔓 !해제 1</span><span class="hunt-loadout-reroll">🎲 !리롤 ×2</span><span class="hunt-loadout-ready-command">!준비</span>
                 </div>
             </div>`;
         this.card = this.container.querySelector('.game-hunt-card');
         (data.selectedWeapons || []).forEach(hunter => this.updateLoadoutCard(hunter));
+    }
+
+    updateLoadoutJoinAvailability(hasNpcSlot) {
+        if (!this.card) return;
+        const command = this.card.querySelector('#hunt-loadout-join-command');
+        if (!hasNpcSlot) command?.remove();
     }
 
     updateLoadoutCard(hunter) {
@@ -252,7 +537,7 @@ class HuntRenderer {
         card.classList.toggle('hunt-loadout-ready', Boolean(hunter.loadoutReady));
         card.setAttribute('aria-label', hunter.loadoutReady ? '준비 완료, 장비 변경 잠김' : '장비 선택 중');
         const personality = this.getPersonalityStyle(hunter.personality);
-        const perkBubbles = this.renderPerkBubbles(hunter.perks || []);
+        const perkBubbles = this.renderPerkBubbles(hunter.perks || [], false, hunter.lockedPerkId);
         const hunterName = this.escapeHTML(hunter.hunterName || `HUNTER ${hunter.index + 1}`);
         card.innerHTML = `
             <div class="hunt-loadout-hunter-name" style="font-size:1.15rem;font-weight:900;color:${this.safeColor(hunter.hunterColor, '#eeeeee')};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${hunter.isNpc ? '🐱 ' : ''}${hunterName}</div>
@@ -265,7 +550,8 @@ class HuntRenderer {
                 <div class="hunt-loadout-weapon-name" style="font-size:1.35rem;font-weight:1000;color:#c98534;" title="${this.escapeHTML(hunter.weaponDisplayName || hunter.name)}">${this.escapeHTML(hunter.weaponDisplayName || hunter.name)}</div>
                 <div class="hunt-loadout-personality" style="background:${personality.bg};border:1px solid ${personality.color};border-radius:7px;color:${personality.color};font-weight:900;padding:3px 7px;">${personality.label}</div>
             </div>
-            <div class="hunt-loadout-perks">${perkBubbles}</div>`;
+            <div class="hunt-loadout-perks">${perkBubbles}</div>
+            <div class="hunt-perk-lock-capacity">🔒 ${hunter.lockedPerkId ? 1 : 0}/1</div>`;
     }
 
     updatePhaseTimer(timeLeft, label) {
@@ -305,7 +591,7 @@ class HuntRenderer {
                             const opacityStyle = isCurrent ? '1.0' : '0.5';
                             return `
                             <div style="display:flex; flex-direction:column; align-items:center; position:relative; width: 125px; opacity: ${opacityStyle};">
-                                <img class="game-hunt-monster-img" src="img/monsters/${m.filename}" onerror="this.src='img/monsters/rathalos.png';" style="width:115px; height:115px; border-radius:18px; border:${borderStyle}; box-shadow:${shadowStyle}; background:rgba(0,0,0,0.6);" />
+                                <img class="game-hunt-monster-img" src="${this.escapeHTML(this.monsterImagePath(m))}" onerror="this.src='img/monsters/rathalos.png';" style="width:115px; height:115px; border-radius:18px; border:${borderStyle}; box-shadow:${shadowStyle}; background:rgba(0,0,0,0.6);" />
                                 <div style="font-size:1.15rem; font-weight:bold; color:${isCurrent ? '#c98534' : '#888'}; margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:125px;">${m.nameKO}</div>
                             </div>
                             ${idx < consecutiveQueue.length - 1 ? '<div style="font-size:2.2rem; color:#c98534; font-weight:bold; opacity:0.3; margin: 0 6px;">→</div>' : ''}
@@ -317,7 +603,7 @@ class HuntRenderer {
         } else {
             monsterShowcaseHTML = `
                 <div class="game-hunt-monster-showcase" style="margin-bottom: 16px; background: transparent; border: none; box-shadow: none; padding: 0;">
-                    <img class="game-hunt-monster-img" src="img/monsters/${selectedMonster.filename}" onerror="this.src='img/monsters/rathalos.png';" style="width: 260px; height: 260px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8)); transition: transform 0.3s ease;" />
+                    <img class="game-hunt-monster-img" src="${this.escapeHTML(this.monsterImagePath(selectedMonster))}" onerror="this.src='img/monsters/rathalos.png';" style="width: 260px; height: 260px; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8)); transition: transform 0.3s ease;" />
                 </div>
             `;
         }
@@ -533,90 +819,81 @@ class HuntRenderer {
         this.card.style.animation = 'none';
         this.card.style.transform = '';
 
-        const { hpLabelText, selectedMonster, selectedWeapons, showMonsterHp, timeLimit, smallMonsterCount = 0, cartLimit = 3 } = data;
+        const { hpLabelText, selectedMonster, selectedWeapons, showMonsterHp, timeLimit, smallMonsterCount = 0,
+            cartLimit = 3, sharedSupply = null } = data;
+        // HuntCombatAnimator is owned by the renderer. Keep the live monster on
+        // that same owner so anatomy, effect origins, and directional mirroring
+        // resolve identically in production and in isolated animation previews.
+        this.selectedMonster = selectedMonster;
+        this.card.classList.toggle('hunt-shared-supply-mode', Boolean(sharedSupply));
         this.cartLimit = Math.max(3, Number(cartLimit || 3));
         const isSmallSwarm = Number(smallMonsterCount) >= 3;
         const monsterVisuals = isSmallSwarm
             ? `<div class="hunt-small-monster-pack" style="--small-monster-count:${smallMonsterCount}">${Array.from({ length: smallMonsterCount }, (_, index) => `
                 <div class="hunt-small-monster-slot" data-small-monster-slot="${index}">
-                    <img class="game-hunt-monster-img hunt-small-monster${index === 0 ? ' is-targeted is-attacking' : ''}" ${index === 0 ? 'id="fight-monster-img"' : ''} data-small-monster-index="${index}" src="img/monsters/${selectedMonster.filename}" onerror="this.src='img/monsters/rathalos.png';" />
+                    <div class="hunt-monster-attack-motion is-small-monster">
+                        <div class="hunt-monster-facing-layer">
+                            <img class="game-hunt-monster-img hunt-small-monster${index === 0 ? ' is-targeted is-attacking' : ''}" ${index === 0 ? 'id="fight-monster-img"' : ''} data-small-monster-index="${index}" src="${this.escapeHTML(this.monsterImagePath(selectedMonster))}" onerror="this.src='img/monsters/rathalos.png';" />
+                        </div>
+                    </div>
                     <div class="hunt-small-monster-hp"><i></i></div>
                     <div class="hunt-small-monster-atb" aria-label="${selectedMonster.nameKO} ${index + 1} 행동 게이지"><i></i></div>
                     <b>${index + 1}</b>
                 </div>`).join('')}</div>`
-            : `<img class="game-hunt-monster-img" id="fight-monster-img" src="img/monsters/${selectedMonster.filename}" onerror="this.src='img/monsters/rathalos.png';" style="width:380px;height:380px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.85));transition:transform .15s ease;position:relative;z-index:2;" />`;
+            : `<div class="hunt-monster-attack-motion">
+                    <div class="hunt-monster-facing-layer">
+                        <img class="game-hunt-monster-img" id="fight-monster-img" src="${this.escapeHTML(this.monsterImagePath(selectedMonster))}" onerror="this.src='img/monsters/rathalos.png';" style="width:380px;height:380px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.85));transition:transform .15s ease;position:relative;z-index:2;" />
+                    </div>
+                </div>`;
         const limitSec = timeLimit || 480;
         const initialMin = String(Math.floor(limitSec / 60)).padStart(2, '0');
         const initialSec = String(limitSec % 60).padStart(2, '0');
 
         this.card.innerHTML = `
-            <div id="game-hunt-top-panel" style="display: flex; flex-direction: column; align-items: center; width: 100%; background: rgba(0,0,0,0.65); border: 2px solid #c5a059; border-radius: 20px; padding: 20px 25px; box-shadow: 0 8px 32px rgba(0,0,0,0.7); position: relative; margin-bottom: 24px; box-sizing: border-box;">
+            <div id="game-hunt-top-panel" class="hunt-monster-vitals">
                 <!-- Monster HP Bar -->
-                <div class="game-hunt-monster-hp-container" style="${showMonsterHp ? '' : 'display:none;'} width: 100%; text-align: left; box-sizing: border-box;">
-                    <div class="game-hunt-monster-hp-wrapper" style="width: 100%; height: 34px; background: #111; border: 2px solid #c5a059; border-radius: 17px; overflow: hidden; position: relative; box-shadow: 0 0 15px rgba(255, 59, 48, 0.45);">
-                        <div id="monster-hp-fill" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ff3b30, #ff9500); transition: width 0.15s ease-out;"></div>
-                        <div id="monster-hp-center-text" class="monster-hp-center-text" data-monster-name="${selectedMonster.nameKO}" style="font-size: 1.5rem; font-weight: bold; line-height: 30px; text-shadow: 0 0 4px rgba(0,0,0,0.9);">
-                            ${selectedMonster.nameKO} (12000 / 12000)
+                <div class="game-hunt-monster-hp-container" style="${showMonsterHp ? '' : 'display:none;'}">
+                    <div class="game-hunt-monster-hp-wrapper">
+                        <div id="monster-hp-fill"></div>
+                        <div id="monster-hp-center-text" class="monster-hp-center-text">
+                            <span id="monster-state-icon" class="monster-state-icon" hidden></span>
+                            <span id="monster-name-text" data-monster-name="${selectedMonster.nameKO}">${selectedMonster.nameKO}</span>
+                            <span id="monster-hp-values">(12000 / 12000)</span>
                         </div>
                     </div>
+                    ${isSmallSwarm ? '' : `
+                        <div class="hunt-monster-atb-track" aria-label="몬스터 행동 게이지">
+                            <i id="monster-atb-fill"></i>
+                        </div>`}
                 </div>
+            </div>
+
+            <div class="hunt-monster-aux-rail" aria-label="몬스터 전투 정보">
+                ${isSmallSwarm ? '<span></span>' : `
+                    <section class="hunt-monster-aux-panel hunt-monster-parts-panel" id="hunt-monster-parts-panel" aria-label="파괴 가능 부위" hidden>
+                        <div class="hunt-monster-parts" id="hunt-monster-parts"></div>
+                    </section>`}
+                <section class="hunt-monster-aux-panel hunt-monster-utility-panel" aria-label="퀘스트 정보">
+                    <div class="hunt-monster-corner-hud">
+                        <span id="cart-counter-board" class="hunt-monster-hud-chip hunt-cart-chip">🛒 ${this.cartLimit}</span>
+                        <span id="battle-timer-label" class="hunt-monster-hud-chip hunt-timer-chip">⏱️ ${initialMin}:${initialSec}</span>
+                    </div>
+                </section>
             </div>
 
             <!-- Monster Showcase Area -->
             <div id="monster-showcase-panel" style="
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
+                justify-content: center;
                 width: 100%;
                 margin: 20px auto 24px;
                 position: relative;
                 overflow: visible;
                 box-sizing: border-box;
-                gap: 24px;
             ">
-                <!-- Left Info Panel -->
-                <div class="hunt-monster-side-panel hunt-monster-side-panel--left" style="
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 14px;
-                    background: rgba(0,0,0,0.45);
-                    border: 1.5px solid rgba(197, 160, 89, 0.25);
-                    border-radius: 16px;
-                    padding: 14px;
-                    min-height: 216px;
-                    justify-content: center;
-                    box-sizing: border-box;
-                    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
-                ">
-                    <div style="font-size: 1.25rem; font-weight: bold; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Quest Status</div>
-                    <div id="cart-counter-board" style="
-                        font-size: 1.45rem;
-                        font-weight: bold;
-                        color: #ff3b30;
-                        background: rgba(255,59,48,0.1);
-                        border: 1.5px solid rgba(255,59,48,0.3);
-                        padding: 10px 20px;
-                        border-radius: 10px;
-                        width: 100%;
-                        text-align: center;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-                        white-space: nowrap;
-                        box-sizing: border-box;
-                    ">
-                        수레 현황: ${this.cartLimit <= 4 ? Array(this.cartLimit).fill('🛒').join(' ') : `🛒 ×${this.cartLimit}`} (0/${this.cartLimit})
-                    </div>
-                    
-                    <div style="font-size: 1.25rem; font-weight: bold; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px;">Monster Action</div>
-                    <!-- Monster ATB Bar -->
-                    <div style="width: 100%; background: #222; height: 16px; border-radius: 8px; overflow: hidden; border: 1px solid #333; box-sizing: border-box; box-shadow: inset 0 0 5px rgba(0,0,0,0.8);">
-                        <div id="monster-atb-fill" style="width: 0%; height: 100%; background: #e58e26; transition: width 0.1s linear;"></div>
-                    </div>
-                </div>
-
-                <!-- Center Monster Image (Scaled to 380px) -->
                 <div class="hunt-monster-motion-stage" style="
-                    width: min(720px, 48vw);
+                    width: min(1320px, 82vw);
                     height: 380px;
                     display: flex;
                     align-items: center;
@@ -624,105 +901,47 @@ class HuntRenderer {
                     position: relative;
                 ">
                     ${monsterVisuals}
-                    <div class="hunt-flight-knockdown-gauge" id="hunt-flight-knockdown-gauge" hidden>
-                        <div><span id="hunt-flight-knockdown-fill"></span></div>
-                        <b id="hunt-flight-knockdown-label">격추 0%</b><small id="hunt-flight-timer">60초</small>
-                    </div>
-                </div>
-
-                <!-- Right Info Panel -->
-                <div class="hunt-monster-side-panel hunt-monster-side-panel--right" style="
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-end;
-                    gap: 14px;
-                    background: rgba(0,0,0,0.45);
-                    border: 1.5px solid rgba(197, 160, 89, 0.25);
-                    border-radius: 16px;
-                    padding: 14px;
-                    min-height: 216px;
-                    justify-content: center;
-                    box-sizing: border-box;
-                    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
-                ">
-                    <div style="font-size: 1.25rem; font-weight: bold; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Monster Status</div>
-                    <div id="monster-status-label" style="
-                        font-size: 1.4rem;
-                        font-weight: bold;
-                        color: #00ffaa;
-                        border: 1.5px solid #00ffaa;
-                        background: rgba(0,255,170,0.08);
-                        padding: 10px 20px;
-                        border-radius: 10px;
-                        width: 100%;
-                        text-align: center;
-                        box-shadow: 0 4px 10px rgba(0,255,170,0.15);
-                        white-space: nowrap;
-                        box-sizing: border-box;
-                    ">
-                        일반 상태
-                    </div>
-
-                    <div style="font-size: 1.25rem; font-weight: bold; color: #aaa; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px;">Time Limit</div>
-                    <div id="battle-timer-label" style="
-                        font-size: 1.45rem;
-                        font-weight: bold;
-                        color: #eee;
-                        background: rgba(255,255,255,0.08);
-                        border: 1.5px solid rgba(255,255,255,0.15);
-                        padding: 10px 20px;
-                        border-radius: 10px;
-                        width: 100%;
-                        text-align: center;
-                        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-                        white-space: nowrap;
-                        box-sizing: border-box;
-                    ">
-                        남은 시간: ${initialMin}:${initialSec}
-                    </div>
                 </div>
             </div>
 
-            <div class="hunt-combat-reserve-commands" aria-label="참가 헌터 행동 예약 명령">
-                <b>예약</b><span>!물약 · !가루 · !폭탄 · !숫돌 · !점프 · !귀환옥</span>
-            </div>
+            ${selectedWeapons.some(hunter => hunter.isNpc)
+                ? '<div class="hunt-combat-hot-join" id="hunt-combat-hot-join">👤 AI 교대 <strong>!참가</strong></div>' : ''}
+            ${sharedSupply ? `<div class="hunt-shared-supply" aria-label="공용 캠프 보급고">
+                <b>⛺ 공용 보급</b>
+                <span id="shared-potion-count">🧪 ${Number(sharedSupply.potions || 0)}/10</span>
+                <span id="shared-trap-count">🪤 ${Number(sharedSupply.shockTraps || 0)}</span>
+                <span id="shared-lifepowder-count">💚 ${Number(sharedSupply.lifepowders || 0)}</span>
+                <span id="shared-bomb-count">💣 ${Number(sharedSupply.bombs || 0)}</span>
+            </div>` : ''}
 
             <!-- 4 Weapons Grid (Bottom) -->
             <div class="game-hunt-weapons-grid">
                 ${selectedWeapons.map(w => `
                 <div class="game-hunt-weapon-card ${w.status === 'dead' ? 'dead' : ''}" id="fight-card-${w.index}" style="position:relative; transition: transform 0.15s ease, border-color 0.15s ease; ${w.status === 'dead' ? 'transform: rotate(180deg);' : ''}">
+                    <div class="hunt-hunter-heading">
+                        <span class="hunt-hunter-personality" aria-label="${this.escapeHTML(this.getPersonalityLabel(w.personality))}">${this.getPersonalityIcon(w.personality)}</span>
+                        <span class="hunt-hunter-name" style="color:${SafeContent.cssColor(w.hunterColor, '#eeeeee')}">${SafeContent.escapeHTML(w.hunterName || 'HUNTER')}</span>
+                    </div>
                     ${this.renderSharpnessGauge(w, `sharpness-${w.index}`)}
-                    <div class="hunt-action-queue" id="hunt-action-queue-${w.index}" aria-label="예약 행동 큐">${this.renderHunterCommandQueue(w)}</div>
+                    <div class="hunt-weapon-special-resource">${this.renderWeaponResourceGlyphs(w)}</div>
                     <div class="game-hunt-weapon-img-container weapon-${w.id} weapon-charge-stage-${Math.min(3, Number(w.id === 'hammer' ? w.hammerChargeLevel : w.greatSwordCharge) || 0)}" id="weapon-img-container-${w.index}" style="--weapon-facing:${Number(w.index) < 2 ? 1 : -1};--great-sword-mirror:${Number(w.index) < 2 ? -1 : 1};position: relative; width: 115px; height: 115px; margin: 0 auto 16px;">
-                        <img class="game-hunt-weapon-img" src="img/weapons/${w.filename}" style="margin: 0;" />
+                        ${['sword_shield', 'lance', 'gunlance'].includes(w.id) ? `
+                            <img class="game-hunt-weapon-img hunt-split-weapon hunt-split-weapon--${w.id}" src="img/weapons/${w.filename}" alt="" />
+                            <img class="hunt-split-shield hunt-split-shield--${w.id}" src="img/weapons/${w.filename}" alt="" />
+                        ` : `<img class="game-hunt-weapon-img${w.id === 'charge_blade' && w.shieldChargeDuration > 0 ? ' cb-shield-charged-img' : ''}" src="img/weapons/${w.filename}" style="margin: 0;" />`}
                         <div class="hunter-blight-overlay" id="hunter-blights-${w.index}" aria-label="${this.blightLabel(w.elementalBlights)}">${this.renderHunterBlights(w.elementalBlights)}</div>
                         ${w.id === 'insect_glaive' ? `<img class="ig-kinsect" id="ig-kinsect-${w.index}" src="img/weapons/kinsect.svg" alt="" />` : ''}
                         ${w.id === 'gunlance' ? `
                             <div class="game-hunt-weapon-overlay gunlance-overheat-overlay" id="overheat-overlay-${w.index}" style="background: linear-gradient(180deg, #ff3b30 0%, #ff9500 100%); mask-image: url('img/weapons/gunlance.svg'); -webkit-mask-image: url('img/weapons/gunlance.svg'); opacity: ${w.overheatDuration ? 1 : 0}; clip-path: inset(${w.overheatDuration ? (30 - w.overheatDuration) / 30 * 100 : 100}% 0px 0px 0px); -webkit-clip-path: inset(${w.overheatDuration ? (30 - w.overheatDuration) / 30 * 100 : 100}% 0px 0px 0px);"></div>
                         ` : ''}
-                        ${w.id === 'long_sword' ? `
-                            <div class="game-hunt-weapon-overlay long-sword-spirit-overlay" id="spirit-overlay-${w.index}" style="background: #ffffff; mask-image: url('img/weapons/long_sword.svg'); -webkit-mask-image: url('img/weapons/long_sword.svg');"></div>
-                        ` : ''}
-                        ${w.id === 'charge_blade' ? `
-                            <div class="game-hunt-weapon-overlay charge-blade-shield-overlay" id="shield-overlay-${w.index}" style="background: #e84393; mask-image: url('img/weapons/charge_blade.svg'); -webkit-mask-image: url('img/weapons/charge_blade.svg');"></div>
-                        ` : ''}
-                        ${w.id === 'hunting_horn'
-                            ? `<div class="weapon-resource-dock weapon-resource-dock-horn">${this.renderWeaponResourceGlyphs(w)}</div>`
-                            : this.renderWeaponResourceGlyphs(w)}
-                        ${['great_sword', 'hammer'].includes(w.id) ? `<div class="weapon-charge-aura" aria-hidden="true" style="mask-image:url('img/weapons/${w.filename}');-webkit-mask-image:url('img/weapons/${w.filename}');"></div>` : ''}
                     </div>
                     <div class="hunt-combat-info">
                     <div class="game-hunt-status-tag-container" style="position: absolute; right: calc(50% + 68px); top: 92px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: flex-end; z-index: 5;">
                         <div class="hunt-horn-buff-rack" id="horn-buffs-${w.index}" aria-label="수렵피리 버프">${this.renderHornBuffBadges(w)}</div>
                     </div>
                     
-                    <div class="atb-circular-container" style="position: absolute; left: calc(50% + 68px); top: 92px; width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 5;">
-                        <svg width="46" height="46" viewBox="0 0 32 32">
-                            <circle cx="16" cy="16" r="12" fill="rgba(0, 0, 0, 0.08)"></circle>
-                            <circle id="atb-circle-fill-${w.index}" cx="16" cy="16" r="6" fill="none" stroke="#00a8ff" stroke-width="12"
-                                    stroke-dasharray="37.7" stroke-dashoffset="${37.7 - (37.7 * (w.atb || 0)) / 100}"
-                                    transform="rotate(-90 16 16)" style="transition: stroke-dashoffset 0.1s linear;"></circle>
-                        </svg>
+                    <div class="hunt-atb-row" aria-label="ATB">
+                        <div class="hunt-atb-track"><i id="atb-fill-${w.index}" style="width:${Math.max(0, Math.min(100, Number(w.atb || 0)))}%"></i></div>
                     </div>
                     
                     <!-- HP Bar -->
@@ -731,26 +950,19 @@ class HuntRenderer {
                         <div class="game-hunt-hp-text" id="hp-text-${w.index}">${w.hp} / ${w.maxHp}</div>
                     </div>
 
-                    <div id="personality-tag-${w.index}" style="font-size:1.35rem; color:#aaa; margin-top:4px; margin-bottom:12px; display:flex; justify-content:center; gap:12px; align-items:center; font-weight:bold;">
-                        <span>${
-                            w.personality === 'offensive' ? '💥' : 
-                            w.personality === 'defensive' ? '🛡️' : 
-                            w.personality === 'veteran' ? '🏆' : 
-                            w.personality === 'support' ? '💚' : 
-                            w.personality === 'newbie' ? '🐣' : 
-                            '⚖️'
-                        }</span>
-                        <span style="opacity:0.3;">|</span>
+                    <div class="hunt-item-list" id="personality-tag-${w.index}">
                         <span id="potion-count-${w.index}">🧪 ${w.potions}</span>
                         <span id="trap-count-${w.index}">🪤 ${Number(w.shockTraps || 0)}</span>
-                        <span id="lifepowder-count-${w.index}">✨ ${Number(w.lifepowders || 0)}</span>
+                        <span id="lifepowder-count-${w.index}">💚 ${Number(w.lifepowders || 0)}</span>
                         <span id="bomb-count-${w.index}">💣 ${Number(w.bombs || 0)}</span>
+                        <span id="flash-count-${w.index}">✨ ${Number(w.flashPods || 0)}</span>
                     </div>
-                    <div class="hunt-combat-perks">${this.renderPerkBubbles(w.perks || [], true)}</div>
+                    <div class="hunt-combat-perks">${this.renderPerkBubbles(w.perks || [], true, w.lockedPerkId)}</div>
  
                     <div class="game-hunt-weapon-name" style="font-size: 2.5rem; font-weight: bold; color:${SafeContent.cssColor(w.hunterColor, '#c98534')}; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; margin-bottom: 6px;">
-                        👤 ${SafeContent.escapeHTML(w.hunterName || 'HUNTER')}
+                        ${SafeContent.escapeHTML(w.weaponDisplayName || w.name)}
                     </div>
+                    <div class="hunt-hunter-probabilities" id="hunter-probabilities-${w.index}" aria-label="헌터 전투 확률">${this.renderHunterProbabilityBadges(w)}</div>
                     </div>
                 </div>`).join('')}
             </div>
@@ -771,26 +983,51 @@ class HuntRenderer {
             fill.style.width = `${pct}%`;
             txt.textContent = `${w.hp} / ${w.maxHp}`;
 
-            // HP Bar Color based on health percentage
-            if (pct <= 25) {
-                fill.style.background = '#ff3b30'; // red
-            } else if (pct <= 55) {
-                fill.style.background = '#ffcc00'; // yellow
-            } else {
-                fill.style.background = '#2eff7b'; // green
-            }
+            fill.style.background = this.hunterHpBarBackground(w, pct);
         }
+    }
+
+    updateCombatHunterIdentity(hunter, hasNpcSlot = true) {
+        if (!this.card || !hunter) return;
+        const card = this.card.querySelector(`#fight-card-${hunter.index}`);
+        const name = card?.querySelector('.hunt-hunter-name');
+        if (name) {
+            name.textContent = hunter.hunterName || 'HUNTER';
+            name.style.color = this.safeColor(hunter.hunterColor, '#eeeeee');
+        }
+        if (card) {
+            card.classList.remove('hunt-hot-joined');
+            void card.offsetWidth;
+            card.classList.add('hunt-hot-joined');
+            this.animationTimers.timeout(() => card.classList.remove('hunt-hot-joined'), 1400);
+        }
+        if (!hasNpcSlot) this.card.querySelector('#hunt-combat-hot-join')?.remove();
+    }
+
+    hunterHpBarBackground(w = {}, pct = 100) {
+        const blights = w.elementalBlights || {};
+        if (Number(blights.poison || 0) > 0) return 'linear-gradient(90deg, #55206f, #b84de0 68%, #efb6ff)';
+        if (Number(blights.fire || 0) > 0) return 'linear-gradient(90deg, #9e1c00, #ff5426 65%, #ffb13b)';
+        if (w.environmentDotType === 'effluvium') return 'linear-gradient(90deg, #31410d, #799b26 65%, #bfdc55)';
+        if (pct <= 25) return '#ff3b30';
+        if (pct <= 55) return '#ffcc00';
+        return '#2eff7b';
+    }
+
+    hunterAtbBarBackground(w = {}, interrupted = false) {
+        if (interrupted) return '#7f8c8d';
+        const blights = w.elementalBlights || {};
+        if (Number(blights.ice || 0) > 0) return 'linear-gradient(90deg, #4ba7d1, #b9efff 72%, #ffffff)';
+        if (Number(blights.water || 0) > 0) return 'linear-gradient(90deg, #075fb8, #28a9ff 72%, #9de6ff)';
+        return 'linear-gradient(90deg, #d99b00, #ffd84d 72%, #fff2a3)';
     }
 
     updateMonsterHpUI(hp, maxHp) {
         if (!this.card) return;
         const fill = this.card.querySelector('#monster-hp-fill');
-        const txt = this.card.querySelector('#monster-hp-center-text');
+        const values = this.card.querySelector('#monster-hp-values');
         if (fill) fill.style.width = `${(hp / maxHp) * 100}%`;
-        if (txt) {
-            const name = txt.dataset.monsterName || "";
-            txt.textContent = `${name} (${hp} / ${maxHp})`;
-        }
+        if (values) values.textContent = `(${hp} / ${maxHp})`;
     }
 
     updateSmallMonsterSwarmUI(state) {
@@ -818,7 +1055,7 @@ class HuntRenderer {
             tail.id = 'hunt-severed-tail';
             tail.className = 'hunt-severed-tail';
             tail.setAttribute('aria-label', '잘린 꼬리');
-            tail.innerHTML = '<img src="local_assets/monster_hunter/ui/rathalos-tail-item.png" alt="" /><b></b>';
+            tail.innerHTML = '<img src="local_assets/monster_hunter/ui/rathalos-tail-item-transparent.png" alt="" /><b></b>';
             this.card.appendChild(tail);
         }
         tail.hidden = !visible;
@@ -844,14 +1081,13 @@ class HuntRenderer {
             if (w?.isAtCamp) weaponCard.dataset.campLabel = `⛺ ${w.campReason || '캠프 대기 중'}`;
             else delete weaponCard.dataset.campLabel;
         }
-        const circle = this.card.querySelector(`#atb-circle-fill-${idx}`);
-        if (circle) {
-            const offset = 37.7 - (37.7 * Math.max(0, Math.min(100, atb))) / 100;
-            circle.style.strokeDashoffset = offset;
+        const fill = this.card.querySelector(`#atb-fill-${idx}`);
+        if (fill) {
+            fill.style.width = `${Math.max(0, Math.min(100, Number(atb || 0)))}%`;
 
             // Check if the hunter is fainted, stunned, roar-stunned, or in hit recovery (interrupted)
             const isInterrupted = w && (w.status === 'dead' || w.status === 'stunned' || w.roarStunned || (w.hitDuration && w.hitDuration > 0));
-            circle.style.stroke = isInterrupted ? '#7f8c8d' : '#00a8ff';
+            fill.style.background = this.hunterAtbBarBackground(w, isInterrupted);
         }
         if (w) {
             this.updateWeaponMechanicUI(idx, w);
@@ -889,7 +1125,7 @@ class HuntRenderer {
         const bar = (code, primary, secondary = null, tone = '') => ({ code, primary: pct(primary), secondary: secondary === null ? null : pct(secondary), tone });
         const visuals = {
             long_sword: () => ({ ...segment('氣', 3, Math.min(3, Number(w.spiritLevel || 0)), 'spirit'), primary: pct(w.spiritGauge) }),
-            dual_blades: () => bar('鬼', w.demonStamina, w.archdemonGauge, 'demon'),
+            dual_blades: () => bar('鬼', w.archdemonGauge, null, 'demon'),
             hunting_horn: () => ({ code: '♪', tone: 'note', noteColors: (w.hornNotes || []).slice(0, 3), scoreCount: Math.min(3, (w.storedMelodies || []).length), primary: pct(w.echoGauge) }),
             gunlance: () => ({ ...segment(w.wyrmstake > 0 ? '砲◆' : '砲◇', Math.min(5, Number(w.maxShells || 5)), Math.min(5, Number(w.shells ?? 5)), 'shell'), primary: pct(w.wyvernGauge) }),
             switch_axe: () => bar(w.weaponMode === 'sword' ? (w.ampedStateDuration > 0 ? '剣✦' : '剣') : (w.powerAxeDuration > 0 ? '斧✦' : '斧'), w.switchGauge, w.ampGauge, 'switch'),
@@ -1019,20 +1255,6 @@ class HuntRenderer {
         if (wrap) wrap.title = `${hunter.weaponDisplayName || hunter.name} · ${currentColor}`;
     }
 
-    renderHunterCommandQueue(hunter) {
-        const labels = { whetstone: '숫돌', lifepowder: '가루', potion: '물약', bomb: '폭탄', jump: '점프', farcaster: '귀환' };
-        const queue = Array.isArray(hunter?.queuedCommands) ? hunter.queuedCommands : [];
-        return queue.map((command, index) => `${index ? '&lt;' : ''}<span>[${labels[command] || command}]</span>`).join('');
-    }
-
-    updateHunterCommandQueueUI(hunter) {
-        if (!this.card || !hunter) return;
-        const queue = this.card.querySelector(`#hunt-action-queue-${hunter.index}`);
-        if (!queue) return;
-        queue.innerHTML = this.renderHunterCommandQueue(hunter);
-        queue.classList.toggle('active', Boolean(hunter.queuedCommands?.length));
-    }
-
     renderHunterBlights(blights = {}) {
         const defs = {
             fire: ['🔥', '화상'], water: ['💧', '수상'], thunder: ['⚡', '뢰상'],
@@ -1058,13 +1280,22 @@ class HuntRenderer {
         overlay.innerHTML = this.renderHunterBlights(blights);
         overlay.setAttribute('aria-label', this.blightLabel(blights));
         overlay.classList.toggle('active', Boolean(overlay.childElementCount));
+        const hpFill = this.card?.querySelector(`#hp-fill-${idx}`);
+        if (hpFill) {
+            const pct = Math.max(0, Math.min(100, Number.parseFloat(hpFill.style.width) || 100));
+            hpFill.style.background = this.hunterHpBarBackground({ elementalBlights: blights }, pct);
+        }
+        const atbFill = this.card?.querySelector(`#atb-fill-${idx}`);
+        if (atbFill) atbFill.style.background = this.hunterAtbBarBackground({ elementalBlights: blights });
     }
 
     updateWeaponChargeAuraUI(idx, w) {
         if (!['great_sword', 'hammer'].includes(w?.id)) return;
         const container = this.card?.querySelector(`#weapon-img-container-${idx}`);
         if (!container) return;
-        const level = Math.min(3, Math.max(0, Number(w.id === 'hammer' ? w.hammerChargeLevel : w.greatSwordCharge) || 0));
+        const mechanicLevel = Number(w.id === 'hammer' ? w.hammerChargeLevel : w.greatSwordCharge) || 0;
+        const releaseLevel = Number(container.dataset?.weaponChargeReleaseStage || 0);
+        const level = Math.min(3, Math.max(0, releaseLevel || mechanicLevel));
         container.classList.remove('weapon-charge-stage-0', 'weapon-charge-stage-1', 'weapon-charge-stage-2', 'weapon-charge-stage-3');
         container.classList.add(`weapon-charge-stage-${level}`);
     }
@@ -1076,7 +1307,7 @@ class HuntRenderer {
             great_sword: () => `CHARGE ${w.greatSwordCharge || 0} · TCS ${w.greatSwordChain || 0}/2`,
             long_sword: () => `기인 ${pct(w.spiritGauge)} · 색 ${w.spiritLevel || 0}/3`,
             sword_shield: () => w.perfectRushStep ? `JUST RUSH ${w.perfectRushStep}/3` : `RUSH BUILD ${w.rushStep || 0}/2`,
-            dual_blades: () => `${w.demonMode ? '귀인화' : (pct(w.archdemonGauge) >= 50 ? '귀인강화' : '평상')} · STA ${pct(w.demonStamina)} · 鬼 ${pct(w.archdemonGauge)}`,
+            dual_blades: () => `${w.demonMode ? '귀인화' : '평상'} · 붉은 귀인 게이지 ${pct(w.archdemonGauge)}%`,
             hunting_horn: () => `음표 ${(w.hornNotes || []).map(note => ({ red: 'R', blue: 'B', green: 'G' })[note] || '·').join('') || '—'} · 악보 ${(w.storedMelodies || []).length}/3 · 향 ${pct(w.echoGauge)}`,
             lance: () => w.powerGuardReady ? 'POWER GUARD · 반격 대기' : (w.lanceCounterReady ? 'COUNTER · 반격 대기' : `THRUST ${w.lanceStep || 0}/2`),
             gunlance: () => `${({ normal: '일반', long: '방사', wide: '확산' })[w.shellingType] || '일반'} · 탄 ${w.shells ?? 5}/${w.maxShells || 5} · 용항 ${w.wyrmstake > 0 ? 'READY' : 'EMPTY'} · 용격 ${pct(w.wyvernGauge)}`,
@@ -1093,7 +1324,8 @@ class HuntRenderer {
     updateMonsterAtbUI(atb) {
         if (!this.card) return;
         const fill = this.card.querySelector('#monster-atb-fill');
-        if (fill) fill.style.width = `${atb}%`;
+        const visibleAtb = Math.max(0, Math.min(100, Number(atb || 0)));
+        if (fill) fill.style.width = `${visibleAtb}%`;
     }
 
     updateMonsterFlightUI(airborne, progress = 0, damage = 0, threshold = 0, remainingTicks = 0) {
@@ -1101,38 +1333,108 @@ class HuntRenderer {
         if (monsterImg) monsterImg.classList.toggle('monster-airborne', Boolean(airborne));
         const stage = this.card?.querySelector('.hunt-monster-motion-stage');
         if (stage) stage.classList.toggle('monster-flight-stage-airborne', Boolean(airborne));
-        const gauge = this.card?.querySelector('#hunt-flight-knockdown-gauge');
-        if (gauge) gauge.hidden = !airborne;
-        const percent = Math.round(Math.max(0, Math.min(1, Number(progress || 0))) * 100);
-        const fill = this.card?.querySelector('#hunt-flight-knockdown-fill');
-        if (fill) fill.style.width = `${percent}%`;
-        const label = this.card?.querySelector('#hunt-flight-knockdown-label');
-        if (label) label.textContent = `격추 ${percent}%`;
-        const timer = this.card?.querySelector('#hunt-flight-timer');
-        if (timer) timer.textContent = `${Math.ceil(Number(remainingTicks || 0) / 10)}초`;
+    }
+
+    updateMonsterTraitVisual(traits = []) {
+        const monsterImg = this.card?.querySelector('#fight-monster-img');
+        if (!monsterImg) return;
+        const known = [
+            'monster-trait-inflated',
+            'monster-trait-rage-eyes',
+            'monster-trait-ice-coated',
+            'monster-trait-hellfire',
+            'monster-trait-scale-heated',
+            'monster-trait-scale-critical'
+        ];
+        known.forEach(className => monsterImg.classList.remove(className));
+        (traits || []).forEach(trait => monsterImg.classList.add(`monster-trait-${trait}`));
+    }
+
+    triggerMonsterTraitReaction(kind, durationTicks = 20) {
+        const monsterImg = this.card?.querySelector('#fight-monster-img');
+        if (!monsterImg) return;
+        const className = kind === 'fatigue-stumble'
+            ? 'monster-trait-fatigue-stumble'
+            : 'monster-trait-limb-slip';
+        monsterImg.classList.remove(className);
+        void monsterImg.offsetWidth;
+        monsterImg.classList.add(className);
+        this.animationTimers.timeout(
+            () => monsterImg.classList.remove(className),
+            Math.max(700, Number(durationTicks || 1) * 100)
+        );
+    }
+
+    updateMonsterPartsUI(parts = []) {
+        const host = this.card?.querySelector('#hunt-monster-parts');
+        if (!host || typeof document === 'undefined') return;
+        const panel = this.card?.querySelector('#hunt-monster-parts-panel');
+        host.replaceChildren();
+        (parts || []).forEach(part => {
+            const slot = document.createElement('span');
+            slot.className = `hunt-monster-part hunt-monster-part--${part.kind || 'part'}`;
+            if (part.broken) slot.classList.add('is-broken');
+            if (part.severed) slot.classList.add('is-severed');
+            slot.dataset.partId = String(part.id || '');
+            const material = typeof HuntMonsterPartMaterialCatalog !== 'undefined'
+                ? HuntMonsterPartMaterialCatalog.resolve(this.selectedMonster, part)
+                : null;
+            const materialLabel = material?.label || `${part.kind || '부위'} 소재`;
+            const shortLabel = String(part.shortLabel || part.kind || '부위').slice(0, 3);
+            slot.setAttribute('aria-label', `${shortLabel}${part.broken ? ' 파괴' : ''}`);
+            slot.title = materialLabel;
+            const icon = document.createElement('img');
+            icon.className = 'hunt-monster-part-image';
+            icon.src = material?.path || '';
+            icon.alt = '';
+            icon.dataset.materialSourceId = material?.sourceId || '';
+            icon.dataset.materialShape = material?.shapeFamily || '';
+            icon.style.setProperty('--hunt-part-tint', material?.tint || 'none');
+            icon.style.filter = `${material?.tint || 'grayscale(1) brightness(1.08)'} brightness(1.2) contrast(1.12) drop-shadow(0 3px 4px #000) drop-shadow(0 0 7px rgba(255,224,143,.62))`;
+            slot.dataset.materialKind = material?.kind || '';
+            slot.dataset.materialSide = material?.side || 'center';
+            slot.appendChild(icon);
+            const caption = document.createElement('small');
+            caption.className = 'hunt-monster-part-label';
+            caption.textContent = shortLabel;
+            slot.appendChild(caption);
+            host.appendChild(slot);
+        });
+        const isEmpty = !host.childElementCount;
+        host.hidden = isEmpty;
+        if (panel) panel.hidden = isEmpty;
     }
 
     updateMonsterStateUI(stateName, title, colorInfo) {
         if (!this.card) return;
-        const statusLbl = this.card.querySelector('#monster-status-label');
+        const statusIcon = this.card.querySelector('#monster-state-icon');
         const hpCenterText = this.card.querySelector('#monster-hp-center-text');
         const monsterImg = this.card.querySelector('#fight-monster-img');
+        const state = String(stateName || '');
+        const icon = state.includes('일반') ? ''
+            : state.includes('분노') ? '😡'
+                : state.includes('탈진') ? '🤤'
+                    : state.includes('격추') ? '💥'
+                    : state.includes('낙석') ? '🪨'
+                        : state.includes('섬광') ? '✨'
+                            : state.includes('마비') && !state.includes('마비함정') ? '⚡'
+                                : state.includes('수면') ? '💤'
+                                : state.includes('마비함정') ? '⚡'
+                                    : state.includes('함정') ? '🕸️'
+                                        : state.includes('기절') ? '💫'
+                                            : state.includes('대경직') ? '💤'
+                                                : state.includes('고고도') ? '🚀'
+                                                    : state.includes('비행') ? '🪽'
+                                                        : state.includes('시동') ? '⚡'
+                                                            : '❗';
 
-        if (statusLbl) {
-            statusLbl.textContent = stateName;
-            statusLbl.style.color = colorInfo.color;
-            statusLbl.style.borderColor = colorInfo.color;
-            statusLbl.style.background = colorInfo.bg;
+        if (statusIcon) {
+            statusIcon.textContent = icon;
+            statusIcon.hidden = !icon;
+            statusIcon.setAttribute('aria-label', icon ? stateName : '');
         }
 
-        if (hpCenterText) {
-            hpCenterText.dataset.monsterName = title;
-            const text = hpCenterText.textContent || "";
-            const hpMatch = text.match(/\(([^)]+)\)/);
-            const hpStr = hpMatch ? hpMatch[1] : '12000 / 12000';
-            hpCenterText.textContent = `${title} (${hpStr})`;
-            hpCenterText.style.color = colorInfo.color;
-        }
+        if (hpCenterText) hpCenterText.style.color = '';
 
         if (monsterImg) {
             if (stateName.includes('분노')) {
@@ -1147,6 +1449,9 @@ class HuntRenderer {
                 monsterImg.classList.remove('stunned_monster');
             }
 
+            monsterImg.classList.toggle('monster-paralyzed', stateName.includes('마비') && !stateName.includes('마비함정'));
+            monsterImg.classList.toggle('monster-sleeping', stateName.includes('수면'));
+
             if (stateName.includes('비행')) {
                 monsterImg.classList.add('valstrax-flying');
             } else {
@@ -1158,13 +1463,24 @@ class HuntRenderer {
             } else {
                 monsterImg.classList.remove('monster-knockdown-anim');
             }
+
+            if (!stateName.includes('구멍함정')) {
+                monsterImg.classList.remove('monster-pitfall-caught', 'monster-pitfall-struggling');
+            }
         }
     }
 
     updatePotionCountUI(idx, count) {
         if (!this.card) return;
+        this.updateSharedPotionUI(count);
         const el = this.card.querySelector(`#potion-count-${idx}`);
         if (el) el.textContent = `🧪 ${count}`;
+    }
+
+    updateSharedPotionUI(count) {
+        if (!this.card) return;
+        const sharedPotion = this.card.querySelector('#shared-potion-count');
+        if (sharedPotion) sharedPotion.textContent = `🧪 ${Number(count || 0)}/10`;
     }
 
     updateHunterItemUI(hunter) {
@@ -1173,10 +1489,20 @@ class HuntRenderer {
         const trap = this.card.querySelector(`#trap-count-${hunter.index}`);
         const powder = this.card.querySelector(`#lifepowder-count-${hunter.index}`);
         const bomb = this.card.querySelector(`#bomb-count-${hunter.index}`);
+        const flash = this.card.querySelector(`#flash-count-${hunter.index}`);
         if (potion) potion.textContent = `🧪 ${Number(hunter.potions || 0)}`;
         if (trap) trap.textContent = `🪤 ${Number(hunter.shockTraps || 0)}`;
-        if (powder) powder.textContent = `✨ ${Number(hunter.lifepowders || 0)}`;
+        if (powder) powder.textContent = `💚 ${Number(hunter.lifepowders || 0)}`;
         if (bomb) bomb.textContent = `💣 ${Number(hunter.bombs || 0)}`;
+        if (flash) flash.textContent = `✨ ${Number(hunter.flashPods || 0)}`;
+        const sharedPotion = this.card?.querySelector('#shared-potion-count');
+        const sharedTrap = this.card?.querySelector('#shared-trap-count');
+        const sharedPowder = this.card?.querySelector('#shared-lifepowder-count');
+        const sharedBomb = this.card?.querySelector('#shared-bomb-count');
+        if (sharedPotion) sharedPotion.textContent = `🧪 ${Number(hunter.potions || 0)}/10`;
+        if (sharedTrap) sharedTrap.textContent = `🪤 ${Number(hunter.shockTraps || 0)}`;
+        if (sharedPowder) sharedPowder.textContent = `💚 ${Number(hunter.lifepowders || 0)}`;
+        if (sharedBomb) sharedBomb.textContent = `💣 ${Number(hunter.bombs || 0)}`;
     }
 
     updateOverheatUI(idx, duration) {
@@ -1222,10 +1548,9 @@ class HuntRenderer {
         this.cartLimit = Math.max(3, Number(limit || 3));
         const el = this.card.querySelector('#cart-counter-board');
         if (el) {
-            let icons = this.cartLimit > 4
-                ? `💥×${carts} · 🛒×${Math.max(0, this.cartLimit - carts)}`
-                : Array.from({ length: this.cartLimit }, (_, index) => index < carts ? '❌' : '🛒').join(' ');
-            el.textContent = `수레 현황: ${icons} (${carts}/${this.cartLimit})`;
+            el.textContent = `🛒 ${Math.max(0, this.cartLimit - carts)}`;
+            el.hidden = false;
+            el.setAttribute('aria-label', `수레 ${carts}/${this.cartLimit}`);
         }
     }
 
@@ -1234,7 +1559,7 @@ class HuntRenderer {
         const min = String(Math.floor(timeSec / 60)).padStart(2, '0');
         const sec = String(timeSec % 60).padStart(2, '0');
         const timerLbl = this.card.querySelector('#battle-timer-label');
-        if (timerLbl) timerLbl.textContent = `남은 시간: ${min}:${sec}`;
+        if (timerLbl) timerLbl.textContent = `⏱️ ${min}:${sec}`;
     }
 
     showSkillBubble(idxOrMonster, text) { return this.combatAnimator.showSkillBubble(idxOrMonster, text); }
@@ -1244,9 +1569,12 @@ class HuntRenderer {
     triggerMonsterCharge() { return this.combatAnimator.triggerMonsterCharge(); }
 
     triggerMonsterAttack(type, emoji, targets, attackName = '', pattern = null) { return this.combatAnimator.triggerMonsterAttack(type, emoji, targets, attackName, pattern); }
+    resolveMonsterImpactTimeline(pattern, targetIndices) { return this.combatAnimator.resolveMonsterImpactTimeline(pattern, targetIndices); }
+    getMonsterMotionTrace() { return this.combatAnimator.getMonsterMotionTrace(); }
     triggerValstraxAmbushWarning() { return this.combatAnimator.triggerValstraxAmbushWarning(); }
 
-    triggerHitAnimation(idx, w, damage) { return this.combatAnimator.triggerHitAnimation(idx, w, damage); }
+    triggerHitAnimation(idx, w, reaction) { return this.combatAnimator.triggerHitAnimation(idx, w, reaction); }
+    cancelHitAnimation(idx) { return this.combatAnimator.cancelHitAnimation(idx); }
 
     triggerRollAnimation(idx) { return this.combatAnimator.triggerRollAnimation(idx); }
 
@@ -1257,6 +1585,9 @@ class HuntRenderer {
     triggerDeathTag(idx, w, timerVal = 5) { return this.combatAnimator.triggerDeathTag(idx, w, timerVal); }
 
     triggerMonsterKnockdownAnim() { return this.combatAnimator.triggerMonsterKnockdownAnim(); }
+    triggerMonsterPartBreakReaction(kind, durationTicks, partKind) {
+        return this.combatAnimator.triggerMonsterPartBreakReaction(kind, durationTicks, partKind);
+    }
 
     triggerEnvironmentEffect(kind) { return this.combatAnimator.triggerEnvironmentEffect(kind); }
 
@@ -1270,7 +1601,7 @@ class HuntRenderer {
 
     triggerRoarStun(idx, isStunned) { return this.combatAnimator.triggerRoarStun(idx, isStunned); }
 
-    spawnVictoryEmoji(idx, emoji) { return this.combatAnimator.spawnVictoryEmoji(idx, emoji); }
+    spawnVictoryEmoji(idx, emoji, options) { return this.combatAnimator.spawnVictoryEmoji(idx, emoji, options); }
 
     spawnCombatChatBubble(idx, message) { return this.notifications.spawnCombatChatBubble(idx, message); }
 

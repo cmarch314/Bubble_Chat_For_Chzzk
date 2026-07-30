@@ -37,6 +37,10 @@ function semanticFromLabel(label, bank) {
         purpose = 'item_action'; actionFamily = 'potion_use'; tags.push('potion');
     } else if (/lifepowder/.test(value)) {
         purpose = 'item_action'; actionFamily = 'lifepowder_use'; tags.push('support');
+    } else if (/sharpen finished|weapon sharpen finished shine/.test(value)) {
+        purpose = 'item_action'; actionFamily = 'whetstone_finish'; tags.push('whetstone', 'completion');
+    } else if (/weapon sharpen/.test(value)) {
+        purpose = 'item_action'; actionFamily = 'whetstone_stroke'; tags.push('whetstone');
     } else if (/hit|impact|part break|slam|explosion|breath|fireball|rocks falling/.test(value) && /^em/.test(bankLower)) {
         purpose = 'monster_action'; actionFamily = 'monster_attack'; tags.push('attack');
     } else if (/voice|growl|scream|grunt|pain|aggro/.test(value) && /^em/.test(bankLower)) {
@@ -112,11 +116,16 @@ function main() {
         }
         const bank = /\.(?:nbnk|npck)$/i.test(table.sheet) ? table.sheet : /^em\d+_(?:vo|se)$/i.test(table.sheet) ? `${table.sheet}.nbnk` : null;
         if (!bank || /^copy of /i.test(bank)) continue;
+        const header = Array.isArray(rows[0]) ? rows[0].map(text) : [];
+        const detectedConfirmedIndex = header.findIndex(value => /confirmed|ยืนยัน/i.test(value));
+        const confirmedIndex = detectedConfirmedIndex >= 0 ? detectedConfirmedIndex : 3;
+        const labelIndex = confirmedIndex - 1;
+        const notesIndex = confirmedIndex + 1;
         rows.slice(1).forEach((row, index) => {
             const ordinal = Number(row[0]);
-            const label = text(row[2]);
+            const label = text(row[labelIndex]);
             if (!Number.isInteger(ordinal) || ordinal < 1 || !label) return;
-            clips.push(reference(bank, ordinal, label, row[3], row[4] || row[5], `${table.sheet}!A${index + 2}:F${index + 2}`));
+            clips.push(reference(bank, ordinal, label, row[confirmedIndex], row[notesIndex], `${table.sheet}!A${index + 2}:F${index + 2}`));
         });
     }
 

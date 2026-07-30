@@ -75,10 +75,15 @@ globalThis.HuntAudioManager = class HuntAudioManager {
 
 const huntDataCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntData.js'), 'utf8');
 eval(huntDataCode);
+globalThis.LocalCompanionEndpoint = require('../js/runtime/LocalCompanionEndpoint.js');
+globalThis.HuntCommandCatalog = require('../js/effects/hunt/HuntCommandCatalog.js');
+globalThis.HuntProfileContract = require('../js/effects/hunt/HuntProfileContract.js');
 const weaponCatalogCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntWeaponCatalog.js'), 'utf8');
 eval(weaponCatalogCode + "; globalThis.HuntWeaponCatalog = HuntWeaponCatalog;");
 const monsterPatternCatalogCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntMonsterPatternCatalog.js'), 'utf8');
 eval(monsterPatternCatalogCode + "; globalThis.HuntMonsterPatternCatalog = HuntMonsterPatternCatalog;");
+
+globalThis.HuntSupportItemPolicy = require('../js/effects/hunt/HuntSupportItemPolicy.js');
 
 const huntInitializerCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntInitializer.js'), 'utf8');
 eval(huntInitializerCode + "; globalThis.HuntInitializer = HuntInitializer;");

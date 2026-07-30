@@ -58,6 +58,7 @@ class AudioMediaStager {
             sourceNode.connect(preGainNode);
             preGainNode.connect(this.compressor);
             mediaElement.__webAudioConnected = true;
+            mediaElement.__bubbleWebAudioEntry = entry;
             this.webAudioEntries.push(entry);
         } catch (error) {
             console.warn('[AudioManager] Failed to connect media element:', error);
@@ -83,10 +84,39 @@ class AudioMediaStager {
         apply();
         const entry = { el: audio, type, apply, detached: true };
         this.nativeEntries.push(entry);
-        audio.addEventListener?.('ended', () => {
-            this.nativeEntries = this.nativeEntries.filter(item => item !== entry);
-        }, { once: true });
+        const release = () => this.releaseMediaElement(audio);
+        audio.addEventListener?.('ended', release, { once: true });
+        // BGM owners stop playback by clearing src and calling load(). That emits
+        // `emptied`, not `ended`, so it must also release the global strong reference.
+        audio.addEventListener?.('emptied', release, { once: true });
         return audio;
+    }
+
+    releaseMediaElement(mediaElement, options = {}) {
+        if (!mediaElement) return false;
+        const nativeCount = this.nativeEntries.length;
+        const webCount = this.webAudioEntries.length;
+        this.nativeEntries = this.nativeEntries.filter(item => item.el !== mediaElement);
+        this.webAudioEntries = this.webAudioEntries.filter(entry => {
+            if (entry.el !== mediaElement) return true;
+            try { entry.sourceNode.disconnect(); } catch (error) {}
+            try { entry.preGainNode.disconnect(); } catch (error) {}
+            return false;
+        });
+        if (mediaElement.__bubbleWebAudioEntry) delete mediaElement.__bubbleWebAudioEntry;
+        if (mediaElement.__webAudioConnected) delete mediaElement.__webAudioConnected;
+
+        if (options.pause === true) {
+            try { mediaElement.pause(); } catch (error) {}
+        }
+        if (options.unload === true) {
+            try {
+                mediaElement.removeAttribute?.('src');
+                mediaElement.src = '';
+                mediaElement.load?.();
+            } catch (error) {}
+        }
+        return nativeCount !== this.nativeEntries.length || webCount !== this.webAudioEntries.length;
     }
 
     updateVolumes() {
@@ -98,7 +128,13 @@ class AudioMediaStager {
             return true;
         });
         this.webAudioEntries = this.webAudioEntries.filter(entry => {
-            if (!entry.el || !document.body.contains(entry.el) || entry.el.ended) return false;
+            if (!entry.el || !document.body.contains(entry.el) || entry.el.ended) {
+                try { entry.sourceNode.disconnect(); } catch (error) {}
+                try { entry.preGainNode.disconnect(); } catch (error) {}
+                if (entry.el?.__bubbleWebAudioEntry === entry) delete entry.el.__bubbleWebAudioEntry;
+                if (entry.el?.__webAudioConnected) delete entry.el.__webAudioConnected;
+                return false;
+            }
             this.applyWebAudioGain(entry);
             return true;
         });

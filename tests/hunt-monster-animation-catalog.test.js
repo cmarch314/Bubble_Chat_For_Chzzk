@@ -3,25 +3,394 @@ const fs = require('fs');
 const path = require('path');
 const Catalog = require('../js/effects/hunt/HuntMonsterAnimationCatalog.js');
 
+for (const [authored, runtime] of Object.entries({
+    'aerial-sweep': 'lateral-sweep',
+    'aerial-dive-return': 'aerial-dive',
+    'aerial-slam': 'aerial-dive',
+    'aerial-dive-explosion': 'aerial-dive',
+    'ground-charge-chain': 'ground-charge-zigzag',
+    'agile-leap-chain': 'pounce-chain',
+    'low-glide-sweep': 'rathalos-glide'
+})) {
+    assert.strictEqual(
+        Catalog.resolve({ id: `test.${authored}`, animationProfile: authored }, '', '', { species: 'Flying Wyvern' }).id,
+        runtime,
+        `${authored} must resolve to an installed motion class`
+    );
+}
+global.HuntMonsterAnimationCatalog = Catalog;
+global.HuntMonsterAnatomyCatalog = require('../js/effects/hunt/HuntMonsterAnatomyCatalog.js');
+const HuntMonsterAttackAnimator = require('../js/effects/hunt/HuntMonsterAttackAnimator.js');
+
+{
+    const facingAnimator = new HuntMonsterAttackAnimator({
+        card: null,
+        animationTimers: { timeout() {} },
+        selectedMonster: { id: 'rathalos' }
+    }, () => {});
+    const cross = facingAnimator.facingPlan(
+        { id: 'aerial-charge-cross', aim: 'sweep' },
+        { runtimeSweepDirection: 'left-to-right' },
+        -300
+    );
+    assert.strictEqual(cross[0].direction, 1,
+        'an authored left-to-right crossing must face right even when the first target is left of home');
+    assert.strictEqual(cross.at(-1).direction, 0,
+        'a crossing must restore the authored sprite direction after it leaves the screen');
+    const reverseCross = facingAnimator.facingPlan(
+        { id: 'aerial-charge-cross', aim: 'sweep' },
+        { runtimeSweepDirection: 'right-to-left' },
+        300
+    );
+    assert.strictEqual(reverseCross[0].direction, -1,
+        'a right-to-left crossing must preserve the sprite original left-facing direction');
+    const approach = facingAnimator.facingPlan({ id: 'close-strike', aim: 'target' }, {}, 240);
+    assert.strictEqual(approach[0].direction, 1);
+    assert.strictEqual(approach[2].direction, -1,
+        'a target approach must turn around before visibly returning home');
+    facingAnimator.owner.selectedMonster = { id: 'diablos' };
+    assert.strictEqual(facingAnimator.facingPlan({ id: 'ground-charge-cross', aim: 'target' }, {
+        runtimeSweepDirection: 'left-to-right'
+    }, 300), null, 'front-facing symmetric sprites must not be mirrored needlessly');
+}
+
+{
+    const monsterRect = { left: 760, top: 120, width: 400, height: 300 };
+    const hunterCenters = [240, 720, 1200, 1680];
+    const monsterImg = {
+        getBoundingClientRect: () => monsterRect
+    };
+    const cards = hunterCenters.map((center, index) => {
+        const anchor = {
+            getBoundingClientRect: () => ({ left: center - 100, top: 650, width: 200, height: 220 })
+        };
+        return {
+            id: `fight-card-${index}`,
+            querySelector: selector => selector === '.game-hunt-weapon-img-container' ? anchor : null
+        };
+    });
+    const card = {
+        getBoundingClientRect: () => ({ left: 0, top: 0, right: 1920, bottom: 918, width: 1920, height: 918 }),
+        querySelector(selector) {
+            if (selector === '#fight-monster-img') return monsterImg;
+            const match = selector.match(/^#fight-card-(\d+)$/);
+            return match ? cards[Number(match[1])] : null;
+        }
+    };
+    const animator = new HuntMonsterAttackAnimator({
+        card,
+        animationTimers: { timeout() {} },
+        selectedMonster: { id: 'rathalos' }
+    }, () => {});
+    const measured = animator.resolveScreenCrossImpactTimeline({
+        tags: ['screen-crossing'],
+        movement: { ticks: 40 },
+        runtimeSweepDirection: 'left-to-right'
+    }, [0, 1, 2, 3]);
+    assert.deepStrictEqual(measured.timeline.map(event => event.atTicks), [12, 16, 20, 24],
+        'live hunter centers must determine collision ticks inside the visible 10%-82% crossing segment');
+    assert.deepStrictEqual(measured.timeline.map(event => event.targetIndices[0]), [0, 1, 2, 3]);
+    assert.strictEqual(measured.runtimeSweepVector, 1,
+        'sprite facing must derive from the same measured left-to-right trajectory as collision timing');
+
+    const reverse = animator.resolveScreenCrossImpactTimeline({
+        tags: ['screen-crossing'],
+        movement: { ticks: 40 },
+        runtimeSweepDirection: 'right-to-left'
+    }, [3, 2, 1, 0]);
+    assert.deepStrictEqual(reverse.timeline.map(event => event.atTicks), [12, 16, 20, 24]);
+    assert.deepStrictEqual(reverse.timeline.map(event => event.targetIndices[0]), [3, 2, 1, 0]);
+    assert.strictEqual(reverse.runtimeSweepVector, -1);
+}
+
 const cases = [
     ['화염 브레스', 'ranged-cast'], ['꼬리 회전', 'tail-sweep'], ['전력 돌진', 'ground-charge'],
-    ['공중 급강하', 'aerial-dive'], ['지중 급습', 'burrow'], ['바디 프레스', 'leap-slam'],
+    ['공중 급강하', 'aerial-dive'], ['지중 급습', 'burrow-emerge'], ['바디 프레스', 'leap-slam'],
     ['앞발 할퀴기', 'close-strike'], ['대폭발', 'area-burst'], ['포효', 'roar']
 ];
 cases.forEach(([name, expected]) => assert.strictEqual(Catalog.resolve({ name }, name, 'physical').id, expected, name));
+assert.strictEqual(Catalog.resolve({ id: 'diablos.horn_uppercut', tags: ['horn', 'target-contact'] }).duration, 2800);
+assert.strictEqual(Catalog.resolve({ id: 'diablos.tail_sweep', tags: ['tail'] }).duration, 3100);
+assert.strictEqual(Catalog.resolve({
+    id: 'future_monster.tail_slam_rock', tags: ['tail', 'projectile'], animationProfile: 'tail-slam-rock'
+}).id, 'tail-slam-rock');
+assert.strictEqual(Catalog.resolve({
+    id: 'future_monster.side_tackle', tags: ['target-contact'], animationProfile: 'side-tackle-contact'
+}).id, 'side-tackle-contact');
+assert.strictEqual(Catalog.resolve({
+    id: 'future_monster.return_charge',
+    tags: ['charge', 'cross-charge'],
+    animationProfile: 'ground-charge-double'
+}).duration, 11400, 'any reviewed monster may reuse the authored double-charge route');
+assert.strictEqual(Catalog.resolve({
+    id: 'future_monster.air_sweep',
+    type: 'charge',
+    chargeMode: 'wide',
+    tags: ['charge', 'wide-charge']
+}).id, 'aerial-charge-cross',
+'wide charges must use screen traversal instead of target-contact charge motion');
 assert.strictEqual(Catalog.resolve({ name: '미분류 공격' }, '', 'elemental').id, 'ranged-cast');
 assert.strictEqual(Catalog.resolve({ name: '미분류 공격' }, '', 'physical').id, 'close-strike');
 assert.strictEqual(Catalog.resolve({ name: '피날레', type: 'ultimate' }, '', 'physical').ultimate, true);
+assert.strictEqual(Catalog.resolve({ id: 'diablos.burrow_enter', name: '지중 잠행', tags: ['burrow-enter'] }).id, 'burrow-enter');
+assert.strictEqual(Catalog.resolve({ id: 'diablos.burrow_emerge', name: '지중 급습', tags: ['burrow-emerge'] }).id, 'burrow-emerge');
+assert.strictEqual(Catalog.resolve({ id: 'diablos.tail_sweep', name: '꼬리 휘두르기', tags: ['tail', 'double-sweep'] }).id, 'tail-sweep-double');
+assert.strictEqual(Catalog.resolve({
+    id: 'diablos.horn_sweep', name: '연속 뿔 휘두르기', tags: ['horn', 'multi-hit', 'target-contact']
+}).id, 'horn-sweep-contact');
+assert.strictEqual(Catalog.resolve({ name: '포효' }, '포효', 'physical').duration, 1313,
+    'monster visual profiles must use the shared 25% slowdown');
 
 assert.strictEqual(Catalog.resolve({ name: '광란의 지그재그 돌진', tags: ['charge', 'cross-charge', 'multi-hit'] }).id, 'ground-charge-zigzag');
 assert.strictEqual(Catalog.resolve({ name: '화염 브레스 쓸기', tags: ['area', 'elemental'] }).id, 'lateral-sweep');
 assert.strictEqual(Catalog.resolve({ name: '연속 발톱 공격', tags: ['multi-hit'] }).id, 'pounce-chain');
 
-const css = fs.readFileSync(path.join(__dirname, '../style.css'), 'utf8');
-for (const id of ['ground-charge-zigzag', 'lateral-sweep', 'pounce-chain']) {
+const css = require('./helpers/hunt-css');
+for (const id of ['ground-charge-zigzag', 'ground-charge-double', 'aerial-charge-cross', 'lateral-sweep', 'pounce-chain', 'burrow-enter', 'burrow-emerge', 'tail-sweep-double', 'tail-slam-rock', 'side-tackle-contact', 'horn-sweep-contact']) {
+    assert(css.includes(`.monster-motion-${id}`), `${id} class must exist`);
+    assert(css.includes(`@keyframes monster-motion-${id}`), `${id} keyframes must exist`);
+}
+for (const id of [
+    'rathalos-bite-contact', 'rathalos-rush-bite', 'rathalos-fireball',
+    'rathalos-triple-fireball', 'rathalos-step-fireball', 'rathalos-backstep-fireball',
+    'rathalos-claw-dive', 'rathalos-air-kick-combo', 'rathalos-tail-sweep-double',
+    'rathalos-flame-sweep', 'rathalos-stomp', 'rathalos-glide'
+]) {
+    assert.strictEqual(Catalog.resolve({ animationProfile: id }).id, id);
     assert(css.includes(`.monster-motion-${id}`), `${id} class must exist`);
     assert(css.includes(`@keyframes monster-motion-${id}`), `${id} keyframes must exist`);
 }
 assert(css.includes('var(--monster-lane-x)'), 'wide motions must scale to the available monster lane');
+assert(css.includes('.hunt-monster-attack-motion'), 'monster attacks need an isolated transform owner outside the status-effect image');
+assert(css.includes('.hunt-monster-facing-layer'), 'direction changes need a nested layer isolated from travel and hit transforms');
+assert(css.includes('.monster-local-action-fx.tail-vortex'), 'Diablos tail sweep needs its local vortex emoji layer');
+assert(css.includes('var(--monster-charge-second-x)'), 'return charge needs a separately locked second target lane');
+assert(css.includes('var(--monster-charge-cross-y)'), 'wide aerial charges need a hunter-row crossing route');
+assert(css.includes('.monster-uppercut-launched'), 'uppercut launch reactions must be reusable across monsters');
+assert(!css.includes('.diablos-horn-launched'), 'shared launch reactions must not retain monster-specific selectors');
+const ironMountainFrames = css.match(/@keyframes monster-motion-side-tackle-contact\s*\{[\s\S]*?\n\}/)?.[0] || '';
+assert.ok(ironMountainFrames, 'Iron Mountain contact keyframes must exist');
+assert.ok(!/rotate\(90deg\)/.test(ironMountainFrames), 'Iron Mountain must not rotate the whole Diablos sprite by 90 degrees');
+{
+    const burrowFrames = css.match(/@keyframes monster-motion-burrow-emerge\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+    assert.match(burrowFrames, /--monster-burrow-apex-y/,
+        'burrow emergence must use the hunter-relative measured apex');
+    assert.match(burrowFrames, /100%\{transform:none/,
+        'burrow emergence must return the monster to its home position');
+    assert.doesNotMatch(burrowFrames, /monster-attack-y\)\s*-\s*95px/,
+        'burrow emergence must not use the old fixed-height overshoot');
+}
+{
+    const doubleChargeFrames = css.match(/@keyframes monster-motion-ground-charge-double\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+    assert.doesNotMatch(doubleChargeFrames, /\b14%\b/,
+        'Diablos return charge must not spend an opening segment on an anticipation pose');
+    assert.doesNotMatch(doubleChargeFrames, /\b35%\b/,
+        'the first pass must not stop at the hunter before leaving the board');
+    assert.match(doubleChargeFrames, /38%[^}]*--monster-charge-bottom/,
+        'the first pass must travel directly off-board from its home position');
+    assert.match(doubleChargeFrames, /18%[^}]*--monster-charge-first-y/,
+        'the first collision frame must cross the locked hunter position');
+    assert.match(doubleChargeFrames, /40%[^}]*--monster-charge-bottom/,
+        'the return pass must launch immediately from off-board without a second telegraph');
+    assert.match(doubleChargeFrames, /40%[^}]*--monster-charge-first-x/,
+        'the return pass must inherit the first pass off-board exit instead of pre-positioning below its next hunter');
+    assert.doesNotMatch(doubleChargeFrames, /40%[^}]*--monster-charge-second-x/,
+        'the return pass must not teleport to the next hunter lane before launching');
+    assert.match(doubleChargeFrames, /62%[^}]*--monster-charge-second-y/,
+        'the return collision frame must cross its separately locked hunter');
+    assert.match(css, /\.monster-motion-ground-charge-double\s*\{[^}]*\slinear\s/,
+        'both charge passes must keep continuous speed through hunter collision frames');
+}
+for (const rig of ['quadruped', 'winged', 'serpentine', 'arthropod']) {
+    assert(css.includes(`data-monster-rig="${rig}"`), `${rig} rig needs a visual transform origin`);
+    assert(css.includes(`monster-motion-close-strike-${rig}`), `${rig} rig needs a distinct close-strike motion`);
+}
+
+{
+    const timers = [];
+    const classes = new Set();
+    const classList = {
+        add: (...names) => names.forEach(name => classes.add(name)),
+        remove: (...names) => names.forEach(name => classes.delete(name)),
+        [Symbol.iterator]: () => classes[Symbol.iterator]()
+    };
+    const properties = new Map();
+    const style = {
+        setProperty(name, value) { properties.set(name, value); },
+        removeProperty(name) { properties.delete(name); }
+    };
+    const monsterImg = {
+        classList, style, dataset: {}, offsetWidth: 100,
+        getBoundingClientRect: () => ({ left: 300, top: 200, width: 200, height: 180, bottom: 380 }),
+        closest: () => ({ clientWidth: 900 }),
+        addEventListener() {},
+        removeEventListener() {}
+    };
+    const targetCard = {
+        id: 'fight-card-0',
+        getBoundingClientRect: () => ({ left: 80, top: 620, width: 260, height: 300 })
+    };
+    const animator = new HuntMonsterAttackAnimator({
+        card: { getBoundingClientRect: () => ({ width: 1920, bottom: 1080 }) },
+        animationTimers: { timeout: callback => timers.push(callback) },
+        selectedMonster: { id: 'diablos', species: 'Flying Wyvern' }
+    }, () => {});
+    animator.playPatternMotion(monsterImg, targetCard, { id: 'diablos.horn_uppercut', name: '뿔 쳐올리기' }, '뿔 쳐올리기', 'physical');
+    assert.strictEqual(Number.parseFloat(properties.get('--monster-attack-x')), -190,
+        'the uppercut must cover the complete horizontal route to the hunter');
+    assert(Number.parseFloat(properties.get('--monster-attack-y')) > 300,
+        'the uppercut must reach the hunter weapon before lifting instead of stopping nearby');
+    animator.playPatternMotion(monsterImg, targetCard, {
+        id: 'future_monster.short_uppercut',
+        name: '짧은 쳐올리기',
+        tags: ['target-contact'],
+        animationProfile: 'horn-uppercut',
+        animationGeometry: { approachX: .5, approachY: .4 }
+    }, '짧은 쳐올리기', 'physical');
+    assert.strictEqual(Number.parseFloat(properties.get('--monster-attack-x')), -95,
+        'another monster must be able to retune a shared motion without an ID branch');
+    assert(Number.parseFloat(properties.get('--monster-attack-y')) < 250);
+    animator.playPatternMotion(monsterImg, targetCard, {
+        id: 'diablos.side_tackle', name: '철산고', tags: ['physical', 'side-tackle', 'target-contact'],
+        animationProfile: 'side-tackle-contact'
+    }, '철산고', 'physical');
+    assert.strictEqual(
+        Number.parseFloat(properties.get('--monster-side-ready-y')),
+        Number.parseFloat(properties.get('--monster-attack-y')) * .7,
+        'Iron Mountain must stop with 30% of the target route remaining before the body check'
+    );
+    assert(classes.has('monster-motion-side-tackle-contact'));
+    animator.playPatternMotion(monsterImg, targetCard, { id: 'diablos.tail_sweep', name: '꼬리 휘두르기', tags: ['tail'] }, '꼬리 휘두르기', 'physical');
+    assert(classes.has('monster-motion-tail-sweep'));
+    timers[0]();
+    assert(classes.has('monster-motion-tail-sweep'), 'an old cleanup timer must not stop the next monster animation');
+    timers.at(-1)();
+    assert(!classes.has('monster-motion-tail-sweep'));
+
+    animator.playPatternMotion(monsterImg, targetCard, {
+        id: 'diablos.horn_sweep', name: '연속 뿔 휘두르기', tags: ['horn', 'multi-hit', 'target-contact']
+    }, '연속 뿔 휘두르기', 'physical');
+    assert(classes.has('monster-motion-horn-sweep-contact'));
+    animator.clearActiveMonsterMotion();
+    assert(!classes.has('monster-motion-horn-sweep-contact'));
+    assert.strictEqual(properties.has('transform'), false);
+}
+
+{
+    const properties = new Map();
+    const animator = new HuntMonsterAttackAnimator({
+        card: null,
+        animationTimers: { timeout() {} },
+        selectedMonster: { id: 'diablos', species: 'Flying Wyvern' }
+    }, () => {});
+    const position = animator.positionBurrowEmergence(
+        { style: { setProperty(name, value) { properties.set(name, value); } } },
+        { getBoundingClientRect: () => ({ left: 700, top: 180, width: 240, height: 240 }) },
+        { getBoundingClientRect: () => ({ left: 240, top: 620, width: 200, height: 300 }) },
+        { clientWidth: 1500 }
+    );
+    assert.strictEqual(position.targetY, 470);
+    assert.strictEqual(position.apexY, 410,
+        'emergence apex must be 20% of the measured hunter anchor height above the hunter');
+    assert.strictEqual(properties.get('--monster-burrow-apex-y'), '410px');
+}
+
+{
+    const motionWrapper = {
+        classList: { contains: name => name === 'hunt-monster-attack-motion' }
+    };
+    const monsterImg = {
+        parentElement: motionWrapper,
+        closest: () => ({ className: 'hunt-monster-motion-stage' })
+    };
+    const animator = new HuntMonsterAttackAnimator({
+        card: null,
+        animationTimers: { timeout() {} },
+        selectedMonster: { id: 'diablos', species: 'Flying Wyvern' }
+    }, () => {});
+    let attachedContainer = null;
+    animator.createLocalEmojiFx = container => { attachedContainer = container; return {}; };
+    animator.createMonsterAttachedEmojiFx(monsterImg, '🌀', 'tail-vortex', 3100);
+    assert.strictEqual(attachedContainer, motionWrapper,
+        'Diablos spin emoji must ride the moving monster layer instead of staying at the stage home position');
+}
+
+{
+    const timers = [];
+    const listeners = {};
+    const classes = new Set(['hunt-monster-attack-motion']);
+    const classList = {
+        add: (...names) => names.forEach(name => classes.add(name)),
+        remove: (...names) => names.forEach(name => classes.delete(name)),
+        contains: name => classes.has(name),
+        [Symbol.iterator]: () => classes[Symbol.iterator]()
+    };
+    const properties = new Set();
+    const style = {
+        setProperty(name) { properties.add(name); },
+        removeProperty(name) { properties.delete(name); }
+    };
+    const wrapper = {
+        classList, style, dataset: {}, offsetWidth: 100, isConnected: true,
+        addEventListener(type, callback) { listeners[type] = callback; },
+        removeEventListener(type, callback) { if (listeners[type] === callback) delete listeners[type]; }
+    };
+    const monsterImg = {
+        parentElement: wrapper,
+        classList: { contains: () => false },
+        getBoundingClientRect: () => ({ left: 300, top: 200, width: 200, height: 180, bottom: 380 }),
+        closest: () => ({ clientWidth: 900 })
+    };
+    const targetCard = {
+        id: 'fight-card-0',
+        getBoundingClientRect: () => ({ left: 80, top: 620, width: 260, height: 300 })
+    };
+    const cardClasses = new Set(['hunt-monster-underground', 'monster-charge-rumble']);
+    const animator = new HuntMonsterAttackAnimator({
+        card: {
+            classList: { remove: (...names) => names.forEach(name => cardClasses.delete(name)) },
+            getBoundingClientRect: () => ({ width: 1920, bottom: 1080 }),
+            querySelectorAll(selector) {
+                return selector === '.hunt-monster-attack-motion' ? [wrapper] : [];
+            }
+        },
+        animationTimers: {
+            timeout(callback) { timers.push(callback); return timers.length - 1; },
+            clear() {}
+        },
+        selectedMonster: { id: 'diablos', species: 'Flying Wyvern' }
+    }, () => {});
+    animator.playPatternMotion(monsterImg, targetCard, {
+        id: 'diablos.horn_sweep', name: '연속 뿔 휘두르기', tags: ['horn', 'multi-hit', 'target-contact']
+    }, '연속 뿔 휘두르기', 'physical');
+    assert(classes.has('monster-motion-horn-sweep-contact'));
+    listeners.animationend({
+        type: 'animationend',
+        target: monsterImg,
+        animationName: 'monster-signature-ultimate'
+    });
+    assert(classes.has('monster-motion-horn-sweep-contact'),
+        'a status or spectacle animation ending on the child image must not cancel the attack-motion wrapper');
+    listeners.animationend({
+        type: 'animationend',
+        target: wrapper,
+        animationName: 'monster-motion-horn-sweep-contact'
+    });
+    assert(!classes.has('monster-motion-horn-sweep-contact'));
+    const events = animator.getMonsterMotionTrace().map(entry => entry.event);
+    assert(events.includes('ignored-child-event'));
+    assert(events.includes('complete'));
+
+    classes.add('monster-motion-ground-charge-double');
+    properties.add('animation');
+    properties.add('transform');
+    animator.clearMonsterMotion('knockdown');
+    assert(!classes.has('monster-motion-ground-charge-double'),
+        'knockdown must remove stale travel classes even after active-motion bookkeeping was lost');
+    assert(!properties.has('animation'));
+    assert(!properties.has('transform'));
+    assert(!cardClasses.has('hunt-monster-underground'));
+    assert(!cardClasses.has('monster-charge-rumble'));
+}
 
 console.log('[test] Monster animation semantic and wide-lane coverage passed.');

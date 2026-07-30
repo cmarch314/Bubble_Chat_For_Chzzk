@@ -1,11 +1,156 @@
 'use strict';
 
 class HuntMonsterAnatomyCatalog {
+    static TARGET_FULL_BREAK_DAMAGE_FRACTION = 0.82;
+    static UNBROKEN_PART_WEIGHT = 4;
+    static BROKEN_PART_WEIGHT = 0.14;
+    static NON_BREAKABLE_PART_WEIGHT = 0.28;
+    static SLASH_TAIL_WEIGHT = 1.65;
+
+    // Curated review overrides sit above generated game data when the imported
+    // break flag describes a damage pool rather than the visible break contract.
+    static PART_OVERRIDES = Object.freeze({
+        rathian: Object.freeze({
+            head: Object.freeze({ breakable: true })
+        }),
+        rathalos: Object.freeze({
+            head: Object.freeze({ breakable: true })
+        }),
+        gold_rathian: Object.freeze({
+            head: Object.freeze({
+                breakable: true,
+                hitzones: Object.freeze({ slash: .22, blunt: .25, pierce: .18 }),
+                breakHitzones: Object.freeze({ slash: .60, blunt: .65, pierce: .55 })
+            })
+        }),
+        silver_rathalos: Object.freeze({
+            head: Object.freeze({
+                breakable: true,
+                hitzones: Object.freeze({ slash: .22, blunt: .25, pierce: .18 }),
+                breakHitzones: Object.freeze({ slash: .60, blunt: .65, pierce: .55 })
+            })
+        })
+    });
+
+    // Measured against the resolved 512x512 sprite. Long parts use a path so
+    // effects can follow their actual silhouette instead of a card midpoint.
+    static VISUAL_GEOMETRY = Object.freeze({
+        rathian: Object.freeze({
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'left',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .18, y: .72 }),
+                torso: Object.freeze({ x: .58, y: .61 }),
+                'left-wing': Object.freeze({ x: .53, y: .20 }),
+                'right-wing': Object.freeze({ x: .73, y: .38 }),
+                foot: Object.freeze({ x: .55, y: .82 }),
+                tail: Object.freeze({
+                    path: Object.freeze([
+                        Object.freeze({ x: .75, y: .65 }),
+                        Object.freeze({ x: .58, y: .79 }),
+                        Object.freeze({ x: .39, y: .84 }),
+                        Object.freeze({ x: .22, y: .78 }),
+                        Object.freeze({ x: .14, y: .56 }),
+                        Object.freeze({ x: .18, y: .30 }),
+                        Object.freeze({ x: .31, y: .17 })
+                    ])
+                })
+            })
+        }),
+        rathalos: Object.freeze({
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'left',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .23, y: .64 }),
+                torso: Object.freeze({ x: .53, y: .61 }),
+                'left-wing': Object.freeze({ x: .31, y: .19 }),
+                'right-wing': Object.freeze({ x: .66, y: .25 }),
+                foot: Object.freeze({ x: .61, y: .70 }),
+                tail: Object.freeze({
+                    path: Object.freeze([
+                        Object.freeze({ x: .82, y: .57 }),
+                        Object.freeze({ x: .84, y: .70 }),
+                        Object.freeze({ x: .73, y: .84 }),
+                        Object.freeze({ x: .53, y: .89 }),
+                        Object.freeze({ x: .32, y: .86 }),
+                        Object.freeze({ x: .17, y: .84 })
+                    ])
+                })
+            })
+        }),
+        legiana: Object.freeze({
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'front',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .52, y: .27 }),
+                torso: Object.freeze({ x: .52, y: .55 }),
+                'left-wing': Object.freeze({ x: .25, y: .42 }),
+                'right-wing': Object.freeze({ x: .78, y: .42 }),
+                tail: Object.freeze({ x: .53, y: .84 })
+            })
+        }),
+        paolumu: Object.freeze({
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'front',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .49, y: .54 }),
+                torso: Object.freeze({ x: .49, y: .48 }),
+                'left-wing': Object.freeze({ x: .20, y: .28 }),
+                'right-wing': Object.freeze({ x: .80, y: .28 }),
+                tail: Object.freeze({ x: .69, y: .79 })
+            })
+        }),
+        bazelgeuse: Object.freeze({
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'front',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .50, y: .70 }),
+                torso: Object.freeze({ x: .50, y: .39 }),
+                'left-wing': Object.freeze({ x: .23, y: .45 }),
+                'right-wing': Object.freeze({ x: .77, y: .45 }),
+                tail: Object.freeze({ x: .50, y: .20 })
+            })
+        }),
+        tigrex: Object.freeze({
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'left',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .24, y: .73 }),
+                torso: Object.freeze({ x: .52, y: .54 }),
+                'left-wing': Object.freeze({ x: .18, y: .38 }),
+                'right-wing': Object.freeze({ x: .73, y: .69 }),
+                tail: Object.freeze({ x: .74, y: .26 })
+            })
+        }),
+        nargacuga: Object.freeze({
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'front',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .50, y: .74 }),
+                torso: Object.freeze({ x: .50, y: .52 }),
+                'left-wing': Object.freeze({ x: .20, y: .56 }),
+                'right-wing': Object.freeze({ x: .80, y: .56 }),
+                tail: Object.freeze({ x: .53, y: .20 })
+            })
+        }),
+        barioth: Object.freeze({
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'front',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .47, y: .25 }),
+                torso: Object.freeze({ x: .49, y: .56 }),
+                'left-wing': Object.freeze({ x: .20, y: .65 }),
+                'right-wing': Object.freeze({ x: .79, y: .65 }),
+                tail: Object.freeze({ x: .65, y: .20 })
+            })
+        })
+    });
+
     static TAIL_SEVERABLE_IDS = new Set([
         'anjanath','azure_rathalos','rathalos','rathian','pink_rathian','gold_rathian','silver_rathalos',
         'bazelgeuse','seething_bazelgeuse','diablos','black_diablos','deviljho','savage_deviljho','dodogama',
-        'great_girros','great_jagras','jyuratodus','kushala_daora','lavasioth','legiana','shrieking_legiana',
-        'lunastra','teostra','nergigante','ruiner_nergigante','odogaron','ebony_odogaron','paolumu','nightshade_paolumu',
+        'great_girros','great_jagras','jyuratodus','kushala_daora','lavasioth',
+        'lunastra','teostra','nergigante','ruiner_nergigante','odogaron','ebony_odogaron',
         'pukei_pukei','coral_pukei_pukei','radobaan','tobi_kadachi','viper_tobi_kadachi','uragaan',
         'vaal_hazak','blackveil_vaal_hazak','xenojiiva','safijiiva','acidic_glavenus','glavenus','alatreon',
         'banbaro','barioth','frostfang_barioth','brachydios','raging_brachydios','tigrex','brute_tigrex',
@@ -13,6 +158,19 @@ class HuntMonsterAnatomyCatalog {
         'gore_magala','shagaru_magala','valstrax','crimson_glow_valstrax','magnamalo','malzeno','primordial_malzeno',
         'mizutsune','astalos','seregios','chameleos','akantor','ukanlos','amatsu','lagiacrus','royal_ludroth'
     ]);
+
+    static REVIEWED_VARIANT_BASES = Object.freeze({
+        azure_rathalos: 'rathalos',
+        silver_rathalos: 'rathalos',
+        pink_rathian: 'rathian',
+        gold_rathian: 'rathian',
+        black_diablos: 'diablos',
+        shrieking_legiana: 'legiana',
+        nightshade_paolumu: 'paolumu',
+        seething_bazelgeuse: 'bazelgeuse',
+        brute_tigrex: 'tigrex',
+        frostfang_barioth: 'barioth'
+    });
 
     static normalize(value) {
         return String(value || '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
@@ -22,6 +180,48 @@ class HuntMonsterAnatomyCatalog {
         if (typeof HUNT_WILDS_MONSTER_ANATOMY !== 'undefined') return HUNT_WILDS_MONSTER_ANATOMY;
         if (typeof window !== 'undefined') return window.HUNT_WILDS_MONSTER_ANATOMY || { monsters: {} };
         return { monsters: {} };
+    }
+
+    static reviewedSource() {
+        if (typeof HUNT_REVIEWED_MONSTER_ANATOMY !== 'undefined') return HUNT_REVIEWED_MONSTER_ANATOMY;
+        if (typeof window !== 'undefined') return window.HUNT_REVIEWED_MONSTER_ANATOMY || { monsters: {} };
+        if (typeof require === 'function') return require('./data/ReviewedMonsterAnatomy.js');
+        return { monsters: {} };
+    }
+
+    static visualGeometry(monster) {
+        const id = this.normalize(monster?.id || monster?.nameEN || monster?.name);
+        const baseId = this.REVIEWED_VARIANT_BASES[id];
+        return this.VISUAL_GEOMETRY[id] || this.VISUAL_GEOMETRY[baseId] || null;
+    }
+
+    static baseFacing(monster) {
+        const id = this.normalize(monster?.id || monster?.nameEN || monster?.name);
+        if (['rathalos', 'azure_rathalos', 'silver_rathalos',
+            'rathian', 'pink_rathian', 'gold_rathian'].includes(id)) return 'left';
+        if (['diablos', 'black_diablos'].includes(id)) return 'front';
+        return this.visualGeometry(monster)?.baseFacing || 'front';
+    }
+
+    static visualPoint(monster, partKind, sequence = 0) {
+        const geometry = this.visualGeometry(monster);
+        if (!geometry) return null;
+        const rawKind = String(partKind || '').toLowerCase();
+        let key = rawKind;
+        if (/head|horn|chin/.test(rawKind)) key = 'head';
+        else if (/tail/.test(rawKind)) key = 'tail';
+        else if (/left.*wing|wing.*left/.test(rawKind)) key = 'left-wing';
+        else if (/right.*wing|wing.*right/.test(rawKind)) key = 'right-wing';
+        else if (/wing/.test(rawKind)) key = Number(sequence || 0) % 2 ? 'right-wing' : 'left-wing';
+        else if (/foot|leg|claw/.test(rawKind)) key = 'foot';
+        else if (/torso|body|back|chest/.test(rawKind)) key = 'torso';
+        const part = geometry.parts[key];
+        if (!part) return null;
+        if (Array.isArray(part.path) && part.path.length) {
+            const index = Math.abs(Math.trunc(Number(sequence) || 0)) % part.path.length;
+            return { ...part.path[index], kind: key, pathIndex: index };
+        }
+        return { x: part.x, y: part.y, kind: key };
     }
 
     static FLYING_IDS = new Set([
@@ -43,6 +243,38 @@ class HuntMonsterAnatomyCatalog {
     static find(monster) {
         const source = this.source().monsters || {};
         const candidates = [monster?.id, monster?.nameEN, monster?.name].map(this.normalize);
+        const reviewed = this.reviewedSource().monsters || {};
+        for (const id of candidates) {
+            if (id && reviewed[id]) {
+                return {
+                    ...reviewed[id],
+                    parts: reviewed[id].parts.map(part => ({
+                        ...part,
+                        hitzones: { ...(part.hitzones || {}) }
+                    }))
+                };
+            }
+            const baseId = this.REVIEWED_VARIANT_BASES[id];
+            if (id && baseId && reviewed[baseId]) {
+                const base = reviewed[baseId];
+                return {
+                    ...base,
+                    id,
+                    tailSeverable: this.TAIL_SEVERABLE_IDS.has(id),
+                    evidence: {
+                        ...(base.evidence || {}),
+                        variantOf: baseId,
+                        inheritance: 'reviewed-world-family'
+                    },
+                    parts: base.parts.map(part => ({
+                        ...part,
+                        id: `${id}:${String(part.kind || 'part')}`,
+                        health: Math.round(Number(part.health || 0) * 1.08),
+                        hitzones: { ...(part.hitzones || {}) }
+                    }))
+                };
+            }
+        }
         for (const id of candidates) {
             if (id && source[id]) return { ...source[id], tailSeverable: this.TAIL_SEVERABLE_IDS.has(id) };
         }
@@ -58,6 +290,12 @@ class HuntMonsterAnatomyCatalog {
             { id: `${id}:head`, kind: 'head', health: 620, breakable: true, hitzones: { slash: .55, blunt: .62, pierce: .48 } },
             { id: `${id}:torso`, kind: 'torso', health: 900, breakable: false, hitzones: { slash: .32, blunt: .32, pierce: .28 } }
         ];
+        if (id === 'diablos' || id === 'black_diablos') {
+            parts.splice(0, 1,
+                { id: `${id}:left-horn`, kind: 'left-horn', health: 310, breakable: true, hitzones: { slash: .55, blunt: .62, pierce: .48 } },
+                { id: `${id}:right-horn`, kind: 'right-horn', health: 310, breakable: true, hitzones: { slash: .55, blunt: .62, pierce: .48 } }
+            );
+        }
         if (flying) {
             parts.push(
                 { id: `${id}:left-wing`, kind: 'left-wing', health: 460, breakable: true, hitzones: { slash: .44, blunt: .40, pierce: .48 } },
@@ -80,38 +318,62 @@ class HuntMonsterAnatomyCatalog {
     }
 
     static breakReaction(monsterId, partKind, airborne = false) {
-        const id = this.normalize(monsterId);
         const kind = String(partKind || '').toLowerCase();
-        if (/tail/.test(kind)) return { type: 'flinch', durationTicks: 32, label: '꼬리 절단 경직' };
-        if (/wing/.test(kind)) {
-            if (airborne) return { type: 'aerial_topple', durationTicks: 105, label: '날개 파괴 격추 대경직' };
-            return { type: 'topple', durationTicks: 70, label: '날개 파괴 대경직' };
+        const tailSever = /tail/.test(kind);
+        if (airborne) {
+            return {
+                type: 'aerial_topple',
+                visualType: tailSever ? 'tail_sever_roll' : 'part_break_topple',
+                durationTicks: 105,
+                label: tailSever ? '꼬리 절단 격추 대경직' : '부위 파괴 격추 대경직'
+            };
         }
-        if (/(front-leg|foreleg|front_leg|fore_leg)/.test(kind) && this.FORELEG_TOPPLE_IDS.has(id)) {
-            return { type: 'topple', durationTicks: 70, label: '앞다리 파괴 대경직' };
+        if (tailSever) {
+            return {
+                type: 'tail_sever_roll',
+                visualType: 'tail_sever_roll',
+                durationTicks: 55,
+                label: '꼬리 절단 나뒹굴기'
+            };
         }
-        if (/(leg|foot)/.test(kind)) return { type: 'topple', durationTicks: 70, label: '다리 파괴 대경직' };
-        if (/(head|horn|chin|spike)/.test(kind) && this.HEAD_TOPPLE_IDS.has(id)) {
-            return { type: 'topple', durationTicks: 70, label: '핵심 부위 파괴 대경직' };
-        }
-        return { type: 'flinch', durationTicks: 28, label: '부위 파괴 경직' };
+        return {
+            type: 'part_break_topple',
+            visualType: 'part_break_topple',
+            durationTicks: 35,
+            label: '부위 파괴 넘어짐'
+        };
+    }
+
+    static partDisplaySlots(parts) {
+        const catalog = typeof HuntMonsterArchetypeCatalog !== 'undefined'
+            ? HuntMonsterArchetypeCatalog
+            : (typeof require === 'function' ? require('./HuntMonsterArchetypeCatalog.js') : null);
+        return catalog ? catalog.partDisplaySlots(parts) : [];
     }
 
     static createPartState(profile) {
         if (!profile) return [];
-        return (profile.parts || []).filter(part => Number(part.health) > 0).map(part => ({
-            id: part.id,
-            kind: part.kind,
-            maxHealth: Number(part.health),
-            health: Number(part.health),
-            breakable: Boolean(part.breakable),
-            severable: Boolean(profile.tailSeverable && /(^|-)tail($|-)/.test(part.kind)),
-            severed: false,
-            broken: false,
-            damageAccumulated: 0,
-            essence: part.essence || null,
-            hitzones: { ...(part.hitzones || {}) }
-        }));
+        const monsterId = this.normalize(profile.id || profile.nameEN || profile.name);
+        const overrides = this.PART_OVERRIDES[monsterId] || {};
+        return (profile.parts || []).filter(part => Number(part.health) > 0).map(part => {
+            const override = overrides[String(part.kind || '').toLowerCase()] || {};
+            return {
+                id: part.id,
+                kind: part.kind,
+                maxHealth: Number(part.health),
+                health: Number(part.health),
+                breakable: Boolean(override.breakable ?? part.breakable),
+                severable: Boolean(profile.tailSeverable && /(^|-)tail($|-)/.test(part.kind)),
+                severed: false,
+                broken: false,
+                damageAccumulated: 0,
+                essence: part.essence || null,
+                hitzones: { ...(override.hitzones || part.hitzones || {}) },
+                breakHitzones: override.breakHitzones
+                    ? { ...override.breakHitzones }
+                    : null
+            };
+        });
     }
 
     static damageTypeForWeapon(weapon) {
@@ -129,8 +391,14 @@ class HuntMonsterAnatomyCatalog {
         const weighted = candidates.map(part => ({
             part,
             weight: Math.max(0.05, Number(part.hitzones?.[damageType] || 0.05))
-                * (part.breakable && !part.broken ? 1.35 : 1)
+                * ((part.breakable || part.severable) && !part.broken
+                    ? this.UNBROKEN_PART_WEIGHT
+                    : part.broken
+                        ? this.BROKEN_PART_WEIGHT
+                        : this.NON_BREAKABLE_PART_WEIGHT)
                 * (damageType === 'blunt' && /(^|[-_])(head|horn|chin)([-_]|$)/.test(part.kind) ? 4.5 : 1)
+                * (damageType === 'slash' && part.severable ? this.SLASH_TAIL_WEIGHT : 1)
+                * (damageType !== 'slash' && part.severable ? 0.02 : 1)
         }));
         const total = weighted.reduce((sum, entry) => sum + entry.weight, 0);
         let roll = Math.max(0, Math.min(0.999999, Number(random()) || 0)) * total;
@@ -141,18 +409,36 @@ class HuntMonsterAnatomyCatalog {
         return weighted[weighted.length - 1].part;
     }
 
+    static partDamageScale(parts, monsterMaxHp) {
+        const totalBreakHealth = (parts || [])
+            .filter(part => part && (part.breakable || part.severable))
+            .reduce((sum, part) => sum + Math.max(0, Number(part.maxHealth || 0)), 0);
+        const hp = Math.max(1, Number(monsterMaxHp || 1));
+        if (totalBreakHealth <= 0) return 0;
+        return totalBreakHealth / (hp * this.TARGET_FULL_BREAK_DAMAGE_FRACTION);
+    }
+
     static applyPartDamage(parts, weapon, rawDamage, scale, random = Math.random) {
         const damageType = this.damageTypeForWeapon(weapon);
         const part = this.choosePart(parts, damageType, random);
         if (!part) return null;
         const hitzone = Math.max(0, Number(part.hitzones?.[damageType] || 0));
         const canDamage = !part.severable || damageType === 'slash';
-        const applied = canDamage ? Math.max(0, Number(rawDamage) || 0) * Math.max(0, Number(scale) || 0) * hitzone : 0;
+        // The incoming action damage has already been resolved. Hitzone remains
+        // important for target preference and bounce, but multiplying it again
+        // here made part durability far outlive the monster's real combat life.
+        const hitzonePartRate = 0.82 + Math.min(1, hitzone) * 0.36;
+        const applied = canDamage
+            ? Math.max(0, Number(rawDamage) || 0) * Math.max(0, Number(scale) || 0) * hitzonePartRate
+            : 0;
         const wasBroken = part.broken;
         part.damageAccumulated += applied;
         part.health = Math.max(0, part.health - applied);
         if ((part.breakable || part.severable) && part.health <= 0) part.broken = true;
         if (part.severable && part.broken) part.severed = true;
+        if (!wasBroken && part.broken && part.breakHitzones) {
+            part.hitzones = { ...part.breakHitzones };
+        }
         return { part, damageType, hitzone, applied, newlyBroken: !wasBroken && part.broken, newlySevered: !wasBroken && part.severed };
     }
 }

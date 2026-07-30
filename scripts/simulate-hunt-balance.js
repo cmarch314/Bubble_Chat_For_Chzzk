@@ -13,20 +13,27 @@ require('../js/effects/MonsterData.js');
 require('../js/effects/hunt/HuntData.js');
 window.HUNT_MONSTER_PATTERN_OVERRIDES = require('../js/effects/hunt/HuntMonsterProfiles.js');
 
+global.HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
 global.HuntActionStateMachine = require('../js/effects/hunt/HuntActionStateMachine.js');
 global.HUNT_WILDS_MOTION_VALUES = require('../js/effects/hunt/data/WildsMotionValues.generated.js');
 global.HUNT_WILDS_RUNTIME_MOTION_TIMINGS = require('../js/effects/hunt/data/WildsRuntimeMotionTimings.generated.js');
 global.HuntMotionValueCatalog = require('../js/effects/hunt/HuntMotionValueCatalog.js');
 global.HuntWeaponMechanics = require('../js/effects/hunt/HuntWeaponMechanics.js');
 global.HuntPerkRuntime = require('../js/effects/hunt/HuntPerkRuntime.js');
-global.HuntHunterCommandQueue = require('../js/effects/hunt/HuntHunterCommandQueue.js');
 global.HuntWeaponActionSelector = require('../js/effects/hunt/HuntWeaponActionSelector.js');
 global.HuntMonsterFlightRuntime = require('../js/effects/hunt/HuntMonsterFlightRuntime.js');
+global.HuntMonsterTraitRuntime = require('../js/effects/hunt/HuntMonsterTraitRuntime.js');
 global.HuntMonsterPatternCatalog = require('../js/effects/hunt/HuntMonsterPatternCatalog.js');
 global.HuntMonsterPatternSelector = require('../js/effects/hunt/HuntMonsterPatternSelector.js');
 global.HuntBalanceTelemetry = require('../js/effects/hunt/HuntBalanceTelemetry.js');
+global.HuntSupportItemPolicy = require('../js/effects/hunt/HuntSupportItemPolicy.js');
+global.HUNT_WILDS_MONSTER_ANATOMY = require('../js/effects/hunt/data/WildsMonsterAnatomy.generated.js');
+global.HuntMonsterArchetypeCatalog = require('../js/effects/hunt/HuntMonsterArchetypeCatalog.js');
+global.HuntMonsterAnatomyCatalog = require('../js/effects/hunt/HuntMonsterAnatomyCatalog.js');
+global.HuntMonsterReleasePolicy = require('../js/effects/hunt/HuntMonsterReleasePolicy.js');
 global.HuntMonsterRules = loadBrowserClass('js/effects/hunt/HuntMonsterRules.js', 'HuntMonsterRules');
 global.HuntBattleTickExecutor = loadBrowserClass('js/effects/hunt/HuntBattleTickExecutor.js', 'HuntBattleTickExecutor');
+global.HuntMonsterActionPolicy = loadBrowserClass('js/effects/hunt/HuntMonsterActionPolicy.js', 'HuntMonsterActionPolicy');
 global.HuntValstraxExecutor = loadBrowserClass('js/effects/hunt/HuntValstraxExecutor.js', 'HuntValstraxExecutor');
 global.HuntMonsterTurnExecutor = loadBrowserClass('js/effects/hunt/HuntMonsterTurnExecutor.js', 'HuntMonsterTurnExecutor');
 global.HuntHunterTurnExecutor = loadBrowserClass('js/effects/hunt/HuntHunterTurnExecutor.js', 'HuntHunterTurnExecutor');
@@ -36,11 +43,14 @@ const HuntPerkCatalog = require('../js/effects/hunt/HuntPerkCatalog.js');
 const HuntSeededRandom = require('../js/effects/hunt/HuntSeededRandom.js');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
 
-const runs = Math.max(1, Number(process.argv[2] || 200));
+const runs = Math.max(1, Number(process.argv[2] || 50));
 const comboList = HuntWeaponCatalog.build(window.HUNT_COMBO_LIST);
 const monsterPatterns = HuntMonsterPatternCatalog.build(window.MONSTER_ATTACKS, window.MONSTER_DATA);
-const weapons = window.HUNT_WEAPONS;
-const monsters = window.MONSTER_DATA.filter(monster => monsterPatterns[monster.id.replace(/-/g, '_')]);
+const weapons = window.HUNT_WEAPONS?.length
+    ? window.HUNT_WEAPONS
+    : Object.keys(comboList).map(id => ({ id, name: id, filename: `${id}.svg`, type: 'melee', speedGroup: 'normal' }));
+const monsters = HuntMonsterReleasePolicy.filter(window.MONSTER_DATA)
+    .filter(monster => monsterPatterns[monster.id.replace(/-/g, '_')]);
 
 function makeHunter(weapon, index, random) {
     const perks = HuntPerkCatalog.roll(random);
@@ -88,7 +98,10 @@ function run(seed) {
         monsterTier: 'normal',
         monsterHp: 15600,
         monsterMaxHp: 15600,
-        monsterSpeed: 2.2,
+        // Keep the simulator on the same variable-owned gauge as
+        // production. A hard-coded legacy speed made fractional monster action
+        // costs resolve more than twice as fast as the live ATB contract.
+        monsterSpeed: HuntAtbConfig.FILL_PER_TICK,
         monsterDamageMod: 0.9,
         monsterStunThreshold: 390,
         MONSTER_ATTACKS: window.MONSTER_ATTACKS,
@@ -101,11 +114,14 @@ function run(seed) {
     });
 
     while (!ended && engine.battleTime < 4800) engine.processTick();
+    const breakableParts = engine.monsterPartState.filter(part => part.breakable || part.severable);
     return {
         victory,
         monsterId: monster.id,
         ticks: engine.battleTime,
         carts: engine.cartCount,
+        partsBroken: breakableParts.filter(part => part.broken || part.severed).length,
+        partsAvailable: breakableParts.length,
         weapons: selectedWeapons.map(weapon => weapon.id),
         telemetry: engine.telemetry.summary()
     };
@@ -132,7 +148,9 @@ for (const result of results) {
     }
 }
 
-console.log(`[hunt-sim] runs=${runs} wins=${wins.length} winRate=${(wins.length / runs * 100).toFixed(1)}% avgTicks=${average(results.map(result => result.ticks)).toFixed(1)} avgCarts=${average(results.map(result => result.carts)).toFixed(2)}`);
+const partBreakRate = results.reduce((sum, result) =>
+    sum + result.partsBroken / Math.max(1, result.partsAvailable), 0) / results.length;
+console.log(`[hunt-sim] runs=${runs} wins=${wins.length} winRate=${(wins.length / runs * 100).toFixed(1)}% avgTicks=${average(results.map(result => result.ticks)).toFixed(1)} avgCarts=${average(results.map(result => result.carts)).toFixed(2)} avgPartBreak=${(partBreakRate * 100).toFixed(1)}%`);
 Object.entries(weaponStats).sort(([a], [b]) => a.localeCompare(b)).forEach(([weaponId, stat]) => {
     console.log(`  ${weaponId.padEnd(16)} hunts=${String(stat.hunts).padStart(4)} win=${(stat.wins / stat.hunts * 100).toFixed(1).padStart(5)}% avgTicks=${(stat.ticks / stat.hunts).toFixed(1).padStart(6)} carts=${(stat.carts / stat.hunts).toFixed(2)} dmg/action=${((stat.damage || 0) / Math.max(1, stat.actions || 0)).toFixed(1)}`);
 });

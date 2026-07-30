@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "rathian",
+  "nameKO": "리오레이아",
+  "canonicalEdition": "world-iceborne",
+  "variantOf": null,
+  "release": {
+    "stage": "released",
+    "order": 30,
+    "reviewId": "world-ground-queen-review-2026-07-28",
+    "reviewedAt": "2026-07-28",
+    "gates": { "evidence": true, "patterns": true, "anatomy": true, "animation": true, "audio": true, "preview": true, "simulation": true }
+  },
+  "runtime": { "profileId": "rathian", "mechanicModules": ["common", "flight", "rath-family"] },
+  "evidenceRefs": [
+    { "kind": "implementation-audit", "path": "data/hunt/rathian-implementation-audit.md" },
+    { "kind": "audio-review", "path": "data/hunt/world-monster-audio-review-labels.json" }
+  ]
+}

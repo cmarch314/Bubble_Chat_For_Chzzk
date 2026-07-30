@@ -20,7 +20,7 @@ assert.strictEqual(trueChargedSlash.audioCue, 'true_charged_slash');
 assert.strictEqual(catalog.charge_blade.find(action => action.id === 'charge_blade.saed').audioCue, 'explosive_heavy');
 assert.strictEqual(catalog.bow.find(action => action.id === 'bow.tracer_dragon_piercer').audioCue, 'dragon_piercer');
 assert.match(trueChargedSlash.timingEvidence, /motion-value-proxy/);
-assert(trueChargedSlash.durationTicks >= 3 && trueChargedSlash.durationTicks <= 24);
+assert.strictEqual(trueChargedSlash.durationTicks, 50, 'True Charged Slash must anchor the full-budget authoring scale');
 const tackle = catalog.great_sword.find(action => action.id === 'great_sword.tackle');
 assert(trueChargedSlash.durationTicks > tackle.durationTicks, 'higher-MV finisher must occupy more ATB time than tackle');
 assert.strictEqual(tackle.gameActionClass, 'cTackle');
@@ -33,8 +33,19 @@ assert.ok(canonical.switch_axe.some(action => action.id === 'switch_axe.full_rel
 assert.deepStrictEqual(canonical.hammer.slice(0, 3).map(action => action.id), [
     'hammer.overhead_1', 'hammer.overhead_2', 'hammer.upswing'
 ]);
-assert.strictEqual(canonical.hammer.find(action => action.id === 'hammer.charge_1').durationTicks, 3, 'explicit short charge timing must survive catalog enrichment');
+assert.strictEqual(canonical.hammer.find(action => action.id === 'hammer.charge_1').durationTicks, 10, 'shared one-second charge timing must survive catalog enrichment');
 assert.ok(canonical.hammer.some(action => action.id === 'hammer.big_bang_finisher'));
 assert.ok(canonical.hammer.some(action => action.id === 'hammer.offset_followup_spinslam'));
+
+const allWeapons = HuntWeaponCatalog.build({});
+assert.strictEqual(Object.keys(allWeapons).length, 14, 'the unified ATB rescale must cover all 14 weapons');
+Object.entries(allWeapons).forEach(([weaponId, actions]) => {
+    const costs = actions.filter(action => Number(action.motionValue) > 0 && !action.tags?.includes('preparation')).map(action => action.atbOccupancyTicks / 10);
+    assert(costs.length > 0, `${weaponId} must retain damaging actions after ATB rescaling`);
+    assert(costs.every(seconds => seconds >= 0.5 && seconds <= 5), `${weaponId} ATB costs must stay inside the 0.5-5 second budget`);
+});
+const fallingBash = allWeapons.sword_shield.find(action => action.id === 'sword_shield.falling_bash');
+assert(fallingBash.atbOccupancyTicks < trueChargedSlash.atbOccupancyTicks,
+    'Falling Bash must no longer cost as much ATB as True Charged Slash');
 
 console.log('[test] Hunt weapon catalog contract passed.');

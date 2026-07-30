@@ -10,7 +10,7 @@ class HuntSmallMonsterSwarm {
         });
         this.targetIndex = 0;
         this.attackerCursor = -1;
-        this.activeAttackerIndex = 0;
+        this.activeAttackerIndex = -1;
     }
     aliveUnits() { return this.units.filter(unit => unit.alive); }
     totalHp() { return this.units.reduce((sum, unit) => sum + unit.hp, 0); }
@@ -67,6 +67,21 @@ class HuntSmallMonsterSwarm {
         const ready = alive.filter(unit => Number(unit.atb || 0) >= 100);
         const later = alive.find(unit => unit.index > this.attackerCursor);
         const attacker = ready.sort((a, b) => b.atb - a.atb || a.index - b.index)[0] || later || alive[0];
+        this.attackerCursor = attacker.index;
+        this.activeAttackerIndex = attacker.index;
+        attacker.atb = 0;
+        return attacker;
+    }
+    reserveReadyAttacker() {
+        const ready = this.aliveUnits()
+            .filter(unit => Number(unit.atb || 0) >= 100)
+            .sort((a, b) => {
+                const aOrder = (a.index - this.attackerCursor - 1 + this.count) % this.count;
+                const bOrder = (b.index - this.attackerCursor - 1 + this.count) % this.count;
+                return aOrder - bOrder || a.index - b.index;
+            });
+        const attacker = ready[0] || null;
+        if (!attacker) return null;
         this.attackerCursor = attacker.index;
         this.activeAttackerIndex = attacker.index;
         attacker.atb = 0;

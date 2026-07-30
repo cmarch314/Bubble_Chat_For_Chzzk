@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,height=1080,initial-scale=1">
+  <title>!수렵 퀘스트 수주 캔버스</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:radial-gradient(circle at 50% 32%,#27342e,#090c0b 72%)}
+    body{color:#fff}
+    .preview-chat-safe{position:fixed;z-index:2147483639;inset:auto 0 0;height:162px;border-top:2px dashed rgba(66,255,184,.72);background:rgba(0,0,0,.52);display:grid;place-items:center;color:#79dcb8;font:900 20px/1 sans-serif;letter-spacing:2px}
+    .preview-result{position:fixed;z-index:2147483647;top:8px;right:12px;padding:8px 13px;border:2px solid #4effaa;background:#06150fe8;color:#7dffb7;font:900 16px/1 sans-serif}
+    .preview-result.fail{border-color:#ff665c;color:#ff8b84;background:#210706e8}
+  </style>
+</head>
+<body>
+  <div id="hunt-preview-container" class="game-overlay-container"></div>
+  <div id="preview-result" class="preview-result">검사 준비</div>
+  <div class="preview-chat-safe">OBS 채팅 안전영역 · 하단 15%</div>
+  <script src="../../js/effects/hunt/HuntRenderer.js"></script>
+  <script>
+    (() => {
+      const monsters = {
+        rathalos: { id:'rathalos', nameKO:'리오레우스', filename:'rathalos.png' },
+        zinogre: { id:'zinogre', nameKO:'진오우거', filename:'zinogre.png' },
+        deviljho: { id:'deviljho', nameKO:'이블조', filename:'deviljho.png' },
+        fatalis: { id:'fatalis', nameKO:'밀라보레아스', filename:'fatalis.png' }
+      };
+      const scenarios = {
+        single: {
+          label:'단일 수렵',
+          data:{ voteTitle:'⚔️ 집회소 수렵 퀘스트 수주 ⚔️', voteSubtitle:'채팅에 !참가를 입력하세요.', consecutiveTotal:1,
+            consecutiveQueue:[monsters.rathalos], selectedMonster:monsters.rathalos, questTier:'large' },
+          participants:[]
+        },
+        filled: {
+          label:'4인 참가 완료',
+          data:{ voteTitle:'⚔️ 집회소 수렵 퀘스트 수주 ⚔️', voteSubtitle:'4명의 헌터가 참가했습니다.', consecutiveTotal:1,
+            consecutiveQueue:[monsters.zinogre], selectedMonster:monsters.zinogre, questTier:'large' },
+          participants:[
+            {nickname:'헌터 하나',color:'#ffcf66'},{nickname:'방패장인',color:'#75b9ff'},
+            {nickname:'피리명인',color:'#80ef9d'},{nickname:'활쟁이',color:'#ff8db8'}
+          ]
+        },
+        consecutive: {
+          label:'3마리 연속 수렵',
+          data:{ voteTitle:'⚔️ 연속 수렵 모집! (1/3) ⚔️', voteSubtitle:'3마리 연속 퀘스트입니다.', consecutiveTotal:3,
+            consecutiveQueue:[monsters.rathalos,monsters.zinogre,monsters.deviljho], selectedMonster:monsters.rathalos, questTier:'large' },
+          participants:[{nickname:'선발 헌터',color:'#fff0a0'}]
+        },
+        elder: {
+          label:'고룡 토벌',
+          data:{ voteTitle:'⚔️ 집회소 고룡 토벌 수주 ⚔️', voteSubtitle:'채팅에 !참가를 입력하세요.', consecutiveTotal:1,
+            consecutiveQueue:[monsters.fatalis], selectedMonster:monsters.fatalis, questTier:'elder' },
+          participants:[]
+        }
+      };
+      const timers = { clearAll(){}, timeout(fn){ fn(); return 0; } };
+      const renderer = Object.create(HuntRenderer.prototype);
+      Object.assign(renderer, {
+        container:document.getElementById('hunt-preview-container'), card:null,
+        lobbyTimers:timers, animationTimers:timers, lobbyTimer:null, lobbyTimeouts:[],
+        combatAnimator:{ clearWeaponAnimations(){} }, notifications:{}
+      });
+
+      function inspect(name) {
+        const scenario = scenarios[name];
+        const card = renderer.card;
+        const slots = [...card.querySelectorAll('.hunt-rise-recruit-slot')];
+        const cardBox = card.getBoundingClientRect();
+        const checks = [
+          ['카드 렌더링', Boolean(card)],
+          ['헌터 슬롯 4개', slots.length === 4],
+          ['!참가 명령 노출', card.textContent.includes('!참가')],
+          ['몬스터 이름 노출', card.textContent.includes(scenario.data.selectedMonster.nameKO)],
+          ['보수금 노출', card.textContent.includes('보수금')],
+          ['하단 15% 미침범', cardBox.bottom <= 918.5],
+          ['가로 오버플로 없음', card.scrollWidth <= card.clientWidth + 1],
+          ['세로 오버플로 없음', card.scrollHeight <= card.clientHeight + 1]
+        ];
+        const failed = checks.filter(([,pass]) => !pass).map(([label]) => label);
+        const result = document.getElementById('preview-result');
+        result.className = `preview-result${failed.length ? ' fail' : ''}`;
+        result.textContent = failed.length ? `FAIL · ${failed.join(', ')}` : `PASS · ${scenario.label}`;
+        window.__HUNT_PREVIEW_RESULT__ = { scenario:name, pass:failed.length === 0, checks:Object.fromEntries(checks), bounds:{
+          left:cardBox.left,top:cardBox.top,right:cardBox.right,bottom:cardBox.bottom,width:cardBox.width,height:cardBox.height
+        }};
+        parent.postMessage({ type:'hunt-preview-result', result:window.__HUNT_PREVIEW_RESULT__ }, '*');
+      }
+
+      window.renderHuntScenario = name => {
+        const scenario = scenarios[name] || scenarios.single;
+        renderer.renderQuestBoard({ ...scenario.data, participantCount:scenario.participants.length, participants:scenario.participants });
+        renderer.updateRecruitmentUI(scenario.participants);
+        requestAnimationFrame(() => inspect(name in scenarios ? name : 'single'));
+      };
+      const initial = new URLSearchParams(location.search).get('scenario') || 'single';
+      window.renderHuntScenario(initial);
+    })();
+  </script>
+</body>
+</html>

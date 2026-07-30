@@ -1,3 +1,13 @@
+const HuntCommandRules = typeof HuntCommandCatalog !== 'undefined'
+    ? HuntCommandCatalog
+    : (typeof require === 'function' ? require('./HuntCommandCatalog') : null);
+const HuntPersistentProfileRules = typeof HuntProfileContract !== 'undefined'
+    ? HuntProfileContract
+    : (typeof require === 'function' ? require('./HuntProfileContract') : null);
+const HuntSupportItemRules = typeof HuntSupportItemPolicy !== 'undefined'
+    ? HuntSupportItemPolicy
+    : (typeof require === 'function' ? require('./HuntSupportItemPolicy') : null);
+
 class HuntInitializer {
     constructor(options = {}) {
         this.random = options.random || Math.random;
@@ -21,7 +31,7 @@ class HuntInitializer {
             { id: 'bow', name: '활', filename: 'bow.svg', type: 'ranged', speedGroup: 'very_fast' }
         ];
 
-        this.fallbackMonsters = window.MONSTER_DATA || [
+        this.fallbackMonsters = window.HUNT_RELEASED_MONSTER_DATA || window.MONSTER_DATA || [
             { id: "rathalos", nameEN: "Rathalos", nameKO: "리오레우스", filename: "rathalos.png" },
             { id: "diablos", nameEN: "Diablos", nameKO: "디아블로스", filename: "diablos.png" },
             { id: "nergigante", nameEN: "Nergigante", nameKO: "네르기간테", filename: "nergigante.png" },
@@ -38,7 +48,12 @@ class HuntInitializer {
             default: ["포효 위협", "몸통 박치기", "꼬리 후려치기", "성난 돌진 공격"]
         };
         this.MONSTER_PATTERNS = HuntMonsterPatternCatalog.build(this.MONSTER_ATTACKS, this.fallbackMonsters);
-        const patternErrors = HuntMonsterPatternCatalog.validate(this.MONSTER_PATTERNS);
+        const patternErrors = [
+            ...HuntMonsterPatternCatalog.validate(this.MONSTER_PATTERNS),
+            ...(typeof HuntMonsterPatternCatalog.validateReleased === 'function'
+                ? HuntMonsterPatternCatalog.validateReleased(this.MONSTER_PATTERNS)
+                : [])
+        ];
         if (patternErrors.length) console.warn('[HuntMonsterPatternCatalog] Invalid patterns:', patternErrors);
 
         this.COMBO_LIST = HuntWeaponCatalog.build(window.HUNT_COMBO_LIST || {});
@@ -52,16 +67,19 @@ class HuntInitializer {
         let consecutiveCount = 1;
         let targetMonsterName = null;
         let chosenWeaponIds = [];
+        let huntMode = 'single';
 
         if (message) {
             const trimmed = message.trim();
-            const match = trimmed.match(/^!(수렵|토벌)\s*([1-9]|10)(?![0-9])/);
+            const command = HuntCommandRules.matchStart(trimmed);
+            huntMode = command?.mode || 'single';
+            const commandArgs = command?.args || '';
+            const match = commandArgs.match(/^([1-9]|10)(?![0-9])/);
             if (match) {
-                consecutiveCount = parseInt(match[2], 10);
+                consecutiveCount = parseInt(match[1], 10);
             }
 
-            const cleanedMsg = trimmed.replace(/^!(수렵|토벌)\s*/, "").trim();
-            const tokens = cleanedMsg.split(/\s+/);
+            const tokens = commandArgs ? commandArgs.split(/\s+/) : [];
             const WEAPON_CHAR_MAP = {
                 '대': 'great_sword', '태': 'long_sword', '한': 'sword_shield', '쌍': 'dual_blades',
                 '해': 'hammer', '피': 'hunting_horn', '건': 'gunlance', '랜': 'lance',
@@ -88,14 +106,22 @@ class HuntInitializer {
             if (monsterNameTokens.length > 0) {
                 targetMonsterName = monsterNameTokens.join(" ");
             }
+            if (command && !command.definition.acceptsArguments) {
+                // The command catalog, not parser-specific mode checks, owns
+                // whether route-affecting arguments are accepted.
+                consecutiveCount = 1;
+                targetMonsterName = null;
+                chosenWeaponIds = [];
+            }
         }
 
         let selectedMonster = null;
         let consecutiveQueue = [];
+        let requestedMonsterMatched = targetMonsterName ? false : null;
 
         if (consecutiveCount > 1) {
             for (let i = 0; i < consecutiveCount; i++) {
-                consecutiveQueue.push(monsters[Math.floor(Math.random() * monsters.length)]);
+                consecutiveQueue.push(monsters[Math.floor(this.random() * monsters.length)]);
             }
             selectedMonster = consecutiveQueue[0];
         } else if (targetMonsterName) {
@@ -127,16 +153,24 @@ class HuntInitializer {
                 '레이아': '리오레이아',
                 '레이아 아종': '리오레이아 아종',
                 '앵화룡': '리오레이아 아종',
-                '금화룡': '리오레이아 희소종'
+                '금화룡': '리오레이아 희소종',
+                '티가': '티가렉스',
+                '티가 아종': '티가렉스 아종',
+                '얀가': '얀가루루가'
             };
             const searchName = stableAliases[targetMonsterName] || nicknameMap[targetMonsterName] || targetMonsterName;
             const normalizedSearch = String(searchName).trim().toLowerCase();
+            const requestsVariant = /아종|희소종|특수개체|역전왕|deviant|subspecies|rare species/.test(normalizedSearch);
             const scoreMonsterMatch = monster => {
                 const names = [monster.nameKO, monster.nameEN, monster.id]
                     .filter(Boolean).map(value => String(value).trim().toLowerCase());
-                if (names.some(value => value === normalizedSearch)) return 300;
-                if (names.some(value => value.startsWith(normalizedSearch))) return 200;
-                if (names.some(value => value.includes(normalizedSearch))) return 100;
+                const variantPenalty = !requestsVariant && (
+                    Boolean(monster.variantOf)
+                    || names.some(value => /아종|희소종|특수개체|subspecies|rare species/.test(value))
+                ) ? 75 : 0;
+                if (names.some(value => value === normalizedSearch)) return 300 - variantPenalty;
+                if (names.some(value => value.startsWith(normalizedSearch))) return 200 - variantPenalty;
+                if (names.some(value => value.includes(normalizedSearch))) return 100 - variantPenalty;
                 return 0;
             };
             const matched = monsters
@@ -145,21 +179,50 @@ class HuntInitializer {
                 .sort((a, b) => b.score - a.score || a.index - b.index)[0]?.monster;
             if (matched) {
                 selectedMonster = matched;
-            } else {
-                selectedMonster = monsters[Math.floor(Math.random() * monsters.length)];
+                requestedMonsterMatched = true;
             }
-            consecutiveQueue = [selectedMonster];
+            consecutiveQueue = selectedMonster ? [selectedMonster] : [];
         } else {
-            selectedMonster = monsters[Math.floor(Math.random() * monsters.length)];
+            selectedMonster = monsters[Math.floor(this.random() * monsters.length)];
             consecutiveQueue = [selectedMonster];
         }
 
         return {
+            huntMode,
             consecutiveTotal: consecutiveCount,
             selectedMonster,
             consecutiveQueue,
-            chosenWeaponIds
+            chosenWeaponIds,
+            requestedMonsterName: targetMonsterName,
+            requestedMonsterMatched
         };
+    }
+
+    applyPersistentProfile(hunter, profile) {
+        if (!hunter || !profile || typeof profile !== 'object') return false;
+        profile = HuntPersistentProfileRules.normalize(profile);
+        let applied = false;
+        if (Array.isArray(profile.perkIds) && typeof HuntPerkCatalog !== 'undefined') {
+            const byId = new Map(HuntPerkCatalog.all().map(perk => [perk.id, perk]));
+            const perks = [...new Set(profile.perkIds)]
+                .map(id => byId.get(id))
+                .filter(Boolean)
+                .slice(0, HuntPersistentProfileRules.MAX_PERKS);
+            hunter.perks = perks;
+            hunter.lockedPerkId = perks.some(perk => perk.id === profile.lockedPerkId)
+                ? profile.lockedPerkId
+                : null;
+            if (hunter.lockedPerkId) {
+                hunter.perks = [
+                    ...perks.filter(perk => perk.id === hunter.lockedPerkId),
+                    ...perks.filter(perk => perk.id !== hunter.lockedPerkId)
+                ];
+            }
+            hunter.perkModifiers = HuntPerkCatalog.aggregate(hunter.perks);
+            applied = true;
+        }
+        hunter.profileLoaded = applied;
+        return applied;
     }
 
     initialTrapCount(personality) {
@@ -168,9 +231,14 @@ class HuntInitializer {
         return 0;
     }
 
+    initialFlashCount(personality) {
+        return HuntSupportItemRules?.initialFlashCount(personality) || 0;
+    }
+
     syncLoadoutItems(hunter) {
         if (!hunter) return hunter;
         hunter.shockTraps = this.initialTrapCount(hunter.personality);
+        hunter.flashPods = this.initialFlashCount(hunter.personality);
         return hunter;
     }
 
@@ -207,11 +275,13 @@ class HuntInitializer {
                 respawnTimer: 0,
                 personality,
                 perks,
+                lockedPerkId: null,
                 perkRerollCount: 0,
                 perkModifiers: typeof HuntPerkCatalog !== 'undefined' ? HuntPerkCatalog.aggregate(perks) : {},
                 potions: 10,
                 lifepowders: 1,
                 shockTraps: this.initialTrapCount(personality),
+                flashPods: this.initialFlashCount(personality),
                 bombs: 1,
                 spiritLevel: 0,
                 demonModeDuration: 0,
@@ -235,6 +305,7 @@ class HuntInitializer {
             hunterColor: hunter.hunterColor,
             personality: hunter.personality,
             perks: hunter.perks || [],
+            lockedPerkId: hunter.lockedPerkId || null,
             perkModifiers: hunter.perkModifiers || {},
             isNpc: Boolean(hunter.isNpc),
             loadoutReady: Boolean(hunter.loadoutReady),
@@ -258,6 +329,7 @@ class HuntInitializer {
             potions: 10,
             lifepowders: 1,
             shockTraps: this.initialTrapCount(preserved.personality),
+            flashPods: this.initialFlashCount(preserved.personality),
             bombs: 1,
             spiritLevel: 0,
             demonModeDuration: 0,
@@ -275,17 +347,38 @@ class HuntInitializer {
         if (!hunter || typeof HuntPerkCatalog === 'undefined') return false;
         const signature = perks => (perks || []).map(perk => perk.id).sort().join('|');
         const previous = signature(hunter.perks);
+        const locked = hunter.lockedPerkId
+            ? (hunter.perks || []).find(perk => perk.id === hunter.lockedPerkId)
+            : null;
+        const boundDung = (hunter.perks || []).find(perk => HuntPerkCatalog.isDung(perk));
+        const retained = [locked, boundDung].filter((perk, index, list) =>
+            perk && list.findIndex(candidate => candidate?.id === perk.id) === index
+        );
+        const withRetainedPerks = rolled => {
+            const retainedIds = new Set(retained.map(perk => perk.id));
+            return [
+                ...retained,
+                ...(rolled || []).filter(perk => !retainedIds.has(perk.id))
+            ].slice(0, HuntPersistentProfileRules.MAX_PERKS);
+        };
         let next = HuntPerkCatalog.roll(this.random);
+        next = withRetainedPerks(next);
         for (let attempt = 0; attempt < 7 && signature(next) === previous; attempt++) {
-            next = HuntPerkCatalog.roll(this.random);
+            next = withRetainedPerks(HuntPerkCatalog.roll(this.random));
         }
         if (signature(next) === previous) {
             const alternative = HuntPerkCatalog.all().find(perk =>
-                perk.name !== '빈 수첩' && perk.name !== '똥'
+                perk.name !== '빈 수첩' && !HuntPerkCatalog.isDung(perk)
                 && !(hunter.perks || []).some(current => current.id === perk.id)
             );
-            if (alternative) next = next.length ? [...next.slice(0, -1), alternative] : [alternative];
+            if (alternative) {
+                next = withRetainedPerks(
+                    next.length ? [...next.slice(0, -1), alternative] : [alternative]
+                );
+            }
         }
+        next = withRetainedPerks(next);
+        next = next.slice(0, HuntPersistentProfileRules.MAX_PERKS);
         hunter.perks = next;
         hunter.perkModifiers = HuntPerkCatalog.aggregate(next);
         return signature(next) !== previous;
@@ -293,7 +386,7 @@ class HuntInitializer {
 
     materializeBattleStartPerks(hunters = []) {
         if (typeof HuntPerkCatalog === 'undefined') return [];
-        const dung = HuntPerkCatalog.all().find(perk => perk.name === '똥');
+        const dung = HuntPerkCatalog.all().find(perk => HuntPerkCatalog.isDung(perk));
         if (!dung) return [];
         return hunters.filter(hunter => {
             if (!hunter || (hunter.perks || []).length > 0 || this.random() >= .1) return false;
@@ -306,13 +399,15 @@ class HuntInitializer {
 
     getMonsterTier(monster) {
         if (!monster) return 'large';
+        if (monster.selectable === false || monster.role === 'journey-event') return 'event';
+        if (['small', 'medium', 'large', 'elder', 'colossal'].includes(monster.tier)) return monster.tier;
         const id = (monster.id || "").toLowerCase().replace(/'/g, '_');
         
         const smallIds = [
             'aptonoth', 'apceros', 'gajau', 'gastodon', 'girros', 'jagras', 
             'kestodon', 'kestodon_female', 'mernos', 'noios', 'barnos', 
             'cortos', 'raphinos', 'shamos', 'wulg', 'anteka', 'kelbi', 
-            'popo', 'felyne', 'gajalaka', 'grimalkyne', 'boaboa', 
+            'popo',
             'mosswine', 'vespoid', 'hornetaur'
         ];
         if (smallIds.includes(id)) {

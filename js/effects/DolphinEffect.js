@@ -40,9 +40,16 @@ class DolphinEffect extends BaseEffect {
             }
         });
 
-        const dolphinLife = conf.duration - conf.dolphinDelay;
+        let msg = context.message || "";
+        const isRainbowRequested = /!돌핀\s*(무지개|레인보우|rainbow)/i.test(msg) || /무지개|rainbow/i.test(msg) || context.isRainbow === true;
+        const rainbowProb = (typeof conf.rainbowProbability === 'number') ? conf.rainbowProbability : 0.15;
+        const isRainbow = isRainbowRequested || (Math.random() < rainbowProb);
+
         this.timers.timeout(() => {
             const dolphinEl = this.director._spawnActor(overlayC, 'lead-dolphin', "🐬", { duration: dolphinLife + 5000 });
+            if (dolphinEl && isRainbow) {
+                dolphinEl.classList.add('rainbow-dolphin');
+            }
             const animateWildBounce = (el, total) => {
                 const start = Date.now(); let rot = 0;
                 const speed = conf.bounceSpeed || 1.0;
@@ -126,8 +133,7 @@ class DolphinEffect extends BaseEffect {
             }, Math.random() * (conf.duration - 5000));
         }
 
-        let msg = context.message || "";
-        msg = msg.replace(/!돌핀/i, '').trim();
+        msg = msg.replace(/!돌핀/i, '').replace(/^\s*(무지개|레인보우|rainbow)\s*/i, '').trim();
         if (msg) {
             this.timers.timeout(() => {
                 const txt = document.createElement('div'); txt.className = 'dolphin-text';

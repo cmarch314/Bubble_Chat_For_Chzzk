@@ -1,0 +1,17 @@
+{
+  "em007_vo": {
+    "label": "Diablos signature roar",
+    "sourceStream": "543762063",
+    "eventIds": ["1263597779"],
+    "verification": "user-audition",
+    "verifiedAt": "2026-07-25"
+  },
+  "em001_vo": {
+    "label": "Rathian/Rathalos shared signature roar",
+    "sourceStream": "721725382",
+    "eventIds": ["1991097789"],
+    "monsterIds": ["rathian", "rathalos"],
+    "verification": "user-audition",
+    "verifiedAt": "2026-07-28"
+  }
+}

@@ -31,6 +31,14 @@ class Harness {
     updateMonsterStateUI(state) { this.events.push(['state', state]); }
     showSkillBubble(target, text) { this.events.push(['bubble', target, text]); }
     addLog(text) { this.events.push(['log', text]); }
+    enterMonsterControlState(kind, ticks) {
+        this.monsterState = kind === 'stun' ? 'stunned' : kind;
+        this.monsterStunDuration = ticks;
+        this.monsterAtb = 0;
+        this.pendingMonsterAction = null;
+        this.updateMonsterAtbUI(0);
+        return true;
+    }
 }
 const MethodHarness = Function(`return class extends arguments[0] {\n${engineSource.slice(start, end)}\n}`)(Harness);
 const engine = new MethodHarness();

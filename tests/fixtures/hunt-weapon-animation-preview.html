@@ -28,11 +28,12 @@
     <section class="preview-grid" id="preview-grid"></section>
   </main>
   <footer class="preview-chat-reserve">OBS 채팅 전용 하단 15% — 무기 연출 침범 금지선</footer>
+  <script src="../../js/effects/hunt/HuntAtbConfig.js"></script>
   <script src="../../js/effects/hunt/HuntWeaponAnimationCatalog.js"></script>
   <script>
     const demonstrations = [
       ['long_sword', '기인베기 III', 'long_sword.spirit_slash_3', 'long_sword.svg'],
-      ['long_sword', '기인대회전베기', 'long_sword.spirit_roundslash', 'long_sword.svg'],
+      ['long_sword', '대회전베기', 'long_sword.spirit_roundslash', 'long_sword.svg'],
       ['long_sword', '특수납도', 'long_sword.special_sheathe', 'long_sword.svg'],
       ['long_sword', '거합베기 · 성공!', 'long_sword.iai_counter_success', 'long_sword.svg'],
       ['long_sword', '기인해방베기', 'long_sword.spirit_release_slash', 'long_sword.svg'],
@@ -66,8 +67,9 @@
         card.style.setProperty('--attack-x', vectors[index][0]);
         card.style.setProperty('--attack-y', vectors[index][1]);
         const isGlaive = weaponId === 'insect_glaive';
-        card.innerHTML = `<div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/${filename}" alt="">${isGlaive ? '<img class="ig-kinsect" src="../../img/weapons/kinsect.svg" alt="">' : ''}</div><div class="preview-weapon">${weaponLabels[weaponId]}</div><div class="preview-action">${actionName}</div><div class="preview-motion"></div>`;
-        const profile = HuntWeaponAnimationCatalog.PROFILES[actionId];
+        const chargedClass = weaponId === 'charge_blade' ? ' cb-shield-charged-img' : '';
+        card.innerHTML = `<div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img${chargedClass}" src="../../img/weapons/${filename}" alt="">${isGlaive ? '<img class="ig-kinsect" src="../../img/weapons/kinsect.svg" alt="">' : ''}</div><div class="preview-weapon">${weaponLabels[weaponId]}</div><div class="preview-action">${actionName}</div><div class="preview-motion"></div>`;
+        const profile = HuntWeaponAnimationCatalog.resolve(weaponId, { id: actionId });
         card.querySelector('.preview-motion').textContent = profile.motion + (profile.effect === 'none' ? ' · 준비/상태 행동' : ` · ${profile.effect}`);
         requestAnimationFrame(() => {
           if (profile.animateWeapon) card.querySelector('.game-hunt-weapon-img').animate(HuntWeaponAnimationCatalog.keyframes(profile, index), { duration: profile.durationMs, easing: 'ease-in-out', iterations: 2 });

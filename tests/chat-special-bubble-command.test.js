@@ -46,5 +46,8 @@ assert.strictEqual(normalB.removed, true);
 
 const cssSource = fs.readFileSync(path.resolve(__dirname, '../style.css'), 'utf8');
 assert.match(cssSource, /광대\.jpg'\) center center \/ cover no-repeat/);
+assert.match(cssSource, /\.chat-box\.chat-box--clown\s*\{[\s\S]*?width:\s*600px;[\s\S]*?max-width:\s*40vw;/);
+assert.match(cssSource, /\.message\.message--clown\s*\{[\s\S]*?text-align:\s*center;[\s\S]*?margin-top:\s*auto;/);
+assert.match(rendererSource, /specialBubble\?\.kind === 'clown'[\s\S]*?fontSize = 3\.6;[\s\S]*?messageEle\.style\.fontSize =/);
 
 console.log('[test] Special clown chat bubble command passed.');

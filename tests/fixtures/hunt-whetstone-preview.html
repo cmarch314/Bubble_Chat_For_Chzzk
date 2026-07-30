@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Whetstone Start and Completion Preview</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:radial-gradient(circle at 50% 38%,#30362f,#080a09 72%)}
+    .preview-row{position:absolute;inset:150px 150px 180px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:140px}
+    .preview-state{position:relative;height:370px;border:4px double #8b5a2b;border-radius:24px;background:#d1b88a;display:grid;place-items:center}
+    .preview-state .game-hunt-weapon-card{position:relative;width:390px;height:220px;overflow:visible;display:grid;place-items:center}
+    .preview-weapon{width:138px;height:138px;filter:drop-shadow(0 6px 8px #000)}
+    .preview-caption{position:absolute;bottom:28px;font:900 28px/1 'CookieRun-Regular',sans-serif;color:#2c1b10}
+    .skill-bubble{bottom:76%;opacity:1}
+  </style>
+</head>
+<body>
+  <main class="preview-row">
+    <section class="preview-state" aria-label="숫돌 시작">
+      <div class="game-hunt-weapon-card">
+        <div class="skill-bubble hunter-skill-bubble skill-bubble--item" aria-label="숫돌">
+          <img class="skill-bubble-item-image" src="../../local_assets/monster_hunter/reference-icons/rise/item/426326752.png" alt="">
+        </div>
+        <img class="preview-weapon" src="../../img/weapons/great_sword.svg" alt="">
+      </div>
+      <b class="preview-caption">숫돌 시작</b>
+    </section>
+    <section class="preview-state" aria-label="숫돌 완료">
+      <div class="game-hunt-weapon-card">
+        <div class="skill-bubble hunter-skill-bubble">예리도 회복!</div>
+        <img class="preview-weapon" src="../../img/weapons/great_sword.svg" alt="">
+      </div>
+      <b class="preview-caption">숫돌 완료</b>
+    </section>
+  </main>
+</body>
+</html>

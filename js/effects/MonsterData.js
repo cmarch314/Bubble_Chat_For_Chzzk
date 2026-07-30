@@ -1,916 +1,14194 @@
 window.MONSTER_DATA = [
     {
-        "id": "ancient_leshen",
-        "nameEN": "Ancient Leshen",
-        "nameKO": "고대 레셴",
-        "filename": "ancient_leshen.png"
-    },
-    {
-        "id": "anjanath",
-        "nameEN": "Anjanath",
-        "nameKO": "안쟈나프",
-        "filename": "anjanath.png"
-    },
-    {
-        "id": "apceros",
-        "nameEN": "Apceros",
-        "nameKO": "압케로스",
-        "filename": "apceros.png"
-    },
-    {
-        "id": "aptonoth",
-        "nameEN": "Aptonoth",
-        "nameKO": "압토노스",
-        "filename": "aptonoth.png"
-    },
-    {
-        "id": "azure_rathalos",
-        "nameEN": "Azure Rathalos",
-        "nameKO": "리오레우스 아종",
-        "filename": "azure_rathalos.png"
-    },
-    {
-        "id": "barnos",
-        "nameEN": "Barnos",
-        "nameKO": "바르노스",
-        "filename": "barnos.png"
-    },
-    {
-        "id": "barroth",
-        "nameEN": "Barroth",
-        "nameKO": "볼보로스",
-        "filename": "barroth.png"
-    },
-    {
-        "id": "bazelgeuse",
-        "nameEN": "Bazelgeuse",
-        "nameKO": "바젤기우스",
-        "filename": "bazelgeuse.png"
-    },
-    {
-        "id": "behemoth",
-        "nameEN": "Behemoth",
-        "nameKO": "베히모스",
-        "filename": "behemoth.png"
-    },
-    {
-        "id": "black_diablos",
-        "nameEN": "Black Diablos",
-        "nameKO": "디아블로스 아종",
-        "filename": "black_diablos.png"
-    },
-    {
-        "id": "deviljho",
-        "nameEN": "Deviljho",
-        "nameKO": "이블조",
-        "filename": "deviljho.png"
-    },
-    {
-        "id": "diablos",
-        "nameEN": "Diablos",
-        "nameKO": "디아블로스",
-        "filename": "diablos.png"
-    },
-    {
-        "id": "dodogama",
-        "nameEN": "Dodogama",
-        "nameKO": "도도가마",
-        "filename": "dodogama.png"
-    },
-    {
-        "id": "felyne",
-        "nameEN": "Felyne",
-        "nameKO": "동반자 아이루",
-        "filename": "felyne.png"
-    },
-    {
-        "id": "gajalaka",
-        "nameEN": "Gajalaka",
-        "nameKO": "가자부",
-        "filename": "gajalaka.png"
-    },
-    {
-        "id": "gajau",
-        "nameEN": "Gajau",
-        "nameKO": "가쟈우",
-        "filename": "gajau.png"
-    },
-    {
-        "id": "gastodon",
-        "nameEN": "Gastodon",
-        "nameKO": "가스토돈",
-        "filename": "gastodon.png"
-    },
-    {
-        "id": "girros",
-        "nameEN": "Girros",
-        "nameKO": "기르오스",
-        "filename": "girros.png"
-    },
-    {
-        "id": "great_girros",
-        "nameEN": "Great Girros",
-        "nameKO": "도스기르오스",
-        "filename": "great_girros.png"
-    },
-    {
-        "id": "great_jagras",
-        "nameEN": "Great Jagras",
-        "nameKO": "도스쟈그라스",
-        "filename": "great_jagras.png"
-    },
-    {
-        "id": "grimalkyne",
-        "nameEN": "Grimalkyne",
-        "nameKO": "테토루",
-        "filename": "grimalkyne.png"
-    },
-    {
-        "id": "hornetaur",
-        "nameEN": "Hornetaur",
-        "nameKO": "칸타로스",
-        "filename": "hornetaur.png"
-    },
-    {
-        "id": "jagras",
-        "nameEN": "Jagras",
-        "nameKO": "쟈그라스",
-        "filename": "jagras.png"
-    },
-    {
-        "id": "jyuratodus",
-        "nameEN": "Jyuratodus",
-        "nameKO": "쥬라토도스",
-        "filename": "jyuratodus.png"
-    },
-    {
-        "id": "kelbi",
-        "nameEN": "Kelbi",
-        "nameKO": "켈비",
-        "filename": "kelbi.png"
-    },
-    {
-        "id": "kestodon_female",
-        "nameEN": "Kestodon Female",
-        "nameKO": "케스토돈 (암컷)",
-        "filename": "kestodon_female.png"
-    },
-    {
-        "id": "kestodon",
-        "nameEN": "Kestodon",
-        "nameKO": "케스토돈",
-        "filename": "kestodon.png"
-    },
-    {
-        "id": "kirin",
-        "nameEN": "Kirin",
-        "nameKO": "키린",
-        "filename": "kirin.png"
-    },
-    {
-        "id": "kulu-ya-ku",
-        "nameEN": "Kulu-Ya-Ku",
-        "nameKO": "쿠루루야쿠",
-        "filename": "kulu-ya-ku.png"
-    },
-    {
-        "id": "kulve_taroth",
-        "nameEN": "Kulve Taroth",
-        "nameKO": "맘-타로트",
-        "filename": "kulve_taroth.png"
-    },
-    {
-        "id": "kushala_daora",
-        "nameEN": "Kushala Daora",
-        "nameKO": "크샬다오라",
-        "filename": "kushala_daora.png"
-    },
-    {
-        "id": "lavasioth",
-        "nameEN": "Lavasioth",
-        "nameKO": "볼가노스",
-        "filename": "lavasioth.png"
-    },
-    {
-        "id": "legiana",
-        "nameEN": "Legiana",
-        "nameKO": "레이기에나",
-        "filename": "legiana.png"
-    },
-    {
-        "id": "leshen",
-        "nameEN": "Leshen",
-        "nameKO": "레셴",
-        "filename": "leshen.png"
-    },
-    {
-        "id": "lunastra",
-        "nameEN": "Lunastra",
-        "nameKO": "나나-테스카토리",
-        "filename": "lunastra.png"
-    },
-    {
-        "id": "mernos",
-        "nameEN": "Mernos",
-        "nameKO": "메르노스",
-        "filename": "mernos.png"
-    },
-    {
-        "id": "mosswine",
-        "nameEN": "Mosswine",
-        "nameKO": "모스",
-        "filename": "mosswine.png"
-    },
-    {
-        "id": "nergigante",
-        "nameEN": "Nergigante",
-        "nameKO": "네르기간테",
-        "filename": "nergigante.png"
-    },
-    {
-        "id": "noios",
-        "nameEN": "Noios",
-        "nameKO": "노이오스",
-        "filename": "noios.png"
-    },
-    {
-        "id": "odogaron",
-        "nameEN": "Odogaron",
-        "nameKO": "오도가론",
-        "filename": "odogaron.png"
-    },
-    {
-        "id": "paolumu",
-        "nameEN": "Paolumu",
-        "nameKO": "파오우르무",
-        "filename": "paolumu.png"
-    },
-    {
-        "id": "pink_rathian",
-        "nameEN": "Pink Rathian",
-        "nameKO": "리오레이아 아종",
-        "filename": "pink_rathian.png"
-    },
-    {
-        "id": "pukei-pukei",
-        "nameEN": "Pukei-Pukei",
-        "nameKO": "푸케푸케",
-        "filename": "pukei-pukei.png"
-    },
-    {
-        "id": "radobaan",
-        "nameEN": "Radobaan",
-        "nameKO": "라도발킨",
-        "filename": "radobaan.png"
-    },
-    {
-        "id": "raphinos",
-        "nameEN": "Raphinos",
-        "nameKO": "라피노스",
-        "filename": "raphinos.png"
-    },
-    {
-        "id": "rathalos",
-        "nameEN": "Rathalos",
-        "nameKO": "리오레우스",
-        "filename": "rathalos.png"
-    },
-    {
-        "id": "rathian",
-        "nameEN": "Rathian",
-        "nameKO": "리오레이아",
-        "filename": "rathian.png"
-    },
-    {
-        "id": "shamos",
-        "nameEN": "Shamos",
-        "nameKO": "샤모스",
-        "filename": "shamos.png"
-    },
-    {
-        "id": "teostra",
-        "nameEN": "Teostra",
-        "nameKO": "테오 테스카토르",
-        "filename": "teostra.png"
-    },
-    {
-        "id": "tobi-kadachi",
-        "nameEN": "Tobi-Kadachi",
-        "nameKO": "토비카가치",
-        "filename": "tobi-kadachi.png"
-    },
-    {
-        "id": "tzitzi-ya-ku",
-        "nameEN": "Tzitzi-Ya-Ku",
-        "nameKO": "치치야쿠",
-        "filename": "tzitzi-ya-ku.png"
-    },
-    {
-        "id": "unknown_monster",
-        "nameEN": "Unknown Monster",
-        "nameKO": "Unknown Monster",
-        "filename": "unknown_monster.png"
-    },
-    {
-        "id": "uragaan",
-        "nameEN": "Uragaan",
-        "nameKO": "우라간킨",
-        "filename": "uragaan.png"
-    },
-    {
-        "id": "vaal_hazak",
-        "nameEN": "Vaal Hazak",
-        "nameKO": "발하자크",
-        "filename": "vaal_hazak.png"
-    },
-    {
-        "id": "vespoid",
-        "nameEN": "Vespoid",
-        "nameKO": "랑고스타",
-        "filename": "vespoid.png"
-    },
-    {
-        "id": "xeno'jiiva",
-        "nameEN": "Xeno'jiiva",
-        "nameKO": "제노-지바",
-        "filename": "xeno'jiiva.png"
-    },
-    {
-        "id": "zorah_magdaros",
-        "nameEN": "Zorah Magdaros",
-        "nameKO": "조라-마그다라오스",
-        "filename": "zorah_magdaros.png"
-    },
-    {
         "id": "acidic_glavenus",
         "nameEN": "Acidic Glavenus",
         "nameKO": "디노발드 아종",
-        "filename": "acidic_glavenus.png"
+        "filename": "acidic_glavenus.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Brute Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
     },
     {
-        "id": "alatreon",
-        "nameEN": "Alatreon",
-        "nameKO": "알바트리온",
-        "filename": "alatreon.png"
+        "id": "agnaktor",
+        "nameEN": "Agnaktor",
+        "nameKO": "아그나코트르",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_agnaktor.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": 4600,
+        "locations": [
+            "Volcano",
+            "Volcanic Hollow"
+        ],
+        "weaknesses": [
+            {
+                "state": "Hard Lava",
+                "elements": {
+                    "fire": 3,
+                    "water": 5,
+                    "thunder": 1,
+                    "ice": 4,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "No Lava",
+                "elements": {
+                    "fire": 1,
+                    "water": 6,
+                    "thunder": 4,
+                    "ice": 4,
+                    "dragon": 6
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "49"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
     },
     {
-        "id": "anteka",
-        "nameEN": "Anteka",
-        "nameKO": "안테카",
-        "filename": "anteka.png"
+        "id": "ahtal_ka",
+        "nameEN": "Ahtal-Ka",
+        "nameKO": "아트랄 카",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_ahtal_ka.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "colossal",
+        "selectable": true,
+        "species": "Neopteron",
+        "variantOf": null,
+        "baseHealth": 4900,
+        "locations": [],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 0,
+                    "thunder": 0,
+                    "ice": 0,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "88"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
     },
     {
-        "id": "banbaro",
-        "nameEN": "Banbaro",
-        "nameKO": "버프바로",
-        "filename": "banbaro.png"
-    },
-    {
-        "id": "barioth",
-        "nameEN": "Barioth",
-        "nameKO": "베리오로스",
-        "filename": "barioth.png"
-    },
-    {
-        "id": "beotodus",
-        "nameEN": "Beotodus",
-        "nameKO": "브란토도스",
-        "filename": "beotodus.png"
-    },
-    {
-        "id": "blackveil_vaal_hazak",
-        "nameEN": "Blackveil Vaal Hazak",
-        "nameKO": "죽음을 두른 발하자크",
-        "filename": "blackveil_vaal_hazak.png"
-    },
-    {
-        "id": "boaboa",
-        "nameEN": "Boaboa",
-        "nameKO": "보아보아",
-        "filename": "boaboa.png"
-    },
-    {
-        "id": "brachydios",
-        "nameEN": "Brachydios",
-        "nameKO": "브라키디오스",
-        "filename": "brachydios.png"
-    },
-    {
-        "id": "brute_tigrex",
-        "nameEN": "Brute Tigrex",
-        "nameKO": "티가렉스 아종",
-        "filename": "brute_tigrex.png"
-    },
-    {
-        "id": "coral_pukei-pukei",
-        "nameEN": "Coral Pukei-Pukei",
-        "nameKO": "푸케푸케 아종",
-        "filename": "coral_pukei-pukei.png"
-    },
-    {
-        "id": "cortos",
-        "nameEN": "Cortos",
-        "nameKO": "코르토스",
-        "filename": "cortos.png"
-    },
-    {
-        "id": "ebony_odogaron",
-        "nameEN": "Ebony Odogaron",
-        "nameKO": "오도가론 아종",
-        "filename": "ebony_odogaron.png"
-    },
-    {
-        "id": "fatalis",
-        "nameEN": "Fatalis",
-        "nameKO": "밀라보레아스",
-        "filename": "fatalis.png"
-    },
-    {
-        "id": "frostfang_barioth",
-        "nameEN": "Frostfang Barioth",
-        "nameKO": "서리칼날 품은 베리오로스",
-        "filename": "frostfang_barioth.png"
-    },
-    {
-        "id": "fulgur_anjanath",
-        "nameEN": "Fulgur Anjanath",
-        "nameKO": "안쟈나프 아종",
-        "filename": "fulgur_anjanath.png"
-    },
-    {
-        "id": "furious_rajang",
-        "nameEN": "Furious Rajang",
-        "nameKO": "격앙 라잔",
-        "filename": "furious_rajang.png"
-    },
-    {
-        "id": "glavenus",
-        "nameEN": "Glavenus",
-        "nameKO": "디노발드",
-        "filename": "glavenus.png"
-    },
-    {
-        "id": "gold_rathian",
-        "nameEN": "Gold Rathian",
-        "nameKO": "리오레이아 희소종",
-        "filename": "gold_rathian.png"
-    },
-    {
-        "id": "namielle",
-        "nameEN": "Namielle",
-        "nameKO": "네로미에르",
-        "filename": "namielle.png"
-    },
-    {
-        "id": "nargacuga",
-        "nameEN": "Nargacuga",
-        "nameKO": "나르가쿠르가",
-        "filename": "nargacuga.png"
-    },
-    {
-        "id": "nightshade_paolumu",
-        "nameEN": "Nightshade Paolumu",
-        "nameKO": "부면룡 파오우르무",
-        "filename": "nightshade_paolumu.png"
-    },
-    {
-        "id": "popo",
-        "nameEN": "Popo",
-        "nameKO": "포포",
-        "filename": "popo.png"
-    },
-    {
-        "id": "raging_brachydios",
-        "nameEN": "Raging Brachydios",
-        "nameKO": "임계 브라키디오스",
-        "filename": "raging_brachydios.png"
-    },
-    {
-        "id": "rajang",
-        "nameEN": "Rajang",
-        "nameKO": "라잔",
-        "filename": "rajang.png"
-    },
-    {
-        "id": "ruiner_nergigante",
-        "nameEN": "Ruiner Nergigante",
-        "nameKO": "모두를 멸하는 네르기간테",
-        "filename": "ruiner_nergigante.png"
-    },
-    {
-        "id": "safi'jiiva",
-        "nameEN": "Safi'jiiva",
-        "nameKO": "무페토-지바",
-        "filename": "safi'jiiva.png"
-    },
-    {
-        "id": "savage_deviljho",
-        "nameEN": "Savage Deviljho",
-        "nameKO": "미친 들이치는 이블조",
-        "filename": "savage_deviljho.png"
-    },
-    {
-        "id": "scarred_yian_garuga",
-        "nameEN": "Scarred Yian Garuga",
-        "nameKO": "상처입은 얀가루루가",
-        "filename": "scarred_yian_garuga.png"
-    },
-    {
-        "id": "seething_bazelgeuse",
-        "nameEN": "Seething Bazelgeuse",
-        "nameKO": "홍련의 솟구치는 바젤기우스",
-        "filename": "seething_bazelgeuse.png"
-    },
-    {
-        "id": "shara_ishvalda",
-        "nameEN": "Shara Ishvalda",
-        "nameKO": "안-이슈왈다",
-        "filename": "shara_ishvalda.png"
-    },
-    {
-        "id": "shrieking_legiana",
-        "nameEN": "Shrieking Legiana",
-        "nameKO": "얼려 찌르는 레이기에나",
-        "filename": "shrieking_legiana.png"
-    },
-    {
-        "id": "silver_rathalos",
-        "nameEN": "Silver Rathalos",
-        "nameKO": "리오레우스 희소종",
-        "filename": "silver_rathalos.png"
-    },
-    {
-        "id": "stygian_zinogre",
-        "nameEN": "Stygian Zinogre",
-        "nameKO": "진오우거 아종",
-        "filename": "stygian_zinogre.png"
-    },
-    {
-        "id": "tigrex",
-        "nameEN": "Tigrex",
-        "nameKO": "티가렉스",
-        "filename": "tigrex.png"
-    },
-    {
-        "id": "velkhana",
-        "nameEN": "Velkhana",
-        "nameKO": "벨카나",
-        "filename": "velkhana.png"
-    },
-    {
-        "id": "viper_tobi-kadachi",
-        "nameEN": "Viper Tobi-Kadachi",
-        "nameKO": "토비카가치 아종",
-        "filename": "viper_tobi-kadachi.png"
-    },
-    {
-        "id": "wulg",
-        "nameEN": "Wulg",
-        "nameKO": "울그",
-        "filename": "wulg.png"
-    },
-    {
-        "id": "yian_garuga",
-        "nameEN": "Yian Garuga",
-        "nameKO": "얀가루루가",
-        "filename": "yian_garuga.png"
-    },
-    {
-        "id": "zinogre",
-        "nameEN": "Zinogre",
-        "nameKO": "진오우거",
-        "filename": "zinogre.png"
-    },
-    {
-        "id": "gore_magala",
-        "nameEN": "Gore Magala",
-        "nameKO": "고어-마가라",
-        "filename": "gore_magala.png"
-    },
-    {
-        "id": "shagaru_magala",
-        "nameEN": "Shagaru Magala",
-        "nameKO": "샤가르마가라",
-        "filename": "shagaru_magala.png"
-    },
-    {
-        "id": "valstrax",
-        "nameEN": "Valstrax",
-        "nameKO": "발파루크",
-        "filename": "valstrax.png"
-    },
-    {
-        "id": "crimson_glow_valstrax",
-        "nameEN": "Crimson Glow Valstrax",
-        "nameKO": "혁요에 번뜩이는 발파루크",
-        "filename": "crimson_glow_valstrax.png"
-    },
-    {
-        "id": "magnamalo",
-        "nameEN": "Magnamalo",
-        "nameKO": "마가이마가도",
-        "filename": "magnamalo.png"
-    },
-    {
-        "id": "malzeno",
-        "nameEN": "Malzeno",
-        "nameKO": "멜-제나",
-        "filename": "malzeno.png"
-    },
-    {
-        "id": "primordial_malzeno",
-        "nameEN": "Primordial Malzeno",
-        "nameKO": "원초를 새기는 멜-제나",
-        "filename": "primordial_malzeno.png"
-    },
-    {
-        "id": "mizutsune",
-        "nameEN": "Mizutsune",
-        "nameKO": "타마미츠네",
-        "filename": "mizutsune.png"
-    },
-    {
-        "id": "astalos",
-        "nameEN": "Astalos",
-        "nameKO": "라이젝스",
-        "filename": "astalos.png"
-    },
-    {
-        "id": "gammoth",
-        "nameEN": "Gammoth",
-        "nameKO": "가무토",
-        "filename": "gammoth.png"
-    },
-    {
-        "id": "seregios",
-        "nameEN": "Seregios",
-        "nameKO": "셀레기오스",
-        "filename": "seregios.png"
-    },
-    {
-        "id": "chameleos",
-        "nameEN": "Chameleos",
-        "nameKO": "오오나즈치",
-        "filename": "chameleos.png"
-    },
-    {
-        "id": "lao_shan_lung",
-        "nameEN": "Lao-Shan Lung",
-        "nameKO": "노산룡",
-        "filename": "lao_shan_lung.png"
-    },
-    {
-        "id": "yamatsukami",
-        "nameEN": "Yamatsukami",
-        "nameKO": "야마츠카미",
-        "filename": "yamatsukami.png"
+        "id": "ajarakan",
+        "nameEN": "Ajarakan",
+        "nameKO": "아자라칸",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0159_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "fanged-beast",
+        "variantOf": null,
+        "baseHealth": 5200,
+        "locations": [
+            "Oilwell Basin",
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "water",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3112
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3113
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3114
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3115
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3116
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3117
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3118
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3119
+            }
+        ],
+        "breakablePartKinds": [
+            "back"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "21"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
     },
     {
         "id": "akantor",
         "nameEN": "Akantor",
         "nameKO": "아캄토름",
-        "filename": "akantor.png"
+        "filename": "akantor.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "generations-ultimate": "33"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": 7100,
+        "locations": [],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 2,
+                    "thunder": 4,
+                    "ice": 1,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Belly",
+            "Back",
+            "Tail",
+            "Front Legs",
+            "Back Legs",
+            "Head (Wounded Belly)",
+            "Neck (Wounded Belly)",
+            "Belly (Wounded Belly)",
+            "Back (Wounded Belly)",
+            "Tail (Wounded Belly)",
+            "Front Legs (Wounded Belly)",
+            "Back Legs (Wounded Belly)"
+        ],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "特大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
     },
     {
-        "id": "ukanlos",
-        "nameEN": "Ukanlos",
-        "nameKO": "우캄루스",
-        "filename": "ukanlos.png"
+        "id": "aknosom",
+        "nameEN": "Aknosom",
+        "nameKO": "아케노시름",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/2084266193_em091_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "2084266193"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "조룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "alatreon",
+        "nameEN": "Alatreon",
+        "nameKO": "알바트리온",
+        "filename": "alatreon.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "baseHealth": 6000,
+        "weaknesses": [
+            {
+                "state": "Red Energy",
+                "elements": {
+                    "fire": 0,
+                    "water": 3,
+                    "thunder": 2,
+                    "ice": 4,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Blue Energy",
+                "elements": {
+                    "fire": 4,
+                    "water": 3,
+                    "thunder": 0,
+                    "ice": 0,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head (Fire Form)",
+            "Neck (Fire Form)",
+            "Body (Fire Form)",
+            "Wings (Fire Form)",
+            "Legs (Fire Form)",
+            "Tail (Fire Form)",
+            "Head (Ice/Thunder Form)",
+            "Neck (Ice/Thunder Form)",
+            "Body (Ice/Thunder Form)",
+            "Wings (Ice/Thunder Form)",
+            "Legs (Ice/Thunder Form)",
+            "Tail (Ice/Thunder Form)"
+        ],
+        "sourceIds": {
+            "world-iceborne": "ErdcV",
+            "generations-ultimate": "50"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "almudron",
+        "nameEN": "Almudron",
+        "nameKO": "오로미도로",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/2040569941_em095_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "2040569941"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "해룡종",
+        "skeleton": [
+            "Leviathan",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "altaroth",
+        "nameEN": "Altaroth",
+        "nameKO": "오르타로스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_altaroth.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Neopteron",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "518617233",
+            "generations-ultimate": "4123"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
     },
     {
         "id": "amatsu",
         "nameEN": "Amatsu",
         "nameKO": "아마츠마가츠치",
-        "filename": "amatsu.png"
+        "filename": "amatsu.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "baseHealth": 8700,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 0,
+                    "thunder": 1,
+                    "ice": 2,
+                    "dragon": 6
+                },
+                "statuses": {
+                    "poison": 6,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Back",
+            "Belly",
+            "Wings",
+            "Legs",
+            "Tail",
+            "Head (Enraged)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1446526160",
+            "generations-ultimate": "58"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
     },
     {
-        "id": "nakarkos",
-        "nameEN": "Nakarkos",
-        "nameKO": "오스트가로아",
-        "filename": "nakarkos.png"
+        "id": "ancient_leshen",
+        "nameEN": "Ancient Leshen",
+        "nameKO": "고대 레셴",
+        "filename": "ancient_leshen.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "54"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "relict",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Ancient Forest"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
     },
     {
-        "id": "goss_harag",
-        "nameEN": "Goss Harag",
-        "nameKO": "고샤하기",
-        "filename": "goss_harag.png"
+        "id": "anjanath",
+        "nameEN": "Anjanath",
+        "nameKO": "안쟈나프",
+        "filename": "anjanath.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "Brute Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1743214542",
+            "world-iceborne": "23"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Ancient Forest",
+            "Wildspire Waste"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "수룡종",
+        "skeleton": [
+            "Brute wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
     },
     {
-        "id": "tetranadon",
-        "nameEN": "Tetranadon",
-        "nameKO": "요츠미와두",
-        "filename": "tetranadon.png"
+        "id": "anteka",
+        "nameEN": "Anteka",
+        "nameKO": "가우시카",
+        "filename": "anteka.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Herbivore",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1771235898",
+            "generations-ultimate": "4112"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
     },
     {
-        "id": "somnacanth",
-        "nameEN": "Somnacanth",
-        "nameKO": "이소네미쿠니",
-        "filename": "somnacanth.png"
+        "id": "apceros",
+        "nameEN": "Apceros",
+        "nameKO": "압케로스",
+        "filename": "apceros.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "world-iceborne": "6",
+            "generations-ultimate": "4098"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "herbivore",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Wildspire Waste"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.neoseeker.com/wiki/Apceros",
+            "audioStatus": "unresolved"
+        }
     },
     {
-        "id": "lunagaron",
-        "nameEN": "Lunagaron",
-        "nameKO": "루나가론",
-        "filename": "lunagaron.png"
+        "id": "apex_arzuros",
+        "nameEN": "Apex Arzuros",
+        "nameKO": "주인 아오아시라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1192999830_em060_07.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1192999830"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "apex_diablos",
+        "nameEN": "Apex Diablos",
+        "nameKO": "주인 디아블로스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/36049421_em007_07.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "36049421"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "apex_mizutsune",
+        "nameEN": "Apex Mizutsune",
+        "nameKO": "주인 타마미츠네",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/2043189560_em082_07.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "2043189560"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "해룡종",
+        "skeleton": [
+            "Leviathan",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "apex_rathalos",
+        "nameEN": "Apex Rathalos",
+        "nameKO": "주인 리오레우스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/99050216_em002_07.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "99050216"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "apex_rathian",
+        "nameEN": "Apex Rathian",
+        "nameKO": "주인 리오레이아",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/453915339_em001_07.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "453915339"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "apex_zinogre",
+        "nameEN": "Apex Zinogre",
+        "nameKO": "주인 진오우거",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1150792755_em057_07.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Fanged Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1150792755"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아룡종",
+        "skeleton": [
+            "Fanged wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "aptonoth",
+        "nameEN": "Aptonoth",
+        "nameKO": "압토노스",
+        "filename": "aptonoth.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "world-iceborne": "1",
+            "generations-ultimate": "4097"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "herbivore",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Ancient Forest"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Aptonoth",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "arkveld",
+        "nameEN": "Arkveld",
+        "nameKO": "알슈베르도",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0160_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "flying-wyvern",
+        "variantOf": null,
+        "baseHealth": 5200,
+        "locations": [
+            "Oilwell Basin",
+            "Windward Plains",
+            "Scarlet Forest",
+            "Ruins of Wyveria",
+            "Iceshard Cliffs"
+        ],
+        "weaknesses": [
+            {
+                "element": "dragon",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3104
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3105
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3106
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3107
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3108
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3109
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3110
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3111
+            }
+        ],
+        "breakablePartKinds": [
+            "left-wing-blade",
+            "right-wing-blade",
+            "head"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "20"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "arzuros",
+        "nameEN": "Arzuros",
+        "nameKO": "아오아시라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_arzuros.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": 2400,
+        "locations": [
+            "Misty Peaks",
+            "Deserted Island",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 2,
+                    "thunder": 4,
+                    "ice": 4,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 6,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1374346390",
+            "generations-ultimate": "60"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "astalos",
+        "nameEN": "Astalos",
+        "nameKO": "라이젝스",
+        "filename": "astalos.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4500,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 2,
+                    "thunder": 0,
+                    "ice": 4,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Charged",
+                "elements": {
+                    "fire": 3,
+                    "water": 3,
+                    "thunder": 0,
+                    "ice": 4,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Belly",
+            "Back",
+            "Wings",
+            "Legs",
+            "Tail",
+            "Tail Tip",
+            "Head (Break)",
+            "Head (Charged)",
+            "Back (Break)",
+            "Wings (Break)",
+            "Wings (Charged)",
+            "Legs (Charged)",
+            "Tail Tip (Break)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1237729819",
+            "generations-ultimate": "81"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Verdant Hills",
+            "Marshlands",
+            "Ancestral Steppe",
+            "Jungle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "aurora_somnacanth",
+        "nameEN": "Aurora Somnacanth",
+        "nameKO": "이소네미쿠니 아종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/88482199_em093_01.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "88482199"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "해룡종",
+        "skeleton": [
+            "Leviathan",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "azure_rathalos",
+        "nameEN": "Azure Rathalos",
+        "nameKO": "리오레우스 아종",
+        "filename": "azure_rathalos.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "24"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "flying wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Ancient Forest",
+            "Elder's Recess"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "baggi",
+        "nameEN": "Baggi",
+        "nameKO": "바기",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/9777038_ems036_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "9777038"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "balahara",
+        "nameEN": "Balahara",
+        "nameKO": "발라하라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0151_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "leviathan",
+        "variantOf": null,
+        "baseHealth": 4400,
+        "locations": [
+            "Windward Plains"
+        ],
+        "weaknesses": [
+            {
+                "effect": "noise",
+                "kind": "effect",
+                "level": 1,
+                "condition": "Effective only while burrowing.",
+                "id": 3002
+            },
+            {
+                "element": "thunder",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3026
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3027
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3028
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3029
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3030
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3031
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3032
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3033
+            }
+        ],
+        "breakablePartKinds": [
+            "head"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "12"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "banbaro",
+        "nameEN": "Banbaro",
+        "nameKO": "버프바로",
+        "filename": "banbaro.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "Brute Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "6dJI8"
+        },
+        "anatomyEvidence": null,
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "barioth",
+        "nameEN": "Barioth",
+        "nameKO": "벨리오로스",
+        "filename": "barioth.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4400,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 6,
+                    "water": 0,
+                    "thunder": 5,
+                    "ice": 0,
+                    "dragon": 4
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Belly",
+            "Wings",
+            "Claws",
+            "Back Legs",
+            "Tail"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "614678208",
+            "world-iceborne": "4k2UP",
+            "generations-ultimate": "42"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Arctic Ridge",
+            "Frozen Seaway"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "barnos",
+        "nameEN": "Barnos",
+        "nameKO": "바르노스",
+        "filename": "barnos.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "16"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "wingdrake",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Barnos",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Elder's Recess",
+            "Great Ravine",
+            "Everstream"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "barroth",
+        "nameEN": "Barroth",
+        "nameKO": "볼보로스",
+        "filename": "barroth.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Brute Wyvern",
+        "baseHealth": 3800,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 0,
+                    "thunder": 0,
+                    "ice": 4,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 1
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Mud",
+                "elements": {
+                    "fire": 0,
+                    "water": 6,
+                    "thunder": 0,
+                    "ice": 4,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 1
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Body",
+            "Claws",
+            "Back Legs",
+            "Tail",
+            "Head (Mud)",
+            "Body (Mud)",
+            "Claws (Mud)",
+            "Back Legs (Mud)",
+            "Tail (Mud)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "643686022",
+            "world-iceborne": "20",
+            "generations-ultimate": "44"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Dunes",
+            "Desert"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "수룡종",
+        "skeleton": [
+            "Brute wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "basarios",
+        "nameEN": "Basarios",
+        "nameKO": "바살모스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_basarios.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": 3400,
+        "locations": [
+            "Marshlands",
+            "Volcano",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 3,
+                    "water": 4,
+                    "thunder": 3,
+                    "ice": 3,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "274815918",
+            "generations-ultimate": "4"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "bazelgeuse",
+        "nameEN": "Bazelgeuse",
+        "nameKO": "바젤기우스",
+        "filename": "bazelgeuse.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "Flying Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "321844636",
+            "world-iceborne": "25"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Ancient Forest",
+            "Coral Highlands",
+            "Wildspire Waste",
+            "Rotten Vale",
+            "Elder's Recess"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "behemoth",
+        "nameEN": "Behemoth",
+        "nameKO": "베히모스",
+        "filename": "behemoth.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "26"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Elder's Recess"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "beotodus",
+        "nameEN": "Beotodus",
+        "nameKO": "브란토도스",
+        "filename": "beotodus.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "Piscine Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "OqOIX"
+        },
+        "anatomyEvidence": null,
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "bishaten",
+        "nameEN": "Bishaten",
+        "nameKO": "비슈텐고",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1935814960_em090_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1935814960"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "black_diablos",
+        "nameEN": "Black Diablos",
+        "nameKO": "디아블로스 아종",
+        "filename": "black_diablos.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "29"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "flying wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Wildspire Waste"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "blackveil_vaal_hazak",
+        "nameEN": "Blackveil Vaal Hazak",
+        "nameKO": "죽음을 두른 발하자크",
+        "filename": "blackveil_vaal_hazak.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Elder Dragon",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "blango",
+        "nameEN": "Blango",
+        "nameKO": "블랑고",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_blango.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4119"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Blango",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "blangonga",
+        "nameEN": "Blangonga",
+        "nameKO": "도도블랑고",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_blangonga.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "fanged-beast",
+        "variantOf": null,
+        "baseHealth": 4200,
+        "locations": [
+            "Arctic Ridge"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 2,
+                    "thunder": 4,
+                    "ice": 0,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "head",
+            "tail"
+        ],
+        "games": [
+            "wilds",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "wilds": "30",
+            "generations-ultimate": "22"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "blood_orange_bishaten",
+        "nameEN": "Blood Orange Bishaten",
+        "nameKO": "비슈텐고 아종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/447894064_em090_01.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "447894064"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "bloodbath_diablos",
+        "nameEN": "Bloodbath Diablos",
+        "nameKO": "오마 디아블로스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_bloodbath_diablos.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": "Diablos",
+        "baseHealth": 5800,
+        "locations": [
+            "Desert"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 5,
+                    "thunder": 3,
+                    "ice": 3,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1031"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "bnahabra",
+        "nameEN": "Bnahabra",
+        "nameKO": "브나하브라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_bnahabra.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Neopteron",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "470812912",
+            "generations-ultimate": "4122"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "boaboa",
+        "nameEN": "Boaboa",
+        "nameKO": "보아보아",
+        "filename": "boaboa.png",
+        "tier": "small",
+        "selectable": false,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "journey-event",
+        "journeyEventId": "boaboa",
+        "species": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "unresolved",
+            "strength": null,
+            "evidence": null,
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "boggi",
+        "nameEN": "Boggi",
+        "nameKO": "올기",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1137262772_ems094_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1137262772"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "boltreaver_astalos",
+        "nameEN": "Boltreaver Astalos",
+        "nameKO": "청전주 라이젝스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_boltreaver_astalos.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": "Astalos",
+        "baseHealth": 5800,
+        "locations": [
+            "Verdant Hills",
+            "Marshlands",
+            "Ancestral Steppe"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 3,
+                    "water": 3,
+                    "thunder": 0,
+                    "ice": 4,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1105"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "bombadgy",
+        "nameEN": "Bombadgy",
+        "nameKO": "분부지나",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1181483312_ems090_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1181483312"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "brachydios",
+        "nameEN": "Brachydios",
+        "nameKO": "브라키디오스",
+        "filename": "brachydios.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Brute Wyvern",
+        "baseHealth": 4600,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 5,
+                    "thunder": 1,
+                    "ice": 4,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Horn",
+            "Head",
+            "Body",
+            "Front Legs",
+            "Back Legs",
+            "Tail",
+            "Tail Tip"
+        ],
+        "sourceIds": {
+            "world-iceborne": "qpVH8",
+            "generations-ultimate": "63"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [
+            "Deserted Island",
+            "Volcano",
+            "Volcanic Hollow"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "brute_tigrex",
+        "nameEN": "Brute Tigrex",
+        "nameKO": "티가렉스 아종",
+        "filename": "brute_tigrex.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Flying Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "mhw-executable-action-enumeration",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "bulldrome",
+        "nameEN": "Bulldrome",
+        "nameKO": "도스팽고",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_bulldrome.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": 1800,
+        "locations": [
+            "Arctic Ridge",
+            "Misty Peaks",
+            "Marshlands",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 2,
+                    "thunder": 5,
+                    "ice": 1,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 2,
+                    "paralysis": 6,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "30"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "bullfango",
+        "nameEN": "Bullfango",
+        "nameKO": "불팽고",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_bullfango.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1829706311",
+            "generations-ultimate": "4109"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "ceanataur",
+        "nameEN": "Ceanataur",
+        "nameKO": "가미자미",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_ceanataur.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Carapaceon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "399612255",
+            "generations-ultimate": "4117"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "cephadrome",
+        "nameEN": "Cephadrome",
+        "nameKO": "도스가레오스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_cephadrome.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Piscine Wyvern",
+        "variantOf": null,
+        "baseHealth": 3000,
+        "locations": [
+            "Dunes",
+            "Desert"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 3,
+                    "thunder": 4,
+                    "ice": 5,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "17"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "cephalos",
+        "nameEN": "Cephalos",
+        "nameKO": "가레오스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_cephalos.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Piscine Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4108"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Cephalos",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "chameleos",
+        "nameEN": "Chameleos",
+        "nameKO": "오나즈치",
+        "filename": "chameleos.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "baseHealth": 6400,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 0,
+                    "thunder": 4,
+                    "ice": 1,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 2,
+                    "paralysis": 2,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Belly",
+            "Back",
+            "Front Legs",
+            "Back Legs",
+            "Wings",
+            "Tail",
+            "Head (Invisible)",
+            "Belly (Invisible)",
+            "Back (Invisible)",
+            "Front Legs (Invisible)",
+            "Back Legs (Invisible)",
+            "Wings (Invisible)",
+            "Tail (Invisible)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "138201299",
+            "generations-ultimate": "25"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Verdant Hills",
+            "Marshlands"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "chaotic_gore_magala",
+        "nameEN": "Chaotic Gore Magala",
+        "nameKO": "혼돈에 신음하는 고어-마가라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_chaotic_gore_magala.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "???",
+        "variantOf": null,
+        "baseHealth": 5800,
+        "locations": [
+            "Ancestral Steppe",
+            "Primal Forest"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 0,
+                    "thunder": 2,
+                    "ice": 1,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            },
+            {
+                "state": "Frenzy",
+                "elements": {
+                    "fire": 5,
+                    "water": 0,
+                    "thunder": 2,
+                    "ice": 1,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "131188813",
+            "generations-ultimate": "1351"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "???",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "chatacabra",
+        "nameEN": "Chatacabra",
+        "nameKO": "차타카브라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0152_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "medium",
+        "selectable": true,
+        "species": "amphibian",
+        "variantOf": null,
+        "baseHealth": 4000,
+        "locations": [
+            "Windward Plains"
+        ],
+        "weaknesses": [
+            {
+                "element": "thunder",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3050
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3051
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3052
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3053
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3054
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3055
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3056
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3057
+            }
+        ],
+        "breakablePartKinds": [
+            "left-front-leg",
+            "right-front-leg"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "14"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "conga",
+        "nameEN": "Conga",
+        "nameKO": "콩가",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_conga.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4118"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Conga",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "congalala",
+        "nameEN": "Congalala",
+        "nameKO": "바바콩가",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_congalala.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "fanged-beast",
+        "variantOf": null,
+        "baseHealth": 4600,
+        "locations": [
+            "Jurassic Frontier",
+            "Marshlands",
+            "Primal Forest",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 1,
+                    "thunder": 1,
+                    "ice": 4,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "tail",
+            "left-front-leg",
+            "right-front-leg",
+            "head"
+        ],
+        "games": [
+            "wilds",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "wilds": "5",
+            "generations-ultimate": "21"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "coral_pukei-pukei",
+        "nameEN": "Coral Pukei-Pukei",
+        "nameKO": "푸케푸케 아종",
+        "filename": "coral_pukei-pukei.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Bird Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "cortos",
+        "nameEN": "Cortos",
+        "nameKO": "코르토스",
+        "filename": "cortos.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Wingdrake",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Cortos",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "crimson_fatalis",
+        "nameEN": "Crimson Fatalis",
+        "nameKO": "홍룡 밀라보레아스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_crimson_fatalis.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "colossal",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": 8000,
+        "locations": [],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 2,
+                    "thunder": 1,
+                    "ice": 4,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "269"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "crimson_glow_valstrax",
+        "nameEN": "Crimson Glow Valstrax",
+        "nameKO": "영묘한 광채의 발파루크",
+        "filename": "crimson_glow_valstrax.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Elder Dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "815111868"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "launch",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "crystalbeard_uragaan",
+        "nameEN": "Crystalbeard Uragaan",
+        "nameKO": "보전 우라간킨",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_crystalbeard_uragaan.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Brute Wyvern",
+        "variantOf": "Uragaan",
+        "baseHealth": 5500,
+        "locations": [
+            "Volcano",
+            "Volcanic Hollow"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 4,
+                    "thunder": 1,
+                    "ice": 1,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 7,
+                    "paralysis": 5,
+                    "sleep": 6
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1069"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "daimyo_hermitaur",
+        "nameEN": "Daimyo Hermitaur",
+        "nameKO": "다이묘자자미",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_daimyo_hermitaur.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Carapaceon",
+        "variantOf": null,
+        "baseHealth": 3300,
+        "locations": [
+            "Dunes",
+            "Deserted Island",
+            "Desert",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 2,
+                    "thunder": 5,
+                    "ice": 3,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "19196313",
+            "generations-ultimate": "19"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "갑각종",
+        "skeleton": [
+            "Other",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "deadeye_yian_garuga",
+        "nameEN": "Deadeye Yian Garuga",
+        "nameKO": "척안 얀가루루가",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_deadeye_yian_garuga.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": "Yian Garuga",
+        "baseHealth": 5000,
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Volcanic Hollow",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 5,
+                    "thunder": 1,
+                    "ice": 3,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1042"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "delex",
+        "nameEN": "Delex",
+        "nameKO": "델크스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/38260556_ems038_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Piscine Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "38260556"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "deviljho",
+        "nameEN": "Deviljho",
+        "nameKO": "이블조",
+        "filename": "deviljho.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "brute wyvern",
+        "baseHealth": 6600,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 2,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 4
+                },
+                "statuses": {
+                    "poison": 7,
+                    "paralysis": 4,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Enraged",
+                "elements": {
+                    "fire": 3,
+                    "water": 3,
+                    "thunder": 5,
+                    "ice": 2,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 7,
+                    "paralysis": 4,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Body",
+            "Back",
+            "Front Legs",
+            "Back Legs",
+            "Tail",
+            "Head (Enraged)",
+            "Body (Enraged)",
+            "Back (Enraged)",
+            "Front Legs (Enraged)",
+            "Back Legs (Enraged)",
+            "Tail (Enraged)"
+        ],
+        "sourceIds": {
+            "world-iceborne": "27",
+            "generations-ultimate": "43"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Arctic Ridge",
+            "Misty Peaks",
+            "Dunes",
+            "Deserted Island",
+            "Marshlands",
+            "Volcano",
+            "Ancestral Steppe",
+            "Volcanic Hollow",
+            "Primal Forest",
+            "Frozen Seaway",
+            "Desert",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "diablos",
+        "nameEN": "Diablos",
+        "nameKO": "디아블로스",
+        "filename": "diablos.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4500,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 3,
+                    "thunder": 3,
+                    "ice": 5,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 6,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Back",
+            "Belly",
+            "Wing Flaps",
+            "Legs",
+            "Tail",
+            "Tail Tip"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "485829389",
+            "world-iceborne": "28",
+            "generations-ultimate": "7"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Dunes"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "dodogama",
+        "nameEN": "Dodogama",
+        "nameKO": "도도가마루",
+        "filename": "dodogama.png",
+        "tier": "medium",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "fanged wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "30"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Elder's Recess"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "doshaguma",
+        "nameEN": "Doshaguma",
+        "nameKO": "도샤구마",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0150_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "fanged-beast",
+        "variantOf": null,
+        "baseHealth": 4800,
+        "locations": [
+            "Windward Plains",
+            "Scarlet Forest",
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "fire",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3018
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3019
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3020
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3021
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3022
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3023
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3024
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3025
+            }
+        ],
+        "breakablePartKinds": [
+            "tail-hair",
+            "right-front-leg",
+            "left-front-leg"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "11"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "dreadking_rathalos",
+        "nameEN": "Dreadking Rathalos",
+        "nameKO": "흑염왕 리오레우스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_dreadking_rathalos.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": "Rathalos",
+        "baseHealth": 5300,
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Deserted Island",
+            "Volcano",
+            "Ancestral Steppe",
+            "Volcanic Hollow"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 2,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1026"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "dreadqueen_rathian",
+        "nameEN": "Dreadqueen Rathian",
+        "nameKO": "자독희 리오레이아",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_dreadqueen_rathian.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": "Rathian",
+        "baseHealth": 4900,
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Misty Peaks",
+            "Dunes",
+            "Marshlands",
+            "Ancestral Steppe",
+            "Desert",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 2,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1025"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "drilltusk_tetsucabra",
+        "nameEN": "Drilltusk Tetsucabra",
+        "nameKO": "암천 테츠카브라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_drilltusk_tetsucabra.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Amphibian",
+        "variantOf": "Tetsucabra",
+        "baseHealth": 4700,
+        "locations": [
+            "Jurassic Frontier",
+            "Deserted Island",
+            "Volcanic Hollow",
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 4,
+                    "thunder": 3,
+                    "ice": 2,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1090"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "duramboros",
+        "nameEN": "Duramboros",
+        "nameKO": "도볼베르크",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_duramboros.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Brute Wyvern",
+        "variantOf": null,
+        "baseHealth": 6600,
+        "locations": [
+            "Misty Peaks",
+            "Marshlands",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 1,
+                    "thunder": 3,
+                    "ice": 3,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 6,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "55"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "ebony_odogaron",
+        "nameEN": "Ebony Odogaron",
+        "nameKO": "오도가론 아종",
+        "filename": "ebony_odogaron.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Fanged Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "elderfrost_gammoth",
+        "nameEN": "Elderfrost Gammoth",
+        "nameKO": "은령 가무토",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_elderfrost_gammoth.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": "Gammoth",
+        "baseHealth": 6800,
+        "locations": [
+            "Arctic Ridge",
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 3,
+                    "thunder": 4,
+                    "ice": 0,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1107"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "espinas",
+        "nameEN": "Espinas",
+        "nameKO": "에스피나스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/141986722_em136_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "141986722"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "fatalis",
+        "nameEN": "Fatalis",
+        "nameKO": "밀라보레아스",
+        "filename": "fatalis.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "baseHealth": 9000,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 1,
+                    "thunder": 2,
+                    "ice": 1,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Belly",
+            "Back",
+            "Tail",
+            "Front Legs",
+            "Back Legs",
+            "Wings"
+        ],
+        "sourceIds": {
+            "world-iceborne": "jA8SZ",
+            "generations-ultimate": "13"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Fatalis",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "felyne",
+        "nameEN": "Felyne",
+        "nameKO": "아이루",
+        "filename": "felyne.png",
+        "tier": "small",
+        "selectable": false,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": null,
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1744255757",
+            "generations-ultimate": "4103"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [],
+        "variantOf": null,
+        "role": "journey-event",
+        "journeyEventId": "felyne",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "flaming_espinas",
+        "nameEN": "Flaming Espinas",
+        "nameKO": "에스피나스 아종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1472640162_em136_01.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1472640162"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "frostfang_barioth",
+        "nameEN": "Frostfang Barioth",
+        "nameKO": "서리칼날 품은 베리오로스",
+        "filename": "frostfang_barioth.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Flying Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "fulgur_anjanath",
+        "nameEN": "Fulgur Anjanath",
+        "nameKO": "안쟈나프 아종",
+        "filename": "fulgur_anjanath.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Brute Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "furious_rajang",
+        "nameEN": "Furious Rajang",
+        "nameKO": "격앙 라잔",
+        "filename": "furious_rajang.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Fanged Beast",
+        "baseHealth": 4800,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 2,
+                    "thunder": 0,
+                    "ice": 4,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Front Legs",
+            "Back Legs",
+            "Body",
+            "Tail",
+            "Front Legs (Enraged)",
+            "Back Legs (Enraged)",
+            "Tail (Enraged)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1326634525",
+            "generations-ultimate": "1303"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Volcano",
+            "Ancestral Steppe"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gaismagorm",
+        "nameEN": "Gaismagorm",
+        "nameKO": "가이아델름",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/261970829_em135_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "colossal",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "261970829"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gajalaka",
+        "nameEN": "Gajalaka",
+        "nameKO": "가자부",
+        "filename": "gajalaka.png",
+        "tier": "small",
+        "selectable": false,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "journey-event",
+        "journeyEventId": "gajalaka",
+        "species": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "unresolved",
+            "strength": null,
+            "evidence": null,
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gajau",
+        "nameEN": "Gajau",
+        "nameKO": "가쟈우",
+        "filename": "gajau.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "fish",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "413407319",
+            "world-iceborne": "9"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Ancient Forest",
+            "Wildspire Waste"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gammoth",
+        "nameEN": "Gammoth",
+        "nameKO": "가무토",
+        "filename": "gammoth.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "generations-ultimate": "83"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": 5400,
+        "locations": [
+            "Arctic Ridge",
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Snow",
+                "elements": {
+                    "fire": 5,
+                    "water": 1,
+                    "thunder": 1,
+                    "ice": 0,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 4,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "No Snow",
+                "elements": {
+                    "fire": 2,
+                    "water": 1,
+                    "thunder": 3,
+                    "ice": 0,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 4,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Trunk",
+            "Front Legs",
+            "Back Legs",
+            "Tail",
+            "Body",
+            "Trunk (Snow)",
+            "Front Legs (Snow)",
+            "Back Legs (Snow)",
+            "Tail (Snow)"
+        ],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
     },
     {
         "id": "garangolm",
         "nameEN": "Garangolm",
         "nameKO": "가란고르무",
-        "filename": "garangolm.png"
+        "filename": "garangolm.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Fanged Beast",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "247196652"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gargwa",
+        "nameEN": "Gargwa",
+        "nameKO": "가구아",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_gargwa.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "262999744",
+            "generations-ultimate": "4138"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gastodon",
+        "nameEN": "Gastodon",
+        "nameKO": "가스토돈",
+        "filename": "gastodon.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "15"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "herbivore",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Gastodon",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Elder's Recess"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "gendrome",
+        "nameEN": "Gendrome",
+        "nameKO": "도스게네포스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_gendrome.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": 2500,
+        "locations": [
+            "Dunes",
+            "Primal Forest",
+            "Desert"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 4,
+                    "thunder": 6,
+                    "ice": 6,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 2,
+                    "sleep": 6
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "15"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Gendrome",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "genprey",
+        "nameEN": "Genprey",
+        "nameKO": "게네포스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_genprey.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4106"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Genprey",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "giadrome",
+        "nameEN": "Giadrome",
+        "nameKO": "도스기아노스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_giadrome.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": 2400,
+        "locations": [
+            "Arctic Ridge",
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 6,
+                    "water": 3,
+                    "thunder": 5,
+                    "ice": 1,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "34"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "giaprey",
+        "nameEN": "Giaprey",
+        "nameKO": "기아노스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_giaprey.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4111"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Giaprey",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "girros",
+        "nameEN": "Girros",
+        "nameKO": "기르오스",
+        "filename": "girros.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "13"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "fanged wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Girros",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Rotten Vale"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "glavenus",
+        "nameEN": "Glavenus",
+        "nameKO": "디노발드",
+        "filename": "glavenus.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Brute Wyvern",
+        "baseHealth": 4400,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 5,
+                    "thunder": 2,
+                    "ice": 3,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Throat",
+            "Dorsal Horns",
+            "Torso",
+            "Front Legs",
+            "Back Legs",
+            "Tail Base",
+            "Tail",
+            "Tail (Heating)"
+        ],
+        "sourceIds": {
+            "world-iceborne": "Lk1ia",
+            "generations-ultimate": "80"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Dunes",
+            "Volcano",
+            "Volcanic Hollow",
+            "Desert",
+            "Jungle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gogmazios",
+        "nameEN": "Gogmazios",
+        "nameKO": "고그마지오스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0078_00_0.png",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "elder",
+        "selectable": true,
+        "species": "elder-dragon",
+        "variantOf": null,
+        "baseHealth": 10000,
+        "locations": [
+            "Oilwell Basin"
+        ],
+        "weaknesses": [
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3058
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3059
+            }
+        ],
+        "breakablePartKinds": [
+            "head",
+            "chest",
+            "back",
+            "left-wing-legs",
+            "right-wing-legs",
+            "tail-tip",
+            "hide"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "34"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gold_rathian",
+        "nameEN": "Gold Rathian",
+        "nameKO": "리오레이아 희소종",
+        "filename": "gold_rathian.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4700,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 3,
+                    "thunder": 5,
+                    "ice": 2,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Back",
+            "Belly",
+            "Tail",
+            "Wings",
+            "Legs",
+            "Tail Tip",
+            "Head (Break)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1518179787",
+            "generations-ultimate": "513"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Misty Peaks"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gore_magala",
+        "nameEN": "Gore Magala",
+        "nameKO": "고어 마가라",
+        "filename": "gore_magala.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "wilds",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "???",
+        "baseHealth": 4800,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 3,
+                    "ice": 1,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "left-wing",
+            "right-wing",
+            "antennae"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1161896781",
+            "wilds": "7",
+            "generations-ultimate": "71"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Ancestral Steppe",
+            "Primal Forest",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "???",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "goss_harag",
+        "nameEN": "Goss Harag",
+        "nameKO": "고샤하기",
+        "filename": "goss_harag.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Fanged Beast",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "2069053547"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gowngoat",
+        "nameEN": "Gowngoat",
+        "nameKO": "메르크",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1123029143_ems093_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Herbivore",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1123029143"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Gowngoat",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gravios",
+        "nameEN": "Gravios",
+        "nameKO": "그라비모스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_gravios.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "flying-wyvern",
+        "variantOf": null,
+        "baseHealth": 4400,
+        "locations": [
+            "Marshlands",
+            "Volcano",
+            "Volcanic Hollow",
+            "Primal Forest",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 6,
+                    "thunder": 3,
+                    "ice": 2,
+                    "dragon": 4
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 5,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "back",
+            "left-leg",
+            "right-leg",
+            "head",
+            "stomach",
+            "left-wing",
+            "right-wing"
+        ],
+        "games": [
+            "wilds",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "wilds": "8",
+            "generations-ultimate": "5"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "great_baggi",
+        "nameEN": "Great Baggi",
+        "nameKO": "도스바기",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/718470492_em054_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "718470492"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "조룡종",
+        "skeleton": [
+            "Bird wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "great_girros",
+        "nameEN": "Great Girros",
+        "nameKO": "도스기르오스",
+        "filename": "great_girros.png",
+        "tier": "medium",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "fanged wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "31"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Rotten Vale"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "great_izuchi",
+        "nameEN": "Great Izuchi",
+        "nameKO": "오사이즈치",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1681174536_em098_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1681174536"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "조룡종",
+        "skeleton": [
+            "Bird wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "great_jagras",
+        "nameEN": "Great Jagras",
+        "nameKO": "도스쟈그라스",
+        "filename": "great_jagras.png",
+        "tier": "medium",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "fanged wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "17"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Ancient Forest"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "great_maccao",
+        "nameEN": "Great Maccao",
+        "nameKO": "도스마카오",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_great_maccao.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": 2000,
+        "locations": [
+            "Jurassic Frontier",
+            "Ancestral Steppe",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 6,
+                    "water": 4,
+                    "thunder": 3,
+                    "ice": 4,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 5,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "85"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "great_thunderbug",
+        "nameEN": "Great Thunderbug",
+        "nameKO": "대뇌광충",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_great_thunderbug.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Neopteron",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4113"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Great_Thunderbug",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "great_wroggi",
+        "nameEN": "Great Wroggi",
+        "nameKO": "도스프로기",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1460759793_em059_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1460759793"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "조룡종",
+        "skeleton": [
+            "Bird wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "grimalkyne",
+        "nameEN": "Grimalkyne",
+        "nameKO": "테토루",
+        "filename": "grimalkyne.png",
+        "tier": "small",
+        "selectable": false,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "journey-event",
+        "journeyEventId": "tetoru",
+        "species": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "unresolved",
+            "strength": null,
+            "evidence": null,
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "grimclaw_tigrex",
+        "nameEN": "Grimclaw Tigrex",
+        "nameKO": "황구조 티가렉스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_grimclaw_tigrex.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": "Tigrex",
+        "baseHealth": 6000,
+        "locations": [
+            "Arctic Ridge",
+            "Dunes",
+            "Ancestral Steppe",
+            "Primal Forest",
+            "Desert"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 3,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1056"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "特大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "guardian_arkveld",
+        "nameEN": "Guardian Arkveld",
+        "nameKO": "수호룡 알슈베르도",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0160_50_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "construct",
+        "variantOf": null,
+        "baseHealth": 5200,
+        "locations": [
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "dragon",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3003
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3004
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3005
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3006
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3007
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3008
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3009
+            }
+        ],
+        "breakablePartKinds": [
+            "head",
+            "left-wing-blade",
+            "right-wing-blade"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "9"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "guardian_doshaguma",
+        "nameEN": "Guardian Doshaguma",
+        "nameKO": "수호룡 도샤구마",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0150_50_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "construct",
+        "variantOf": null,
+        "baseHealth": 5800,
+        "locations": [
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "fire",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 2938
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2939
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2940
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2941
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2942
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2943
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2944
+            }
+        ],
+        "breakablePartKinds": [
+            "tail-hair",
+            "right-front-leg",
+            "left-front-leg"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "2"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "guardian_ebony_odogaron",
+        "nameEN": "Guardian Ebony Odogaron",
+        "nameKO": "수호룡 오도가론 아종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0113_51_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "construct",
+        "variantOf": null,
+        "baseHealth": 5000,
+        "locations": [
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "water",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3164
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3165
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3166
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3167
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3168
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3169
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3170
+            }
+        ],
+        "breakablePartKinds": [
+            "tail-tip",
+            "right-front-leg",
+            "right-hind-leg",
+            "head"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "28"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "guardian_fulgur_anjanath",
+        "nameEN": "Guardian Fulgur Anjanath",
+        "nameKO": "수호룡 안쟈나프 아종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0100_51_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "construct",
+        "variantOf": null,
+        "baseHealth": 5000,
+        "locations": [
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "ice",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3073
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3074
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3075
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3076
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3077
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3078
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3079
+            }
+        ],
+        "breakablePartKinds": [
+            "left-leg",
+            "right-leg",
+            "head"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "16"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "guardian_rathalos",
+        "nameEN": "Guardian Rathalos",
+        "nameKO": "수호룡 리오레우스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0002_50_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "construct",
+        "variantOf": null,
+        "baseHealth": 5000,
+        "locations": [
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "dragon",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3134
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3135
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3136
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3137
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3138
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3139
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3140
+            }
+        ],
+        "breakablePartKinds": [
+            "left-wing",
+            "right-wing"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "24"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "gypceros",
+        "nameEN": "Gypceros",
+        "nameKO": "게리오스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_gypceros.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "bird-wyvern",
+        "variantOf": null,
+        "baseHealth": 3900,
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Marshlands",
+            "Ancestral Steppe",
+            "Primal Forest",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 2,
+                    "thunder": 0,
+                    "ice": 3,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 0,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "head"
+        ],
+        "games": [
+            "wilds",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "wilds": "22",
+            "generations-ultimate": "9"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "hellblade_glavenus",
+        "nameEN": "Hellblade Glavenus",
+        "nameKO": "신멸인 디노발드",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_hellblade_glavenus.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Brute Wyvern",
+        "variantOf": "Glavenus",
+        "baseHealth": 5100,
+        "locations": [
+            "Jurassic Frontier",
+            "Dunes",
+            "Volcano",
+            "Volcanic Hollow",
+            "Desert",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 5,
+                    "thunder": 2,
+                    "ice": 3,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1104"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "hermitaur",
+        "nameEN": "Hermitaur",
+        "nameKO": "야오자미",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_hermitaur.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Carapaceon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "385362366",
+            "generations-ultimate": "4116"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "hirabami",
+        "nameEN": "Hirabami",
+        "nameKO": "히라바미",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0161_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "leviathan",
+        "variantOf": null,
+        "baseHealth": 4500,
+        "locations": [
+            "Ruins of Wyveria",
+            "Iceshard Cliffs"
+        ],
+        "weaknesses": [
+            {
+                "element": "fire",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3080
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3081
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3082
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3083
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3084
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3085
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3086
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3087
+            }
+        ],
+        "breakablePartKinds": [
+            "head",
+            "tail"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "17"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "hornetaur",
+        "nameEN": "Hornetaur",
+        "nameKO": "칸타로스",
+        "filename": "hornetaur.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "neopteron",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1682217807",
+            "world-iceborne": "14",
+            "generations-ultimate": "4101"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Rotten Vale"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "iodrome",
+        "nameEN": "Iodrome",
+        "nameKO": "도스이오스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_iodrome.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": 3500,
+        "locations": [
+            "Marshlands",
+            "Volcano",
+            "Volcanic Hollow",
+            "Primal Forest"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 6,
+                    "thunder": 6,
+                    "ice": 3,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 2,
+                    "paralysis": 5,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "16"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "ioprey",
+        "nameEN": "Ioprey",
+        "nameKO": "이오스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_ioprey.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4107"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Ioprey",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "izuchi",
+        "nameEN": "Izuchi",
+        "nameKO": "이즈치",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1195733201_ems091_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1195733201"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "jaggi",
+        "nameEN": "Jaggi",
+        "nameKO": "재기",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_jaggi.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "114986952",
+            "generations-ultimate": "4130"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "jaggia",
+        "nameEN": "Jaggia",
+        "nameKO": "재기노스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_jaggia.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "129236969",
+            "generations-ultimate": "4131"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "jagras",
+        "nameEN": "Jagras",
+        "nameKO": "쟈그라스",
+        "filename": "jagras.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "fanged wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "933125691",
+            "world-iceborne": "2"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Ancient Forest"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "jin_dahaad",
+        "nameEN": "Jin Dahaad",
+        "nameKO": "진 다하드",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0162_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "colossal",
+        "selectable": true,
+        "species": "leviathan",
+        "variantOf": null,
+        "baseHealth": 7400,
+        "locations": [
+            "Iceshard Cliffs"
+        ],
+        "weaknesses": [
+            {
+                "element": "fire",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3149
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3150
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3151
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3152
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3153
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3154
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3155
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3156
+            }
+        ],
+        "breakablePartKinds": [
+            "frozen-bigcore-after",
+            "tail",
+            "frozen-core-waist",
+            "right-front-leg",
+            "left-front-leg",
+            "right-hind-leg",
+            "left-hind-leg",
+            "head"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "26"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "jyuratodus",
+        "nameEN": "Jyuratodus",
+        "nameKO": "쥬라토도스",
+        "filename": "jyuratodus.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "Piscine Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1755961030",
+            "world-iceborne": "21"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Wildspire Waste"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "어룡종",
+        "skeleton": [
+            "Piscine wyvern",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "kecha_wacha",
+        "nameEN": "Kecha Wacha",
+        "nameKO": "케차와차",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_kecha_wacha.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": 3800,
+        "locations": [
+            "Ancestral Steppe",
+            "Primal Forest"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 3,
+                    "ice": 2,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "65"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "kelbi",
+        "nameEN": "Kelbi",
+        "nameKO": "켈비",
+        "filename": "kelbi.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "herbivore",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "2055863177",
+            "world-iceborne": "10",
+            "generations-ultimate": "4099"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Coral Highlands",
+            "Wildspire Waste"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "kestodon",
+        "nameEN": "Kestodon",
+        "nameKO": "케스토돈",
+        "filename": "kestodon.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "herbivore",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "826867193",
+            "world-iceborne": "7"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Ancient Forest",
+            "Wildspire Waste"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "kestodon_female",
+        "nameEN": "Kestodon Female",
+        "nameKO": "케스토돈 (암컷)",
+        "filename": "kestodon_female.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Herbivore",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Kestodon",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "khezu",
+        "nameEN": "Khezu",
+        "nameKO": "푸루푸루",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_khezu.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": 4500,
+        "locations": [
+            "Arctic Ridge",
+            "Marshlands",
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 2,
+                    "thunder": 0,
+                    "ice": 2,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 2,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "395307913",
+            "generations-ultimate": "3"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "kirin",
+        "nameEN": "Kirin",
+        "nameKO": "키린",
+        "filename": "kirin.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "elder dragon",
+        "baseHealth": 3200,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 2,
+                    "thunder": 0,
+                    "ice": 2,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 2,
+                    "paralysis": 0,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Body",
+            "Lower Body",
+            "Front Legs",
+            "Head (Enraged)",
+            "Body (Enraged)",
+            "Lower Body (Enraged)",
+            "Front Legs (Enraged)"
+        ],
+        "sourceIds": {
+            "world-iceborne": "32",
+            "generations-ultimate": "11"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Arctic Ridge",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "konchu",
+        "nameEN": "Konchu",
+        "nameKO": "쿤추",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_konchu.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Neopteron",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4141"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Konchu",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "kulu-ya-ku",
+        "nameEN": "Kulu-Ya-Ku",
+        "nameKO": "쿠루루야크",
+        "filename": "kulu-ya-ku.png",
+        "tier": "medium",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "Bird Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1875928865",
+            "world-iceborne": "18"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Ancient Forest",
+            "Wildspire Waste"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "조룡종",
+        "skeleton": [
+            "Bird wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "kulve_taroth",
+        "nameEN": "Kulve Taroth",
+        "nameKO": "맘-타로트",
+        "filename": "kulve_taroth.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "33"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Caverns of El Dorado"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://gamewith.net/monsterhunterworld-iceborne/article/show/18097",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "kushala_daora",
+        "nameEN": "Kushala Daora",
+        "nameKO": "크샬다오라",
+        "filename": "kushala_daora.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "baseHealth": 4200,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 3,
+                    "water": 2,
+                    "thunder": 5,
+                    "ice": 0,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 2,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Dark Wind",
+                "elements": {
+                    "fire": 2,
+                    "water": 1,
+                    "thunder": 5,
+                    "ice": 0,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 2,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Belly",
+            "Back",
+            "Tail",
+            "Front Legs",
+            "Back Legs",
+            "Wings",
+            "Head (Wind Barrier)",
+            "Neck (Wind Barrier)",
+            "Belly (Wind Barrier)",
+            "Back (Wind Barrier)",
+            "Tail (Wind Barrier)",
+            "Front Legs (Wind Barrier)",
+            "Back Legs (Wind Barrier)",
+            "Wings (Wind Barrier)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "257661234",
+            "world-iceborne": "34",
+            "generations-ultimate": "24"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Arctic Ridge",
+            "Frozen Seaway"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
     },
     {
         "id": "lagiacrus",
         "nameEN": "Lagiacrus",
         "nameKO": "라기아크루스",
-        "filename": "lagiacrus.png"
+        "filename": "lagiacrus.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "wilds",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "leviathan",
+        "baseHealth": 5000,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 0,
+                    "ice": 3,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "back",
+            "head",
+            "front-legs"
+        ],
+        "sourceIds": {
+            "wilds": "31",
+            "generations-ultimate": "46"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Misty Peaks",
+            "Deserted Island",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "lagombi",
+        "nameEN": "Lagombi",
+        "nameKO": "울크스스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_lagombi.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": 3600,
+        "locations": [
+            "Arctic Ridge",
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 0,
+                    "thunder": 3,
+                    "ice": 0,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1389104311",
+            "generations-ultimate": "61"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "lala_barina",
+        "nameEN": "Lala Barina",
+        "nameKO": "라바라 바리나",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0154_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "temnoceran",
+        "variantOf": null,
+        "baseHealth": 4000,
+        "locations": [
+            "Scarlet Forest",
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "fire",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 2953
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 2954
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2955
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2956
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2957
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2958
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2959
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2960
+            }
+        ],
+        "breakablePartKinds": [
+            "left-nail",
+            "right-nail",
+            "petal"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "4"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "lao_shan_lung",
+        "nameEN": "Lao-Shan Lung",
+        "nameKO": "노산룡",
+        "filename": "lao_shan_lung.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "generations-ultimate": "12"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": 25000,
+        "locations": [],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 1,
+                    "thunder": 1,
+                    "ice": 3,
+                    "dragon": 6
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Mouth",
+            "Back",
+            "Legs",
+            "Belly",
+            "Tail",
+            "Back (Break)"
+        ],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "larinoth",
+        "nameEN": "Larinoth",
+        "nameKO": "리모세토스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_larinoth.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Herbivore",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4143"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Larinoth",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "lavasioth",
+        "nameEN": "Lavasioth",
+        "nameKO": "볼가노스",
+        "filename": "lavasioth.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "piscine wyvern",
+        "baseHealth": 4500,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 4,
+                    "thunder": 3,
+                    "ice": 3,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Wings",
+            "Back",
+            "Tail",
+            "Belly",
+            "Legs"
+        ],
+        "sourceIds": {
+            "world-iceborne": "35",
+            "generations-ultimate": "36"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [
+            "Volcano"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "legiana",
+        "nameEN": "Legiana",
+        "nameKO": "레이기에나",
+        "filename": "legiana.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "flying wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "36"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Coral Highlands",
+            "Rotten Vale"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "leshen",
+        "nameEN": "Leshen",
+        "nameKO": "레셴",
+        "filename": "leshen.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "relict",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "53"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Ancient Forest"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://www.gamegrin.com/articles/monster-hunter-world-to-kill-an-ancient-leshen-complete-guide/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "lucent_nargacuga",
+        "nameEN": "Lucent Nargacuga",
+        "nameKO": "나르가쿠르가 희소종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1661782447_em037_02.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1661782447"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "ludroth",
+        "nameEN": "Ludroth",
+        "nameKO": "루드로스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_ludroth.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "51986285",
+            "generations-ultimate": "4135"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "lunagaron",
+        "nameEN": "Lunagaron",
+        "nameKO": "루나가론",
+        "filename": "lunagaron.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Fanged Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "232963023"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아룡종",
+        "skeleton": [
+            "Fanged wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "lunastra",
+        "nameEN": "Lunastra",
+        "nameKO": "나나-테스카토리",
+        "filename": "lunastra.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "37"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Elder's Recess"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "maccao",
+        "nameEN": "Maccao",
+        "nameKO": "마카오",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_maccao.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4142"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Maccao",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "magma_almudron",
+        "nameEN": "Magma Almudron",
+        "nameKO": "오로미도로 아종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/15778133_em095_01.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "15778133"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "해룡종",
+        "skeleton": [
+            "Leviathan",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "magnamalo",
+        "nameEN": "Magnamalo",
+        "nameKO": "마가이마가도",
+        "filename": "magnamalo.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Fanged Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1921564947"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아룡종",
+        "skeleton": [
+            "Fanged wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "malfestio",
+        "nameEN": "Malfestio",
+        "nameKO": "호로로호루루",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_malfestio.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": 4000,
+        "locations": [
+            "Jurassic Frontier",
+            "Deserted Island",
+            "Primal Forest",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 4,
+                    "thunder": 2,
+                    "ice": 2,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "79"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "malzeno",
+        "nameEN": "Malzeno",
+        "nameKO": "멜-제나",
+        "filename": "malzeno.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Elder Dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "50943022"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "melynx",
+        "nameEN": "Melynx",
+        "nameKO": "메라루",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_melynx.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": false,
+        "species": null,
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1623747362",
+            "generations-ultimate": "4104"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "journey-event",
+        "journeyEventId": "melynx",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "mernos",
+        "nameEN": "Mernos",
+        "nameKO": "메르노스",
+        "filename": "mernos.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "3"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "wingdrake",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Mernos",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Ancient Forest",
+            "Wildspire Waste"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "mizutsune",
+        "nameEN": "Mizutsune",
+        "nameKO": "타마미츠네",
+        "filename": "mizutsune.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "wilds",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Leviathan",
+        "baseHealth": 4600,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 0,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Enraged",
+                "elements": {
+                    "fire": 3,
+                    "water": 0,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "tail",
+            "left-nail",
+            "right-nail",
+            "head",
+            "dorsal-fin"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1251979832",
+            "wilds": "15",
+            "generations-ultimate": "82"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Misty Peaks",
+            "Primal Forest",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "해룡종",
+        "skeleton": [
+            "Leviathan",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "moofah",
+        "nameEN": "Moofah",
+        "nameKO": "무파",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_moofah.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Herbivore",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "4144"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Moofah",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "mosswine",
+        "nameEN": "Mosswine",
+        "nameKO": "모스",
+        "filename": "mosswine.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "world-iceborne": "5",
+            "generations-ultimate": "4100"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "herbivore",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Ancient Forest",
+            "Wildspire Waste",
+            "Rotten Vale"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Mosswine",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "najarala",
+        "nameEN": "Najarala",
+        "nameKO": "가라라아자라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_najarala.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Snake Wyvern",
+        "variantOf": null,
+        "baseHealth": 4350,
+        "locations": [
+            "Verdant Hills",
+            "Marshlands",
+            "Primal Forest"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 3,
+                    "thunder": 2,
+                    "ice": 5,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 2,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "68"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "nakarkos",
+        "nameEN": "Nakarkos",
+        "nameKO": "오스트가로아",
+        "filename": "nakarkos.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "generations-ultimate": "84"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": 14000,
+        "locations": [],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 3,
+                    "water": 0,
+                    "thunder": 1,
+                    "ice": 0,
+                    "dragon": 4
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Back",
+            "Shell",
+            "Head",
+            "Fin",
+            "Body",
+            "Blowhole",
+            "Weakpoint",
+            "Head (Mucus Covered)"
+        ],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "namielle",
+        "nameEN": "Namielle",
+        "nameKO": "네로미에르",
+        "filename": "namielle.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "59"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Coral Highlands"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "nargacuga",
+        "nameEN": "Nargacuga",
+        "nameKO": "나르가쿠르가",
+        "filename": "nargacuga.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4200,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 1,
+                    "thunder": 5,
+                    "ice": 2,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck + Back",
+            "Belly",
+            "Wing Blades",
+            "Front Legs",
+            "Back Legs",
+            "Tail",
+            "Tail Tip",
+            "Head (Enraged)",
+            "Front Legs (Enraged)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1047302063",
+            "world-iceborne": "BKNIm",
+            "generations-ultimate": "37"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Misty Peaks",
+            "Deserted Island",
+            "Jungle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "narwa_the_allmother",
+        "nameEN": "Narwa the Allmother",
+        "nameKO": "백룡 연원 나루하타타히메",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/664702249_em099_05.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "elder",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "664702249"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "nergigante",
+        "nameEN": "Nergigante",
+        "nameKO": "네르기간테",
+        "filename": "nergigante.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "38"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Wildspire Waste",
+            "Elder's Recess"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "nerscylla",
+        "nameEN": "Nerscylla",
+        "nameKO": "네르스큐라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_nerscylla.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "temnoceran",
+        "variantOf": null,
+        "baseHealth": 3900,
+        "locations": [
+            "Marshlands",
+            "Primal Forest"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 0,
+                    "thunder": 1,
+                    "ice": 3,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 3,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            },
+            {
+                "state": "No Hide",
+                "elements": {
+                    "fire": 1,
+                    "water": 0,
+                    "thunder": 5,
+                    "ice": 1,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 3,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "left-nail",
+            "hide"
+        ],
+        "games": [
+            "wilds",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "wilds": "6",
+            "generations-ultimate": "70"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "nibelsnarf",
+        "nameEN": "Nibelsnarf",
+        "nameKO": "하플보카",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_nibelsnarf.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": 4000,
+        "locations": [
+            "Dunes",
+            "Desert"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 3,
+                    "thunder": 4,
+                    "ice": 4,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "56"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "nightcloak_malfestio",
+        "nameEN": "Nightcloak Malfestio",
+        "nameKO": "농은 호로로호루루",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_nightcloak_malfestio.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": "Malfestio",
+        "baseHealth": 4800,
+        "locations": [
+            "Jurassic Frontier",
+            "Deserted Island",
+            "Primal Forest",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 3,
+                    "water": 4,
+                    "thunder": 1,
+                    "ice": 1,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1103"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "nightshade_paolumu",
+        "nameEN": "Nightshade Paolumu",
+        "nameKO": "부면룡 파오우르무",
+        "filename": "nightshade_paolumu.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Flying Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "noios",
+        "nameEN": "Noios",
+        "nameKO": "노이오스",
+        "filename": "noios.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "8"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "wingdrake",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Noios",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Wildspire Waste"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "nu_udra",
+        "nameEN": "Nu Udra",
+        "nameKO": "누 이그드라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0158_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "cephalopod",
+        "variantOf": null,
+        "baseHealth": 5250,
+        "locations": [
+            "Oilwell Basin"
+        ],
+        "weaknesses": [
+            {
+                "element": "water",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3157
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3158
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3159
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3160
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3161
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3162
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3163
+            }
+        ],
+        "breakablePartKinds": [
+            "head"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "27"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "odogaron",
+        "nameEN": "Odogaron",
+        "nameKO": "오도가론",
+        "filename": "odogaron.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "fanged wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "39"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Coral Highlands",
+            "Rotten Vale"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Odogaron",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "old_fatalis",
+        "nameEN": "Old Fatalis",
+        "nameKO": "조룡 밀라보레아스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_old_fatalis.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "colossal",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": 9000,
+        "locations": [],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 1,
+                    "thunder": 1,
+                    "ice": 3,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "525"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "omega_planetes",
+        "nameEN": "Omega Planetes",
+        "nameKO": "오메가 플라네테스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0166_00_0.png",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "colossal",
+        "selectable": true,
+        "species": "machine",
+        "variantOf": null,
+        "baseHealth": 7000,
+        "locations": [
+            "Iceshard Cliffs"
+        ],
+        "weaknesses": [
+            {
+                "element": "thunder",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3060
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3061
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3062
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3063
+            }
+        ],
+        "breakablePartKinds": [
+            "right-front-leg",
+            "left-front-leg",
+            "right-hind-leg",
+            "left-hind-leg",
+            "head",
+            "periscope"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "33"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "paolumu",
+        "nameEN": "Paolumu",
+        "nameKO": "파오우르무",
+        "filename": "paolumu.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "flying wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "40"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Coral Highlands"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "pink_rathian",
+        "nameEN": "Pink Rathian",
+        "nameKO": "리오레이아 아종",
+        "filename": "pink_rathian.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "44"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "flying wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Coral Highlands",
+            "Wildspire Waste"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "plesioth",
+        "nameEN": "Plesioth",
+        "nameKO": "가노토토스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_plesioth.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Piscine Wyvern",
+        "variantOf": null,
+        "baseHealth": 4000,
+        "locations": [
+            "Misty Peaks",
+            "Deserted Island",
+            "Desert",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 5,
+                    "ice": 2,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 5,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "10"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "popo",
+        "nameEN": "Popo",
+        "nameKO": "포포",
+        "filename": "popo.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Herbivore",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1876970084",
+            "generations-ultimate": "4110"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Popo",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "primordial_malzeno",
+        "nameEN": "Primordial Malzeno",
+        "nameKO": "원초를 새기는 멜-제나",
+        "filename": "primordial_malzeno.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Elder Dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1301934382"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "pukei-pukei",
+        "nameEN": "Pukei-Pukei",
+        "nameKO": "푸케푸케",
+        "filename": "pukei-pukei.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "Bird Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1636956044",
+            "world-iceborne": "19"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Ancient Forest",
+            "Wildspire Waste"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "조룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "pyrantula",
+        "nameEN": "Pyrantula",
+        "nameKO": "하제히바키",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1869529590_ems092_01.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Temnoceran",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1869529590"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "pyre_rakna_kadaki",
+        "nameEN": "Pyre Rakna-Kadaki",
+        "nameKO": "야츠카다키 아종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/102732212_em094_01.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Temnoceran",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "102732212"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "협각종",
+        "skeleton": [
+            "Other"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "quematrice",
+        "nameEN": "Quematrice",
+        "nameKO": "케마트리스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0153_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "medium",
+        "selectable": true,
+        "species": "brute-wyvern",
+        "variantOf": null,
+        "baseHealth": 4000,
+        "locations": [
+            "Windward Plains",
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "water",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3010
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3011
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3012
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3013
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3014
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3015
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3016
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3017
+            }
+        ],
+        "breakablePartKinds": [
+            "head"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "10"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "rachnoid",
+        "nameEN": "Rachnoid",
+        "nameKO": "츠케히바키",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1075749110_ems092_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Temnoceran",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1075749110"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "radobaan",
+        "nameEN": "Radobaan",
+        "nameKO": "라도발킨",
+        "filename": "radobaan.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "brute wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "41"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Rotten Vale"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "raging_brachydios",
+        "nameEN": "Raging Brachydios",
+        "nameKO": "임계 브라키디오스",
+        "filename": "raging_brachydios.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "generations-ultimate": "1343"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Brute Wyvern",
+        "variantOf": null,
+        "baseHealth": 5500,
+        "locations": [],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 4,
+                    "thunder": 1,
+                    "ice": 5,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Horn",
+            "Head",
+            "Body",
+            "Arms",
+            "Legs",
+            "Tail",
+            "Horn (Red Slime)",
+            "Head (Red Slime)",
+            "Arms (Red Slime)",
+            "Tail (Red Slime)"
+        ],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "rajang",
+        "nameEN": "Rajang",
+        "nameKO": "라잔",
+        "filename": "rajang.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Fanged Beast",
+        "baseHealth": 4500,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 2,
+                    "thunder": 0,
+                    "ice": 4,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Front Legs",
+            "Back Legs",
+            "Body",
+            "Tail",
+            "Front Legs (Enraged)",
+            "Back Legs (Enraged)",
+            "Tail (Enraged)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "243411229",
+            "world-iceborne": "57",
+            "generations-ultimate": "23"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Arctic Ridge",
+            "Dunes",
+            "Volcano",
+            "Ancestral Steppe",
+            "Desert"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "rakna_kadaki",
+        "nameEN": "Rakna-Kadaki",
+        "nameKO": "야츠카다키",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/2026860724_em094_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Temnoceran",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "2026860724"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "협각종",
+        "skeleton": [
+            "Other"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "raphinos",
+        "nameEN": "Raphinos",
+        "nameKO": "라피노스",
+        "filename": "raphinos.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "11"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "wingdrake",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Raphinos",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Coral Highlands",
+            "Rotten Vale"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "rathalos",
+        "nameEN": "Rathalos",
+        "nameKO": "리오레우스",
+        "filename": "rathalos.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "wilds",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4200,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 2,
+                    "thunder": 6,
+                    "ice": 2,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "left-wing",
+            "right-wing"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "381074408",
+            "world-iceborne": "42",
+            "wilds": "29",
+            "generations-ultimate": "2"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Deserted Island",
+            "Volcano",
+            "Ancestral Steppe",
+            "Volcanic Hollow",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "rathian",
+        "nameEN": "Rathian",
+        "nameKO": "리오레이아",
+        "filename": "rathian.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "wilds",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4500,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 3,
+                    "thunder": 4,
+                    "ice": 3,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "left-wing",
+            "right-wing"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "366824395",
+            "world-iceborne": "43",
+            "wilds": "13",
+            "generations-ultimate": "1"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Misty Peaks",
+            "Dunes",
+            "Deserted Island",
+            "Marshlands",
+            "Ancestral Steppe",
+            "Primal Forest",
+            "Desert",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "redhelm_arzuros",
+        "nameEN": "Redhelm Arzuros",
+        "nameKO": "홍두 아오아시라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_redhelm_arzuros.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": "Arzuros",
+        "baseHealth": 4500,
+        "locations": [
+            "Misty Peaks",
+            "Deserted Island",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 3,
+                    "water": 0,
+                    "thunder": 1,
+                    "ice": 3,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 6,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1084"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "remobra",
+        "nameEN": "Remobra",
+        "nameKO": "가브라스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_remobra.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Snake Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "338098585",
+            "generations-ultimate": "4115"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "rey_dau",
+        "nameEN": "Rey Dau",
+        "nameKO": "레 다우",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0156_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "flying-wyvern",
+        "variantOf": null,
+        "baseHealth": 5000,
+        "locations": [
+            "Windward Plains"
+        ],
+        "weaknesses": [
+            {
+                "element": "ice",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 2945
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 2946
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2947
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2948
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2949
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2950
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2951
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2952
+            }
+        ],
+        "breakablePartKinds": [
+            "head",
+            "hide"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "3"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "rhenoplos",
+        "nameEN": "Rhenoplos",
+        "nameKO": "리노프로스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_rhenoplos.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Herbivore",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "322885843",
+            "generations-ultimate": "4121"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "risen_chameleos",
+        "nameEN": "Risen Chameleos",
+        "nameKO": "괴이 극복 오나즈치",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1186844883_em025_08.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "elder",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1186844883"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "risen_crimson_glow_valstrax",
+        "nameEN": "Risen Crimson Glow Valstrax",
+        "nameKO": "괴이 극복 발파루크",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/210106812_em086_08.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "elder",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "210106812"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "launch",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "risen_kushala_daora",
+        "nameEN": "Risen Kushala Daora",
+        "nameKO": "괴이 극복 크샬다오라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1172594994_em024_08.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "elder",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1172594994"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "risen_shagaru_magala",
+        "nameEN": "Risen Shagaru Magala",
+        "nameKO": "괴이 극복 샤가르마가라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/479959906_em072_08.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "elder",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "479959906"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "risen_teostra",
+        "nameEN": "Risen Teostra",
+        "nameKO": "괴이 극복 테오-테스카토르",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1080586385_em027_08.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "elder",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1080586385"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "rompopolo",
+        "nameEN": "Rompopolo",
+        "nameKO": "푸푸로포루",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0155_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "brute-wyvern",
+        "variantOf": null,
+        "baseHealth": 4500,
+        "locations": [
+            "Oilwell Basin"
+        ],
+        "weaknesses": [
+            {
+                "element": "water",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3096
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3097
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3098
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3099
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3100
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3101
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3102
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3103
+            }
+        ],
+        "breakablePartKinds": [
+            "right-front-leg",
+            "head",
+            "back",
+            "tail"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "19"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
     },
     {
         "id": "royal_ludroth",
         "nameEN": "Royal Ludroth",
-        "nameKO": "로알루드로스",
-        "filename": "royal_ludroth.png"
+        "nameKO": "로아루드로스",
+        "filename": "royal_ludroth.png",
+        "tier": "medium",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Leviathan",
+        "baseHealth": 4100,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 6,
+                    "water": 0,
+                    "thunder": 3,
+                    "ice": 2,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Belly",
+            "Mane",
+            "Back",
+            "Front Legs",
+            "Back Legs",
+            "Tail"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "585215589",
+            "generations-ultimate": "47"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Misty Peaks",
+            "Deserted Island",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "해룡종",
+        "skeleton": [
+            "Leviathan",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "ruiner_nergigante",
+        "nameEN": "Ruiner Nergigante",
+        "nameKO": "모두를 멸하는 네르기간테",
+        "filename": "ruiner_nergigante.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Elder Dragon",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "rustrazor_ceanataur",
+        "nameEN": "Rustrazor Ceanataur",
+        "nameKO": "개열 쇼군기자미",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_rustrazor_ceanataur.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Carapaceon",
+        "variantOf": "Shogun Ceanataur",
+        "baseHealth": 4500,
+        "locations": [
+            "Marshlands",
+            "Volcano"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 3,
+                    "water": 1,
+                    "thunder": 4,
+                    "ice": 3,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1044"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "safi'jiiva",
+        "nameEN": "Safi'jiiva",
+        "nameKO": "무페토-지바",
+        "filename": "safi'jiiva.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "55"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Secluded Valley"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "savage_deviljho",
+        "nameEN": "Savage Deviljho",
+        "nameKO": "미친 들이치는 이블조",
+        "filename": "savage_deviljho.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "generations-ultimate": "1323"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Brute Wyvern",
+        "variantOf": null,
+        "baseHealth": 6000,
+        "locations": [
+            "Verdant Hills",
+            "Arctic Ridge",
+            "Misty Peaks",
+            "Dunes",
+            "Deserted Island",
+            "Volcano",
+            "Ancestral Steppe",
+            "Frozen Seaway",
+            "Desert"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 4,
+                    "thunder": 6,
+                    "ice": 4,
+                    "dragon": 4
+                },
+                "statuses": {
+                    "poison": 7,
+                    "paralysis": 4,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Body",
+            "Back",
+            "Front Legs",
+            "Back Legs",
+            "Tail",
+            "Head (Enraged)",
+            "Body (Enraged)",
+            "Back (Enraged)",
+            "Back Legs (Enraged)",
+            "Tail (Enraged)"
+        ],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "scarred_yian_garuga",
+        "nameEN": "Scarred Yian Garuga",
+        "nameKO": "상처입은 얀가루루가",
+        "filename": "scarred_yian_garuga.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Bird Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "scorned_magnamalo",
+        "nameEN": "Scorned Magnamalo",
+        "nameKO": "원망 서린 마가이마가도",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/857304595_em089_05.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Fanged Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "857304595"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아룡종",
+        "skeleton": [
+            "Fanged wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "seething_bazelgeuse",
+        "nameEN": "Seething Bazelgeuse",
+        "nameKO": "홍련의 솟구치는 바젤기우스",
+        "filename": "seething_bazelgeuse.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Flying Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1572835996"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "seltas",
+        "nameEN": "Seltas",
+        "nameKO": "아르셀타스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_seltas.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Neopteron",
+        "variantOf": null,
+        "baseHealth": 2000,
+        "locations": [
+            "Jurassic Frontier",
+            "Ancestral Steppe",
+            "Primal Forest",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 2,
+                    "thunder": 5,
+                    "ice": 2,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 5,
+                    "sleep": 5
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "76"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "seltas_queen",
+        "nameEN": "Seltas Queen",
+        "nameKO": "게넬 셀타스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_seltas_queen.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Neopteron",
+        "variantOf": null,
+        "baseHealth": 5200,
+        "locations": [
+            "Jurassic Frontier",
+            "Primal Forest",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 1,
+                    "ice": 4,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Broke Legs",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 3,
+                    "ice": 4,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "69"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "seregios",
+        "nameEN": "Seregios",
+        "nameKO": "셀레기오스",
+        "filename": "seregios.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "wilds",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4200,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 2,
+                    "thunder": 4,
+                    "ice": 3,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "right-leg",
+            "left-leg",
+            "head",
+            "right-wing",
+            "left-wing"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1280901767",
+            "wilds": "32",
+            "generations-ultimate": "77"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Dunes",
+            "Volcanic Hollow"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "shagaru_magala",
+        "nameEN": "Shagaru Magala",
+        "nameKO": "샤가르마가라",
+        "filename": "shagaru_magala.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "baseHealth": 5500,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 3,
+                    "ice": 2,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Torso",
+            "Wing Arms",
+            "Front Legs",
+            "Back Legs",
+            "Wings",
+            "Tail",
+            "Wing Arms (Break)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1176146786",
+            "generations-ultimate": "72"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "shamos",
+        "nameEN": "Shamos",
+        "nameKO": "샤모스",
+        "filename": "shamos.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "12"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "fanged wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Shamos",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Coral Highlands"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "shara_ishvalda",
+        "nameEN": "Shara Ishvalda",
+        "nameKO": "안-이슈왈다",
+        "filename": "shara_ishvalda.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "Elder Dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "8mvfA"
+        },
+        "anatomyEvidence": null,
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "shogun_ceanataur",
+        "nameEN": "Shogun Ceanataur",
+        "nameKO": "쇼군기자미",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_shogun_ceanataur.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Carapaceon",
+        "variantOf": null,
+        "baseHealth": 4000,
+        "locations": [
+            "Marshlands",
+            "Volcano",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 2,
+                    "thunder": 5,
+                    "ice": 3,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "67000766",
+            "generations-ultimate": "20"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "갑각종",
+        "skeleton": [
+            "Other",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "shrieking_legiana",
+        "nameEN": "Shrieking Legiana",
+        "nameKO": "얼려 찌르는 레이기에나",
+        "filename": "shrieking_legiana.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Flying Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "silver_rathalos",
+        "nameEN": "Silver Rathalos",
+        "nameKO": "리오레우스 희소종",
+        "filename": "silver_rathalos.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 4900,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 6,
+                    "thunder": 5,
+                    "ice": 3,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Back",
+            "Belly",
+            "Tail",
+            "Wings",
+            "Legs",
+            "Tail Tip",
+            "Head (Break)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1532413416",
+            "generations-ultimate": "514"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Misty Peaks"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": true
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "silverwind_nargacuga",
+        "nameEN": "Silverwind Nargacuga",
+        "nameKO": "백질풍 나르가쿠르가",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_silverwind_nargacuga.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Flying Wyvern",
+        "variantOf": "Nargacuga",
+        "baseHealth": 5000,
+        "locations": [
+            "Jurassic Frontier",
+            "Misty Peaks",
+            "Deserted Island",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 1,
+                    "thunder": 5,
+                    "ice": 2,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1061"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "slagtoth",
+        "nameEN": "Slagtoth",
+        "nameKO": "즈와로포스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_slagtoth.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Herbivore",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "248241955",
+            "generations-ultimate": "4137"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "snowbaron_lagombi",
+        "nameEN": "Snowbaron Lagombi",
+        "nameKO": "대설주 우르크스스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_snowbaron_lagombi.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": "Lagombi",
+        "baseHealth": 4500,
+        "locations": [
+            "Arctic Ridge",
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 3,
+                    "ice": 0,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1085"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "somnacanth",
+        "nameEN": "Somnacanth",
+        "nameKO": "이소네미쿠니",
+        "filename": "somnacanth.png",
+        "tier": "medium",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Leviathan",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "2146828439"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "해룡종",
+        "skeleton": [
+            "Leviathan",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "soulseer_mizutsune",
+        "nameEN": "Soulseer Mizutsune",
+        "nameKO": "천안 타마미츠네",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_soulseer_mizutsune.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": "Mizutsune",
+        "baseHealth": 5200,
+        "locations": [
+            "Misty Peaks",
+            "Primal Forest",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 1,
+                    "thunder": 1,
+                    "ice": 4,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 0,
+                    "sleep": 0
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1106"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "stonefist_hermitaur",
+        "nameEN": "Stonefist Hermitaur",
+        "nameKO": "모쇄 다이묘자자미",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_stonefist_hermitaur.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Carapaceon",
+        "variantOf": "Daimyo Hermitaur",
+        "baseHealth": 5500,
+        "locations": [
+            "Dunes",
+            "Deserted Island",
+            "Desert"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 0,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 0
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1043"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "stygian_zinogre",
+        "nameEN": "Stygian Zinogre",
+        "nameKO": "진오우거 아종",
+        "filename": "stygian_zinogre.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "56"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "fanged wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Guiding Lands"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "teostra",
+        "nameEN": "Teostra",
+        "nameKO": "테오-테스카토르",
+        "filename": "teostra.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "baseHealth": 5300,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 4,
+                    "thunder": 2,
+                    "ice": 4,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Enraged",
+                "elements": {
+                    "fire": 0,
+                    "water": 3,
+                    "thunder": 2,
+                    "ice": 3,
+                    "dragon": 4
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Belly",
+            "Back",
+            "Tail",
+            "Front Legs",
+            "Back Legs",
+            "Wings",
+            "Head (Enraged)",
+            "Belly (Enraged)",
+            "Back (Enraged)",
+            "Tail (Enraged)",
+            "Front Legs (Enraged)",
+            "Back Legs (Enraged)",
+            "Wings (Enraged)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "200239249",
+            "world-iceborne": "45",
+            "generations-ultimate": "27"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Volcano",
+            "Volcanic Hollow"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "tetranadon",
+        "nameEN": "Tetranadon",
+        "nameKO": "요츠미와두",
+        "filename": "tetranadon.png",
+        "tier": "medium",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Amphibian",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "2099040502"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "양서종",
+        "skeleton": [
+            "Other",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "tetsucabra",
+        "nameEN": "Tetsucabra",
+        "nameKO": "테츠카브라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_tetsucabra.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Amphibian",
+        "variantOf": null,
+        "baseHealth": 4000,
+        "locations": [
+            "Jurassic Frontier",
+            "Deserted Island",
+            "Volcanic Hollow",
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 5,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "66"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "thunder_serpent_narwa",
+        "nameEN": "Thunder Serpent Narwa",
+        "nameKO": "나루하타타히메",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1695408169_em099_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "elder",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1695408169"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "thunderlord_zinogre",
+        "nameEN": "Thunderlord Zinogre",
+        "nameKO": "금뢰공 진오우거",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_thunderlord_zinogre.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Fanged Wyvern",
+        "variantOf": "Zinogre",
+        "baseHealth": 5800,
+        "locations": [
+            "Jurassic Frontier",
+            "Misty Peaks",
+            "Deserted Island",
+            "Frozen Seaway",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 2,
+                    "thunder": 0,
+                    "ice": 4,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Charged",
+                "elements": {
+                    "fire": 3,
+                    "water": 3,
+                    "thunder": 0,
+                    "ice": 5,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "1081"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "tigrex",
+        "nameEN": "Tigrex",
+        "nameKO": "티가렉스",
+        "filename": "tigrex.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "baseHealth": 5000,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 3,
+                    "thunder": 4,
+                    "ice": 2,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 4,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Belly",
+            "Back",
+            "Tail",
+            "Front Legs",
+            "Back Legs",
+            "Head (Enraged)",
+            "Neck (Enraged)",
+            "Belly (Enraged)",
+            "Back (Enraged)",
+            "Front Legs (Enraged)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "808327178",
+            "world-iceborne": "jVAhP",
+            "generations-ultimate": "32"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Arctic Ridge",
+            "Dunes",
+            "Marshlands",
+            "Ancestral Steppe",
+            "Primal Forest",
+            "Frozen Seaway",
+            "Desert"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "비룡종",
+        "skeleton": [
+            "Flying wyvern",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "tobi-kadachi",
+        "nameEN": "Tobi-Kadachi",
+        "nameKO": "토비카가치",
+        "filename": "tobi-kadachi.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "species": "Fanged Wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1770194663",
+            "world-iceborne": "22"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [
+            "Ancient Forest"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아룡종",
+        "skeleton": [
+            "Fanged wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "tzitzi-ya-ku",
+        "nameEN": "Tzitzi-Ya-Ku",
+        "nameKO": "치치야크",
+        "filename": "tzitzi-ya-ku.png",
+        "tier": "medium",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "bird wyvern",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "48"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Coral Highlands"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "ukanlos",
+        "nameEN": "Ukanlos",
+        "nameKO": "우캄루스",
+        "filename": "ukanlos.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "generations-ultimate": "38"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Flying Wyvern",
+        "variantOf": null,
+        "baseHealth": 7000,
+        "locations": [],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 2,
+                    "thunder": 4,
+                    "ice": 0,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 2,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Belly",
+            "Back",
+            "Tail",
+            "Front Legs",
+            "Back Legs",
+            "Head (Wounded Belly)",
+            "Neck (Wounded Belly)",
+            "Belly (Wounded Belly)",
+            "Back (Wounded Belly)",
+            "Tail (Wounded Belly)",
+            "Front Legs (Wounded Belly)",
+            "Back Legs (Wounded Belly)"
+        ],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "特大",
+            "evidence": "mh4info-mhxx-named-attack-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "unknown_monster",
+        "nameEN": "Unknown Monster",
+        "nameKO": "Unknown Monster",
+        "filename": "unknown_monster.png",
+        "tier": "large",
+        "selectable": false,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "journey-event",
+        "journeyEventId": "mysterious_tracks",
+        "species": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "unresolved",
+            "strength": null,
+            "evidence": null,
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "uragaan",
+        "nameEN": "Uragaan",
+        "nameKO": "우라간킨",
+        "filename": "uragaan.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "brute wyvern",
+        "baseHealth": 4300,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 5,
+                    "thunder": 1,
+                    "ice": 3,
+                    "dragon": 5
+                },
+                "statuses": {
+                    "poison": 7,
+                    "paralysis": 5,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Back",
+            "Belly",
+            "Front Legs",
+            "Back Legs",
+            "Tail",
+            "Tail Tip",
+            "Head (Break)"
+        ],
+        "sourceIds": {
+            "world-iceborne": "49",
+            "generations-ultimate": "45"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [
+            "Volcano",
+            "Volcanic Hollow"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "uroktor",
+        "nameEN": "Uroktor",
+        "nameKO": "우로코트르",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_uroktor.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "233991938",
+            "generations-ultimate": "4136"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "uth_duna",
+        "nameEN": "Uth Duna",
+        "nameKO": "우드 투나",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0157_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "leviathan",
+        "variantOf": null,
+        "baseHealth": 5500,
+        "locations": [
+            "Scarlet Forest"
+        ],
+        "weaknesses": [
+            {
+                "element": "thunder",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3141
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3142
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3143
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3144
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3145
+            },
+            {
+                "effect": "flash",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3146
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3147
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3148
+            }
+        ],
+        "breakablePartKinds": [
+            "tail",
+            "head",
+            "right-front-leg",
+            "left-front-leg"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "25"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "vaal_hazak",
+        "nameEN": "Vaal Hazak",
+        "nameKO": "발하자크",
+        "filename": "vaal_hazak.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "50"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Rotten Vale"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "valstrax",
+        "nameEN": "Valstrax",
+        "nameKO": "발파루크",
+        "filename": "valstrax.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "sourceIds": {
+            "generations-ultimate": "86"
+        },
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": 4800,
+        "locations": [
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 5,
+                    "water": 5,
+                    "thunder": 5,
+                    "ice": 5,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 2,
+                    "sleep": 2
+                },
+                "tools": {
+                    "pitfallTrap": 0,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Body",
+            "Wing Talons",
+            "Front Legs",
+            "Back Legs",
+            "Wings",
+            "Tail",
+            "Head (Enraged)",
+            "Neck (Enraged)",
+            "Body (Enraged)",
+            "Back Legs (Enraged)",
+            "Wing (Enraged)",
+            "Tail (Enraged)"
+        ],
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Valstrax",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "velkhana",
+        "nameEN": "Velkhana",
+        "nameKO": "이베르카나",
+        "filename": "velkhana.png",
+        "tier": "elder",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne"
+        ],
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "species": "Elder Dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "440849622",
+            "world-iceborne": "J1pFn"
+        },
+        "anatomyEvidence": null,
+        "mediaEvidence": "existing-runtime-image",
+        "locations": [],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": "fly",
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Strong roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "velocidrome",
+        "nameEN": "Velocidrome",
+        "nameKO": "도스란포스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_velocidrome.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": 2000,
+        "locations": [
+            "Verdant Hills",
+            "Primal Forest",
+            "Jungle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 6,
+                    "water": 6,
+                    "thunder": 6,
+                    "ice": 6,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 6,
+                    "sleep": 6
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "14"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "velociprey",
+        "nameEN": "Velociprey",
+        "nameKO": "람포스",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_velociprey.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1637997251",
+            "generations-ultimate": "4105"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "vespoid",
+        "nameEN": "Vespoid",
+        "nameKO": "랑고스타",
+        "filename": "vespoid.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "neopteron",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "rise-sunbreak": "1696451436",
+            "world-iceborne": "4",
+            "generations-ultimate": "4102"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Ancient Forest",
+            "Coral Highlands",
+            "Wildspire Waste",
+            "Rotten Vale",
+            "Elder's Recess"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "violet_mizutsune",
+        "nameEN": "Violet Mizutsune",
+        "nameKO": "타마미츠네 희소종",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/1061157944_em082_02.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "large",
+        "selectable": true,
+        "species": "Leviathan",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1061157944"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "해룡종",
+        "skeleton": [
+            "Leviathan",
+            "Aquatic"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "viper_tobi-kadachi",
+        "nameEN": "Viper Tobi-Kadachi",
+        "nameKO": "토비카가치 아종",
+        "filename": "viper_tobi-kadachi.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "sourceIds": {
+            "world-iceborne": "58"
+        },
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "fanged wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "low",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        },
+        "mediaEvidence": "existing-runtime-image",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [
+            "Hoarfrost Reach"
+        ],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "anatomyEvidence": "mhw-db-species-and-location-reference"
+    },
+    {
+        "id": "volvidon",
+        "nameEN": "Volvidon",
+        "nameKO": "랑그로토라",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_volvidon.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "medium",
+        "selectable": true,
+        "species": "Fanged Beast",
+        "variantOf": null,
+        "baseHealth": 3800,
+        "locations": [
+            "Jurassic Frontier",
+            "Dunes",
+            "Volcano",
+            "Desert",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 0,
+                    "water": 5,
+                    "thunder": 2,
+                    "ice": 4,
+                    "dragon": 0
+                },
+                "statuses": {
+                    "poison": 3,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1403354196",
+            "generations-ultimate": "62"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아수종",
+        "skeleton": [
+            "Fanged beast"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "wind_serpent_ibushi",
+        "nameEN": "Wind Serpent Ibushi",
+        "nameKO": "이부시마키히코",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/2054819914_em096_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "elder",
+        "selectable": true,
+        "species": "Elder Dragon",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "2054819914"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "고룡종",
+        "skeleton": [
+            "Other",
+            "Arial"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "wroggi",
+        "nameEN": "Wroggi",
+        "nameKO": "프로기",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/rise/monster/143032033_ems043_00.png",
+        "mediaEvidence": "kiranico-localized-id-and-icon-row",
+        "tier": "small",
+        "selectable": true,
+        "species": "Bird Wyvern",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "143032033"
+        },
+        "evidence": "kiranico-localized-id-and-icon-row",
+        "anatomyEvidence": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "wulg",
+        "nameEN": "Wulg",
+        "nameKO": "울그",
+        "filename": "wulg.png",
+        "tier": "small",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Fanged Wyvern",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.fandom.com/wiki/Wulg",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "xeno'jiiva",
+        "nameEN": "Xeno'jiiva",
+        "nameKO": "제노-지바",
+        "filename": "xeno'jiiva.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "51"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Confluence of Fates"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "high",
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "xu_wu",
+        "nameEN": "Xu Wu",
+        "nameKO": "시이우",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0163_00_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "large",
+        "selectable": true,
+        "species": "cephalopod",
+        "variantOf": null,
+        "baseHealth": 4500,
+        "locations": [
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "ice",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 3127
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3128
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 3,
+                "condition": null,
+                "id": 3129
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 1,
+                "condition": null,
+                "id": 3130
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 3131
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3132
+            },
+            {
+                "effect": "exhaust",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 3133
+            }
+        ],
+        "breakablePartKinds": [
+            "head",
+            "left-front-arm",
+            "right-front-arm",
+            "mouth"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "23"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "yamatsukami",
+        "nameEN": "Yamatsukami",
+        "nameKO": "야마츠카미",
+        "filename": "yamatsukami.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime"
+        ],
+        "evidence": "existing-runtime-image-catalog",
+        "sourceIds": {},
+        "role": "combat",
+        "journeyEventId": null,
+        "species": "Elder Dragon",
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "evidence": "published-behavior-description",
+            "sourceUrl": "https://monsterhunter.neoseeker.com/wiki/Yama_Tsukami",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "yian_garuga",
+        "nameEN": "Yian Garuga",
+        "nameKO": "얀가루루가",
+        "filename": "yian_garuga.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Bird Wyvern",
+        "baseHealth": 4200,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 1,
+                    "water": 5,
+                    "thunder": 1,
+                    "ice": 3,
+                    "dragon": 3
+                },
+                "statuses": {
+                    "poison": 0,
+                    "paralysis": 3,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Neck",
+            "Back",
+            "Belly",
+            "Tail",
+            "Wings",
+            "Legs"
+        ],
+        "sourceIds": {
+            "world-iceborne": "jXmhm",
+            "generations-ultimate": "18"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Volcanic Hollow",
+            "Jungle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "小",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "yian_kut_ku",
+        "nameEN": "Yian Kut-Ku",
+        "nameKO": "얀쿡크",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_yian_kut_ku.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "bird-wyvern",
+        "variantOf": null,
+        "baseHealth": 3800,
+        "locations": [
+            "Jurassic Frontier",
+            "Verdant Hills",
+            "Marshlands",
+            "Ancestral Steppe",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 4,
+                    "thunder": 4,
+                    "ice": 5,
+                    "dragon": 1
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 5,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "head"
+        ],
+        "games": [
+            "wilds",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "wilds": "18",
+            "generations-ultimate": "8"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "zamite",
+        "nameEN": "Zamite",
+        "nameKO": "스쿠아길",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_zamite.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "small",
+        "selectable": true,
+        "species": "Amphibian",
+        "variantOf": null,
+        "baseHealth": null,
+        "locations": [],
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "games": [
+            "rise-sunbreak",
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "157265542",
+            "generations-ultimate": "4140"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "kiranico-rise-installed-attack-move-table",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "zamtrios",
+        "nameEN": "Zamtrios",
+        "nameKO": "자보아자길",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/mhgu/monster/monster_zamtrios.png",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "tier": "large",
+        "selectable": true,
+        "species": "Amphibian",
+        "variantOf": null,
+        "baseHealth": 5200,
+        "locations": [
+            "Frozen Seaway"
+        ],
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 5,
+                    "ice": 0,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 6,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Ice Armor",
+                "elements": {
+                    "fire": 4,
+                    "water": 0,
+                    "thunder": 4,
+                    "ice": 0,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 6,
+                    "paralysis": 4,
+                    "sleep": 4
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [],
+        "games": [
+            "generations-ultimate"
+        ],
+        "sourceIds": {
+            "generations-ultimate": "67"
+        },
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": "大",
+            "evidence": "game-e-mhxx-named-attack-pattern-guide",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "zinogre",
+        "nameEN": "Zinogre",
+        "nameKO": "진오우거",
+        "filename": "zinogre.png",
+        "tier": "large",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "rise-sunbreak",
+            "world-iceborne",
+            "generations-ultimate"
+        ],
+        "evidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "species": "Fanged Wyvern",
+        "baseHealth": 5300,
+        "weaknesses": [
+            {
+                "state": "Normal",
+                "elements": {
+                    "fire": 2,
+                    "water": 4,
+                    "thunder": 0,
+                    "ice": 5,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 1,
+                    "flashBomb": 1
+                }
+            },
+            {
+                "state": "Charged",
+                "elements": {
+                    "fire": 3,
+                    "water": 4,
+                    "thunder": 0,
+                    "ice": 5,
+                    "dragon": 2
+                },
+                "statuses": {
+                    "poison": 5,
+                    "paralysis": 3,
+                    "sleep": 3
+                },
+                "tools": {
+                    "pitfallTrap": 1,
+                    "shockTrap": 0,
+                    "flashBomb": 1
+                }
+            }
+        ],
+        "breakablePartKinds": [
+            "Head",
+            "Body",
+            "Back",
+            "Front Legs",
+            "Back Legs",
+            "Upper Legs",
+            "Tail",
+            "Tail Tip",
+            "Head (Charged)",
+            "Body (Charged)",
+            "Back (Charged)",
+            "Front Legs (Charged)",
+            "Back Legs (Charged)",
+            "Upper Legs (Charged)",
+            "Tail (Charged)"
+        ],
+        "sourceIds": {
+            "rise-sunbreak": "1432800563",
+            "world-iceborne": "60",
+            "generations-ultimate": "57"
+        },
+        "anatomyEvidence": "mhgudb-sqlite-hitzones-status-and-habitat",
+        "mediaEvidence": "mhgudb-sqlite-monster-anatomy-and-habitat",
+        "locations": [
+            "Jurassic Frontier",
+            "Misty Peaks",
+            "Deserted Island",
+            "Frozen Seaway",
+            "Jungle",
+            "Ruined Pinnacle"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": "아룡종",
+        "skeleton": [
+            "Fanged wyvern"
+        ],
+        "locomotion": {
+            "defaultMovePattern": null,
+            "flyingStanceToMove": false
+        },
+        "roar": {
+            "status": "verified-present",
+            "strength": "Weak roar",
+            "evidence": "mhrice-installed-move-table-and-internal-species",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "zoh_shia",
+        "nameEN": "Zoh Shia",
+        "nameKO": "조 시아",
+        "filename": null,
+        "imagePath": "local_assets/monster_hunter/reference-icons/wilds/monster/EM0164_50_0.webp",
+        "mediaEvidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "tier": "elder",
+        "selectable": true,
+        "species": "construct",
+        "variantOf": null,
+        "baseHealth": 9000,
+        "locations": [
+            "Ruins of Wyveria"
+        ],
+        "weaknesses": [
+            {
+                "element": "dragon",
+                "kind": "element",
+                "level": 1,
+                "condition": null,
+                "id": 2932
+            },
+            {
+                "status": "paralysis",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2933
+            },
+            {
+                "status": "poison",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2934
+            },
+            {
+                "status": "sleep",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2935
+            },
+            {
+                "status": "blastblight",
+                "kind": "status",
+                "level": 2,
+                "condition": null,
+                "id": 2936
+            },
+            {
+                "effect": "stun",
+                "kind": "effect",
+                "level": 1,
+                "condition": null,
+                "id": 2937
+            }
+        ],
+        "breakablePartKinds": [
+            "left-front-leg",
+            "right-front-leg",
+            "head-hide",
+            "left-wing-arm-hide",
+            "right-wing-arm-hide"
+        ],
+        "games": [
+            "wilds"
+        ],
+        "sourceIds": {
+            "wilds": "1"
+        },
+        "evidence": "installed-game-emid-fixed-id+mhdb-game-id",
+        "anatomyEvidence": "wilds-game-files-via-mhdb",
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-present",
+            "strength": null,
+            "evidence": "installed-game-action-id+action-param",
+            "audioStatus": "unresolved"
+        }
+    },
+    {
+        "id": "zorah_magdaros",
+        "nameEN": "Zorah Magdaros",
+        "nameKO": "조라-마그다라오스",
+        "filename": "zorah_magdaros.png",
+        "tier": "colossal",
+        "selectable": true,
+        "games": [
+            "legacy-runtime",
+            "world-iceborne"
+        ],
+        "evidence": "mhw-db-game-reference",
+        "mediaEvidence": "existing-runtime-image",
+        "species": "elder dragon",
+        "baseHealth": null,
+        "weaknesses": [],
+        "breakablePartKinds": [],
+        "sourceIds": {
+            "world-iceborne": "52"
+        },
+        "anatomyEvidence": "mhw-db-species-and-location-reference",
+        "locations": [
+            "Great Ravine",
+            "Everstream"
+        ],
+        "variantOf": null,
+        "role": "combat",
+        "journeyEventId": null,
+        "speciesKO": null,
+        "skeleton": [],
+        "locomotion": null,
+        "roar": {
+            "status": "verified-absent",
+            "strength": null,
+            "evidence": "published-earplugs-test",
+            "sourceUrl": "https://www.reddit.com/r/MonsterHunter/comments/ddjpj4/iceborne_list_of_roar_levels_for_each_monster/",
+            "audioStatus": "unresolved"
+        }
     }
 ];
-
-window.HUNT_WEAPONS = [
-    { id: 'great_sword', name: '대검', filename: 'great_sword.svg', type: 'shield', speedGroup: 'slow' },
-    { id: 'long_sword', name: '태도', filename: 'long_sword.svg', type: 'melee', speedGroup: 'fast' },
-    { id: 'sword_shield', name: '한손검', filename: 'sword_shield.svg', type: 'shield', speedGroup: 'very_fast' },
-    { id: 'dual_blades', name: '쌍검', filename: 'dual_blades.svg', type: 'melee', speedGroup: 'very_fast' },
-    { id: 'hammer', name: '해머', filename: 'hammer.svg', type: 'melee', speedGroup: 'slow' },
-    { id: 'hunting_horn', name: '수렵피리', filename: 'hunting_horn.svg', type: 'melee', speedGroup: 'normal' },
-    { id: 'lance', name: '랜스', filename: 'lance.svg', type: 'shield', speedGroup: 'fast' },
-    { id: 'gunlance', name: '건랜스', filename: 'gunlance.svg', type: 'shield', speedGroup: 'normal' },
-    { id: 'switch_axe', name: '슬래시액스', filename: 'switch_axe.svg', type: 'melee', speedGroup: 'normal' },
-    { id: 'charge_blade', name: '차지액스', filename: 'charge_blade.svg', type: 'shield', speedGroup: 'slow' },
-    { id: 'insect_glaive', name: '조충곤', filename: 'insect_glaive.svg', type: 'melee', speedGroup: 'fast' },
-    { id: 'light_bowgun', name: '라이트보건', filename: 'light_bowgun.svg', type: 'ranged', speedGroup: 'fast' },
-    { id: 'heavy_bowgun', name: '헤비보건', filename: 'heavy_bowgun.svg', type: 'shield', speedGroup: 'normal' },
-    { id: 'bow', name: '활', filename: 'bow.svg', type: 'ranged', speedGroup: 'very_fast' }
-];
-
-window.MONSTER_ATTACKS = {
-    rathalos: ["화룡의 포효", "화염구 브레스", "독조강습 타격", "꼬리 휩쓸기", "돌진 몸통박치기"],
-    azure_rathalos: ["청화룡의 포효", "공중 활공 브레스", "맹독 발톱 급습", "회전 꼬리치기", "돌진 몸통박치기"],
-    silver_rathalos: ["은화룡의 겁염 포효", "초고온 화염 폭사", "강습 발톱 가격", "서머솔트 테일베기", "공중 브레스 연사"],
-    rathian: ["자화룡의 포효", "화염 브레스 3연발", "서머솔트 테일 꼬리치기", "돌진 깨물기", "꼬리 후려치기"],
-    pink_rathian: ["앵화룡의 포효", "공중 돌풍 서머솔트", "화염 물어뜯기", "꼬리 회전 휩쓸기", "맹렬한 돌진"],
-    gold_rathian: ["금화룡의 포효", "초겁염 서머솔트", "핵열 브레스 방출", "강철 테일 후려치기", "연속 지면 들이받기"],
-    diablos: ["각룡의 포효", "지중 급습 쳐올리기", "각공격 들이받기", "꼬리 회전치기", "돌진 덮치기"],
-    black_diablos: ["흑각룡의 미친 포효", "지중 연쇄 돌진", "대형 각 쳐올리기", "꼬리 강타", "폭주 몸통박치기"],
-    nergigante: ["멸진룡의 포효", "파멸의 일격 (지면 덮치기)", "가시 파편 발사", "날개 지면 강강타", "앞발 내려치기"],
-    ruiner_nergigante: ["모멸진룡의 포효", "열상 가시 지면 분쇄", "파멸의 파 극파멸 일격", "연속 앞발 강타", "돌진 꼬리치기"],
-    zinogre: ["뇌랑룡의 포효", "연속 전뇌 펀치", "등 찍기 폭발", "초전도 번개벼락", "꼬리 공중 회전베기"],
-    stygian_zinogre: ["옥랑룡의 포효", "용식충 뇌격 발사", "용속성 연속 펀치", "옥랑룡 백텀블링 강타", "용빛 등 찍기"],
-    velkhana: ["빙룡의 포효", "빙벽 생성 강타", "얼음 브레스 방출", "고리형 절대영도 폭발", "꼬리 얼음칼 찌르기"],
-    frostfang_barioth: ["빙아룡의 얼음포효", "얼음 동결 브레스", "지면 빙결 강습", "빙판 유도 태클", "날카로운 꼬리 휩쓸기"],
-    deviljho: ["폭룡의 용내성 포효", "용속성 브레스 방출", "헌터 물어뜯기 내팽개치기", "바위 쳐올려 던지기", "대형 철산고 몸통박치기"],
-    savage_deviljho: ["미친 이블조의 폭포효", "사방 용폭 열선 브레스", "광란의 물어뜯기 대폭발", "대지 분쇄 암석 투척", "용속성 방출 철산고"],
-    brachydios: ["점균의 폭포효", "점균 펀치 연사", "지면 강타 폭발", "점균 바닥 폭파", "박치기 폭렬 강타"],
-    raging_brachydios: ["임계 점균 폭효", "점균 연쇄 폭사", "지폭 천성 지면 주먹 찍기", "열화 격파 전신 폭발", "점균 대형 태클"],
-    glavenus: ["참룡의 예검 포효", "꼬리 대형 대회전베기", "화염 꼬리 2연 찌르기", "화염구 투사체 브레스", "꼬리 갈기 돌진치기"],
-    acidic_glavenus: ["유황 참룡의 포효", "결정 부식 꼬리 찌르기", "산성 칼날 대회전베기", "속도 강화 꼬리 연속베기", "돌진 가시 베기"],
-    nargacuga: ["신룡의 날카로운 포효", "꼬리 가시 미사일 발사", "바람 베기 날개 칼날강타", "꼬리 쳐내기 내려치기", "연속 은신 덮치기"],
-    tigrex: ["굉룡의 음파 포효", "광란의 좌우 지그재그 돌진", "암석 파편 쳐 올리기", "제자리 회전 베기", "문어발 이빨 물어뜯기"],
-    brute_tigrex: ["흑굉룡의 음파 대포효", "음파 분출 돌진 연속 타격", "포효 음파 레이저 방출", "암석 대포 투척", "회전 쳐 올리기"],
-    barroth: ["토사룡의 증기 포효", "진흙 투척 방어막", "대가리 돌진 쳐받기", "몸 털기 진흙 분사", "꼬리 휩쓸기"],
-    bazelgeuse: ["폭린룡의 경보음 포효", "폭탄 비늘 투하 폭발", "활공 폭격 돌진", "비늘 격발 지면 헤딩", "꼬리 폭탄 휩쓸기"],
-    seething_bazelgeuse: ["홍련 바젤의 폭열 포효", "붉은 초폭 비늘 투하", "홍련 활공 대폭격", "핵열 폭린 지면 돌진", "비늘 대폭발 꼬리치기"],
-    behemoth: ["마수 베히모스의 포효", "황도 메테오 (초거대 운석)", "메테오 낙하 타격", "대지진 충격파", "선더볼트 번개 강타"],
-    kirin: ["환수의 푸른 울음", "직선형 벼락 낙하", "주변 전격망 전도", "돌격 전격 돌진", "도약 전격 차기"],
-    kushala_daora: ["강룡의 태풍 포효", "용오름 회오리바람 생성", "풍압 탄환 브레스", "활공 풍압 태클", "꼬리 바람 베기"],
-    teostra: ["염왕룡의 폭염 포효", "분진 폭발 (슈퍼노바)", "화염 브레스 쓸기", "앞발 분진 폭파", "돌진 불꽃 돌격"],
-    lunastra: ["염비룡의 폭염 포효", "헬 플레어 (청염 대폭발)", "청염 바닥 생성 폭열", "화염 꼬리치기", "날개 쓸기 바람 폭풍"],
-    odogaron: ["참조룡의 민첩 포효", "열상 발톱 3연 할퀴기", "벽 반동 공중 급습", "물어뜯기 연속 난무", "꼬리 회전치기"],
-    ebony_odogaron: ["흉조 오도가론의 흑포효", "용속성 물어뜯기 습격", "열상 용속성 공중 난무", "속사포 연속 돌격", "꼬리 가시치기"],
-    namielle: ["네로미에르의 번개수포효", "대용량 수류 브레스", "지면 물 폭파 전격 유도", "수분 폭발 워터젯", "비상 전격 낙하 강타"],
-    alatreon: ["황흑룡의 원소 포효", "에스카톤 저지먼트 (종말의 심판)", "화염 원소 브레스", "빙결 원소 고리 쓸기", "황뢰 번개 낙하 폭풍"],
-    fatalis: ["흑룡의 파멸적 노성", "겁염의 브레스 (구역 초토화)", "지면 용암 분출 폭사", "대형 철산고 몸통 강타", "꼬리 휩쓸기 지진"],
-    safi_jiiva: ["제왕의 용포효", "제왕의 푸른 집속 빛 브레스", "지면 에너지 대폭발", "구속 잡아채기 흡수", "앞발 대지 분쇄"],
-    banbaro: ["버프바로의 뿔 포효", "거대 암석 굴려 돌격", "대형 통나무 뿔 강타", "진흙 바위 던지기", "뿔로 쳐올리기"],
-    barioth: ["빙아룡의 풍압 포효", "회오리 빙결 브레스", "벽 타기 삼차원 강습", "꼬리 얼음 폭격", "날개 가시 몸통 박치기"],
-    beotodus: ["동어룡의 눈보라 포효", "눈속 헤엄 급습 치기", "눈폭탄 투척 격돌", "눈 더미 들이받기", "꼬리 얼음 휩쓸기"],
-    rajang: ["금사자의 야성 포효", "투기 경화 암석 던지기", "연속 뎀프시롤 펀치", "공중 전격 기가 빔 브레스", "바디프레스 내려찍기"],
-    furious_rajang: ["격앙 라잔의 노성", "투기 대폭발 암석 투척", "광란의 지면 벼락 방사", "전뇌 바디프레스 폭렬", "뎀프시롤 연속 강펀치"],
-    shara_ishvalda: ["안-이슈왈다의 노래", "음파 진동포 브레스", "지면 유사 대모래 폭풍", "대지 분쇄 충격포", "앞발 모래 폭사"],
-    pukei_pukei: ["조룡의 포효", "독가스 꼬리 분출", "독액 발사 투사체", "혀 늘려 쳐 치기", "돌진 덮치기"],
-    coral_pukei_pukei: ["수요조의 물 포효", "수압 레이저 꼬리 쓸기", "입 수압 벌룬 방출", "물폭탄 들이받기", "공중 물뿜기 강타"],
-    kulu_ya_ku: ["조룡의 기합소리", "돌 투척 돌격", "화강암 방패막 타격", "항아리 던지기 피격", "공중 점프 내려찍기"],
-    tzitzi_ya_ku: ["조룡의 날카로운 소리", "섬광 기관 안광 실명 발사", "공중 2단 발차기", "앞발 할퀴기", "꼬리 쓸기"],
-    great_jagras: ["적룡의 위협 포효", "통째로 집어삼키기 구르기", "위액 토사물 분사", "앞발 강타", "꼬리 휩쓸기"],
-    great_girros: ["도스기르오스의 쉭쉭 포효", "마비독 이빨 물어뜯기", "소환수 기르오스 협공", "마비 브레스 투사", "꼬리 강타"],
-    aptonoth: ["초식동물의 슬픈 울음", "뒤돌아 차기", "가벼운 머리 들이받기", "무작정 도망 돌격"],
-    vespoid: ["날개 웅웅 소리", "마비 침 찌르기", "침입 독침 주사", "하늘 날며 위협"],
-    gore_magala: ["흑식룡의 포효", "광룡화 바이러스 살포", "돌진 덮치기 폭발", "광룡 탄환 발사", "지면 강타 폭발"],
-    shagaru_magala: ["천회룡의 엄숙한 포효", "진 광룡화 폭사 브레스", "지면 붕괴 내리찍기", "광룡 벼락 연쇄 폭격", "날개다리 돌진 쓸기"],
-    valstrax: ["천혜룡의 제트 포효", "붉은 혜성 강습 (하늘 돌격)", "기공 탄환 사격", "용기 제트 찌르기", "돌격 들이받기"],
-    crimson_glow_valstrax: ["혁요룡의 혜성 노성", "혁요 혜성 궤도 강습", "용기 충격파 방출", "용속성 제트 창 찌르기", "기공 연사 빔 폭사"],
-    magnamalo: ["원망마룡의 원령 포효", "귀화 가스 돌진 덮치기", "귀화 구체 발사", "귀화 꼬리창 찌르기", "대폭발 바디프레스"],
-    malzeno: ["은작룡의 귀족 포효", "블러드 바이트 물어뜯기", "큐리아 구체 유도 발사", "순간이동 강습 찌르기", "붉은 혈계 대폭사 브레스"],
-    primordial_malzeno: ["원초 멜제나의 엄결 포효", "날개 방패 가드 강습", "큐리아 폭주 난무 5연타", "성스러운 빛 칼날베기", "성도 고온 파괴 광선"],
-    mizutsune: ["포호룡의 거품 포효", "무지개 비누방울 살포", "수압 레이저 뿜기", "거품 덮치기 바디프레스", "지면 미끄러지기 돌진"],
-    astalos: ["전룡의 고주파 포효", "전뇌 칼날 날개 내려치기", "전뇌 벼락 레이저포", "전자기장 구체 투사", "전뇌 꼬리 찌르기"],
-    gammoth: ["거수의 울부짖음", "눈보라 강풍 흡입", "대형 코 눈덩이 굴리기", "대지진 발구르기 내려찍기", "눈 털기 몸통 돌격"],
-    seregios: ["천인룡의 날카로운 포효", "열상 가시 깃털 사격", "공중 회전 발톱 강습", "열상 돌진 깨물기", "꼬리 날개 가시 쓸기"],
-    chameleos: ["하룡의 기괴한 소리", "은신 안개 투하 기습", "맹독 가스 안개 방출", "독액 방출 사격", "혓바닥 아이템 훔치기 강타"],
-    lao_shan_lung: ["노산룡의 대지진 포효", "초거대 몸통박치기 돌격", "거대 꼬리 휩쓸기", "낙석 유발 대지진", "화염 브레스 분출"],
-    yamatsukami: ["부악룡의 진동 포효", "대용량 진공 흡입", "촉수 연속 휘두르기", "부악 가스 대폭발", "공중 낙하 강타"],
-    akantor: ["패룡의 음파 대포효", "용암 구역 불기둥 분출", "음파 레이저 빔 방출", "대형 이빨 지중 쳐올리기", "돌진 덮치기"],
-    ukanlos: ["붕룡의 지진 포효", "빙반 강습 얼음 깨기", "지중 빙결 돌격 쳐올리기", "빙결 대수류 브레스", "대형 턱 들이받기"],
-    amatsu: ["남룡 아마츠마가츠치 포효", "대태풍 용오름 생성", "초고압 수류 탄환 사격", "공중 활공 대습격", "대재앙 번개 폭풍"],
-    nakarkos: ["해룡 오스트가로아 포효", "용골 거대 포 사격", "점액 올가미 뿜기", "용속성 레이저 대포격", "거대 뼈다귀 후려치기"],
-    goss_harag: ["설귀수의 악귀 포효", "양손 얼음칼 연속 난무", "빙결 브레스 사격", "얼음칼 투척 강타", "지면 빙결 몸통박치기"],
-    tetranadon: ["하와두의 위협 소리", "자갈 들이받기 돌격", "이끼 바위 투척", "물 삼켜 몸 부풀려 깔아뭉개기", "양손 박수 마비치기"],
-    somnacanth: ["인어룡의 자장가 노래", "수면 가스 안개 방출", "수면 탄환 사격", "지면 조개 껍데기 격돌", "지면 활공 들이받기"],
-    lunagaron: ["빙랑룡의 보름달 포효", "직립 얼음발톱 난무", "빙결 돌진 할퀴기", "고속 스피드 지그재그 돌격", "빙결 폭발 꼬리치기"],
-    garangolm: ["강전수의 석벽 포효", "화염 오른손 내려치기", "이끼 왼손 바위치기", "화염 이끼 합장 초폭발", "대형 철산고 돌진"],
-    lagiacrus: ["해룡의 심해 포효", "대방전 번개막 생성", "수류 전격 브레스", "지상 들이받기 슬라이딩 돌진", "번개 구체 발사"],
-    royal_ludroth: ["수수룡의 물거품 포효", "물 폭탄 브레스 사격", "스펀지 갈기 몸 털기", "측면 굴러 깔아뭉개기", "지면 수류 돌진"],
-    default: ["포효 위협", "몸통 박치기", "꼬리 후려치기", "성난 돌진 공격"]
-};
-
-// Historical snapshot retained for migration comparison only.
-// Runtime combat data is owned by hunt/HuntData.js and must never be overwritten here.
-window.HUNT_LEGACY_COMBO_LIST = {
-    great_sword: [
-        { name: "발차기", dmg: 70, sharp: 0, stun: 20, nextSpeed: "very_fast", soundKey: ["발차기!"], special: "🦶 [발차기] 매우 빠른 발차기로 몬스터의 턱을 걷어찹니다!" },
-        { name: "모아베기", dmg: 290, sharp: -8, stun: 10, nextSpeed: "slow", soundKey: ["아주강력해", "기가맥", "개꿀잼"] },
-        { name: "강모아베기", dmg: 420, sharp: -10, stun: 20, nextSpeed: "slow", soundKey: ["아주강력해", "성공!", "개꿀잼"], special: "💥 [강모아베기] 더욱 힘을 실은 모아베기로 몬스터를 강하게 내려칩니다!" },
-        { name: "참모아베기", dmg: 680, sharp: -15, stun: 30, nextSpeed: "slow", soundKey: ["아주강력해", "성공!", "상쾌해", "개꿀잼"], special: "💥 [역경직] 파괴적인 참모아베기가 몬스터에게 작렬합니다!" }
-    ],
-    long_sword: [
-        { name: "세로베기", dmg: 100, sharp: -3 },
-        { name: "기인베기 I", dmg: 140, sharp: -4 },
-        { name: "기인베기 II", dmg: 180, sharp: -4 },
-        { name: "기인투구깨기", dmg: 480, sharp: -12, special: "⚡ [연타] 붉은 기인 게이지를 격발시켜 투구깨기 찌르기를 먹였습니다!" }
-    ],
-    sword_shield: [
-        { name: "돌진베기", dmg: 70, sharp: -2, stun: 0 },
-        { name: "방패치기", dmg: 60, sharp: 0, stun: 60, special: "🛡️ [방패타격] 방패 모서리로 몬스터의 정수리를 강하게 들이받습니다!" },
-        { name: "저스트 러시 I", dmg: 120, sharp: -3, stun: 0 },
-        { name: "저스트 러시 II", dmg: 160, sharp: -3, stun: 0 },
-        { name: "폴배시 (방패강습)", dmg: 380, sharp: -8, stun: 90 }
-    ],
-    dual_blades: [
-        { name: "귀인화 진입", dmg: 60, sharp: -2, special: "👹 [귀인화] 안개를 뿜어내며 기동성과 파괴력을 극대화합니다!" },
-        { name: "귀인돌진연참", dmg: 150, sharp: -6 },
-        { name: "귀인 난무", dmg: 460, sharp: -16, special: "🌀 [난무] 제자리에서 몬스터의 약점을 잘게 썰어 대량의 출혈을 냅니다!" }
-    ],
-    hammer: [
-        { name: "쿵 쿵 따", dmg: 260, sharp: -6, stun: 50 },
-        { name: "키프 스웨이", dmg: 70, sharp: -2, stun: 10, special: "🌀 [키프 스웨이] 해머를 든 채 빠르게 옆으로 회전하며 회피 기동을 실행합니다!" },
-        { name: "2차지 어퍼!", dmg: 210, sharp: -5, stun: 60 },
-        { name: "3차지 내려치기", dmg: 380, sharp: -8, stun: 90 },
-        { name: "회전 회오리!!!", dmg: 620, sharp: -15, stun: 180, special: "🌀 [회전회오리] 온 힘을 실어 공중으로 도약해 해머를 7회 연속 회전시키며 몬스터의 정수리를 분쇄합니다!" }
-    ],
-    hunting_horn: [
-        { name: "음표 공격 I (적)", dmg: 90, sharp: -3, stun: 20, special: "🎵 [자가강화] 신나는 연주로 파티원 전원의 이동 속도를 증가시킵니다." },
-        { name: "향음타 (피리 연주 회복)", dmg: 120, sharp: -4, stun: 30, special: "🎵 [피리 연주 회복] 향음 연주를 격발시켜 파티원 전체의 체력을 회복시킵니다! (+25 HP)" },
-        { name: "삼중 연주 (공격력 UP)", dmg: 380, sharp: -8, stun: 80, special: "🎺 [공대UP] 공격력 대폭 상승 연주 버프를 아군 전체에 적용합니다!" }
-    ],
-    charge_blade: [
-        { name: "검 모아 2단베기", dmg: 130, sharp: -4, nextSpeed: "very_fast" },
-        { name: "고압속성베기 (방패강화)", dmg: 200, sharp: -4, nextSpeed: "very_fast" },
-        { name: "변형 (검→도끼)", dmg: 150, sharp: -5, special: "⚙️ [속성변형] 검과 방패를 합체하여 거대한 도끼 모드로 변형합니다!", nextSpeed: "slow" },
-        { name: "도끼 속성해방베기 I", dmg: 250, sharp: -6, nextSpeed: "slow" },
-        { name: "초고출력 속성해방베기", dmg: 650, sharp: -15, special: "⚡ [초고출력] 초거대 검으로 지면을 내리치며 대자연의 전격을 방출합니다!", nextSpeed: "very_fast" },
-        { name: "변형 (도끼→검)", dmg: 120, sharp: -3, special: "⚙️ [속성변형] 도끼를 분리하여 가벼운 검과 방패의 검 모드로 변형합니다!", nextSpeed: "very_fast" }
-    ],
-    lance: [
-        { name: "중단찌르기", dmg: 100, sharp: -3 },
-        { name: "상단찌르기", dmg: 105, sharp: -3 },
-        { name: "가드 대시", dmg: 60, sharp: -2, special: "🛡️ [가드 전진] 견고한 대형 방패로 정면을 밀치며 방어 태세를 유지합니다." },
-        { name: "돌진 피니시 찌르기", dmg: 350, sharp: -8 }
-    ],
-    gunlance: [
-        { name: "수평찌르기", dmg: 90, sharp: -3 },
-        { name: "포격 (방어무시)", dmg: 160, sharp: -6, special: "🔥 [포격] 포격과 강습을 거쳐 화력 폭발을 냅니다." },
-        { name: "풀버스트", dmg: 480, sharp: -18, special: "💥 [풀버스트] 장전된 잔탄을 일시에 격발해 대규모 화력 폭발을 냅니다!" }
-    ],
-    switch_axe: [
-        { name: "도끼 세로베기", dmg: 120, sharp: -4 },
-        { name: "검 변형 2단베기", dmg: 230, sharp: -6 },
-        { name: "기 속성 해방 찌르기", dmg: 520, sharp: -12, special: "⚡ [해방] 검날을 쑤셔 넣고 톱니가 구르며 거대한 속성 폭발을 터트립니다!" }
-    ],
-    insect_glaive: [
-        { name: "진액 추출", dmg: 80, sharp: -2, special: "🐝 [진액] 엽충을 부려 몬스터의 몸에서 3색 진액을 모아 도핑합니다." },
-        { name: "비원베기", dmg: 180, sharp: -4 },
-        { name: "급습찌르기 (강하)", dmg: 420, sharp: -8 }
-    ],
-    light_bowgun: [
-        { name: "일반탄 사격", dmg: 100, ammo: -1 },
-        { name: "기폭용탄 설치", dmg: 180, ammo: -1, special: "💣 [기폭용탄] 아군 탄환 공격에 유도 감응하여 기폭되는 유탄 지뢰를놓습니다." },
-        { name: "속사 (일반탄)", dmg: 340, ammo: -2 }
-    ],
-    heavy_bowgun: [
-        { name: "기관용탄 장전 (특수)", dmg: 60, ammo: -1 },
-        { name: "기관용탄 난사", dmg: 420, ammo: -3, special: "🔫 [기관용탄] 게틀링 총신을 회전시키며 전방에 무수한 철갑탄을 연사합니다!" },
-        { name: "용격탄 사격", dmg: 580, ammo: -1, special: "💥 [용격탄] 짧고 무거운 압축 용격포를 격발시켜 적을 충격에 흔듭니다!" }
-    ],
-    bow: [
-        { name: "차지 샷", dmg: 90 },
-        { name: "강사", dmg: 160 },
-        { name: "용의 화살 (풀 차지)", dmg: 410, special: "🏹 [용의화살] 기를 모아 온 몸을 관통해 나가는 초장거리 회전 화살을 발사합니다!" }
-    ]
-};

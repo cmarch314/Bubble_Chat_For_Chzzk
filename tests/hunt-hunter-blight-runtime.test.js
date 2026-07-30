@@ -7,11 +7,13 @@ const HuntHunterBlightRuntime = require('../js/effects/hunt/HuntHunterBlightRunt
 
 const updates = [];
 const cancelled = [];
+const hitRecoveryCancellations = [];
 const engine = {
     battleTime: 0,
     callbacks: { onUpdateHunterBlightUI: (index, blights) => updates.push([index, { ...blights }]) },
     actionStateMachine: { cancel: (hunter, state) => cancelled.push([hunter.index, state]) },
-    addLog: () => {}, updateHpUI: () => {}, updateWeaponAtbUI: () => {}, triggerHunterCart: () => {}
+    addLog: () => {}, updateHpUI: () => {}, updateWeaponAtbUI: () => {}, triggerHunterCart: () => {},
+    cancelHunterHitRecovery: (hunter, reason) => hitRecoveryCancellations.push([hunter.index, reason])
 };
 const runtime = new HuntHunterBlightRuntime(engine);
 
@@ -34,6 +36,8 @@ assert.deepStrictEqual(Object.keys(hunter.elementalBlights).sort(), ['dragon', '
 assert.strictEqual(runtime.canAct(hunter), false);
 assert.strictEqual(hunter.atb, 0);
 assert.strictEqual(cancelled.length, 2, 'paralysis and sleep must both cancel the current action');
+assert.deepStrictEqual(hitRecoveryCancellations, [[2, 'paralysis'], [2, 'sleep']],
+    'paralysis and sleep must immediately replace an in-progress hit pose');
 
 delete hunter.elementalBlights.paralysis;
 assert.strictEqual(runtime.onIncomingHit(hunter, 20), 30, 'a hit must wake a sleeping hunter with bonus damage');
@@ -48,5 +52,9 @@ const rendererSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hu
 for (const emoji of ['🔥', '💧', '⚡', '❄️', '🐉', '☠️', '💤']) assert.ok(rendererSource.includes(emoji), `${emoji} must remain visible in the hunter overlay renderer`);
 const turnSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntMonsterTurnExecutor.js'), 'utf8');
 assert.match(turnSource, /blightRuntime\.fromAttack\(pattern\)/, 'all monster status-tagged attacks must route through the ailment runtime');
+assert.match(turnSource, /damage > 0 && !isGuard && !isDodge && engine\.blightRuntime/,
+    'successful guards and evasions must block elemental and status payloads even when guard chip remains');
+assert.match(turnSource, /damage > 0 && !isGuard && !isDodge && target\.status === 'alive'/,
+    'successful guards and evasions must bypass the hunter stun roll');
 
 console.log('[test] Elemental and poison/paralysis/sleep hunter ailments passed.');

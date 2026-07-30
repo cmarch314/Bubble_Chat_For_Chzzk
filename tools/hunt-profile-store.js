@@ -38,18 +38,14 @@ class HuntProfileStore {
             throw error;
         }
         this.readStatement = this.db.prepare(`
-            SELECT weapon_id, weapon_instance_id, personality, perk_ids, locked_perk_id, revision, updated_at
+            SELECT perk_ids, locked_perk_id, revision, updated_at
             FROM hunt_profiles WHERE profile_key = ?
         `);
         this.writeStatement = this.db.prepare(`
             INSERT INTO hunt_profiles (
-                profile_key, weapon_id, weapon_instance_id,
-                personality, perk_ids, locked_perk_id, revision, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, 1, ?)
+                profile_key, perk_ids, locked_perk_id, revision, updated_at
+            ) VALUES (?, ?, ?, 1, ?)
             ON CONFLICT(profile_key) DO UPDATE SET
-                weapon_id = excluded.weapon_id,
-                weapon_instance_id = excluded.weapon_instance_id,
-                personality = excluded.personality,
                 perk_ids = excluded.perk_ids,
                 locked_perk_id = excluded.locked_perk_id,
                 revision = hunt_profiles.revision + 1,
@@ -59,7 +55,7 @@ class HuntProfileStore {
 
     migrate() {
         let current = Number(this.db.prepare('PRAGMA user_version').get().user_version || 0);
-        const databaseVersion = 2;
+        const databaseVersion = 3;
         if (current > databaseVersion) {
             throw new Error(`Unsupported hunt profile schema version: ${current}`);
         }
@@ -94,6 +90,33 @@ class HuntProfileStore {
                 ) WITHOUT ROWID;
                 PRAGMA user_version = 2;
             `);
+            current = 2;
+        }
+        if (current < 3) {
+            this.db.exec('BEGIN IMMEDIATE');
+            try {
+                this.db.exec(`
+                    CREATE TABLE hunt_profiles_perks_only (
+                        profile_key TEXT PRIMARY KEY,
+                        perk_ids TEXT NOT NULL DEFAULT '[]',
+                        locked_perk_id TEXT,
+                        revision INTEGER NOT NULL DEFAULT 1,
+                        updated_at INTEGER NOT NULL
+                    ) WITHOUT ROWID;
+                    INSERT INTO hunt_profiles_perks_only (
+                        profile_key, perk_ids, locked_perk_id, revision, updated_at
+                    )
+                    SELECT profile_key, perk_ids, locked_perk_id, revision, updated_at
+                    FROM hunt_profiles;
+                    DROP TABLE hunt_profiles;
+                    ALTER TABLE hunt_profiles_perks_only RENAME TO hunt_profiles;
+                    PRAGMA user_version = 3;
+                `);
+                this.db.exec('COMMIT');
+            } catch (error) {
+                this.db.exec('ROLLBACK');
+                throw error;
+            }
         }
     }
 
@@ -106,9 +129,6 @@ class HuntProfileStore {
         try { perkIds = JSON.parse(row.perk_ids); } catch (_) { perkIds = []; }
         return {
             schemaVersion: HuntProfileContract.SCHEMA_VERSION,
-            weaponId: row.weapon_id,
-            weaponInstanceId: row.weapon_instance_id,
-            personality: row.personality,
             perkIds: Array.isArray(perkIds) ? perkIds : [],
             lockedPerkId: row.locked_perk_id,
             revision: row.revision,
@@ -123,9 +143,6 @@ class HuntProfileStore {
         const updatedAt = Date.now();
         this.writeStatement.run(
             key,
-            clean.weaponId,
-            clean.weaponInstanceId,
-            clean.personality,
             JSON.stringify(clean.perkIds),
             clean.lockedPerkId,
             updatedAt

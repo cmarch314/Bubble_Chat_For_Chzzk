@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>몬스터 음성 이벤트 검수</title>
+<style>
+:root{color-scheme:dark;--bg:#090c12;--panel:#151a24;--line:#344057;--text:#f6f7fa;--muted:#a7b0c0;--gold:#ffc95c}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -25%,#34415d 0,var(--bg) 46%);color:var(--text);font:16px "Pretendard","Noto Sans KR",sans-serif}
+header{position:sticky;top:0;z-index:10;padding:18px 26px;background:rgba(9,12,18,.95);border-bottom:1px solid var(--line);backdrop-filter:blur(16px)}
+.top{display:flex;align-items:center;gap:16px;max-width:1480px;margin:auto}h1{margin:0;font-size:25px;white-space:nowrap}select{min-width:300px;height:46px;border:2px solid #53627a;border-radius:10px;background:#111722;color:white;padding:0 14px;font:inherit;font-weight:800}
+#completeReview{height:46px;padding:0 18px;border:2px solid #5a6980;border-radius:10px;background:#1a2230;color:#e8edf6;font:inherit;font-weight:900;cursor:pointer;white-space:nowrap}#completeReview:hover{border-color:var(--gold)}#completeReview.completed{border-color:#3dd28a;background:#15382b;color:#8ff0bd;box-shadow:0 0 16px rgba(61,210,138,.2)}#completeReview:disabled{cursor:default;opacity:.7}#summary{margin-left:auto;color:var(--muted);font-size:14px}main{max-width:1480px;margin:auto;padding:20px 26px 120px}.guide{margin-bottom:16px;padding:12px 15px;border:1px solid var(--line);border-radius:10px;background:rgba(21,26,36,.82);color:var(--muted)}.guide b{color:var(--gold)}
+.group{margin-bottom:14px;border:2px solid #2d374b;border-radius:13px;background:linear-gradient(135deg,#171c27,#10141c);overflow:hidden}.group.reviewed{border-color:#736136;box-shadow:0 0 18px rgba(255,201,92,.10)}
+.group-head{display:flex;align-items:center;gap:8px;padding:13px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}.event{font-size:18px;font-weight:900}.chip{padding:4px 8px;border-radius:6px;background:#253046;color:#cfd8e8;font-size:12px;font-weight:900}.chip.random{color:#ffe09b}.chip.sequence{color:#96d7ff}.chip.layer{color:#99edbd}.chip.switch{color:#d9b9ff}.chip.reusable{color:#84e8bd;background:#17372e}.chip.identity{color:#ffb8c1;background:#3b2028}
+.actions{display:flex;gap:7px;margin-left:auto;align-items:center}.actions button,.play-all,.play{height:38px;border:1px solid #46546d;border-radius:8px;background:#1c2534;color:white;padding:0 12px;font:inherit;font-weight:800;cursor:pointer}.actions button.selected{border-color:var(--gold);color:var(--gold);box-shadow:0 0 12px rgba(255,201,92,.25)}.actions input,.actions select{height:38px;border:1px solid #46546d;border-radius:8px;background:#0d1118;color:white;padding:0 10px;font:inherit}.actions input{width:190px}.actions select{min-width:150px;font-weight:800}.save{color:#67e3a5;font-size:13px}
+.source-details{border-top:1px solid #252f41}.source-details summary{padding:10px 15px;color:var(--muted);font-size:13px;font-weight:800;cursor:pointer}.source-details[open] summary{color:#dce4f2}.sources{display:grid;gap:7px;padding:0 11px 11px}.source{display:grid;grid-template-columns:50px 130px 130px 1fr;align-items:center;gap:10px;padding:8px 10px;border:1px solid #273247;border-radius:9px;background:#10151e}.play{font-size:18px;padding:0}.play.playing{background:var(--gold);color:#171108}.source-id,.stream{font-family:ui-monospace,monospace;color:#c4cee0}.path{overflow-wrap:anywhere;color:var(--muted);font-size:13px}.empty{padding:70px;text-align:center;color:var(--muted)}
+.player{position:fixed;left:50%;bottom:15px;z-index:20;transform:translateX(-50%);display:grid;grid-template-columns:340px 1fr;align-items:center;gap:16px;width:min(1100px,calc(100% - 40px));padding:12px 17px;border:1px solid #596982;border-radius:13px;background:rgba(13,17,24,.97);box-shadow:0 18px 50px #000}.now b{display:block;color:var(--gold)}.now small{color:var(--muted)}audio{width:100%}
+</style>
+</head>
+<body>
+<header><div class="top"><h1>🔊 몬스터 음성 검수</h1><select id="monster"></select><button id="completeReview" type="button">검수 완료</button><span id="summary">불러오는 중…</span></div></header>
+<main><div class="guide"><b>이벤트 묶음 단위 검수:</b> RANDOM은 후보 중 하나, SEQUENCE는 순서 재생, LAYER는 동시 재생입니다. 버튼 한 번으로 묶음 전체에 의미를 저장합니다.</div><section id="groups"></section></main>
+<div class="player"><div class="now"><b id="nowTitle">재생할 묶음을 선택하세요</b><small id="nowMeta">파일이 아니라 이벤트 관계를 기준으로 듣습니다.</small></div><audio id="audio" controls preload="none"></audio></div>
+<script>
+const state={monster:'',monsters:[],groups:[],presets:{},queue:[],queueIndex:0,playingButton:null},audio=document.querySelector('#audio');
+const $=selector=>document.querySelector(selector),esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const primaryPresets=new Set(['roar','breath','physical']);
+const category=tags=>Object.entries(state.presets).find(([,preset])=>preset.tags.length===tags.length&&preset.tags.every(tag=>tags.includes(tag)))?.[0]||(tags.length?'custom':'');
+const extraOptions=selected=>'<option value="">세부 프리셋…</option>'+Object.entries(state.presets).filter(([key])=>!primaryPresets.has(key)).map(([key,preset])=>'<option value="'+esc(key)+'" '+(selected===key?'selected':'')+'>'+esc(preset.label)+'</option>').join('');
+async function save(group,type,text,status){
+  status.textContent='저장 중…';
+  const response=await fetch('/api/group-label',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({monster:state.monster,bank:group.bank,eventId:group.eventId,sourceIds:group.sources.map(item=>item.sourceId),category:type,customLabel:text})});
+  const result=await response.json();if(!response.ok)throw new Error(result.error||'저장 실패');
+  group.groupTags=result.tags;group.reviewedSources=result.savedSources;status.textContent=result.runtime?'저장·반영됨 ✓':'저장됨 ✓';setTimeout(()=>status.textContent='',1200);render();
+}
+function play(source,group,button){
+  if(!source.path)return;state.queue=[];state.playingButton?.classList.remove('playing');state.playingButton=button;button.classList.add('playing');
+  audio.src='/audio?path='+encodeURIComponent(source.path);audio.play();$('#nowTitle').textContent=group.bank+' · EVENT '+group.eventId;$('#nowMeta').textContent='SOURCE '+source.sourceId+(source.stream!==null?' · STREAM '+source.stream:'');
+}
+function playGroup(group,button){state.queue=group.sources.filter(item=>item.path).map(source=>({source,group,button}));state.queueIndex=0;playQueued()}
+function playQueued(){const item=state.queue[state.queueIndex];if(!item)return;state.playingButton?.classList.remove('playing');state.playingButton=item.button;item.button.classList.add('playing');audio.src='/audio?path='+encodeURIComponent(item.source.path);audio.play();$('#nowTitle').textContent=item.group.bank+' · EVENT '+item.group.eventId+' · 묶음 재생';$('#nowMeta').textContent=(state.queueIndex+1)+' / '+state.queue.length+' · SOURCE '+item.source.sourceId}
+audio.onended=()=>{if(state.queue.length&&++state.queueIndex<state.queue.length)playQueued();else{state.queue=[];state.playingButton?.classList.remove('playing')}};
+function render(){
+  const root=$('#groups');root.textContent='';
+  for(const group of state.groups){
+    const selected=category(group.groupTags),card=document.createElement('article');card.className='group'+(group.groupTags.length?' reviewed':'');
+    const scopeChip=group.sourceLayer==='sound-effect'?'<span class="chip reusable">범용 SE 후보</span>':group.sourceLayer==='voice'?'<span class="chip identity">몬스터 전용 VO</span>':'';
+    card.innerHTML='<div class="group-head"><button class="play-all">▶ 전체</button><span class="event">'+esc(group.bank)+' · EVENT '+group.eventId+'</span>'+scopeChip+group.structures.map(value=>'<span class="chip '+esc(value)+'">'+esc(value.toUpperCase())+'</span>').join('')+'<span class="chip">'+group.sources.length+' SOURCES</span><div class="actions"><button data-type="roar">포효</button><button data-type="breath">브레스</button><button data-type="physical">물리공격</button><select class="extra-presets">'+extraOptions(selected)+'</select><input placeholder="직접 입력 (쉼표로 복수 태그)" value="'+esc(selected==='custom'?group.groupTags.join(', '):'')+'"><button data-type="custom">저장</button><button data-type="clear">지우기</button><span class="save"></span></div></div><details class="source-details"><summary>구성 음원 '+group.sources.length+'개 보기</summary><div class="sources"></div></details>';
+    card.querySelector('.play-all').onclick=event=>playGroup(group,event.currentTarget);
+    const status=card.querySelector('.save'),input=card.querySelector('input');
+    card.querySelectorAll('[data-type]').forEach(button=>{if(button.dataset.type===selected)button.classList.add('selected');button.onclick=()=>save(group,button.dataset.type,input.value,status).catch(error=>status.textContent=error.message)});
+    card.querySelector('.extra-presets').onchange=event=>{if(event.target.value)save(group,event.target.value,'',status).catch(error=>status.textContent=error.message)};
+    const sources=card.querySelector('.sources');
+    for(const source of group.sources){const row=document.createElement('div');row.className='source';row.innerHTML='<button class="play" '+(source.path?'':'disabled')+'>▶</button><span class="source-id">ID '+source.sourceId+'</span><span class="stream">'+(source.stream===null?'STREAM ?':'STREAM '+source.stream)+'</span><span class="path">'+esc(source.path||'디코딩 파일 없음')+'</span>';row.querySelector('.play').onclick=event=>play(source,group,event.currentTarget);sources.appendChild(row)}
+    root.appendChild(card);
+  }
+  $('#summary').textContent=state.groups.length+'개 이벤트 묶음 · '+state.groups.filter(group=>group.groupTags.length).length+'개 분류됨';
+}
+function renderMonsterOptions(){const select=$('#monster'),selected=state.monster||select.value;select.innerHTML=state.monsters.map(monster=>{const status=monster.reviewStatus==='completed'?' · 완료 ✓':monster.reviewStatus==='silent-voice'?' · 음성 없음 ✓':'';return '<option value="'+monster.id+'">'+esc(monster.name)+' ('+monster.id+') · '+monster.groups+'개 묶음'+status+'</option>'}).join('');if(selected&&state.monsters.some(monster=>monster.id===selected))select.value=selected}
+function renderCompletion(){const monster=state.monsters.find(item=>item.id===state.monster),button=$('#completeReview');const silent=monster?.reviewStatus==='silent-voice',completed=monster?.reviewStatus==='completed';button.disabled=!monster||silent;button.classList.toggle('completed',completed||silent);button.textContent=silent?'음성 없음 ✓':completed?'검수 완료 ✓':'검수 완료'}
+async function setCompletion(){const monster=state.monsters.find(item=>item.id===state.monster);if(!monster||monster.reviewStatus==='silent-voice')return;const button=$('#completeReview'),completed=monster.reviewStatus!=='completed';button.disabled=true;button.textContent='저장 중…';try{const response=await fetch('/api/review-completion',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({monster:state.monster,completed})}),result=await response.json();if(!response.ok)throw new Error(result.error||'완료 상태 저장 실패');monster.reviewStatus=result.reviewStatus;renderMonsterOptions();renderCompletion()}catch(error){button.textContent=error.message;setTimeout(renderCompletion,1600)}}
+async function loadMonster(id){state.monster=id;renderCompletion();$('#summary').textContent='불러오는 중…';const response=await fetch('/api/groups?monster='+encodeURIComponent(id)),data=await response.json();if(!response.ok)throw new Error(data.error);state.groups=data.groups;render();renderCompletion()}
+async function init(){const data=await fetch('/api/monsters').then(response=>response.json()),select=$('#monster');state.presets=data.presets||{};state.monsters=data.monsters||[];renderMonsterOptions();if(!state.monsters.length){$('#groups').innerHTML='<div class="empty">먼저 이벤트 그래프를 생성해야 합니다.</div>';renderCompletion();return}select.onchange=()=>loadMonster(select.value);$('#completeReview').onclick=()=>setCompletion();await loadMonster(select.value)}
+init().catch(error=>$('#groups').innerHTML='<div class="empty">'+esc(error.message)+'</div>');
+</script>
+</body>
+</html>

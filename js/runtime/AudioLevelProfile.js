@@ -26,7 +26,7 @@ class AudioLevelProfile {
 
     gain(path) {
         const entry = this.get(path);
-        const gainDb = Number(entry?.gainDb);
+        const gainDb = Number(typeof entry === 'number' ? entry : entry?.gainDb);
         if (!Number.isFinite(gainDb)) return 1;
         return Math.pow(10, Math.max(-18, Math.min(12, gainDb)) / 20);
     }

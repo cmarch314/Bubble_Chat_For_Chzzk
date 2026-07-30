@@ -5,8 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const HuntMonsterActionPolicy = require('../js/effects/hunt/HuntMonsterActionPolicy.js');
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterTurnExecutor.js');
-const context = vm.createContext({ console });
+const context = vm.createContext({ console, HuntMonsterActionPolicy });
 vm.runInContext(`${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntMonsterTurnExecutor = HuntMonsterTurnExecutor;`, context, { filename: sourcePath });
 
 const calls = { bubbles: [], profiles: [], outcomes: [] };
@@ -18,7 +19,7 @@ const hunter = {
 const noop = () => {};
 const engine = {
     selectedWeapons: [hunter], selectedMonster: { id: 'test_monster', nameKO: '훈련 몬스터' },
-    MONSTER_PATTERNS: { test_monster: [{ id: 'test.hit', name: '훈련 공격', type: 'melee', damageRatio: .3, minTargets: 1, maxTargets: 1, recoveryTicks: 7 }] },
+    MONSTER_PATTERNS: { test_monster: [{ id: 'test.hit', name: '훈련 공격', type: 'melee', damageRatio: .3, minTargets: 1, maxTargets: 1, recoveryTicks: 7, runtimeImpactCommit: true }] },
     monsterState: 'normal', monsterHp: 1000, monsterMaxHp: 1000, monsterAtb: 100, monsterDamageMod: 1,
     monsterStunAccum: 0, monsterStunThreshold: 9999, monsterStunDuration: 0, callbacks: {}, teamTactic: 'balanced',
     random: () => 0, actionStateMachine: { cancel: (target, state) => { target.currentAction = null; target.actionState = state; }, canGuard: () => false, canEvade: () => false, canCounter: () => false },

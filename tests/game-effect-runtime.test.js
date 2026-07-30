@@ -56,6 +56,8 @@ const quizPath = path.resolve(__dirname, '../js/effects/SoundQuizEffect.js');
 const quizSource = fs.readFileSync(quizPath, 'utf8');
 assert.match(quizSource, /this\.runtime = new GameEffectRuntime\(this, director\)/);
 assert.doesNotMatch(quizSource, /setTimeout\(|setInterval\(|clearTimeout\(|clearInterval\(/);
+assert.match(quizSource, /const shouldContinue = await this\.runtime\.wait\(5000\);\s*cleanupFireworks\(\);\s*if \(!shouldContinue\) break;/,
+    'forced quiz shutdown must clean fireworks before leaving the round loop');
 
 const racingPath = path.resolve(__dirname, '../js/effects/RacingEffect.js');
 const racingSource = fs.readFileSync(racingPath, 'utf8');

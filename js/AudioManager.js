@@ -18,7 +18,7 @@ class AudioManager {
         this.basePath = './SFX/';
         this.commandMatcher = new AudioCommandMatcher(configManager);
         this.levelProfile = typeof AudioLevelProfile === 'function'
-            ? new AudioLevelProfile(window.HIVE_AUDIO_LEVELS || {})
+            ? new AudioLevelProfile(window.HIVE_AUDIO_GAINS || window.HIVE_AUDIO_LEVELS || {})
             : { gain: () => 1, volume: (path, volume) => Math.min(1, Math.max(0, volume)) };
         // [Performance] 오디오 버퍼 캐시 (중복 로딩 방지)
         this.bufferCache = new Map();
@@ -176,6 +176,10 @@ class AudioManager {
 
     connectMediaElement(mediaElement, type = 'visual', options = {}) {
         return this.mediaStager.connectMediaElement(mediaElement, type, options);
+    }
+
+    releaseMediaElement(mediaElement, options = {}) {
+        return this.mediaStager.releaseMediaElement(mediaElement, options);
     }
 
     getOutputVolume(path, type = 'visual', baseVolume = 1) {

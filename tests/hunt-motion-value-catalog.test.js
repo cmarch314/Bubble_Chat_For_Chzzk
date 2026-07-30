@@ -17,6 +17,10 @@ assert.match(timing.timingEvidence, /motion-value-proxy/);
 const lightProxy = HuntMotionValueCatalog.motionValueTiming({ motionValue: 20 });
 const heavyProxy = HuntMotionValueCatalog.motionValueTiming({ motionValue: 200 });
 assert(lightProxy.ticks < heavyProxy.ticks, 'higher motion value must occupy more ATB time');
+assert.strictEqual(HuntMotionValueCatalog.motionValueTiming({ motionValue: 190 }).ticks, 50,
+    'True Charged Slash-class attacks retain the stable full-budget authoring scale');
+assert.strictEqual(HuntMotionValueCatalog.motionValueTiming({ motionValue: 10 }).ticks, 5,
+    'very light attacks must retain the half-second cadence floor');
 assert.strictEqual(HuntMotionValueCatalog.motionValueTiming({ motionValue: 0 }), null, 'preparation actions retain authored timing');
 
 const measuredTiming = HuntMotionValueCatalog.timingFor('great_sword', {

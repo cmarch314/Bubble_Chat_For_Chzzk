@@ -39,4 +39,18 @@ assert.strictEqual(result.accepted, true);
 assert.strictEqual(hunter.hp, 58);
 assert.strictEqual(tactics.supportGauge, 5);
 
+tactics.supportGauge = 50;
+engine.battleTime = 40;
+engine.monsterFlashUseCount = 4;
+result = tactics.handle(engine, { nickname: 'FlashViewer' }, '!섬광');
+assert.strictEqual(result.accepted, false);
+assert.strictEqual(result.feedback, '🚫 섬광 내성');
+assert.strictEqual(tactics.supportGauge, 50, 'an immune flash must refund viewer support gauge');
+
+engine.battleTime = 50;
+engine.monsterFlashUseCount = 3;
+result = tactics.handle(engine, { nickname: 'FlashViewer2' }, '!섬광');
+assert.strictEqual(result.accepted, true);
+assert.strictEqual(engine.monsterFlashUseCount, 4);
+
 console.log('[test] Hunt chat tactics participation contract passed.');

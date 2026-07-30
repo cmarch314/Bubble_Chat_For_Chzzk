@@ -79,9 +79,15 @@ assert.strictEqual(isTrustedLocalAuthority('127.0.0.1:17890', 17890), true);
         const landing = await fetch(`${base}/index.html`);
         assert.match(landing.headers.get('set-cookie') || '', /bubblechat_session=/);
         assert.match(landing.headers.get('content-security-policy') || '', /default-src 'self'/);
+        assert.match(landing.headers.get('content-security-policy') || '', /font-src[^;]*https:\/\/cdn\.jsdelivr\.net/);
         assert.strictEqual((await fetch(`${base}/.runtime/hunt-profiles.sqlite`)).status, 404);
         assert.strictEqual((await fetch(`${base}/.git/config`)).status, 404);
         assert.strictEqual((await fetch(`${base}/package.json`)).status, 404);
+        assert.strictEqual((await fetch(`${base}/api/chzzk?url=https%3A%2F%2Fexample.com`)).status, 400,
+            'the read-only allowlisted proxy must not depend on CEF cookie persistence');
+        assert.strictEqual((await fetch(`${base}/api/chzzk?url=https%3A%2F%2Fexample.com`, {
+            headers: { Origin: 'https://evil.example' }
+        })).status, 403);
         assert.strictEqual((await fetch(`${base}/api/hunt-profile?uid=viewer-1`)).status, 401);
         assert.strictEqual((await fetch(`${base}/api/hunt-profile?uid=viewer-1`, {
             headers: { ...sessionHeaders, Origin: 'https://evil.example' }
@@ -89,14 +95,21 @@ assert.strictEqual(isTrustedLocalAuthority('127.0.0.1:17890', 17890), true);
         const saved = await fetch(`${base}/api/hunt-profile`, {
             method: 'POST',
             headers: { ...sessionHeaders, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid: 'viewer-1', nickname: '헌터', profile: { weaponId: 'long_sword' } })
+            body: JSON.stringify({
+                uid: 'viewer-1',
+                nickname: '헌터',
+                profile: { perkIds: ['perk_001'], lockedPerkId: 'perk_001' }
+            })
         });
         assert.strictEqual(saved.status, 200);
         assert.strictEqual(saved.headers.get('access-control-allow-origin'), null);
         const loaded = await fetch(`${base}/api/hunt-profile?uid=viewer-1&nickname=%ED%97%8C%ED%84%B0`, {
             headers: sessionHeaders
         });
-        assert.deepStrictEqual((await loaded.json()).profile, { weaponId: 'long_sword' });
+        assert.deepStrictEqual((await loaded.json()).profile, {
+            perkIds: ['perk_001'],
+            lockedPerkId: 'perk_001'
+        });
         const denied = await fetch(`${base}/index.html`, { method: 'POST' });
         assert.strictEqual(denied.status, 405, 'POST must stay limited to the profile endpoint');
         const runSaved = await fetch(`${base}/api/hunt-run?channelKey=channel-a`, {

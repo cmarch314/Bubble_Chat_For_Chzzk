@@ -48,8 +48,6 @@ class HuntChatTactics {
     }
 
     handle(engine, msgData, message) {
-        const queuedAction = engine?.hunterCommandQueue?.handle(engine, msgData, message);
-        if (queuedAction?.handled) return queuedAction;
         const command = this.parse(message);
         if (!command || !engine) return { handled: false };
         const nickname = String(msgData && msgData.nickname || 'anonymous');
@@ -95,9 +93,26 @@ class HuntChatTactics {
 
         if (command === 'flash') {
             if (!this.spendGauge(50)) return { handled: true, accepted: false, feedback: `✨ 50 필요 · ${this.supportGauge}/100` };
+            const flashPolicy = typeof HuntSupportItemPolicy !== 'undefined'
+                ? HuntSupportItemPolicy
+                : (typeof require === 'function' ? require('./HuntSupportItemPolicy.js') : null);
+            if (!flashPolicy?.isFlashEffective(engine)) {
+                this.addGauge(50);
+                return { handled: true, accepted: false, feedback: '🚫 섬광 내성' };
+            }
+            engine.monsterFlashUseCount = Number(engine.monsterFlashUseCount || 0) + 1;
             engine.monsterAtb = 0;
-            engine.monsterRecoveryDuration = Math.max(engine.monsterRecoveryDuration || 0, 25);
+            if (engine.monsterFlightState === 'airborne') {
+                engine.monsterFlightRuntime?.forceLanding(engine, 'viewer-flash');
+            } else {
+                engine.monsterRecoveryDuration = Math.max(engine.monsterRecoveryDuration || 0, 25);
+            }
             engine.updateMonsterAtbUI(0);
+            engine.playSFX?.('flash_pod', null, {
+                action: 'support',
+                item: 'flash-pod'
+            });
+            engine.triggerEnvironmentEffect?.('flash');
             engine.addLog(`✨ [시청자 섬광] ${nickname}의 섬광탄! 몬스터의 행동이 지연됩니다.`, '#fff27a');
             return { handled: true, accepted: true, feedback: '✨ 섬광 성공' };
         }
@@ -112,6 +127,7 @@ class HuntChatTactics {
             const trapTicks = engine.consumeTrapDuration(35);
             engine.monsterKnockdownDuration = Math.max(engine.monsterKnockdownDuration || 0, trapTicks);
             engine.monsterAtb = 0;
+            engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
             engine.triggerEnvironmentEffect?.('pitfall');
             engine.addLog(`🪤 [시청자 함정] ${nickname}의 함정 성공! ${(trapTicks / 10).toFixed(1)}초 집중 공격 기회입니다.`, '#ffcf66');
             return { handled: true, accepted: true, feedback: '🪤 함정 성공' };

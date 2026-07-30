@@ -1,0 +1,4896 @@
+{
+  "version": 1,
+  "source": {
+    "title": "Monster Hunter Double Cross guide - named attack patterns",
+    "url": "https://game-e.com/mhxx/monster/",
+    "evidence": "individual monster attack-pattern headings, descriptions, species and roar table"
+  },
+  "counts": {
+    "expected": 44,
+    "imported": 44,
+    "failed": 0,
+    "moves": 321,
+    "verifiedRoarPresent": 23,
+    "verifiedRoarAbsent": 21
+  },
+  "failures": [],
+  "monsters": [
+    {
+      "game": "generations-ultimate",
+      "pageId": "agnaktor",
+      "nameEN": "Agnaktor",
+      "nameKO": "아그나코트",
+      "speciesJA": "海竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "突進",
+          "descriptionJA": "ハンターに向かって突進してくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転攻撃",
+          "descriptionJA": "【予備動作】後退りする。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "潜行して突進",
+          "descriptionJA": "【対処方法】進行方向に突進されそうになったら方向転換する。",
+          "semantic": "burrow",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "体当たり",
+          "descriptionJA": "回転して尻尾でなぎ払う。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "連続してかみつく",
+          "descriptionJA": "【予備動作】とぐろを巻く。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "連続ついばみ",
+          "descriptionJA": "地中に潜って背ビレだけを出して突進してくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ボディプレス",
+          "descriptionJA": "非怒り状態なら音爆弾を当てると地上に引きずり出せる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "熱線ブレス",
+          "descriptionJA": "ハンターに体当たりしてくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/agnaktor.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "a3ec4ca3186282e56a9a2cbf2fae1e67f4f0a5c5669e48333050221228a4e8bd"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "amatsumagatsushi",
+      "nameEN": "Amatsu",
+      "nameKO": "아마츠마가츠치",
+      "speciesJA": "古龍種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "怒り移行時や閃光玉解除時に使ってくる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾なぎ払い",
+          "descriptionJA": "【予備動作】目が光った後にうなずく。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "左腕なぎ払い",
+          "descriptionJA": "右から前方を尻尾でなぎ払ってくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "サパーソルト尻尾攻撃",
+          "descriptionJA": "【予備動作】後へ尻尾を振り上げてうめき声を上げる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転攻撃",
+          "descriptionJA": "【対処方法】左半身側の前方へ回避すると当たらない。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進(弱)",
+          "descriptionJA": "前方から左半身側をなぎ払ってくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進(強)",
+          "descriptionJA": "【予備動作】体を右半身側にひねる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "竜巻",
+          "descriptionJA": "【対処方法】左半身側の前方へ回避すると当たらない。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "とぐろ竜巻",
+          "descriptionJA": "前方に一回転して尻尾で攻撃してくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "水弾ブレス",
+          "descriptionJA": "【予備動作】うめき声を上げた後に身を震わせて尻尾を振り上げる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "2連続水弾ブレス",
+          "descriptionJA": "【対処方法】左半身側の前方へ回避すると当たらない。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "3連続水弾ブレス",
+          "descriptionJA": "回転しながら体下を攻撃してくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/amatsumagatsushi.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "8fc9ff7ae0da77755ba4ade00e98a87a8a10abef87c7ed82e8d1d0c4d99264cd"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "arzuros",
+      "nameEN": "Arzuros",
+      "nameKO": "아오아시라",
+      "speciesJA": "牙獣種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "連続ひっかき",
+          "descriptionJA": "前脚を交互にひっかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "両手ひっかき",
+          "descriptionJA": "通常時と疲労時は3回、怒り時は4回連続で引っかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転引っかき",
+          "descriptionJA": "【予備動作】立ち上がって手を振り回す。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "【対処方法】すれ違うように回避する。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかり",
+          "descriptionJA": "前進しながらクロスするようにひっかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "拘束",
+          "descriptionJA": "【予備動作】両手を横に開く。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ヒップアタック",
+          "descriptionJA": "回転しながらひっかいてきて1回と2回の場合がある。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "前脚を出してくる",
+          "descriptionJA": "【予備動作】体を縮めてどちらかの前脚を引く。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/arzuros.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "c18e8a028fca51646f00f1729a6a5673c04001149815806022a12dfe7a80ce3d"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "blangonga",
+      "nameEN": "Blangonga",
+      "nameKO": "도도블랑고",
+      "speciesJA": "牙竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "ボディプレス",
+          "descriptionJA": "倒れ込んできて振動を発生させる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "殴りかかり",
+          "descriptionJA": "【予備動作】前脚を振り上げて立ち上がる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "雪玉投げ",
+          "descriptionJA": "【対処方法】振動派には広くない。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "右腕を振りかぶって飛びかかりながら殴ってくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "後脚蹴り",
+          "descriptionJA": "距離が遠い時に使ってくることが多い。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "冷凍ブレス",
+          "descriptionJA": "【予備動作】右腕を振りかぶる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "【対処方法】左右へ少し移動する。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "雪の中から攻撃",
+          "descriptionJA": "雪玉を放り投げてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "両腕攻撃",
+          "descriptionJA": "着弾すると砕けて破片に当たってもダメージがある。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/blangonga.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "78eeabd5170cdc8b4708f12e098ce2a1bfc83ae3445eb336b22407853a5ca951"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "brachydios",
+      "nameEN": "Brachydios",
+      "nameKO": "브라키디오스",
+      "speciesJA": "獣竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "回り込む",
+          "descriptionJA": "地面に腕を付いてハンターの死角に回り込んでくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "パンチ攻撃",
+          "descriptionJA": "腕を付いた地面には粘菌が付着される。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "叩きつけ攻撃",
+          "descriptionJA": "【予備動作】方向転換する。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかりパンチ",
+          "descriptionJA": "前方のハンターにパンチしてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "粘菌塗布",
+          "descriptionJA": "【予備動作】ターンの後に鳴き声をあげる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "直線爆発",
+          "descriptionJA": "【対処方法】ハンターの右に回り込んだ時は右前脚で、左に回り込んだ時は左前脚でフックしてくる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "拡散爆発",
+          "descriptionJA": "前脚を叩きつけてくる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかり",
+          "descriptionJA": "【予備動作】片方の前脚を持ち上げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "連続パンチ",
+          "descriptionJA": "【対処方法】狙われたら左右に前転回避する。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾攻撃",
+          "descriptionJA": "跳びかかりながらパンチをしてくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "粘菌塗布",
+          "descriptionJA": "【予備動作】距離がある時に右前脚を持ち上げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/brachydios.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "ddbe97b036d92677b0c3e7cee94fecbdf4e7f49e94c1c732396f5f9cccda3aac"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "bulldrome",
+      "nameEN": "Bulldrome",
+      "nameKO": "도스팽고",
+      "speciesJA": "牙獣種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "突進",
+          "descriptionJA": "Uターンしてくる場合もあるがその時は予備動作が無い時。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進(長距離)",
+          "descriptionJA": "【予備動作】予備動作無し or ハンターの方向に向き直り脚で地面を蹴る。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "牙攻撃",
+          "descriptionJA": "【対処方法】予備動作がある場合はUターンしてこないので追いかけると攻撃のチャンス。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/bulldrome.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "8c225cbdf7178b257fd9d22262817052d415dd7b199932ab4a3adb5047b65676"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "cephadrome",
+      "nameEN": "Cephadrome",
+      "nameKO": "도스가레오스",
+      "speciesJA": "魚竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "正面に噛みついてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "体当たり",
+          "descriptionJA": "【予備動作】右半身側へ頭を引く。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "砂ブレス",
+          "descriptionJA": "【対処方法】予備動作が分かりやすいので落ち着いて対処しよう。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "3連続砂ブレス",
+          "descriptionJA": "体当たりをしてくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "這いずり",
+          "descriptionJA": "2回連続で繰り出してくることもある。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾攻撃",
+          "descriptionJA": "【予備動作】右脚を1歩踏みこみ体を左にひねる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滑空からの噛みつき",
+          "descriptionJA": "【対処方法】左側に回避する。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "背ビレ攻撃",
+          "descriptionJA": "狙ったハンターに砂のブレスを吐いてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "地中から砂ブレス",
+          "descriptionJA": "【予備動作】両脚を上げて踏ん張り頭を振り上げる。",
+          "semantic": "burrow",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/cephadrome.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "b3b7d724abf2204153352c2ae914e7980283210c2c66769e7b642495120d810f"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "chameleos",
+      "nameEN": "Chameleos",
+      "nameKO": "오오나즈치",
+      "speciesJA": "古龍種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "突進からの舌なぎ払い",
+          "descriptionJA": "突進した後に舌でなぎ払ってくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "舌なぎ払い",
+          "descriptionJA": "【予備動作】舌をペロッと出す。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "【対処方法】右半身側に回り込むように回避する。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "引っかき",
+          "descriptionJA": "舌でなぎ払ってくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "後方尻尾を叩きつけ",
+          "descriptionJA": "攻撃には龍属性がある。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "毒霧ブレス",
+          "descriptionJA": "ダメージを食らうとアイテムを盗まれる事もある。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ジャンプして毒霧ブレス",
+          "descriptionJA": "盗まれるアイテムは食べられるアイテムが優先して盗まれる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "毒玉ブレス",
+          "descriptionJA": "【予備動作】2歩後退りして1回舌なめずりをする。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "毒霧ブレス乱射",
+          "descriptionJA": "【対処方法】右半身側に回り込むように回避する。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/chameleos.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "5907d8b9d7a47511b14ba6f9574f204b0a658c4ec8d50a95e42316f22884d46b"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "daimyo-hermitaur",
+      "nameEN": "Daimyo Hermitaur",
+      "nameKO": "다이묘자자미",
+      "speciesJA": "甲殻種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "泡のブレス",
+          "descriptionJA": "水属性の泡ブレスを吐いてくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ボディプレス",
+          "descriptionJA": "【予備動作】両爪を大きく広げる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "左右の爪攻撃",
+          "descriptionJA": "【対処方法】直線上に出してくるので左右に回避する。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "真上に飛び上がって落下する。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "地中からの突き上げ",
+          "descriptionJA": "爪を左右に振り下ろしてくる。",
+          "semantic": "burrow",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "特殊なガード",
+          "descriptionJA": "ヤドを向けて突進してくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/daimyo-hermitaur.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "509e2a6849a509c51bc0ce2b1beee61d60c25cfdf1e143d82e160902ee1eca6c"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "dosmakkao",
+      "nameEN": "Great Maccao",
+      "nameKO": "도스마카오",
+      "speciesJA": "鳥竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "仲間呼び",
+          "descriptionJA": "吠えて仲間のマッカォを呼び寄せる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ひっかき攻撃",
+          "descriptionJA": "【予備動作】首を後ろにそらす。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾で支えて連続で引っかいてくる",
+          "descriptionJA": "【対処方法】吠えている時は無防備になるのでチャンス。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "タックル",
+          "descriptionJA": "前脚でひっかいてくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかり",
+          "descriptionJA": "【予備動作】斜め後方に身を引く。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾立ち",
+          "descriptionJA": "【対処方法】正面に留まらないようにする。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/dosmakkao.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "6ddce843d5033bb35286dd1f8c6e33e9970edefe67b24d95585a973f76f746ac"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "duramboros",
+      "nameEN": "Duramboros",
+      "nameKO": "도볼베르크",
+      "speciesJA": "獣竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "大"
+      },
+      "moves": [
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "咆哮を放ってくる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾叩きつけ",
+          "descriptionJA": "【予備動作】右脚を前にだして頭を上げる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾なぎ払い",
+          "descriptionJA": "【対処方法】叫び終わった後に動き出すまで時間がかかる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかり",
+          "descriptionJA": "尻尾を地面に叩きつけてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "大回転",
+          "descriptionJA": "右後方に1回、右後方に2回、左右の後方に2回、振り下ろした後に後ずさりしてもう一回のパターンがある。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "大回転後のジャンプ攻撃",
+          "descriptionJA": "叩きつけた時に振動も発生する。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "大回転後の尻尾なぎ払い",
+          "descriptionJA": "【予備動作】右脚と尻尾を振り上げる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "大回転後の跳びかかり",
+          "descriptionJA": "【対処方法】耐震のスキルがあると有効。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "体をひねって前方を尻尾でなぎ払ってくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "【予備動作】後退して斜めに構えて尻尾を振り上げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "頭を振って噛みつき",
+          "descriptionJA": "【対処方法】予備動作を確認後に離れる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "体当たり",
+          "descriptionJA": "尻尾の重さを利用して横にジャンプして飛びかかってくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/duramboros.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "26cd2c969e5acbb0748581a152979ea9621ecba9e4ddba5483d6e5fa1c9ea3b8"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "giadrome",
+      "nameEN": "Giadrome",
+      "nameKO": "도스기아노스",
+      "speciesJA": "鳥竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "跳びかかり",
+          "descriptionJA": "前方に向かって飛びかかってくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "凍結液吐き",
+          "descriptionJA": "【予備動作】振り向いてステップ後に鳴き声を上げる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/giadrome.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "407f1c15cd1cf41ef4c9c9e86128cd83d80475ca8214852bb122ab08c10bb25d"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "gore-magala",
+      "nameEN": "Gore Magala",
+      "nameKO": "고어 마가라",
+      "speciesJA": "-",
+      "roar": {
+        "status": "verified-present",
+        "strength": "大"
+      },
+      "moves": [
+        {
+          "nameJA": "突進",
+          "descriptionJA": "突進してくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "【予備動作】翼脚をたたむ。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "S字突進",
+          "descriptionJA": "【対処方法】ガードするか正面に留まらないようにする。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "なぎ払い",
+          "descriptionJA": "2歩前進して噛みつく。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "3連ブレス攻撃",
+          "descriptionJA": "【予備動作】右前脚を上げる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "恐竜ウィルス鱗粉",
+          "descriptionJA": "【対処方法】回避するか正面に留まらないようにする。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滑空",
+          "descriptionJA": "ハンターに向かってS字の起動で突進してくる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "空中からブレス",
+          "descriptionJA": "【予備動作】後退りした後に左前脚を振り上げる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "倒れ込み",
+          "descriptionJA": "【対処方法】モンスターの右側にいるか至近距離なら振り上げた左前脚の下をくぐり抜ける。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "翼脚攻撃",
+          "descriptionJA": "頭と尻尾でなぎ払ってくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "キック",
+          "descriptionJA": "【予備動作】状態をねじる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/gore-magala.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "a919b0e5a93cd711a91053b5ffae702bed045880620eb281cb8b3c766a4b7547"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "gypceros",
+      "nameEN": "Gypceros",
+      "nameKO": "게리오스",
+      "speciesJA": "鳥竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "閃光",
+          "descriptionJA": "トサカから閃光を放ってきて食らうと気絶してしまう。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "毒液",
+          "descriptionJA": "トサカを破壊しても閃光を出そうとするのでチャンスが生まれる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾攻撃",
+          "descriptionJA": "【予備動作】トサカを3回打ち鳴らして両翼を広げる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転尻尾攻撃",
+          "descriptionJA": "【対処方法】翼が広がりきった後にタイミングをはかって回避する。トサカの部位を破壊すれば閃光を放てなくなる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "連続ついばみ",
+          "descriptionJA": "放物線上に毒の液を吐き出してくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "毒吐き突進",
+          "descriptionJA": "当たると毒状態になる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "死にマネからの攻撃",
+          "descriptionJA": "【予備動作】動きがとまり体を起こして頭を振り上げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/gypceros.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "81f03958a0d45023da55155245703102085d65a707fa1301dbe078cedf0e1c7d"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "hororohoruru",
+      "nameEN": "Malfestio",
+      "nameKO": "호로로호루루",
+      "speciesJA": "鳥竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "大"
+      },
+      "moves": [
+        {
+          "nameJA": "鱗粉",
+          "descriptionJA": "地面に飛び降りて羽から鱗粉を周囲にまき散らす。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "超音波",
+          "descriptionJA": "鱗粉に触れると前後不覚状態になり操作が逆になってしまう。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滑空",
+          "descriptionJA": "一定時間で回復するが「にが虫」を使うと直ぐに回復できる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "羽攻撃",
+          "descriptionJA": "【予備動作】空中で尻尾を振り上げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "脚攻撃",
+          "descriptionJA": "【対処方法】ガードするか言ってん離れる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "青色の超音波を発射してくる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/hororohoruru.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "a170a8229f5ad446256bebcdd57b693a4cf1b09bffd19ca2b0d4e489f866111d"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "iodrome",
+      "nameEN": "Iodrome",
+      "nameKO": "도스이오스",
+      "speciesJA": "鳥竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "毒液攻撃",
+          "descriptionJA": "毒液を飛ばしてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "毒液攻撃",
+          "descriptionJA": "食うとダメージとともに毒状態になる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかり",
+          "descriptionJA": "遠距離に毒液を飛ばしてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "食うとダメージとともに毒状態になり毒の着地地点に毒が広がる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "拘束",
+          "descriptionJA": "ハンターに向かって突進してくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/iodrome.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "39913ba5eb91f8350585ccbda2f5b56306af228736b9f861732178570eef2ec6"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "kecha-wacha",
+      "nameEN": "Kecha Wacha",
+      "nameKO": "케차와차",
+      "speciesJA": "牙獣種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "振り向き引っかき",
+          "descriptionJA": "爪で引っかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滑空",
+          "descriptionJA": "振り向くだけで何もしない時もある。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "爪攻撃",
+          "descriptionJA": "【予備動作】チラッと後ろを見る。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ひっかき（ぶら下がり中）",
+          "descriptionJA": "【対処方法】攻撃までの時間が長いので反撃のチャンス。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転引っかき（ぶら下がり中）",
+          "descriptionJA": "怒り状態になると行ってくる攻撃方法。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "飛びかかり（ぶら下がり中）",
+          "descriptionJA": "腕の皮膜を利用して滑空してくる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "粘液攻撃",
+          "descriptionJA": "【予備動作】バックステップをする。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ツタを揺らしてくる",
+          "descriptionJA": "【対処方法】バックステップを確認したら左右に回り込む。間に合わない場合はガード。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/kecha-wacha.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "babf6f460a75720485970aeea435bcd4f4dcf9d3ee811ee3eb95b09b9e3e10e2"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "khezu",
+      "nameEN": "Khezu",
+      "nameKO": "푸루푸루",
+      "speciesJA": "飛竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "大"
+      },
+      "moves": [
+        {
+          "nameJA": "体内発電",
+          "descriptionJA": "全身から強烈な電気を放出する。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "電気ブレス",
+          "descriptionJA": "【予備動作】体から青い光を発する。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "飛びつき",
+          "descriptionJA": "【対処方法】ガード+1のスキルがあるとガードの後に帯電中に反撃が出来る。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転尻尾攻撃",
+          "descriptionJA": "3方向 or 5方向に地を這うような電気ブレスを吐いてくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "首伸ばして噛みつき",
+          "descriptionJA": "ガード強化のスキルがないとガード不可能。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "落下攻撃",
+          "descriptionJA": "当たると雷属性やられ【大】になり気絶しやすくなる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/khezu.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "a67522665682d227afa11ebb2acb904417e32833accf4714402bfafdc256bb25"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "kirin",
+      "nameEN": "Kirin",
+      "nameKO": "키린",
+      "speciesJA": "古龍種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "電撃",
+          "descriptionJA": "前方や周囲に落雷を発生させる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "ハンターに向かって突進してきて落雷を連続で落とす。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "猛突進",
+          "descriptionJA": "ハンターに向かって猛突進してくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "後ろ蹴り",
+          "descriptionJA": "後にハンターがいると後ろ足で蹴飛ばしてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/kirin.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "19f7fb20bd94cdf733ec8018236e2ff4f8a7016096b04f622a121ed9106aeda8"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "kushala-daora",
+      "nameEN": "Kushala Daora",
+      "nameKO": "크샬다오라",
+      "speciesJA": "古龍種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "風ブレス",
+          "descriptionJA": "前方へ風のブレスを吐いてくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滞空中に放射風ブレス",
+          "descriptionJA": "【予備動作】大きく頭を振り上げる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滑空中に風ブレス",
+          "descriptionJA": "【対処方法】左右に移動する。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "猛ダッシュ",
+          "descriptionJA": "滑空中に放射状に風のブレスを吐く。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滞空中に爪攻撃",
+          "descriptionJA": "左右に放つパターンと360度回転するパターンがある。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "風まとい",
+          "descriptionJA": "【対処方法】足元にいれば当たらない。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/kushala-daora.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "7d54e517c78f03e128b3ea9b68e2d798fde62ccc0b1e9006886b2aa31273b5b3"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "lagiacrus",
+      "nameEN": "Lagiacrus",
+      "nameKO": "라기아크루스",
+      "speciesJA": "海竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "前進しながら噛みついてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "【予備動作】尻尾を地面に降ろして右後方に頭を引く。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転尻尾攻撃",
+          "descriptionJA": "【対処方法】右半身側に回り込むように移動する。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ボディプレス",
+          "descriptionJA": "滑り込みながら突進してくる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "体当たり",
+          "descriptionJA": "【予備動作】体をうねらせて後ずさる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "雷ブレス",
+          "descriptionJA": "【対処方法】近距離の時は左右に移動すると回避できる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "大放電",
+          "descriptionJA": "噛みついた反動を利用して尻尾で攻撃してくる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "蓄電",
+          "descriptionJA": "【予備動作】首を持ち上げながら立ち上がる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/lagiacrus.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "a66e0f79e8d3467b5bd50a549b12d6299a001a2ce905d0b6c5c8f8ba75e9f4cc"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "lagombi",
+      "nameEN": "Lagombi",
+      "nameKO": "울크스스",
+      "speciesJA": "牙獣種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "突進",
+          "descriptionJA": "腹で氷上を滑りながら突進してくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかり",
+          "descriptionJA": "1回の突進、3回の突進、突進してから振り返って跳びかかってくる、突進後にUターンして再び突進、突進後にUターンして跳びかかってくる等のパターンがある。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ジャンプヒップ攻撃",
+          "descriptionJA": "【予備動作】立ち上がって両前脚を地面に付ける。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "氷塊投げ",
+          "descriptionJA": "【対処方法】左右に回避する。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "雪玉転がし",
+          "descriptionJA": "大きく跳びかかってきて食らうと吹っ飛ぶ。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/lagombi.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "7e413a91aeafad16171530e6f58a6c8a1fccfbb037550484bfa165f80c851a80"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "lavasioth",
+      "nameEN": "Lavasioth",
+      "nameKO": "볼가노스",
+      "speciesJA": "魚竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "足踏み",
+          "descriptionJA": "ヴォルガノスはほとんどの場合、行動と行動の間に2歩足踏みをする。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "地中からの急襲",
+          "descriptionJA": "赤くなった地面や溶岩からいきなり飛び出してきて着地後に前方に這いずりながら進んでくる。",
+          "semantic": "burrow",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "這いずり",
+          "descriptionJA": "【予備動作】ハンターの足元が真っ赤になる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾振り",
+          "descriptionJA": "【対処方法】赤くなった場所を避けて着地したヴォルガノスの進行方向から逃げる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ジャンピングボディプレス",
+          "descriptionJA": "前方に小さくジャンプして前方に這いずってくる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "溶岩ブレス",
+          "descriptionJA": "Uターンしてくるパターンもある。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "溶岩飛ばし",
+          "descriptionJA": "【予備動作】動きを止めて頭を下げ、尻尾を振る。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/lavasioth.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "56afc5730fea057bcc6495d77987ca405472b861386c3151fc98b83348db81a1"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "najarala",
+      "nameEN": "Najarala",
+      "nameKO": "가라라아자라",
+      "speciesJA": "蛇竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "大"
+      },
+      "moves": [
+        {
+          "nameJA": "噛み付き",
+          "descriptionJA": "1～2回、首を伸ばして噛みついてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "鳴甲飛ばし",
+          "descriptionJA": "【予備動作】唸りながら首を後ろに引く。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "音波",
+          "descriptionJA": "【対処方法】2回噛みついた後は首が伸びているのでチャンス。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "囲い込んで攻撃",
+          "descriptionJA": "尻尾を使って2つの鳴甲をばら撒いてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "鳴甲を飛ばした後に咆哮や音波を出して地面に落ちた鳴甲を爆発させる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾なぎ払い",
+          "descriptionJA": "【予備動作】後退しながら音を鳴らして尻尾を振り上げる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "振動波",
+          "descriptionJA": "【対処方法】鳴甲が着地した時に咆哮【大】の効果があるので高級耳栓があると有効。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "潜行から突き上げるく",
+          "descriptionJA": "口から音波を出す。",
+          "semantic": "burrow",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/najarala.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "d6f1916b5b30702dadeb672a5e4369c18fd28906cdde8fca5034afe769abca11"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "nargacuga",
+      "nameEN": "Nargacuga",
+      "nameKO": "나르가쿠르가",
+      "speciesJA": "飛竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "尻尾でなぎ払い",
+          "descriptionJA": "尻尾で後方から斜め前方へなぎ払う。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "大回転尻尾攻撃",
+          "descriptionJA": "【予備動作】左右のどちらかに身を後方に引いて尻尾を振り上げる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "トゲ飛ばし",
+          "descriptionJA": "【対処方法】攻撃判定は一瞬なのでタイミングよく回避しよう。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "飛びかかり",
+          "descriptionJA": "甲高い音を鳴らしながら前進して尻尾を大回転させてくる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "連続飛びかかり",
+          "descriptionJA": "【予備動作】後方へ身を引いて体をねじる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾叩きつけ",
+          "descriptionJA": "【対処方法】範囲の広い攻撃だが攻撃判定が一瞬なのタイミングよく回避しよう。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "ハンターに向かってトゲを飛ばしてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "尻尾を振り回している時間が長いほど多くのトゲが飛んでくる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/nargacuga.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "259262ed5286ff81ca1097b8b5e3b28bd2b5f6a9a116f73ab241fda224dbf7ea"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "nibelsnarf",
+      "nameEN": "Nibelsnarf",
+      "nameKO": "하플보카",
+      "speciesJA": "海竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "砂ブレス（直線）",
+          "descriptionJA": "正面に砂のブレスを吐く。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "砂ブレス（扇状）",
+          "descriptionJA": "【予備動作】前脚を踏ん張り息を吸い込む。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "砂噴射",
+          "descriptionJA": "【対処方法】ガード不能だが左右に移動すれば回避できる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "扇状に砂のブレスを吐く。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "【予備動作】前脚を踏ん張り大きく息を吸い込む。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "砂中からの突き上げ攻撃",
+          "descriptionJA": "【対処方法】ガード不能だが背後に回り込めば当たらない。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "吹き飛ばし攻撃",
+          "descriptionJA": "背中側に広範囲で砂を噴出する。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/nibelsnarf.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "ec6b9beeb535042d4823a849f3c3083258f5a1b6db8703ba9bbdfdda467598bb"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "plesioth",
+      "nameEN": "Plesioth",
+      "nameKO": "가노토토스",
+      "speciesJA": "魚竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "急接近",
+          "descriptionJA": "ハンターに急接近してくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ボディアタック",
+          "descriptionJA": "【予備動作】なし。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "腹すべり",
+          "descriptionJA": "【対処方法】急接近後に回転尻尾攻撃をする事が多いので注意。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転尻尾攻撃",
+          "descriptionJA": "右半身側へ体当たりをしてくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "一直線に水ブレス",
+          "descriptionJA": "【予備動作】急に横向きになり左側に重心を置く。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "扇状に水ブレス",
+          "descriptionJA": "【対処方法】左脚側へ回避する。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/plesioth.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "9c43536e0759d7405e785889cdf77a6feba962711df59a33ee47eeb6d789a247"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "rathalos",
+      "nameEN": "Rathalos",
+      "nameKO": "리오레우스",
+      "speciesJA": "飛竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "地上でも空中でも怒り移行時に放ってくる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "【対処方法】耳栓スキルで対処しよう。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾攻撃",
+          "descriptionJA": "噛みついてくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "炎ブレス",
+          "descriptionJA": "【予備動作】首を右後方に引く。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "【対処方法】噛みついた時に揺れる尻尾にも当たり判定があるので注意。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滑空",
+          "descriptionJA": "180度回転しながら尻尾で攻撃してくる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "毒蹴り",
+          "descriptionJA": "2回セットで行ってくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "滑空炎ブレス",
+          "descriptionJA": "【予備動作】右後方を向く。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "3連炎ブレス",
+          "descriptionJA": "【対処方法】正面にいる時はすれ違うように回避しよう。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "拘束",
+          "descriptionJA": "ハンターに向かって火玉を1発吐き出してくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/rathalos.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "66c85e27992ff2c6e71bdfeda36673cb5a7f2d033ab69a8b92f2ec9bef7b92c3"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "rathian",
+      "nameEN": "Rathian",
+      "nameKO": "리오레이아",
+      "speciesJA": "飛竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "咆哮を放ってくる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "【予備動作】怒り移行時。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転尻尾攻撃",
+          "descriptionJA": "【対処方法】耳栓のスキルを使う。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "1歩前進して噛みついてくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "サマーソルト攻撃",
+          "descriptionJA": "【予備動作】首を右後方へ引く。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "3連炎ブレス",
+          "descriptionJA": "【対処方法】噛みついた時に揺れる尻尾に当たると尻もちをつく。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "扇状炎ブレス",
+          "descriptionJA": "回転しながら尻尾で攻撃してくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/rathian.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "ebbdfdadc1f41c125062664905050f3b2565f1461efb5f5cd315173557a7ee58"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "royal-ludroth",
+      "nameEN": "Royal Ludroth",
+      "nameKO": "로아루도로스",
+      "speciesJA": "海竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "突進",
+          "descriptionJA": "ハンターに向かって突進してくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "飛びかかり",
+          "descriptionJA": "ハンターに向かって飛びかかってくる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "前進しながら左右に2回噛みついてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ボディプレス",
+          "descriptionJA": "【予備動作】頭を持ち上げる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "横転",
+          "descriptionJA": "体を持ち上げて地面に叩きつけてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "水ブレス",
+          "descriptionJA": "叩きつけられた時に頭と体の周囲に水属性の飛沫が発生して当たると水やられ状態になる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "水弾攻撃",
+          "descriptionJA": "横に転がってくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "パンチ",
+          "descriptionJA": "【予備動作】頭を持ち上げて回転方向に向く。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾振り",
+          "descriptionJA": "1回と3回がありどちらも着弾した飛沫がしばらく地面に残り触れると水やられ状態になる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/royal-ludroth.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "83846f4c997d1099b1a4bb2f0eb2027e61b8e68f3680ab0387222e2ce4105222"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "seltas",
+      "nameEN": "Seltas",
+      "nameKO": "아르셀타스",
+      "speciesJA": "甲虫種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "腐食液",
+          "descriptionJA": "腐食液を放ってきます。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "空中からの鎌攻撃",
+          "descriptionJA": "【予備動作】地上や空中で両腕を鎌を広げる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "空中からの鎌なぎ払い攻撃",
+          "descriptionJA": "【対処方法】正面にいると当たらない。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "鎌を振り下してくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/seltas.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "6397b72a166148d54039624f78d824b34f95358bb9cc632911bee0e06b2d5d76"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "seltas-queen",
+      "nameEN": "Seltas Queen",
+      "nameKO": "게넬 셀타스",
+      "speciesJA": "甲虫種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "高圧ブレス",
+          "descriptionJA": "ハンターがどこにいようがお構いなしに高圧ブレスを放ってくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾攻撃",
+          "descriptionJA": "食らうと水やられ状態になる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "踏みつけ",
+          "descriptionJA": "尻尾を振り回してくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "腐食液",
+          "descriptionJA": "前脚を地面に叩きつけてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "悪臭ガス",
+          "descriptionJA": "ハンターに向かって突進してくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進(連携)",
+          "descriptionJA": "ゲネル・セルタスと合体しているアルセルタスから腐食液を連続で放ってくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ボディプレス(連携)",
+          "descriptionJA": "腐食液には防御力低下の効果がある。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "捕食(連携)",
+          "descriptionJA": "胴体から悪臭ガスを放ち食らうと悪臭状態になり回復アイテムが使えなくなる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/seltas-queen.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "ba03a604e6c8070f87e4e268d9db326161f903b1b0d0487222134ac955aba9f5"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "seregios",
+      "nameEN": "Seregios",
+      "nameKO": "셀레기오스",
+      "speciesJA": "飛竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "両翼を広げて首を伸ばした時に咆哮してくる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "刃鱗飛ばし（前方）",
+          "descriptionJA": "【予備動作】重心を低くして首を震わせる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "刃鱗飛ばし（後方）",
+          "descriptionJA": "前方の3方向に刃鱗を飛ばしてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "キック",
+          "descriptionJA": "【予備動作】首を縮めて頭を震わせる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "爪引っかき",
+          "descriptionJA": "【対処方法】予備動作中に斜め前方まで近づくと当たらない。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾なぎ払い",
+          "descriptionJA": "左後方に3方向、右後方に3方向の刃鱗を飛ばしてくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "飛び蹴り",
+          "descriptionJA": "【予備動作】尻尾を立てて鳴き声を上げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "拘束",
+          "descriptionJA": "【対処方法】尻尾を切断するとこの攻撃での刃鱗の威力が弱体化する。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/seregios.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "6e22107379bc4eafc073158caeed332ddc3ac98beb277f6c78d76ca436b2c977"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "shogun-ceanataur",
+      "nameEN": "Shogun Ceanataur",
+      "nameKO": "쇼군기자미",
+      "speciesJA": "甲殻種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "爪攻撃",
+          "descriptionJA": "その場で攻撃するパターンと1歩踏み出すパターンがある。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "【予備動作】動きが止まって鳴き声を上げながら両腕を上げる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "両爪攻撃",
+          "descriptionJA": "【対処方法】どちらのパターンも近づいてしまった方が回避しやすい。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転爪攻撃",
+          "descriptionJA": "正面に突進してくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "天井から水ブレス",
+          "descriptionJA": "1回のパターンと3回のパターンがある。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "地中から急襲",
+          "descriptionJA": "【予備動作】なし。",
+          "semantic": "burrow",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/shogun-ceanataur.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "db93956710f3bdcdff6ba73d249294f6819eaf288359c7050e1a1805ab4979ae"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "teostra",
+      "nameEN": "Teostra",
+      "nameKO": "테오 테스카토르",
+      "speciesJA": "古龍種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "爪攻撃",
+          "descriptionJA": "前脚の左右の爪でひっかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ダッシュ",
+          "descriptionJA": "ハンターが近くにいる時に使ってくることが多く当たると爆破やられ状態になる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾を振る",
+          "descriptionJA": "ハンターに向かってダッシュして突進してくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "粉塵爆発",
+          "descriptionJA": "後方を尻尾を振って攻撃してくる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "炎ブレス",
+          "descriptionJA": "当たると爆破やられ状態になる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "空中爆発",
+          "descriptionJA": "尻尾を振っている時は正面と側面が無防備になるので攻撃のチャンス。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "爆発させてブレス",
+          "descriptionJA": "粉塵を巻き上げて周囲を爆発させてくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/teostra.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "825e6f9dec7a0025cc58e723d4c155a0fc77acae23d07331d854cdd6c930fe0e"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "tetsucabra",
+      "nameEN": "Tetsucabra",
+      "nameKO": "테츠카브라",
+      "speciesJA": "両生種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "岩石掘り",
+          "descriptionJA": "岩石で盾を作ったり砕いて投げつけてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "岩くだき",
+          "descriptionJA": "【予備動作】背中を丸めて地中に牙を刺す。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ジャンプ攻撃",
+          "descriptionJA": "【対処方法】その後の行動に注意しよう。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "踏み潰し",
+          "descriptionJA": "口に岩を加えて噛み砕き地面に叩きつけて周囲にダメージを与える。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかり",
+          "descriptionJA": "ダメージ範囲が広いので注意が必要だがカード可能。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "力を入れた時に尻尾が膨張して柔らかかなるので尻尾を攻撃するチャンスとなる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "岩が大きすぎて砕けない場合はそのまま設置する。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "粘液飛ばし",
+          "descriptionJA": "両顎を破壊すると大きな岩を掘り出せなくなる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "横転",
+          "descriptionJA": "【予備動作】後脚で立ち上がる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/tetsucabra.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "6b43d4c56090e3240a3ece764f320974eabad2883faecab3f0a03c7728ab97c0"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "tigrex",
+      "nameEN": "Tigrex",
+      "nameKO": "티가렉스",
+      "speciesJA": "飛竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "特大"
+      },
+      "moves": [
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "予備動作が短ければ1回、長ければ2回噛みついてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転攻撃",
+          "descriptionJA": "【予備動作】体を引いて区部を振り上げる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "【対処方法】1回の時は後ろへ下がり2回の時は左右へ離れるかガードする。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "岩石飛ばし",
+          "descriptionJA": "右前脚を軸にして回転して攻撃する。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "飛びついてくる",
+          "descriptionJA": "【予備動作】左側に重心を傾ける。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "【対処方法】左側にいれば少し下がると回避できる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/tigrex.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "014a86796409b67886963b3bb9f9a2a0fb821c4d9b570ff17a7a7b6073f66f37"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "uragaan",
+      "nameEN": "Uragaan",
+      "nameKO": "우라간킨",
+      "speciesJA": "獣竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "ハンターを発見した時と怒り移行時に咆哮をしてくる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "顎スタンプ",
+          "descriptionJA": "咆哮の後は2回顎スタンプをしてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "4連続顎スタンプ",
+          "descriptionJA": "【予備動作】左脚で踏ん張って頭部を斜め上に突き上げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾なぎ払い",
+          "descriptionJA": "予備動作後に顎を叩きつけてくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "転がり攻撃",
+          "descriptionJA": "叩きつけた後に振動効果があり火薬岩を誘爆させる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ショルダータックル",
+          "descriptionJA": "【予備動作】頭を持ち上げてハンターの方を振り向く。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "火炎ガス",
+          "descriptionJA": "【対処方法】振動をガードか回避するとチャンスになる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "睡眠ガス",
+          "descriptionJA": "前進して左右に4回スタンプしてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "噛みつき",
+          "descriptionJA": "【予備動作】唸りながら頭を上げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/uragaan.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "b82971db226d2c35112d03aafdd52348a1187e03c9b068ee25f1d5323c27322d"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "velocidrome",
+      "nameEN": "Velocidrome",
+      "nameKO": "도스람포스",
+      "speciesJA": "鳥竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "拘束",
+          "descriptionJA": "2回サイドステップした後に飛びかかりの攻撃を受けると拘束されてしまう。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "飛びかかり",
+          "descriptionJA": "後脚で蹴り出しハンターに向かって飛びかかってくる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/velocidrome.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "21757d54304eb0d21b82ada70b2f303c24d1f7de686905e1231765dd4d9138bb"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "volvidon",
+      "nameEN": "Volvidon",
+      "nameKO": "랑그로토라",
+      "speciesJA": "牙獣種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "連続ひっかき",
+          "descriptionJA": "左右の前脚を振り下ろしてひっかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "クロスひっかき",
+          "descriptionJA": "通常時と疲労時は3回、怒り時は4回ひっかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転ひっかき",
+          "descriptionJA": "【予備動作】立ち上がって手を振り回す。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "転がり",
+          "descriptionJA": "前進してクロスするようにひっかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "舌攻撃",
+          "descriptionJA": "【予備動作】後ずさりして両腕を広げる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "唾吐き",
+          "descriptionJA": "回転しながらひっかいてくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "悪臭ガス",
+          "descriptionJA": "1回の場合と2回の場合がある。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ジャンプ攻撃",
+          "descriptionJA": "前後左右に転がってくる。",
+          "semantic": "aerial",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/volvidon.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "b3a208fd5135e7a5b42dd57aa3b9ef731abb5dd6bc715fee5976c3045e408343"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "yian-garuga",
+      "nameEN": "Yian Garuga",
+      "nameKO": "얀가루루가",
+      "speciesJA": "鳥竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "サマーソルト尻尾攻撃",
+          "descriptionJA": "宙返りをして尻尾で攻撃してくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "連続ついばみ",
+          "descriptionJA": "ダメージが大きく当たると必ず毒状態になる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "火炎ブレス",
+          "descriptionJA": "【予備動作】2歩後ずさりする。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転して尻尾を振り回す",
+          "descriptionJA": "【対処方法】足元にいる時は尻尾の方へ、近距離の場合は横に移動して回避する。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "連続で4回連続でついばむ攻撃をしてくる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "クチバシ突き刺し",
+          "descriptionJA": "ガードするとスタミナを連続で減らされる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "【予備動作】距離がある時は小さく跳びかかる。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/yian-garuga.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "6fefd68b3142e3bd0f1136ef88b4638cc9246e887a36bbbdee52769f329fad94"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "yian-kut-ku",
+      "nameEN": "Yian Kut-Ku",
+      "nameKO": "얀쿡",
+      "speciesJA": "鳥竜種",
+      "roar": {
+        "status": "verified-absent",
+        "strength": null
+      },
+      "moves": [
+        {
+          "nameJA": "ついばみ攻撃",
+          "descriptionJA": "4回連続でついばんでくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "ガードすると連続でスタミナを削られてしまう。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "尻尾を振り回す",
+          "descriptionJA": "【予備動作】近距離の場合はいきなり、距離がある時は小さく跳びかかってくる。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "火玉吐き",
+          "descriptionJA": "【対処方法】正面にいる時はすれ違うように回避する。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/yian-kut-ku.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "34c2d49fad0bd56e00d9342fa26fde8d38c429454a49ff1b43ef25b97fc7cfb8"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "zamtrios",
+      "nameEN": "Zamtrios",
+      "nameKO": "자보아자길",
+      "speciesJA": "両生種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "大"
+      },
+      "moves": [
+        {
+          "nameJA": "凍結ブレス",
+          "descriptionJA": "左右に凍結するブレスを吐いてくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "引っかき",
+          "descriptionJA": "近距離パターンと長距離パターンがある。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "凍結液吐き",
+          "descriptionJA": "【予備動作】頭を上げる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "跳びかかってくる",
+          "descriptionJA": "【対処方法】ブレスから離れるように移動する。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "溜める",
+          "descriptionJA": "前方を引っかいてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "【予備動作】前脚を後ろに行く。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "回転攻撃",
+          "descriptionJA": "【対処方法】氷まとい状態だと攻撃範囲が広くなるので注意。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "潜行から飛び出し",
+          "descriptionJA": "前方に1つ凍結液を吐いてくる。",
+          "semantic": "burrow",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "咆哮",
+          "descriptionJA": "当たると雪だるま状態になってしまう。",
+          "semantic": "roar",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "氷の光線",
+          "descriptionJA": "氷まとい状態だと3つ吐いてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "連続氷吐き",
+          "descriptionJA": "【予備動作】後脚で達がある。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "転がり",
+          "descriptionJA": "【対処方法】至近距離に近づくと当たらない。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/zamtrios.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "aa6340ef50d6da5d4cbe4321bac972a1db1fdee809733cfe2617b70778e709cb"
+    },
+    {
+      "game": "generations-ultimate",
+      "pageId": "zinogre",
+      "nameEN": "Zinogre",
+      "nameKO": "진오우거",
+      "speciesJA": "牙竜種",
+      "roar": {
+        "status": "verified-present",
+        "strength": "小"
+      },
+      "moves": [
+        {
+          "nameJA": "帯電",
+          "descriptionJA": "空気中にいる雷光虫を集めて体にまとう。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "前脚攻撃",
+          "descriptionJA": "帯電中は攻撃のチャンスでもあるが帯電の量が一定以上になると超帯電状態になり周囲に落雷を落としてくる。",
+          "semantic": "close",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "突進",
+          "descriptionJA": "超帯電中は速度と攻撃力が大幅にアップするが一部の肉質が軟化して攻撃しやすくなる。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ボディプレス",
+          "descriptionJA": "帯電は「閃光弾を使う」「ダメージを与えてひるませる」で解除可能。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "反転から尻尾叩きつけ",
+          "descriptionJA": "ひるませて帯電を解除した場合、必ず落とし物をする。",
+          "semantic": "sweep",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "ショルダータックル",
+          "descriptionJA": "超帯電中は転倒時に背中で虫取りが可能。",
+          "semantic": "charge",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "雷光弾",
+          "descriptionJA": "前進しながら前脚を連続で叩きつけてくる。",
+          "semantic": "projectile",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        },
+        {
+          "nameJA": "フライングボディプレス",
+          "descriptionJA": "通常時は2回、超帯電時と怒り時は3回攻撃してくる。",
+          "semantic": "area",
+          "damage": {
+            "Physical": 35
+          },
+          "statuses": {},
+          "guardable": null,
+          "power": 35,
+          "offensive": true,
+          "evidence": "game-e-mhxx-named-attack-pattern-guide"
+        }
+      ],
+      "sourceUrl": "https://game-e.com/mhxx/monster/zinogre.php",
+      "evidence": "game-e-mhxx-named-attack-pattern-guide",
+      "sourceSha256": "083f45781a41506881b3357047e46ebd35c546e2e664db93701e293110a93a07"
+    }
+  ]
+}

@@ -18,11 +18,27 @@ class HuntWeaponMechanics {
         bow: { bowCharge: 0, bowPowerStep: 0, tracerGauge: 0, tracerTicks: 0, bowStamina: 100, fuseArrows: 0 }
     });
 
+    static LONG_SWORD_SPECIAL_SHEATHE_CHANCE = Object.freeze([0, 0.10, 0.20, 1]);
+
     constructor(random = Math.random) {
         this.random = random;
     }
 
+    static longSwordSpecialSheatheChance(spiritLevel = 0) {
+        const level = Math.max(0, Math.min(3, Math.floor(Number(spiritLevel || 0))));
+        return HuntWeaponMechanics.LONG_SWORD_SPECIAL_SHEATHE_CHANCE[level];
+    }
+
+    static atbConfig() {
+        return typeof HuntAtbConfig !== 'undefined'
+            ? HuntAtbConfig
+            : require('./HuntAtbConfig.js');
+    }
+
     static canonicalActions() {
+        const atbConfig = this.atbConfig();
+        const chargeStageTicks = atbConfig.STANDARD_CHARGE_STAGE_TICKS;
+        const chargeStageAuthoredCost = atbConfig.STANDARD_CHARGE_AUTHORED_COST_SECONDS;
         return {
             switch_axe: [
                 {
@@ -137,7 +153,8 @@ class HuntWeaponMechanics {
                     id: 'hammer.charge_1', name: '차지 1단계', dmg: 0, motionValue: 0,
                     requirements: { hammerChargeLevel: 0 }, effects: { hammerChargeLevel: 1, atbAfterAction: 94 },
                     tags: ['blunt', 'charge', 'preparation'], audioCue: 'none',
-                    windupTicks: 1, activeTicks: 1, recoveryTicks: 1, durationTicks: 3,
+                    atbCostSeconds: chargeStageAuthoredCost,
+                    windupTicks: 1, activeTicks: 1, recoveryTicks: 3, durationTicks: chargeStageTicks,
                     mechanicEvidence: 'wilds-action-class:cChargeStart/cCharge1Swing1'
                 },
                 {
@@ -150,7 +167,8 @@ class HuntWeaponMechanics {
                     id: 'hammer.charge_2', name: '차지 2단계', dmg: 0, motionValue: 0,
                     requirements: { hammerChargeLevel: 1 }, effects: { hammerChargeLevel: 2, atbAfterAction: 94 },
                     tags: ['blunt', 'charge', 'preparation'], audioCue: 'none',
-                    windupTicks: 1, activeTicks: 1, recoveryTicks: 1, durationTicks: 3,
+                    atbCostSeconds: chargeStageAuthoredCost,
+                    windupTicks: 1, activeTicks: 1, recoveryTicks: 3, durationTicks: chargeStageTicks,
                     mechanicEvidence: 'wilds-action-class:cCharge2Swing'
                 },
                 {
@@ -163,7 +181,8 @@ class HuntWeaponMechanics {
                     id: 'hammer.charge_3', name: '차지 3단계', dmg: 0, motionValue: 0,
                     requirements: { hammerChargeLevel: 2 }, effects: { hammerChargeLevel: 3, atbAfterAction: 92 },
                     tags: ['blunt', 'charge', 'preparation'], audioCue: 'none',
-                    windupTicks: 1, activeTicks: 1, recoveryTicks: 1, durationTicks: 3,
+                    atbCostSeconds: chargeStageAuthoredCost,
+                    windupTicks: 1, activeTicks: 1, recoveryTicks: 3, durationTicks: chargeStageTicks,
                     mechanicEvidence: 'wilds-action-class:cCharge3Lash/cCharge3Spin'
                 },
                 {
@@ -176,7 +195,8 @@ class HuntWeaponMechanics {
                     id: 'hammer.mighty_charge', name: '혼신 모으기', dmg: 0, motionValue: 0,
                     requirements: { hammerChargeLevel: 3 }, effects: { hammerChargeLevel: 4, atbAfterAction: 90 },
                     tags: ['blunt', 'charge', 'preparation', 'finisher-setup'], audioCue: 'none',
-                    windupTicks: 1, activeTicks: 1, recoveryTicks: 2, durationTicks: 4,
+                    atbCostSeconds: chargeStageAuthoredCost,
+                    windupTicks: 1, activeTicks: 1, recoveryTicks: 3, durationTicks: chargeStageTicks,
                     mechanicEvidence: 'wilds-action-class:cSuperChargeStartToLoop'
                 },
                 {
@@ -191,6 +211,7 @@ class HuntWeaponMechanics {
     }
 
     static extendedActions() {
+        const greatSwordChargeTicks = this.atbConfig().STANDARD_CHARGE_STAGE_TICKS;
         const prep = (id, name, requirements, effects, evidence, durationTicks = 4) => ({
             id, name, dmg: 0, motionValue: 0, requirements, effects,
             tags: ['preparation', ...(/charge|draw/.test(id) ? ['charge'] : [])], audioCue: 'none', durationTicks,
@@ -198,17 +219,17 @@ class HuntWeaponMechanics {
         });
         return {
             great_sword: [
-                prep('great_sword.charge_1', '모아베기 · 1차지', { greatSwordChain: 0, greatSwordCharge: 0 }, { greatSwordCharge: 1, atbAfterAction: 94 }, 'wilds-action-class:cIdleToCharge', 3),
-                prep('great_sword.charge_2', '모아베기 · 2차지', { greatSwordChain: 0, greatSwordCharge: 1 }, { greatSwordCharge: 2, atbAfterAction: 93 }, 'wilds-motion-reference:charged-slash-hold-loop', 3),
-                prep('great_sword.charge_3', '모아베기 · 3차지', { greatSwordChain: 0, greatSwordCharge: 2 }, { greatSwordCharge: 3, atbAfterAction: 92 }, 'wilds-motion-reference:charged-slash-hold-loop', 3),
+                { ...prep('great_sword.charge_1', '모아베기 · 1차지', { greatSwordChain: 0, greatSwordCharge: 0 }, { greatSwordCharge: 1, atbAfterAction: 94 }, 'wilds-action-class:cIdleToCharge', greatSwordChargeTicks), atbCostSeconds: 5 },
+                prep('great_sword.charge_2', '모아베기 · 2차지', { greatSwordChain: 0, greatSwordCharge: 1 }, { greatSwordCharge: 2, atbAfterAction: 93 }, 'wilds-motion-reference:charged-slash-hold-loop', greatSwordChargeTicks),
+                prep('great_sword.charge_3', '모아베기 · 3차지', { greatSwordChain: 0, greatSwordCharge: 2 }, { greatSwordCharge: 3, atbAfterAction: 92 }, 'wilds-motion-reference:charged-slash-hold-loop', greatSwordChargeTicks),
                 { id: 'great_sword.charged_slash', name: '모아베기', dmg: 330, motionValue: 82, requirements: { greatSwordChain: 0, minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, greatSwordChain: 1 }, next: ['great_sword.strong_charge_1'], tags: ['sever', 'charge-release', 'heavy'], audioCue: 'charged_slash', durationTicks: 15, mechanicEvidence: 'wilds-action-class:cVerticalSlash' },
-                prep('great_sword.strong_charge_1', '강 모아베기 · 1차지', { greatSwordChain: 1, greatSwordCharge: 0 }, { greatSwordCharge: 1, atbAfterAction: 94 }, 'wilds-action-class:cStrongCharge', 3),
-                prep('great_sword.strong_charge_2', '강 모아베기 · 2차지', { greatSwordChain: 1, greatSwordCharge: 1 }, { greatSwordCharge: 2, atbAfterAction: 93 }, 'wilds-motion-reference:strong-charged-slash-hold-loop', 3),
-                prep('great_sword.strong_charge_3', '강 모아베기 · 3차지', { greatSwordChain: 1, greatSwordCharge: 2 }, { greatSwordCharge: 3, atbAfterAction: 92 }, 'wilds-motion-reference:strong-charged-slash-hold-loop', 3),
+                prep('great_sword.strong_charge_1', '강 모아베기 · 1차지', { greatSwordChain: 1, greatSwordCharge: 0 }, { greatSwordCharge: 1, atbAfterAction: 94 }, 'wilds-action-class:cStrongCharge', greatSwordChargeTicks),
+                prep('great_sword.strong_charge_2', '강 모아베기 · 2차지', { greatSwordChain: 1, greatSwordCharge: 1 }, { greatSwordCharge: 2, atbAfterAction: 93 }, 'wilds-motion-reference:strong-charged-slash-hold-loop', greatSwordChargeTicks),
+                prep('great_sword.strong_charge_3', '강 모아베기 · 3차지', { greatSwordChain: 1, greatSwordCharge: 2 }, { greatSwordCharge: 3, atbAfterAction: 92 }, 'wilds-motion-reference:strong-charged-slash-hold-loop', greatSwordChargeTicks),
                 { id: 'great_sword.strong_charged_slash', name: '강 모아베기', dmg: 470, motionValue: 118, requirements: { greatSwordChain: 1, minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, greatSwordChain: 2 }, next: ['great_sword.true_charge_1'], tags: ['sever', 'charge-release', 'heavy'], audioCue: 'charged_slash', durationTicks: 17, mechanicEvidence: 'wilds-action-class:cStrongVerticalSlash' },
-                prep('great_sword.true_charge_1', '참 모아베기 · 1차지', { greatSwordChain: 2, greatSwordCharge: 0 }, { greatSwordCharge: 1, atbAfterAction: 94 }, 'wilds-action-class:cSpiritCharge', 3),
-                prep('great_sword.true_charge_2', '참 모아베기 · 2차지', { greatSwordChain: 2, greatSwordCharge: 1 }, { greatSwordCharge: 2, atbAfterAction: 93 }, 'wilds-motion-reference:true-charged-slash-hold-loop', 3),
-                prep('great_sword.true_charge_3', '참 모아베기 · 3차지', { greatSwordChain: 2, greatSwordCharge: 2 }, { greatSwordCharge: 3, atbAfterAction: 92 }, 'wilds-motion-reference:true-charged-slash-hold-loop', 3),
+                prep('great_sword.true_charge_1', '참 모아베기 · 1차지', { greatSwordChain: 2, greatSwordCharge: 0 }, { greatSwordCharge: 1, atbAfterAction: 94 }, 'wilds-action-class:cSpiritCharge', greatSwordChargeTicks),
+                prep('great_sword.true_charge_2', '참 모아베기 · 2차지', { greatSwordChain: 2, greatSwordCharge: 1 }, { greatSwordCharge: 2, atbAfterAction: 93 }, 'wilds-motion-reference:true-charged-slash-hold-loop', greatSwordChargeTicks),
+                prep('great_sword.true_charge_3', '참 모아베기 · 3차지', { greatSwordChain: 2, greatSwordCharge: 2 }, { greatSwordCharge: 3, atbAfterAction: 92 }, 'wilds-motion-reference:true-charged-slash-hold-loop', greatSwordChargeTicks),
                 { id: 'great_sword.true_charged_slash', name: '참 모아베기', dmg: 760, motionValue: 190, hits: [15, 175], requirements: { greatSwordChain: 2, minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, greatSwordChain: 0 }, tags: ['sever', 'charge-release', 'heavy', 'finisher'], audioCue: 'true_charged_slash', durationTicks: 21, mechanicEvidence: 'wilds-action-class:cSpiritVerticalSlash' },
                 { id: 'great_sword.tackle', name: '차지 태클', dmg: 95, motionValue: 26, stun: 55, requirements: { minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, advanceGreatSwordChain: true, atbAfterAction: 86 }, tags: ['blunt', 'counter', 'tackle'], audioCue: 'blunt_light', durationTicks: 7, mechanicEvidence: 'wilds-action-class:cTackle' },
                 { id: 'great_sword.wide_slash', name: '횡베기', dmg: 168, motionValue: 42, effects: {}, next: ['great_sword.side_blow'], tags: ['sever'], audioCue: 'slash_heavy', durationTicks: 9, mechanicEvidence: 'wilds-motion-values:wide-slash-42' },
@@ -222,7 +243,7 @@ class HuntWeaponMechanics {
                 { id: 'long_sword.spirit_slash_1', name: '기인베기 I', dmg: 145, motionValue: 36, requirements: { minSpiritGauge: 28 }, effects: { spiritGauge: -28 }, next: ['long_sword.spirit_slash_2'], tags: ['sever', 'spirit'], audioCue: 'slash_heavy', durationTicks: 9, mechanicEvidence: 'wilds-action-class:cKijinSlash1NoCombo' },
                 { id: 'long_sword.spirit_slash_2', name: '기인베기 II', dmg: 185, motionValue: 46, requirements: { minSpiritGauge: 20 }, effects: { spiritGauge: -20 }, next: ['long_sword.spirit_slash_3'], tags: ['sever', 'spirit'], audioCue: 'slash_heavy', durationTicks: 10, mechanicEvidence: 'wilds-action-class:cKijinSlash2' },
                 { id: 'long_sword.spirit_slash_3', name: '기인베기 III', dmg: 220, motionValue: 55, requirements: { minSpiritGauge: 18 }, effects: { spiritGauge: -18 }, next: ['long_sword.spirit_roundslash'], tags: ['sever', 'spirit'], audioCue: 'slash_heavy', durationTicks: 11, mechanicEvidence: 'wilds-action-class:cKijinSlash3' },
-                { id: 'long_sword.spirit_roundslash', name: '기인대회전베기', dmg: 285, motionValue: 70, requirements: { minSpiritGauge: 12 }, effects: { spiritGauge: -12, spiritLevel: 1, spiritRoundslashReady: false }, next: ['long_sword.overhead_slash'], tags: ['sever', 'spirit', 'finisher'], audioCue: 'slash_heavy', durationTicks: 13, mechanicEvidence: 'wilds-action-class:cKijinSlashRound' },
+                { id: 'long_sword.spirit_roundslash', name: '대회전베기', dmg: 285, motionValue: 70, requirements: { minSpiritGauge: 12 }, effects: { spiritGauge: -12, spiritRoundslashReady: false }, next: ['long_sword.overhead_slash'], tags: ['sever', 'spirit', 'finisher'], audioCue: 'slash_heavy', durationTicks: 13, mechanicEvidence: 'wilds-action-class:cKijinSlashRound;spirit-level-on-confirmed-hit' },
                 { id: 'long_sword.helm_breaker', name: '기인투구깨기', dmg: 560, motionValue: 140, hits: [20, 20, 20, 20, 20, 20, 20], requirements: { minSpiritLevel: 3 }, effects: { spiritLevel: -1, iaiHelmBreakerReady: false, openSpiritRelease: true }, next: ['long_sword.spirit_release_slash'], tags: ['sever', 'spirit', 'multi-hit', 'finisher'], audioCue: 'slash_heavy', durationTicks: 18, mechanicEvidence: 'wilds-action-class:cKabutowariLand' },
                 { id: 'long_sword.spirit_release_slash', name: '기인해방베기', dmg: 520, motionValue: 104, hits: [18, 20, 22, 22, 22], requirements: { spiritReleaseReady: true }, effects: { spiritReleaseReady: false }, tags: ['sever', 'spirit', 'multi-hit', 'finisher'], audioCue: 'slash_heavy', durationTicks: 19, mechanicEvidence: 'wilds-motion-reference:spirit-release-slash' },
                 { id: 'long_sword.foresight', name: '간파베기', dmg: 125, motionValue: 31, requirements: { monsterPressure: true }, effects: { spiritGauge: 20 }, tags: ['sever', 'counter', 'foresight', 'reaction-only'], audioCue: 'counter', durationTicks: 9, mechanicEvidence: 'wilds-action-class:cMikiriSlash' },
@@ -230,9 +251,9 @@ class HuntWeaponMechanics {
                 { id: 'long_sword.iai_counter_fail', name: '거합베기 실패', dmg: 0, motionValue: 0, requirements: { specialSheatheReady: true }, effects: { specialSheatheReady: false, iaiHelmBreakerReady: false, spiritLevel: -1, spiritGauge: -25 }, tags: ['counter-fail'], audioCue: 'none', durationTicks: 6, mechanicEvidence: 'world-mechanic:iai-spirit-slash-miss-consumes-spirit-level' }
             ],
             sword_shield: [
-                { id: 'sword_shield.chop', name: '베어내리기', dmg: 72, motionValue: 18, effects: { snsChain: 1 }, next: ['sword_shield.lateral_slash'], tags: ['sever', 'sns-flow'], audioCue: 'slash_light', durationTicks: 5, mechanicEvidence: 'wilds-action-class:cSlash1' },
-                { id: 'sword_shield.lateral_slash', name: '가로베기', dmg: 82, motionValue: 20, requirements: { snsChain: 1 }, effects: { snsChain: 2 }, next: ['sword_shield.return_stroke'], tags: ['sever', 'sns-flow'], audioCue: 'slash_light', durationTicks: 5, mechanicEvidence: 'wilds-action-class:cHorizontalSlash' },
-                { id: 'sword_shield.return_stroke', name: '되돌려베기', dmg: 88, motionValue: 22, requirements: { snsChain: 2 }, effects: { snsChain: 3 }, next: ['sword_shield.spinning_rising_slash'], tags: ['sever', 'sns-flow'], audioCue: 'slash_light', durationTicks: 5, mechanicEvidence: 'wilds-motion-reference:return-stroke' },
+                { id: 'sword_shield.chop', name: '베어내리기', dmg: 72, motionValue: 18, effects: { snsChain: 1 }, next: ['sword_shield.lateral_slash'], tags: ['sever', 'sns-flow'], audioCue: 'slash_light', durationTicks: 5, atbCostSeconds: 0.5, mechanicEvidence: 'wilds-action-class:cSlash1' },
+                { id: 'sword_shield.lateral_slash', name: '가로베기', dmg: 82, motionValue: 20, requirements: { snsChain: 1 }, effects: { snsChain: 2 }, next: ['sword_shield.return_stroke'], tags: ['sever', 'sns-flow'], audioCue: 'slash_light', durationTicks: 5, atbCostSeconds: 0.5, mechanicEvidence: 'wilds-action-class:cHorizontalSlash' },
+                { id: 'sword_shield.return_stroke', name: '되돌려베기', dmg: 88, motionValue: 22, requirements: { snsChain: 2 }, effects: { snsChain: 3 }, next: ['sword_shield.spinning_rising_slash'], tags: ['sever', 'sns-flow'], audioCue: 'slash_light', durationTicks: 5, atbCostSeconds: 0.5, mechanicEvidence: 'wilds-motion-reference:return-stroke' },
                 { id: 'sword_shield.spinning_rising_slash', name: '회전 올려베기', dmg: 102, motionValue: 26, requirements: { snsChain: 3 }, effects: { snsChain: 4 }, next: ['sword_shield.spinning_reaper'], tags: ['sever', 'sns-flow'], audioCue: 'slash_light', durationTicks: 6, mechanicEvidence: 'wilds-motion-reference:spinning-rising-slash' },
                 { id: 'sword_shield.spinning_reaper', name: '회전 수확베기', dmg: 126, motionValue: 32, requirements: { snsChain: 4 }, effects: { snsChain: 0 }, next: ['sword_shield.chop'], tags: ['sever', 'sns-flow'], audioCue: 'slash_light', durationTicks: 7, mechanicEvidence: 'wilds-motion-reference:spinning-reaper' },
                 { id: 'sword_shield.charged_chop', name: '모아베기', dmg: 265, motionValue: 66, requirements: { minSnsChain: 2 }, effects: { snsChain: 0 }, tags: ['sever', 'sns-finisher'], audioCue: 'slash_heavy', durationTicks: 11, mechanicEvidence: 'wilds-motion-reference:charged-chop' },
@@ -252,18 +273,18 @@ class HuntWeaponMechanics {
                 { id: 'sword_shield.counter_slash', name: '카운터베기', dmg: 225, motionValue: 56, requirements: { snsCounterReady: true }, effects: { snsCounterReady: false, snsChain: 1 }, tags: ['sever', 'counter', 'sns-finisher'], audioCue: 'counter', durationTicks: 8, mechanicEvidence: 'wilds-motion-reference:counter-slash' }
             ],
             dual_blades: [
-                prep('dual_blades.enter_demon', '귀인화', { demonMode: false, minDemonStamina: 30 }, { demonMode: true, atbAfterAction: 92 }, 'wilds-action-class:cKijinOn', 3),
+                prep('dual_blades.enter_demon', '귀인화', { demonMode: false, minArchdemonGauge: 100 }, { demonMode: true, atbAfterAction: 92 }, 'wilds-action-class:cKijinOn', 3),
                 prep('dual_blades.exit_demon', '귀인화 해제', { demonMode: true }, { demonMode: false, demonDanceStep: 0, atbAfterAction: 88 }, 'wilds-controls:demon-mode-toggle-off', 3),
-                { id: 'dual_blades.double_slash', name: '이단베기', dmg: 76, motionValue: 19, hits: [9, 10], requirements: { demonMode: false, dualChain: 0 }, effects: { dualChain: 1, demonStamina: 5 }, next: ['dual_blades.double_slash_return'], tags: ['sever', 'multi-hit', 'dual-flow'], audioCue: 'slash_light', durationTicks: 5, mechanicEvidence: 'wilds-action-class:cTwiceSlash' },
-                { id: 'dual_blades.double_slash_return', name: '이단되돌려베기', dmg: 88, motionValue: 22, hits: [10, 12], requirements: { demonMode: false, dualChain: 1 }, effects: { dualChain: 2, demonStamina: 5 }, next: ['dual_blades.circle_slash'], tags: ['sever', 'multi-hit', 'dual-flow'], audioCue: 'slash_light', durationTicks: 5, mechanicEvidence: 'wilds-motion-reference:double-slash-return' },
-                { id: 'dual_blades.circle_slash', name: '차륜베기', dmg: 112, motionValue: 28, hits: [8, 9, 11], requirements: { demonMode: false, dualChain: 2 }, effects: { dualChain: 0, demonStamina: 6 }, next: ['dual_blades.double_slash'], tags: ['sever', 'multi-hit', 'dual-flow'], audioCue: 'slash_light', durationTicks: 6, mechanicEvidence: 'wilds-motion-reference:circle-slash' },
-                { id: 'dual_blades.demon_fang', name: '귀인연참', dmg: 128, motionValue: 32, hits: [9, 11, 12], requirements: { demonMode: true, minDemonStamina: 6, demonChain: 0 }, effects: { demonChain: 1, demonStamina: -6, archdemonGauge: 14 }, next: ['dual_blades.demon_double_slash'], tags: ['sever', 'multi-hit', 'demon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 6, mechanicEvidence: 'wilds-action-class:cKijinChain1NoCombo' },
-                { id: 'dual_blades.demon_double_slash', name: '귀인이단베기', dmg: 152, motionValue: 38, hits: [10, 12, 16], requirements: { demonMode: true, minDemonStamina: 7, demonChain: 1 }, effects: { demonChain: 2, demonStamina: -7, archdemonGauge: 16 }, next: ['dual_blades.demon_flurry'], tags: ['sever', 'multi-hit', 'demon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 6, mechanicEvidence: 'wilds-action-class:cKijinTwiceSlash' },
-                { id: 'dual_blades.demon_flurry', name: '귀인육단베기', dmg: 224, motionValue: 56, hits: [7, 8, 9, 9, 11, 12], requirements: { demonMode: true, minDemonStamina: 9, demonChain: 2 }, effects: { demonChain: 3, demonStamina: -9, archdemonGauge: 20 }, next: ['dual_blades.demon_roundslash'], tags: ['sever', 'multi-hit', 'demon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 8, mechanicEvidence: 'wilds-action-class:cKijinSixTimeSlash' },
-                { id: 'dual_blades.demon_roundslash', name: '귀인차륜베기', dmg: 176, motionValue: 44, hits: [10, 14, 20], requirements: { demonMode: true, minDemonStamina: 8, demonChain: 3 }, effects: { demonChain: 0, demonStamina: -8, archdemonGauge: 18 }, next: ['dual_blades.demon_fang'], tags: ['sever', 'multi-hit', 'demon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 7, mechanicEvidence: 'wilds-motion-reference:demon-roundslash' },
-                { id: 'dual_blades.blade_dance_1', name: '귀인난무 I', dmg: 138, motionValue: 34, hits: [7, 8, 9, 10], requirements: { demonMode: true, minDemonStamina: 8, demonDanceStep: 0 }, effects: { demonDanceStep: 1, demonChain: 0, demonStamina: -8, archdemonGauge: 12, atbAfterAction: 74 }, next: ['dual_blades.blade_dance_2'], tags: ['sever', 'multi-hit', 'demon', 'blade-dance'], audioCue: 'slash_light', durationTicks: 7, mechanicEvidence: 'wilds-action-class:cRanbu1' },
-                { id: 'dual_blades.blade_dance_2', name: '귀인난무 II', dmg: 206, motionValue: 52, hits: [8, 9, 10, 11, 14], requirements: { demonMode: true, minDemonStamina: 10, demonDanceStep: 1 }, effects: { demonDanceStep: 2, demonStamina: -10, archdemonGauge: 14, atbAfterAction: 68 }, next: ['dual_blades.blade_dance'], tags: ['sever', 'multi-hit', 'demon', 'blade-dance'], audioCue: 'slash_light', durationTicks: 9, mechanicEvidence: 'wilds-action-class:cRanbu2' },
-                { id: 'dual_blades.blade_dance', name: '귀인난무 III', dmg: 390, motionValue: 98, hits: [7, 8, 9, 9, 10, 11, 13, 15, 16], requirements: { demonMode: true, minDemonStamina: 18, demonDanceStep: 2 }, effects: { demonDanceStep: 0, demonChain: 0, demonStamina: -18, archdemonGauge: 22 }, tags: ['sever', 'multi-hit', 'demon', 'blade-dance', 'finisher'], audioCue: 'slash_heavy', durationTicks: 15, mechanicEvidence: 'wilds-action-class:cRanbu3' },
+                { id: 'dual_blades.double_slash', name: '이단베기', dmg: 76, motionValue: 19, hits: [9, 10], requirements: { demonMode: false, dualChain: 0 }, effects: { dualChain: 1, archdemonGauge: 25 }, next: ['dual_blades.double_slash_return'], tags: ['sever', 'multi-hit', 'dual-flow'], audioCue: 'slash_light', durationTicks: 5, mechanicEvidence: 'wilds-action-class:cTwiceSlash' },
+                { id: 'dual_blades.double_slash_return', name: '이단되돌려베기', dmg: 88, motionValue: 22, hits: [10, 12], requirements: { demonMode: false, dualChain: 1 }, effects: { dualChain: 2, archdemonGauge: 30 }, next: ['dual_blades.circle_slash'], tags: ['sever', 'multi-hit', 'dual-flow'], audioCue: 'slash_light', durationTicks: 5, mechanicEvidence: 'wilds-motion-reference:double-slash-return' },
+                { id: 'dual_blades.circle_slash', name: '차륜베기', dmg: 112, motionValue: 28, hits: [8, 9, 11], requirements: { demonMode: false, dualChain: 2 }, effects: { dualChain: 0, archdemonGauge: 35 }, next: ['dual_blades.double_slash'], tags: ['sever', 'multi-hit', 'dual-flow'], audioCue: 'slash_light', durationTicks: 6, mechanicEvidence: 'wilds-motion-reference:circle-slash' },
+                { id: 'dual_blades.demon_fang', name: '귀인연참', dmg: 128, motionValue: 32, hits: [9, 11, 12], requirements: { demonMode: true, minArchdemonGauge: 12, demonChain: 0 }, effects: { demonChain: 1, archdemonGauge: -12 }, next: ['dual_blades.demon_double_slash'], tags: ['sever', 'multi-hit', 'demon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 6, mechanicEvidence: 'wilds-action-class:cKijinChain1NoCombo' },
+                { id: 'dual_blades.demon_double_slash', name: '귀인이단베기', dmg: 152, motionValue: 38, hits: [10, 12, 16], requirements: { demonMode: true, minArchdemonGauge: 14, demonChain: 1 }, effects: { demonChain: 2, archdemonGauge: -14 }, next: ['dual_blades.demon_flurry'], tags: ['sever', 'multi-hit', 'demon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 6, mechanicEvidence: 'wilds-action-class:cKijinTwiceSlash' },
+                { id: 'dual_blades.demon_flurry', name: '귀인육단베기', dmg: 224, motionValue: 56, hits: [7, 8, 9, 9, 11, 12], requirements: { demonMode: true, minArchdemonGauge: 18, demonChain: 2 }, effects: { demonChain: 3, archdemonGauge: -18 }, next: ['dual_blades.demon_roundslash'], tags: ['sever', 'multi-hit', 'demon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 8, mechanicEvidence: 'wilds-action-class:cKijinSixTimeSlash' },
+                { id: 'dual_blades.demon_roundslash', name: '귀인차륜베기', dmg: 176, motionValue: 44, hits: [10, 14, 20], requirements: { demonMode: true, minArchdemonGauge: 16, demonChain: 3 }, effects: { demonChain: 0, archdemonGauge: -16 }, next: ['dual_blades.demon_fang'], tags: ['sever', 'multi-hit', 'demon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 7, mechanicEvidence: 'wilds-motion-reference:demon-roundslash' },
+                { id: 'dual_blades.blade_dance_1', name: '귀인난무 I', dmg: 138, motionValue: 34, hits: [7, 8, 9, 10], requirements: { demonMode: true, minArchdemonGauge: 18, demonDanceStep: 0 }, effects: { demonDanceStep: 1, demonChain: 0, archdemonGauge: -18, atbAfterAction: 74 }, next: ['dual_blades.blade_dance_2'], tags: ['sever', 'multi-hit', 'demon', 'blade-dance'], audioCue: 'slash_light', durationTicks: 7, mechanicEvidence: 'wilds-action-class:cRanbu1' },
+                { id: 'dual_blades.blade_dance_2', name: '귀인난무 II', dmg: 206, motionValue: 52, hits: [8, 9, 10, 11, 14], requirements: { demonMode: true, minArchdemonGauge: 20, demonDanceStep: 1 }, effects: { demonDanceStep: 2, archdemonGauge: -20, atbAfterAction: 68 }, next: ['dual_blades.blade_dance'], tags: ['sever', 'multi-hit', 'demon', 'blade-dance'], audioCue: 'slash_light', durationTicks: 9, mechanicEvidence: 'wilds-action-class:cRanbu2' },
+                { id: 'dual_blades.blade_dance', name: '귀인난무 III', dmg: 390, motionValue: 98, hits: [7, 8, 9, 9, 10, 11, 13, 15, 16], requirements: { demonMode: true, minArchdemonGauge: 28, demonDanceStep: 2 }, effects: { demonDanceStep: 0, demonChain: 0, archdemonGauge: -28 }, tags: ['sever', 'multi-hit', 'demon', 'blade-dance', 'finisher'], audioCue: 'slash_heavy', durationTicks: 15, mechanicEvidence: 'wilds-action-class:cRanbu3' },
                 { id: 'dual_blades.archdemon_rush', name: '귀인돌진연참 · 귀인강화', dmg: 142, motionValue: 36, hits: [10, 12, 14], requirements: { demonMode: false, archdemonMode: true, archdemonStep: 0 }, effects: { archdemonStep: 1, archdemonGauge: -10 }, next: ['dual_blades.archdemon_flurry'], tags: ['sever', 'multi-hit', 'archdemon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 6, mechanicEvidence: 'wilds-action-class:cKijinRush' },
                 { id: 'dual_blades.archdemon_flurry', name: '귀인연속베기 · 귀인강화', dmg: 194, motionValue: 49, hits: [9, 10, 13, 17], requirements: { demonMode: false, archdemonStep: 1 }, effects: { archdemonStep: 2, archdemonGauge: -12 }, next: ['dual_blades.archdemon_slash'], tags: ['sever', 'multi-hit', 'archdemon', 'dual-flow'], audioCue: 'slash_light', durationTicks: 8, mechanicEvidence: 'wilds-motion-reference:archdemon-flurry' },
                 { id: 'dual_blades.archdemon_slash', name: '귀인강화 연참', dmg: 270, motionValue: 68, hits: [13, 15, 18, 22], requirements: { demonMode: false, archdemonStep: 2 }, effects: { archdemonStep: 0, archdemonGauge: -18 }, tags: ['sever', 'multi-hit', 'archdemon', 'finisher'], audioCue: 'slash_heavy', durationTicks: 10, mechanicEvidence: 'wilds-motion-reference:archdemon-finish' }
@@ -397,6 +418,9 @@ class HuntWeaponMechanics {
         };
         Object.entries(HuntWeaponMechanics.WEAPON_FIELD_DEFAULTS[hunter.id] || {}).forEach(([key, value]) => numberDefault(key, value));
         if (hunter.id === 'long_sword') {
+            hunter.longSwordForesightEligible = Boolean(hunter.longSwordForesightEligible);
+            hunter.longSwordReactiveFollowup = Boolean(hunter.longSwordReactiveFollowup);
+            hunter.longSwordForesightChain = Math.max(0, Number(hunter.longSwordForesightChain || 0));
             hunter.specialSheatheReady = Boolean(hunter.specialSheatheReady);
             hunter.spiritRoundslashReady = Boolean(hunter.spiritRoundslashReady);
             hunter.iaiHelmBreakerReady = Boolean(hunter.iaiHelmBreakerReady);
@@ -501,6 +525,7 @@ class HuntWeaponMechanics {
         if (req.snsAerialReady !== undefined && Boolean(hunter.snsAerialReady) !== req.snsAerialReady) return false;
         if (req.snsCounterReady !== undefined && Boolean(hunter.snsCounterReady) !== req.snsCounterReady) return false;
         if (req.demonMode !== undefined && Boolean(hunter.demonMode) !== req.demonMode) return false;
+        if (req.minArchdemonGauge && Number(hunter.archdemonGauge || 0) < req.minArchdemonGauge) return false;
         if (req.minDemonStamina && Number(hunter.demonStamina || 0) < req.minDemonStamina) return false;
         if (req.archdemonMode && Number(hunter.archdemonGauge || 0) < 50) return false;
         if (req.dualChain !== undefined && Number(hunter.dualChain || 0) !== req.dualChain) return false;
@@ -673,7 +698,7 @@ class HuntWeaponMechanics {
             if (hunter.specialSheatheReady) return byId('long_sword.iai_counter_fail');
             if (hunter.spiritRoundslashReady && hunter.spiritGauge >= 12) return byId('long_sword.spirit_roundslash');
             if (context.monsterDowned && hunter.spiritLevel >= 3 && this.random() < 0.72) return byId('long_sword.helm_breaker');
-            const specialSheatheChance = hunter.spiritLevel >= 3 ? 0.88 : 0.34;
+            const specialSheatheChance = HuntWeaponMechanics.longSwordSpecialSheatheChance(hunter.spiritLevel);
             if (hunter._mechanicMonsterPressure && hunter.spiritLevel > 0 && this.random() < specialSheatheChance) return byId('long_sword.special_sheathe');
             const linked = linkedFromLast();
             if (linked >= 0 && this.random() < 0.86) return linked;
@@ -707,8 +732,8 @@ class HuntWeaponMechanics {
             if (hunter.demonMode) {
                 if (hunter.demonDanceStep === 1) return byId('dual_blades.blade_dance_2');
                 if (hunter.demonDanceStep === 2) return byId('dual_blades.blade_dance');
-                if (hunter.demonStamina < 12 && Number(hunter.demonModeMinTicks || 0) <= 0) return byId('dual_blades.exit_demon');
-                if (context.monsterDowned && hunter.demonStamina >= 38) return byId('dual_blades.blade_dance_1');
+                if (Number(hunter.archdemonGauge || 0) < 12) return byId('dual_blades.exit_demon');
+                if (context.monsterDowned && hunter.archdemonGauge >= 66) return byId('dual_blades.blade_dance_1');
                 const demonLinks = {
                     'dual_blades.demon_fang': 'dual_blades.demon_double_slash',
                     'dual_blades.demon_double_slash': 'dual_blades.demon_flurry',
@@ -722,19 +747,7 @@ class HuntWeaponMechanics {
                     ? fang
                     : byId('dual_blades.exit_demon');
             }
-            if (hunter.archdemonStep === 1) return byId('dual_blades.archdemon_flurry');
-            if (hunter.archdemonStep === 2) return byId('dual_blades.archdemon_slash');
-            if (hunter.archdemonGauge >= 50 && (hunter.demonStamina < 42 || this.random() < 0.34)) return byId('dual_blades.archdemon_rush');
-            if (hunter.demonStamina < 30) {
-                const normalLinks = {
-                    'dual_blades.double_slash': 'dual_blades.double_slash_return',
-                    'dual_blades.double_slash_return': 'dual_blades.circle_slash',
-                    'dual_blades.circle_slash': 'dual_blades.double_slash'
-                };
-                const linked = byId(normalLinks[hunter.lastActionId]);
-                return linked >= 0 ? linked : byId('dual_blades.double_slash');
-            }
-            if (hunter.demonToggleCooldown <= 0 && hunter.demonStamina >= 65) return byId('dual_blades.enter_demon');
+            if (hunter.demonToggleCooldown <= 0 && hunter.archdemonGauge >= 100) return byId('dual_blades.enter_demon');
             const normalLinks = {
                 'dual_blades.double_slash': 'dual_blades.double_slash_return',
                 'dual_blades.double_slash_return': 'dual_blades.circle_slash',
@@ -1127,8 +1140,8 @@ class HuntWeaponMechanics {
             hunter.demonModeDuration = hunter.demonMode ? 1 : 0;
             if (action.id === 'dual_blades.enter_demon') {
                 hunter.demonToggleCooldown = 100;
-                hunter.demonModeMinTicks = 60;
-                engine.addLog(`🔥 [귀인화] ${hunter.hunterName}의 스태미나와 귀인 게이지가 맞물리기 시작합니다.`, '#ff5252');
+                hunter.demonModeMinTicks = 0;
+                engine.addLog(`🔥 [귀인화] ${hunter.hunterName}이(가) 가득 채운 붉은 귀인 게이지를 해방합니다.`, '#ff5252');
             }
             if (action.id === 'dual_blades.exit_demon') {
                 hunter.demonToggleCooldown = 100;
@@ -1281,6 +1294,21 @@ class HuntWeaponMechanics {
         return { atbAfterAction };
     }
 
+    onAttackMiss(engine, hunter, action) {
+        if (hunter?.id !== 'long_sword' || action?.id !== 'long_sword.spirit_roundslash') return false;
+        hunter.spiritGauge = 0;
+        hunter.spiritRoundslashReady = false;
+        engine.addLog?.(`💨 [대회전 실패] ${hunter.hunterName}의 대회전베기가 빗나가 기인 게이지가 0이 되었습니다.`, '#a9b8c7');
+        return true;
+    }
+
+    onConfirmedHit(engine, hunter, action) {
+        if (hunter?.id !== 'long_sword' || action?.id !== 'long_sword.spirit_roundslash') return false;
+        hunter.spiritLevel = Math.min(3, Number(hunter.spiritLevel || 0) + 1);
+        engine.addLog?.(`✨ [대회전 적중] ${hunter.hunterName}: 기인 ${hunter.spiritLevel}/3`, '#ff9f43');
+        return true;
+    }
+
     tick(hunter) {
         this.initialize(hunter);
         if (hunter.id === 'switch_axe') {
@@ -1297,14 +1325,6 @@ class HuntWeaponMechanics {
         if (hunter.id === 'dual_blades') {
             if (hunter.demonToggleCooldown > 0) hunter.demonToggleCooldown--;
             if (hunter.demonModeMinTicks > 0) hunter.demonModeMinTicks--;
-            const demonDelta = hunter.demonMode ? -0.32 : 0.42;
-            hunter.demonStamina = Math.max(0, Math.min(100, hunter.demonStamina + (this.engine?.blightRuntime ? this.engine.blightRuntime.staminaDelta(hunter, demonDelta) : demonDelta)));
-            if (hunter.demonStamina <= 0) {
-                hunter.demonMode = false;
-                hunter.demonModeMinTicks = 0;
-                hunter.demonToggleCooldown = Math.max(100, hunter.demonToggleCooldown);
-            }
-            if (!hunter.demonMode && hunter.archdemonGauge > 0) hunter.archdemonGauge = Math.max(0, hunter.archdemonGauge - 0.08);
             hunter.demonModeDuration = hunter.demonMode ? 1 : 0;
         }
         ['melodyBuffTicks', 'echoBubbleTicks', 'hornAttackBuffTicks', 'hornDefenseBuffTicks', 'hornSpeedBuffTicks', 'wyvernFireCooldown', 'shieldChargeDuration', 'specialAmmoCooldown', 'tracerTicks', 'hammerFocusCooldown']
@@ -1331,7 +1351,12 @@ class HuntWeaponMechanics {
 
     onHit(hunter) {
         if (!hunter) return;
+        // A confirmed hit breaks the current input chain. Durable resources and
+        // modes remain, but the next turn must never resume at an internal step.
+        hunter.lastActionId = null;
         if (hunter.id === 'long_sword') {
+            hunter.longSwordForesightEligible = false;
+            hunter.longSwordForesightChain = 0;
             hunter.specialSheatheReady = false;
             hunter.spiritRoundslashReady = false;
             hunter.iaiHelmBreakerReady = false;
@@ -1345,30 +1370,68 @@ class HuntWeaponMechanics {
             hunter.hammerOffsetWaiting = false;
             hunter.hammerOffsetFollowupReady = false;
         }
-        if (hunter.id === 'gunlance') hunter.wyvernFireCharging = false;
-        if (hunter.id === 'charge_blade') hunter.cbGuardWaiting = false;
-        if (hunter.id === 'heavy_bowgun') hunter.hbgCounterWaiting = false;
-        if (hunter.id === 'great_sword' && (hunter.greatSwordCharge > 0 || hunter.greatSwordChain > 0)) {
+        if (hunter.id === 'switch_axe') {
+            hunter.switchCounterWaiting = false;
+            hunter.switchCounterReady = false;
+        }
+        if (hunter.id === 'lance') {
+            hunter.lanceStep = 0;
+            hunter.lanceMobilityStep = 0;
+            hunter.lanceDashStep = 0;
+            hunter.lanceCounterWaiting = false;
+            hunter.lanceCounterReady = false;
+            hunter.powerGuardWaiting = false;
+            hunter.powerGuardReady = false;
+            hunter.powerGuardCharge = 0;
+        }
+        if (hunter.id === 'gunlance') {
+            hunter.wyvernFireCharging = false;
+            hunter.gunlanceStep = 0;
+            hunter.shellStep = 0;
+        }
+        if (hunter.id === 'charge_blade') {
+            hunter.cbGuardWaiting = false;
+            hunter.cbGuardReady = false;
+            hunter.cbSwordStep = 0;
+            hunter.cbAxeStep = 0;
+        }
+        if (hunter.id === 'heavy_bowgun') {
+            hunter.hbgCounterWaiting = false;
+            hunter.hbgCounterReady = false;
+            hunter.wyvernheartStep = 0;
+        }
+        if (hunter.id === 'great_sword') {
             hunter.greatSwordCharge = 0;
             hunter.greatSwordChain = 0;
+            hunter.greatSwordChargeLocked = false;
         }
-        if (hunter.id === 'sword_shield' && hunter.perfectRushStep > 0) hunter.perfectRushStep = 0;
         if (hunter.id === 'sword_shield') {
+            hunter.snsChain = 0;
+            hunter.perfectRushStep = 0;
             hunter.snsBackstepReady = false;
             hunter.snsAerialReady = false;
             hunter.snsPerfectGuardReady = false;
             hunter.snsCounterReady = false;
             hunter.snsShieldStep = 0;
         }
-        if (hunter.id === 'dual_blades' && hunter.demonDanceStep > 0) hunter.demonDanceStep = 0;
+        if (hunter.id === 'dual_blades') {
+            hunter.dualChain = 0;
+            hunter.demonChain = 0;
+            hunter.demonDanceStep = 0;
+            hunter.archdemonStep = 0;
+        }
         if (hunter.id === 'hunting_horn' && hunter.recitalActive) {
             hunter.recitalActive = false;
             hunter.recitalPlayed = 0;
             hunter.recitalStartCount = 0;
         }
-        if (hunter.id === 'insect_glaive' && hunter.airborne) hunter.airborne = false;
-        if (hunter.id === 'bow' && hunter.bowCharge > 0) {
-            hunter.bowCharge = Math.max(0, hunter.bowCharge - 1);
+        if (hunter.id === 'insect_glaive') {
+            hunter.airborne = false;
+            hunter.glaiveStep = 0;
+            hunter.glaiveCharge = 0;
+        }
+        if (hunter.id === 'bow') {
+            hunter.bowCharge = 0;
             hunter.bowPowerStep = 0;
         }
     }

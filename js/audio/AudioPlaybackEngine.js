@@ -1,4 +1,16 @@
 class AudioPlaybackEngine {
+    static trimBufferCache(manager, maxEntries = 80) {
+        const cache = manager?.bufferCache;
+        if (!cache || typeof cache.keys !== 'function' || typeof cache.delete !== 'function') return;
+        const protectedPaths = manager.visualAudioPaths || new Set();
+        while (cache.size > maxEntries) {
+            const keys = [...cache.keys()];
+            const victim = keys.find(key => !protectedPaths.has(key)) || keys[0];
+            if (victim === undefined) break;
+            cache.delete(victim);
+        }
+    }
+
     static async play(manager, input, options = {}) {
         if (manager.disposed) return;
         let force = false;
@@ -129,7 +141,11 @@ class AudioPlaybackEngine {
 
                 // 1. Check Cache
                 if (manager.bufferCache.has(playPath)) {
-                    playBuffer(manager.bufferCache.get(playPath));
+                    const cachedBuffer = manager.bufferCache.get(playPath);
+                    // Map insertion order is the LRU order used by trimBufferCache.
+                    manager.bufferCache.delete(playPath);
+                    manager.bufferCache.set(playPath, cachedBuffer);
+                    playBuffer(cachedBuffer);
                 } else {
                     // 2. Fetch & Decode & Cache
                     fetch(playPath)
@@ -141,16 +157,8 @@ class AudioPlaybackEngine {
                         .then(audioBuffer => {
                             // Cache the decoded buffer
                             manager.bufferCache.set(playPath, audioBuffer);
-                            // Cache eviction limit (Max 80, skip visual audio)
-                            if (manager.bufferCache.size > 80) {
-                                for (const key of manager.bufferCache.keys()) {
-                                    if (!manager.visualAudioPaths.has(key)) {
-                                        manager.bufferCache.delete(key);
-                                        console.log(`[AudioManager] Evicted chat SFX from cache: ${key}`);
-                                        break;
-                                    }
-                                }
-                            }
+                            // Visual clips are preferred, but never allowed to defeat the hard cap.
+                            AudioPlaybackEngine.trimBufferCache(manager);
                             playBuffer(audioBuffer);
                         })
                         .catch(e => {
@@ -161,12 +169,14 @@ class AudioPlaybackEngine {
                                 baseVolume
                             });
                             if (manager.disposed) {
+                                manager.releaseMediaElement?.(audio);
                                 resolve();
                                 return;
                             }
                             manager.activeFallbackAudio.add(audio);
                             const cleanup = () => {
                                 manager.activeFallbackAudio.delete(audio);
+                                manager.releaseMediaElement?.(audio);
                                 resolve();
                             };
                             audio.onended = cleanup;
@@ -203,6 +213,7 @@ class AudioPlaybackEngine {
                         .then(arrayBuffer => manager.audioCtx.decodeAudioData(arrayBuffer))
                         .then(audioBuffer => {
                             manager.bufferCache.set(url, audioBuffer);
+                            AudioPlaybackEngine.trimBufferCache(manager);
                         })
                         .catch(e => {
                             // Do nothing on preloader failure, fallback handles it at play time

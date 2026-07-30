@@ -2,6 +2,7 @@
 // You can manually edit this file or overwrite it using the Export function in config.html
 // AI Should Not Change Any Mapping that is already present
 window.CHZZK_CHANNEL_ID = "057a9a03fea9b368eb0c76b9e95e1ae5"; // [Optional] Set your Channel ID here to skip lookup
+window.BUBBLECHAT_COMPANION_ORIGIN = ""; // Optional localhost override; blank follows the current local server or port 17890.
 
 window.HIVE_VOLUME_CONFIG = {
     "master": 1.5,

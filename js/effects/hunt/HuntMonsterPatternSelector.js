@@ -2,6 +2,7 @@ class HuntMonsterPatternSelector {
     constructor(random = Math.random) {
         this.random = random;
         this.lastPatternByMonster = new Map();
+        this.consecutiveUsesByMonster = new Map();
         this.cooldowns = new Map();
         this.enragedTurnsWithoutUltimate = new Map();
     }
@@ -19,30 +20,44 @@ class HuntMonsterPatternSelector {
         const lastId = this.lastPatternByMonster.get(monsterId);
         const isAllowed = pattern => context.monsterTier !== 'small'
             || (pattern.type !== 'roar' && !pattern.tags?.includes('roar'));
+        const brokenParts = new Set((context.partState || [])
+            .filter(part => part?.broken || part?.severed)
+            .map(part => String(part.kind || part.id || '').toLowerCase()));
+        const activeTraits = new Set(context.traits || []);
+        const matchesContext = pattern =>
+            (!pattern.requiredState || pattern.requiredState === context.state)
+            && !(pattern.forbiddenStates || []).includes(context.state)
+            && (pattern.requiredTraits || []).every(trait => activeTraits.has(trait))
+            && !(pattern.forbiddenTraits || []).some(trait => activeTraits.has(trait))
+            && !(pattern.forbiddenWhenBroken || []).some(part => brokenParts.has(part))
+            && (pattern.maxHpRatio === undefined || context.hpRatio <= pattern.maxHpRatio)
+            && (!(pattern.tags || []).includes('landing-only') || context.landingPending)
+            && (context.flightState === 'airborne'
+                ? !(pattern.tags || []).includes('ground-only')
+                    && (context.shortFlightChain
+                        ? (pattern.tags || []).includes('flight-only')
+                        : ((pattern.tags || []).includes('flight-only') || (pattern.tags || []).includes('air-compatible')))
+                : !(pattern.tags || []).includes('flight-only'));
         let candidates = patterns.filter(pattern =>
             isAllowed(pattern)
             &&
             !this.cooldowns.has(`${monsterId}:${pattern.id}`)
-            && (!pattern.requiredState || pattern.requiredState === context.state)
-            && (pattern.maxHpRatio === undefined || context.hpRatio <= pattern.maxHpRatio)
-            && (context.flightState === 'airborne'
-                ? (pattern.tags.includes('flight-only') || pattern.tags.includes('air-compatible'))
-                : !pattern.tags.includes('flight-only'))
+            && matchesContext(pattern)
         );
         if (!candidates.length) candidates = patterns.filter(pattern =>
             isAllowed(pattern)
-            && (!pattern.requiredState || pattern.requiredState === context.state)
-            && (pattern.maxHpRatio === undefined || context.hpRatio <= pattern.maxHpRatio)
-            && (context.flightState === 'airborne'
-                ? (pattern.tags.includes('flight-only') || pattern.tags.includes('air-compatible'))
-                : !pattern.tags.includes('flight-only'))
+            && matchesContext(pattern)
         );
         if (!candidates.length) return null;
         if (context.state === 'enraged' && context.ultimateUsedInRage) {
             const nonUltimate = candidates.filter(pattern => !pattern.tags.includes('ultimate') && pattern.type !== 'ultimate');
             if (nonUltimate.length) candidates = nonUltimate;
         }
-        const withoutRepeat = candidates.filter(pattern => pattern.id !== lastId);
+        const consecutiveUses = Number(this.consecutiveUsesByMonster.get(monsterId) || 0);
+        const withoutRepeat = candidates.filter(pattern =>
+            pattern.id !== lastId
+            || consecutiveUses < Math.max(1, Number(pattern.maxConsecutiveUses || 1))
+        );
         if (withoutRepeat.length) candidates = withoutRepeat;
         if (context.state !== 'enraged') {
             this.enragedTurnsWithoutUltimate.set(monsterId, 0);
@@ -50,7 +65,9 @@ class HuntMonsterPatternSelector {
             if (nonUltimate.length) candidates = nonUltimate;
         }
         if (context.flightState === 'airborne') {
-            const aerial = candidates.filter(pattern => pattern.tags.includes('flight-only') || pattern.tags.includes('air-compatible'));
+            const aerial = candidates.filter(pattern => context.shortFlightChain
+                ? pattern.tags.includes('flight-only')
+                : pattern.tags.includes('flight-only') || pattern.tags.includes('air-compatible'));
             if (aerial.length) candidates = aerial;
         }
         const ultimateCandidates = context.ultimateUsedInRage
@@ -64,7 +81,12 @@ class HuntMonsterPatternSelector {
             pattern,
             weight: Math.max(0.05, Number(pattern.weight || 1)
                 * (context.state === 'enraged' && pattern.tags.includes('ultimate') ? 3 : 1)
-                * (context.state === 'exhausted' && pattern.tags.includes('charge') ? 0.45 : 1))
+                * (context.state === 'exhausted' && pattern.tags.includes('charge') ? 0.45 : 1)
+                * (context.state === 'exhausted' && pattern.tags.includes('burrow-enter') ? 0.28 : 1)
+                * Object.entries(pattern.weightWhenBroken || {}).reduce(
+                    (weight, [part, modifier]) => brokenParts.has(part) ? weight * Number(modifier || 1) : weight, 1)
+                * Object.entries(pattern.weightWhenTraits || {}).reduce(
+                    (weight, [trait, modifier]) => activeTraits.has(trait) ? weight * Number(modifier || 1) : weight, 1))
         }));
         const total = weighted.reduce((sum, entry) => sum + entry.weight, 0);
         let roll = this.random() * total;
@@ -74,6 +96,10 @@ class HuntMonsterPatternSelector {
             if (roll <= 0) { selected = entry.pattern; break; }
         }
         this.lastPatternByMonster.set(monsterId, selected.id);
+        this.consecutiveUsesByMonster.set(
+            monsterId,
+            selected.id === lastId ? consecutiveUses + 1 : 1
+        );
         if (context.state === 'enraged') {
             this.enragedTurnsWithoutUltimate.set(monsterId,
                 selected.tags.includes('ultimate') ? 0 : missedUltimates + 1);

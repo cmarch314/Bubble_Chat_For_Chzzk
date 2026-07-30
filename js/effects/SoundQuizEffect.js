@@ -51,44 +51,66 @@ class SoundQuizEffect extends BaseEffect {
         this.forceStopped = false;
 
 
-        // Parse rounds from streamer message, e.g. "!퀴즈 3"
+        // Parse rounds and AI mode from streamer message, e.g. "!퀴즈 AI 3", "!퀴즈 5 AI", "!퀴즈 AI"
         const msg = (context.message || "").trim();
-        const parts = msg.split(/\s+/);
+        const parts = msg.split(/\s+/).slice(1);
         let totalRounds = 1;
-        if (parts.length > 1) {
-            const parsed = parseInt(parts[1], 10);
-            if (!isNaN(parsed) && parsed > 0) {
-                totalRounds = parsed; // Remove the 20 rounds limit
+        let isAiOnly = false;
+
+        parts.forEach(part => {
+            const p = part.toLowerCase();
+            if (p === 'ai') {
+                isAiOnly = true;
+            } else if (/^ai\d+$/i.test(p)) {
+                isAiOnly = true;
+                const parsed = parseInt(p.replace(/ai/i, ''), 10);
+                if (!isNaN(parsed) && parsed > 0) totalRounds = parsed;
+            } else if (/^\d+ai$/i.test(p)) {
+                isAiOnly = true;
+                const parsed = parseInt(p.replace(/ai/i, ''), 10);
+                if (!isNaN(parsed) && parsed > 0) totalRounds = parsed;
+            } else {
+                const parsed = parseInt(p, 10);
+                if (!isNaN(parsed) && parsed > 0) {
+                    totalRounds = parsed;
+                }
             }
-        }
-        // Select eligible sounds
-        const soundConf = this.config.getSoundConfig();
-        const visualConf = this.config.getVisualConfig() || {};
-        
-        // Build a list of visual effect sound keys and audio override keys to exclude from quiz
-        const visualSoundKeys = new Set();
-        Object.values(visualConf).forEach(val => {
-            if (val && val.soundKey) visualSoundKeys.add(val.soundKey.normalize('NFC').replace(/\s+/g, '').toLowerCase());
-            if (val && val.audioOverride) visualSoundKeys.add(val.audioOverride.normalize('NFC').replace(/\s+/g, '').toLowerCase());
         });
 
         const CMC_FILES = window.HIVE_CMC_FILES || [];
+        let eligibleKeys = [];
 
-        const keys = Object.keys(soundConf || {});
-        const eligibleKeys = [
-            ...keys.filter(k => {
-                const norm = this._normalize(k);
-                if (norm.length < 2) return false;
-                if (k.includes('풀버전') || k.includes('송') || k.includes('댄스')) return false;
-                
-                // Exclude keys associated with visual effects
-                const cleanKey = k.normalize('NFC').replace(/\s+/g, '').toLowerCase();
-                if (visualSoundKeys.has(cleanKey)) return false;
+        if (isAiOnly) {
+            // Only AI video commands from HIVE_CMC_FILES
+            eligibleKeys = [...CMC_FILES];
+        } else {
+            // Select eligible sounds
+            const soundConf = this.config.getSoundConfig();
+            const visualConf = this.config.getVisualConfig() || {};
+            
+            // Build a list of visual effect sound keys and audio override keys to exclude from quiz
+            const visualSoundKeys = new Set();
+            Object.values(visualConf).forEach(val => {
+                if (val && val.soundKey) visualSoundKeys.add(val.soundKey.normalize('NFC').replace(/\s+/g, '').toLowerCase());
+                if (val && val.audioOverride) visualSoundKeys.add(val.audioOverride.normalize('NFC').replace(/\s+/g, '').toLowerCase());
+            });
 
-                return true;
-            }),
-            ...CMC_FILES
-        ];
+            const keys = Object.keys(soundConf || {});
+            eligibleKeys = [
+                ...keys.filter(k => {
+                    const norm = this._normalize(k);
+                    if (norm.length < 2) return false;
+                    if (k.includes('풀버전') || k.includes('송') || k.includes('댄스')) return false;
+                    
+                    // Exclude keys associated with visual effects
+                    const cleanKey = k.normalize('NFC').replace(/\s+/g, '').toLowerCase();
+                    if (visualSoundKeys.has(cleanKey)) return false;
+
+                    return true;
+                }),
+                ...CMC_FILES
+            ];
+        }
 
         // Keep track of asked questions in this session
         const askedKeys = [];
@@ -109,25 +131,33 @@ class SoundQuizEffect extends BaseEffect {
                     candidates = eligibleKeys;
                 }
                 
-                this.correctAnswer = candidates.length > 0 
+                const selectedKey = candidates.length > 0 
                     ? candidates[Math.floor(Math.random() * candidates.length)]
                     : "야호";
-                askedKeys.push(this.correctAnswer);
+                askedKeys.push(selectedKey);
                 this.winner = null;
 
-                console.log(`🎮 [SoundQuiz] Round ${currentRound}/${totalRounds} Started. Word: ${this.correctAnswer}`);
+                const isCmc = CMC_FILES.includes(selectedKey);
+                const videoFile = isCmc ? selectedKey : null;
 
-                const isCmc = CMC_FILES.includes(this.correctAnswer);
+                // Convert CMC filename to user-typed command name (e.g. "구독감사1" -> "구독감사", "싼다(느낌표)" -> "싼다!")
+                this.correctAnswer = isCmc
+                    ? selectedKey.replace(/\(물음표\)/g, '?').replace(/\(느낌표\)/g, '!').replace(/\d+$/, '')
+                    : selectedKey;
+
+                console.log(`🎮 [SoundQuiz] Round ${currentRound}/${totalRounds} Started (AI: ${isAiOnly}). File: ${selectedKey}, Answer: ${this.correctAnswer}`);
+
+                const quizTitle = isAiOnly ? 'AI 비디오 퀴즈!' : (isCmc ? '비디오 퀴즈!' : '사운드 퀴즈!');
 
                 if (isCmc) {
                     container.innerHTML = `
                         <div class="game-quiz-card">
                             ${this._getLeaderboardHTML()}
-                            <div class="game-title">🎬 비디오 퀴즈! (${currentRound} / ${totalRounds})</div>
+                            <div class="game-title">🎬 ${quizTitle} (${currentRound} / ${totalRounds})</div>
                             <div class="game-subtitle">재생되는 영상의 키워드를 맞추세요!</div>
                             <div class="game-status" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                                 <span>🎬 영상 재생 중...</span>
-                                <video id="quiz-video" src="AI CMC/${encodeURIComponent(this.correctAnswer)}.mp4" style="width: 100%; max-width: 600px; border-radius: 16px; border: 4px solid #00ffa3; box-shadow: 0 4px 30px rgba(0,255,163,0.3);" playsinline></video>
+                                <video id="quiz-video" src="AI CMC/${encodeURIComponent(videoFile)}.mp4" style="width: 100%; max-width: 600px; border-radius: 16px; border: 4px solid #00ffa3; box-shadow: 0 4px 30px rgba(0,255,163,0.3);" playsinline></video>
                             </div>
                             <div class="game-quiz-hint">힌트 글자수: ${this.correctAnswer.length}글자</div>
                             <div class="game-timer">남은 시간: 30초</div>
@@ -138,7 +168,7 @@ class SoundQuizEffect extends BaseEffect {
                     container.innerHTML = `
                         <div class="game-quiz-card">
                             ${this._getLeaderboardHTML()}
-                            <div class="game-title">🎵 사운드 퀴즈! (${currentRound} / ${totalRounds})</div>
+                            <div class="game-title">🎵 ${quizTitle} (${currentRound} / ${totalRounds})</div>
                             <div class="game-subtitle">재생되는 효과음의 키워드를 맞추세요!</div>
                             <div class="game-status">🎧 소리 재생 중...</div>
                             <div class="game-quiz-hint">힌트 글자수: ${this.correctAnswer.length}글자</div>
@@ -259,8 +289,9 @@ class SoundQuizEffect extends BaseEffect {
                 }
 
                 // Wait 5 seconds before next round
-                if (!await this.runtime.wait(5000)) break;
+                const shouldContinue = await this.runtime.wait(5000);
                 cleanupFireworks();
+                if (!shouldContinue) break;
             }
 
             this.runtime.end();

@@ -87,9 +87,18 @@ class ChatMediaBubbleController {
                     }
                 }
 
+                const doRelease = () => {
+                    this.audioManager?.releaseMediaElement?.(video, { pause: true, unload: true });
+                    if (chatBox.parentElement) {
+                        chatBox.remove?.();
+                    }
+                };
+
                 if (chatBox.parentElement) {
                     chatBox.classList.remove('visible');
-                    this.timers.timeout(() => chatBox.remove(), 1000);
+                    this.timers.timeout(doRelease, 300);
+                } else {
+                    doRelease();
                 }
             };
 
@@ -119,7 +128,11 @@ class ChatMediaBubbleController {
 
                 if (item.type === 'video') {
                     video.style.display = 'block';
-                    video.src = `AI CMC/${encodeURIComponent(item.name)}.mp4`;
+                    const candidates = Array.isArray(item.files) && item.files.length > 0
+                        ? item.files
+                        : [item.name || item.command];
+                    const filename = candidates[Math.floor(Math.random() * candidates.length)];
+                    video.src = `AI CMC/${encodeURIComponent(filename)}.mp4`;
                     this.audioManager?.applyNativeVolume(video, { type: 'visual', path: video.src });
                     video.play().catch(e => {
                         console.error("CMC video play failed, skipping:", e);
@@ -154,15 +167,6 @@ class ChatMediaBubbleController {
                 if (!hasTriggeredNext) {
                     hasTriggeredNext = true;
                     playNext();
-                }
-            });
-
-            video.addEventListener('timeupdate', () => {
-                if (!hasTriggeredNext && video.duration && video.duration > 0.5) {
-                    if (video.currentTime >= video.duration - 0.5) {
-                        hasTriggeredNext = true;
-                        playNext();
-                    }
                 }
             });
 

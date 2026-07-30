@@ -45,7 +45,9 @@ function semanticReferenceFor(bank, stream) {
 }
 
 const requested = new Set(process.argv.slice(2).filter(value => !value.startsWith('--')));
+const requestedBank = process.argv.find(value => value.startsWith('--bank='))?.slice('--bank='.length).toLowerCase() || null;
 const runtimeOnly = process.argv.includes('--runtime');
+const retryFailed = process.argv.includes('--retry-failed');
 const runtimeMonsterIds = new Set([
     'em001','em002','em007','em011','em013','em018','em023','em024','em025','em026','em027','em032','em036','em037',
     'em042','em043','em044','em045','em047','em050','em057','em058','em063','em071','em072','em077','em080','em082',
@@ -63,6 +65,14 @@ manifest.source = gameProfiles[game].source;
 manifest.entries = Array.isArray(manifest.entries) ? manifest.entries : [];
 const completedBanks = new Set(manifest.completedBanks || []);
 const failedBanks = new Set(manifest.failedBanks || []);
+const ignoredBanks = new Map((manifest.ignoredBanks || []).map(entry => [entry.bank, entry.reason]));
+if (retryFailed) {
+    for (const bank of [...failedBanks]) {
+        if (!requestedBank || cleanBankName(bank).toLowerCase() === requestedBank) {
+            failedBanks.delete(bank);
+        }
+    }
+}
 for (const bank of [...completedBanks]) {
     const records = manifest.entries.filter(entry => String(entry.sourceBank || '').replace(/\\/g, '/').endsWith(bank));
     if (records.length && records.every(entry => !fs.existsSync(path.join(root, entry.path)))) {
@@ -189,10 +199,21 @@ function eventLinks(bankFile, bankKey) {
     return links;
 }
 
+function companionEventBankCandidates(file) {
+    const name = path.basename(file);
+    if (/_media\.bnk\./i.test(name)) {
+        return [file.replace(/_media(?=\.bnk\.)/i, '')];
+    }
+    // Wilds keeps WEM payloads in *_m.sbnk.1.X64 while the sibling bank
+    // without "_m" owns the Wwise event/HIRC graph.
+    if (/_m\.sbnk\.\d+\.x64/i.test(name)) {
+        return [file.replace(/_m(?=\.sbnk\.\d+\.x64)/i, '')];
+    }
+    return [];
+}
+
 function companionEventBank(file) {
-    if (!/_media\.bnk\./i.test(path.basename(file))) return null;
-    const candidate = file.replace(/_media(?=\.bnk\.)/i, '');
-    return fs.existsSync(candidate) ? candidate : null;
+    return companionEventBankCandidates(file).find(candidate => fs.existsSync(candidate)) || null;
 }
 
 function eventLinksForDecodedBank(file, staged, bankKey) {
@@ -405,6 +426,9 @@ function save() {
     manifest.generatedAt = new Date().toISOString();
     manifest.completedBanks = [...completedBanks].sort();
     manifest.failedBanks = [...failedBanks].sort();
+    manifest.ignoredBanks = [...ignoredBanks.entries()]
+        .map(([bank, reason]) => ({ bank, reason }))
+        .sort((a, b) => a.bank.localeCompare(b.bank));
     manifest.summary = manifest.entries.reduce((summary, entry) => {
         summary[entry.category] = (summary[entry.category] || 0) + 1;
         return summary;
@@ -429,6 +453,7 @@ function main() {
         .filter(file => /\.(?:sbnk|spck)\.\d+\.x64(?:\.[a-z0-9]+)?$|\.(?:nbnk|npck|bnk|pck)$/i.test(path.basename(file)))
         .map(file => ({ file, meta: classify(file) }))
         .filter(item => item.meta && (!requested.size || requested.has(item.meta.category)))
+        .filter(item => !requestedBank || cleanBankName(item.file).toLowerCase() === requestedBank)
         .filter(item => !process.argv.includes('--semantic-only') || semanticBanks.has(cleanBankName(item.file).toLowerCase()))
         .filter(item => !runtimeOnly || item.meta.category !== 'monster' || runtimeMonsterIds.has(String(item.meta.monsterId || '').replace(/^em0(?=\d{3})/, 'em')))
         .sort((a, b) => categoryPriority.indexOf(a.meta.category) - categoryPriority.indexOf(b.meta.category) || a.file.localeCompare(b.file));
@@ -436,7 +461,14 @@ function main() {
     let processed = 0;
     for (const { file, meta } of banks) {
         const bankKey = path.relative(inputRoot, file).replace(/\\/g, '/');
-        if (completedBanks.has(bankKey) || failedBanks.has(bankKey)) continue;
+        if (completedBanks.has(bankKey) || failedBanks.has(bankKey) || ignoredBanks.has(bankKey)) continue;
+        if (fs.statSync(file).size <= 32) {
+            failedBanks.delete(bankKey);
+            ignoredBanks.set(bankKey, 'stub-bank-no-media');
+            save();
+            console.log(`[mh-audio] ignored media-free stub bank: ${bankKey}`);
+            continue;
+        }
         try {
             decodeBank(file, meta, bankKey);
             completedBanks.add(bankKey);
@@ -454,4 +486,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { parseTxtpLinks, companionEventBank, linkForStream };
+module.exports = { parseTxtpLinks, companionEventBankCandidates, companionEventBank, linkForStream };

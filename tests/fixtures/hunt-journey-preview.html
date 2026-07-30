@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>!몬헌 브라우저 시각 단위 테스트</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#080b0a;font-family:"Malgun Gothic",sans-serif}
+    #viewport{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:center center;background:#000;box-shadow:0 0 70px #000}
+    iframe{display:block;width:1920px;height:1080px;border:0}
+    .toolbar{position:fixed;z-index:20;top:12px;left:50%;display:flex;align-items:center;gap:8px;padding:8px 12px;border:2px solid #b98b43;border-radius:8px;background:#111e;color:#fff;transform:translateX(-50%);box-shadow:0 5px 24px #000a}
+    .toolbar b{margin-right:6px;color:#ffd27e}
+    .toolbar button{padding:7px 12px;border:1px solid #96733d;border-radius:5px;background:#282b28;color:#eee;font-weight:900;cursor:pointer}
+    .toolbar button.active{border-color:#62ffb3;background:#16472f;color:#baffda}
+    #status{min-width:150px;margin-left:7px;color:#79ffb7;font-weight:900}
+    #status.fail{color:#ff8b84}
+    .hint{position:fixed;z-index:20;right:12px;bottom:10px;padding:7px 10px;background:#000c;color:#bbb;font-size:12px}
+  </style>
+</head>
+<body>
+  <div id="viewport"><iframe id="preview" src="hunt-journey-canvas.html?scene=opening" title="!몬헌 1920×1080 미리보기"></iframe></div>
+  <nav class="toolbar" aria-label="몬헌 여정 화면 장면">
+    <b>!몬헌 UI TEST</b>
+    <button class="active" data-scene="opening">수주·참가</button>
+    <button data-scene="vote">몬스터 투표</button>
+    <button data-scene="travel">이동 지도</button>
+    <button data-scene="event">랜덤 이벤트</button>
+    <button data-scene="upgrade">대장간 강화</button>
+    <span id="status">검사 준비</span>
+  </nav>
+  <div class="hint">내부 캔버스 1920×1080 · 녹색 점선 아래는 OBS 채팅 안전영역</div>
+  <script>
+    const viewport = document.getElementById('viewport');
+    const frame = document.getElementById('preview');
+    const status = document.getElementById('status');
+    function fit() {
+      const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
+      viewport.style.transform = `translate(-50%,-50%) scale(${scale})`;
+    }
+    addEventListener('resize', fit);
+    fit();
+    document.querySelectorAll('[data-scene]').forEach(button => button.addEventListener('click', () => {
+      document.querySelectorAll('[data-scene]').forEach(item => item.classList.toggle('active', item === button));
+      frame.contentWindow.renderJourneyScene(button.dataset.scene);
+    }));
+    addEventListener('message', event => {
+      if (event.data?.type !== 'hunt-journey-preview-result') return;
+      status.className = event.data.result.pass ? '' : 'fail';
+      status.textContent = event.data.result.pass ? 'PASS' : 'FAIL';
+    });
+  </script>
+</body>
+</html>

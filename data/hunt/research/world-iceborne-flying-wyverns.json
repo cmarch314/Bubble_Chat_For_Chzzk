@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "reviewId": "world-iceborne-flying-wyverns-2026-07-28",
+  "scope": "All 19 Flying Wyverns appearing in Monster Hunter: World and Iceborne",
+  "classificationSource": "https://game8.jp/mhw/329896",
+  "implementationSources": [
+    "data/hunt/world-monster-behavior.generated.json",
+    "data/hunt/world-shell-behavior.generated.json",
+    "https://mhworld.kiranico.com/ja/",
+    "https://mhworld.jp/m/"
+  ],
+  "policy": {
+    "canonicalEdition": "world-iceborne",
+    "variantModel": "inherit shared body mechanics, author only observed differences",
+    "audio": "verified same-monster routes or silence; never cross-monster substitution",
+    "flight": "persistent only when the World behavior uses sustained flight; leaps and glides remain typed attacks"
+  },
+  "families": [
+    {
+      "base": "rathian",
+      "members": ["rathian", "pink_rathian", "gold_rathian"],
+      "evidence": "World Rathian family: grounded fireballs, charges, poisonous somersaults; rare species adds charged blue-flame state."
+    },
+    {
+      "base": "rathalos",
+      "members": ["rathalos", "azure_rathalos", "silver_rathalos"],
+      "evidence": "World Rathalos family: fireballs, claw attacks, glide sweeps, and aerial pressure; rare species adds charged blue-flame state."
+    },
+    {
+      "base": "diablos",
+      "members": ["diablos", "black_diablos"],
+      "evidence": "World Diablos family: burrow/emerge, horn charges, tail attacks, and rage chains; Black Diablos is faster and more charge-heavy."
+    },
+    {
+      "base": "legiana",
+      "members": ["legiana", "shrieking_legiana"],
+      "evidence": "https://mhworld.jp/m/d/65/",
+      "notes": "Straight and wide ice sweeps, aerial kicks and dives; Shrieking Legiana chains rapid airborne ice assaults."
+    },
+    {
+      "base": "paolumu",
+      "members": ["paolumu", "nightshade_paolumu"],
+      "evidence": "https://gamewith.jp/mhw/161668",
+      "notes": "Inflation gates hovering air blasts and body slams; Nightshade replaces pressure zoning with movable sleep clouds."
+    },
+    {
+      "base": "bazelgeuse",
+      "members": ["bazelgeuse", "seething_bazelgeuse"],
+      "evidence": "https://gamewith.jp/mhw/165073",
+      "notes": "Scales fall from body attacks and aerial bombing; Seething heats head and tail, then uses purple scales and a diving explosion."
+    },
+    {
+      "base": "tigrex",
+      "members": ["tigrex", "brute_tigrex"],
+      "evidence": "https://gamewith.jp/mhw/151846",
+      "variantEvidence": "https://gamewith.jp/mhw/166312",
+      "notes": "Grounded charge chains, spin finishers, rocks and damaging roars; Brute Tigrex interrupts charges with directional roars."
+    },
+    {
+      "base": "nargacuga",
+      "members": ["nargacuga"],
+      "evidence": "https://mhworld.jp/m/d/61",
+      "notes": "Crouched leap chains, tail spin/slam, and lingering bleed spikes; enraged tail slam and spin may repeat."
+    },
+    {
+      "base": "barioth",
+      "members": ["barioth", "frostfang_barioth"],
+      "evidence": "https://gamewith.jp/mhw/219962",
+      "notes": "Leaps, tackles, tail sweeps and tornado projectiles; foreleg breaks cause landing slips. Frostfang adds freezing ground that roots hunters."
+    }
+  ],
+  "roster": [
+    "rathian", "pink_rathian", "gold_rathian",
+    "rathalos", "azure_rathalos", "silver_rathalos",
+    "diablos", "black_diablos",
+    "legiana", "shrieking_legiana",
+    "paolumu", "nightshade_paolumu",
+    "bazelgeuse", "seething_bazelgeuse",
+    "tigrex", "brute_tigrex", "nargacuga",
+    "barioth", "frostfang_barioth"
+  ]
+}

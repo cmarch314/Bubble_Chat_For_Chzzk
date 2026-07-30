@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "editionOrder": [
+    "world-iceborne",
+    "rise-sunbreak",
+    "wilds",
+    "generations-ultimate",
+    "unassigned"
+  ],
+  "batchSize": 8,
+  "firstWorldWave": [
+    "anjanath",
+    "great_jagras",
+    "kulu-ya-ku",
+    "pukei-pukei",
+    "barroth",
+    "jyuratodus",
+    "tobi-kadachi",
+    "tzitzi-ya-ku"
+  ],
+  "researchLanguages": ["ja", "en", "ko"],
+  "releaseGates": [
+    "evidence",
+    "patterns",
+    "anatomy",
+    "animation",
+    "audio",
+    "preview",
+    "simulation"
+  ]
+}

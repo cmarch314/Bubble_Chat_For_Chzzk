@@ -18,8 +18,7 @@ class CommandsScrollEffect extends BaseEffect {
         const soundConf = this.config.getSoundConfig() || {};
         const soundKeys = Object.keys(soundConf).sort();
 
-        const CMC_FILES = window.HIVE_CMC_FILES || [];
-        const videoKeys = [...CMC_FILES].sort();
+        const videoKeys = Object.keys(window.HIVE_CMC_COMMAND_GROUPS || {}).sort();
 
         // 2. Create container
         const container = document.createElement('div');

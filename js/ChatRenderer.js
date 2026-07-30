@@ -79,10 +79,30 @@ class ChatRenderer {
         let timeout = 10000;
 
         if (specialBubble?.kind === 'clown') {
-            slotSpan = 1;
+            slotSpan = 2;
+            chatBox.classList.add('chat-box--clown');
             chatLineInner.classList.add('chat-line-inner--clown');
             messageEle.classList.add('message--clown');
             messageEle.textContent = specialBubble.text;
+
+            const textLen = specialBubble.text.length;
+            let fontSize = 3.2;
+            if (textLen <= 4) {
+                fontSize = 3.6;
+            } else if (textLen <= 8) {
+                fontSize = 3.0;
+            } else if (textLen <= 14) {
+                fontSize = 2.4;
+            } else if (textLen <= 22) {
+                fontSize = 2.0;
+            } else if (textLen <= 35) {
+                fontSize = 1.7;
+            } else if (textLen <= 50) {
+                fontSize = 1.4;
+            } else {
+                fontSize = 1.2;
+            }
+            messageEle.style.fontSize = `${fontSize}em`;
             timeout = 10000;
         } else if (videoQueue.length > 0) {
             const mediaResult = this.mediaBubbleController.mount(originalMessage, elements, videoQueue);

@@ -1,0 +1,5018 @@
+{
+  "schemaVersion": 1,
+  "policy": {
+    "editionOrder": [
+      "world-iceborne",
+      "rise-sunbreak",
+      "wilds",
+      "generations-ultimate",
+      "unassigned"
+    ],
+    "batchSize": 8,
+    "researchLanguages": [
+      "ja",
+      "en",
+      "ko"
+    ],
+    "releaseGates": [
+      "evidence",
+      "patterns",
+      "anatomy",
+      "animation",
+      "audio",
+      "preview",
+      "simulation"
+    ]
+  },
+  "summary": {
+    "released": 20,
+    "queued": 238,
+    "batches": 33,
+    "byEdition": {
+      "world-iceborne": 58,
+      "rise-sunbreak": 82,
+      "wilds": 29,
+      "generations-ultimate": 58,
+      "unassigned": 11
+    }
+  },
+  "nextBatch": {
+    "id": "world-iceborne-batch-01",
+    "edition": "world-iceborne",
+    "status": "queued",
+    "monsters": [
+      {
+        "id": "anjanath",
+        "nameKO": "안쟈나프",
+        "nameEN": "Anjanath",
+        "tier": "large",
+        "edition": "world-iceborne",
+        "variantOf": null,
+        "sourceIds": {
+          "rise-sunbreak": "1743214542",
+          "world-iceborne": "23"
+        },
+        "readiness": {
+          "image": true,
+          "patternCandidate": true,
+          "anatomy": true,
+          "animationRig": true,
+          "roarResolved": true,
+          "audio": false
+        }
+      },
+      {
+        "id": "great_jagras",
+        "nameKO": "도스쟈그라스",
+        "nameEN": "Great Jagras",
+        "tier": "medium",
+        "edition": "world-iceborne",
+        "variantOf": null,
+        "sourceIds": {
+          "world-iceborne": "17"
+        },
+        "readiness": {
+          "image": true,
+          "patternCandidate": true,
+          "anatomy": true,
+          "animationRig": true,
+          "roarResolved": true,
+          "audio": true
+        }
+      },
+      {
+        "id": "kulu-ya-ku",
+        "nameKO": "쿠루루야크",
+        "nameEN": "Kulu-Ya-Ku",
+        "tier": "medium",
+        "edition": "world-iceborne",
+        "variantOf": null,
+        "sourceIds": {
+          "rise-sunbreak": "1875928865",
+          "world-iceborne": "18"
+        },
+        "readiness": {
+          "image": true,
+          "patternCandidate": true,
+          "anatomy": true,
+          "animationRig": true,
+          "roarResolved": true,
+          "audio": true
+        }
+      },
+      {
+        "id": "pukei-pukei",
+        "nameKO": "푸케푸케",
+        "nameEN": "Pukei-Pukei",
+        "tier": "large",
+        "edition": "world-iceborne",
+        "variantOf": null,
+        "sourceIds": {
+          "rise-sunbreak": "1636956044",
+          "world-iceborne": "19"
+        },
+        "readiness": {
+          "image": true,
+          "patternCandidate": true,
+          "anatomy": true,
+          "animationRig": true,
+          "roarResolved": true,
+          "audio": false
+        }
+      },
+      {
+        "id": "barroth",
+        "nameKO": "볼보로스",
+        "nameEN": "Barroth",
+        "tier": "large",
+        "edition": "world-iceborne",
+        "variantOf": null,
+        "sourceIds": {
+          "rise-sunbreak": "643686022",
+          "world-iceborne": "20",
+          "generations-ultimate": "44"
+        },
+        "readiness": {
+          "image": true,
+          "patternCandidate": true,
+          "anatomy": true,
+          "animationRig": true,
+          "roarResolved": true,
+          "audio": false
+        }
+      },
+      {
+        "id": "jyuratodus",
+        "nameKO": "쥬라토도스",
+        "nameEN": "Jyuratodus",
+        "tier": "large",
+        "edition": "world-iceborne",
+        "variantOf": null,
+        "sourceIds": {
+          "rise-sunbreak": "1755961030",
+          "world-iceborne": "21"
+        },
+        "readiness": {
+          "image": true,
+          "patternCandidate": true,
+          "anatomy": true,
+          "animationRig": true,
+          "roarResolved": true,
+          "audio": false
+        }
+      },
+      {
+        "id": "tobi-kadachi",
+        "nameKO": "토비카가치",
+        "nameEN": "Tobi-Kadachi",
+        "tier": "large",
+        "edition": "world-iceborne",
+        "variantOf": null,
+        "sourceIds": {
+          "rise-sunbreak": "1770194663",
+          "world-iceborne": "22"
+        },
+        "readiness": {
+          "image": true,
+          "patternCandidate": true,
+          "anatomy": true,
+          "animationRig": true,
+          "roarResolved": true,
+          "audio": false
+        }
+      },
+      {
+        "id": "tzitzi-ya-ku",
+        "nameKO": "치치야크",
+        "nameEN": "Tzitzi-Ya-Ku",
+        "tier": "medium",
+        "edition": "world-iceborne",
+        "variantOf": null,
+        "sourceIds": {
+          "world-iceborne": "48"
+        },
+        "readiness": {
+          "image": true,
+          "patternCandidate": true,
+          "anatomy": true,
+          "animationRig": true,
+          "roarResolved": true,
+          "audio": true
+        }
+      }
+    ]
+  },
+  "batches": [
+    {
+      "id": "world-iceborne-batch-01",
+      "edition": "world-iceborne",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "anjanath",
+          "nameKO": "안쟈나프",
+          "nameEN": "Anjanath",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1743214542",
+            "world-iceborne": "23"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "great_jagras",
+          "nameKO": "도스쟈그라스",
+          "nameEN": "Great Jagras",
+          "tier": "medium",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "17"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "kulu-ya-ku",
+          "nameKO": "쿠루루야크",
+          "nameEN": "Kulu-Ya-Ku",
+          "tier": "medium",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1875928865",
+            "world-iceborne": "18"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "pukei-pukei",
+          "nameKO": "푸케푸케",
+          "nameEN": "Pukei-Pukei",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1636956044",
+            "world-iceborne": "19"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "barroth",
+          "nameKO": "볼보로스",
+          "nameEN": "Barroth",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "643686022",
+            "world-iceborne": "20",
+            "generations-ultimate": "44"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "jyuratodus",
+          "nameKO": "쥬라토도스",
+          "nameEN": "Jyuratodus",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1755961030",
+            "world-iceborne": "21"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "tobi-kadachi",
+          "nameKO": "토비카가치",
+          "nameEN": "Tobi-Kadachi",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1770194663",
+            "world-iceborne": "22"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "tzitzi-ya-ku",
+          "nameKO": "치치야크",
+          "nameEN": "Tzitzi-Ya-Ku",
+          "tier": "medium",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "48"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "world-iceborne-batch-02",
+      "edition": "world-iceborne",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "alatreon",
+          "nameKO": "알바트리온",
+          "nameEN": "Alatreon",
+          "tier": "colossal",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "ErdcV",
+            "generations-ultimate": "50"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "ancient_leshen",
+          "nameKO": "고대 레셴",
+          "nameEN": "Ancient Leshen",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "54"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "apceros",
+          "nameKO": "압케로스",
+          "nameEN": "Apceros",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "6",
+            "generations-ultimate": "4098"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "aptonoth",
+          "nameKO": "압토노스",
+          "nameEN": "Aptonoth",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "1",
+            "generations-ultimate": "4097"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "banbaro",
+          "nameKO": "버프바로",
+          "nameEN": "Banbaro",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "6dJI8"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "barnos",
+          "nameKO": "바르노스",
+          "nameEN": "Barnos",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "16"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "behemoth",
+          "nameKO": "베히모스",
+          "nameEN": "Behemoth",
+          "tier": "colossal",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "26"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "beotodus",
+          "nameKO": "브란토도스",
+          "nameEN": "Beotodus",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "OqOIX"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "world-iceborne-batch-03",
+      "edition": "world-iceborne",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "brachydios",
+          "nameKO": "브라키디오스",
+          "nameEN": "Brachydios",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "qpVH8",
+            "generations-ultimate": "63"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "deviljho",
+          "nameKO": "이블조",
+          "nameEN": "Deviljho",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "27",
+            "generations-ultimate": "43"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "dodogama",
+          "nameKO": "도도가마루",
+          "nameEN": "Dodogama",
+          "tier": "medium",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "30"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "fatalis",
+          "nameKO": "밀라보레아스",
+          "nameEN": "Fatalis",
+          "tier": "colossal",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "jA8SZ",
+            "generations-ultimate": "13"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "gajau",
+          "nameKO": "가쟈우",
+          "nameEN": "Gajau",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "413407319",
+            "world-iceborne": "9"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "gastodon",
+          "nameKO": "가스토돈",
+          "nameEN": "Gastodon",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "15"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "girros",
+          "nameKO": "기르오스",
+          "nameEN": "Girros",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "13"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "glavenus",
+          "nameKO": "디노발드",
+          "nameEN": "Glavenus",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "Lk1ia",
+            "generations-ultimate": "80"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "world-iceborne-batch-04",
+      "edition": "world-iceborne",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "great_girros",
+          "nameKO": "도스기르오스",
+          "nameEN": "Great Girros",
+          "tier": "medium",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "31"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "hornetaur",
+          "nameKO": "칸타로스",
+          "nameEN": "Hornetaur",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1682217807",
+            "world-iceborne": "14",
+            "generations-ultimate": "4101"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "jagras",
+          "nameKO": "쟈그라스",
+          "nameEN": "Jagras",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "933125691",
+            "world-iceborne": "2"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "kelbi",
+          "nameKO": "켈비",
+          "nameEN": "Kelbi",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2055863177",
+            "world-iceborne": "10",
+            "generations-ultimate": "4099"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "kestodon",
+          "nameKO": "케스토돈",
+          "nameEN": "Kestodon",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "826867193",
+            "world-iceborne": "7"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "kirin",
+          "nameKO": "키린",
+          "nameEN": "Kirin",
+          "tier": "elder",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "32",
+            "generations-ultimate": "11"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "kulve_taroth",
+          "nameKO": "맘-타로트",
+          "nameEN": "Kulve Taroth",
+          "tier": "colossal",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "33"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "kushala_daora",
+          "nameKO": "크샬다오라",
+          "nameEN": "Kushala Daora",
+          "tier": "elder",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "257661234",
+            "world-iceborne": "34",
+            "generations-ultimate": "24"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "world-iceborne-batch-05",
+      "edition": "world-iceborne",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "lavasioth",
+          "nameKO": "볼가노스",
+          "nameEN": "Lavasioth",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "35",
+            "generations-ultimate": "36"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "leshen",
+          "nameKO": "레셴",
+          "nameEN": "Leshen",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "53"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "lunastra",
+          "nameKO": "나나-테스카토리",
+          "nameEN": "Lunastra",
+          "tier": "elder",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "37"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "mernos",
+          "nameKO": "메르노스",
+          "nameEN": "Mernos",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "3"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "mosswine",
+          "nameKO": "모스",
+          "nameEN": "Mosswine",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "5",
+            "generations-ultimate": "4100"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "namielle",
+          "nameKO": "네로미에르",
+          "nameEN": "Namielle",
+          "tier": "elder",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "59"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "nergigante",
+          "nameKO": "네르기간테",
+          "nameEN": "Nergigante",
+          "tier": "elder",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "38"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "noios",
+          "nameKO": "노이오스",
+          "nameEN": "Noios",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "8"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "world-iceborne-batch-06",
+      "edition": "world-iceborne",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "odogaron",
+          "nameKO": "오도가론",
+          "nameEN": "Odogaron",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "39"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "radobaan",
+          "nameKO": "라도발킨",
+          "nameEN": "Radobaan",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "41"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "rajang",
+          "nameKO": "라잔",
+          "nameEN": "Rajang",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "243411229",
+            "world-iceborne": "57",
+            "generations-ultimate": "23"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "raphinos",
+          "nameKO": "라피노스",
+          "nameEN": "Raphinos",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "11"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "safi'jiiva",
+          "nameKO": "무페토-지바",
+          "nameEN": "Safi'jiiva",
+          "tier": "colossal",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "55"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "shamos",
+          "nameKO": "샤모스",
+          "nameEN": "Shamos",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "12"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "shara_ishvalda",
+          "nameKO": "안-이슈왈다",
+          "nameEN": "Shara Ishvalda",
+          "tier": "colossal",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "8mvfA"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "stygian_zinogre",
+          "nameKO": "진오우거 아종",
+          "nameEN": "Stygian Zinogre",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "56"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "world-iceborne-batch-07",
+      "edition": "world-iceborne",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "teostra",
+          "nameKO": "테오-테스카토르",
+          "nameEN": "Teostra",
+          "tier": "elder",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "200239249",
+            "world-iceborne": "45",
+            "generations-ultimate": "27"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "uragaan",
+          "nameKO": "우라간킨",
+          "nameEN": "Uragaan",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "49",
+            "generations-ultimate": "45"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "vaal_hazak",
+          "nameKO": "발하자크",
+          "nameEN": "Vaal Hazak",
+          "tier": "elder",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "50"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "velkhana",
+          "nameKO": "이베르카나",
+          "nameEN": "Velkhana",
+          "tier": "elder",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "440849622",
+            "world-iceborne": "J1pFn"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "vespoid",
+          "nameKO": "랑고스타",
+          "nameEN": "Vespoid",
+          "tier": "small",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1696451436",
+            "world-iceborne": "4",
+            "generations-ultimate": "4102"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "viper_tobi-kadachi",
+          "nameKO": "토비카가치 아종",
+          "nameEN": "Viper Tobi-Kadachi",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "58"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "xeno'jiiva",
+          "nameKO": "제노-지바",
+          "nameEN": "Xeno'jiiva",
+          "tier": "colossal",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "51"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "yian_garuga",
+          "nameKO": "얀가루루가",
+          "nameEN": "Yian Garuga",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "jXmhm",
+            "generations-ultimate": "18"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "world-iceborne-batch-08",
+      "edition": "world-iceborne",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "zinogre",
+          "nameKO": "진오우거",
+          "nameEN": "Zinogre",
+          "tier": "large",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1432800563",
+            "world-iceborne": "60",
+            "generations-ultimate": "57"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "zorah_magdaros",
+          "nameKO": "조라-마그다라오스",
+          "nameEN": "Zorah Magdaros",
+          "tier": "colossal",
+          "edition": "world-iceborne",
+          "variantOf": null,
+          "sourceIds": {
+            "world-iceborne": "52"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-01",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "aknosom",
+          "nameKO": "아케노시름",
+          "nameEN": "Aknosom",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2084266193"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "almudron",
+          "nameKO": "오로미도로",
+          "nameEN": "Almudron",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2040569941"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "altaroth",
+          "nameKO": "오르타로스",
+          "nameEN": "Altaroth",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "518617233",
+            "generations-ultimate": "4123"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "amatsu",
+          "nameKO": "아마츠마가츠치",
+          "nameEN": "Amatsu",
+          "tier": "colossal",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1446526160",
+            "generations-ultimate": "58"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "anteka",
+          "nameKO": "가우시카",
+          "nameEN": "Anteka",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1771235898",
+            "generations-ultimate": "4112"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "apex_arzuros",
+          "nameKO": "주인 아오아시라",
+          "nameEN": "Apex Arzuros",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1192999830"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "apex_diablos",
+          "nameKO": "주인 디아블로스",
+          "nameEN": "Apex Diablos",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "36049421"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "apex_mizutsune",
+          "nameKO": "주인 타마미츠네",
+          "nameEN": "Apex Mizutsune",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2043189560"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-02",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "apex_rathalos",
+          "nameKO": "주인 리오레우스",
+          "nameEN": "Apex Rathalos",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "99050216"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "apex_rathian",
+          "nameKO": "주인 리오레이아",
+          "nameEN": "Apex Rathian",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "453915339"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "apex_zinogre",
+          "nameKO": "주인 진오우거",
+          "nameEN": "Apex Zinogre",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1150792755"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "arzuros",
+          "nameKO": "아오아시라",
+          "nameEN": "Arzuros",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1374346390",
+            "generations-ultimate": "60"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "astalos",
+          "nameKO": "라이젝스",
+          "nameEN": "Astalos",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1237729819",
+            "generations-ultimate": "81"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "aurora_somnacanth",
+          "nameKO": "이소네미쿠니 아종",
+          "nameEN": "Aurora Somnacanth",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "88482199"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "baggi",
+          "nameKO": "바기",
+          "nameEN": "Baggi",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "9777038"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "basarios",
+          "nameKO": "바살모스",
+          "nameEN": "Basarios",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "274815918",
+            "generations-ultimate": "4"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-03",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "bishaten",
+          "nameKO": "비슈텐고",
+          "nameEN": "Bishaten",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1935814960"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "blood_orange_bishaten",
+          "nameKO": "비슈텐고 아종",
+          "nameEN": "Blood Orange Bishaten",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "447894064"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "bnahabra",
+          "nameKO": "브나하브라",
+          "nameEN": "Bnahabra",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "470812912",
+            "generations-ultimate": "4122"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "boggi",
+          "nameKO": "올기",
+          "nameEN": "Boggi",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1137262772"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "bombadgy",
+          "nameKO": "분부지나",
+          "nameEN": "Bombadgy",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1181483312"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "bullfango",
+          "nameKO": "불팽고",
+          "nameEN": "Bullfango",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1829706311",
+            "generations-ultimate": "4109"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "ceanataur",
+          "nameKO": "가미자미",
+          "nameEN": "Ceanataur",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "399612255",
+            "generations-ultimate": "4117"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "chaotic_gore_magala",
+          "nameKO": "혼돈에 신음하는 고어-마가라",
+          "nameEN": "Chaotic Gore Magala",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "131188813",
+            "generations-ultimate": "1351"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-04",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "crimson_glow_valstrax",
+          "nameKO": "영묘한 광채의 발파루크",
+          "nameEN": "Crimson Glow Valstrax",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "815111868"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "daimyo_hermitaur",
+          "nameKO": "다이묘자자미",
+          "nameEN": "Daimyo Hermitaur",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "19196313",
+            "generations-ultimate": "19"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "delex",
+          "nameKO": "델크스",
+          "nameEN": "Delex",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "38260556"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "espinas",
+          "nameKO": "에스피나스",
+          "nameEN": "Espinas",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "141986722"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "flaming_espinas",
+          "nameKO": "에스피나스 아종",
+          "nameEN": "Flaming Espinas",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1472640162"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "furious_rajang",
+          "nameKO": "격앙 라잔",
+          "nameEN": "Furious Rajang",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1326634525",
+            "generations-ultimate": "1303"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "gaismagorm",
+          "nameKO": "가이아델름",
+          "nameEN": "Gaismagorm",
+          "tier": "colossal",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "261970829"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "garangolm",
+          "nameKO": "가란고르무",
+          "nameEN": "Garangolm",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "247196652"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-05",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "gargwa",
+          "nameKO": "가구아",
+          "nameEN": "Gargwa",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "262999744",
+            "generations-ultimate": "4138"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "gore_magala",
+          "nameKO": "고어 마가라",
+          "nameEN": "Gore Magala",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1161896781",
+            "wilds": "7",
+            "generations-ultimate": "71"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "goss_harag",
+          "nameKO": "고샤하기",
+          "nameEN": "Goss Harag",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2069053547"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "gowngoat",
+          "nameKO": "메르크",
+          "nameEN": "Gowngoat",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1123029143"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "great_baggi",
+          "nameKO": "도스바기",
+          "nameEN": "Great Baggi",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "718470492"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "great_izuchi",
+          "nameKO": "오사이즈치",
+          "nameEN": "Great Izuchi",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1681174536"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "great_wroggi",
+          "nameKO": "도스프로기",
+          "nameEN": "Great Wroggi",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1460759793"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "hermitaur",
+          "nameKO": "야오자미",
+          "nameEN": "Hermitaur",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "385362366",
+            "generations-ultimate": "4116"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-06",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "izuchi",
+          "nameKO": "이즈치",
+          "nameEN": "Izuchi",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1195733201"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "jaggi",
+          "nameKO": "재기",
+          "nameEN": "Jaggi",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "114986952",
+            "generations-ultimate": "4130"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "jaggia",
+          "nameKO": "재기노스",
+          "nameEN": "Jaggia",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "129236969",
+            "generations-ultimate": "4131"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "khezu",
+          "nameKO": "푸루푸루",
+          "nameEN": "Khezu",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "395307913",
+            "generations-ultimate": "3"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "lagombi",
+          "nameKO": "울크스스",
+          "nameEN": "Lagombi",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1389104311",
+            "generations-ultimate": "61"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "lucent_nargacuga",
+          "nameKO": "나르가쿠르가 희소종",
+          "nameEN": "Lucent Nargacuga",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1661782447"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "ludroth",
+          "nameKO": "루드로스",
+          "nameEN": "Ludroth",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "51986285",
+            "generations-ultimate": "4135"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "lunagaron",
+          "nameKO": "루나가론",
+          "nameEN": "Lunagaron",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "232963023"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-07",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "magma_almudron",
+          "nameKO": "오로미도로 아종",
+          "nameEN": "Magma Almudron",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "15778133"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "magnamalo",
+          "nameKO": "마가이마가도",
+          "nameEN": "Magnamalo",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1921564947"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "malzeno",
+          "nameKO": "멜-제나",
+          "nameEN": "Malzeno",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "50943022"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "mizutsune",
+          "nameKO": "타마미츠네",
+          "nameEN": "Mizutsune",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1251979832",
+            "wilds": "15",
+            "generations-ultimate": "82"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "narwa_the_allmother",
+          "nameKO": "백룡 연원 나루하타타히메",
+          "nameEN": "Narwa the Allmother",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "664702249"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "popo",
+          "nameKO": "포포",
+          "nameEN": "Popo",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1876970084",
+            "generations-ultimate": "4110"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "primordial_malzeno",
+          "nameKO": "원초를 새기는 멜-제나",
+          "nameEN": "Primordial Malzeno",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1301934382"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "pyrantula",
+          "nameKO": "하제히바키",
+          "nameEN": "Pyrantula",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1869529590"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-08",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "pyre_rakna_kadaki",
+          "nameKO": "야츠카다키 아종",
+          "nameEN": "Pyre Rakna-Kadaki",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "102732212"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "rachnoid",
+          "nameKO": "츠케히바키",
+          "nameEN": "Rachnoid",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1075749110"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "rakna_kadaki",
+          "nameKO": "야츠카다키",
+          "nameEN": "Rakna-Kadaki",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2026860724"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "remobra",
+          "nameKO": "가브라스",
+          "nameEN": "Remobra",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "338098585",
+            "generations-ultimate": "4115"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "rhenoplos",
+          "nameKO": "리노프로스",
+          "nameEN": "Rhenoplos",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "322885843",
+            "generations-ultimate": "4121"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "risen_chameleos",
+          "nameKO": "괴이 극복 오나즈치",
+          "nameEN": "Risen Chameleos",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1186844883"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "risen_crimson_glow_valstrax",
+          "nameKO": "괴이 극복 발파루크",
+          "nameEN": "Risen Crimson Glow Valstrax",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "210106812"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "risen_kushala_daora",
+          "nameKO": "괴이 극복 크샬다오라",
+          "nameEN": "Risen Kushala Daora",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1172594994"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-09",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "risen_shagaru_magala",
+          "nameKO": "괴이 극복 샤가르마가라",
+          "nameEN": "Risen Shagaru Magala",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "479959906"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "risen_teostra",
+          "nameKO": "괴이 극복 테오-테스카토르",
+          "nameEN": "Risen Teostra",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1080586385"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "royal_ludroth",
+          "nameKO": "로아루드로스",
+          "nameEN": "Royal Ludroth",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "585215589",
+            "generations-ultimate": "47"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "scorned_magnamalo",
+          "nameKO": "원망 서린 마가이마가도",
+          "nameEN": "Scorned Magnamalo",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "857304595"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "seregios",
+          "nameKO": "셀레기오스",
+          "nameEN": "Seregios",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1280901767",
+            "wilds": "32",
+            "generations-ultimate": "77"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "shagaru_magala",
+          "nameKO": "샤가르마가라",
+          "nameEN": "Shagaru Magala",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1176146786",
+            "generations-ultimate": "72"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "shogun_ceanataur",
+          "nameKO": "쇼군기자미",
+          "nameEN": "Shogun Ceanataur",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "67000766",
+            "generations-ultimate": "20"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "slagtoth",
+          "nameKO": "즈와로포스",
+          "nameEN": "Slagtoth",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "248241955",
+            "generations-ultimate": "4137"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-10",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "somnacanth",
+          "nameKO": "이소네미쿠니",
+          "nameEN": "Somnacanth",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2146828439"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "tetranadon",
+          "nameKO": "요츠미와두",
+          "nameEN": "Tetranadon",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2099040502"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "thunder_serpent_narwa",
+          "nameKO": "나루하타타히메",
+          "nameEN": "Thunder Serpent Narwa",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1695408169"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "uroktor",
+          "nameKO": "우로코트르",
+          "nameEN": "Uroktor",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "233991938",
+            "generations-ultimate": "4136"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "velociprey",
+          "nameKO": "람포스",
+          "nameEN": "Velociprey",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1637997251",
+            "generations-ultimate": "4105"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "violet_mizutsune",
+          "nameKO": "타마미츠네 희소종",
+          "nameEN": "Violet Mizutsune",
+          "tier": "large",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1061157944"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "volvidon",
+          "nameKO": "랑그로토라",
+          "nameEN": "Volvidon",
+          "tier": "medium",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "1403354196",
+            "generations-ultimate": "62"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "wind_serpent_ibushi",
+          "nameKO": "이부시마키히코",
+          "nameEN": "Wind Serpent Ibushi",
+          "tier": "elder",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "2054819914"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "rise-sunbreak-batch-11",
+      "edition": "rise-sunbreak",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "wroggi",
+          "nameKO": "프로기",
+          "nameEN": "Wroggi",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "143032033"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "zamite",
+          "nameKO": "스쿠아길",
+          "nameEN": "Zamite",
+          "tier": "small",
+          "edition": "rise-sunbreak",
+          "variantOf": null,
+          "sourceIds": {
+            "rise-sunbreak": "157265542",
+            "generations-ultimate": "4140"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "wilds-batch-01",
+      "edition": "wilds",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "ajarakan",
+          "nameKO": "아자라칸",
+          "nameEN": "Ajarakan",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "21"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "arkveld",
+          "nameKO": "알슈베르도",
+          "nameEN": "Arkveld",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "20"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "balahara",
+          "nameKO": "발라하라",
+          "nameEN": "Balahara",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "12"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "blangonga",
+          "nameKO": "도도블랑고",
+          "nameEN": "Blangonga",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "30",
+            "generations-ultimate": "22"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "chatacabra",
+          "nameKO": "차타카브라",
+          "nameEN": "Chatacabra",
+          "tier": "medium",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "14"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "congalala",
+          "nameKO": "바바콩가",
+          "nameEN": "Congalala",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "5",
+            "generations-ultimate": "21"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "doshaguma",
+          "nameKO": "도샤구마",
+          "nameEN": "Doshaguma",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "11"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "gogmazios",
+          "nameKO": "고그마지오스",
+          "nameEN": "Gogmazios",
+          "tier": "elder",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "34"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "wilds-batch-02",
+      "edition": "wilds",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "gravios",
+          "nameKO": "그라비모스",
+          "nameEN": "Gravios",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "8",
+            "generations-ultimate": "5"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "guardian_arkveld",
+          "nameKO": "수호룡 알슈베르도",
+          "nameEN": "Guardian Arkveld",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "9"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "guardian_doshaguma",
+          "nameKO": "수호룡 도샤구마",
+          "nameEN": "Guardian Doshaguma",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "2"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "guardian_ebony_odogaron",
+          "nameKO": "수호룡 오도가론 아종",
+          "nameEN": "Guardian Ebony Odogaron",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "28"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "guardian_fulgur_anjanath",
+          "nameKO": "수호룡 안쟈나프 아종",
+          "nameEN": "Guardian Fulgur Anjanath",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "16"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "guardian_rathalos",
+          "nameKO": "수호룡 리오레우스",
+          "nameEN": "Guardian Rathalos",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "24"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "gypceros",
+          "nameKO": "게리오스",
+          "nameEN": "Gypceros",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "22",
+            "generations-ultimate": "9"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "hirabami",
+          "nameKO": "히라바미",
+          "nameEN": "Hirabami",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "17"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "wilds-batch-03",
+      "edition": "wilds",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "jin_dahaad",
+          "nameKO": "진 다하드",
+          "nameEN": "Jin Dahaad",
+          "tier": "colossal",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "26"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "lagiacrus",
+          "nameKO": "라기아크루스",
+          "nameEN": "Lagiacrus",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "31",
+            "generations-ultimate": "46"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "lala_barina",
+          "nameKO": "라바라 바리나",
+          "nameEN": "Lala Barina",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "4"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "nerscylla",
+          "nameKO": "네르스큐라",
+          "nameEN": "Nerscylla",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "6",
+            "generations-ultimate": "70"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "nu_udra",
+          "nameKO": "누 이그드라",
+          "nameEN": "Nu Udra",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "27"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "omega_planetes",
+          "nameKO": "오메가 플라네테스",
+          "nameEN": "Omega Planetes",
+          "tier": "colossal",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "33"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "quematrice",
+          "nameKO": "케마트리스",
+          "nameEN": "Quematrice",
+          "tier": "medium",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "10"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "rey_dau",
+          "nameKO": "레 다우",
+          "nameEN": "Rey Dau",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "3"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "wilds-batch-04",
+      "edition": "wilds",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "rompopolo",
+          "nameKO": "푸푸로포루",
+          "nameEN": "Rompopolo",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "19"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "uth_duna",
+          "nameKO": "우드 투나",
+          "nameEN": "Uth Duna",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "25"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "xu_wu",
+          "nameKO": "시이우",
+          "nameEN": "Xu Wu",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "23"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "yian_kut_ku",
+          "nameKO": "얀쿡크",
+          "nameEN": "Yian Kut-Ku",
+          "tier": "large",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "18",
+            "generations-ultimate": "8"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "zoh_shia",
+          "nameKO": "조 시아",
+          "nameEN": "Zoh Shia",
+          "tier": "elder",
+          "edition": "wilds",
+          "variantOf": null,
+          "sourceIds": {
+            "wilds": "1"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "generations-ultimate-batch-01",
+      "edition": "generations-ultimate",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "agnaktor",
+          "nameKO": "아그나코트르",
+          "nameEN": "Agnaktor",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "49"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "ahtal_ka",
+          "nameKO": "아트랄 카",
+          "nameEN": "Ahtal-Ka",
+          "tier": "colossal",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "88"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "akantor",
+          "nameKO": "아캄토름",
+          "nameEN": "Akantor",
+          "tier": "colossal",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "33"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "blango",
+          "nameKO": "블랑고",
+          "nameEN": "Blango",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4119"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "bulldrome",
+          "nameKO": "도스팽고",
+          "nameEN": "Bulldrome",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "30"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "cephadrome",
+          "nameKO": "도스가레오스",
+          "nameEN": "Cephadrome",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "17"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "cephalos",
+          "nameKO": "가레오스",
+          "nameEN": "Cephalos",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4108"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "conga",
+          "nameKO": "콩가",
+          "nameEN": "Conga",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4118"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "generations-ultimate-batch-02",
+      "edition": "generations-ultimate",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "crimson_fatalis",
+          "nameKO": "홍룡 밀라보레아스",
+          "nameEN": "Crimson Fatalis",
+          "tier": "colossal",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "269"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "duramboros",
+          "nameKO": "도볼베르크",
+          "nameEN": "Duramboros",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "55"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "gammoth",
+          "nameKO": "가무토",
+          "nameEN": "Gammoth",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "83"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "gendrome",
+          "nameKO": "도스게네포스",
+          "nameEN": "Gendrome",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "15"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "genprey",
+          "nameKO": "게네포스",
+          "nameEN": "Genprey",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4106"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "giadrome",
+          "nameKO": "도스기아노스",
+          "nameEN": "Giadrome",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "34"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "giaprey",
+          "nameKO": "기아노스",
+          "nameEN": "Giaprey",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4111"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "great_maccao",
+          "nameKO": "도스마카오",
+          "nameEN": "Great Maccao",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "85"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "generations-ultimate-batch-03",
+      "edition": "generations-ultimate",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "great_thunderbug",
+          "nameKO": "대뇌광충",
+          "nameEN": "Great Thunderbug",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4113"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "iodrome",
+          "nameKO": "도스이오스",
+          "nameEN": "Iodrome",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "16"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "ioprey",
+          "nameKO": "이오스",
+          "nameEN": "Ioprey",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4107"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "kecha_wacha",
+          "nameKO": "케차와차",
+          "nameEN": "Kecha Wacha",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "65"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "konchu",
+          "nameKO": "쿤추",
+          "nameEN": "Konchu",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4141"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "lao_shan_lung",
+          "nameKO": "노산룡",
+          "nameEN": "Lao-Shan Lung",
+          "tier": "colossal",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "12"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "larinoth",
+          "nameKO": "리모세토스",
+          "nameEN": "Larinoth",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4143"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "maccao",
+          "nameKO": "마카오",
+          "nameEN": "Maccao",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4142"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "generations-ultimate-batch-04",
+      "edition": "generations-ultimate",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "malfestio",
+          "nameKO": "호로로호루루",
+          "nameEN": "Malfestio",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "79"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "moofah",
+          "nameKO": "무파",
+          "nameEN": "Moofah",
+          "tier": "small",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "4144"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "najarala",
+          "nameKO": "가라라아자라",
+          "nameEN": "Najarala",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "68"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "nakarkos",
+          "nameKO": "오스트가로아",
+          "nameEN": "Nakarkos",
+          "tier": "colossal",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "84"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "nibelsnarf",
+          "nameKO": "하플보카",
+          "nameEN": "Nibelsnarf",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "56"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "old_fatalis",
+          "nameKO": "조룡 밀라보레아스",
+          "nameEN": "Old Fatalis",
+          "tier": "colossal",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "525"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "plesioth",
+          "nameKO": "가노토토스",
+          "nameEN": "Plesioth",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "10"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "raging_brachydios",
+          "nameKO": "임계 브라키디오스",
+          "nameEN": "Raging Brachydios",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "1343"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "generations-ultimate-batch-05",
+      "edition": "generations-ultimate",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "savage_deviljho",
+          "nameKO": "미친 들이치는 이블조",
+          "nameEN": "Savage Deviljho",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "1323"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "seltas",
+          "nameKO": "아르셀타스",
+          "nameEN": "Seltas",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "76"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "seltas_queen",
+          "nameKO": "게넬 셀타스",
+          "nameEN": "Seltas Queen",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "69"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "tetsucabra",
+          "nameKO": "테츠카브라",
+          "nameEN": "Tetsucabra",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "66"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "ukanlos",
+          "nameKO": "우캄루스",
+          "nameEN": "Ukanlos",
+          "tier": "colossal",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "38"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "valstrax",
+          "nameKO": "발파루크",
+          "nameEN": "Valstrax",
+          "tier": "elder",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "86"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "velocidrome",
+          "nameKO": "도스란포스",
+          "nameEN": "Velocidrome",
+          "tier": "medium",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "14"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "zamtrios",
+          "nameKO": "자보아자길",
+          "nameEN": "Zamtrios",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": null,
+          "sourceIds": {
+            "generations-ultimate": "67"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "generations-ultimate-batch-06",
+      "edition": "generations-ultimate",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "bloodbath_diablos",
+          "nameKO": "오마 디아블로스",
+          "nameEN": "Bloodbath Diablos",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "diablos",
+          "sourceIds": {
+            "generations-ultimate": "1031"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "boltreaver_astalos",
+          "nameKO": "청전주 라이젝스",
+          "nameEN": "Boltreaver Astalos",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "astalos",
+          "sourceIds": {
+            "generations-ultimate": "1105"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "crystalbeard_uragaan",
+          "nameKO": "보전 우라간킨",
+          "nameEN": "Crystalbeard Uragaan",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "uragaan",
+          "sourceIds": {
+            "generations-ultimate": "1069"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "deadeye_yian_garuga",
+          "nameKO": "척안 얀가루루가",
+          "nameEN": "Deadeye Yian Garuga",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "yian_garuga",
+          "sourceIds": {
+            "generations-ultimate": "1042"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "dreadking_rathalos",
+          "nameKO": "흑염왕 리오레우스",
+          "nameEN": "Dreadking Rathalos",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "rathalos",
+          "sourceIds": {
+            "generations-ultimate": "1026"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "dreadqueen_rathian",
+          "nameKO": "자독희 리오레이아",
+          "nameEN": "Dreadqueen Rathian",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "rathian",
+          "sourceIds": {
+            "generations-ultimate": "1025"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "drilltusk_tetsucabra",
+          "nameKO": "암천 테츠카브라",
+          "nameEN": "Drilltusk Tetsucabra",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "tetsucabra",
+          "sourceIds": {
+            "generations-ultimate": "1090"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "elderfrost_gammoth",
+          "nameKO": "은령 가무토",
+          "nameEN": "Elderfrost Gammoth",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "gammoth",
+          "sourceIds": {
+            "generations-ultimate": "1107"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "generations-ultimate-batch-07",
+      "edition": "generations-ultimate",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "grimclaw_tigrex",
+          "nameKO": "황구조 티가렉스",
+          "nameEN": "Grimclaw Tigrex",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "tigrex",
+          "sourceIds": {
+            "generations-ultimate": "1056"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "hellblade_glavenus",
+          "nameKO": "신멸인 디노발드",
+          "nameEN": "Hellblade Glavenus",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "glavenus",
+          "sourceIds": {
+            "generations-ultimate": "1104"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "nightcloak_malfestio",
+          "nameKO": "농은 호로로호루루",
+          "nameEN": "Nightcloak Malfestio",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "malfestio",
+          "sourceIds": {
+            "generations-ultimate": "1103"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "redhelm_arzuros",
+          "nameKO": "홍두 아오아시라",
+          "nameEN": "Redhelm Arzuros",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "arzuros",
+          "sourceIds": {
+            "generations-ultimate": "1084"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "rustrazor_ceanataur",
+          "nameKO": "개열 쇼군기자미",
+          "nameEN": "Rustrazor Ceanataur",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "shogun_ceanataur",
+          "sourceIds": {
+            "generations-ultimate": "1044"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "silverwind_nargacuga",
+          "nameKO": "백질풍 나르가쿠르가",
+          "nameEN": "Silverwind Nargacuga",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "nargacuga",
+          "sourceIds": {
+            "generations-ultimate": "1061"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "snowbaron_lagombi",
+          "nameKO": "대설주 우르크스스",
+          "nameEN": "Snowbaron Lagombi",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "lagombi",
+          "sourceIds": {
+            "generations-ultimate": "1085"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "soulseer_mizutsune",
+          "nameKO": "천안 타마미츠네",
+          "nameEN": "Soulseer Mizutsune",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "mizutsune",
+          "sourceIds": {
+            "generations-ultimate": "1106"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "generations-ultimate-batch-08",
+      "edition": "generations-ultimate",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "stonefist_hermitaur",
+          "nameKO": "모쇄 다이묘자자미",
+          "nameEN": "Stonefist Hermitaur",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "daimyo_hermitaur",
+          "sourceIds": {
+            "generations-ultimate": "1043"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "thunderlord_zinogre",
+          "nameKO": "금뢰공 진오우거",
+          "nameEN": "Thunderlord Zinogre",
+          "tier": "large",
+          "edition": "generations-ultimate",
+          "variantOf": "zinogre",
+          "sourceIds": {
+            "generations-ultimate": "1081"
+          },
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "unassigned-batch-01",
+      "edition": "unassigned",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "acidic_glavenus",
+          "nameKO": "디노발드 아종",
+          "nameEN": "Acidic Glavenus",
+          "tier": "large",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "blackveil_vaal_hazak",
+          "nameKO": "죽음을 두른 발하자크",
+          "nameEN": "Blackveil Vaal Hazak",
+          "tier": "elder",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "coral_pukei-pukei",
+          "nameKO": "푸케푸케 아종",
+          "nameEN": "Coral Pukei-Pukei",
+          "tier": "large",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "cortos",
+          "nameKO": "코르토스",
+          "nameEN": "Cortos",
+          "tier": "small",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "ebony_odogaron",
+          "nameKO": "오도가론 아종",
+          "nameEN": "Ebony Odogaron",
+          "tier": "large",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "fulgur_anjanath",
+          "nameKO": "안쟈나프 아종",
+          "nameEN": "Fulgur Anjanath",
+          "tier": "large",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "kestodon_female",
+          "nameKO": "케스토돈 (암컷)",
+          "nameEN": "Kestodon Female",
+          "tier": "small",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "ruiner_nergigante",
+          "nameKO": "모두를 멸하는 네르기간테",
+          "nameEN": "Ruiner Nergigante",
+          "tier": "elder",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "unassigned-batch-02",
+      "edition": "unassigned",
+      "status": "queued",
+      "monsters": [
+        {
+          "id": "scarred_yian_garuga",
+          "nameKO": "상처입은 얀가루루가",
+          "nameEN": "Scarred Yian Garuga",
+          "tier": "large",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": false
+          }
+        },
+        {
+          "id": "wulg",
+          "nameKO": "울그",
+          "nameEN": "Wulg",
+          "tier": "small",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        },
+        {
+          "id": "yamatsukami",
+          "nameKO": "야마츠카미",
+          "nameEN": "Yamatsukami",
+          "tier": "colossal",
+          "edition": "unassigned",
+          "variantOf": null,
+          "sourceIds": {},
+          "readiness": {
+            "image": true,
+            "patternCandidate": true,
+            "anatomy": true,
+            "animationRig": true,
+            "roarResolved": true,
+            "audio": true
+          }
+        }
+      ]
+    }
+  ]
+}

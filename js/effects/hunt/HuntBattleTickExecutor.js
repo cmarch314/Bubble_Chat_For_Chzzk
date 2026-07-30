@@ -1,24 +1,149 @@
 class HuntBattleTickExecutor {
+    static displayPatternName(pattern, monster) {
+        const catalog = globalThis.HuntMonsterPatternCatalog
+            || (typeof require === 'function' ? require('./HuntMonsterPatternCatalog.js') : null);
+        return catalog?.displayName ? catalog.displayName(pattern, monster) : String(pattern?.name || '');
+    }
+
+    static atbConfig() {
+        if (typeof HuntAtbConfig !== 'undefined') return HuntAtbConfig;
+        if (typeof require === 'function') return require('./HuntAtbConfig.js');
+        throw new Error('HuntAtbConfig is required before the battle tick runtime');
+    }
+
+    static monsterTurnExecutor() {
+        if (typeof HuntMonsterTurnExecutor !== 'undefined') return HuntMonsterTurnExecutor;
+        if (typeof require === 'function') return require('./HuntMonsterTurnExecutor.js');
+        return null;
+    }
+
     static execute(engine) {
         engine.battleTime++;
+        if (Number(engine.monsterRageOpenerRetryTicks || 0) > 0) {
+            engine.monsterRageOpenerRetryTicks--;
+            if (engine.monsterRageOpenerRetryTicks === 0
+                && engine.monsterState === 'enraged'
+                && engine.monsterFlightState !== 'airborne') {
+                engine.forcedMonsterPatternId = engine.monsterBehavior?.rageOpenerPatternId || null;
+            }
+        }
+        if (Number(engine.monsterActionLockTicks || 0) > 0) {
+            engine.monsterActionLockTicks--;
+        }
+        if (engine.monsterTraversalState) {
+            const forciblyInterrupted = engine.monsterKnockdownDuration > 0
+                || engine.monsterStunDuration > 0
+                || engine.monsterState === 'knocked_down'
+                || engine.monsterState === 'stunned';
+            if (forciblyInterrupted) {
+                const MonsterTurns = HuntBattleTickExecutor.monsterTurnExecutor();
+                const detachedImpact = Boolean(
+                    engine.pendingMonsterImpact
+                    && MonsterTurns?.actionPolicy?.().impactSurvivesInterruption?.(
+                        engine.pendingMonsterImpact.pattern
+                    )
+                );
+                if (detachedImpact) engine.clearMonsterTraversal?.('interrupted');
+                else if (engine.interruptMonsterMovement) engine.interruptMonsterMovement('interrupted');
+                else engine.clearMonsterTraversal?.('interrupted');
+            }
+        }
+        if (engine.monsterTraversalState) {
+            engine.monsterTraversalState.remainingTicks = Math.max(
+                0, Number(engine.monsterTraversalState.remainingTicks || 0) - 1
+            );
+            if (engine.monsterTraversalState.remainingTicks <= 0) {
+                engine.clearMonsterTraversal?.('complete');
+            }
+        }
         if (engine.monsterPatternSelector) engine.monsterPatternSelector.tick();
-        if (engine.monsterFlightRuntime) engine.monsterFlightRuntime.tick(engine);
+        if (engine.monsterFlightRuntime) {
+            engine.monsterFlightRuntime.promoteAirborneKnockdown?.(engine);
+            engine.monsterFlightRuntime.tick(engine);
+        }
+        engine.monsterTraitRuntime?.tick?.(engine);
         engine.updateTimerUI(engine.battleTime);
+
+        if (engine.pendingMonsterImpact) {
+            const interrupted = engine.monsterKnockdownDuration > 0 || engine.monsterStunDuration > 0
+                || engine.monsterState === 'knocked_down' || engine.monsterState === 'stunned';
+            const MonsterTurns = HuntBattleTickExecutor.monsterTurnExecutor();
+            const detachedImpact = Boolean(
+                MonsterTurns?.actionPolicy?.().impactSurvivesInterruption?.(
+                    engine.pendingMonsterImpact.pattern
+                )
+            );
+            if (interrupted && !detachedImpact) {
+                if (engine.interruptMonsterMovement) engine.interruptMonsterMovement('impact-interrupted');
+                else {
+                    engine.pendingMonsterImpact = null;
+                    engine.clearMonsterTraversal?.('impact-interrupted');
+                }
+            } else {
+                engine.pendingMonsterImpact.remainingTicks--;
+                if (engine.pendingMonsterImpact.remainingTicks <= 0) {
+                    const pendingImpact = engine.pendingMonsterImpact;
+                    const hasTimeline = Array.isArray(pendingImpact.events);
+                    const events = hasTimeline
+                        ? pendingImpact.events
+                        : [{
+                            atTicks: pendingImpact.totalTicks,
+                            targetIndices: [pendingImpact.targetIndex].filter(Number.isInteger)
+                        }];
+                    const eventIndex = Number(pendingImpact.nextEventIndex || 0);
+                    const event = events[eventIndex] || events[0];
+                    const nextEvent = events[eventIndex + 1];
+                    if (nextEvent) {
+                        pendingImpact.nextEventIndex = eventIndex + 1;
+                        pendingImpact.remainingTicks = Math.max(
+                            1, Number(nextEvent.atTicks || 0) - Number(event.atTicks || 0)
+                        );
+                    } else {
+                        engine.pendingMonsterImpact = null;
+                    }
+                    engine.executeMonsterTurn(
+                        hasTimeline ? {
+                            ...pendingImpact.pattern,
+                            runtimeImpactTargetIndices: event.targetIndices,
+                            runtimeImpactEmpty: event.allowEmpty === true,
+                            runtimeImpactDamageScale: Number(event.damageScale || 1),
+                            runtimeImpactSecondaryInterference: event.secondaryInterference || null,
+                            runtimeImpactAudioCue: event.audioCue || null,
+                            runtimeImpactIgnoreBrokenPartDamage: event.ignoreBrokenPartDamage === true,
+                            runtimeImpactSuppressStatus: event.suppressStatus === true,
+                            runtimeImpactTimelineIndex: eventIndex,
+                            runtimeImpactTimelineFinal: !nextEvent
+                        } : pendingImpact.pattern,
+                        pendingImpact.attackerIndex,
+                        event.targetIndices?.[0] ?? pendingImpact.targetIndex
+                    );
+                }
+            }
+        }
 
         if (engine.pendingMonsterAction) {
             const interrupted = engine.monsterKnockdownDuration > 0 || engine.monsterStunDuration > 0
                 || engine.monsterState === 'knocked_down' || engine.monsterState === 'stunned';
             if (interrupted) {
-                engine.addLog(`💥 [공격 중단] ${engine.selectedMonster.nameKO}의 ${engine.pendingMonsterAction.pattern.name} 준비가 무너졌습니다!`, '#00ffa3');
-                engine.pendingMonsterAction = null;
+                const interruptedName = HuntBattleTickExecutor.displayPatternName(
+                    engine.pendingMonsterAction.pattern, engine.selectedMonster);
+                engine.addLog(`💥 [공격 중단] ${engine.selectedMonster.nameKO}의 ${interruptedName} 준비가 무너졌습니다!`, '#00ffa3');
                 engine.monsterAtb = 0;
+                if (engine.interruptMonsterMovement) engine.interruptMonsterMovement('interrupted');
+                else {
+                    engine.pendingMonsterAction = null;
+                    engine.clearMonsterTraversal?.('interrupted');
+                }
             } else {
-                engine.pendingMonsterAction.remainingTicks--;
+                const MonsterTurns = HuntBattleTickExecutor.monsterTurnExecutor();
+                if (!MonsterTurns?.refreshPreparedTarget || MonsterTurns.refreshPreparedTarget(engine)) {
+                    engine.pendingMonsterAction.remainingTicks--;
+                }
             }
             if (engine.pendingMonsterAction && engine.pendingMonsterAction.remainingTicks <= 0) {
-                const preparedPattern = engine.pendingMonsterAction.pattern;
+                const preparedAction = engine.pendingMonsterAction;
                 engine.pendingMonsterAction = null;
-                engine.executeMonsterTurn(preparedPattern);
+                engine.executeMonsterTurn(preparedAction.pattern, preparedAction.attackerIndex, preparedAction.targetIndex);
             }
         }
 
@@ -45,6 +170,7 @@ class HuntBattleTickExecutor {
             if (engine.battleTime % 10 === 0) {
                 engine.selectedWeapons.forEach(w => {
                     if (w.status === 'alive') {
+                        w.environmentDotType = 'effluvium';
                         w.hp = Math.max(0, w.hp - 1);
                         engine.updateHpUI(w);
                         if (w.hp <= 0) {
@@ -117,9 +243,10 @@ class HuntBattleTickExecutor {
             engine.monsterRoarDuration--;
         }
 
-        // 헌터 귀막기 경직 틱 차감
+        // Legacy timed roar recovery remains for old saved states. New
+        // interference poses recover from their ATB gauge instead.
         engine.selectedWeapons.forEach(w => {
-            if (w.roarStunned && w.roarStunDuration && w.roarStunDuration > 0) {
+            if (!w.interference && w.roarStunned && w.roarStunDuration && w.roarStunDuration > 0) {
                 w.roarStunDuration--;
                 if (w.roarStunDuration <= 0) {
                     w.roarStunned = false;
@@ -173,7 +300,28 @@ class HuntBattleTickExecutor {
                 if (engine.weaponMechanics) engine.weaponMechanics.tick(w);
                 if (engine.blightRuntime) engine.blightRuntime.tick(w);
                 if (w.hitDuration && w.hitDuration > 0) {
-                    w.hitDuration--;
+                    const totalTicks = Math.max(1, Number(w.hitRecoveryTotalTicks || w.hitDuration));
+                    w.hitDuration = Math.max(0, Number(w.hitDuration) - 1);
+                    w.atb = Math.min(
+                        HuntBattleTickExecutor.atbConfig().GAUGE_MAX,
+                        HuntBattleTickExecutor.atbConfig().GAUGE_MAX * (totalTicks - w.hitDuration) / totalTicks
+                    );
+                    if (w.hitDuration === 0) {
+                        w.atb = HuntBattleTickExecutor.atbConfig().GAUGE_MAX;
+                        w.hitRecoveryTotalTicks = 0;
+                        w.hitReactionKind = null;
+                        w.hitKnockbackDirection = 0;
+                        if (Number(w.pendingStunDuration || 0) > 0
+                            && (!engine.blightRuntime?.canAct || engine.blightRuntime.canAct(w))) {
+                            w.status = 'stunned';
+                            w.stunDuration = Number(w.pendingStunDuration);
+                            w.pendingStunDuration = 0;
+                            w.atb = 0;
+                            w.stunStartedThisTick = true;
+                            engine.addLog(`🌀 [기절] ${w.name}이(가) 피격에서 일어난 직후 기절했습니다!`, '#e58e26');
+                            engine.callbacks?.onTriggerStunUI?.(w.index, true);
+                        }
+                    }
                 }
                 if (w.rollDuration && w.rollDuration > 0) {
                     w.rollDuration--;
@@ -188,8 +336,13 @@ class HuntBattleTickExecutor {
                         if (w.pendingSharpnessRestore) {
                             w.pendingSharpnessRestore = false;
                             w.sharpness = Number(w.maxSharpness || 0);
+                            engine.playSFX?.('whetstone_finish', null, {
+                                hunterIndex: w.index,
+                                item: 'whetstone_finish',
+                                action: 'whetstone_finish'
+                            });
                             engine.addLog(`✨ [숫돌질 완료] ${w.hunterName}의 ${w.weaponDisplayName || w.name} 예리도가 완전히 회복되었습니다!`, '#c98534');
-                            engine.showSkillBubble(w.index, '🪨✨ 예리도 회복');
+                            engine.showSkillBubble(w.index, '예리도 회복!');
                             engine.updateSharpnessUI(w.index, w);
                         }
                     }
@@ -197,7 +350,8 @@ class HuntBattleTickExecutor {
                 if (engine.actionStateMachine) engine.actionStateMachine.tick(w);
                 else if (w.attackDuration && w.attackDuration > 0) w.attackDuration--;
                 if (w.status === 'stunned' && w.stunDuration && w.stunDuration > 0) {
-                    w.stunDuration--;
+                    if (w.stunStartedThisTick) w.stunStartedThisTick = false;
+                    else w.stunDuration--;
                     if (w.stunDuration === 0) {
                         w.status = 'alive';
                         if (engine.perkRuntime) engine.perkRuntime.onRecovered(w);
@@ -241,12 +395,15 @@ class HuntBattleTickExecutor {
 
         // Long pressure arc: opening read, sustained rage, brief exhaustion.
         if (!engine.selectedMonster.id.includes('valstrax')) {
-            const nextState = HuntMonsterRules.stateForBattleTime(engine.battleTime);
+            const nextState = HuntMonsterRules.stateForBattleTime(engine.battleTime, engine.monsterBehavior);
 
             if (engine.monsterState !== 'knocked_down' && engine.monsterState !== 'stunned' && nextState !== engine.monsterState) {
                 engine.monsterState = nextState;
                 if (engine.monsterState === 'enraged') {
                     engine.monsterUltimateUsedInRage = false;
+                    if (engine.monsterFlightState !== 'airborne') {
+                        engine.forcedMonsterPatternId = engine.monsterBehavior?.rageOpenerPatternId || null;
+                    }
                     engine.monsterSpeed = engine.getMonsterSpeedForState('enraged');
                     engine.updateMonsterStateUI('분노 상태', `😡 분노한 ${engine.selectedMonster.nameKO} 😡`, { color: '#ff3b30', bg: 'rgba(255,59,48,0.1)' });
                     if (engine.monsterTier !== 'small') engine.triggerMonsterRoarFlinch(false);
@@ -282,6 +439,12 @@ class HuntBattleTickExecutor {
 
         // Check victory conditions
         if (engine.monsterHp <= 0) {
+            if (!engine.monsterDeathCuePlayed) {
+                engine.monsterDeathCuePlayed = true;
+                engine.playSFX?.('monster_death', null, {
+                    monsterId: engine.selectedMonster.id
+                });
+            }
             if (engine.currentConsecutiveIndex < engine.consecutiveTotal - 1) {
                 engine.triggerNextConsecutive();
                 return;
@@ -294,13 +457,21 @@ class HuntBattleTickExecutor {
         }
 
         // Monster ATB
-        if (engine.pendingMonsterAction) {
-            engine.monsterAtb = 0;
+        if (engine.pendingMonsterAction || engine.pendingMonsterImpact) {
+            engine.monsterAtb = engine.smallMonsterSwarm
+                ? engine.smallMonsterSwarm.advanceAtb(engine.monsterSpeed)
+                : Math.min(HuntBattleTickExecutor.atbConfig().GAUGE_MAX, engine.monsterAtb + engine.monsterSpeed);
         } else if (engine.monsterKnockdownDuration > 0) {
             engine.monsterKnockdownDuration--;
+            // Traps and knockdowns prevent actions, but they do not pause the
+            // monster's ATB recovery. A full gauge is held until the opening ends.
+            engine.monsterAtb = Math.min(
+                HuntBattleTickExecutor.atbConfig().GAUGE_MAX,
+                engine.monsterAtb + engine.monsterSpeed
+            );
             if (engine.monsterKnockdownDuration <= 0) {
                 // Recovery from knockdown
-                const restoreState = HuntMonsterRules.stateForBattleTime(engine.battleTime);
+                const restoreState = HuntMonsterRules.stateForBattleTime(engine.battleTime, engine.monsterBehavior);
 
                 engine.monsterState = restoreState;
                 engine.monsterSpeed = engine.getMonsterSpeedForState(restoreState);
@@ -321,7 +492,7 @@ class HuntBattleTickExecutor {
             engine.monsterStunDuration--;
             if (engine.monsterStunDuration <= 0) {
                 // Recovery from stun
-                const restoreState = HuntMonsterRules.stateForBattleTime(engine.battleTime);
+                const restoreState = HuntMonsterRules.stateForBattleTime(engine.battleTime, engine.monsterBehavior);
 
                 engine.monsterState = restoreState;
                 engine.monsterSpeed = engine.getMonsterSpeedForState(restoreState);
@@ -342,17 +513,21 @@ class HuntBattleTickExecutor {
                 engine.addLog(`📢 ${engine.selectedMonster.nameKO}이(가) 기절에서 깨어나 정신을 가다듬습니다. (기절 내성치 상승: ${engine.monsterStunThreshold})`, '#00ffa3');
             }
         } else if (engine.monsterRecoveryDuration > 0) {
+            // Compatibility-only motion lock. ATB is the actual recovery cost and
+            // continues filling instead of being reset for a second cooldown.
             engine.monsterRecoveryDuration--;
-            engine.monsterAtb = 0;
-        } else if (engine.monsterRoarDuration > 0 || (engine.selectedMonster.id.includes('valstrax') && engine.monsterState === 'valstrax_flying')) {
-            // 포효 시전 중 또는 발파루크 비행 중에는 몬스터 ATB가 충전되지 않음
+            engine.monsterAtb = Math.min(HuntBattleTickExecutor.atbConfig().GAUGE_MAX, engine.monsterAtb + engine.monsterSpeed);
+        } else if (engine.monsterRoarDuration > 0) {
+            // Roar motion is an action lock, not a second ATB penalty.
+            engine.monsterAtb = Math.min(HuntBattleTickExecutor.atbConfig().GAUGE_MAX, engine.monsterAtb + engine.monsterSpeed);
+        } else if (engine.selectedMonster.id.includes('valstrax') && engine.monsterState === 'valstrax_flying') {
             engine.monsterAtb = 0;
         } else if (engine.smallMonsterSwarm) {
             engine.monsterAtb = engine.smallMonsterSwarm.advanceAtb(engine.monsterSpeed);
         } else {
             engine.monsterAtb = Math.min(100, engine.monsterAtb + engine.monsterSpeed);
         }
-        engine.updateMonsterAtbUI(engine.monsterAtb);
+        if (!engine.smallMonsterSwarm) engine.updateMonsterAtbUI(engine.monsterAtb);
         if (engine.smallMonsterSwarm && engine.callbacks.onUpdateSmallMonsterSwarmUI) {
             engine.callbacks.onUpdateSmallMonsterSwarmUI(engine.smallMonsterSwarm.snapshot());
         }
@@ -367,14 +542,10 @@ class HuntBattleTickExecutor {
             const isHitStunned = w.hitDuration && w.hitDuration > 0;
             const isInvincibleJumping = Number(w.jumpInvulnerableTicks || 0) > 0;
 
-            if (w.status === 'alive' && !isInvincibleJumping && (!engine.perkRuntime || engine.perkRuntime.canAct(w)) && (!engine.blightRuntime?.canAct || engine.blightRuntime.canAct(w)) && !w.roarStunned && !isHitStunned && !isRolling && !isGuarding && !isGathering && !isUsingItem && !isAttacking) {
-                // Weapon cadence is already represented by each action's
-                // motion-value-derived occupancy. A second coarse speedGroup
-                // multiplier made nominally quick/slow weapons diverge far more
-                // than their actual moves and even overrode individual attacks.
-                // 1.15 is a shared pacing baseline that preserves the intended
-                // hunt win band without reintroducing weapon-class divergence.
-                let fillRate = 1.15;
+            if (w.status === 'alive' && !isInvincibleJumping && (!engine.perkRuntime || engine.perkRuntime.canAct(w)) && (!engine.blightRuntime?.canAct || engine.blightRuntime.canAct(w)) && (!w.roarStunned || w.interference?.kind === 'roar') && !isHitStunned) {
+                // One shared timing config owns the full-gauge cadence. Actions
+                // spend a proportional portion while recovery continues in motion.
+                let fillRate = HuntBattleTickExecutor.atbConfig().FILL_PER_TICK;
                 
                 // Apply hunter speed multiplier from config
                 fillRate *= engine.hunterSpeedMultiplier;
@@ -393,13 +564,23 @@ class HuntBattleTickExecutor {
                         fillRate *= 1.15;
                     }
                 }
-                w.atb = Math.min(100, w.atb + fillRate);
+                w.atb = Math.min(HuntBattleTickExecutor.atbConfig().GAUGE_MAX, w.atb + fillRate);
+            }
+            if (w.interference && w.atb >= HuntBattleTickExecutor.atbConfig().GAUGE_MAX) {
+                engine.clearHunterInterference?.(w);
             }
             engine.updateWeaponAtbUI(w.index, w.atb);
         });
 
         // Execute Turns
-        if (engine.monsterAtb >= 100 && (!engine.monsterRoarDuration || engine.monsterRoarDuration <= 0)) {
+        if (engine.monsterAtb >= 100
+            && Number(engine.monsterActionLockTicks || 0) <= 0
+            && !engine.monsterTraversalState
+            && Number(engine.monsterKnockdownDuration || 0) <= 0
+            && Number(engine.monsterStunDuration || 0) <= 0
+            && engine.monsterState !== 'knocked_down'
+            && engine.monsterState !== 'stunned'
+            && (!engine.monsterRoarDuration || engine.monsterRoarDuration <= 0)) {
             try {
                 if (engine.selectedMonster.id.includes('valstrax') && engine.monsterState === 'valstrax_charging') {
                     engine.executeValstraxChargeSuccess();
@@ -412,7 +593,24 @@ class HuntBattleTickExecutor {
         }
 
         engine.selectedWeapons.forEach(w => {
-            if (w.atb >= 100 && (w.status === 'alive' || w.status === 'stunned') && !w.roarStunned) {
+            const actionLocked = Number(w.attackDuration || 0) > 0
+                || Number(w.rollDuration || 0) > 0
+                || Number(w.guardDuration || 0) > 0
+                || Number(w.itemDuration || 0) > 0
+                || Boolean(w.isGathering)
+                || Boolean(w.interference)
+                || Number(w.hitDuration || 0) > 0
+                || w.status === 'stunned'
+                || Number(w.jumpInvulnerableTicks || 0) > 0;
+            const atbConfig = HuntBattleTickExecutor.atbConfig();
+            const actionAtbThreshold = w.id === 'dual_blades' && w.demonMode
+                ? atbConfig.DEMON_MODE_ACTION_THRESHOLD
+                : atbConfig.GAUGE_MAX;
+            const continuesGreatSwordCharge = w.id === 'great_sword' && Boolean(w.greatSwordChargeLocked);
+            const continuesLongSwordCounter = w.id === 'long_sword'
+                && Boolean(w.longSwordReactiveFollowup)
+                && Boolean(w.spiritRoundslashReady);
+            if ((w.atb >= actionAtbThreshold || continuesGreatSwordCharge || continuesLongSwordCounter) && !actionLocked && w.status === 'alive' && !w.roarStunned) {
                 try {
                     engine.executeHunterTurn(w);
                     w.consecutiveActionErrors = 0;
@@ -426,6 +624,7 @@ class HuntBattleTickExecutor {
     static recoverHunterTurn(engine, hunter, error) {
         hunter.consecutiveActionErrors = Number(hunter.consecutiveActionErrors || 0) + 1;
         hunter.atb = 0;
+        hunter.greatSwordChargeLocked = false;
         hunter.attackDuration = 0;
         hunter.currentAction = null;
         hunter.actionState = 'idle';
@@ -452,7 +651,12 @@ class HuntBattleTickExecutor {
 
     static recoverMonsterTurn(engine, error) {
         engine.pendingMonsterAction = null;
+        engine.pendingMonsterImpact = null;
         engine.monsterAtb = 0;
+        if (engine.monsterBurrowState) {
+            engine.monsterBurrowState = null;
+            engine.callbacks?.onTriggerMonsterBurrowPhase?.('cancel', null, 0);
+        }
         engine.updateMonsterAtbUI(0);
         console.error('[HuntBattleTickExecutor] Monster turn recovered', engine.selectedMonster?.id, error);
         if (!engine.monsterTurnErrorReported) {

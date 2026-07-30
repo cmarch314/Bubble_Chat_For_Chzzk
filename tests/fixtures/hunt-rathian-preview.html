@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>레이아 전투 계약 프리뷰</title>
+  <link rel="stylesheet" href="../../style.css">
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#070b08}
+    body{font-family:"Noto Sans KR",sans-serif}
+    #preview-viewport{position:absolute;inset:0;width:1920px;height:1080px;transform-origin:0 0}
+    #board{position:relative!important;left:auto!important;top:auto!important;width:1848px;height:880px;margin:22px 36px;color:#fff;overflow:visible;background:radial-gradient(circle at 50% 31%,#435c31 0,#172014 44%,#070907 82%);border:2px solid #819850;animation:none!important;transform:none!important;opacity:1!important}
+    .preview-title{position:absolute;left:28px;top:18px;z-index:80;font-size:28px;font-weight:900;color:#e4f2a4}
+    .preview-controls{position:absolute;right:24px;top:14px;z-index:90;display:flex;gap:7px;justify-content:flex-end}
+    button{padding:9px 13px;border:1px solid #9db45f;border-radius:7px;color:#fff;background:#28351d;font-size:16px;font-weight:800;cursor:pointer}
+    .hunt-monster-vitals{position:absolute;left:50%;top:76px;z-index:62;width:570px;transform:translateX(-50%);text-align:center}
+    .hunt-monster-vitals strong{font-size:30px}.monster-hp{height:13px;margin-top:5px;background:#172314;border:2px solid #77934b}.monster-hp i{display:block;width:73%;height:100%;background:#b7c846}
+    .hunt-monster-atb-track{width:50%;height:8px;margin:6px auto;background:#2d2816;border:1px solid #756a32}.hunt-monster-atb-track i{display:block;width:64%;height:100%;background:#ffd13f}
+    .hunt-monster-parts{position:absolute;left:0;top:128px;display:flex;gap:11px;padding:8px 12px;border:2px solid #667949;background:#10170de8;border-radius:8px}
+    .hunt-monster-part{position:relative;font-size:32px;opacity:1;filter:brightness(1.5) drop-shadow(0 0 5px #dff58a66)}
+    .hunt-monster-part.is-broken::after{content:"";position:absolute;left:-2px;top:16px;width:37px;height:5px;background:#ff5e48;transform:rotate(-43deg);box-shadow:0 0 6px #ff3d2a}
+    #monster-showcase-panel{position:absolute;left:100px;right:100px;top:120px;height:440px;z-index:45;overflow:visible}
+    .hunt-monster-attack-motion{position:absolute;left:50%;top:16px;width:430px;height:400px;margin-left:-215px;z-index:48}
+    #fight-monster-img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 14px #000c)}
+    .game-hunt-weapons-grid{position:absolute;left:64px;right:64px;bottom:50px;height:280px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+    .game-hunt-weapon-card{position:relative;border:2px solid #6e794e;background:#11180fd9;overflow:visible}
+    .game-hunt-weapon-img-container{position:absolute;left:50%;top:-26px;width:260px;height:230px;transform:translateX(-50%);z-index:70}
+    .game-hunt-weapon-img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 10px 7px #000c)}
+    .hunter-name{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:24px;font-weight:900}
+    .chat-safe{position:absolute;left:0;right:0;bottom:0;height:162px;box-sizing:border-box;padding:42px;color:#b8c2a8;background:#080808;border-top:2px dashed #52613e;text-align:center;font-size:22px}
+  </style>
+</head>
+<body>
+  <div id="preview-viewport">
+    <main id="board" class="game-hunt-card hunt-combat-board">
+      <div class="preview-title">리오레이아 · 월드 원종 계약</div>
+      <nav class="preview-controls" aria-label="레이아 패턴 미리보기">
+        <button data-pattern="fireball">단발 화염구</button>
+        <button data-pattern="triple_fireball">3연 화염구</button>
+        <button data-pattern="triple_charge">3연 돌진</button>
+        <button data-pattern="somersault">서머솔트</button>
+        <button data-pattern="double_somersault">2연 서머솔트</button>
+      </nav>
+      <section class="hunt-monster-vitals">
+        <strong>리오레이아 👑</strong>
+        <div class="monster-hp"><i></i></div><div class="hunt-monster-atb-track"><i></i></div>
+        <div class="hunt-monster-parts" aria-label="파괴 가능 부위"><span class="hunt-monster-part">💀</span><span class="hunt-monster-part">🛡️</span><span class="hunt-monster-part">🪽</span><span class="hunt-monster-part is-broken">🪽</span><span class="hunt-monster-part">〰️</span></div>
+      </section>
+      <div id="monster-showcase-panel" class="game-hunt-monster-showcase hunt-monster-motion-stage">
+        <div class="hunt-monster-attack-motion"><div class="hunt-monster-facing-layer"><img id="fight-monster-img" class="game-hunt-monster-img" src="../../img/monsters/rathian.png" alt="리오레이아"></div></div>
+      </div>
+      <section class="game-hunt-weapons-grid">
+        <article id="fight-card-0" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/great_sword.svg" alt=""></div><div class="hunter-name">공격형</div></article>
+        <article id="fight-card-1" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/lance.svg" alt=""></div><div class="hunter-name">수비형</div></article>
+        <article id="fight-card-2" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/hunting_horn.svg" alt=""></div><div class="hunter-name">지원형</div></article>
+        <article id="fight-card-3" class="game-hunt-weapon-card"><div class="game-hunt-weapon-img-container"><img class="game-hunt-weapon-img" src="../../img/weapons/bow.svg" alt=""></div><div class="hunter-name">베테랑</div></article>
+      </section>
+    </main>
+    <footer class="chat-safe">OBS 채팅 안전영역 · 하단 15%</footer>
+  </div>
+  <script src="../../js/effects/hunt/HuntAtbConfig.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAnatomyCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAnimationCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
+  <script>
+    const viewport=document.getElementById('preview-viewport');
+    const fit=()=>viewport.style.transform=`scale(${Math.min(innerWidth/1920,innerHeight/1080)})`;
+    addEventListener('resize',fit);fit();
+    const board=document.getElementById('board');
+    const owner={card:board,selectedMonster:{id:'rathian',nameKO:'리오레이아',species:'Flying Wyvern'},animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)},clear(id){clearTimeout(id)}}};
+    const animator=new HuntMonsterAttackAnimator(owner,()=>{});
+    const patterns={
+      fireball:{id:'rathian.fireball',name:'단발 화염구',type:'projectile',tags:['projectile','fire'],delivery:'projectile',animationProfile:'rathalos-fireball'},
+      triple_fireball:{id:'rathian.triple_fireball',name:'3연 화염구',type:'projectile',tags:['projectile','fire','multi-hit'],delivery:'projectile',animationProfile:'rathian-triple-fireball'},
+      triple_charge:{id:'rathian.triple_charge',name:'3연속 돌진',type:'charge',tags:['charge','multi-hit'],animationProfile:'ground-charge-triple',runtimeChargeAnchors:[0,1,2]},
+      somersault:{id:'rathian.somersault',name:'서머솔트',type:'physical',tags:['tail','poison','target-contact'],animationProfile:'rathian-somersault'},
+      double_somersault:{id:'rathian.double_somersault',name:'2연 서머솔트',type:'physical',tags:['tail','poison','target-contact','multi-hit'],animationProfile:'rathian-somersault-double'}
+    };
+    function play(key){
+      const p=patterns[key]; const img=document.getElementById('fight-monster-img');
+      const target=board.querySelector(key==='triple_charge'?'#fight-card-0':'#fight-card-1');
+      animator.playPatternMotion(img,target,p,p.name,p.type);
+    }
+    document.querySelectorAll('[data-pattern]').forEach(button=>button.addEventListener('click',()=>play(button.dataset.pattern)));
+    addEventListener('load',()=>play('somersault'));
+  </script>
+</body>
+</html>

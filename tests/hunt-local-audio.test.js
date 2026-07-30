@@ -51,13 +51,32 @@ const context = vm.createContext({
         });
     },
     window: {
-        HUNT_WEAPON_AUDIO_CUES: {}, HUNT_ROAR_ROUTE: { furious_rajang: 'rajang' },
+        HUNT_WEAPON_AUDIO_CUES: {}, HUNT_ROAR_ROUTE: { furious_rajang: 'rajang', rathian: 'rathalos' },
+        HUNT_WORLD_MONSTER_SILENT_VOICE_IDS: ['rajang'],
+        HUNT_VERIFIED_GENERIC_MONSTER_SE_CUES: {
+            physical_attack: [{
+                label: 'reviewed physical action fallback',
+                evidence: 'world-user-audition-semantic-se-fallback',
+                temporaryFallback: true,
+                reuseScope: 'cross-species-semantic-se',
+                layers: [['local/reviewed-physical-action-se.mp3', 0.6, 0]]
+            }],
+            physical_impact: [{
+                label: 'reviewed physical impact fallback',
+                evidence: 'world-user-audition-semantic-se-fallback',
+                temporaryFallback: true,
+                reuseScope: 'cross-species-semantic-se',
+                layers: [['local/reviewed-physical-impact-se.mp3', 0.65, 0]]
+            }]
+        },
         HUNT_VERIFIED_LOCAL_WEAPON_CUES: {
             'great_sword:slash_heavy': [{ label: 'test', evidence: 'unit', layers: [['local/verified-gs.mp3', 0.7, 0]] }],
+            'great_sword:charge_tier_1': [{ label: 'test charge tier 1', evidence: 'unit', layers: [['local/verified-gs-charge-1.mp3', 0.62, 0]] }],
             'bow:dragon_piercer': [{ label: 'test', evidence: 'unit', layers: [['local/verified-dragon.mp3', 0.7, 0]] }],
             'bow:bow_shot': [{ label: 'test', evidence: 'unit', layers: [['local/verified-bow.mp3', 0.7, 0]] }]
         },
         HUNT_VERIFIED_LOCAL_ITEM_CUES: {
+            flash_pod: [{ label: 'test flash', evidence: 'unit', layers: [['local/flash-pod.mp3', 0.82, 0]] }],
             lifepowder: [{ label: 'test powder', evidence: 'unit', layers: [['local/powder-a.mp3', 0.6, 0], ['local/powder-b.mp3', 0.6, 40]] }]
         },
         HUNT_LOCAL_WEAPON_ACTION_ROUTES: {
@@ -118,23 +137,27 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     assert.strictEqual(manager.monsterGroup('furious_rajang'), 'em023_05');
     assert.strictEqual(manager.weaponGroup('great_sword'), 'g_swd');
     assert.strictEqual(manager.playMonsterAction({ id: 'rathalos' }, 'roar'), true);
+    assert.strictEqual(manager.playMonsterAction({ id: 'rathian' }, 'roar'), true,
+        'Rathian must play the exact shared Rathalos roar route');
     assert.ok(!played.some(item => item.audioPath === 'local/forbidden-roar-background.mp3'),
         'roars must discard every secondary ambience/SE layer');
-    assert.strictEqual(manager.playMonsterAction({ id: 'furious_rajang' }, 'roar'), true, 'a proven variant route must reuse its labelled base-species roar');
+    assert.strictEqual(manager.playMonsterAction({ id: 'furious_rajang' }, 'roar'), false,
+        'Rajang and its routed variant must stay silent when audition found no monster voice');
     assert.strictEqual(manager.playMonsterAction({ id: 'rathalos' }, 'physical', { patternName: '돌진' }), true,
-        'an unmapped attack should use only the same monster SE bank as a generic action layer');
-    assert.strictEqual(played.at(-1).audioPath, 'local/rathalos-se.mp3');
+        'an unmapped physical attack should use only the reviewed semantic SE pool');
+    assert.strictEqual(played.at(-1).audioPath, 'local/reviewed-physical-impact-se.mp3');
     assert.ok(!played.some(item => item.audioPath === 'local/rathalos-vo-unknown.mp3'), 'unknown monster VO must never masquerade as an attack or roar');
     assert.strictEqual(manager.playMonsterAction({ id: 'nargacuga' }, 'physical', { patternName: '꼬리 내려찍기' }), true);
-    assert.strictEqual(manager.playMonsterAction({ id: 'nargacuga' }, 'physical', { patternName: '앞발 할퀴기' }), false);
+    assert.strictEqual(manager.playMonsterAction({ id: 'nargacuga' }, 'physical', { patternName: '앞발 할퀴기' }), true);
     assert.strictEqual(manager.playMonsterAction({ id: 'safi_jiiva' }, 'ultimate', { patternType: 'ultimate' }), true);
     manager.playMHAsset('slash_heavy', null, { weaponId: 'great_sword' });
     await Promise.resolve();
     assert.deepStrictEqual(played.map(item => item.audioPath), [
         'local/verified-roar.mp3',
-        'local/verified-rajang.mp3',
-        'local/rathalos-se.mp3',
+        'local/verified-roar.mp3',
+        'local/reviewed-physical-impact-se.mp3',
         'local/narga-tail.mp3',
+        'local/reviewed-physical-action-se.mp3',
         'local/safi-breath.mp3',
         'local/safi-explosion.mp3',
         'local/verified-gs.mp3'
@@ -151,6 +174,11 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     await Promise.resolve();
     assert.deepStrictEqual(played.slice(powderStart, powderStart + 2).map(item => item.audioPath), ['local/powder-a.mp3', 'local/powder-b.mp3']);
     assert.ok(!played.slice(powderStart).some(item => /Item Found|Potion Drink/.test(item.audioPath)), 'Lifepowder must not reuse potion or item-acquisition audio');
+    const flashStart = played.length;
+    manager.playMHAsset('flash_pod', null, { hunterIndex: 0, action: 'support', item: 'flash-pod' });
+    await Promise.resolve();
+    assert.deepStrictEqual(played.slice(flashStart).map(item => item.audioPath), ['local/flash-pod.mp3'],
+        'flash support must play only the audition-confirmed flash-pod explosion');
     assert.strictEqual(manager.playWeaponAction('dual_blades', 'slash_light'), true, 'weapon-bank evidence must prevent an unmapped weapon from becoming silent');
     await Promise.resolve();
     assert.strictEqual(played.at(-1).audioPath, 'local/db-bank.mp3');
@@ -159,6 +187,10 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
         'an evidence-ranked action route must outrank broad same-weapon fallback');
     await Promise.resolve();
     assert.strictEqual(played.at(-1).audioPath, 'local/evidence-ranked-gl-reload.mp3');
+    assert.strictEqual(manager.playWeaponAction('great_sword', 'charge_tier_1'), true,
+        'an exact Great Sword charge tier must outrank broad same-weapon fallback');
+    await Promise.resolve();
+    assert.strictEqual(played.at(-1).audioPath, 'local/verified-gs-charge-1.mp3');
     assert.strictEqual(played[0].options.baseVolume, 1, 'hunt audio gain must double and cap native playback safely');
     manager.playMHAsset('dragon_piercer', null, { weaponId: 'bow' });
     await Promise.resolve();

@@ -1,6 +1,6 @@
 const HUNT_ROAR_ROUTE = {
     azure_rathalos: 'rathalos', silver_rathalos: 'rathalos',
-    rathian: 'rathian', pink_rathian: 'rathian', gold_rathian: 'rathian',
+    rathian: 'rathalos', pink_rathian: 'rathalos', gold_rathian: 'rathalos',
     black_diablos: 'diablos', stygian_zinogre: 'zinogre',
     ruiner_nergigante: 'nergigante', savage_deviljho: 'deviljho',
     raging_brachydios: 'brachydios', acidic_glavenus: 'glavenus',
@@ -13,6 +13,20 @@ const HUNT_ROAR_ROUTE = {
     brute_tigrex: 'tigrex', viper_tobi_kadachi: 'tobi_kadachi',
     blackveil_vaal_hazak: 'vaal_hazak'
 };
+
+const HUNT_GENERATED_WORLD_ROAR_ROUTES = typeof module !== 'undefined' && module.exports
+    ? require('./data/WorldMonsterRoarRoutes.generated.js').HUNT_WORLD_MONSTER_ROAR_ROUTES
+    : (window.HUNT_WORLD_MONSTER_ROAR_ROUTES || {});
+const HUNT_GENERATED_WORLD_REVIEW_DATA = typeof module !== 'undefined' && module.exports
+    ? require('./data/WorldMonsterAudioReviewRoutes.generated.js')
+    : window;
+const HUNT_GENERATED_WORLD_REVIEW_ROUTES = HUNT_GENERATED_WORLD_REVIEW_DATA.HUNT_WORLD_MONSTER_REVIEW_ROUTES || {};
+const HUNT_VERIFIED_GENERIC_MONSTER_SE_CUES = Object.freeze(
+    HUNT_GENERATED_WORLD_REVIEW_DATA.HUNT_WORLD_MONSTER_SE_FALLBACKS || {}
+);
+const HUNT_GENERATED_SILENT_VOICE_IDS = Object.freeze(
+    [...(HUNT_GENERATED_WORLD_REVIEW_DATA.HUNT_WORLD_MONSTER_SILENT_VOICE_IDS || [])]
+);
 
 // Kept as an empty compatibility export for older overlay extensions. The
 // former generic files were unverified and are no longer valid hunt fallbacks.
@@ -31,6 +45,18 @@ const HUNT_PROTECTED_CLASSIC_AUDIO = Object.freeze([
 // enters this table only when its original event label identifies the action;
 // duration and filename shape are never treated as semantic evidence.
 const HUNT_VERIFIED_LOCAL_WEAPON_CUES = {
+    'great_sword:charge_tier_1': [{
+        label: 'Charge tier 1', evidence: 'MHW Audio Modding workbook exact World wp00 event label',
+        layers: [['local_assets/monster_hunter/world/weapon/great_sword/wp00_two_epvsp_nbnk_010_739955564.mp3', 0.62, 0]]
+    }],
+    'great_sword:charge_tier_2': [{
+        label: 'Charge tier 2', evidence: 'MHW Audio Modding workbook exact World wp00 event label',
+        layers: [['local_assets/monster_hunter/world/weapon/great_sword/wp00_two_epvsp_nbnk_002_285500585.mp3', 0.64, 0]]
+    }],
+    'great_sword:charge_tier_3': [{
+        label: 'Charge tier 3', evidence: 'MHW Audio Modding workbook exact World wp00 event label',
+        layers: [['local_assets/monster_hunter/world/weapon/great_sword/wp00_two_epvsp_nbnk_009_701005050.mp3', 0.66, 0]]
+    }],
     'great_sword:true_charged_slash': [{
         label: 'true charged slash power hit', evidence: 'World wp00 event label',
         layers: [
@@ -105,6 +131,14 @@ const HUNT_VERIFIED_LOCAL_WEAPON_CUES = {
 // This official World healing-powder burst is the closest semantically proven
 // surrogate and is kept distinct from potion drinking and item-acquisition UI.
 const HUNT_VERIFIED_LOCAL_ITEM_CUES = {
+    flash_pod: [{
+        label: 'Flash pod explosion',
+        evidence: 'MHW Audio Modding workbook confirmed slinnger_shell WEM 51; '
+            + 'Wwise event 2588333717 / source 584946289.',
+        layers: [
+            ['local_assets/monster_hunter/world/unknown/common/slinnger_shell_nbnk_051_584946289.mp3', 0.82, 0]
+        ]
+    }],
     lifepowder: [{
         label: 'healing powder burst',
         evidence: 'World healing kinsect powder exact event labels; explicit Lifepowder surrogate',
@@ -113,6 +147,28 @@ const HUNT_VERIFIED_LOCAL_ITEM_CUES = {
             ['local_assets/monster_hunter/world/weapon/insect_glaive/wp10_rod_epvsp_shell_nbnk_019_792796667.mp3', 0.62, 45]
         ]
     }],
+    whetstone_stroke: [{
+        label: 'Weapon sharpen [1/3]',
+        evidence: 'MHW Audio Modding workbook confirmed pl_prop_cmn WEM 34; '
+            + 'three strokes match the installed Wilds PlayerItemParam _Toishi_SharpenCount=3.',
+        layers: [
+            ['local_assets/monster_hunter/world/unknown/common/pl_prop_cmn_nbnk_034_139101520.mp3', 0.74, 0],
+            ['local_assets/monster_hunter/world/unknown/common/pl_prop_cmn_nbnk_034_139101520.mp3', 0.78, 0],
+            ['local_assets/monster_hunter/world/unknown/common/pl_prop_cmn_nbnk_034_139101520.mp3', 0.82, 0]
+        ]
+    }],
+    whetstone_finish: [{
+        label: 'Sharpen finished',
+        evidence: 'MHW Audio Modding workbook confirmed wp_cmn_epvsp WEM 52 / source 838569492.',
+        layers: [
+            ['local_assets/monster_hunter/world/unknown/common/wp_cmn_epvsp_nbnk_052_838569492.mp3', 0.82, 0]
+        ]
+    }]
+};
+
+// Exact barrel-bomb item events are not mapped yet. These weapon-bank sounds are
+// explicit, replaceable spectacle surrogates and must never be presented as verified item evidence.
+const HUNT_LOCAL_ITEM_SURROGATE_CUES = {
     barrel_bomb: [{
         label: 'barrel bomb explosion and blast',
         evidence: 'World gunlance explosive shell & Wyrmstake detonation evidence',
@@ -168,6 +224,13 @@ const HUNT_VERIFIED_HIT_CUES = {
             ['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_032_473159840.mp3', 0.70, 0]
         ]
     }],
+    ranged_normal: [{
+        label: 'ranged normal hit',
+        evidence: 'World bow shell evidence',
+        layers: [
+            ['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_032_473159840.mp3', 0.58, 0]
+        ]
+    }],
     bounce_hard: [{
         label: 'deflection bounce on hard shell',
         evidence: 'World weapon deflection evidence',
@@ -187,12 +250,156 @@ const monsterRoar = (label, paths) => [{
 }];
 
 const HUNT_VERIFIED_LOCAL_MONSTER_CUES = {
-    'rathian:roar': monsterRoar('Rathian/Rathalos roar', [
-        'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_087_695415387.mp3'
-    ]),
-    'rathalos:roar': monsterRoar('Rathian/Rathalos roar', [
-        'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_087_695415387.mp3'
-    ]),
+    'diablos:burrow': [{
+        label: 'Diablos burrow ground rumble',
+        evidence: 'User-audition-confirmed World em007_se event chain',
+        patternKeywords: ['burrow', '지중'],
+        layers: [[
+            'local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_056_205431218.mp3',
+            0.66,
+            0
+        ]]
+    }],
+    'black_diablos:burrow': [{
+        label: 'Black Diablos shared burrow ground rumble',
+        evidence: 'User-audition-confirmed shared World em007 body action',
+        patternKeywords: ['burrow', '지중'],
+        layers: [[
+            'local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_056_205431218.mp3',
+            0.66,
+            0
+        ]]
+    }],
+    'rathalos:telegraph': [{
+        label: 'Rathalos fireball charge vocal',
+        evidence: 'User-audition-confirmed World em001 VO breath-charge event chain',
+        patternKeywords: ['fireball', 'backstep_fireball', '화염구', '브레스'],
+        layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_117_897645699.mp3', 0.66, 0]]
+    }],
+    'rathian:telegraph': [
+        {
+            label: 'Rathian somersault vocal 1',
+            evidence: 'User-tag-confirmed World em001 VO event 2838412660',
+            patternKeywords: ['somersault', '서머솔트'],
+            layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_027_137441638.mp3', 0.7, 0]]
+        },
+        {
+            label: 'Rathian somersault vocal 2',
+            evidence: 'User-tag-confirmed World em001 VO event 2838412660',
+            patternKeywords: ['somersault', '서머솔트'],
+            layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_047_287664299.mp3', 0.7, 0]]
+        },
+        {
+            label: 'Rath family fireball charge vocal',
+            evidence: 'User-audition-confirmed shared World em001 VO breath-charge event chain',
+            patternKeywords: ['fireball', 'backstep_fireball', '화염구', '브레스'],
+            layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_117_897645699.mp3', 0.66, 0]]
+        }
+    ],
+    'rathalos:attack': [
+        ...[
+            'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_042_249895042.mp3',
+            'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_124_948696462.mp3'
+        ].map((bitePath, index) => ({
+            label: `Rathalos bite vocal ${index + 1}`,
+            evidence: 'User-audition-confirmed World em001 VO event chain and grouped random playback',
+            patternKeywords: ['bite', '물어'],
+            layers: [[bitePath, 0.68, 0]]
+        })),
+        ...[
+            {
+                path: 'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_107_840416626.mp3',
+                label: 'Rathalos aerial attack vocal'
+            },
+            {
+                path: 'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_046_267272460.mp3',
+                label: 'Rathalos aerial attack vocal event variant 2'
+            },
+            {
+                path: 'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_105_829711342.mp3',
+                label: 'Rathalos user-selected nearby aerial vocal 3'
+            },
+            {
+                path: 'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_109_846481219.mp3',
+                label: 'Rathalos user-selected nearby aerial vocal 4'
+            },
+            {
+                path: 'local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_009_36906213.mp3',
+                label: 'Rathalos confirmed wing flap 1'
+            },
+            {
+                path: 'local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_014_53232238.mp3',
+                label: 'Rathalos confirmed wing flap 2'
+            },
+            {
+                path: 'local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_013_50067497.mp3',
+                label: 'Rathalos confirmed wing flap 3'
+            },
+            {
+                path: 'local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_277_1063210653.mp3',
+                label: 'Rathalos confirmed wing flap 4'
+            }
+        ].map(candidate => ({
+            label: candidate.label,
+            evidence: 'User-audition-confirmed World em001 aerial VO/SE random pool',
+            patternKeywords: ['glide', 'claw_dive', 'stomp', '활공', '강습', '내려찍기'],
+            layers: [[candidate.path, candidate.path.includes('_vo_') ? 0.64 : 0.6, 0]]
+        })),
+        {
+            label: 'Rathalos backstep fire remaining on the ground',
+            evidence: 'User-audition-confirmed World em001 SE event chain',
+            patternKeywords: ['backstep_fireball', '백스텝'],
+            layers: [['local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_012_44522100.mp3', 0.58, 120]]
+        }
+    ],
+    'rathian:attack': [{
+        label: 'Rathian bite vocal',
+        evidence: 'User-audition-confirmed World em001 VO event chain',
+        patternKeywords: ['bite', '물어'],
+        layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_042_249895042.mp3', 0.68, 0]]
+    },
+    {
+        label: 'Rathian shared Rath-family bite vocal 2',
+        evidence: 'User-audition-confirmed shared World em001 VO event chain',
+        patternKeywords: ['bite'],
+        layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_124_948696462.mp3', 0.68, 0]]
+    },
+    ...[
+        'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_107_840416626.mp3',
+        'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_046_267272460.mp3',
+        'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_105_829711342.mp3',
+        'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_109_846481219.mp3',
+        'local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_009_36906213.mp3',
+        'local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_014_53232238.mp3',
+        'local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_013_50067497.mp3',
+        'local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_277_1063210653.mp3'
+    ].map((aerialPath, index) => ({
+        label: `Rathian shared Rath-family aerial vocal / wing layer ${index + 1}`,
+        evidence: 'User-audition-confirmed shared World em001 aerial VO/SE pool',
+        patternKeywords: ['somersault', 'glide', 'bite_somersault', 'flight'],
+        layers: [[aerialPath, aerialPath.includes('_vo_') ? 0.64 : 0.6, 0]]
+    }))
+    ],
+    'rathalos:knockdown': [{
+        label: 'Rathalos incapacitated / trapped vocal',
+        evidence: 'User-audition-confirmed World em001 VO event chain',
+        layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_044_259426345.mp3', 0.7, 0]]
+    }],
+    'rathalos:trap': [{
+        label: 'Rathalos trapped vocal',
+        evidence: 'User-audition-confirmed World em001 VO event chain',
+        layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_044_259426345.mp3', 0.7, 0]]
+    }],
+    'rathalos:flinch': [{
+        label: 'Rathalos small flinch vocal',
+        evidence: 'User-audition-confirmed World em001 VO event chain',
+        layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_121_930577735.mp3', 0.66, 0]]
+    }],
+    'rathalos:death': [{
+        label: 'Rathalos death vocal',
+        evidence: 'User-audition-confirmed World em001 VO event chain',
+        layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_045_265716738.mp3', 0.74, 0]]
+    }],
     'diablos:roar': monsterRoar('Diablos roar', [
         'local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_054_520295467.mp3'
     ]),
@@ -282,22 +489,141 @@ const HUNT_VERIFIED_LOCAL_MONSTER_CUES = {
     }]
 };
 
+// World Rathian and Rathalos share the audition-confirmed Rath-family reaction
+// Workbook WEM numbers are review indices, not decoded stream ordinals. Never
+// fall back to the old hand-authored roar paths when the generated evidence
+// audit withholds an ambiguous route.
+Object.keys(HUNT_VERIFIED_LOCAL_MONSTER_CUES).forEach(key => {
+    if (key.endsWith(':roar')) delete HUNT_VERIFIED_LOCAL_MONSTER_CUES[key];
+});
+Object.assign(HUNT_VERIFIED_LOCAL_MONSTER_CUES, HUNT_GENERATED_WORLD_ROAR_ROUTES);
+for (const [key, variants] of Object.entries(HUNT_GENERATED_WORLD_REVIEW_ROUTES)) {
+    const current = Array.isArray(HUNT_VERIFIED_LOCAL_MONSTER_CUES[key])
+        ? HUNT_VERIFIED_LOCAL_MONSTER_CUES[key]
+        : [];
+    const paths = new Set(current.flatMap(variant => (variant.layers || []).map(layer => layer[0])));
+    HUNT_VERIFIED_LOCAL_MONSTER_CUES[key] = [
+        ...current,
+        ...variants.filter(variant => !(variant.layers || []).some(layer => paths.has(layer[0])))
+    ];
+}
+for (const monsterId of HUNT_GENERATED_SILENT_VOICE_IDS) {
+    for (const kind of ['roar', 'death', 'flinch', 'knockdown', 'trap', 'telegraph']) {
+        delete HUNT_VERIFIED_LOCAL_MONSTER_CUES[`${monsterId}:${kind}`];
+    }
+}
+
+// Rathian and Rathalos use the same audition-confirmed World roar event.
+// Alias the route object itself so future regeneration cannot make only one
+// side audible or let the pair drift onto different clips.
+const HUNT_SHARED_RATH_ROAR = HUNT_VERIFIED_LOCAL_MONSTER_CUES['rathalos:roar'];
+if (Array.isArray(HUNT_SHARED_RATH_ROAR)) {
+    HUNT_VERIFIED_LOCAL_MONSTER_CUES['rathian:roar'] = HUNT_SHARED_RATH_ROAR;
+}
+
+// Generated review routes may replace either side with a newly merged array.
+// Reapply the Rath-family reaction aliases after every generated merge so
+// runtime random pools and their tests observe one shared authoritative set.
+['knockdown', 'trap', 'flinch', 'death'].forEach(kind => {
+    const shared = HUNT_VERIFIED_LOCAL_MONSTER_CUES[`rathalos:${kind}`];
+    if (Array.isArray(shared)) HUNT_VERIFIED_LOCAL_MONSTER_CUES[`rathian:${kind}`] = shared;
+});
+
+// User audition confirmed that Tigrex and Brute Tigrex share the same voice
+// files. Rebuild the variant routes after generated-route merging so later
+// review regeneration cannot silently split the pair again. Keep any authored
+// Brute Tigrex SE, but never treat a shared body-impact SE as voice evidence.
+['roar', 'attack', 'telegraph', 'knockdown', 'trap', 'flinch', 'death'].forEach(kind => {
+    const shared = HUNT_VERIFIED_LOCAL_MONSTER_CUES[`tigrex:${kind}`];
+    if (!Array.isArray(shared)) return;
+    const sharedVoice = shared.filter(variant =>
+        (variant.layers || []).some(([audioPath]) => String(audioPath).includes('_vo_')));
+    const authoredVariantSe = (HUNT_VERIFIED_LOCAL_MONSTER_CUES[`brute_tigrex:${kind}`] || [])
+        .filter(variant => (variant.layers || []).every(([audioPath]) => String(audioPath).includes('_se_')));
+    HUNT_VERIFIED_LOCAL_MONSTER_CUES[`brute_tigrex:${kind}`] = [
+        ...sharedVoice,
+        ...authoredVariantSe
+    ];
+});
+
+// Rath subspecies, rare species, deviants and apex/guardian forms retain the
+// same creature voice identity as their base species. Inherit only confirmed
+// VO layers: variant-specific breath, wing and impact SE remain independently
+// authored and must never be replaced by a family alias.
+const HUNT_MONSTER_VOICE_FAMILY_ROUTES = Object.freeze({
+    black_diablos: 'diablos',
+    stygian_zinogre: 'zinogre',
+    ruiner_nergigante: 'nergigante',
+    savage_deviljho: 'deviljho',
+    raging_brachydios: 'brachydios',
+    acidic_glavenus: 'glavenus',
+    furious_rajang: 'rajang',
+    seething_bazelgeuse: 'bazelgeuse',
+    frostfang_barioth: 'barioth',
+    shrieking_legiana: 'legiana',
+    crimson_glow_valstrax: 'valstrax',
+    primordial_malzeno: 'malzeno',
+    scarred_yian_garuga: 'yian_garuga',
+    fulgur_anjanath: 'anjanath',
+    nightshade_paolumu: 'paolumu',
+    viper_tobi_kadachi: 'tobi_kadachi',
+    coral_pukei_pukei: 'pukei_pukei',
+    ebony_odogaron: 'odogaron',
+    brute_tigrex: 'tigrex',
+    blackveil_vaal_hazak: 'vaal_hazak',
+    azure_rathalos: 'rathalos',
+    silver_rathalos: 'rathalos',
+    dreadking_rathalos: 'rathalos',
+    apex_rathalos: 'rathalos',
+    guardian_rathalos: 'rathalos',
+    pink_rathian: 'rathian',
+    gold_rathian: 'rathian',
+    dreadqueen_rathian: 'rathian',
+    apex_rathian: 'rathian'
+});
+const HUNT_MONSTER_VOICE_KINDS = Object.freeze([
+    'roar', 'attack', 'telegraph', 'knockdown', 'trap', 'flinch', 'death'
+]);
+for (const [variantId, baseId] of Object.entries(HUNT_MONSTER_VOICE_FAMILY_ROUTES)) {
+    for (const kind of HUNT_MONSTER_VOICE_KINDS) {
+        const baseVoice = (HUNT_VERIFIED_LOCAL_MONSTER_CUES[`${baseId}:${kind}`] || [])
+            .filter(variant => (variant.layers || [])
+                .some(([audioPath]) => String(audioPath).includes('_vo_')));
+        if (!baseVoice.length) continue;
+        const exactVariantSe = (HUNT_VERIFIED_LOCAL_MONSTER_CUES[`${variantId}:${kind}`] || [])
+            .filter(variant => (variant.layers || [])
+                .every(([audioPath]) => !String(audioPath).includes('_vo_')));
+        HUNT_VERIFIED_LOCAL_MONSTER_CUES[`${variantId}:${kind}`] = [
+            ...baseVoice,
+            ...exactVariantSe
+        ];
+    }
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         HUNT_ROAR_ROUTE,
+        HUNT_MONSTER_VOICE_FAMILY_ROUTES,
+        HUNT_VERIFIED_GENERIC_MONSTER_SE_CUES,
+        HUNT_WORLD_MONSTER_SILENT_VOICE_IDS: HUNT_GENERATED_SILENT_VOICE_IDS,
         HUNT_WEAPON_AUDIO_CUES,
         HUNT_PROTECTED_CLASSIC_AUDIO,
         HUNT_VERIFIED_LOCAL_WEAPON_CUES,
         HUNT_VERIFIED_LOCAL_ITEM_CUES,
+        HUNT_LOCAL_ITEM_SURROGATE_CUES,
         HUNT_VERIFIED_HIT_CUES,
         HUNT_VERIFIED_LOCAL_MONSTER_CUES
     };
 } else {
     window.HUNT_ROAR_ROUTE = HUNT_ROAR_ROUTE;
+    window.HUNT_MONSTER_VOICE_FAMILY_ROUTES = HUNT_MONSTER_VOICE_FAMILY_ROUTES;
+    window.HUNT_VERIFIED_GENERIC_MONSTER_SE_CUES = HUNT_VERIFIED_GENERIC_MONSTER_SE_CUES;
+    window.HUNT_WORLD_MONSTER_SILENT_VOICE_IDS = HUNT_GENERATED_SILENT_VOICE_IDS;
     window.HUNT_WEAPON_AUDIO_CUES = HUNT_WEAPON_AUDIO_CUES;
     window.HUNT_PROTECTED_CLASSIC_AUDIO = HUNT_PROTECTED_CLASSIC_AUDIO;
     window.HUNT_VERIFIED_LOCAL_WEAPON_CUES = HUNT_VERIFIED_LOCAL_WEAPON_CUES;
     window.HUNT_VERIFIED_LOCAL_ITEM_CUES = HUNT_VERIFIED_LOCAL_ITEM_CUES;
+    window.HUNT_LOCAL_ITEM_SURROGATE_CUES = HUNT_LOCAL_ITEM_SURROGATE_CUES;
     window.HUNT_VERIFIED_HIT_CUES = HUNT_VERIFIED_HIT_CUES;
     window.HUNT_VERIFIED_LOCAL_MONSTER_CUES = HUNT_VERIFIED_LOCAL_MONSTER_CUES;
 }

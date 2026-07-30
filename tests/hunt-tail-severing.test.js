@@ -11,7 +11,11 @@ const blunt = HuntMonsterAnatomyCatalog.applyPartDamage([tail], { id: 'hammer' }
 assert.strictEqual(blunt.applied, 0, 'blunt damage must never sever a tail');
 const slash = HuntMonsterAnatomyCatalog.applyPartDamage([tail], { id: 'long_sword', type: 'melee' }, 9999, 1, () => 0);
 assert.strictEqual(slash.newlySevered, true, 'slash damage must create a distinct severed state');
-assert.strictEqual(HuntMonsterAnatomyCatalog.find({ id: 'kirin' }), null, 'monsters without severable tails must not receive fictional tail state');
+const kirinParts = HuntMonsterAnatomyCatalog.createPartState(
+    HuntMonsterAnatomyCatalog.find({ id: 'kirin' })
+);
+assert.ok(!kirinParts.some(part => part.severable),
+    'monsters without severable tails must not receive a fictional tail-cut state');
 
 const logs = [];
 const hunter = { index: 0, hunterName: 'TAIL', perks: [{ name: '꼬리 수집가' }] };

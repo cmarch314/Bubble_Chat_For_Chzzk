@@ -101,7 +101,7 @@ function securityHeaders() {
             "img-src 'self' data: blob: https:",
             "media-src 'self' blob: https:",
             "connect-src 'self' https://api.chzzk.naver.com https://comm-api.game.naver.com wss://kr-ss1.chat.naver.com",
-            "font-src 'self' data:",
+            "font-src 'self' data: https://cdn.jsdelivr.net",
             "object-src 'none'",
             "base-uri 'none'",
             "frame-ancestors 'none'"
@@ -321,7 +321,6 @@ function createServer(options = {}) {
         }
         const isProfileRequest = requestUrl.pathname === HuntProfileContract.ENDPOINT_PATH;
         const isRunRequest = requestUrl.pathname === HuntRunState.ENDPOINT_PATH;
-        const isApiRequest = requestUrl.pathname.startsWith('/api/');
         const isWritableApi = isProfileRequest || isRunRequest;
         const allowedMethods = isRunRequest
             ? ['GET', 'HEAD', 'POST', 'DELETE', 'OPTIONS']
@@ -330,7 +329,7 @@ function createServer(options = {}) {
             sendJson(response, 405, { error: 'Method not allowed' });
             return;
         }
-        if (isApiRequest && !hasSessionCookie(request, sessionToken)) {
+        if (isWritableApi && !hasSessionCookie(request, sessionToken)) {
             sendJson(response, 401, { error: 'Local companion session is required' });
             return;
         }

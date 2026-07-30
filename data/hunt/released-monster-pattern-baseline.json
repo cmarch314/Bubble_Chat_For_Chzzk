@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "purpose": "Phase 0 behavior-preservation baseline for reviewed combat kits",
+  "records": [
+    {
+      "id": "bazelgeuse",
+      "count": 7,
+      "sha256": "a932f208a9bb9d4b9d7aedcc146cf6fa7505fe8c2d5869dd48e635117cbf8748"
+    },
+    {
+      "id": "chameleos",
+      "count": 7,
+      "sha256": "ada6f44702917ed6d4c9f9c14e756ba7d02ab7951c4665db390c004f0c6ea277"
+    },
+    {
+      "id": "rathian",
+      "count": 13,
+      "sha256": "b04f237513de45608eb6c8ae1e9749787607afdfc977c2196fa74d553d6a4133"
+    },
+    {
+      "id": "rathalos",
+      "count": 12,
+      "sha256": "ca59c142063417043dc605018781c7ba093dccdc7ee2041414b8880f93e25d74"
+    },
+    {
+      "id": "diablos",
+      "count": 10,
+      "sha256": "9a9101be3a064af844b18d83fc9098d3aca453cf39302ce05d7cc83738ef5d0f"
+    },
+    {
+      "id": "black_diablos",
+      "count": 10,
+      "sha256": "08a33cefbf6d1d426f7049653a5d5ac6d13acfe0aaca5092380ee56bb58b6a4f"
+    },
+    {
+      "id": "legiana",
+      "count": 6,
+      "sha256": "f78e638f305acabdf78f4d818c5cb673ff5e4b346150c7fd70d8066ce3763c22"
+    },
+    {
+      "id": "shrieking_legiana",
+      "count": 7,
+      "sha256": "3af2462198dc5e4a0046becdbb03b6b719643fea4860b8ffd56b88e5efcd9cec"
+    },
+    {
+      "id": "paolumu",
+      "count": 5,
+      "sha256": "ad3b3f96cfaf0dbaae27df7b84410fbbd11be26327a87c63bdcbe345998dc1c5"
+    },
+    {
+      "id": "nightshade_paolumu",
+      "count": 7,
+      "sha256": "35f88328633589b87fd834d8d9b6d46e1998760f69a7f25a8a837e839aaadbc2"
+    },
+    {
+      "id": "seething_bazelgeuse",
+      "count": 9,
+      "sha256": "4d9fc1f9e97b92e6fc2b7a83f1abad3eb13a5fe10a7ebfe38fdab47589614974"
+    },
+    {
+      "id": "tigrex",
+      "count": 6,
+      "sha256": "40c30b7e4943b691b8c2274e3d686659f3d53ec51c62e3f14103b181d8844b1c"
+    },
+    {
+      "id": "brute_tigrex",
+      "count": 8,
+      "sha256": "281245f196bcaf26e96d55b9f9112b5e8a7a3ae7981d26e8d4eaf286dac03386"
+    },
+    {
+      "id": "nargacuga",
+      "count": 5,
+      "sha256": "b746465945cff0a8949b0afe6cc940b0863868b817a3dd0a32fb8b4091108a25"
+    },
+    {
+      "id": "barioth",
+      "count": 6,
+      "sha256": "55af23a85bca090a9f469c154a632046cb4aab47d52e67c04964af0d0eb90074"
+    },
+    {
+      "id": "frostfang_barioth",
+      "count": 8,
+      "sha256": "78c9884b3321b414d4ac085b11ba3df0d272f70f74a13c5aaa6db51c4d3e1d8b"
+    },
+    {
+      "id": "pink_rathian",
+      "count": 14,
+      "sha256": "1dbf18f3d06591ebe7781e4bd9b6c99df4999c7735639d621a1a913eae936071"
+    },
+    {
+      "id": "gold_rathian",
+      "count": 15,
+      "sha256": "f291ef2ecad4d77dbea58168ff90edab545e80d8e93b5a46e5eb4a84e4359895"
+    },
+    {
+      "id": "azure_rathalos",
+      "count": 13,
+      "sha256": "320a538461cab7677e3a138e90075b24d8e80e2b28d07aeef3e90817802d6ca8"
+    },
+    {
+      "id": "silver_rathalos",
+      "count": 14,
+      "sha256": "c37937c5d7c467061705b2b5d8d0389cc2f85e10bd4d384baaf11bc52933d253"
+    }
+  ]
+}

@@ -15,34 +15,48 @@ class HuntWeaponAnimationCatalog {
                     effect,
                     impact: effect !== 'none',
                     animateWeapon: options.animateWeapon !== false,
+                    releaseChargePose: options.releaseChargePose === true,
+                    trackTarget: options.trackTarget === true,
+                    transformOrigin: options.transformOrigin || (weaponId === 'long_sword' ? '82% 18%' : '50% 50%'),
                     kinsect: options.kinsect || 'none',
                     source: 'capcom-controls+wilds-action-class'
                 });
             });
         };
 
-        add('great_sword', ['charge_1', 'strong_charge_1', 'true_charge_1'], 'great_sword_charge_raise', 360, 'none');
-        add('great_sword', ['charge_2', 'charge_3', 'strong_charge_2', 'strong_charge_3', 'true_charge_2', 'true_charge_3'], 'great_sword_charge_hold', 360, 'none');
-        add('great_sword', ['charged_slash'], 'great_sword_charged_release', 920);
-        add('great_sword', ['strong_charged_slash'], 'great_sword_charged_release', 1020);
-        add('great_sword', ['true_charged_slash'], 'great_sword_true_release', 1220);
+        const atbConfig = typeof HuntAtbConfig !== 'undefined'
+            ? HuntAtbConfig
+            : require('./HuntAtbConfig.js');
+        const chargeStageVisualMs = atbConfig.STANDARD_CHARGE_VISUAL_MS;
+        add('great_sword', ['charge_1', 'strong_charge_1', 'true_charge_1'], 'great_sword_charge_raise', chargeStageVisualMs, 'none');
+        add('great_sword', ['charge_2', 'charge_3', 'strong_charge_2', 'strong_charge_3', 'true_charge_2', 'true_charge_3'], 'great_sword_charge_hold', chargeStageVisualMs, 'none');
+        add('great_sword', ['charged_slash'], 'great_sword_charged_release', 920, 'sever', {
+            releaseChargePose: true, trackTarget: true
+        });
+        add('great_sword', ['strong_charged_slash'], 'great_sword_charged_release', 1020, 'sever', {
+            releaseChargePose: true, trackTarget: true
+        });
+        add('great_sword', ['true_charged_slash'], 'great_sword_true_release', 1220, 'sever', {
+            releaseChargePose: true, trackTarget: true
+        });
         add('great_sword', ['tackle'], 'shoulder_tackle', 480, 'counter');
         add('great_sword', ['wide_slash'], 'horizontal_slash', 620, 'sever');
         add('great_sword', ['side_blow'], 'quick_chop', 430, 'blunt');
         add('great_sword', ['kick'], 'shoulder_tackle', 390, 'blunt');
 
-        add('long_sword', ['overhead_slash'], 'overhead_slash', 560);
-        add('long_sword', ['thrust'], 'thrust', 430);
-        add('long_sword', ['rising_slash'], 'rising_slash', 520);
-        add('long_sword', ['spirit_slash_1', 'spirit_slash_2'], 'spirit_chain', 590);
-        add('long_sword', ['spirit_slash_3'], 'spirit_chain_finish', 680);
-        add('long_sword', ['spirit_roundslash'], 'roundslash', 720);
-        add('long_sword', ['helm_breaker'], 'helm_breaker', 980, 'multi');
-        add('long_sword', ['spirit_release_slash'], 'spirit_release_slash', 1080, 'multi');
-        add('long_sword', ['foresight'], 'counter_slash', 720, 'counter');
-        add('long_sword', ['special_sheathe'], 'special_sheathe', 640, 'none');
-        add('long_sword', ['iai_counter_fail'], 'iai_counter_fail', 520, 'none');
-        add('long_sword', ['iai_counter_success'], 'iai_counter_success', 820, 'counter');
+        add('long_sword', ['overhead_slash'], 'ls_overhead_slash', 560);
+        add('long_sword', ['thrust'], 'ls_thrust', 430);
+        add('long_sword', ['rising_slash'], 'ls_rising_slash', 520);
+        add('long_sword', ['spirit_slash_1'], 'ls_spirit_slash_1', 590);
+        add('long_sword', ['spirit_slash_2'], 'ls_spirit_slash_2', 590);
+        add('long_sword', ['spirit_slash_3'], 'ls_spirit_slash_3', 680);
+        add('long_sword', ['spirit_roundslash'], 'ls_roundslash', 720);
+        add('long_sword', ['helm_breaker'], 'ls_helm_breaker', 980, 'multi');
+        add('long_sword', ['spirit_release_slash'], 'ls_spirit_release_slash', 1080, 'multi');
+        add('long_sword', ['foresight'], 'ls_foresight_slash', 720, 'counter');
+        add('long_sword', ['special_sheathe'], 'ls_special_sheathe', 640, 'none');
+        add('long_sword', ['iai_counter_fail'], 'ls_iai_counter_fail', 520, 'none');
+        add('long_sword', ['iai_counter_success'], 'ls_iai_counter_success', 820, 'counter');
 
         add('sword_shield', ['chop'], 'quick_chop', 360);
         add('sword_shield', ['lateral_slash'], 'horizontal_slash', 390);
@@ -76,11 +90,19 @@ class HuntWeaponAnimationCatalog {
         add('dual_blades', ['archdemon_flurry'], 'dual_flurry', 580, 'multi');
         add('dual_blades', ['archdemon_slash'], 'archdemon_slash', 650, 'multi');
 
-        add('hammer', ['charge_1', 'charge_2', 'charge_3', 'mighty_charge'], 'hammer_charge', 440, 'none');
-        add('hammer', ['release_1'], 'hammer_side_swing', 520, 'blunt');
-        add('hammer', ['release_2'], 'hammer_uppercut', 650, 'blunt');
-        add('hammer', ['release_3'], 'hammer_spin_slam', 890, 'blunt');
-        add('hammer', ['mighty_charge_slam'], 'hammer_mighty_slam', 1080, 'blunt');
+        add('hammer', ['charge_1', 'charge_2', 'charge_3', 'mighty_charge'], 'hammer_charge', chargeStageVisualMs, 'none');
+        add('hammer', ['release_1'], 'hammer_charged_side_swing', 520, 'blunt', {
+            releaseChargePose: true, trackTarget: true
+        });
+        add('hammer', ['release_2'], 'hammer_charged_uppercut', 650, 'blunt', {
+            releaseChargePose: true, trackTarget: true
+        });
+        add('hammer', ['release_3'], 'hammer_charged_spin_slam', 890, 'blunt', {
+            releaseChargePose: true, trackTarget: true
+        });
+        add('hammer', ['mighty_charge_slam'], 'hammer_charged_mighty_slam', 1080, 'blunt', {
+            releaseChargePose: true, trackTarget: true
+        });
         add('hammer', ['overhead_1', 'overhead_2'], 'hammer_overhead_chain', 580, 'blunt');
         add('hammer', ['upswing'], 'hammer_uppercut', 720, 'blunt');
         add('hammer', ['big_bang_1', 'big_bang_2', 'big_bang_3', 'big_bang_4'], 'hammer_big_bang', 580, 'blunt');
@@ -234,6 +256,23 @@ class HuntWeaponAnimationCatalog {
             horizontal_slash: [idle, [.28, 0, 0, -58, 1, -28, -2], [.68, 1, 1, 76, 1.08, 0, 0], end],
             rising_slash: [idle, [.25, 0, 0, 54, .98, -22, 30], [.7, 1, 1, -62, 1.09, 0, 0], end],
             thrust: [idle, [.3, 0, 0, -5, .97, -20, 2], [.7, 1, 1, 3, 1.1, 0, 0], end],
+            // The Long Sword source image is asymmetric: the grip is at the
+            // upper-right and the blade extends diagonally away from it. Every
+            // motion pivots from that grip so the blade, never the handle, traces
+            // the contact arc through the monster.
+            ls_overhead_slash: [[0, 0, 0, -92, 1, -18, 8], [.28, 0, 0, -116, 1.03, -24, -2], [.68, .88, .9, 38, 1.1, 0, 0], [.82, 1, 1, 48, 1.06, 0, 3], end],
+            ls_thrust: [[0, 0, 0, -42, .98, -18, 7], [.32, 0, 0, -48, .95, -28, 10], [.7, .92, .94, -45, 1.12, 0, 0], [.82, .72, .76, -42, 1.04, 0, 1], end],
+            ls_rising_slash: [[0, 0, 0, 68, .98, -24, 28], [.28, 0, 0, 82, .96, -32, 34], [.7, .9, .94, -58, 1.11, 0, -5], [.82, 1, 1, -70, 1.07, 0, -10], end],
+            ls_spirit_slash_1: [[0, 0, 0, -88, 1, -22, 5], [.26, 0, 0, -108, 1.02, -30, 2], [.68, .92, .94, 48, 1.12, 0, 0], end],
+            ls_spirit_slash_2: [[0, 0, 0, 76, 1, -24, 14], [.26, 0, 0, 94, 1.02, -32, 20], [.68, .94, .96, -62, 1.13, 0, -3], end],
+            ls_spirit_slash_3: [[0, 0, 0, -112, 1.02, -34, 5], [.24, 0, 0, -128, 1.06, -42, -2], [.5, .58, .66, 66, 1.12, 0, 0], [.76, 1, 1, -48, 1.16, 0, -4], end],
+            ls_roundslash: [[0, 0, 0, -72, 1, -26, 4], [.24, 0, 0, -96, 1.03, -34, 0], [.62, 1, 1, 258, 1.14, 0, 0], [.82, .82, .86, 342, 1.08, 0, 2], [1, 0, 0, 360, 1, 0, 0]],
+            ls_helm_breaker: [[0, 0, 0, -38, 1, 0, 0], [.24, .25, .82, -54, 1.04, 0, -78], [.48, .62, .96, -62, 1.1, 0, -112], [.7, 1, 1, 92, 1.2, 0, 30], [.84, .9, .92, 108, 1.08, 0, 10], end],
+            ls_foresight_slash: [[0, 0, 0, -28, .96, -18, 8], [.26, -.18, -.08, -74, .9, -64, 22], [.48, -.12, -.05, -98, .94, -72, 18], [.76, .92, .94, 62, 1.15, 0, 0], end],
+            ls_special_sheathe: [[0, 0, 0, 8, 1, 0, 0], [.32, 0, 0, 42, .94, -38, 16], [.64, 0, 0, 102, .88, -58, 22], [.84, 0, 0, 108, .9, -56, 18], end],
+            ls_iai_counter_fail: [[0, 0, 0, 108, .9, -56, 18], [.42, 0, 0, 112, .88, -62, 22], [.74, 0, 0, 30, .9, -22, 12], end],
+            ls_iai_counter_success: [[0, 0, 0, 108, .9, -56, 18], [.26, 0, 0, 122, .86, -68, 22], [.54, 1, 1, -76, 1.24, 0, 0], [.72, .74, .78, -92, .98, 0, 4], end],
+            ls_spirit_release_slash: [[0, 0, 0, -62, .96, -24, 10], [.18, 0, 0, -94, 1, -32, 5], [.4, .34, .2, 78, 1.14, 0, 0], [.6, 1, 1, -112, 1.27, 0, 0], [.8, .84, .88, 54, 1.12, 0, 4], [.92, 1, 1, -48, 1.08, 0, 0], end],
             lance_thrust: [idle, [.24, 0, 0, 0, .98, -16, 4], [.62, 1, 1, 0, 1.13, 0, 0], [.78, .72, .72, 0, 1.05, 0, 0], end],
             lance_high_thrust: [idle, [.25, 0, 0, 18, .98, -14, 12], [.65, 1, 1, -24, 1.13, 0, -32], end],
             spirit_chain: [idle, [.22, 0, 0, -52, 1, -24, 6], [.5, .65, .72, 58, 1.06, 0, 0], [.72, .38, .62, -34, 1.08, 0, 0], end],
@@ -260,6 +299,11 @@ class HuntWeaponAnimationCatalog {
             falling_bash: [idle, [.24, .2, .75, 12, 1.06, 0, -58], [.56, .62, .95, 128, 1.14, 0, 14], [.76, 1, 1, 172, 1.18, 0, 0], end],
             plunging_thrust: [idle, [.28, .3, .8, 0, 1.06, 0, -62], [.58, .7, 1, -2, 1.16, 0, 12], [.8, 1, 1, 0, 1.1, 0, 0], end],
             counter_slash: [idle, [.2, 0, 0, 10, .96, -18, 0], [.5, 1, 1, -76, 1.16, 0, 0], [.74, .82, .86, -20, 1.04, 0, 0], end],
+            split_shield_brace: [idle, [.3, 0, 0, -5, 1.02, 8, 2], [.72, 0, 0, 3, 1.06, 12, 0], end],
+            split_shield_guard: [idle, [.24, 0, 0, -20, 1.08, -12, -4], [.62, 0, 0, -28, 1.16, -20, -6], [.84, 0, 0, -20, 1.1, -14, -3], end],
+            split_shield_bash: [idle, [.22, 0, 0, -18, 1.04, -20, 2], [.58, .72, .68, 16, 1.2, 0, 0], [.78, .35, .32, -8, 1.08, 8, 2], end],
+            split_shield_dash: [idle, [.2, 0, 0, -12, 1.08, -16, 0], [.56, .48, .42, 8, 1.18, 0, 0], [.8, .25, .22, -5, 1.1, 4, 0], end],
+            split_shield_recoil: [idle, [.26, 0, 0, -10, 1.08, 10, 2], [.52, 0, 0, 14, .92, 24, 8], [.78, 0, 0, -4, 1.06, 8, 1], end],
             demon_mode: [idle, [.3, 0, 0, -14, .92, 0, 0], [.58, 0, 0, 10, 1.18, 0, -12], [.78, 0, 0, -6, 1.1, 0, -4], end],
             dual_cross: [idle, [.2, .38, .42, 52, 1.04, -10, 0], [.42, .65, .7, -58, 1.08, 12, 0], [.68, 1, 1, 66, 1.12, 0, 0], [.84, .76, .8, -32, 1.04, 0, 0], end],
             dual_roundslash: [idle, [.18, .2, .3, -72, 1.02, -12, 3], [.44, .62, .68, 150, 1.08, 8, 0], [.7, 1, 1, 330, 1.14, 0, 0], [.86, .8, .82, 410, 1.06, 0, 0], [1, 0, 0, 360, 1, 0, 0]],
@@ -269,7 +313,7 @@ class HuntWeaponAnimationCatalog {
             blade_dance_drive: [idle, [.14, .18, .24, -85, 1.02, 0, 0], [.32, .4, .5, 125, 1.07, 0, 0], [.5, .64, .7, -210, 1.1, 0, 0], [.7, .9, .94, 315, 1.13, 0, 0], [.86, 1, 1, -390, 1.14, 0, 0], end],
             blade_dance: [idle, [.18, .25, .35, 120, 1.03, 0, 0], [.42, .62, .72, 320, 1.08, 0, 0], [.7, 1, 1, 620, 1.14, 0, 0], [.86, .84, .82, 720, 1.08, 0, 0], [1, 0, 0, 720, 1, 0, 0]],
             archdemon_slash: [idle, [.25, 0, 0, -70, .98, -20, 8], [.6, 1, 1, 210, 1.13, 0, 0], [.8, .84, .82, 310, 1.08, 0, 0], [1, 0, 0, 360, 1, 0, 0]],
-            hammer_charge: [idle, [.28, 0, 0, -18, .88, -12, 14], [.62, 0, 0, 10, 1.14, -4, 5], [.82, 0, 0, -6, 1.06, 0, 0], end],
+            hammer_charge: [idle, [.28, 0, 0, -36, .92, -13, 12], [.62, 0, 0, -68, 1.08, -20, 1], [.82, 0, 0, -82, 1.1, -24, -7], [1, 0, 0, -78, 1.08, -22, -6]],
             hammer_overhead_chain: [idle, [.24, 0, 0, -108, 1.05, -28, 18], [.6, .72, .78, -35, 1.12, 0, -4], [.76, 1, 1, 44, 1.18, 0, 0], end],
             hammer_big_bang: [idle, [.22, 0, 0, -88, 1.03, -24, 12], [.56, .3, .36, -48, 1.12, 0, -8], [.7, 1, 1, 38, 1.2, 0, 2], [.86, .72, .74, 30, 1.07, 0, 5], end],
             hammer_big_bang_finish: [idle, [.18, 0, 0, -112, 1.08, -34, 10], [.42, .34, .38, -55, 1.18, 0, -12], [.58, 1, 1, 55, 1.3, 0, 0], [.72, .82, .88, -36, 1.2, 0, -6], [.86, 1, 1, 64, 1.28, 0, 3], end],
@@ -281,6 +325,10 @@ class HuntWeaponAnimationCatalog {
             hammer_uppercut: [idle, [.28, 0, 0, 62, .96, -28, 34], [.72, 1, 1, -76, 1.2, 0, -22], end],
             hammer_spin_slam: [idle, [.2, 0, 0, -70, 1, -18, 10], [.58, .68, .7, 300, 1.12, 0, 0], [.78, 1, 1, 410, 1.22, 0, 0], [1, 0, 0, 360, 1, 0, 0]],
             hammer_mighty_slam: [idle, [.28, 0, 0, -118, 1.08, -36, 26], [.52, .12, .14, -88, 1.16, 0, 0], [.72, 1, 1, 62, 1.34, 0, 0], [.84, .92, .86, 66, 1.2, 0, 0], end],
+            hammer_charged_side_swing: [[0, 0, 0, -78, 1.08, -22, -6], [.24, 0, 0, -104, 1.12, -34, -12], [.7, 1, 1, 88, 1.18, 0, 0], end],
+            hammer_charged_uppercut: [[0, 0, 0, -78, 1.08, -22, -6], [.24, 0, 0, -42, .98, -30, 18], [.72, 1, 1, -76, 1.22, 0, -22], end],
+            hammer_charged_spin_slam: [[0, 0, 0, -78, 1.08, -22, -6], [.18, 0, 0, -112, 1.12, -30, -8], [.56, .68, .7, 300, 1.16, 0, 0], [.78, 1, 1, 410, 1.24, 0, 0], [1, 0, 0, 360, 1, 0, 0]],
+            hammer_charged_mighty_slam: [[0, 0, 0, -82, 1.12, -25, -8], [.26, 0, 0, -126, 1.16, -40, -22], [.5, .12, .14, -92, 1.2, 0, 0], [.72, 1, 1, 62, 1.36, 0, 0], [.84, .92, .86, 66, 1.22, 0, 0], end],
             horn_left_swing: [idle, [.3, 0, 0, -74, 1, -36, 4], [.72, 1, 1, 80, 1.15, 0, 0], end],
             horn_right_swing: [idle, [.3, 0, 0, 74, 1, 36, 4], [.72, 1, 1, -80, 1.15, 0, 0], end],
             horn_back_strike: [idle, [.34, 0, 0, -105, .98, -54, 12], [.72, .88, .9, 135, 1.18, 0, 0], end],
@@ -340,17 +388,32 @@ class HuntWeaponAnimationCatalog {
         return this._motions;
     }
 
-    static keyframes(profile, hunterIndex = 0) {
+    static shieldMotion(profile = {}) {
+        const id = String(profile.actionId || '');
+        if (!/^(?:sword_shield|lance|gunlance)\./.test(id)) return null;
+        if (/shield_bash|falling_bash/.test(id)) return 'split_shield_bash';
+        if (/guard|counter|power_guard|payback/.test(id)) return 'split_shield_guard';
+        if (/backstep|dash|leaping/.test(id)) return 'split_shield_dash';
+        if (/shell|burst|wyrmstake|wyvern_fire/.test(id)) return 'split_shield_recoil';
+        return 'split_shield_brace';
+    }
+
+    static keyframes(profile, hunterIndex = 0, targetVector = null) {
         const vectors = [
             { x: 174, y: -150, side: 1 }, { x: 68, y: -184, side: 1 },
             { x: -68, y: -184, side: -1 }, { x: -174, y: -150, side: -1 }
         ];
-        const v = vectors[Math.max(0, Math.min(3, Number(hunterIndex) || 0))];
+        const fallbackVector = vectors[Math.max(0, Math.min(3, Number(hunterIndex) || 0))];
+        const hasMeasuredTarget = Number.isFinite(targetVector?.x) && Number.isFinite(targetVector?.y);
+        const v = hasMeasuredTarget
+            ? { x: Number(targetVector.x), y: Number(targetVector.y), side: fallbackVector.side }
+            : fallbackVector;
         const spec = this.MOTIONS[profile?.motion] || this.MOTIONS.horizontal_slash;
         const preserveGreatSwordBladeDirection = String(profile?.motion || '').startsWith('great_sword_');
         const greatSwordBladeMirror = preserveGreatSwordBladeDirection && v.side > 0 ? -1 : 1;
         return spec.map(([offset, xRatio, yRatio, rotation, scale, xNudge, yNudge]) => ({
             offset,
+            transformOrigin: profile?.transformOrigin || '50% 50%',
             transform: `translate(${Math.round(v.x * xRatio + xNudge * v.side)}px, ${Math.round(v.y * yRatio + yNudge)}px) rotate(${Math.round(rotation * (preserveGreatSwordBladeDirection ? 1 : v.side))}deg) scale(${scale})${preserveGreatSwordBladeDirection ? ` scaleX(${greatSwordBladeMirror})` : ''}`
         }));
     }

@@ -1,0 +1,2633 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-25T06:52:47.199Z",
+  "sources": [
+    {
+      "title": "MonsterHunter - Monster Actions (executable extraction)",
+      "url": "https://gist.github.com/haato3o/faec6cbf2afe2b30c13b97908d5697b4"
+    },
+    {
+      "title": "Monster Hunter World Modding - Monster IDs",
+      "url": "https://github.com/Ezekial711/MonsterHunterWorldModding/wiki/Monster-IDs"
+    }
+  ],
+  "counts": {
+    "namespaces": 22,
+    "monsters": 20,
+    "patterns": 115
+  },
+  "monsters": [
+    {
+      "id": "acidic_glavenus",
+      "namespace": "Em080_01",
+      "nameEN": "Acidic Glavenus",
+      "nameKO": "디노발드 아종",
+      "sourceActionCount": 64,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "acidic_glavenus.world.0.twocombotailattackoneshot",
+          "name": "꼬리 공격 탄",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "TwoComboTailAttackOneShot",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "acidic_glavenus.world.1.somersault",
+          "name": "공중 급습",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "SomerSault",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "acidic_glavenus.world.2.switchtwocombojumptailattack",
+          "name": "도약 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "SwitchTwoComboJumpTailAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "acidic_glavenus.world.3.switchbitebefore",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "SwitchBiteBefore",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "acidic_glavenus.world.4.switchtwocombojumptailattackup",
+          "name": "도약 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "SwitchTwoComboJumpTailAttackUp",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "acidic_glavenus.world.5.switchtwocombojumptailattackbeforel",
+          "name": "도약 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "SwitchTwoComboJumpTailAttackBeforeL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "azure_rathalos",
+      "namespace": "Em002_01",
+      "nameEN": "Azure Rathalos",
+      "nameKO": "리오레우스 아종",
+      "sourceActionCount": 17,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "azure_rathalos.world.0.backhoverbreathcombo",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "BackHoverBreathCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "azure_rathalos.world.1.rushbiteflycombo",
+          "name": "돌진 물어뜯기 비행",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushBiteFlyCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "azure_rathalos.world.2.kickflystartcombo",
+          "name": "차기 비행",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "KickFlyStartCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "azure_rathalos.world.3.breathflycombo",
+          "name": "브레스 비행",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "BreathFlyCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "azure_rathalos.world.4.doublekickfly2combo",
+          "name": "연속 차기",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "DoubleKickFly2Combo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "azure_rathalos.world.5.backstepbreathtoaircombo",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "BackStepBreathToAirCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "black_diablos",
+      "namespace": "Em007_01",
+      "nameEN": "Black Diablos",
+      "nameKO": "디아블로스 아종",
+      "sourceActionCount": 17,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "black_diablos.world.0.rushheadbuttstrongattack",
+          "name": "돌진 공격",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushHeadbuttStrongAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "black_diablos.world.1.rushheadbuttcurvel",
+          "name": "돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushHeadbuttCurveL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "black_diablos.world.2.rushheadbuttcurvel2",
+          "name": "돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushHeadbuttCurveL2",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "black_diablos.world.3.rushheadbuttcurvel3",
+          "name": "돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushHeadbuttCurveL3",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "black_diablos.world.4.rushheadbuttcurver",
+          "name": "돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushHeadbuttCurveR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "black_diablos.world.5.rushheadbuttcurver2",
+          "name": "돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushHeadbuttCurveR2",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "blackveil_vaal_hazak",
+      "namespace": "Em115_05",
+      "nameEN": "Blackveil Vaal Hazak",
+      "nameKO": "죽음을 두른 발하자크",
+      "sourceActionCount": 16,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "blackveil_vaal_hazak.world.0.upgradedsyoukilaser",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "UpgradedSyoukiLaser",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "blackveil_vaal_hazak.world.1.sporeballnova",
+          "name": "광역 공격",
+          "type": "ultimate",
+          "damageRatio": 0.9,
+          "windupTicks": 14,
+          "activeTicks": 5,
+          "recoveryTicks": 18,
+          "minTargets": 4,
+          "maxTargets": 4,
+          "cooldownTicks": 450,
+          "weight": 0.55,
+          "tags": [
+            "ultimate",
+            "area",
+            "all-target"
+          ],
+          "requiredState": "enraged",
+          "sourceActionClass": "SporeBallNova",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "blackveil_vaal_hazak.world.2.spreadsyoukibreath",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "SpreadSyoukiBreath",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "blackveil_vaal_hazak.world.3.upgradedsyoukidrainlaser",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "UpgradedSyoukiDrainLaser",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "blackveil_vaal_hazak.world.4.breatheshootallspores",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "BreatheShootAllSpores",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "blackveil_vaal_hazak.world.5.sporeballnovalanding",
+          "name": "광역 공격",
+          "type": "ultimate",
+          "damageRatio": 0.9,
+          "windupTicks": 14,
+          "activeTicks": 5,
+          "recoveryTicks": 18,
+          "minTargets": 4,
+          "maxTargets": 4,
+          "cooldownTicks": 450,
+          "weight": 0.55,
+          "tags": [
+            "ultimate",
+            "area",
+            "all-target"
+          ],
+          "requiredState": "enraged",
+          "sourceActionClass": "SporeBallNovaLanding",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "brute_tigrex",
+      "namespace": "Em032_01",
+      "nameEN": "Brute Tigrex",
+      "nameKO": "티가렉스 아종",
+      "sourceActionCount": 24,
+      "roar": {
+        "status": "verified-present",
+        "sourceActionClass": "SuperRoarR",
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "brute_tigrex.world.roar",
+          "name": "포효",
+          "type": "roar",
+          "damageRatio": 0,
+          "windupTicks": 3,
+          "activeTicks": 2,
+          "recoveryTicks": 8,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 120,
+          "weight": 0.25,
+          "tags": [
+            "roar"
+          ],
+          "sourceActionClass": "SuperRoarR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "brute_tigrex.world.0.footsweepr",
+          "name": "휩쓸기",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "FootSweepR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "brute_tigrex.world.1.footsweepl",
+          "name": "휩쓸기",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "FootSweepL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "coral_pukei_pukei",
+      "namespace": "Em102_01",
+      "nameEN": "Coral Pukei-Pukei",
+      "nameKO": "푸케푸케 아종",
+      "sourceActionCount": 89,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "coral_pukei_pukei.world.0.sweepwaterlaserl",
+          "name": "휩쓸기 물 레이저",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "SweepWaterLaserL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "coral_pukei_pukei.world.1.ecotailfadeattack",
+          "name": "꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "EcoTailFadeAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "coral_pukei_pukei.world.2.rotatewaterbomb",
+          "name": "광역 공격",
+          "type": "area",
+          "damageRatio": 0.38,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "area"
+          ],
+          "sourceActionClass": "RotateWaterBomb",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "coral_pukei_pukei.world.3.ecoheadfadeattack",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "EcoHeadFadeAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "coral_pukei_pukei.world.4.sweepwaterlaserr",
+          "name": "휩쓸기 물 레이저",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "SweepWaterLaserR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "coral_pukei_pukei.world.5.drinkwaterlaser",
+          "name": "물 레이저",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "DrinkWaterLaser",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "ebony_odogaron",
+      "namespace": "Em113_01",
+      "nameEN": "Ebony Odogaron",
+      "nameKO": "오도가론 아종",
+      "sourceActionCount": 15,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "ebony_odogaron.world.0.dragonbreathl",
+          "name": "용속성 브레스",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "DragonBreathL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ebony_odogaron.world.1.curvedragonrush",
+          "name": "용속성 돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "CurveDragonRush",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ebony_odogaron.world.2.rollingtailattackl",
+          "name": "회전 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "RollingTailAttackL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ebony_odogaron.world.3.shortdistanceattack",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ShortDistanceAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ebony_odogaron.world.4.dragonbreathr",
+          "name": "용속성 브레스",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "DragonBreathR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ebony_odogaron.world.5.rollingtailattackr",
+          "name": "회전 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "RollingTailAttackR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "frostfang_barioth",
+      "namespace": "Em042_05",
+      "nameEN": "Frostfang Barioth",
+      "nameKO": "얼음 칼날을 찬 벨리오로스",
+      "sourceActionCount": 59,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "frostfang_barioth.world.0.deadlybreathnormal",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "DeadlyBreathNormal",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "frostfang_barioth.world.1.deadlybiteslammed",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "DeadlyBiteSlammed",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "frostfang_barioth.world.2.deadlybiteslammedlatterl",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "DeadlyBiteSlammedLatterL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "frostfang_barioth.world.3.deadlybiteslammedlatterr",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "DeadlyBiteSlammedLatterR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "frostfang_barioth.world.4.deadlybiteslammedfly",
+          "name": "물어뜯기 비행",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "DeadlyBiteSlammedFly",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "frostfang_barioth.world.5.deadlybiteslammedflylatterl",
+          "name": "물어뜯기 비행",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "DeadlyBiteSlammedFlyLatterL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "fulgur_anjanath",
+      "namespace": "Em100_01",
+      "nameEN": "Fulgur Anjanath",
+      "nameKO": "안쟈나프 아종",
+      "sourceActionCount": 116,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "fulgur_anjanath.world.0.asyutriplenosebreath",
+          "name": "3연속 브레스",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "AsyuTripleNoseBreath",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "fulgur_anjanath.world.1.rushbite",
+          "name": "돌진 물어뜯기",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushBite",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "fulgur_anjanath.world.2.asyumiddlerangesweep",
+          "name": "휩쓸기",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "AsyuMiddleRangeSweep",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "fulgur_anjanath.world.3.asyuelecmaxbite",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "AsyuElecMaxBite",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "fulgur_anjanath.world.4.bite2rencombo",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "Bite2renCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "fulgur_anjanath.world.5.asyudashbite",
+          "name": "질주 물어뜯기",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "AsyuDashBite",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "gold_rathian",
+      "namespace": "Em001_02",
+      "nameEN": "Gold Rathian",
+      "nameKO": "금화룡",
+      "sourceActionCount": 32,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "gold_rathian.world.0.ultimatebreathground",
+          "name": "필살 브레스 지면",
+          "type": "ultimate",
+          "damageRatio": 0.9,
+          "windupTicks": 14,
+          "activeTicks": 5,
+          "recoveryTicks": 18,
+          "minTargets": 4,
+          "maxTargets": 4,
+          "cooldownTicks": 450,
+          "weight": 0.55,
+          "tags": [
+            "ultimate",
+            "projectile",
+            "all-target"
+          ],
+          "requiredState": "enraged",
+          "sourceActionClass": "UltimateBreathGround",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "gold_rathian.world.1.dashattacktwiceshort",
+          "name": "질주 공격",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "DashAttackTwiceShort",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "gold_rathian.world.2.stepinsomersaultflyattackl",
+          "name": "공중제비 비행 공격",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "StepinSomersaultFlyAttackL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "gold_rathian.world.3.singlekick",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "SingleKick",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "gold_rathian.world.4.ultimatebreathfly",
+          "name": "필살 브레스 비행",
+          "type": "ultimate",
+          "damageRatio": 0.9,
+          "windupTicks": 14,
+          "activeTicks": 5,
+          "recoveryTicks": 18,
+          "minTargets": 4,
+          "maxTargets": 4,
+          "cooldownTicks": 450,
+          "weight": 0.55,
+          "tags": [
+            "ultimate",
+            "projectile",
+            "all-target"
+          ],
+          "requiredState": "enraged",
+          "sourceActionClass": "UltimateBreathFly",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "gold_rathian.world.5.triplebreathsingle",
+          "name": "3연속 브레스",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "TripleBreathSingle",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "nightshade_paolumu",
+      "namespace": "Em110_01",
+      "nameEN": "Nightshade Paolumu",
+      "nameKO": "파오우르무 아종",
+      "sourceActionCount": 37,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "nightshade_paolumu.world.0.sleepbreathlarge",
+          "name": "브레스 대형",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "SleepBreathLarge",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "nightshade_paolumu.world.1.specialspinrush",
+          "name": "회전 돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "SpecialSpinRush",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "nightshade_paolumu.world.2.subgroundtailattackfrontslap",
+          "name": "지면 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "SubGroundTailAttackFrontSlap",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "nightshade_paolumu.world.3.subgroundtailattackbackslap",
+          "name": "지면 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "SubGroundTailAttackBackSlap",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "nightshade_paolumu.world.4.specialspinrushmain",
+          "name": "회전 돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "SpecialSpinRushMain",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "nightshade_paolumu.world.5.subflytailattackfrontslap",
+          "name": "비행 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "SubFlyTailAttackFrontSlap",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "pink_rathian",
+      "namespace": "Em001_01",
+      "nameEN": "Pink Rathian",
+      "nameKO": "리오레이아 아종",
+      "sourceActionCount": 12,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "pink_rathian.world.0.highpowerbreathcombo",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "HighPowerBreathCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "pink_rathian.world.1.somersaultkickside",
+          "name": "공중제비 차기",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "SomersaultKickSide",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "pink_rathian.world.2.somersaultkicksidetakeoff",
+          "name": "공중제비 차기",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "SomersaultKickSideTakeOff",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "pink_rathian.world.3.somersaultkicksidefly",
+          "name": "공중제비 차기 비행",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "SomersaultKickSideFly",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "pink_rathian.world.4.somersaultkicksideflytolanding",
+          "name": "공중제비 차기 비행",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "SomersaultKickSideFlyToLanding",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "raging_brachydios",
+      "namespace": "Em063_05",
+      "nameEN": "Raging Brachydios",
+      "nameKO": "사납게 터지는 브라키디오스",
+      "sourceActionCount": 54,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "raging_brachydios.world.0.tailstomp",
+          "name": "휩쓸기",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "TailStomp",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "raging_brachydios.world.1.threepointexplosion",
+          "name": "광역 공격",
+          "type": "area",
+          "damageRatio": 0.38,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "area"
+          ],
+          "sourceActionClass": "ThreePointExplosion",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "raging_brachydios.world.2.armslammedl_2",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ArmSlammedL_2",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "raging_brachydios.world.3.armslammedendl_2",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ArmSlammedEndL_2",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "raging_brachydios.world.4.armslammedr_2",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ArmSlammedR_2",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "raging_brachydios.world.5.armslammedendr_2",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ArmSlammedEndR_2",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "ruiner_nergigante",
+      "namespace": "Em103_05",
+      "nameEN": "Ruiner Nergigante",
+      "nameKO": "모두를 멸하는 네르기간테",
+      "sourceActionCount": 57,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "ruiner_nergigante.world.0.strongdoublepunch",
+          "name": "연속 강타",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "StrongDoublePunch",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ruiner_nergigante.world.1.tospecialheadattack",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ToSpecialHeadAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ruiner_nergigante.world.2.tospecialarmlattack",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ToSpecialArmLAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ruiner_nergigante.world.3.tospecialarmrattack",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ToSpecialArmRAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ruiner_nergigante.world.4.tospecialwinglattack",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ToSpecialWingLAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "ruiner_nergigante.world.5.tospecialwingrattack",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ToSpecialWingRAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "savage_deviljho",
+      "namespace": "Em043_05",
+      "nameEN": "Savage Deviljho",
+      "nameKO": "미친 이블조",
+      "sourceActionCount": 61,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "savage_deviljho.world.0.superdragonbreath",
+          "name": "용속성 브레스",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "SuperDragonBreath",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "savage_deviljho.world.1.rushbite",
+          "name": "돌진 물어뜯기",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "RushBite",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "savage_deviljho.world.2.jumpattackbite",
+          "name": "도약 공격 물어뜯기",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "JumpAttackBite",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "savage_deviljho.world.3.largebitenear",
+          "name": "대형 물어뜯기",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "LargeBiteNear",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "savage_deviljho.world.4.tolargebitenear",
+          "name": "대형 물어뜯기",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ToLargeBiteNear",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "savage_deviljho.world.5.combotolargebite",
+          "name": "대형 물어뜯기",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ComboToLargeBite",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "seething_bazelgeuse",
+      "namespace": "Em118_05",
+      "nameEN": "Seething Bazelgeuse",
+      "nameKO": "홍련의 솟구치는 바젤기우스",
+      "sourceActionCount": 34,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "seething_bazelgeuse.world.0.blasttacklecomboendr",
+          "name": "돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "BlastTackleComboEndR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "seething_bazelgeuse.world.1.tailattackdouble",
+          "name": "꼬리 공격 연속",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "TailAttackDouble",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "seething_bazelgeuse.world.2.specialfallattackmiddlel",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "SpecialFallAttackMiddleL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "seething_bazelgeuse.world.3.tailattacktriplestartredrelease",
+          "name": "꼬리 공격 3연속",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "TailAttackTripleStartRedRelease",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "seething_bazelgeuse.world.4.tailattacktripleendredrelease",
+          "name": "꼬리 공격 3연속",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "TailAttackTripleEndRedRelease",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "seething_bazelgeuse.world.5.blasttacklecomboendl",
+          "name": "돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "BlastTackleComboEndL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "shrieking_legiana",
+      "namespace": "Em111_05",
+      "nameEN": "Shrieking Legiana",
+      "nameKO": "얼려 찌르는 레이기에나",
+      "sourceActionCount": 25,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "shrieking_legiana.world.0.huntingthrow",
+          "name": "원거리 공격",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "HuntingThrow",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "shrieking_legiana.world.1.huntingdiveattack",
+          "name": "급강하 공격",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "HuntingDiveAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "shrieking_legiana.world.2.enhancedsideattackl",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "EnhancedSideAttackL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "shrieking_legiana.world.3.huntingdiveattackr",
+          "name": "급강하 공격",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "HuntingDiveAttackR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "shrieking_legiana.world.4.enhancedsideattackr",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "EnhancedSideAttackR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "silver_rathalos",
+      "namespace": "Em002_02",
+      "nameEN": "Silver Rathalos",
+      "nameKO": "은화룡",
+      "sourceActionCount": 25,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "silver_rathalos.world.0.sweepbreathverticalcombo",
+          "name": "휩쓸기 브레스",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "SweepBreathVerticalCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "silver_rathalos.world.1.frontsweepkick",
+          "name": "휩쓸기 차기",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "FrontSweepKick",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "silver_rathalos.world.2.sequencefrontbitefirst",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "SequenceFrontBiteFirst",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "silver_rathalos.world.3.sweepbreathhorizontalcombo",
+          "name": "휩쓸기 브레스",
+          "type": "projectile",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 3,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "projectile"
+          ],
+          "sourceActionClass": "SweepBreathHorizontalCombo",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "silver_rathalos.world.4.sequencefrontbitesecond",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "SequenceFrontBiteSecond",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "silver_rathalos.world.5.warparoundtailattack",
+          "name": "꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "WarpAroundTailAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "stygian_zinogre",
+      "namespace": "Em057_01",
+      "nameEN": "Stygian Zinogre",
+      "nameKO": "진오우거 아종",
+      "sourceActionCount": 44,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "stygian_zinogre.world.0.lifelightningchargemax",
+          "name": "돌진",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "LifeLightningChargeMax",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "stygian_zinogre.world.1.jumpattackwallup2",
+          "name": "도약 공격",
+          "type": "aerial",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "aerial"
+          ],
+          "sourceActionClass": "JumpAttackWallUp2",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "stygian_zinogre.world.2.dragontailattack",
+          "name": "용속성 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "DragonTailAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "stygian_zinogre.world.3.extremecomboflyingpunchstart1",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ExtremeComboFlyingPunchStart1",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "stygian_zinogre.world.4.extremecomboflyingpunchstart2",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ExtremeComboFlyingPunchStart2",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "stygian_zinogre.world.5.extremecomboflyingpunchmain1",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ExtremeComboFlyingPunchMain1",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    },
+    {
+      "id": "viper_tobi_kadachi",
+      "namespace": "Em109_01",
+      "nameEN": "Viper Tobi-Kadachi",
+      "nameKO": "토비카가치 아종",
+      "sourceActionCount": 60,
+      "roar": {
+        "status": "unresolved",
+        "sourceActionClass": null,
+        "audioStatus": "unresolved"
+      },
+      "patterns": [
+        {
+          "id": "viper_tobi_kadachi.world.0.brokensiderushbite",
+          "name": "돌진 물어뜯기",
+          "type": "charge",
+          "damageRatio": 0.36,
+          "windupTicks": 7,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "charge"
+          ],
+          "sourceActionClass": "BrokenSideRushBite",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "viper_tobi_kadachi.world.1.poisonsidetailattack",
+          "name": "독 꼬리 공격",
+          "type": "sweep",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 3,
+          "recoveryTicks": 9,
+          "minTargets": 2,
+          "maxTargets": 4,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "sweep"
+          ],
+          "sourceActionClass": "PoisonSideTailAttack",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "viper_tobi_kadachi.world.2.combobitel",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ComboBiteL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "viper_tobi_kadachi.world.3.combobiter",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "ComboBiteR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "viper_tobi_kadachi.world.4.brokencombobitel",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "BrokenComboBiteL",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        },
+        {
+          "id": "viper_tobi_kadachi.world.5.brokencombobiter",
+          "name": "근접 공격",
+          "type": "physical",
+          "damageRatio": 0.29,
+          "windupTicks": 5,
+          "activeTicks": 2,
+          "recoveryTicks": 9,
+          "minTargets": 1,
+          "maxTargets": 2,
+          "cooldownTicks": 32,
+          "weight": 1,
+          "tags": [
+            "close"
+          ],
+          "sourceActionClass": "BrokenComboBiteR",
+          "sourceGame": "world-iceborne",
+          "evidence": "mhw-executable-action-enumeration",
+          "confidence": "extracted-action"
+        }
+      ],
+      "evidence": "mhw-executable-action-enumeration"
+    }
+  ]
+}
