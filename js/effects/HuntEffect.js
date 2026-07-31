@@ -59,7 +59,7 @@ class HuntEffect extends BaseEffect {
             veteran: ['😎', '👍', '😄', '✌️', '💪'],
             support: ['🥰', '💚', '😍', '😊', '🥳'],
             newbie: ['🤩', '😂', '🥳', '🙌', '💛'],
-            offensive: ['😼', '😈', '😎', '🔥', '✊'],
+            offensive: ['😼', '😈', '😎', '👊', '✊'],
             defensive: ['😌', '👍', '😊', '👌', '🧡'],
             normal: ['🙂', '👍', '😄', '👏', '❤️']
         };

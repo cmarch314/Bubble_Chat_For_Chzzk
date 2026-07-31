@@ -646,7 +646,7 @@ class HuntMonsterAttackAnimator {
             { id: 'ice', test: /(^|\s)ice(\s|$)|얼음|빙결|빙룡|빙벽|절대영도|냉기/, emoji: '❄️', color: '#6ee9ff', hot: '#ffffff', shadow: '#2681ff' },
             { id: 'water', test: /(^|\s)water(\s|$)|수류|수압|물|포말|거품|레이저/, emoji: '🌊', color: '#29bfff', hot: '#eaffff', shadow: '#075dcc' },
             { id: 'dragon', test: /(^|\s)dragon(\s|$)|광룡|용속성|광기|흑룡|용기/, emoji: '🐉', color: '#d641ff', hot: '#ffb8ff', shadow: '#35005f' },
-            { id: 'poison', test: /(^|\s)poison(\s|$)|독|맹독|독조|독액/, emoji: '☠️', color: '#b8ff35', hot: '#f1ffad', shadow: '#4a0570' },
+            { id: 'poison', test: /(^|\s)poison(\s|$)|독|맹독|독조|독액/, emoji: '☠️', color: '#b542ff', hot: '#f4d5ff', shadow: '#35005f' },
             { id: 'blast', test: /(^|\s)blast(\s|$)|폭발|폭파|점균|대재앙|혜성/, emoji: '💥', color: '#ff7b22', hot: '#ffffff', shadow: '#a40037' },
             { id: 'wind', test: /(^|\s)wind(\s|$)|바람|폭풍|회오리|진공|분사/, emoji: '🌪️', color: '#baffdc', hot: '#ffffff', shadow: '#247f75' }
         ];

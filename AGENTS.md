@@ -21,6 +21,7 @@ Reject an elegant change if it adds routine streamer work or harms silent-viewer
 - Reuse an owner/helper, native feature, or installed dependency; otherwise make the smallest coherent change.
 - Run focused tests, then proportional regression before handoff.
 - Keep reports concise: preserve outcomes, evidence, paths, failures, risks, and required next steps; omit filler and repeated logs.
+- When reporting in Korean, default to compact 음슴체 for progress updates and handoffs. Keep questions, approval or safety prompts, and ambiguity-sensitive explanations in natural polite Korean; brevity must not remove evidence, risks, or required next steps.
 
 ## 3. Core Runtime Ownership
 
@@ -72,6 +73,7 @@ Canonical chain:
 - Duration is never semantic evidence. It only orders review; never infer identity from it.
 - Bank names prove only identity/role. Unknown semantics stay `unknown` until a reference, event, label, or verified audition establishes them.
 - Action routes require semantic evidence; never fill gaps with unrelated or duration-matched sounds. VO, roars, pain, and death remain monster-identity-bound: reviewed subspecies/special forms may inherit only their base-species VO, never another species. Missing wing and physical-action SE may use audition-confirmed semantic fallback pools temporarily; elemental delivery stays exact. Preserve fallback provenance, and reject every other unresolved SE.
+- Attack VO may accompany action start; non-vocal attack SE plays only from its authored impact, projectile, or explosion event. Verify delayed and multi-hit timelines do not emit SE when merely scheduled.
 - Weapon fallback stays within the same weapon; item fallback stays within its semantic family and records surrogates.
 - Taxonomy/importers own identity and event evidence; graph/review tooling preserves HIRC recipes and atomic event-group labels. Explicit individual auditions remain authoritative.
 - Manifests separate semantic, bank, and review evidence. Keep bulk data in ignored SQLite and generate compact runtime outputs.

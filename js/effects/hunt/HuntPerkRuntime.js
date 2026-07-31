@@ -202,7 +202,7 @@ class HuntPerkRuntime {
         if (names.has('폭파광')) add('monsterBlastBuild');
         if (this.engine.monsterPoisonBuild >= 100 && !this.engine.monsterPoisonTicks) {
             this.engine.monsterPoisonBuild = 0; this.engine.monsterPoisonTicks = 100;
-            this.engine.addLog(`☠️ [독] ${hunter.hunterName}의 독이 축적되어 몬스터가 중독됐습니다!`, '#9bea64');
+            this.engine.addLog(`☠️ [독] ${hunter.hunterName}의 독이 축적되어 몬스터가 중독됐습니다!`, '#c77dff');
         }
         if (this.engine.monsterParalysisBuild >= 100) {
             this.engine.monsterParalysisBuild = 0;
