@@ -48,7 +48,7 @@ class GameHelpEffect extends BaseEffect {
                         <span class="game-help-cmd">${HuntCommandCatalog.helpLabel()}</span>
                     </div>
                     <div class="game-help-desc">
-                        집회소에서 <strong>!참여</strong>를 입력하면 4명을 선발합니다. 선발자는 출발 전 <strong>!대검 지원가</strong>처럼 무기와 성향을 몇 번이든 변경할 수 있으며 퍽은 무작위로 고정됩니다. 전투 중에는 <strong>!공격/!안전/!지원</strong>, <strong>!회피/!가드</strong>, 공동 지원 <strong>!회복/!섬광/!함정/!낙석</strong>을 사용합니다. (시작: 스트리머 전용)
+                        집회소에서 <strong>!참가</strong>를 입력하면 4명을 선발합니다. 선발자는 출발 전 <strong>!대검 지원가</strong>처럼 무기와 성향을 몇 번이든 변경할 수 있으며 퍽은 무작위로 고정됩니다. 전투 중에는 <strong>!공격/!안전/!지원</strong>, <strong>!회피/!가드</strong>, 공동 지원 <strong>!회복/!섬광/!함정/!낙석</strong>을 사용합니다. (시작: 스트리머 전용)
                     </div>
                 </div>
 
