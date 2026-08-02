@@ -1239,6 +1239,46 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 6783244,
     "mtimeMs": 1785281408921
   },
+  "AI CMC/몬헌하라1.mp4": {
+    "category": "visual",
+    "inputLufs": -10.45,
+    "truePeakDb": -0.47,
+    "gainDb": -7.55,
+    "measurement": "loudnorm",
+    "duration": 1.37,
+    "bytes": 3617835,
+    "mtimeMs": 1785699132467
+  },
+  "AI CMC/몬헌하라2.mp4": {
+    "category": "visual",
+    "inputLufs": -10.39,
+    "truePeakDb": 0.01,
+    "gainDb": -7.61,
+    "measurement": "loudnorm",
+    "duration": 1.37,
+    "bytes": 3656306,
+    "mtimeMs": 1785699151808
+  },
+  "AI CMC/몬헌하라3.mp4": {
+    "category": "visual",
+    "inputLufs": -12.28,
+    "truePeakDb": -0.25,
+    "gainDb": -5.72,
+    "measurement": "loudnorm",
+    "duration": 1.58,
+    "bytes": 4167522,
+    "mtimeMs": 1785699167238
+  },
+  "AI CMC/몬헌하라4.mp4": {
+    "category": "visual",
+    "inputLufs": -10.19,
+    "truePeakDb": 0.03,
+    "gainDb": -7.81,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 2966329,
+    "mtimeMs": 1785699186961
+  },
   "AI CMC/무슨.mp4": {
     "category": "visual",
     "inputLufs": -16.4,
