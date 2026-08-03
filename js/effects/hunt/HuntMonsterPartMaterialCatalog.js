@@ -94,6 +94,25 @@ class HuntMonsterPartMaterialCatalog {
         head: '머리', back: '등', leg: '발톱', wing: '날개', tail: '꼬리', part: '부위'
     });
 
+    static shortPartLabel(part) {
+        const value = String(part?.kind || part?.sourceKind || part || '').toLowerCase();
+        const side = this.displaySide({ kind: value });
+        if (/(horn|fang|tusk)/.test(value)) return '뿔';
+        if (/head|chin/.test(value)) return '머리';
+        if (/wing/.test(value)) return side === 'left' ? '좌익' : side === 'right' ? '우익' : '날개';
+        if (/(front[-_ ]?leg|foreleg|front[-_ ]?foot)/.test(value)) {
+            return side === 'left' ? '왼발' : side === 'right' ? '오른발' : '앞발';
+        }
+        if (/(hind[-_ ]?leg|rear[-_ ]?leg|hind[-_ ]?foot)/.test(value)) {
+            return side === 'left' ? '왼뒷발' : side === 'right' ? '오른뒷발' : '뒷발';
+        }
+        if (/(leg|foot|claw|nail)/.test(value)) return side === 'left' ? '왼발' : side === 'right' ? '오른발' : '발';
+        if (/tail/.test(value)) return '꼬리';
+        if (/back/.test(value)) return '등';
+        if (/(torso|body|chest|stomach|shell|hide)/.test(value)) return '몸통';
+        return '부위';
+    }
+
     static normalize(value) {
         return String(value || '').trim().toLowerCase().replace(/['’]/g, '')
             .replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
@@ -127,6 +146,7 @@ class HuntMonsterPartMaterialCatalog {
             monsterId,
             kind,
             side,
+            shortLabel: this.shortPartLabel(part),
             label: `${monsterName ? `${monsterName} ` : ''}${this.PART_LABELS[kind] || this.PART_LABELS.part}`,
             path: `${this.ITEM_ROOT}${template.sourceId}.png`,
             tint: this.MONSTER_TINTS[monsterId] || 'grayscale(1) brightness(1.08)',

@@ -52,6 +52,8 @@ class HuntMonsterAnimationCatalog {
                 'rathalos-stomp': 2700,
                 'rathalos-glide': 4200,
                 'rathian-triple-fireball': 3600,
+                'rathian-tail-sweep-double': 4200,
+                'rathian-ground-charge': 3000,
                 'rathian-somersault': 3040,
                 'rathian-somersault-double': 5120,
                 'rathian-bite-somersault': 5500,

@@ -1466,13 +1466,10 @@ class HuntRenderer {
         if (hpCenterText) hpCenterText.style.color = '';
 
         if (monsterImg) {
-            const facingLayer = monsterImg.closest('.hunt-monster-facing-layer');
             if (stateName.includes('분노')) {
                 monsterImg.classList.add('enraged');
-                facingLayer?.classList.toggle('tigrex-local-enrage', this.selectedMonster?.id === 'tigrex');
             } else {
                 monsterImg.classList.remove('enraged');
-                facingLayer?.classList.remove('tigrex-local-enrage');
             }
 
             if (stateName.includes('기절')) {

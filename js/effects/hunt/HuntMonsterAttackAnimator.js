@@ -51,6 +51,111 @@ class HuntMonsterAttackAnimator {
         return Math.max(0, Math.round(Number(impactTicks || 0) * tickMs - visualTravelMs));
     }
 
+    static tigrexRouteDirections(points = [], exits = []) {
+        let previousDirection = -1;
+        return points.map((point, index) => {
+            const start = index === 0 ? { x: 0 } : (exits[index - 1] || { x: 0 });
+            const direction = Math.sign(Number(point?.x || 0) - Number(start?.x || 0));
+            if (direction) previousDirection = direction;
+            return direction || previousDirection;
+        });
+    }
+
+    static tigrexBranchStartDelayMs(atTicks, branchDurationMs, impactRatio, ticksPerSecond = 10) {
+        const visualBranchDurationMs = typeof HuntAtbConfig !== 'undefined'
+            && HuntAtbConfig.scaleVisualDurationMs
+            ? HuntAtbConfig.scaleVisualDurationMs(branchDurationMs)
+            : Number(branchDurationMs || 0);
+        return Math.max(0,
+            Number(atTicks || 0) * 1000 / Math.max(1, Number(ticksPerSecond || 10))
+            - visualBranchDurationMs * Math.max(0, Math.min(1, Number(impactRatio || 0))));
+    }
+
+    static tigrexBranchApproachDurationMs(
+        passStart, passTarget, passExit, branchPoint, chargeDurationMs, passTravelRatio
+    ) {
+        const distance = (from, to) => Math.hypot(
+            Number(to?.x || 0) - Number(from?.x || 0),
+            Number(to?.y || 0) - Number(from?.y || 0)
+        );
+        const passDistance = distance(passStart, passTarget) + distance(passTarget, passExit);
+        const approachDistance = distance(passExit, branchPoint);
+        const passDurationMs = Math.max(1,
+            Number(chargeDurationMs || 0) * Number(passTravelRatio || 0));
+        const chargeSpeed = passDistance / passDurationMs;
+        if (!Number.isFinite(chargeSpeed) || chargeSpeed <= 0) return 520;
+        return Math.max(280, Math.min(1000, Math.round(approachDistance / chargeSpeed)));
+    }
+
+    static tigrexChargeRouteKeyframes(points = [], exits = [], recoil = {}, passCount = 2) {
+        const distance = (from, to) => Math.max(1, Math.hypot(
+            Number(to?.x || 0) - Number(from?.x || 0),
+            Number(to?.y || 0) - Number(from?.y || 0)
+        ));
+        const transform = (point, scale = 1.12) =>
+            `translate(${Number(point?.x || 0)}px,${Number(point?.y || 0)}px) scale(${scale})`;
+        const firstHitOffset = passCount === 3 ? .165 : .176;
+        const firstExitOffset = passCount === 3 ? .27 : .29;
+        const firstChargeSpeed = distance(points[0], exits[0])
+            / (firstExitOffset - firstHitOffset);
+        const impactOffsets = [firstHitOffset];
+        const route = [{
+            startOffset: passCount === 3 ? .09 : .10,
+            hitOffset: firstHitOffset,
+            exitOffset: firstExitOffset
+        }];
+        let cursor = firstExitOffset;
+        for (let index = 1; index < Math.min(passCount, points.length, exits.length); index += 1) {
+            cursor += passCount === 3 ? .01 : .08;
+            const hitOffset = cursor + distance(exits[index - 1], points[index]) / firstChargeSpeed;
+            const exitOffset = hitOffset + distance(points[index], exits[index]) / firstChargeSpeed;
+            route.push({ startOffset: cursor, hitOffset, exitOffset });
+            impactOffsets.push(hitOffset);
+            cursor = exitOffset;
+        }
+        const frames = [
+            { offset: 0, transform: 'none', opacity: 1 },
+            { offset: passCount === 3 ? .055 : .06, transform: transform(recoil, 1), opacity: 1 },
+            { offset: passCount === 3 ? .09 : .10, transform: transform(recoil, 1), opacity: 1 }
+        ];
+        route.forEach((pass, index) => {
+            if (index > 0) frames.push({
+                offset: pass.startOffset,
+                transform: transform(exits[index - 1]),
+                opacity: 1
+            });
+            frames.push(
+                { offset: pass.hitOffset, transform: transform(points[index]), opacity: 1 },
+                { offset: pass.exitOffset, transform: transform(exits[index]), opacity: 1 }
+            );
+        });
+        frames.push({ offset: 1, transform: transform(exits[route.length - 1]), opacity: 1 });
+        frames.sort((a, b) => a.offset - b.offset);
+        frames.impactOffsets = impactOffsets;
+        frames.routeExitOffset = route[route.length - 1].exitOffset;
+        frames.speedPerNormalizedDuration = firstChargeSpeed;
+        return frames;
+    }
+
+    static tigrexBiteRoute(lastExit, targetPoint, monsterRect, mouthPoint, overshoot = 112) {
+        const contact = {
+            x: Number(targetPoint?.x || 0)
+                - (Number(mouthPoint?.x ?? .5) - .5) * Number(monsterRect?.width || 0),
+            y: Number(targetPoint?.y || 0)
+                - (Number(mouthPoint?.y ?? .5) - .5) * Number(monsterRect?.height || 0)
+        };
+        const dx = contact.x - Number(lastExit?.x || 0);
+        const dy = contact.y - Number(lastExit?.y || 0);
+        const distance = Math.max(1, Math.hypot(dx, dy));
+        return {
+            contact,
+            finish: {
+                x: contact.x + dx / distance * Number(overshoot || 0),
+                y: contact.y + dy / distance * Number(overshoot || 0)
+            }
+        };
+    }
+
     resolveMotionElement(monsterImg) {
         const closest = monsterImg?.closest?.('.hunt-monster-attack-motion');
         if (closest?.classList?.contains?.('hunt-monster-attack-motion')) return closest;
@@ -202,19 +307,25 @@ class HuntMonsterAttackAnimator {
             const directions = (pattern?.runtimeTigrexFacingDirections || [])
                 .map(Number).map(Math.sign).filter(Boolean);
             if (!directions.length) return null;
-            if (directions.length >= 3) return [
+            const passCount = Math.max(2, Math.min(3,
+                Number(pattern?.targeting?.passCountByState?.[this.owner.monsterState]) || 2));
+            if (passCount === 3) return [
                 { offset: 0, direction: directions[0] },
-                { offset: .30, direction: directions[0] },
-                { offset: .31, direction: directions[1] || directions[0] },
-                { offset: .54, direction: directions[1] || directions[0] },
-                { offset: .55, direction: directions[2] || directions[1] || directions[0] },
-                { offset: 1, direction: directions[2] || directions[1] || directions[0] }
+                { offset: .339, direction: directions[0] },
+                { offset: .34, direction: directions[1] || directions[0] },
+                { offset: .569, direction: directions[1] || directions[0] },
+                { offset: .57, direction: directions[2] || directions[1] || directions[0] },
+                { offset: .689, direction: directions[2] || directions[1] || directions[0] },
+                { offset: .69, direction: directions[3] || directions[2] || directions[1] || directions[0] },
+                { offset: 1, direction: directions[3] || directions[2] || directions[1] || directions[0] }
             ];
             return [
                 { offset: 0, direction: directions[0] },
-                { offset: .36, direction: directions[0] },
-                { offset: .37, direction: directions[1] || directions[0] },
-                { offset: 1, direction: directions[1] || directions[0] }
+                { offset: .419, direction: directions[0] },
+                { offset: .42, direction: directions[1] || directions[0] },
+                { offset: .639, direction: directions[1] || directions[0] },
+                { offset: .64, direction: directions[2] || directions[1] || directions[0] },
+                { offset: 1, direction: directions[2] || directions[1] || directions[0] }
             ];
         }
 
@@ -229,7 +340,8 @@ class HuntMonsterAttackAnimator {
                 { offset: 1, direction: 0 }
             ];
         }
-        if (['ground-charge-cross', 'aerial-charge-cross', 'legiana-drill-cross', 'ground-charge'].includes(id)) {
+        if (['ground-charge-cross', 'aerial-charge-cross', 'legiana-drill-cross',
+            'ground-charge', 'rathian-ground-charge'].includes(id)) {
             if (!horizontalDirection) return null;
             const hideOffset = ['aerial-charge-cross', 'legiana-drill-cross'].includes(id) ? .65 : .73;
             return [
@@ -268,15 +380,19 @@ class HuntMonsterAttackAnimator {
             ];
         }
         if (id === 'ground-charge-triple') {
-            const firstDirection = horizontalDirection || -1;
+            const authoredDirections = (pattern?.runtimeChargeFacingDirections || [])
+                .map(Number).map(Math.sign);
+            const firstDirection = authoredDirections[0] || horizontalDirection || -1;
+            const secondDirection = authoredDirections[1] || -firstDirection;
+            const thirdDirection = authoredDirections[2] || -secondDirection;
             return [
                 { offset: 0, direction: firstDirection },
                 { offset: .30, direction: firstDirection },
-                { offset: .31, direction: -firstDirection },
-                { offset: .60, direction: -firstDirection },
-                { offset: .61, direction: firstDirection },
-                { offset: .88, direction: firstDirection },
-                { offset: .89, direction: 0 },
+                { offset: .31, direction: secondDirection },
+                { offset: .62, direction: secondDirection },
+                { offset: .63, direction: thirdDirection },
+                { offset: .89, direction: thirdDirection },
+                { offset: .90, direction: 0 },
                 { offset: 1, direction: 0 }
             ];
         }
@@ -333,8 +449,11 @@ class HuntMonsterAttackAnimator {
             transform: `scaleX(${scaleFor(step.direction)})`
         }));
         layer.dataset.monsterFacingPlan = String(profile?.id || 'directional');
+        layer.dataset.monsterFacingDirections = plan
+            .map(step => `${step.offset}:${step.direction}`)
+            .join('|');
         const animation = typeof layer.animate === 'function'
-            ? layer.animate(keyframes, { duration: profile.duration, easing: 'linear', fill: 'both' })
+            ? layer.animate(keyframes, { duration: profile.duration, easing: 'step-end', fill: 'both' })
             : null;
         if (!animation) layer.style.transform = keyframes[0].transform;
         const cleanup = () => {
@@ -351,9 +470,28 @@ class HuntMonsterAttackAnimator {
             layer.style.removeProperty('--monster-facing-flip');
             monsterImg?.style?.removeProperty?.('--monster-facing-flip');
             delete layer.dataset.monsterFacingPlan;
+            delete layer.dataset.monsterFacingDirections;
         };
         if (activeMotion) activeMotion.finishers.push(cleanup);
         return { animation, keyframes, cleanup };
+    }
+
+    scheduleTigrexStrideAudio(activeMotion, strideDelayMs = 0) {
+        if (!activeMotion || typeof this.owner?.onMonsterStrideAudio !== 'function') return;
+        let intervalId = null;
+        const expectedGeneration = activeMotion.generation;
+        const playStep = () => {
+            if (this.activeMonsterMotion?.generation !== expectedGeneration) return;
+            this.owner.onMonsterStrideAudio(this.owner.selectedMonster);
+        };
+        const startId = this.animationTimers.timeout(() => {
+            playStep();
+            intervalId = this.animationTimers.interval(playStep, 300);
+        }, Math.max(0, Number(strideDelayMs || 0)) + 300);
+        activeMotion.finishers.push(() => {
+            this.animationTimers.clear?.(startId);
+            if (intervalId !== null) this.animationTimers.clear?.(intervalId);
+        });
     }
 
     traceMonsterMotion(event, details = {}, anomaly = false) {
@@ -387,6 +525,8 @@ class HuntMonsterAttackAnimator {
         active.element.style.removeProperty('transform');
         active.element.style.removeProperty('transition');
         delete active.element.dataset.tigrexChargePasses;
+        delete active.element.dataset.tigrexRouteOffsets;
+        delete active.element.dataset.tigrexRouteFallback;
         this.card?.querySelectorAll?.('.monster-local-action-fx')?.forEach(node => node.remove());
         active.finishers.forEach(finisher => finisher());
         this.traceMonsterMotion('complete', {
@@ -401,6 +541,9 @@ class HuntMonsterAttackAnimator {
     startMonsterMotion(motionElement, motionClass, duration, onFinish = null, metadata = {}) {
         this.clearActiveMonsterMotion(null, 'replaced');
         motionElement.classList.remove(...Array.from(motionElement.classList).filter(name => name.startsWith('monster-motion-')));
+        if (metadata.disableCssAnimation) {
+            motionElement.style.setProperty('animation', 'none', 'important');
+        }
         if (metadata.preservedTransform && metadata.preservedTransform !== 'none') {
             motionElement.style.setProperty('--tigrex-branch-start-transform', metadata.preservedTransform);
         }
@@ -489,6 +632,9 @@ class HuntMonsterAttackAnimator {
 
     playPatternMotion(monsterImg, targetCard, pattern, attackName, type) {
         const Catalog = typeof HuntMonsterAnimationCatalog !== 'undefined' ? HuntMonsterAnimationCatalog : null;
+        const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
+            ? HuntMonsterAnatomyCatalog
+            : null;
         if (!Catalog) {
             this.traceMonsterMotion('skip', { reason: 'catalog-missing', patternId: pattern?.id || null }, true);
             return null;
@@ -542,6 +688,7 @@ class HuntMonsterAttackAnimator {
             motionElement.style.setProperty('--monster-side-ready-y', `${attackY * readyRatio}px`);
         }
         motionElement.style.setProperty('--monster-motion-duration', `${profile.duration}ms`);
+        motionElement.dataset.monsterMotionProfile = profile.id;
         motionElement.dataset.monsterRig = profile.rig.id;
         if (pattern?.chargeLaunchStyle) {
             motionElement.dataset.chargeLaunchStyle = pattern.chargeLaunchStyle;
@@ -549,6 +696,8 @@ class HuntMonsterAttackAnimator {
             delete motionElement.dataset.chargeLaunchStyle;
         }
         let secondFacingX = 0;
+        let tigrexRouteKeyframes = null;
+        let tigrexStrideDelayMs = 0;
         if (profile.id === 'bazel-carpet-bombing') {
             const cardRect = this.card.getBoundingClientRect();
             const direction = pattern?.runtimeSweepDirection === 'right-to-left' ? -1 : 1;
@@ -575,7 +724,18 @@ class HuntMonsterAttackAnimator {
             motionElement.style.setProperty('--monster-carpet-flight-y',
                 `${Math.max(-160, cardRect.top - monsterRect.bottom - 120)}px`);
         }
-        if (profile.id === 'ground-charge' || profile.id === 'ground-charge-cross'
+        if (profile.id === 'tigrex-double-bite') {
+            const mouthPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, 'mouth', 0)
+                || { x: .5, y: .5 };
+            const biteRoute = HuntMonsterAttackAnimator.tigrexBiteRoute(
+                { x: 0, y: 0 }, { x: attackX, y: attackY }, monsterRect, mouthPoint);
+            motionElement.style.setProperty('--tigrex-bite-contact-x', `${biteRoute.contact.x}px`);
+            motionElement.style.setProperty('--tigrex-bite-contact-y', `${biteRoute.contact.y}px`);
+            motionElement.style.setProperty('--tigrex-bite-finish-x', `${biteRoute.finish.x}px`);
+            motionElement.style.setProperty('--tigrex-bite-finish-y', `${biteRoute.finish.y}px`);
+            motionElement.dataset.tigrexBiteRoute = 'standalone';
+        }
+        if (profile.id === 'ground-charge' || profile.id === 'rathian-ground-charge' || profile.id === 'ground-charge-cross'
             || profile.id === 'ground-charge-zigzag' || profile.id === 'ground-charge-double'
             || profile.id === 'ground-charge-triple' || profile.id === 'aerial-charge-cross'
             || profile.id === 'legiana-drill-cross' || profile.id === 'tigrex-charge-chain') {
@@ -690,13 +850,35 @@ class HuntMonsterAttackAnimator {
                 const first = routePoint(firstRect);
                 const second = routePoint(secondRect);
                 const third = routePoint(thirdRect);
+                // Every pass is a complete straight charge: contact the hunter,
+                // continue along the same vector beyond the screen, then start
+                // the next independently calculated line from that off-screen
+                // endpoint. Never use a hunter contact point as a turn vertex.
+                const firstExit = exitFromHome(first);
+                const secondExit = exitPastPoint(firstExit, second);
+                const thirdExit = exitPastPoint(secondExit, third);
+                const directionOr = (dx, fallback) => Math.sign(dx) || fallback || -1;
+                const firstDirection = directionOr(first.x, -1);
+                const secondDirection = directionOr(second.x - firstExit.x, -firstDirection);
+                const thirdDirection = directionOr(third.x - secondExit.x, -secondDirection);
+                pattern.runtimeChargeFacingDirections = [
+                    firstDirection,
+                    secondDirection,
+                    thirdDirection
+                ];
                 secondFacingX = second.x;
                 motionElement.style.setProperty('--monster-charge-first-x', `${first.x}px`);
                 motionElement.style.setProperty('--monster-charge-first-y', `${first.y}px`);
+                motionElement.style.setProperty('--monster-charge-first-exit-x', `${firstExit.x}px`);
+                motionElement.style.setProperty('--monster-charge-first-exit-y', `${firstExit.y}px`);
                 motionElement.style.setProperty('--monster-charge-second-x', `${second.x}px`);
                 motionElement.style.setProperty('--monster-charge-second-y', `${second.y}px`);
+                motionElement.style.setProperty('--monster-charge-second-exit-x', `${secondExit.x}px`);
+                motionElement.style.setProperty('--monster-charge-second-exit-y', `${secondExit.y}px`);
                 motionElement.style.setProperty('--monster-charge-third-x', `${third.x}px`);
                 motionElement.style.setProperty('--monster-charge-third-y', `${third.y}px`);
+                motionElement.style.setProperty('--monster-charge-third-exit-x', `${thirdExit.x}px`);
+                motionElement.style.setProperty('--monster-charge-third-exit-y', `${thirdExit.y}px`);
             }
             if (profile.id === 'tigrex-charge-chain') {
                 const sequence = Array.isArray(pattern?.runtimeImpactTargetSequence)
@@ -724,7 +906,16 @@ class HuntMonsterAttackAnimator {
                 const points = [pointForPass(0, firstPoint)];
                 points.push(pointForPass(1, points[0]));
                 if (passCount === 3) points.push(pointForPass(2, points[1]));
-                pattern.runtimeTigrexFacingDirections = points.map(point => Math.sign(point.x) || -1);
+                const firstDistance = Math.max(1, Math.hypot(points[0].x, points[0].y));
+                const launchRecoilDistance = 56;
+                const launchRecoil = {
+                    x: -points[0].x / firstDistance * launchRecoilDistance,
+                    y: -points[0].y / firstDistance * launchRecoilDistance
+                };
+                motionElement.style.setProperty('--tigrex-launch-recoil-x',
+                    `${launchRecoil.x}px`);
+                motionElement.style.setProperty('--tigrex-launch-recoil-y',
+                    `${launchRecoil.y}px`);
                 const exits = [];
                 exits.push(exitPastPoint({ x: 0, y: 0 }, points[0]));
                 for (let index = 1; index < points.length; index += 1) {
@@ -740,22 +931,146 @@ class HuntMonsterAttackAnimator {
                 const lastPoint = points[points.length - 1];
                 const lastExit = exits[exits.length - 1];
                 const branchApproachRatio = .84;
+                const branchPoint = {
+                    x: lastExit.x + (lastPoint.x - lastExit.x) * branchApproachRatio,
+                    y: lastExit.y + (lastPoint.y - lastExit.y) * branchApproachRatio
+                };
+                const finalPassStart = exits[Math.max(0, exits.length - 2)] || { x: 0, y: 0 };
+                const finalPassTravelRatio = passCount === 3 ? .11 : .16;
+                pattern.runtimeTigrexBranchApproachDurationMs =
+                    HuntMonsterAttackAnimator.tigrexBranchApproachDurationMs(
+                        finalPassStart,
+                        lastPoint,
+                        lastExit,
+                        branchPoint,
+                        profile.duration,
+                        finalPassTravelRatio
+                    );
                 motionElement.style.setProperty('--tigrex-branch-x',
-                    `${lastExit.x + (lastPoint.x - lastExit.x) * branchApproachRatio}px`);
+                    `${branchPoint.x}px`);
                 motionElement.style.setProperty('--tigrex-branch-y',
-                    `${lastExit.y + (lastPoint.y - lastExit.y) * branchApproachRatio}px`);
+                    `${branchPoint.y}px`);
+                motionElement.style.setProperty('--tigrex-branch-last-exit-x', `${lastExit.x}px`);
+                motionElement.style.setProperty('--tigrex-branch-last-exit-y', `${lastExit.y}px`);
+                motionElement.dataset.tigrexBranchApproachMs =
+                    String(pattern.runtimeTigrexBranchApproachDurationMs);
+                if (pattern?.branchKind === 'bite') {
+                    const mouthPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, 'mouth', 0)
+                        || { x: .5, y: .5 };
+                    const biteRoute = HuntMonsterAttackAnimator.tigrexBiteRoute(
+                        lastExit, lastPoint, monsterRect, mouthPoint);
+                    motionElement.style.setProperty('--tigrex-bite-target-x', `${lastPoint.x}px`);
+                    motionElement.style.setProperty('--tigrex-bite-target-y', `${lastPoint.y}px`);
+                    motionElement.style.setProperty('--tigrex-bite-contact-x', `${biteRoute.contact.x}px`);
+                    motionElement.style.setProperty('--tigrex-bite-contact-y', `${biteRoute.contact.y}px`);
+                    motionElement.style.setProperty('--tigrex-bite-finish-x', `${biteRoute.finish.x}px`);
+                    motionElement.style.setProperty('--tigrex-bite-finish-y', `${biteRoute.finish.y}px`);
+                }
+                const passDirections = HuntMonsterAttackAnimator.tigrexRouteDirections(points, exits);
+                const branchDirection = Math.sign(branchPoint.x - lastExit.x)
+                    || passDirections[passDirections.length - 1]
+                    || -1;
+                pattern.runtimeTigrexFacingDirections = [...passDirections, branchDirection];
+                tigrexRouteKeyframes = HuntMonsterAttackAnimator.tigrexChargeRouteKeyframes(
+                    points, exits, launchRecoil, passCount);
+                const routeSpeedPxPerMs = Number(
+                    tigrexRouteKeyframes.speedPerNormalizedDuration || 1) / profile.duration;
+                const branchApproachDistance = Math.hypot(
+                    branchPoint.x - lastExit.x,
+                    branchPoint.y - lastExit.y
+                );
+                pattern.runtimeTigrexBranchApproachDurationMs = Math.max(280,
+                    Math.round(branchApproachDistance / Math.max(.01, routeSpeedPxPerMs)));
+                pattern.runtimeTigrexRouteExitDelayMs = profile.duration
+                    * Number(tigrexRouteKeyframes.routeExitOffset || 0);
+                motionElement.dataset.tigrexBranchApproachMs =
+                    String(pattern.runtimeTigrexBranchApproachDurationMs);
+                tigrexStrideDelayMs = Math.round(profile.duration * (passCount === 3 ? .09 : .10));
+                motionElement.style.setProperty('--tigrex-stride-delay', `${tigrexStrideDelayMs}ms`);
+                const timeline = Array.isArray(pattern.runtimeResolvedImpactTimeline)
+                    ? pattern.runtimeResolvedImpactTimeline
+                    : [];
+                // Engine ticks stay at 100 ms. The profile duration is already
+                // visually scaled, so scaling the tick divisor again resolves
+                // damage before the sprite reaches the hunter.
+                const runtimeTickMs = 1000 / Math.max(1,
+                    Number(typeof HuntAtbConfig !== 'undefined'
+                        ? HuntAtbConfig.TICKS_PER_SECOND
+                        : 10));
+                const passEvents = timeline.filter(event =>
+                    /^tigrex-charge-(?:pass|return)$/.test(event.eventKind || ''));
+                passEvents.forEach((event, index) => {
+                    const offset = tigrexRouteKeyframes.impactOffsets?.[index];
+                    if (Number.isFinite(offset)) {
+                        event.atTicks = Math.max(1, Math.round(offset * profile.duration / runtimeTickMs));
+                    }
+                });
+                const branchEvent = timeline.find(event =>
+                    /^tigrex-(?:rock|spin|bite)$/.test(event.eventKind || ''));
+                if (branchEvent) {
+                    const scaledBranchDuration = typeof HuntAtbConfig !== 'undefined'
+                        && HuntAtbConfig.scaleVisualDurationMs
+                        ? HuntAtbConfig.scaleVisualDurationMs(branchEvent.animationDurationMs || 0)
+                        : Number(branchEvent.animationDurationMs || 0);
+                    const branchImpactMs = pattern.runtimeTigrexRouteExitDelayMs
+                        + pattern.runtimeTigrexBranchApproachDurationMs
+                        + scaledBranchDuration * Number(branchEvent.animationImpactRatio || .6);
+                    branchEvent.atTicks = Math.max(1, Math.ceil(branchImpactMs / runtimeTickMs));
+                    const secondBite = timeline.find(event => event.eventKind === 'tigrex-bite-second');
+                    if (secondBite) secondBite.atTicks = branchEvent.atTicks + 5;
+                }
                 motionElement.dataset.tigrexChargePasses = String(passCount);
                 secondFacingX = points[points.length - 1]?.x ?? points[0].x;
             }
         }
         const motionClass = `monster-motion-${profile.id}`;
+        const useDynamicTigrexRoute = Boolean(
+            tigrexRouteKeyframes?.length && typeof motionElement.animate === 'function');
         const activeMotion = this.startMonsterMotion(
             motionElement,
             motionClass,
             profile.duration,
             null,
-            { patternId: pattern?.id || null }
+            {
+                patternId: pattern?.id || null,
+                disableCssAnimation: useDynamicTigrexRoute
+            }
         );
+        if (useDynamicTigrexRoute) {
+            try {
+                const routeAnimation = motionElement.animate(tigrexRouteKeyframes, {
+                    duration: profile.duration,
+                    easing: 'linear',
+                    fill: 'both'
+                });
+                activeMotion.finishers.push(() => {
+                    try { routeAnimation.cancel(); } catch (_) { /* detached OBS node */ }
+                });
+                motionElement.dataset.tigrexRouteOffsets = tigrexRouteKeyframes
+                    .map(frame => Number(frame.offset).toFixed(4)).join('|');
+            } catch (error) {
+                // Never leave the wrapper at animation:none with only the child
+                // stride flip running. Invalid/unsupported WAAPI keyframes fall
+                // back to the authored CSS route so the charge still travels.
+                motionElement.style.removeProperty('animation');
+                void motionElement.offsetWidth;
+                activeMotion.expectedAnimationNames = new Set([
+                    Number(motionElement.dataset.tigrexChargePasses) === 3
+                        ? 'tigrex-charge-chain-three'
+                        : 'tigrex-charge-chain'
+                ]);
+                motionElement.dataset.tigrexRouteFallback = 'css';
+                this.traceMonsterMotion('route-fallback', {
+                    generation: activeMotion.generation,
+                    motionClass,
+                    patternId: pattern?.id || null,
+                    reason: String(error?.message || error || 'waapi-failed')
+                });
+            }
+        }
+        if (profile.id === 'tigrex-charge-chain') {
+            this.scheduleTigrexStrideAudio(activeMotion, tigrexStrideDelayMs);
+        }
         this.startFacingMotion(monsterImg, profile, pattern, attackX, secondFacingX, activeMotion);
         return profile;
     }
@@ -1012,7 +1327,12 @@ class HuntMonsterAttackAnimator {
             ? HuntMonsterAnatomyCatalog
             : null;
         const originKind = pattern.originPart || pattern.partUse?.fixed || 'right-front-leg';
-        const originPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, originKind, 0);
+        const originPoint = originKind === 'lower-front-leg'
+            ? ['left-front-leg', 'right-front-leg']
+                .map(kind => anatomy?.visualPoint?.(this.owner?.selectedMonster, kind, 0))
+                .filter(Boolean)
+                .sort((a, b) => Number(b.y || 0) - Number(a.y || 0))[0]
+            : anatomy?.visualPoint?.(this.owner?.selectedMonster, originKind, 0);
         const originX = monsterRect.left + monsterRect.width * (originPoint?.x ?? .5);
         const originY = monsterRect.top + monsterRect.height * (originPoint?.y ?? .58);
         const targetX = targetRect.left + targetRect.width / 2;
@@ -1049,36 +1369,89 @@ class HuntMonsterAttackAnimator {
         const ticksPerSecond = typeof HuntAtbConfig !== 'undefined'
             ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10)
             : 10;
-        const impactLeadMs = Number(branchEvent.animationDurationMs || 0)
-            * Math.max(0, Math.min(1, Number(branchEvent.animationImpactRatio || .6)));
-        const delayMs = Math.max(0,
-            Number(branchEvent.atTicks || 0) * 1000 / ticksPerSecond - impactLeadMs);
+        const delayMs = HuntMonsterAttackAnimator.tigrexBranchStartDelayMs(
+            branchEvent.atTicks,
+            branchEvent.animationDurationMs,
+            branchEvent.animationImpactRatio || .6,
+            ticksPerSecond
+        );
+        const approachTravelMs = Math.max(120,
+            Number(pattern.runtimeTigrexBranchApproachDurationMs || 520));
+        const approachMotionMs = Math.ceil(approachTravelMs / .9);
+        const approachDelayMs = Math.max(
+            Number(pattern.runtimeTigrexRouteExitDelayMs || 0),
+            Math.max(0, delayMs - approachTravelMs)
+        );
         this.animationTimers.timeout(() => {
             if (!this.card || this.activeMonsterMotion?.generation !== expectedGeneration) return;
-            const Catalog = typeof HuntMonsterAnimationCatalog !== 'undefined'
-                ? HuntMonsterAnimationCatalog
-                : null;
-            const profile = Catalog?.resolve?.({
-                animationProfile: branchEvent.animationProfile,
-                animationDurationMs: branchEvent.animationDurationMs
-            }, branchEvent.displayName || '', 'physical', this.owner.selectedMonster);
             const motionElement = this.resolveMotionElement(monsterImg);
-            if (!profile || !motionElement) return;
-            const preservedTransform = typeof getComputedStyle === 'function'
-                ? getComputedStyle(motionElement).transform
-                : null;
-            this.startMonsterMotion(
+            if (!motionElement) return;
+            motionElement.style.setProperty('--monster-motion-duration', `${approachMotionMs}ms`);
+            const approachMotion = this.startMonsterMotion(
                 motionElement,
-                `monster-motion-${profile.id}`,
-                profile.duration,
+                'monster-motion-tigrex-branch-approach',
+                approachMotionMs,
                 null,
                 {
-                    patternId: `${pattern.id}:${branchEvent.eventKind}`,
-                    preservePoseOnReplace: true,
-                    preservedTransform
+                    patternId: `${pattern.id}:branch-approach`
                 }
             );
-        }, delayMs);
+            this.animationTimers.timeout(() => {
+                if (!this.card || this.activeMonsterMotion?.generation !== approachMotion?.generation) return;
+                const Catalog = typeof HuntMonsterAnimationCatalog !== 'undefined'
+                    ? HuntMonsterAnimationCatalog
+                    : null;
+                const profile = Catalog?.resolve?.({
+                    animationProfile: branchEvent.animationProfile,
+                    animationDurationMs: branchEvent.animationDurationMs
+                }, branchEvent.displayName || '', 'physical', this.owner.selectedMonster);
+                if (!profile) return;
+                const preservedTransform = typeof getComputedStyle === 'function'
+                    ? getComputedStyle(motionElement).transform
+                    : null;
+                motionElement.style.setProperty('--monster-motion-duration', `${profile.duration}ms`);
+                const branchMotion = this.startMonsterMotion(
+                    motionElement,
+                    `monster-motion-${profile.id}`,
+                    profile.duration,
+                    null,
+                    {
+                        patternId: `${pattern.id}:${branchEvent.eventKind}`,
+                        preservePoseOnReplace: true,
+                        preservedTransform
+                    }
+                );
+                if (branchEvent.eventKind === 'tigrex-rock') {
+                    const travelMs = 720;
+                    const impactRatio = Math.max(0, Math.min(1,
+                        Number(branchEvent.animationImpactRatio || .7)));
+                    const releaseDelayMs = Math.max(0,
+                        Math.round(profile.duration * impactRatio - travelMs));
+                    this.animationTimers.timeout(() => {
+                        if (!this.card || this.activeMonsterMotion?.generation !== branchMotion?.generation) return;
+                        let indices = Array.isArray(branchEvent.targetIndices)
+                            && branchEvent.targetIndices.length
+                            ? branchEvent.targetIndices
+                            : [];
+                        const primary = Number(indices[0]);
+                        const frontLegBroken = (pattern.runtimeBrokenPartKinds || [])
+                            .some(kind => /front-leg/.test(String(kind)));
+                        if (!frontLegBroken && Number.isInteger(primary)) {
+                            indices = [primary - 1, primary, primary + 1]
+                                .filter(index => index >= 0 && index <= 3)
+                                .filter(index => this.card.querySelector(`#fight-card-${index}`));
+                        } else {
+                            indices = indices.slice(0, 1);
+                        }
+                        this.owner?.onMonsterProjectileLaunchAudio?.(this.owner.selectedMonster, pattern);
+                        indices.forEach(index => {
+                            const liveCard = this.card.querySelector(`#fight-card-${index}`);
+                            if (liveCard) this.createRockProjectile(monsterImg, liveCard, pattern, travelMs);
+                        });
+                    }, releaseDelayMs);
+                }
+            }, approachTravelMs);
+        }, approachDelayMs);
     }
 
     createMonsterAttachedEmojiFx(monsterImg, emoji, extraClass, durationMs) {
@@ -1456,6 +1829,9 @@ class HuntMonsterAttackAnimator {
         // the 720 ms projectile animation to arrive at the authored impact tick.
         if (pattern?.runtimeImpactPending) {
             if (pattern.projectileVisual === 'rock') {
+                const branchOwnsRockProjectile = pattern.tags?.includes('tigrex-charge-chain')
+                    && pattern.branchKind === 'rock';
+                if (branchOwnsRockProjectile) return;
                 const ticksPerSecond = typeof HuntAtbConfig !== 'undefined'
                     ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10)
                     : 10;
@@ -1481,6 +1857,7 @@ class HuntMonsterAttackAnimator {
                         const indices = Array.isArray(event.targetIndices) && event.targetIndices.length
                             ? event.targetIndices
                             : targets.map(target => target.index);
+                        this.owner?.onMonsterProjectileLaunchAudio?.(this.owner.selectedMonster, pattern);
                         indices.forEach(index => {
                             const liveCard = this.card.querySelector(`#fight-card-${index}`);
                             if (liveCard) this.createRockProjectile(monsterImg, liveCard, pattern, travelMs);

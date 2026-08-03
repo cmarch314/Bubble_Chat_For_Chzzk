@@ -25,6 +25,12 @@ async function main() {
         'lazy hunt scripts must be unique');
     assert.match(HUNT_RUNTIME_SCRIPT_PATHS[0], /runtime-action-routes\.js/);
     assert.strictEqual(HUNT_RUNTIME_SCRIPT_PATHS[0], HUNT_ACTION_AUDIO_RUNTIME_PATH);
+    const monsterAudioScripts = HUNT_RUNTIME_SCRIPT_PATHS.filter(src =>
+        /WorldMonster(?:Roar|AudioReview)Routes|HuntAudioCatalog/.test(src));
+    assert.strictEqual(monsterAudioScripts.length, 3,
+        'monster audio runtime must load roar evidence, reviewed routes, and the catalog');
+    assert.ok(monsterAudioScripts.every(src => src.endsWith('?v=20260803a')),
+        'all monster audio route layers must share one cache revision so OBS cannot mix stale mappings');
     assert.ok(!HUNT_RUNTIME_SCRIPT_PATHS.includes(HUNT_AUDIO_RUNTIME_PATH),
         'the large voice catalog must load asynchronously after hunt UI registration');
     assert.strictEqual(HUNT_RUNTIME_SCRIPT_PATHS.at(-1), 'js/effects/HuntEffect.js');

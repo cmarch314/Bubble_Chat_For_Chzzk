@@ -729,7 +729,7 @@ class HuntAudioManager {
         const normalized = String(kind || 'attack').toLowerCase();
         return new Set([
             'attack', 'roar', 'telegraph', 'death', 'flinch',
-            'knockdown', 'trap', 'ultimate', 'burrow'
+            'knockdown', 'trap', 'ultimate', 'burrow', 'charge_stride_step', 'projectile_launch'
         ]).has(normalized) ? normalized : 'attack';
     }
 

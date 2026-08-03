@@ -18,6 +18,8 @@ const FlightRuntime = require('../js/effects/hunt/HuntMonsterFlightRuntime.js');
 const PatternSelector = require('../js/effects/hunt/HuntMonsterPatternSelector.js');
 const ReleasePolicy = require('../js/effects/hunt/HuntMonsterReleasePolicy.js');
 const TurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
+global.HuntMonsterAnatomyCatalog = AnatomyCatalog;
+const AttackAnimator = require('../js/effects/hunt/HuntMonsterAttackAnimator.js');
 
 const rathian = profiles.rathian;
 const byId = id => rathian.find(pattern => pattern.id === id);
@@ -95,13 +97,38 @@ assert.strictEqual(ActionPolicy.brokenPartDamageModifier(tailCut, somersault), .
 assert.strictEqual(ActionPolicy.effectiveTargetCap(tailCut, doubleSomersault), 1);
 assert.deepStrictEqual(doubleSomersault.impactTimeline.map(event => event.audioCue),
     ['somersault', 'somersault'], 'both somersaults need their own voice event');
+assert.deepStrictEqual(somersault.impactTimeline.map(event => event.atTicks), [19]);
+assert.deepStrictEqual(doubleSomersault.impactTimeline.map(event => event.atTicks), [22, 53]);
+assert.deepStrictEqual(biteSomersault.impactTimeline.map(event => event.atTicks), [20, 54]);
+assert.deepStrictEqual(somersaultGlide.impactTimeline.map(event => event.atTicks), [21, 80]);
 assert.strictEqual(biteSomersault.impactTimeline[0].suppressStatus, true);
 assert.strictEqual(biteSomersault.impactTimeline[0].ignoreBrokenPartDamage, true);
 assert.strictEqual(somersaultGlide.impactTimeline[1].secondaryInterference.scope, 'adjacent');
 assert.strictEqual(byId('rathian.bite').maxConsecutiveUses, 1);
-assert.deepStrictEqual(byId('rathian.tail_sweep').impactTimeline.map(event => event.atTicks), [14, 24]);
+assert.ok(byId('rathian.bite').tags.includes('weak'), 'Rathian bite must use the weak-hit contract');
+assert.deepStrictEqual(byId('rathian.tail_sweep').impactTimeline.map(event => event.atTicks), [24, 34]);
 assert.strictEqual(byId('rathian.tail_sweep').animationDurationMs, 4200);
+assert.strictEqual(byId('rathian.tail_sweep').animationProfile, 'rathian-tail-sweep-double');
 assert.strictEqual(byId('rathian.triple_charge').animationDurationMs, 9000);
+assert.strictEqual(byId('rathian.triple_charge').movement.ticks, 113);
+assert.strictEqual(byId('rathian.charge').animationProfile, 'rathian-ground-charge');
+assert.strictEqual(byId('rathian.charge').impact.visualRatio, .30);
+assert.deepStrictEqual(byId('rathian.triple_charge').impact.passRatios, [.12, .43, .74],
+    'each charge collision must land during the constant-speed pass, before the off-screen exit');
+const facingAnimator = new AttackAnimator({ selectedMonster: { id: 'rathian' } });
+assert.deepStrictEqual(
+    facingAnimator.facingPlan({ id: 'rathian-ground-charge' }, {}, 180).slice(0, 2),
+    [{ offset: 0, direction: 1 }, { offset: .73, direction: 1 }],
+    'Rathian single charge must face its actual horizontal travel direction'
+);
+assert.deepStrictEqual(
+    facingAnimator.facingPlan({ id: 'ground-charge-triple' }, {
+        runtimeChargeFacingDirections: [-1, 1, -1]
+    }).filter(step => step.direction !== 0).map(step => step.direction),
+    [-1, -1, 1, 1, -1, -1],
+    'each Rathian triple-charge pass must use its independently measured travel direction'
+);
+assert.strictEqual(byId('rathian.glide').impactTimeline[0].atTicks, 42);
 assert.strictEqual(doubleSomersault.animationDurationMs, 6400,
     'Rathian multi-step motions must not be compressed by the shared animation defaults');
 
@@ -202,14 +229,17 @@ assert.strictEqual(
 );
 const tripleChargeFrames = css.match(/@keyframes monster-motion-ground-charge-triple\s*\{([\s\S]*?)\n\}/)?.[1] || '';
 for (const [percent, variable] of [
-    ['18%', '--monster-charge-first-y'],
-    ['50%', '--monster-charge-second-y'],
-    ['78%', '--monster-charge-third-y']
+    ['12%', '--monster-charge-first-y'],
+    ['43%', '--monster-charge-second-y'],
+    ['74%', '--monster-charge-third-y']
 ]) {
     assert.match(tripleChargeFrames, new RegExp(`${percent.replace('%', '%')}[^}]*${variable}`),
         `Rathian triple charge needs a visible ${percent} collision at ${variable}`);
 }
 assert.match(css, /\.monster-motion-ground-charge-triple\s*\{[^}]*\slinear\s/);
+const singleChargeFrames = css.match(/@keyframes monster-motion-rathian-ground-charge\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+assert.match(singleChargeFrames, /30%[^}]*--monster-charge-first-y/,
+    'Rathian single charge must reach the hunter early instead of slowly approaching before acceleration');
 assert.doesNotMatch(tripleChargeFrames, /rotate\(180deg\)/);
 const sharedDoubleTailFrames = css.split('\n').find(line =>
     line.includes('@keyframes monster-motion-tail-sweep-double')) || '';
@@ -219,6 +249,8 @@ assert.doesNotMatch(sharedDoubleTailFrames, /rotate\((?:702|720)deg\)/,
     'two half-turns must complete one circle instead of spinning a full circle twice');
 for (const animationName of [
     'rathian-somersault',
+    'rathian-tail-sweep-double',
+    'rathian-ground-charge',
     'rathian-somersault-double',
     'rathian-bite-somersault',
     'rathian-somersault-glide',
@@ -229,8 +261,10 @@ for (const animationName of [
     assert.match(css, new RegExp(`@keyframes monster-motion-${animationName}`));
 }
 const somersaultFrames = css.match(/@keyframes monster-motion-rathian-somersault\s*\{([\s\S]*?)\n\}/)?.[1] || '';
-assert.match(somersaultFrames, /30%\{[^}]*rotate\(calc\(-108deg\*var\(--monster-facing-flip,1\)\)\)/,
-    'the tail impact must rise through the first 30% of a counter-clockwise rotation');
+assert.match(somersaultFrames, /36%\{[^}]*rotate\(0deg\)/,
+    'Rathian must finish approaching the target before beginning the somersault');
+assert.match(somersaultFrames, /48%\{[^}]*rotate\(calc\(-108deg\*var\(--monster-facing-flip,1\)\)\)/,
+    'the tail impact must rise only after the approach has finished');
 assert.doesNotMatch(somersaultFrames, /rotate\((?:150|200|250)deg\)/,
     'the somersault must not reach the same pose by sweeping the tail downward first');
 for (const [animationName, impactAngle] of [
@@ -241,6 +275,21 @@ for (const [animationName, impactAngle] of [
     const frames = css.match(new RegExp(`@keyframes monster-motion-${animationName}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] || '';
     assert.match(frames, new RegExp(`rotate\\(calc\\(${impactAngle.replace('-', '\\-')}\\*var\\(--monster-facing-flip,1\\)\\)\\)`),
         `${animationName} must share the upward somersault rotation`);
+    assert.match(frames, /rotate\(0deg\)/,
+        `${animationName} must complete its approach before rotating`);
+}
+const somersaultGlideFrames = css.match(/@keyframes monster-motion-rathian-somersault-glide\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+for (const percent of ['8%', '15%', '22%', '30%']) {
+    assert.match(somersaultGlideFrames, new RegExp(`${percent.replace('%', '%')}[^}]*opacity:1`),
+        `Rathian must stay fully visible through the somersault at ${percent}`);
+}
+for (const [percent, variable] of [
+    ['29%', '--monster-charge-first-exit-y'],
+    ['61%', '--monster-charge-second-exit-y'],
+    ['89%', '--monster-charge-third-exit-y']
+]) {
+    assert.match(tripleChargeFrames, new RegExp(`${percent.replace('%', '%')}[^}]*${variable}`),
+        `Rathian triple charge must pass through its hunter and leave the screen at ${percent}`);
 }
 assert.match(css, /\.monster-local-action-fx\.breath-fizzle/);
 assert.match(css, /\.monster-local-action-fx\.flight-stagger/);
@@ -252,5 +301,15 @@ assert.match(animatorSource, /runtimeImpactTargetSequence/);
 assert.match(animatorSource, /runtimeImpactAllowEmptySequence/);
 assert.match(animatorSource, /const phantomCard/,
     'empty left/right lanes still need a visible off-screen fireball');
+const turnExecutorSource = fs.readFileSync(
+    path.join(__dirname, '..', 'js', 'effects', 'hunt', 'HuntMonsterTurnExecutor.js'),
+    'utf8'
+);
+assert.match(turnExecutorSource,
+    /!isImpactCommit && pattern\.type !== 'roar' && !pattern\.suppressPrepareAudio/,
+    'somersault vocals must not fire when the action merely starts');
+assert.match(turnExecutorSource,
+    /pattern\.type !== 'roar' && pattern\.runtimeImpactAudioCue !== 'somersault'/,
+    'the authored somersault contact vocal must not be doubled by the default impact route');
 
 console.log('[test] Reviewed World Rathian runtime contract passed.');

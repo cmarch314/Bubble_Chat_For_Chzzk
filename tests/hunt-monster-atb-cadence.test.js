@@ -117,6 +117,7 @@ assert.strictEqual(bazelBodyPressTiming.animationTicks, 30,
 
 const longCharge = profiles.diablos.find(pattern => pattern.id === 'diablos.rage_charge');
 const preparedEngine = {
+    selectedWeapons: [{ index: 0, status: 'alive' }],
     selectedMonster: { id: 'diablos', nameKO: '디아블로스', species: 'Flying Wyvern' },
     MONSTER_PATTERNS: { diablos: [longCharge] },
     monsterPatternSelector: { select: () => longCharge },

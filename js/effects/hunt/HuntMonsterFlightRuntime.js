@@ -309,21 +309,26 @@ class HuntMonsterFlightRuntime {
         const pendingTrap = engine.pendingLandingTrap;
         if (!pendingTrap) return false;
         engine.pendingLandingTrap = null;
-        const trapTicks = engine.consumeTrapDuration?.(40) || 40;
-        engine.monsterState = 'knocked_down';
-        engine.monsterKnockdownDuration = Math.max(
-            Number(engine.monsterKnockdownDuration || 0),
-            trapTicks
-        );
-        if (HuntMonsterFlightAtbConfig?.applyMonsterControlAtb) {
-            HuntMonsterFlightAtbConfig.applyMonsterControlAtb(engine, 'trap');
+        let trapEffect;
+        if (typeof engine.beginMonsterTrapControl === 'function') {
+            trapEffect = engine.beginMonsterTrapControl('shocktrap', 40);
         } else {
-            engine.monsterAtb = 50;
-            engine.updateMonsterAtbUI?.(50);
+            const trapTicks = engine.consumeTrapDuration?.(40) || 40;
+            engine.monsterState = 'knocked_down';
+            engine.monsterKnockdownDuration = Math.max(
+                Number(engine.monsterKnockdownDuration || 0),
+                trapTicks
+            );
+            if (HuntMonsterFlightAtbConfig?.applyMonsterControlAtb) {
+                HuntMonsterFlightAtbConfig.applyMonsterControlAtb(engine, 'trap');
+            } else {
+                engine.monsterAtb = 50;
+                engine.updateMonsterAtbUI?.(50);
+            }
+            trapEffect = { durationTicks: trapTicks, retainedAtb: engine.monsterAtb, useCount: 1 };
         }
         engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
-        engine.triggerEnvironmentEffect?.('shocktrap', pendingTrap.hunterIndex);
-        engine.callbacks?.onTriggerMonsterKnockdownAnim?.();
+        engine.triggerEnvironmentEffect?.('shocktrap', pendingTrap.hunterIndex, trapEffect);
         engine.addLog?.(`🪤 [착지 함정] ${engine.selectedMonster.nameKO}(이)가 설치된 함정을 밟았습니다!`, '#ffe66d');
         return true;
     }

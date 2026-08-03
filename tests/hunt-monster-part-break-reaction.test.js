@@ -159,8 +159,8 @@ for (const kind of ['knockdown', 'stun', 'paralysis', 'sleep']) {
     assert.strictEqual(HuntAtbConfig.monsterAtbAfterControl(kind), 100,
         `${kind} must fill and hold ATB so the monster can act as soon as control ends`);
 }
-assert.strictEqual(HuntAtbConfig.monsterAtbAfterControl('flash'), 0,
-    'a non-knockdown flash reaction keeps its explicit reset policy');
+assert.strictEqual(HuntAtbConfig.monsterAtbAfterControl('flash'), 50,
+    'a flash reaction must retain a fixed half gauge instead of emptying ATB');
 const negativeControlEngine = {
     monsterAtb: -175,
     updateMonsterAtbUI(value) { this.renderedMonsterAtb = value; }

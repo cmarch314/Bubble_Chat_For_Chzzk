@@ -68,11 +68,12 @@ const HuntHunterTurnExecutor = require('../js/effects/hunt/HuntHunterTurnExecuto
         addLog: () => {},
         showSkillBubble: () => {},
         monsterFlightRuntime: {
-            forceLanding(target, reason) {
+            forceLanding(target, reason, _durationTicks, options = {}) {
                 events.push(`landing:${reason}`);
                 target.monsterFlightState = 'grounded';
                 target.monsterState = 'knocked_down';
                 target.monsterKnockdownDuration = 105;
+                target.retainedFlashAtb = options.retainedAtb;
             }
         }
     };
@@ -80,6 +81,10 @@ const HuntHunterTurnExecutor = require('../js/effects/hunt/HuntHunterTurnExecuto
     assert.strictEqual(hunter.flashPods, 0);
     assert.strictEqual(runtimeEngine.monsterFlashUseCount, 1);
     assert.strictEqual(runtimeEngine.monsterKnockdownDuration, 105);
+    assert.strictEqual(runtimeEngine.monsterAtb, 50,
+        'flash interruption must retain a fixed half gauge instead of emptying monster ATB');
+    assert.strictEqual(runtimeEngine.retainedFlashAtb, 50,
+        'an airborne flash knockdown must preserve the same half gauge through forced landing');
     assert.deepStrictEqual(events, ['interrupt:flash', 'landing:flash', 'items:0', 'effect:flash']);
 }
 

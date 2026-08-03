@@ -35,7 +35,9 @@ const PRESETS = Object.freeze({
     groundFire: { label: '바닥 화염', tags: ['ground_fire'] },
     tornado: { label: '회오리', tags: ['tornado'] },
     thunder: { label: '천둥', tags: ['thunder'] },
-    hoofStep: { label: '발굽', tags: ['hoof_step'] }
+    hoofStep: { label: '발굽', tags: ['hoof_step'] },
+    chargeStrideStep: { label: '돌진 스탭', tags: ['charge_stride_step'] },
+    projectileLaunch: { label: '투사체 발사', tags: ['projectile_launch'] }
 });
 
 const TAG_ALIASES = Object.freeze({
@@ -47,10 +49,33 @@ const TAG_ALIASES = Object.freeze({
     회오리: 'tornado',
     천둥: 'thunder',
     발굽: 'hoof_step',
+    '돌진 스탭': 'charge_stride_step',
+    '바위 발사': 'projectile_launch',
     summersalt_vocal: 'somersault_vocal'
 });
 
 const MONSTER_NAMES = Object.freeze({
+    em013: '밀라보레아스',
+    em042: '벨리오로스',
+    em050: '알바트리온',
+    em057: '진오우거',
+    em063: '브라키디오스',
+    em080: '디노발드',
+    em100: '안쟈나프',
+    em101: '도스쟈그라스',
+    em105: '제노-지바',
+    em108: '쥬라토도스',
+    em114: '라도발킨',
+    em115: '발하자크 · 죽음을 두른 발하자크',
+    em116: '도도가마루',
+    em117: '맘-타로트',
+    em121: '베히모스',
+    em122: '브란토도스',
+    em123: '버프바로',
+    em124: '이베르카나',
+    em125: '네로미에르',
+    em126: '안-이슈왈다',
+    em127: '레셴 · 고대 레셴',
     em118: '바젤기우스 · 홍련의 솟구치는 바젤기우스',
     em001: '레우스 · 레이아',
     em007: '디아블로스',
@@ -139,10 +164,12 @@ function orderedSources(event, aliases = []) {
 
 function groupEvents(graph, labels) {
     const records = labels.records || [];
+    const excludedSourceIds = new Set((labels.excludedSourceIds || []).map(Number));
+    const seenGroups = new Set();
     return (graph.events || [])
-        .filter(event => event.chunk === 'chunkG0')
         .map(event => {
-            const sources = orderedSources(event, graph.deduplication?.aliases || []);
+            const sources = orderedSources(event, graph.deduplication?.aliases || [])
+                .filter(source => !excludedSourceIds.has(Number(source.sourceId)));
             const sourceIds = new Set(sources.map(source => Number(source.sourceId)));
             const reviews = records.filter(record =>
                 record.bank === event.bank
@@ -170,6 +197,13 @@ function groupEvents(graph, labels) {
             };
         })
         .filter(group => group.sources.length)
+        .filter(group => {
+            const signature = `${group.bank}:${group.eventId}:${group.sources
+                .map(source => source.sourceId).sort((a, b) => a - b).join(',')}`;
+            if (seenGroups.has(signature)) return false;
+            seenGroups.add(signature);
+            return true;
+        })
         .sort((a, b) => a.bank.localeCompare(b.bank) || a.eventId - b.eventId);
 }
 
@@ -312,7 +346,7 @@ function listMonsters(labelsPath = LABELS_PATH) {
             return {
                 id,
                 name: MONSTER_NAMES[id] || id,
-                groups: (graph.events || []).filter(event => event.chunk === 'chunkG0').length,
+                groups: groupEvents(graph, { records: [] }).length,
                 reviewStatus: reviewStatusForGraphId(id, runtimePolicy, bankMap)
             };
         });

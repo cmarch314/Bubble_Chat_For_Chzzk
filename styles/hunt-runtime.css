@@ -330,23 +330,10 @@
 }
 
 .game-hunt-monster-img.enraged {
+    filter: drop-shadow(0 24px 22px rgba(0, 0, 0, 0.78))
+        drop-shadow(0 0 18px rgba(255, 28, 22, 0.9)) brightness(1.3) !important;
     animation: monster-idle 3s ease-in-out infinite alternate, enraged-glow 0.8s ease-in-out infinite alternate !important;
 }
-
-/* Tigrex rage is localized to its eyes and foreleg vessels. */
-.hunt-monster-facing-layer.tigrex-local-enrage .game-hunt-monster-img.enraged {
-    animation:monster-idle 3s ease-in-out infinite alternate !important;
-    filter:drop-shadow(0 10px 20px rgba(0,0,0,.85)) brightness(1.08) !important;
-}
-.hunt-monster-facing-layer.tigrex-local-enrage::after {
-    content:"";position:absolute;inset:0;z-index:4;pointer-events:none;
-    background:
-        radial-gradient(ellipse at 31% 61%,rgba(255,40,20,.98) 0 1.2%,rgba(255,30,10,.48) 2.2%,transparent 5%),
-        radial-gradient(ellipse at 43% 27%,rgba(205,12,8,.78) 0 3%,rgba(158,0,0,.38) 7%,transparent 15%),
-        radial-gradient(ellipse at 75% 69%,rgba(205,12,8,.78) 0 3%,rgba(158,0,0,.38) 7%,transparent 15%);
-    mix-blend-mode:screen;animation:tigrex-local-enrage-pulse .7s ease-in-out infinite alternate;
-}
-@keyframes tigrex-local-enrage-pulse { from{opacity:.46;filter:brightness(.85)} to{opacity:.92;filter:brightness(1.35)} }
 
 .game-hunt-monster-img.valstrax-flying {
     transform: translateY(-500px) scale(0.1) !important;
@@ -1524,6 +1511,7 @@
 .monster-motion-ground-charge-zigzag { animation: monster-motion-ground-charge-zigzag var(--monster-motion-duration) cubic-bezier(.2,.7,.18,1) both !important; }
 .monster-motion-ground-charge-double { animation:monster-motion-ground-charge-double var(--monster-motion-duration) linear both !important; }
 .monster-motion-ground-charge-triple { animation:monster-motion-ground-charge-triple var(--monster-motion-duration) linear both !important; }
+.monster-motion-rathian-ground-charge { animation:monster-motion-rathian-ground-charge var(--monster-motion-duration) linear both !important; }
 .monster-motion-aerial-charge-cross { animation:monster-motion-aerial-charge-cross var(--monster-motion-duration) linear both !important; z-index:18; }
 .monster-motion-legiana-drill-cross { animation:monster-motion-legiana-drill-cross var(--monster-motion-duration) linear both !important; z-index:18; }
 .monster-motion-legiana-hop-strike { animation:monster-motion-legiana-hop-strike var(--monster-motion-duration) cubic-bezier(.2,.82,.18,1) both !important; z-index:18; }
@@ -1536,6 +1524,19 @@
 .monster-motion-pounce-chain { animation: monster-motion-pounce-chain var(--monster-motion-duration) cubic-bezier(.18,.8,.2,1) both !important; }
 .monster-motion-tigrex-charge-chain { animation:tigrex-charge-chain var(--monster-motion-duration) linear both !important; }
 .monster-motion-tigrex-charge-chain[data-tigrex-charge-passes="3"] { animation-name:tigrex-charge-chain-three !important; }
+.monster-motion-tigrex-branch-approach { animation:tigrex-branch-approach var(--monster-motion-duration) linear both !important; }
+.monster-motion-tigrex-charge-chain .hunt-monster-facing-layer > .game-hunt-monster-img {
+    animation:tigrex-charge-stride-flip .6s steps(1,end) var(--tigrex-stride-delay,1s) infinite !important;
+    transition:none !important;
+}
+.monster-motion-tigrex-branch-approach .hunt-monster-facing-layer > .game-hunt-monster-img {
+    animation:tigrex-charge-stride-flip .6s steps(1,end) infinite !important;
+    transition:none !important;
+}
+@keyframes tigrex-charge-stride-flip {
+    0%,49.99%{transform:scaleX(1) translateY(1px)}
+    50%,100%{transform:scaleX(-1) translateY(-2px)}
+}
 .monster-motion-diablos-tail-cross { animation:monster-motion-diablos-tail-cross var(--monster-motion-duration) cubic-bezier(.2,.72,.18,1) both !important; transform-origin:72% 48%; }
 .monster-motion-tigrex-exhausted-trip { animation:tigrex-exhausted-trip var(--monster-motion-duration) ease-out both !important; transform-origin:55% 72%; }
 .monster-motion-tigrex-rock-hop { animation:tigrex-rock-hop var(--monster-motion-duration) cubic-bezier(.2,.72,.16,1) both !important; }
@@ -1569,6 +1570,7 @@
 .monster-motion-rathalos-stomp { animation:monster-motion-rathalos-stomp var(--monster-motion-duration) cubic-bezier(.16,.8,.18,1) both !important; }
 .monster-motion-rathalos-glide { animation:monster-motion-rathalos-glide var(--monster-motion-duration) cubic-bezier(.12,.78,.16,1) both !important; }
 .monster-motion-rathian-triple-fireball { animation:monster-motion-rathian-triple-fireball var(--monster-motion-duration) ease-in-out both !important; transform-origin:22% 70%; }
+.monster-motion-rathian-tail-sweep-double { animation:monster-motion-rathian-tail-sweep-double var(--monster-motion-duration) linear both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-somersault { animation:monster-motion-rathian-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-somersault-double { animation:monster-motion-rathian-somersault-double var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-bite-somersault { animation:monster-motion-rathian-bite-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
@@ -1791,8 +1793,8 @@
 @keyframes monster-charge-footfall { 0%{opacity:0;scale:.4} 28%{opacity:.95;scale:1.35} 100%{opacity:0;scale:2.7} }
 .monster-charge-rumble { animation:monster-charge-rumble 110ms linear 6; }
 @keyframes monster-charge-rumble { 0%,100%{translate:0 0} 35%{translate:-5px 3px} 70%{translate:5px -2px} }
-@keyframes monster-motion-tail-sweep { 0%,100%{transform:none} 23%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(.98)} 39%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-18deg) scale(.97)} 78%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(342deg) scale(1.12)} }
-@keyframes monster-motion-tail-sweep-double { 0%,100%{transform:none} 15%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(.98)} 26%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-18deg) scale(.97)} 52%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(162deg) scale(1.12)} 59%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(158deg) scale(1.04)} 85%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(342deg) scale(1.14)} }
+@keyframes monster-motion-tail-sweep { 0%{transform:none} 23%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(.98)} 39%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-18deg) scale(.97)} 78%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(342deg) scale(1.12)} 100%{transform:translate(0,0) rotate(360deg) scale(1)} }
+@keyframes monster-motion-tail-sweep-double { 0%{transform:none} 15%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(.98)} 26%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-18deg) scale(.97)} 52%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(162deg) scale(1.12)} 59%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(158deg) scale(1.04)} 85%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(342deg) scale(1.14)} 100%{transform:translate(0,0) rotate(360deg) scale(1)} }
 @keyframes monster-motion-tail-slam-rock { 0%,100%{transform:none} 18%{transform:translate(calc(var(--monster-attack-x)*.16),calc(var(--monster-attack-y)*.12)) rotate(7deg) scale(.96)} 36%{transform:translate(calc(var(--monster-attack-x)*.3),calc(var(--monster-attack-y)*.2 - 42px)) rotate(-17deg) scale(1.02)} 50%{transform:translate(calc(var(--monster-attack-x)*.3),calc(var(--monster-attack-y)*.28 + 30px)) rotate(13deg) scale(1.12,.88);filter:brightness(1.3)} 64%{transform:translate(calc(var(--monster-attack-x)*.24),calc(var(--monster-attack-y)*.22)) rotate(-8deg) scale(1.04)} 82%{transform:translate(calc(var(--monster-attack-x)*.08),0) rotate(3deg)} }
 @keyframes monster-motion-side-tackle-contact {
     0%,100%{transform:none}
@@ -1885,16 +1887,16 @@
 }
 @keyframes monster-motion-ground-charge-triple {
     0%,100%{transform:none;opacity:1}
-    18%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-first-y)) scale(1.18);opacity:1}
-    29%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-bottom)) scale(1.48);opacity:1}
-    30%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-bottom)) scale(1.48);opacity:0}
-    31%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-bottom)) scale(1.34);opacity:1}
-    50%{transform:translate(var(--monster-charge-second-x),var(--monster-charge-second-y)) scale(1.2);opacity:1}
-    61%{transform:translate(var(--monster-charge-second-x),calc(var(--monster-charge-top)*-1)) scale(.82);opacity:1}
-    62%{transform:translate(var(--monster-charge-second-x),calc(var(--monster-charge-top)*-1)) scale(.82);opacity:1}
-    78%{transform:translate(var(--monster-charge-third-x),var(--monster-charge-third-y)) scale(1.2);opacity:1}
-    89%{transform:translate(var(--monster-charge-third-x),var(--monster-charge-bottom)) scale(1.5);opacity:1}
-    90%{transform:translate(var(--monster-charge-third-x),var(--monster-charge-bottom)) scale(1.5);opacity:0}
+    12%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-first-y)) scale(1.18);opacity:1}
+    29%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.34);opacity:1}
+    30%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.34);opacity:0}
+    31%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.34);opacity:1}
+    43%{transform:translate(var(--monster-charge-second-x),var(--monster-charge-second-y)) scale(1.2);opacity:1}
+    60%{transform:translate(var(--monster-charge-second-exit-x),var(--monster-charge-second-exit-y)) scale(.92);opacity:1}
+    61%{transform:translate(var(--monster-charge-second-exit-x),var(--monster-charge-second-exit-y)) scale(.92);opacity:1}
+    74%{transform:translate(var(--monster-charge-third-x),var(--monster-charge-third-y)) scale(1.2);opacity:1}
+    89%{transform:translate(var(--monster-charge-third-exit-x),var(--monster-charge-third-exit-y)) scale(1.34);opacity:1}
+    90%{transform:translate(var(--monster-charge-third-exit-x),var(--monster-charge-third-exit-y)) scale(1.34);opacity:0}
     94%{transform:translate(0,-95px) scale(.86);opacity:0}
     97%{transform:translate(0,-45px) scale(.93);opacity:1}
 }
@@ -1902,30 +1904,35 @@
 @keyframes monster-motion-pounce-chain { 0%,100%{transform:none} 15%{transform:translateX(calc(var(--monster-lane-x)*-.68)) translateY(-45px) rotate(-9deg) scale(.92)} 34%{transform:translateX(calc(var(--monster-lane-x)*.46)) translateY(35px) rotate(8deg) scale(1.16)} 51%{transform:translateX(calc(var(--monster-lane-x)*.82)) translateY(-65px) rotate(12deg) scale(.98)} 70%{transform:translateX(calc(var(--monster-lane-x)*-.48)) translateY(55px) rotate(-11deg) scale(1.2)} 86%{transform:translateX(calc(var(--monster-lane-x)*.18)) rotate(4deg) scale(1.04)} }
 @keyframes tigrex-charge-chain {
   0%,100%{transform:none;opacity:1}
-  2%{transform:translate(calc(var(--tigrex-pass-1-x)*-.03),-12px) scale(.97)}
-  17.6%{transform:translate(var(--tigrex-pass-1-x),var(--tigrex-pass-1-y)) scale(1.18);opacity:1}
-  29%{transform:translate(var(--tigrex-exit-1-x),var(--tigrex-exit-1-y)) scale(1.38);opacity:1}
-  29.5%,30%{transform:translate(var(--tigrex-exit-1-x),var(--tigrex-exit-1-y)) scale(1.05);opacity:1}
-  49.4%{transform:translate(var(--tigrex-pass-2-x),var(--tigrex-pass-2-y)) scale(1.2);opacity:1}
-  61%{transform:translate(var(--tigrex-exit-2-x),var(--tigrex-exit-2-y)) scale(.88);opacity:1}
-  61.5%,62%{transform:translate(var(--tigrex-exit-2-x),var(--tigrex-exit-2-y)) scale(.96);opacity:1}
-  91.8%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) scale(1.12);opacity:1}
-  96%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) scale(1.05);opacity:1}
+  6%,10%{transform:translate(var(--tigrex-launch-recoil-x),var(--tigrex-launch-recoil-y));opacity:1}
+  17.6%{transform:translate(var(--tigrex-pass-1-x),var(--tigrex-pass-1-y)) scale(1.12);opacity:1}
+  29%,37%{transform:translate(var(--tigrex-exit-1-x),var(--tigrex-exit-1-y)) scale(1.12);opacity:1}
+  48.3%{transform:translate(var(--tigrex-pass-2-x),var(--tigrex-pass-2-y)) scale(1.12);opacity:1}
+  72.2%,100%{transform:translate(var(--tigrex-exit-2-x),var(--tigrex-exit-2-y)) scale(1.12);opacity:1}
+}
+@keyframes monster-motion-rathian-ground-charge {
+    0%,6%{transform:none;opacity:1}
+    10%{transform:translateY(20px) scale(.94,1.04);opacity:1}
+    30%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-first-y)) scale(1.22);opacity:1}
+    73%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.38);opacity:1}
+    74%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.38);opacity:0}
+    82%{transform:translate(var(--monster-charge-return-x),var(--monster-charge-return-y)) scale(.82);opacity:0}
+    90%{transform:translate(calc(var(--monster-charge-return-x)*.35),-52px) scale(.92);opacity:1}
+    100%{transform:none;opacity:1}
 }
 @keyframes tigrex-charge-chain-three {
   0%,100%{transform:none;opacity:1}
-  2%{transform:translate(calc(var(--tigrex-pass-1-x)*-.03),-12px) scale(.97)}
-  16.5%{transform:translate(var(--tigrex-pass-1-x),var(--tigrex-pass-1-y)) scale(1.18)}
-  27%{transform:translate(var(--tigrex-exit-1-x),var(--tigrex-exit-1-y)) scale(1.36)}
-  27.5%,28%{transform:translate(var(--tigrex-exit-1-x),var(--tigrex-exit-1-y));opacity:1}
-  40%{transform:translate(var(--tigrex-pass-2-x),var(--tigrex-pass-2-y)) scale(1.2)}
-  50%{transform:translate(var(--tigrex-exit-2-x),var(--tigrex-exit-2-y)) scale(.9)}
-  50.5%,51%{transform:translate(var(--tigrex-exit-2-x),var(--tigrex-exit-2-y));opacity:1}
-  63.5%{transform:translate(var(--tigrex-pass-3-x),var(--tigrex-pass-3-y)) scale(1.2)}
-  74%{transform:translate(var(--tigrex-exit-3-x),var(--tigrex-exit-3-y)) scale(1.38)}
-  74.5%,75%{transform:translate(var(--tigrex-exit-3-x),var(--tigrex-exit-3-y));opacity:1}
-  94.1%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) scale(1.12)}
-  96%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) scale(1.05)}
+  5.5%,9%{transform:translate(var(--tigrex-launch-recoil-x),var(--tigrex-launch-recoil-y));opacity:1}
+  16.5%{transform:translate(var(--tigrex-pass-1-x),var(--tigrex-pass-1-y)) scale(1.12)}
+  27%,28%{transform:translate(var(--tigrex-exit-1-x),var(--tigrex-exit-1-y)) scale(1.12);opacity:1}
+  39.5%{transform:translate(var(--tigrex-pass-2-x),var(--tigrex-pass-2-y)) scale(1.12)}
+  61.9%,62.9%{transform:translate(var(--tigrex-exit-2-x),var(--tigrex-exit-2-y)) scale(1.12);opacity:1}
+  86.3%{transform:translate(var(--tigrex-pass-3-x),var(--tigrex-pass-3-y)) scale(1.12)}
+  96.8%,100%{transform:translate(var(--tigrex-exit-3-x),var(--tigrex-exit-3-y)) scale(1.12);opacity:1}
+}
+@keyframes tigrex-branch-approach {
+  0%{transform:translate(var(--tigrex-branch-last-exit-x),var(--tigrex-branch-last-exit-y)) scale(1.12);opacity:1}
+  90%,100%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) scale(1.12);opacity:1}
 }
 @keyframes monster-motion-diablos-tail-cross {
   0%,100%{transform:none}
@@ -1937,16 +1944,24 @@
   86%{transform:translate(calc(var(--monster-attack-x)*.11),calc(var(--monster-attack-y)*.12)) rotate(-20deg) scale(1.1)}
 }
 @keyframes tigrex-exhausted-trip {0%{transform:translate(calc(var(--monster-attack-x)*-.9),calc(var(--monster-attack-y)*.18)) rotate(-5deg)} 12%{transform:translate(calc(var(--monster-attack-x)*-.45),calc(var(--monster-attack-y)*.38)) rotate(-18deg) scale(1.08,.88)} 25%,88%{transform:translate(calc(var(--monster-attack-x)*-.28),calc(var(--monster-attack-y)*.48)) rotate(-82deg) scale(1.12,.82)} 100%{transform:none}}
-@keyframes tigrex-rock-hop {0%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 24%{transform:translate(calc(var(--tigrex-branch-x)*.88),calc(var(--tigrex-branch-y)*.82 - 42px)) scale(.94)} 48%{transform:translate(calc(var(--tigrex-branch-x)*.72),calc(var(--tigrex-branch-y)*.66)) rotate(-9deg) scale(1.04)} 70%{transform:translate(calc(var(--tigrex-branch-x)*.76),calc(var(--tigrex-branch-y)*.7)) rotate(8deg) scale(1.1,.92)} 100%{transform:none}}
-@keyframes tigrex-sliding-spin {0%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 18%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(35deg) scale(1.08)} 68%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(360deg) scale(1.16)} 82%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(360deg)} 100%{transform:none}}
-@keyframes tigrex-running-double-bite {0%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 34%{transform:translate(calc(var(--tigrex-branch-x)*1.04),calc(var(--tigrex-branch-y)*1.02)) rotate(-11deg) scale(1.12)} 62%{transform:translate(calc(var(--tigrex-branch-x)*1.08),calc(var(--tigrex-branch-y)*1.04)) rotate(10deg) scale(1.14)} 82%{transform:translate(calc(var(--tigrex-branch-x)*1.1),calc(var(--tigrex-branch-y)*1.05)) rotate(2deg)} 100%{transform:none}}
+@keyframes tigrex-rock-hop {0%,8%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 22%{transform:translate(0,-68px) scale(.92)} 34%{transform:translate(0,0) scale(1.04,.92)} 38%{transform:translate(0,0) rotate(10deg) scale(1.1,.9)} 58%{transform:translate(-16px,0) rotate(-4deg) scale(1.02)} 100%{transform:none}}
+@keyframes tigrex-sliding-spin {0%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 18%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(35deg) scale(1.08)} 68%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(360deg) scale(1.16)} 82%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(360deg)} 100%{transform:translate(0,0) rotate(360deg)}}
+@keyframes tigrex-running-double-bite {0%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 34%{transform:translate(var(--tigrex-bite-contact-x),var(--tigrex-bite-contact-y)) rotate(-11deg) scale(1.12)} 62%{transform:translate(var(--tigrex-bite-finish-x),var(--tigrex-bite-finish-y)) rotate(10deg) scale(1.14)} 82%,100%{transform:translate(var(--tigrex-bite-finish-x),var(--tigrex-bite-finish-y)) rotate(2deg)}}
 @keyframes tigrex-foreleg-slam {0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*.45),calc(var(--monster-attack-y)*.38 - 20px)) rotate(-8deg)} 56%{transform:translate(calc(var(--monster-attack-x)*.72),calc(var(--monster-attack-y)*.72)) rotate(9deg) scale(1.12,.9)} 78%{transform:translate(calc(var(--monster-attack-x)*.35),calc(var(--monster-attack-y)*.3))}}
 @keyframes tigrex-bite {0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*.18),calc(var(--monster-attack-y)*.12)) rotate(7deg) scale(.96)} 58%{transform:translate(calc(var(--monster-attack-x)*.82),calc(var(--monster-attack-y)*.78)) rotate(-8deg) scale(1.13)} 74%{transform:translate(calc(var(--monster-attack-x)*.7),calc(var(--monster-attack-y)*.66)) rotate(5deg)}}
-@keyframes tigrex-double-bite {0%,100%{transform:none} 18%{transform:translate(calc(var(--monster-attack-x)*.22),calc(var(--monster-attack-y)*.16)) scale(.95)} 43%{transform:translate(calc(var(--monster-attack-x)*.68),calc(var(--monster-attack-y)*.62)) rotate(-11deg) scale(1.12)} 61%{transform:translate(calc(var(--monster-attack-x)*.84),calc(var(--monster-attack-y)*.76)) rotate(10deg) scale(1.14)} 79%{transform:translate(calc(var(--monster-attack-x)*.72),calc(var(--monster-attack-y)*.66))}}
-@keyframes tigrex-clockwise-spin {0%,100%{transform:none} 12%{transform:translate(calc(var(--monster-attack-x)*.18),calc(var(--monster-attack-y)*.14)) rotate(-12deg) scale(.94)} 50%{transform:translate(calc(var(--monster-attack-x)*.82),calc(var(--monster-attack-y)*.78)) rotate(-12deg) scale(1.02)} 82%{transform:translate(calc(var(--monster-attack-x)*.92),calc(var(--monster-attack-y)*.88)) rotate(360deg) scale(1.15)} 92%{transform:translate(calc(var(--monster-attack-x)*.68),calc(var(--monster-attack-y)*.62)) rotate(360deg)}}
+@keyframes tigrex-double-bite {0%,100%{transform:none} 18%{transform:translate(calc(var(--tigrex-bite-contact-x)*.3),calc(var(--tigrex-bite-contact-y)*.3)) scale(.95)} 43%{transform:translate(var(--tigrex-bite-contact-x),var(--tigrex-bite-contact-y)) rotate(-11deg) scale(1.12)} 66%{transform:translate(var(--tigrex-bite-finish-x),var(--tigrex-bite-finish-y)) rotate(10deg) scale(1.14)} 79%{transform:translate(var(--tigrex-bite-finish-x),var(--tigrex-bite-finish-y)) rotate(2deg)}}
+@keyframes tigrex-clockwise-spin {0%{transform:none} 12%{transform:translate(calc(var(--monster-attack-x)*.18),calc(var(--monster-attack-y)*.14)) rotate(-12deg) scale(.94)} 50%{transform:translate(calc(var(--monster-attack-x)*.82),calc(var(--monster-attack-y)*.78)) rotate(-12deg) scale(1.02)} 82%{transform:translate(calc(var(--monster-attack-x)*.92),calc(var(--monster-attack-y)*.88)) rotate(360deg) scale(1.15)} 92%{transform:translate(calc(var(--monster-attack-x)*.68),calc(var(--monster-attack-y)*.62)) rotate(360deg)} 100%{transform:translate(0,0) rotate(360deg)}}
 @keyframes tigrex-rock-shot {0%,100%{transform:none} 28%{transform:translate(calc(var(--monster-attack-x)*.15),calc(var(--monster-attack-y)*.12)) rotate(-12deg) scale(.96)} 55%{transform:translate(calc(var(--monster-attack-x)*.3),calc(var(--monster-attack-y)*.26)) rotate(11deg) scale(1.12,.9)} 70%{transform:translate(calc(var(--monster-attack-x)*.24),calc(var(--monster-attack-y)*.2)) rotate(-4deg)}}
-@keyframes tigrex-leap {0%,100%{transform:none} 18%{transform:translate(calc(var(--monster-attack-x)*-.12),calc(var(--monster-attack-y)*-.08)) scale(.92)} 48%{transform:translate(calc(var(--monster-attack-x)*.72),calc(var(--monster-attack-y)*.55 - 120px)) rotate(-8deg) scale(1.04)} 68%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(6deg) scale(1.22,.88)} 82%{transform:translate(calc(var(--monster-attack-x)*.72),calc(var(--monster-attack-y)*.6))}}
-@keyframes monster-motion-body-spin { 0%,100%{transform:none} 20%{transform:scale(.9) rotate(-12deg)} 62%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y)*.35)) rotate(360deg) scale(1.16)} 78%{transform:translate(calc(var(--monster-attack-x)*.7),0) rotate(390deg)} }
+@keyframes tigrex-leap {
+  0%,100%{transform:none}
+  12%{transform:translateY(22px) scale(1.08,.84)}
+  30%{transform:translate(0,-270px) rotate(-7deg) scale(.9,1.12)}
+  50%{transform:translate(calc(var(--monster-attack-x)*.62),calc(var(--monster-attack-y)*.24 - 300px)) rotate(5deg) scale(.96,1.08)}
+  68%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(8deg) scale(1.25,.76);filter:brightness(1.32) drop-shadow(0 24px 12px #0009)}
+  78%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(3deg) scale(1.08,.92)}
+  88%{transform:translate(calc(var(--monster-attack-x)*.55),calc(var(--monster-attack-y)*.5))}
+}
+@keyframes monster-motion-body-spin { 0%{transform:none} 20%{transform:scale(.9) rotate(-12deg)} 62%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y)*.35)) rotate(360deg) scale(1.16)} 78%{transform:translate(calc(var(--monster-attack-x)*.7),0) rotate(390deg)} 100%{transform:translate(0,0) rotate(390deg) scale(1)} }
 @keyframes monster-motion-leap-slam { 0%,100%{transform:none} 18%{transform:translateY(28px) scale(1.08,.84)} 50%{transform:translate(calc(var(--monster-attack-x)*.55),-185px) rotate(-6deg) scale(.88,1.12)} 73%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) scale(1.24,.78);filter:brightness(1.35) drop-shadow(0 26px 12px #0008)} }
 @keyframes monster-motion-aerial-dive { 0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*-.2),-210px) rotate(-12deg) scale(.72);filter:drop-shadow(0 35px 15px #0008)} 52%{transform:translate(calc(var(--monster-attack-x)*.4),-250px) rotate(12deg) scale(.8)} 76%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(1.26);filter:brightness(1.5)} }
 @keyframes monster-motion-burrow-enter { 0%{transform:none;opacity:1} 28%{transform:translateY(18px) rotate(-4deg) scale(1.04);opacity:1} 68%{transform:translateY(210px) rotate(8deg) scale(.92);opacity:.8;filter:sepia(.35) blur(1px)} 100%{transform:translateY(280px) scale(.82);opacity:0;filter:sepia(.55) blur(3px)} }
@@ -2076,57 +2091,74 @@
 @keyframes monster-motion-rathalos-backstep-fireball { 0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*.08),28px) rotate(4deg) scale(1.05)} 44%{transform:translate(calc(var(--monster-attack-x)*-.12),-18px) rotate(-6deg) scale(1.12);filter:brightness(1.55) drop-shadow(0 0 20px #ff6a24)} 73%{transform:translate(calc(var(--monster-attack-x)*-.18),-190px) rotate(-10deg) scale(.78)} 100%{transform:none} }
 @keyframes monster-motion-rathalos-claw-dive { 0%,100%{transform:none} 20%{transform:translate(calc(var(--monster-attack-x)*-.18),-220px) rotate(-13deg) scale(.73)} 45%{transform:translate(calc(var(--monster-attack-x)*.38),-260px) rotate(12deg) scale(.8)} 66%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-10deg) scale(1.28);filter:brightness(1.5) drop-shadow(0 20px 12px #0009)} 82%{transform:translate(calc(var(--monster-attack-x)*.55),-150px) rotate(7deg) scale(.88)} }
 @keyframes monster-motion-rathalos-air-kick-combo { 0%,100%{transform:none} 18%{transform:translate(calc(var(--monster-attack-x)*-.2),-205px) rotate(-10deg) scale(.76)} 42%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(12deg) scale(1.24)} 55%{transform:translate(calc(var(--monster-attack-x)*.3),-175px) rotate(-12deg) scale(.82)} 72%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-9deg) scale(1.29);filter:brightness(1.45)} 86%{transform:translate(calc(var(--monster-attack-x)*.2),-120px) scale(.9)} }
-@keyframes monster-motion-rathalos-tail-sweep-double { 0%,100%{transform:none} 14%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-12deg) scale(.96)} 39%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(168deg) scale(1.13)} 48%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(158deg) scale(1.04)} 73%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(348deg) scale(1.16)} 88%{transform:translate(calc(var(--monster-attack-x)*.35),calc(var(--monster-attack-y)*.28)) rotate(360deg) scale(1.03)} }
+@keyframes monster-motion-rathalos-tail-sweep-double { 0%{transform:none} 14%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-12deg) scale(.96)} 39%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(168deg) scale(1.13)} 48%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(158deg) scale(1.04)} 73%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(348deg) scale(1.16)} 88%{transform:translate(calc(var(--monster-attack-x)*.35),calc(var(--monster-attack-y)*.28)) rotate(360deg) scale(1.03)} 100%{transform:translate(0,0) rotate(360deg) scale(1)} }
 @keyframes monster-motion-rathalos-flame-sweep { 0%,100%{transform:none} 12%{transform:translateY(-34px) rotate(-6deg) scale(.96)} 28%{transform:translateX(calc(var(--monster-lane-x)*-.28)) translateY(-52px) rotate(-12deg) scale(1.08);filter:brightness(1.45)} 48%{transform:translateX(calc(var(--monster-lane-x)*.3)) translateY(-48px) rotate(12deg) scale(1.14);filter:brightness(1.55) drop-shadow(0 0 24px #ff6a24)} 68%{transform:translateX(calc(var(--monster-lane-x)*-.18)) translateY(-42px) rotate(-8deg) scale(1.1)} 84%{transform:translateY(-25px) scale(1.03)} }
 @keyframes monster-motion-rathalos-stomp { 0%,100%{transform:none} 20%{transform:translate(calc(var(--monster-attack-x)*.12),-185px) rotate(7deg) scale(.78)} 48%{transform:translate(calc(var(--monster-attack-x)*.5),-220px) rotate(-5deg) scale(.84)} 70%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(4deg) scale(1.28,.82);filter:brightness(1.5) drop-shadow(0 24px 12px #0009)} 82%{transform:translate(calc(var(--monster-attack-x)*.65),calc(var(--monster-attack-y)*.45)) scale(1.06)} }
 @keyframes monster-motion-rathalos-glide { 0%,100%{transform:none;opacity:1} 16%{transform:translate(calc(var(--monster-attack-x)*-.2),-225px) rotate(-12deg) scale(.73)} 43%{transform:translate(calc(var(--monster-attack-x)*.55),calc(var(--monster-attack-y)*.42)) rotate(8deg) scale(1.04)} 64%{transform:translate(calc(var(--monster-attack-x)*1.18),calc(var(--monster-attack-y) + 540px)) rotate(-6deg) scale(1.42);opacity:1} 65%{opacity:0} 75%{transform:translateY(-185px) scale(.78);opacity:0} 82%{opacity:1} }
 @keyframes monster-motion-rathian-triple-fireball {
     0%,100%{transform:none}
     12%{transform:translateY(13px) rotate(-4deg) scale(.95)}
-    25%{transform:translate(-18px,-17px) rotate(5deg) scale(1.1);filter:brightness(1.42) drop-shadow(0 0 17px #ff7030)}
-    39%{transform:translateY(7px) rotate(-2deg) scale(.98)}
-    54%{transform:translate(17px,-16px) rotate(-5deg) scale(1.11);filter:brightness(1.48) drop-shadow(0 0 18px #ff7030)}
-    67%{transform:translateY(7px) rotate(2deg) scale(.99)}
-    82%{transform:translate(0,-21px) rotate(3deg) scale(1.13);filter:brightness(1.55) drop-shadow(0 0 20px #ff7030)}
+    28%{transform:translate(-18px,-17px) rotate(5deg) scale(1.1);filter:brightness(1.42) drop-shadow(0 0 17px #ff7030)}
+    35%{transform:translateY(7px) rotate(-2deg) scale(.98)}
+    43%{transform:translate(17px,-16px) rotate(-5deg) scale(1.11);filter:brightness(1.48) drop-shadow(0 0 18px #ff7030)}
+    50%{transform:translateY(7px) rotate(2deg) scale(.99)}
+    58%{transform:translate(0,-21px) rotate(3deg) scale(1.13);filter:brightness(1.55) drop-shadow(0 0 20px #ff7030)}
+    74%{transform:translateY(4px) rotate(0deg) scale(1)}
+}
+@keyframes monster-motion-rathian-tail-sweep-double {
+    0%{transform:none}
+    14%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(0deg) scale(.98)}
+    26%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-18deg) scale(.97)}
+    45%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(162deg) scale(1.12)}
+    46%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(162deg) scale(1.06)}
+    64%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(342deg) scale(1.14)}
+    78%{transform:translate(calc(var(--monster-attack-x)*.42),calc(var(--monster-attack-y)*.35)) rotate(360deg) scale(1.03)}
+    100%{transform:translate(0,0) rotate(360deg) scale(1)}
 }
 @keyframes monster-motion-rathian-somersault {
-    0%,100%{transform:none}
-    12%{transform:translate(calc(var(--monster-attack-x)*.12),28px) rotate(calc(12deg*var(--monster-facing-flip,1))) scale(.96,1.05)}
-    22%{transform:translate(calc(var(--monster-attack-x)*.50),calc(var(--monster-attack-y)*.34 - 130px)) rotate(calc(-48deg*var(--monster-facing-flip,1))) scale(1.1)}
-    30%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-108deg*var(--monster-facing-flip,1))) scale(1.3);filter:brightness(1.4) drop-shadow(0 -16px 20px #ff330088)}
-    46%{transform:translate(calc(var(--monster-attack-x)*.82),calc(var(--monster-attack-y)*.62 - 140px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.08)}
-    74%{transform:translate(calc(var(--monster-attack-x)*.30),-70px) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(.93)}
+    0%{transform:none}
+    12%{transform:translate(calc(var(--monster-attack-x)*.10),28px) rotate(0deg) scale(.96,1.05)}
+    36%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(0deg) scale(1.08)}
+    48%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-108deg*var(--monster-facing-flip,1))) scale(1.3);filter:brightness(1.4) drop-shadow(0 -16px 20px #ff330088)}
+    62%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 140px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.08)}
+    76%{transform:translate(calc(var(--monster-attack-x)*.30),-70px) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(.93)}
+    100%{transform:translate(0,0) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1)}
 }
 @keyframes monster-motion-rathian-somersault-double {
-    0%,100%{transform:none}
-    8%{transform:translate(calc(var(--monster-attack-x)*.10),28px) rotate(calc(12deg*var(--monster-facing-flip,1))) scale(.96,1.05)}
-    20%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-108deg*var(--monster-facing-flip,1))) scale(1.3);filter:brightness(1.38) drop-shadow(0 -16px 20px #ff330088)}
-    34%{transform:translate(calc(var(--monster-attack-x)*.50),calc(var(--monster-attack-y)*.34 - 130px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.05)}
-    44%{transform:translate(calc(var(--monster-attack-x)*.25),calc(var(--monster-attack-y)*.20 - 90px)) rotate(calc(-348deg*var(--monster-facing-flip,1))) scale(.96,1.05)}
-    64%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-468deg*var(--monster-facing-flip,1))) scale(1.35);filter:brightness(1.45) drop-shadow(0 -16px 20px #ff330088)}
-    78%{transform:translate(calc(var(--monster-attack-x)*.60),calc(var(--monster-attack-y)*.30 - 130px)) rotate(calc(-720deg*var(--monster-facing-flip,1))) scale(1.08)}
+    0%{transform:none}
+    8%{transform:translate(calc(var(--monster-attack-x)*.10),28px) rotate(0deg) scale(.96,1.05)}
+    20%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(0deg) scale(1.08)}
+    27%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-108deg*var(--monster-facing-flip,1))) scale(1.3);filter:brightness(1.38) drop-shadow(0 -16px 20px #ff330088)}
+    38%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 135px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.05)}
+    54%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.08)}
+    66%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-468deg*var(--monster-facing-flip,1))) scale(1.35);filter:brightness(1.45) drop-shadow(0 -16px 20px #ff330088)}
+    78%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 135px)) rotate(calc(-720deg*var(--monster-facing-flip,1))) scale(1.08)}
     90%{transform:translate(calc(var(--monster-attack-x)*.25),-60px) rotate(calc(-720deg*var(--monster-facing-flip,1))) scale(.94)}
+    100%{transform:translate(0,0) rotate(calc(-720deg*var(--monster-facing-flip,1))) scale(1)}
 }
 @keyframes monster-motion-rathian-bite-somersault {
-    0%,100%{transform:none}
-    12%{transform:translate(calc(var(--monster-attack-x)*.50),calc(var(--monster-attack-y)*.48)) rotate(calc(-6deg*var(--monster-facing-flip,1))) scale(1.08)}
-    25%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y)*.80)) rotate(calc(4deg*var(--monster-facing-flip,1))) scale(1.15);filter:brightness(1.2)}
-    40%{transform:translate(calc(var(--monster-attack-x)*.60),calc(var(--monster-attack-y)*.50 + 20px)) rotate(calc(12deg*var(--monster-facing-flip,1))) scale(.96)}
-    57%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-108deg*var(--monster-facing-flip,1))) scale(1.3);filter:brightness(1.4) drop-shadow(0 -16px 20px #ff330088)}
-    70%{transform:translate(calc(var(--monster-attack-x)*.60),calc(var(--monster-attack-y)*.30 - 100px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.05)}
+    0%{transform:none}
+    12%{transform:translate(calc(var(--monster-attack-x)*.50),calc(var(--monster-attack-y)*.48)) rotate(0deg) scale(1.08)}
+    24%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y)*.80)) rotate(0deg) scale(1.15);filter:brightness(1.2)}
+    48%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(0deg) scale(1.08)}
+    65%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-108deg*var(--monster-facing-flip,1))) scale(1.3);filter:brightness(1.4) drop-shadow(0 -16px 20px #ff330088)}
+    76%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 130px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.05)}
     84%{transform:translate(calc(var(--monster-attack-x)*.25),-60px) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(.93)}
+    100%{transform:translate(0,0) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1)}
 }
 @keyframes monster-motion-rathian-somersault-glide {
-    0%,100%{transform:none;opacity:1}
-    8%{transform:translate(calc(var(--monster-attack-x)*.10),25px) rotate(calc(12deg*var(--monster-facing-flip,1))) scale(.96)}
-    18%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-108deg*var(--monster-facing-flip,1))) scale(1.28);filter:brightness(1.38)}
-    28%{transform:translate(calc(var(--monster-charge-side)*.5),-140px) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.0)}
+    0%{transform:none;opacity:1}
+    8%{transform:translate(calc(var(--monster-attack-x)*.10),25px) rotate(0deg) scale(.96);opacity:1}
+    15%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(0deg) scale(1.08);opacity:1}
+    22%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(-108deg*var(--monster-facing-flip,1))) scale(1.28);filter:brightness(1.38);opacity:1}
+    30%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 140px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.0);opacity:1}
     44%{transform:translate(calc(var(--monster-charge-side)*-.48),-150px) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(.82);opacity:0}
     48%{transform:translate(calc(var(--monster-charge-side)*-.85),-105px) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(.86);opacity:1}
     66%{transform:translate(calc(var(--monster-charge-side)*.20),calc(var(--monster-attack-y)*.38 - 75px)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.02)}
     82%{transform:translate(calc(var(--monster-charge-side)*1.18),calc(var(--monster-attack-y)*.95)) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1.2);opacity:1}
     83%{opacity:0}
-    92%{transform:none;opacity:0}
+    92%{transform:translate(0,0) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1);opacity:0}
+    100%{transform:translate(0,0) rotate(calc(-360deg*var(--monster-facing-flip,1))) scale(1);opacity:1}
 }
 @keyframes monster-motion-rathian-glide {
     0%,100%{transform:none;opacity:1}
@@ -2564,7 +2596,11 @@
 .rockfall-debris { position:absolute; left:50%; bottom:76px; width:16px; height:12px; background:#8b755d; border:2px solid #3d2c1d; transform:rotate(calc(var(--i) * 27deg)); animation:rockfall-debris-burst 1s calc(1s + var(--i) * 12ms) ease-out both; }
 .monster-pitfall-caught { animation:monster-pitfall-caught .65s ease-out both !important; transform-origin:50% 90%; }
 .monster-pitfall-caught.monster-pitfall-struggling { animation:monster-pitfall-struggle .72s ease-in-out infinite alternate !important; }
-.monster-shocktrap-caught { filter:drop-shadow(0 0 13px #fff7a0) drop-shadow(0 0 24px #ffe23d) !important; }
+.monster-shocktrap-caught {
+    animation:monster-shocktrap-held .22s steps(2,end) infinite !important;
+    transform-origin:50% 78%;
+    filter:drop-shadow(0 0 13px #fff7a0) drop-shadow(0 0 24px #ffe23d) !important;
+}
 .environment-pitfall.is-atb-bound .pitfall-hole { animation:pitfall-open-held .46s ease-out both; }
 .environment-pitfall.is-atb-bound .pitfall-net { animation:pitfall-net-held .52s ease-out both; }
 .environment-pitfall.is-atb-bound::after,
@@ -2669,6 +2705,11 @@
 @keyframes rockfall-debris-burst { 0%{opacity:1;transform:translate(0,0) rotate(calc(var(--i) * 27deg))} 100%{opacity:0;transform:rotate(calc(var(--i) * 27deg)) translateX(230px) translateY(-120px) rotate(280deg)} }
 @keyframes monster-pitfall-caught { 0%{transform:translateY(0) scale(1)} 25%{transform:translateY(35px) scaleY(.78)} 35%,82%{transform:translateY(92px) scaleY(.58)} 100%{transform:translateY(50px) scaleY(.72)} }
 @keyframes monster-pitfall-struggle { 0%{transform:translateY(50px) rotate(-2deg) scaleY(.72)} 100%{transform:translateY(56px) rotate(2deg) scaleY(.68)} }
+@keyframes monster-shocktrap-held {
+    0%{transform:translate(-3px,1px) rotate(-1deg) scale(1,.98)}
+    50%{transform:translate(3px,-2px) rotate(1deg) scale(.99,1.02)}
+    100%{transform:translate(-1px,2px) rotate(-.5deg) scale(1.01,.99)}
+}
 @keyframes monster-rockfall-hit { 0%,38%{transform:translateY(0) rotate(0)} 44%{transform:translateY(28px) rotate(-9deg) scale(.93)} 51%{transform:translateY(10px) rotate(7deg)} 60%,100%{transform:translateY(58px) rotate(90deg) scale(.9)} }
 @keyframes hunt-rockfall-screen-shake { 0%,100%{transform:translate(0)} 15%{transform:translate(-13px,7px)} 32%{transform:translate(11px,-8px)} 48%{transform:translate(-8px,5px)} 65%{transform:translate(6px,-3px)} 82%{transform:translate(-3px,2px)} }
 

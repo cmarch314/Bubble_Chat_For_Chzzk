@@ -45,10 +45,15 @@ assert.strictEqual(normalA.removed, false);
 assert.strictEqual(normalB.removed, false);
 
 const cssSource = fs.readFileSync(path.resolve(__dirname, '../style.css'), 'utf8');
-assert.match(cssSource, /광대\.jpg'\) right 14px center \/ 112% auto no-repeat/);
+assert.match(cssSource, /광대\.jpg'\) right 14px top \/ 112% auto no-repeat/);
 assert.doesNotMatch(cssSource, /\.chat-box\.chat-box--clown|chat-line-inner--clown\s*\{[\s\S]*?width:\s*600px;/,
     'clown bubbles must retain the ordinary chat width');
-assert.match(cssSource, /\.message\.message--clown\s*\{[\s\S]*?text-align:\s*center;[\s\S]*?margin-top:\s*auto;/);
+assert.match(cssSource, /chat-line-inner--clown\s*\{[\s\S]*?width:\s*min\(372px, calc\(20vw - 12px\)\);/,
+    'clown bubbles must leave a stable gap between ordinary chat slots');
+assert.match(cssSource, /\.message\.message--clown\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?bottom:\s*14px;[\s\S]*?max-height:\s*116px;/,
+    'clown copy must stay inside the lower caption-safe area');
+assert.match(cssSource, /chat-line-inner--clown \.name-box\s*\{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*10px;/,
+    'clown author label must stay over the right hair area instead of the face');
 assert.match(rendererSource, /specialBubble\?\.kind === 'clown'[\s\S]*?fontSize = 3\.6;[\s\S]*?messageEle\.style\.fontSize =/);
 const clownBranch = rendererSource.match(/if \(specialBubble\?\.kind === 'clown'\)[\s\S]*?else if/)?.[0] || '';
 assert.doesNotMatch(clownBranch, /slotSpan\s*=\s*2|chat-box--clown/,

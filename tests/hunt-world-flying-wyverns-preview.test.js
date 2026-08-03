@@ -12,6 +12,8 @@ const html = fs.readFileSync(path.resolve(
 assert.match(html, /width:1920px;height:1080px/);
 assert.match(html, /하단 15%/);
 assert.match(html, /const roster=\[[^\]]+\]/);
+assert.match(html, /class="hunt-monster-attack-motion">\s*<div class="hunt-monster-facing-layer">\s*<img id="fight-monster-img"/,
+    'review previews must preserve production travel > facing > image transform ownership');
 for (const id of require('../data/hunt/research/world-iceborne-flying-wyverns.json').roster) {
     assert.match(html, new RegExp(`['"]${id}['"]`), `${id} must be selectable in the visual review fixture`);
 }

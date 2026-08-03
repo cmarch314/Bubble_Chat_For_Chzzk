@@ -157,6 +157,15 @@ assert.deepStrictEqual([
     engine.consumeTrapDuration(40), engine.consumeTrapDuration(40), engine.consumeTrapDuration(40), engine.consumeTrapDuration(40)
 ], [40, 28, 18, 10], 'repeated traps must rapidly shorten as monster resistance accumulates');
 engine.monsterTrapUseCount = 0;
+engine.monsterAtb = -80;
+const firstTrap = engine.beginMonsterTrapControl('shocktrap', 40);
+assert.strictEqual(firstTrap.durationTicks, 40);
+assert.strictEqual(engine.monsterAtb, 50,
+    'first trap entry must replace action debt with a fixed half gauge');
+assert.strictEqual(engine.activeTrapControl.retainedAtb, 50,
+    'trap visuals and ATB recovery must share one lifecycle record');
+engine.activeTrapControl = null;
+engine.monsterTrapUseCount = 0;
 assert.match(fs.readFileSync(hunterTurnPath, 'utf8'), /action: 'weapon_preparation'/,
     'non-damaging weapon mechanics must still route a same-weapon preparation layer');
 assert.strictEqual(engine.getPreviousMonsterMaterial('화룡'), '화룡의 비늘');

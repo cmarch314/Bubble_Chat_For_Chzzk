@@ -6,6 +6,7 @@ const path = require('path');
 const HuntMonsterFlightRuntime = require('../js/effects/hunt/HuntMonsterFlightRuntime.js');
 const HuntMonsterPatternSelector = require('../js/effects/hunt/HuntMonsterPatternSelector.js');
 const HuntMonsterTraitRuntime = require('../js/effects/hunt/HuntMonsterTraitRuntime.js');
+const HuntMonsterTurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
 
 assert.strictEqual(HuntMonsterFlightRuntime.isCapable({ id: 'rathalos' }), true);
 assert.strictEqual(HuntMonsterFlightRuntime.isCapable({ id: 'diablos' }), false);
@@ -156,6 +157,30 @@ const transitionEngine = {
 runtime.afterAction(transitionEngine, { id: 'rathalos.backstep_fireball', flightTransition: 'takeoff' });
 assert.strictEqual(transitionEngine.monsterFlightState, 'airborne',
     'a reviewed combo may enter flight through generic pattern data');
+
+const unavailablePartyEngine = {
+    selectedMonster: { id: 'legiana', nameKO: '레이기에나' },
+    selectedWeapons: [
+        { index: 0, status: 'alive', cartRecoveryTicks: 30 },
+        { index: 1, status: 'alive', isAtCamp: true },
+        { index: 2, status: 'alive', jumpInvulnerableTicks: 5 },
+        { index: 3, status: 'carted' }
+    ],
+    pendingMonsterAction: null,
+    monsterAtb: 100,
+    monsterFlightState: 'airborne',
+    monsterFlightRuntime: {
+        beforeTurn() {
+            throw new Error('flight state must not advance without a target');
+        }
+    },
+    battleTime: 321,
+    perkRuntime: null
+};
+assert.strictEqual(HuntMonsterTurnExecutor.prepare(unavailablePartyEngine), false);
+assert.strictEqual(unavailablePartyEngine.monsterAtb, 100,
+    'an airborne monster must retain full ATB while every hunter is temporarily unavailable');
+assert.strictEqual(unavailablePartyEngine.monsterActionGateDiagnostics.at(-1).reason, 'no-targetable-hunters');
 
 const hunterTurnSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntHunterTurnExecutor.js'), 'utf8');
 const battleTickSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntBattleTickExecutor.js'), 'utf8');

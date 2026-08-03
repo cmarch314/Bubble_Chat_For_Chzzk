@@ -349,7 +349,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         weight: 0.16, cooldown: 90, monsterAtbCost: 0.5
     }],
     ['rathalos.bite', '물어뜯기', 'physical', 0.24, {
-        sourceMoveNameJA: '噛みつき', recovery: 1, tags: ['physical', 'ground-only', 'target-contact'],
+        sourceMoveNameJA: '噛みつき', recovery: 1, tags: ['physical', 'ground-only', 'target-contact', 'weak'],
         monsterAtbCost: 0.32, movement: { ticks: 20 }, impact: { delayRatio: 0.6 },
         animationProfile: 'rathalos-bite-contact', maxConsecutiveUses: 3
     }],
@@ -450,8 +450,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
     }],
     ['rathian.bite', '물어뜯기', 'physical', 0.22, {
         sourceMoveNameJA: '噛みつき', recovery: 1,
-        tags: ['physical', 'ground-only', 'target-contact'], monsterAtbCost: 0.30,
-        movement: { ticks: 20 }, impact: { delayRatio: 0.60 },
+        tags: ['physical', 'ground-only', 'target-contact', 'weak'], monsterAtbCost: 0.30,
+        movement: { ticks: 20 }, impact: { visualRatio: 0.55 },
         animationProfile: 'rathalos-bite-contact', animationDurationMs: 2400,
         maxConsecutiveUses: 1
     }],
@@ -460,10 +460,10 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         tags: ['area', 'tail', 'ground-only', 'target-contact'], monsterAtbCost: 0.58,
         movement: { ticks: 42 }, targeting: { mode: 'lane' },
         impactTimeline: [
-            { atTicks: 14, damageScale: 1 },
-            { atTicks: 24, damageScale: 1 }
+            { atTicks: 24, damageScale: 1 },
+            { atTicks: 34, damageScale: 1 }
         ],
-        animationProfile: 'tail-sweep-double', animationDurationMs: 4200,
+        animationProfile: 'rathian-tail-sweep-double', animationDurationMs: 4200,
         brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.70 }
     }],
     ['rathian.fireball', '화염구 브레스', 'projectile', 0.34, {
@@ -506,15 +506,15 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         forbiddenStates: ['enraged'],
         tags: ['charge', 'ground-only', 'target-contact'], monsterAtbCost: 0.52,
         movement: { ticks: 24, untargetable: true }, targeting: { mode: 'adjacent-lane' },
-        impact: { delayRatio: 0.58 }, animationProfile: 'ground-charge', animationDurationMs: 3000
+        impact: { visualRatio: 0.30 }, animationProfile: 'rathian-ground-charge', animationDurationMs: 3000
     }],
     ['rathian.triple_charge', '삼연속 돌진', 'charge', 0.30, {
         sourceMoveNameJA: '三連突進', minTargets: 1, maxTargets: 2, windup: 5, recovery: 1,
         state: 'enraged', cooldown: 54, tags: ['charge', 'ground-only', 'multi-hit'],
         monsterAtbCost: 0.82,
-        movement: { kind: 'rathian-triple-charge', ticks: 98, untargetable: true },
+        movement: { kind: 'rathian-triple-charge', ticks: 113, untargetable: true },
         targeting: { mode: 'triple-adjacent-passes' },
-        impact: { passRatios: [0.18, 0.50, 0.78], completePathOnTargetLoss: true },
+        impact: { passRatios: [0.12, 0.43, 0.74], completePathOnTargetLoss: true },
         animationProfile: 'ground-charge-triple', animationDurationMs: 9000
     }],
     ['rathian.somersault', '독가시 서머솔트', 'physical', 0.48, {
@@ -523,7 +523,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         weight: 1.25,
         tags: ['physical', 'poison', 'tail', 'flight-only', 'target-contact', 'strong'],
         monsterAtbCost: 0.72, movement: { ticks: 25 },
-        impactTimeline: [{ atTicks: 10, damageScale: 1, audioCue: 'somersault' }],
+        impactTimeline: [{ atTicks: 19, damageScale: 1, audioCue: 'somersault' }],
         animationProfile: 'rathian-somersault', animationDurationMs: 3200,
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.70 },
@@ -537,8 +537,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         monsterAtbCost: 0.86, movement: { ticks: 50 },
         targeting: { mode: 'independent-passes', passCount: 2 },
         impactTimeline: [
-            { atTicks: 10, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' },
-            { atTicks: 32, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' }
+            { atTicks: 22, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' },
+            { atTicks: 53, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' }
         ],
         animationProfile: 'rathian-somersault-double', animationDurationMs: 6400, originPart: 'tail',
         statusBlockedWhenBroken: ['tail'], brokenPartTargetCaps: { tail: 1 },
@@ -552,8 +552,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         tags: ['physical', 'poison', 'tail', 'flight-only', 'target-contact', 'multi-hit', 'strong'],
         monsterAtbCost: 0.84, movement: { ticks: 55 },
         impactTimeline: [
-            { atTicks: 15, damageScale: 0.50, ignoreBrokenPartDamage: true, suppressStatus: true },
-            { atTicks: 40, damageScale: 1, audioCue: 'somersault' }
+            { atTicks: 20, damageScale: 0.50, ignoreBrokenPartDamage: true, suppressStatus: true },
+            { atTicks: 54, damageScale: 1, audioCue: 'somersault' }
         ],
         animationProfile: 'rathian-bite-somersault', animationDurationMs: 6600,
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
@@ -569,9 +569,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         monsterAtbCost: 0.88, movement: { ticks: 65, untargetable: true },
         targeting: { mode: 'independent-passes', passCount: 2 },
         impactTimeline: [
-            { atTicks: 10, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' },
+            { atTicks: 21, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' },
             {
-                atTicks: 53, targetMode: 'sequential', damageScale: 0.583,
+                atTicks: 80, targetMode: 'sequential', damageScale: 0.583,
                 ignoreBrokenPartDamage: true, suppressStatus: true,
                 secondaryInterference: { kind: 'wind', size: 'small', scope: 'adjacent' }
             }
@@ -588,7 +588,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         tags: ['charge', 'flight-only', 'target-contact'], monsterAtbCost: 0.58,
         movement: { ticks: 40, untargetable: true },
         impactTimeline: [{
-            atTicks: 28, damageScale: 1,
+            atTicks: 42, damageScale: 1,
             secondaryInterference: { kind: 'wind', size: 'small', scope: 'adjacent' }
         }],
         animationProfile: 'rathian-glide', animationDurationMs: 4800,
@@ -988,9 +988,9 @@ function tigrexChargeBranch(id, branchKind, branchLabel, weightByState, normalFi
         eventKind: `tigrex-${branchKind}${secondBite ? '-second' : ''}`,
         displayName: branchLabel,
         animationProfile: branchProfile,
-        animationDurationMs: branchKind === 'spin' ? 2600 : branchKind === 'rock' ? 2200 : 1800,
-        animationImpactRatio: branchKind === 'rock' ? .70 : branchKind === 'spin' ? .68 : .34,
-        audioCue: branchKind === 'rock' ? 'physical' : null
+        animationDurationMs: branchKind === 'spin' ? 2000 : branchKind === 'rock' ? 2200 : 1800,
+        animationImpactRatio: branchKind === 'rock' ? .70 : branchKind === 'spin' ? .52 : .34,
+        audioCue: secondBite ? null : 'tigrex-final-vocal'
     });
     const normalTimeline = [
         { atTicks: 15, damageScale: 1, eventKind: 'tigrex-charge-pass' },
@@ -1000,7 +1000,6 @@ function tigrexChargeBranch(id, branchKind, branchLabel, weightByState, normalFi
     const enragedTimeline = [
         { atTicks: 14, damageScale: 1, eventKind: 'tigrex-charge-pass' },
         { atTicks: 34, damageScale: 1, eventKind: 'tigrex-charge-return' },
-        { atTicks: 54, damageScale: 1, eventKind: 'tigrex-charge-pass' },
         finalEvent(enragedFinal)
     ];
     const exhaustedTimeline = [
@@ -1027,14 +1026,18 @@ function tigrexChargeBranch(id, branchKind, branchLabel, weightByState, normalFi
         cooldown: 1,
         maxConsecutiveUses: 99,
         monsterAtbCost: branchKind === 'spin' ? 1 : branchKind === 'rock' ? .95 : .88,
+        postActionRecoverySeconds: branchKind === 'rock' ? 3 : branchKind === 'spin' ? 3 : 1,
         staminaCostProfile: 'timeline-atb',
-        targeting: { mode: 'independent-passes', passCountByState: { normal: 2, enraged: 3, exhausted: 2 } },
+        // Two collision passes, followed by a third charge-speed approach that
+        // brakes in front of the hunter and branches without passing through.
+        targeting: { mode: 'independent-passes', passCountByState: { normal: 2, enraged: 2, exhausted: 2 } },
         movement: { kind: 'tigrex-charge-chain', ticks: 100, ticksByState: { normal: 100, enraged: 86, exhausted: 92 }, untargetable: true },
         impactTimelineByState: { normal: normalTimeline, enraged: enragedTimeline, exhausted: exhaustedTimeline },
         animationProfile: 'tigrex-charge-chain',
         animationDurationMs: 8500,
         projectileVisual: branchKind === 'rock' ? 'rock' : null,
         projectileEventKinds: branchKind === 'rock' ? ['tigrex-rock'] : null,
+        originPart: branchKind === 'rock' ? 'lower-front-leg' : null,
         branchKind,
         branchLabel,
         visualAnchors: TIGREX_ANCHORS,
@@ -1095,14 +1098,15 @@ HUNT_MONSTER_PATTERN_OVERRIDES.tigrex = worldFlying([
         cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .62,
         postActionRecoverySeconds: 3, targeting: { mode: 'primary-adjacent-both' },
         impact: { visualRatio: .82 },
-        brokenPartTargetCaps: { tail: 2 }, animationProfile: 'tigrex-clockwise-spin', animationDurationMs: 2000,
+        brokenPartTargetCaps: { tail: 2 }, animationProfile: 'tigrex-clockwise-spin', animationDurationMs: 1540,
         visualAnchors: TIGREX_ANCHORS
     }],
     ['tigrex.rock_shot', '바위 날리기', 'projectile', .30, {
-        minTargets: 1, maxTargets: 3, actionClass: 'RockLauncher', tags: ['projectile', 'strong', 'ground-only'],
+        minTargets: 3, maxTargets: 3, actionClass: 'RockLauncher', tags: ['projectile', 'strong', 'ground-only'],
         delivery: 'projectile', cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .48,
         projectileVisual: 'rock',
-        postActionRecoverySeconds: 2, targeting: { mode: 'primary-adjacent-both' },
+        originPart: 'lower-front-leg',
+        postActionRecoverySeconds: 3, targeting: { mode: 'primary-adjacent-both' },
         impact: { visualRatio: .55 }, animationDurationMs: 2200,
         brokenPartTargetCaps: { 'right-front-leg': 1 }, partUse: { fixed: 'right-front-leg' },
         habitatVariants: { snow: 'ice', volcanic: 'fire', wet: 'water', default: 'raw' },

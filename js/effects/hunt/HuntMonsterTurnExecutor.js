@@ -519,7 +519,13 @@ class HuntMonsterTurnExecutor {
         const targetShape = event.targetShape || event.targetMode;
         if (targetShape === 'primary-adjacent-both' || targetShape === 'center-left-right') {
             const targetable = HuntMonsterTurnExecutor.targetableHunters(engine);
-            const primaryIndex = fallbackIndices.find(Number.isInteger);
+            // Timeline events may retarget between charge passes. Anchor the
+            // splash to that event's resolved primary, not the action's first
+            // prepared target retained in fallbackIndices.
+            const primaryIndex = (Array.isArray(event.targetIndices)
+                ? event.targetIndices
+                : []).find(Number.isInteger)
+                ?? fallbackIndices.find(Number.isInteger);
             const primary = targetable.find(target => target.index === primaryIndex);
             if (!primary) return [];
             return targetable
@@ -663,6 +669,23 @@ class HuntMonsterTurnExecutor {
 
     static prepare(engine) {
         if (engine.pendingMonsterAction) return false;
+        // Do not begin (or pay for) an action while every hunter is temporarily
+        // unavailable. This commonly happens while the party is carting, at
+        // camp, or inside a brief invulnerability exit. Previously an airborne
+        // monster could repeatedly spend a full ATB bar on actions that were
+        // cancelled immediately, appearing frozen until a hunter returned.
+        if (!HuntMonsterTurnExecutor.targetableHunters(engine).length) {
+            engine.monsterActionGateDiagnostics = [
+                ...(engine.monsterActionGateDiagnostics || []),
+                {
+                    tick: Number(engine.battleTime || 0),
+                    monsterId: engine.selectedMonster?.id || 'unknown',
+                    reason: 'no-targetable-hunters',
+                    retainedAtb: Number(engine.monsterAtb || 0)
+                }
+            ].slice(-24);
+            return false;
+        }
         const monsterKey = engine.selectedMonster.id.replace(/-/g, '_').replace(/'/g, '');
         const patterns = engine.MONSTER_PATTERNS[monsterKey] || engine.MONSTER_PATTERNS[engine.selectedMonster.id] || engine.MONSTER_PATTERNS.default || [];
         if (engine.monsterFlightRuntime
@@ -683,6 +706,12 @@ class HuntMonsterTurnExecutor {
         } else if (pattern.partUse?.fixed) {
             pattern = { ...pattern, runtimeUsedPart: pattern.partUse.fixed };
         }
+        pattern = {
+            ...pattern,
+            runtimeBrokenPartKinds: (engine.monsterPartState || [])
+                .filter(part => part?.broken || part?.severed)
+                .map(part => part.kind)
+        };
         engine.monsterTraitRuntime?.beforeAction?.(engine, pattern);
         if (engine.monsterJustTookOff) {
             const takeoffInterference = pattern.flight?.takeoffInterference;
@@ -843,16 +872,17 @@ class HuntMonsterTurnExecutor {
             return;
         }
 
-        if (pattern.type === 'roar' && isImpactCommit
-            && Number(pattern.damageRatio || 0) <= 0) {
+        if (pattern.type === 'roar' && isImpactCommit) {
             if (engine.telemetry) engine.telemetry.recordMonsterPattern(engine.selectedMonster.id, pattern, 'roar', 0);
             engine.triggerMonsterRoarFlinch(false);
-            engine.monsterTraitRuntime?.afterAction?.(engine, pattern, []);
-            engine.monsterRecoveryDuration = 0;
-            return;
+            if (Number(pattern.damageRatio || 0) <= 0) {
+                engine.monsterTraitRuntime?.afterAction?.(engine, pattern, []);
+                engine.monsterRecoveryDuration = 0;
+                return;
+            }
         }
 
-        if (!isImpactCommit && pattern.type !== 'roar') {
+        if (!isImpactCommit && pattern.type !== 'roar' && !pattern.suppressPrepareAudio) {
             engine.playSFX('monster_attack', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
@@ -868,6 +898,15 @@ class HuntMonsterTurnExecutor {
                 patternId: pattern.id,
                 patternName: pattern.name,
                 patternType: 'somersault'
+            });
+        } else if (isImpactCommit && pattern.runtimeImpactAudioCue === 'tigrex-final-vocal') {
+            engine.playSFX?.('monster_attack', null, {
+                monsterId: engine.selectedMonster.id,
+                patternId: pattern.id,
+                patternName: pattern.name,
+                patternType: pattern.branchKind || 'attack',
+                patternTags: pattern.tags,
+                audioPhase: 'action-start'
             });
         }
 
@@ -1042,6 +1081,27 @@ class HuntMonsterTurnExecutor {
                     runtimeResolvedImpactTimeline: events
                 }
             );
+            // The renderer may synchronously replace authored ticks with
+            // measured collision ticks (Tigrex charge passes, screen sweeps,
+            // projectile travel). Keep the engine's first countdown on that
+            // same mutated timeline instead of retaining the pre-render value.
+            const synchronizedImpactDelay = Math.max(1, Number(
+                events[0]?.atTicks || impactDelayTicks
+            ));
+            engine.pendingMonsterImpact.remainingTicks = synchronizedImpactDelay;
+            engine.pendingMonsterImpact.totalTicks = synchronizedImpactDelay;
+            const synchronizedFinalImpactTick = events.reduce((latest, event) =>
+                Math.max(latest, Number(event?.atTicks || 0)), synchronizedImpactDelay);
+            if (engine.monsterTraversalState) {
+                engine.monsterTraversalState.remainingTicks = Math.max(
+                    Number(engine.monsterTraversalState.remainingTicks || 0),
+                    synchronizedFinalImpactTick
+                );
+                engine.monsterTraversalState.totalTicks = Math.max(
+                    Number(engine.monsterTraversalState.totalTicks || 0),
+                    synchronizedFinalImpactTick
+                );
+            }
             engine.monsterRecoveryDuration = 0;
             return;
         }
@@ -1049,7 +1109,7 @@ class HuntMonsterTurnExecutor {
         // Creature vocals may accompany the action start, but authored and
         // fallback SE belongs to the actual contact/projectile/explosion event.
         // Delayed and multi-hit timelines re-enter here once per committed event.
-        if (pattern.type !== 'roar') {
+        if (pattern.type !== 'roar' && pattern.runtimeImpactAudioCue !== 'somersault') {
             engine.playSFX('monster_attack', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
@@ -1502,6 +1562,10 @@ class HuntMonsterTurnExecutor {
                 Math.ceil(recoveryMs / 100),
                 isTigrexExhaustedTrip ? 'tigrex-exhausted-trip' : 'tigrex-wall-stuck'
             );
+            if (isTigrexReturnDodgeStuck) {
+                engine.showSkillBubble?.('monster', '💥 이빨이 벽에 박힘!');
+                engine.addLog?.(`💥 [벽 충돌] ${engine.selectedMonster.nameKO}의 이빨이 벽에 박혀 무방비 상태가 됐습니다!`, '#ffd06a');
+            }
         }
 
         // Trigger dynamic monster attack animation

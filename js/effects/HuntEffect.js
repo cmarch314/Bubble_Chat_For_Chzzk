@@ -22,6 +22,10 @@ class HuntEffect extends BaseEffect {
 
         this.renderer = new HuntRenderer();
         this.audioManager = new HuntAudioManager(director, this.config);
+        this.renderer.onMonsterStrideAudio = monster =>
+            this.audioManager.playMonsterAction(monster, 'charge_stride_step');
+        this.renderer.onMonsterProjectileLaunchAudio = monster =>
+            this.audioManager.playMonsterAction(monster, 'projectile_launch');
         const SeededRandom = typeof HuntSeededRandom !== 'undefined'
             ? HuntSeededRandom
             : class { next() { return Math.random(); } };

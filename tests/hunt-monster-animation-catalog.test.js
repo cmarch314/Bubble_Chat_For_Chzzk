@@ -1,6 +1,7 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
+global.HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
 const Catalog = require('../js/effects/hunt/HuntMonsterAnimationCatalog.js');
 
 for (const [authored, runtime] of Object.entries({
@@ -21,6 +22,55 @@ for (const [authored, runtime] of Object.entries({
 global.HuntMonsterAnimationCatalog = Catalog;
 global.HuntMonsterAnatomyCatalog = require('../js/effects/hunt/HuntMonsterAnatomyCatalog.js');
 const HuntMonsterAttackAnimator = require('../js/effects/hunt/HuntMonsterAttackAnimator.js');
+const animatorSource = fs.readFileSync(path.join(__dirname, '..', 'js', 'effects', 'hunt', 'HuntMonsterAttackAnimator.js'), 'utf8');
+const runtimeStyle = fs.readFileSync(path.join(__dirname, '..', 'styles', 'hunt-runtime.css'), 'utf8');
+
+// A completed turn is visually identical to zero degrees, but interpolating
+// from 360/720 back to `transform:none` visibly rewinds the monster. Keep the
+// accumulated angle through the return frame and let the motion cleanup snap
+// the detached transform only after the animation has ended.
+function keyframeBlocks(source) {
+    const blocks = [];
+    let cursor = 0;
+    while ((cursor = source.indexOf('@keyframes ', cursor)) >= 0) {
+        const name = source.slice(cursor + 11).match(/^\s*([\w-]+)/)?.[1];
+        const open = source.indexOf('{', cursor);
+        let depth = 1;
+        let end = open + 1;
+        while (depth > 0 && end < source.length) {
+            if (source[end] === '{') depth += 1;
+            else if (source[end] === '}') depth -= 1;
+            end += 1;
+        }
+        blocks.push({ name, body: source.slice(open + 1, end - 1) });
+        cursor = end;
+    }
+    return blocks;
+}
+
+const rotationValues = text => [...text.matchAll(
+    /rotate\((?:calc\()?\s*([-+]?\d+(?:\.\d+)?)deg/g
+)].map(match => Number(match[1]));
+for (const { name, body } of keyframeBlocks(runtimeStyle)) {
+    if (!/^(?:monster-motion-|tigrex-)/.test(name || '')) continue;
+    const turns = rotationValues(body);
+    const largestTurn = Math.max(0, ...turns.map(Math.abs));
+    if (largestTurn < 300) continue;
+    const frames = [...body.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
+    const finalFrame = frames.find(match => match[1].split(',').some(value => value.trim() === '100%'));
+    assert.ok(finalFrame, `${name} must author an explicit 100% recovery frame`);
+    assert.doesNotMatch(finalFrame[2], /transform\s*:\s*none/,
+        `${name} must not reverse-spin into transform:none while returning`);
+    const finalTurns = rotationValues(finalFrame[2]);
+    assert.ok(Math.max(0, ...finalTurns.map(Math.abs)) >= largestTurn,
+        `${name} must preserve its accumulated rotation through recovery`);
+}
+assert.match(animatorSource, /easing: 'step-end'/,
+    'direction changes must flip the image discretely without a scale-through-zero squash');
+assert.match(animatorSource, /tigrexRouteFallback = 'css'/,
+    'Tigrex charge must retain a moving CSS fallback if dynamic route keyframes fail');
+assert.match(runtimeStyle, /\.game-hunt-monster-img\.enraged\s*\{[\s\S]*?filter:\s*drop-shadow\(0 0 18px/,
+    'the rage aura must remain visible when an attack replaces the image animation channel');
 
 {
     const facingAnimator = new HuntMonsterAttackAnimator({
@@ -52,6 +102,85 @@ const HuntMonsterAttackAnimator = require('../js/effects/hunt/HuntMonsterAttackA
     assert.strictEqual(facingAnimator.facingPlan({ id: 'ground-charge-cross', aim: 'target' }, {
         runtimeSweepDirection: 'left-to-right'
     }, 300), null, 'front-facing symmetric sprites must not be mirrored needlessly');
+}
+
+{
+    assert.deepStrictEqual(
+        HuntMonsterAttackAnimator.tigrexRouteDirections(
+            [{ x: -420 }, { x: -180 }, { x: 520 }],
+            [{ x: -1320 }, { x: 1280 }, { x: 1320 }]
+        ),
+        [-1, 1, -1],
+        'each Tigrex pass must face by its current offscreen origin-to-target vector, not target screen half'
+    );
+    assert.strictEqual(
+        HuntMonsterAttackAnimator.tigrexBranchStartDelayMs(78, 2600, .68, 10),
+        5590,
+        'the branch scheduler must subtract the scaled branch windup from the real 100 ms combat tick'
+    );
+    assert.strictEqual(
+        HuntMonsterAttackAnimator.tigrexBranchApproachDurationMs(
+            { x: -1000, y: 700 }, { x: 0, y: 300 }, { x: 1000, y: 700 },
+            { x: 160, y: 364 }, 10000, .2
+        ),
+        840,
+        'the finisher approach duration must preserve the preceding charge speed for the measured route'
+    );
+    const biteRoute = HuntMonsterAttackAnimator.tigrexBiteRoute(
+        { x: -900, y: -700 },
+        { x: 120, y: 340 },
+        { width: 390, height: 390 },
+        { x: .43, y: .72 }
+    );
+    assert.ok(biteRoute.contact.y < 340,
+        'the monster center must compensate for Tigrex mouth being below the image center');
+    assert.ok(
+        (biteRoute.finish.x - biteRoute.contact.x) * (biteRoute.contact.x + 900)
+        + (biteRoute.finish.y - biteRoute.contact.y) * (biteRoute.contact.y + 700) > 0,
+        'the second bite must finish beyond the hunter along the incoming charge vector'
+    );
+    const routeFrames = HuntMonsterAttackAnimator.tigrexChargeRouteKeyframes(
+        [{ x: 180, y: 330 }, { x: 180, y: 330 }],
+        [{ x: 570, y: 1015 }, { x: -620, y: -1105 }],
+        { x: -28, y: -48 },
+        2
+    );
+    const secondHitOffset = routeFrames.impactOffsets[1];
+    const secondLaunch = routeFrames.find(frame => frame.offset > .29 && frame.offset < secondHitOffset);
+    const firstSpeed = Math.hypot(570 - 180, 1015 - 330) / ((.29 - .176) * 10000);
+    const inboundSpeed = Math.hypot(180 - 570, 330 - 1015)
+        / ((secondHitOffset - secondLaunch.offset) * 10000);
+    const outboundSpeed = Math.hypot(-620 - 180, -1105 - 330)
+        / ((routeFrames.routeExitOffset - secondHitOffset) * 10000);
+    assert.ok(Math.abs(inboundSpeed - firstSpeed) / firstSpeed < .01);
+    assert.ok(Math.abs(outboundSpeed - firstSpeed) / firstSpeed < .01,
+        'the second pass must match the first charge speed before and after contact');
+    const enragedFrames = HuntMonsterAttackAnimator.tigrexChargeRouteKeyframes(
+        [{ x: 180, y: 330 }, { x: 180, y: 330 }, { x: 180, y: 330 }],
+        [{ x: 570, y: 1015 }, { x: -620, y: -1105 }, { x: 570, y: 1015 }],
+        { x: -28, y: -48 },
+        3
+    );
+    const enragedSecondLaunch = enragedFrames.find(frame =>
+        frame.offset > .27 && frame.offset < enragedFrames.impactOffsets[1]);
+    const enragedThirdLaunch = enragedFrames.find(frame =>
+        frame.offset > enragedFrames.impactOffsets[1]
+        && frame.offset < enragedFrames.impactOffsets[2]);
+    assert.ok(enragedSecondLaunch && enragedThirdLaunch,
+        'enraged second and third passes must each have a distance-balanced offscreen launch');
+    const tigrexFacingAnimator = new HuntMonsterAttackAnimator({
+        card: null,
+        animationTimers: { timeout() {} },
+        selectedMonster: { id: 'tigrex' },
+        monsterState: 'normal'
+    }, () => {});
+    const normalTurns = tigrexFacingAnimator.facingPlan(
+        { id: 'tigrex-charge-chain' },
+        { runtimeTigrexFacingDirections: [-1, 1, -1], targeting: { passCountByState: { normal: 2 } } }
+    );
+    assert.deepStrictEqual(normalTurns.map(step => [step.offset, step.direction]), [
+        [0, -1], [.419, -1], [.42, 1], [.639, 1], [.64, -1], [1, -1]
+    ], 'Tigrex must flip at the offscreen relaunch boundary, then face its final branch approach');
 }
 
 {

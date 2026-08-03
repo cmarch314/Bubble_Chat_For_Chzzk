@@ -86,13 +86,21 @@ class HuntChatTactics {
                 return { handled: true, accepted: false, feedback: '🚫 섬광 내성' };
             }
             engine.monsterFlashUseCount = Number(engine.monsterFlashUseCount || 0) + 1;
-            engine.monsterAtb = 0;
+            engine.interruptMonsterMovement?.('viewer-flash');
+            const retainedFlashAtb = engine.setMonsterAtbForControl?.('flash')
+                ?? (typeof HuntAtbConfig !== 'undefined'
+                    ? HuntAtbConfig.applyMonsterControlAtb(engine, 'flash')
+                    : 50);
+            if (typeof engine.setMonsterAtbForControl !== 'function'
+                && typeof HuntAtbConfig === 'undefined') engine.monsterAtb = retainedFlashAtb;
             if (engine.monsterFlightState === 'airborne') {
-                engine.monsterFlightRuntime?.forceLanding(engine, 'viewer-flash');
+                engine.monsterFlightRuntime?.forceLanding(engine, 'viewer-flash', null, {
+                    retainedAtb: retainedFlashAtb
+                });
             } else {
                 engine.monsterRecoveryDuration = Math.max(engine.monsterRecoveryDuration || 0, 25);
             }
-            engine.updateMonsterAtbUI(0);
+            engine.updateMonsterAtbUI(retainedFlashAtb);
             engine.playSFX?.('flash_pod', null, {
                 action: 'support',
                 item: 'flash-pod'
@@ -108,12 +116,10 @@ class HuntChatTactics {
                 this.addGauge(70);
                 return { handled: true, accepted: false, feedback: '🚫 함정 면역' };
             }
-            engine.monsterState = 'knocked_down';
-            const trapTicks = engine.consumeTrapDuration(35);
-            engine.monsterKnockdownDuration = Math.max(engine.monsterKnockdownDuration || 0, trapTicks);
-            engine.monsterAtb = 0;
+            const trapEffect = engine.beginMonsterTrapControl('pitfall', 35);
+            const trapTicks = trapEffect.durationTicks;
             engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
-            engine.triggerEnvironmentEffect?.('pitfall');
+            engine.triggerEnvironmentEffect?.('pitfall', null, trapEffect);
             engine.addLog(`🪤 [시청자 함정] ${nickname}의 함정 성공! ${(trapTicks / 10).toFixed(1)}초 집중 공격 기회입니다.`, '#ffcf66');
             return { handled: true, accepted: true, feedback: '🪤 함정 성공' };
         }

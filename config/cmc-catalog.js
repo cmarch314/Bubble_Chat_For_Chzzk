@@ -58,7 +58,9 @@ window.HIVE_CMC_FILES = [
     "빨리", "도망쳐",
     "빨리않", "일해라", "일해일",
     "멍멍", "멍멍2", "멍멍3",
-    "냥", "냥냥", "냥냥2", "미야옹", "야옹", "에옹"
+    "냥", "냥냥", "냥냥2", "미야옹", "야옹", "에옹",
+    "그러지마", "그러지마3", "안되요", "안되요2", "이방제", "하지마", "하지마2",
+    "FUN", "즐겨요", "해피", "흥분"
 ];
 
 // Windows-safe filenames use readable marker words for punctuation and optional
@@ -77,6 +79,11 @@ if (window.HIVE_CMC_COMMAND_GROUPS["내돈"]) {
 }
 if (window.HIVE_CMC_COMMAND_GROUPS["깔깔"]) {
     window.HIVE_CMC_COMMAND_GROUPS["깔깔깔"] = window.HIVE_CMC_COMMAND_GROUPS["깔깔"];
+}
+if (window.HIVE_CMC_COMMAND_GROUPS["하지마"]) {
+    window.HIVE_CMC_COMMAND_GROUPS["하지마요"] = window.HIVE_CMC_COMMAND_GROUPS["하지마"];
+    window.HIVE_CMC_COMMAND_GROUPS["하지말아요"] = window.HIVE_CMC_COMMAND_GROUPS["하지마"];
+    window.HIVE_CMC_COMMAND_GROUPS["하지마라"] = window.HIVE_CMC_COMMAND_GROUPS["하지마"];
 }
 
 // Chat-triggered MP3 voices performed by CMC. This boundary was present in

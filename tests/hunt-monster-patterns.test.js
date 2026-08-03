@@ -361,6 +361,20 @@ assert.deepStrictEqual(
     assert.deepStrictEqual(resolved, [2],
         'late retargeting must prefer a live hunter who is not already tumbling');
 }
+{
+    const hunters = [0, 1, 2, 3].map(index => ({ index, status: 'alive', hitDuration: 0 }));
+    const engine = { selectedWeapons: hunters, random: () => 0, perkRuntime: null };
+    assert.deepStrictEqual(HuntMonsterTurnExecutor.resolveImpactEventTargetIndices(
+        engine,
+        { targetShape: 'primary-adjacent-both', targetIndices: [1] },
+        [3]
+    ), [0, 1, 2], 'a timeline splash must center on its resolved event target, not the action fallback');
+    assert.deepStrictEqual(HuntMonsterTurnExecutor.resolveImpactEventTargetIndices(
+        engine,
+        { targetShape: 'primary-adjacent-both', targetIndices: [2] },
+        [0]
+    ), [1, 2, 3], 'the opposite charge target must resolve only its own adjacent slots');
+}
 assert.deepStrictEqual(carpet.selectionChanceByState, { normal: .20, enraged: .45 });
 assert.deepStrictEqual(carpet.selectionChancePenaltyPerBrokenPart, {
     partPattern: 'wing',

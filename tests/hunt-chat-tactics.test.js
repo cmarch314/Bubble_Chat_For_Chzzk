@@ -49,5 +49,7 @@ engine.monsterFlashUseCount = 3;
 result = tactics.handle(engine, { nickname: 'FlashViewer2' }, '!섬광');
 assert.strictEqual(result.accepted, true);
 assert.strictEqual(engine.monsterFlashUseCount, 4);
+assert.strictEqual(engine.monsterAtb, 50,
+    'viewer flash must retain the same fixed half ATB as every other flash source');
 
 console.log('[test] Hunt chat tactics participation contract passed.');

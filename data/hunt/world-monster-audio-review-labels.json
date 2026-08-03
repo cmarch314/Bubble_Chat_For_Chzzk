@@ -12,6 +12,7 @@
   },
   "runtimePolicy": {
     "completedMonsterIds": [
+      "bazelgeuse",
       "deviljho",
       "diablos",
       "jyuratodus",
@@ -22,13 +23,12 @@
       "nargacuga",
       "rathalos",
       "rathian",
+      "seething_bazelgeuse",
       "teostra",
       "tigrex",
       "yian_garuga"
     ],
-    "silentVoiceMonsterIds": [
-      "rajang"
-    ],
+    "silentVoiceMonsterIds": [],
     "semanticSeFallbackTags": [
       "wing_flap",
       "physical_attack",
@@ -36,6 +36,9 @@
     ],
     "voiceFallbackFamilies": []
   },
+  "excludedSourceIds": [
+    704952435
+  ],
   "records": [
     {
       "bank": "em001_se",
@@ -3067,48 +3070,6 @@
     {
       "monster": "em032",
       "bank": "em032_vo",
-      "eventId": 3235591343,
-      "sourceId": 704952435,
-      "reference": false,
-      "tags": [
-        "monster_roar"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_vo",
-      "eventId": 3893339916,
-      "sourceId": 616198421,
-      "reference": true,
-      "tags": [
-        "physical_attack"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_vo",
-      "eventId": 3893339916,
-      "sourceId": 234378500,
-      "reference": false,
-      "tags": [
-        "physical_attack"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_vo",
       "eventId": 4167502529,
       "sourceId": 122557872,
       "reference": true,
@@ -3263,34 +3224,6 @@
     {
       "monster": "em032",
       "bank": "em032_vo",
-      "eventId": 2923253360,
-      "sourceId": 56764999,
-      "reference": true,
-      "tags": [
-        "돌진"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_vo",
-      "eventId": 2923253360,
-      "sourceId": 704952435,
-      "reference": false,
-      "tags": [
-        "돌진"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_vo",
       "eventId": 2280690157,
       "sourceId": 709100618,
       "reference": true,
@@ -3403,20 +3336,6 @@
     {
       "monster": "em032",
       "bank": "em032_vo",
-      "eventId": 325134089,
-      "sourceId": 909459873,
-      "reference": true,
-      "tags": [
-        "small_flinch_vocal"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_vo",
       "eventId": 253472435,
       "sourceId": 581498106,
       "reference": true,
@@ -3427,90 +3346,6 @@
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
       "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 709999311,
-      "reference": true,
-      "tags": [
-        "바위타격"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "sound-effect",
-      "reuseScope": "cross-title-semantic"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 902414029,
-      "reference": false,
-      "tags": [
-        "바위타격"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "sound-effect",
-      "reuseScope": "cross-title-semantic"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 457423698,
-      "reference": false,
-      "tags": [
-        "바위타격"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "sound-effect",
-      "reuseScope": "cross-title-semantic"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 80444631,
-      "reference": false,
-      "tags": [
-        "바위타격"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "sound-effect",
-      "reuseScope": "cross-title-semantic"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 85678699,
-      "reference": false,
-      "tags": [
-        "바위타격"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "sound-effect",
-      "reuseScope": "cross-title-semantic"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 598853864,
-      "reference": false,
-      "tags": [
-        "바위타격"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "sound-effect",
-      "reuseScope": "cross-title-semantic"
     },
     {
       "monster": "em032",
@@ -3627,62 +3462,6 @@
     {
       "monster": "em032",
       "bank": "em032_01_vo",
-      "eventId": 3659753839,
-      "sourceId": 121042081,
-      "reference": true,
-      "tags": [
-        "monster_roar"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_01_vo",
-      "eventId": 3659753839,
-      "sourceId": 91276484,
-      "reference": false,
-      "tags": [
-        "monster_roar"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_01_vo",
-      "eventId": 3659753833,
-      "sourceId": 283785836,
-      "reference": true,
-      "tags": [
-        "breath"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_01_vo",
-      "eventId": 3659753833,
-      "sourceId": 110695309,
-      "reference": false,
-      "tags": [
-        "breath"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_01_vo",
       "eventId": 2677224995,
       "sourceId": 693686256,
       "reference": true,
@@ -3707,20 +3486,6 @@
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
       "reuseScope": "monster-identity"
-    },
-    {
-      "monster": "em032",
-      "bank": "em032_01_se",
-      "eventId": 3229357962,
-      "sourceId": 635324224,
-      "reference": true,
-      "tags": [
-        "physical_attack"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "sound-effect",
-      "reuseScope": "cross-title-semantic"
     },
     {
       "monster": "em036",
@@ -4918,7 +4683,9 @@
       "eventId": 329955462,
       "sourceId": 457291258,
       "reference": true,
-      "tags": ["폭린폭발"],
+      "tags": [
+        "폭린폭발"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -4930,7 +4697,9 @@
       "eventId": 1369674560,
       "sourceId": 676863950,
       "reference": true,
-      "tags": ["폭린폭발"],
+      "tags": [
+        "폭린폭발"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -4942,7 +4711,9 @@
       "eventId": 1369674560,
       "sourceId": 154999830,
       "reference": false,
-      "tags": ["폭린폭발"],
+      "tags": [
+        "폭린폭발"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -4954,7 +4725,9 @@
       "eventId": 1369674560,
       "sourceId": 94184838,
       "reference": false,
-      "tags": ["폭린폭발"],
+      "tags": [
+        "폭린폭발"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -4966,7 +4739,9 @@
       "eventId": 1646912344,
       "sourceId": 929211688,
       "reference": true,
-      "tags": ["폭린폭발"],
+      "tags": [
+        "폭린폭발"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -4978,7 +4753,9 @@
       "eventId": 1646912344,
       "sourceId": 573643063,
       "reference": false,
-      "tags": ["폭린폭발"],
+      "tags": [
+        "폭린폭발"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -4990,7 +4767,9 @@
       "eventId": 1646912344,
       "sourceId": 119548103,
       "reference": false,
-      "tags": ["폭린폭발"],
+      "tags": [
+        "폭린폭발"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -5002,7 +4781,9 @@
       "eventId": 4114590055,
       "sourceId": 76314627,
       "reference": true,
-      "tags": ["small_flinch_vocal"],
+      "tags": [
+        "small_flinch_vocal"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5014,7 +4795,9 @@
       "eventId": 3411438907,
       "sourceId": 386696490,
       "reference": true,
-      "tags": ["monster_roar"],
+      "tags": [
+        "monster_roar"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5026,7 +4809,9 @@
       "eventId": 2859019915,
       "sourceId": 660399003,
       "reference": true,
-      "tags": ["physical_attack"],
+      "tags": [
+        "physical_attack"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5038,7 +4823,9 @@
       "eventId": 2848381055,
       "sourceId": 987525133,
       "reference": true,
-      "tags": ["breath"],
+      "tags": [
+        "breath"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5050,7 +4837,9 @@
       "eventId": 2822432008,
       "sourceId": 808226650,
       "reference": true,
-      "tags": ["breath"],
+      "tags": [
+        "breath"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5062,7 +4851,9 @@
       "eventId": 2822432008,
       "sourceId": 891653597,
       "reference": false,
-      "tags": ["breath"],
+      "tags": [
+        "breath"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5074,7 +4865,9 @@
       "eventId": 2765797071,
       "sourceId": 164328779,
       "reference": true,
-      "tags": ["physical_attack"],
+      "tags": [
+        "physical_attack"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5086,7 +4879,9 @@
       "eventId": 2765797071,
       "sourceId": 367937005,
       "reference": false,
-      "tags": ["physical_attack"],
+      "tags": [
+        "physical_attack"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5098,7 +4893,9 @@
       "eventId": 2622531251,
       "sourceId": 397927528,
       "reference": true,
-      "tags": ["physical_attack"],
+      "tags": [
+        "physical_attack"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5110,7 +4907,9 @@
       "eventId": 2622531251,
       "sourceId": 483503586,
       "reference": false,
-      "tags": ["physical_attack"],
+      "tags": [
+        "physical_attack"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5122,7 +4921,9 @@
       "eventId": 2321416505,
       "sourceId": 675251350,
       "reference": true,
-      "tags": ["death_vocal"],
+      "tags": [
+        "death_vocal"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
@@ -5134,7 +4935,9 @@
       "eventId": 1545209983,
       "sourceId": 264040908,
       "reference": true,
-      "tags": ["breath"],
+      "tags": [
+        "breath"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -5146,7 +4949,9 @@
       "eventId": 1564401912,
       "sourceId": 879365226,
       "reference": true,
-      "tags": ["breath"],
+      "tags": [
+        "breath"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -5158,7 +4963,9 @@
       "eventId": 1564401912,
       "sourceId": 686487186,
       "reference": false,
-      "tags": ["breath"],
+      "tags": [
+        "breath"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -5170,7 +4977,9 @@
       "eventId": 1564401912,
       "sourceId": 823414065,
       "reference": false,
-      "tags": ["breath"],
+      "tags": [
+        "breath"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -5182,7 +4991,2011 @@
       "eventId": 3836985661,
       "sourceId": 778477451,
       "reference": true,
-      "tags": ["breath"],
+      "tags": [
+        "breath"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_vo",
+      "eventId": 3893339916,
+      "sourceId": 616198421,
+      "reference": true,
+      "tags": [
+        "bite_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_vo",
+      "eventId": 3893339916,
+      "sourceId": 234378500,
+      "reference": false,
+      "tags": [
+        "bite_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_vo",
+      "eventId": 3799475962,
+      "sourceId": 1043197902,
+      "reference": true,
+      "tags": [
+        "trapped_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_vo",
+      "eventId": 2923253360,
+      "sourceId": 56764999,
+      "reference": true,
+      "tags": [
+        "돌진 준비 음성"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_01_vo",
+      "eventId": 3659753839,
+      "sourceId": 121042081,
+      "reference": true,
+      "tags": [
+        "breath"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_01_vo",
+      "eventId": 3659753839,
+      "sourceId": 91276484,
+      "reference": false,
+      "tags": [
+        "breath"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_01_vo",
+      "eventId": 3659753833,
+      "sourceId": 283785836,
+      "reference": true,
+      "tags": [
+        "breath"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_01_vo",
+      "eventId": 3659753833,
+      "sourceId": 110695309,
+      "reference": false,
+      "tags": [
+        "breath"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 709999311,
+      "reference": true,
+      "tags": [
+        "projectile_launch"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 902414029,
+      "reference": false,
+      "tags": [
+        "projectile_launch"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 457423698,
+      "reference": false,
+      "tags": [
+        "projectile_launch"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 80444631,
+      "reference": false,
+      "tags": [
+        "projectile_launch"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 85678699,
+      "reference": false,
+      "tags": [
+        "projectile_launch"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 598853864,
+      "reference": false,
+      "tags": [
+        "projectile_launch"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_vo",
+      "eventId": 2047953935,
+      "sourceId": 86505012,
+      "reference": true,
+      "tags": [
+        "bite_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_vo",
+      "eventId": 2047953935,
+      "sourceId": 274374301,
+      "reference": false,
+      "tags": [
+        "bite_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_vo",
+      "eventId": 2047953935,
+      "sourceId": 491077462,
+      "reference": false,
+      "tags": [
+        "bite_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_vo",
+      "eventId": 2047953935,
+      "sourceId": 673883317,
+      "reference": false,
+      "tags": [
+        "bite_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3849171692,
+      "sourceId": 596529739,
+      "reference": true,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3849171692,
+      "sourceId": 296184562,
+      "reference": false,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3698786900,
+      "sourceId": 719729467,
+      "reference": true,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3698786900,
+      "sourceId": 316698978,
+      "reference": false,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 801247111,
+      "reference": true,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 735321148,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 15916291,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 754037267,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 162309118,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 725235156,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 249398672,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 744084147,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 515689077,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 332209445,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 295278610,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 545743947,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 635468719,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 417850902,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 165209550,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 979636485,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 16791734,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 917809194,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 969668231,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 782338671,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 753156656,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 566826419,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 185701084,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 599505749,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 146389261,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 406953875,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 161943049,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 383378433,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 1047783279,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 308571385,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 253437045,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 13533300,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 360434487,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 712277052,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 786098825,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 156885250,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 755298531,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 88824087,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 382217210,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 430348886,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 496596530,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 749283002,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 569270081,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 404238433,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 433249761,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 716781034,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 715087557,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 1013769265,
+      "reference": false,
+      "tags": [
+        "physical_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 133614821,
+      "reference": true,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 310275042,
+      "reference": false,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 197493141,
+      "reference": false,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 431135933,
+      "reference": false,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 111458175,
+      "reference": false,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em032",
+      "bank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 594642029,
+      "reference": false,
+      "tags": [
+        "charge_stride_step"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em023",
+      "bank": "em023_vo",
+      "eventId": 2239163290,
+      "sourceId": 815649512,
+      "reference": true,
+      "tags": [
+        "monster_roar"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 4148339283,
+      "sourceId": 64300403,
+      "reference": true,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 4038990684,
+      "sourceId": 375786278,
+      "reference": true,
+      "tags": [
+        "death_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 3623329482,
+      "sourceId": 139680426,
+      "reference": true,
+      "tags": [
+        "aerial_attack_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 3567738029,
+      "sourceId": 159015252,
+      "reference": true,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 3567738029,
+      "sourceId": 96065718,
+      "reference": false,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 838575270,
+      "reference": true,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 32076891,
+      "reference": false,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 379099446,
+      "reference": false,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 3283357056,
+      "sourceId": 444535259,
+      "reference": true,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 3016774578,
+      "sourceId": 1000217927,
+      "reference": true,
+      "tags": [
+        "monster_roar"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 2385751720,
+      "sourceId": 119188586,
+      "reference": true,
+      "tags": [
+        "breath_charge"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 2038625480,
+      "sourceId": 153685996,
+      "reference": true,
+      "tags": [
+        "trapped_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 1841360141,
+      "sourceId": 645954412,
+      "reference": true,
+      "tags": [
+        "aerial_attack_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 1735132301,
+      "sourceId": 239831573,
+      "reference": true,
+      "tags": [
+        "knockdown_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 488266263,
+      "sourceId": 848223578,
+      "reference": true,
+      "tags": [
+        "death_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 417118413,
+      "sourceId": 627501455,
+      "reference": true,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_vo",
+      "eventId": 142471643,
+      "sourceId": 665516075,
+      "reference": true,
+      "tags": [
+        "knockdown_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 470750966,
+      "reference": true,
+      "tags": [
+        "breath_shot"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 223473159,
+      "reference": false,
+      "tags": [
+        "breath_shot"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 419687109,
+      "reference": false,
+      "tags": [
+        "breath_shot"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 445947746,
+      "reference": false,
+      "tags": [
+        "breath_shot"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 1067689534,
+      "reference": false,
+      "tags": [
+        "breath_shot"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 770041581,
+      "reference": true,
+      "tags": [
+        "breath_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 941995433,
+      "reference": false,
+      "tags": [
+        "breath_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 164701204,
+      "reference": false,
+      "tags": [
+        "breath_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 461087013,
+      "reference": false,
+      "tags": [
+        "breath_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 845292340,
+      "reference": false,
+      "tags": [
+        "breath_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 180351430,
+      "reference": false,
+      "tags": [
+        "breath_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 1063916993,
+      "reference": false,
+      "tags": [
+        "breath_impact"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 744930022,
+      "reference": true,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 1012695912,
+      "reference": false,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 414245490,
+      "reference": false,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3918228905,
+      "sourceId": 1046290488,
+      "reference": true,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3918228905,
+      "sourceId": 549607774,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3918228905,
+      "sourceId": 774907858,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3918228905,
+      "sourceId": 459208440,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3918228905,
+      "sourceId": 879048427,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3918228905,
+      "sourceId": 841821012,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3752459436,
+      "sourceId": 432709767,
+      "reference": true,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3752459436,
+      "sourceId": 535128452,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3752459436,
+      "sourceId": 688128197,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3752459436,
+      "sourceId": 646154479,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3752459436,
+      "sourceId": 1015956041,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 3752459436,
+      "sourceId": 675216915,
+      "reference": false,
+      "tags": [
+        "불똥폭발"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 1061468205,
+      "reference": true,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 542690694,
+      "reference": false,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 925605907,
+      "reference": false,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 397623422,
+      "reference": false,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 704731334,
+      "reference": false,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 1010445229,
+      "reference": true,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 410130058,
+      "reference": false,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 21891287,
+      "reference": false,
+      "tags": [
+        "physical_attack"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 856682766,
+      "reference": true,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 133439873,
+      "reference": false,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 167652134,
+      "reference": false,
+      "tags": [
+        "wing_flap"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 583886316,
+      "sourceId": 590283719,
+      "reference": true,
+      "tags": [
+        "breath_shot"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_se",
+      "eventId": 583886316,
+      "sourceId": 839572263,
+      "reference": false,
+      "tags": [
+        "breath_shot"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 106962102,
+      "reference": true,
+      "tags": [
+        "폭린가열"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 970377002,
+      "reference": false,
+      "tags": [
+        "폭린가열"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 27102425,
+      "reference": false,
+      "tags": [
+        "폭린가열"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 306459759,
+      "reference": false,
+      "tags": [
+        "폭린가열"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 419288118,
+      "reference": false,
+      "tags": [
+        "폭린가열"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 1010936356,
+      "reference": false,
+      "tags": [
+        "폭린가열"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 84053471,
+      "reference": false,
+      "tags": [
+        "폭린가열"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 645614758,
+      "reference": false,
+      "tags": [
+        "폭린가열"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "sound-effect",
+      "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em118",
+      "bank": "em118_05_se",
+      "eventId": 1285714277,
+      "sourceId": 475915758,
+      "reference": false,
+      "tags": [
+        "폭린가열"
+      ],
       "verdict": "확정",
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
@@ -5203,10 +7016,12 @@
     "바위타격": "physical_impact",
     "날개칼날베기": "physical_attack",
     "summersalt_vocal": "somersault_vocal",
-    "폭린폭발": "blast_scale_explosion"
+    "폭린폭발": "blast_scale_explosion",
+    "돌진 스탭": "charge_stride_step",
+    "바위 발사": "projectile_launch"
   },
-  "updatedAt": "2026-08-02T06:40:16.448Z",
-  "normalizedAt": "2026-07-29T15:15:29.123Z",
+  "updatedAt": "2026-08-03T19:46:49.419Z",
+  "normalizedAt": "2026-08-03T19:00:19.388Z",
   "reusePolicy": {
     "voice": "monster-identity-only",
     "soundEffect": "cross-title-by-semantic-delivery-element-and-body-compatibility",

@@ -431,16 +431,75 @@ function createEngine(overrides = {}) {
         triggerMonsterRoarFlinch: () => { rageRoars++; }
     });
     context.HuntBattleTickExecutor.execute(engine);
-    assert.strictEqual(engine.monsterState, 'enraged');
+    assert.strictEqual(engine.monsterState, 'normal',
+        'timed rage must not replace the state snapshot of an action already in progress');
     assert.strictEqual(rageRoars, 0,
         'rage must not roar over an attack that is still in progress');
-    assert.strictEqual(engine.pendingMonsterRageRoar, true);
+    assert.strictEqual(engine.pendingMonsterRageRoar, undefined);
     context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.monsterState, 'enraged');
     assert.strictEqual(rageRoars, 1,
         'the queued rage roar must fire exactly once after the current attack completes');
     assert.strictEqual(engine.pendingMonsterRageRoar, false);
     assert.strictEqual(engine.forcedMonsterPatternId, 'rathalos.backstep_fireball',
         'Rathalos rage opener must be queued after its rage roar');
+}
+
+{
+    const impactPattern = { id: 'tigrex.charge_rock', name: '연속 돌진' };
+    const { engine } = createEngine({
+        battleTime: 1999,
+        monsterState: 'enraged',
+        monsterBehavior: {
+            rageStartTick: 800,
+            rageDurationTicks: 1200,
+            rageRecoveryDurationTicks: 300
+        },
+        pendingMonsterImpact: {
+            pattern: impactPattern,
+            remainingTicks: 5,
+            totalTicks: 10,
+            events: [{ atTicks: 10, targetIndices: [0] }],
+            nextEventIndex: 0,
+            targetIndex: 0
+        }
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.monsterState, 'enraged',
+        'rage expiry must wait until a multi-impact charge and its traversal finish');
+    engine.pendingMonsterImpact = null;
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.monsterState, 'normal',
+        'the deferred timed state must apply at the first safe action boundary');
+}
+
+{
+    const engine = {
+        battleTime: 1999,
+        monsterState: 'enraged',
+        monsterBehavior: {
+            rageStartTick: 800,
+            rageDurationTicks: 1200,
+            rageRecoveryDurationTicks: 300
+        },
+        pendingMonsterImpact: { remainingTicks: 400 }
+    };
+    for (let tick = 0; tick < 350; tick++) {
+        engine.battleTime++;
+        assert.strictEqual(context.HuntBattleTickExecutor.resolveTimedMonsterState(engine), 'enraged');
+    }
+    engine.pendingMonsterImpact = null;
+    engine.battleTime++;
+    assert.strictEqual(context.HuntBattleTickExecutor.resolveTimedMonsterState(engine), 'normal',
+        'a long action must not skip the entire normal recovery window and leave rage permanent');
+    engine.monsterState = 'normal';
+    for (let tick = 0; tick < 299; tick++) {
+        engine.battleTime++;
+        assert.strictEqual(context.HuntBattleTickExecutor.resolveTimedMonsterState(engine), 'normal');
+    }
+    engine.battleTime++;
+    assert.strictEqual(context.HuntBattleTickExecutor.resolveTimedMonsterState(engine), 'enraged',
+        'the next rage must begin only after the full authored recovery interval');
 }
 
 {

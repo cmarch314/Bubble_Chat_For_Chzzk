@@ -151,7 +151,9 @@ class HuntPerkRuntime {
         const affinity = Math.min(.95, weaponAffinity + Number(hunter.perkModifiers?.critChance || (names.has('💩') ? .6 : 0))
             + (names.has('간파') ? .18 : 0)
             + (names.has('약점 특효') && (this.engine.monsterWoundOpen || this.engine.monsterState === 'stunned') ? .3 : 0));
-        if (affinity > 0 && this.engine.random() < affinity) value *= names.has('슈퍼회심') ? 1.4 : 1.25;
+        const criticalHit = affinity > 0 && this.engine.random() < affinity;
+        hunter.lastAttackCritical = criticalHit;
+        if (criticalHit) value *= names.has('슈퍼회심') ? 1.4 : 1.25;
         if (names.has('한 대만') && hunter.oneHitReady) { value *= 1.8; hunter.oneHitReady = false; }
         if (names.has('훈타') && this.engine.random() < .12) value = 0;
         if (names.has('발도술') && !hunter.lastActionId) value *= 1.2;
@@ -377,11 +379,10 @@ class HuntPerkRuntime {
         }
         if (names.has('덫 장인') && !trapImmune && hunter.perkTraps > 0 && this.engine.monsterState === 'normal') {
             hunter.perkTraps--;
-            const trapTicks = this.engine.consumeTrapDuration(45);
-            this.engine.monsterKnockdownDuration = trapTicks;
-            this.engine.monsterState = 'knocked_down'; this.engine.monsterAtb = 0;
+            const trapEffect = this.engine.beginMonsterTrapControl('pitfall', 45);
+            const trapTicks = trapEffect.durationTicks;
             hunter.itemDuration = 12;
-            this.engine.triggerEnvironmentEffect('pitfall', hunter.index);
+            this.engine.triggerEnvironmentEffect('pitfall', hunter.index, trapEffect);
             this.engine.addLog(`🕸️ [덫 장인] ${hunter.hunterName}이(가) 신속하게 함정을 설치해 몬스터를 ${(trapTicks / 10).toFixed(1)}초 구속했습니다!`, '#e0ffa3');
             return true;
         }
@@ -392,10 +393,18 @@ class HuntPerkRuntime {
             && this.engine.monsterAtb >= 70 && flashPolicy?.isFlashEffective(this.engine)) {
             hunter.perkFlashes--;
             this.engine.monsterFlashUseCount = Number(this.engine.monsterFlashUseCount || 0) + 1;
-            this.engine.monsterAtb = 0; this.engine.monsterRecoveryDuration = Math.max(this.engine.monsterRecoveryDuration, 25);
+            this.engine.interruptMonsterMovement?.('perk-flash');
+            const atbConfig = typeof HuntAtbConfig !== 'undefined'
+                ? HuntAtbConfig
+                : (typeof require === 'function' ? require('./HuntAtbConfig.js') : null);
+            const retainedFlashAtb = this.engine.setMonsterAtbForControl?.('flash')
+                ?? atbConfig.applyMonsterControlAtb(this.engine, 'flash');
+            this.engine.monsterRecoveryDuration = Math.max(this.engine.monsterRecoveryDuration, 25);
             hunter.itemDuration = 8;
             if (this.engine.monsterFlightState === 'airborne') {
-                this.engine.monsterFlightRuntime?.forceLanding(this.engine, 'perk-flash');
+                this.engine.monsterFlightRuntime?.forceLanding(this.engine, 'perk-flash', null, {
+                    retainedAtb: retainedFlashAtb
+                });
             }
             this.engine.playSFX?.('flash_pod', null, {
                 hunterIndex: hunter.index,

@@ -80,19 +80,14 @@ const HUNT_VERIFIED_LOCAL_WEAPON_CUES = {
         { label: 'full burst five shells', evidence: 'World wp07 shell event label', layers: [['local_assets/monster_hunter/world/weapon/gunlance/wp07_gun_epvsp_shell_nbnk_009_272642002.mp3', 0.76, 0]] },
         { label: 'wyrmstake cannon explosion', evidence: 'World wp07 shell event label', layers: [['local_assets/monster_hunter/world/weapon/gunlance/wp07_gun_epvsp_shell_nbnk_040_932229979.mp3', 0.76, 0]] }
     ],
-    // The common-bank string-pull clips are deliberately excluded. Charging
-    // uses only the labelled charge-air effect, trimmed to its action window.
-    'bow:bow_charge_start': [{
-        label: 'Charge air cone',
-        evidence: 'MHW Audio Modding workbook exact World wp11 event 2976616266 / source 304692171',
-        maxDurationMs: 1050,
-        layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_019_304692171.mp3', 0.52, 0]]
-    }],
+    // Draw stages stay silent. wp_bow_cmn contains explicit String pull clips,
+    // while the previously used charge-air source still audibly carried that
+    // texture in play. Charging sidestep instead uses the exact locomotion cue.
     'bow:bow_charge_step': [{
-        label: 'Charge air cone',
-        evidence: 'same-bow charge continuation surrogate; exact World wp11 event 2976616266 / source 304692171',
-        maxDurationMs: 550,
-        layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_019_304692171.mp3', 0.48, 0]]
+        label: 'Quick dash begin/stop',
+        evidence: 'MHW Audio Modding workbook exact World pl_prop_cmn WEM 104',
+        maxDurationMs: 700,
+        layers: [['local_assets/monster_hunter/world/unknown/common/pl_prop_cmn_nbnk_104_449143534.mp3', 0.48, 0]]
     }],
     'bow:bow_shot': [{
         label: 'arrow shot',

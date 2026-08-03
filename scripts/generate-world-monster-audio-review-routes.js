@@ -24,6 +24,8 @@ const TAG_ROUTES = Object.freeze({
     tornado: { kind: 'attack', volume: 0.64, keywords: ['tornado', 'wind'] },
     thunder: { kind: 'attack', volume: 0.66, keywords: ['thunder', 'lightning'] },
     hoof_step: { kind: 'attack', volume: 0.58, keywords: ['charge', 'stomp', 'hoof'] },
+    charge_stride_step: { kind: 'charge_stride_step', volume: 0.58 },
+    projectile_launch: { kind: 'projectile_launch', volume: 0.62 },
     wing_flap: { kind: 'attack', volume: 0.58, keywords: ['air', 'flight', 'glide', 'wing'] },
     aerial_attack_vocal: { kind: 'attack', volume: 0.64, keywords: ['air', 'flight', 'glide', 'dive'] },
     bite_vocal: { kind: 'attack', volume: 0.66, keywords: ['bite'] },

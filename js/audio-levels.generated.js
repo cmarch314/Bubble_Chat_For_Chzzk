@@ -99,6 +99,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3860909,
     "mtimeMs": 1785161123320
   },
+  "AI CMC/FUN.mp4": {
+    "category": "visual",
+    "inputLufs": -15.22,
+    "truePeakDb": -1.34,
+    "gainDb": -2.78,
+    "measurement": "loudnorm",
+    "duration": 1.94,
+    "bytes": 4971672,
+    "mtimeMs": 1785787454107
+  },
   "AI CMC/MDMF.mp4": {
     "category": "visual",
     "inputLufs": -17.35,
@@ -433,6 +443,26 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 2.28,
     "bytes": 6023951,
     "mtimeMs": 1784846819020
+  },
+  "AI CMC/그러지마.mp4": {
+    "category": "visual",
+    "inputLufs": -14.66,
+    "truePeakDb": -1.72,
+    "gainDb": -3.34,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 2951681,
+    "mtimeMs": 1785779299053
+  },
+  "AI CMC/그러지마3.mp4": {
+    "category": "visual",
+    "inputLufs": -15.51,
+    "truePeakDb": -2.55,
+    "gainDb": -2.49,
+    "measurement": "loudnorm",
+    "duration": 1.32,
+    "bytes": 3558074,
+    "mtimeMs": 1785779331656
   },
   "AI CMC/그렇구나.mp4": {
     "category": "visual",
@@ -2273,6 +2303,26 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3455925,
     "mtimeMs": 1785160904562
   },
+  "AI CMC/안되요.mp4": {
+    "category": "visual",
+    "inputLufs": -15.61,
+    "truePeakDb": -3.85,
+    "gainDb": -2.39,
+    "measurement": "loudnorm",
+    "duration": 0.9,
+    "bytes": 2456684,
+    "mtimeMs": 1785779274512
+  },
+  "AI CMC/안되요2.mp4": {
+    "category": "visual",
+    "inputLufs": -14.39,
+    "truePeakDb": -2.73,
+    "gainDb": -3.61,
+    "measurement": "loudnorm",
+    "duration": 1,
+    "bytes": 2629742,
+    "mtimeMs": 1785779315368
+  },
   "AI CMC/안심.mp4": {
     "category": "visual",
     "inputLufs": -19.87,
@@ -2906,6 +2956,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4046348,
     "mtimeMs": 1781046247863
   },
+  "AI CMC/이방제.mp4": {
+    "category": "visual",
+    "inputLufs": -19.05,
+    "truePeakDb": -3.17,
+    "gainDb": 1.05,
+    "measurement": "loudnorm",
+    "duration": 3.99,
+    "bytes": 10064118,
+    "mtimeMs": 1785773447684
+  },
   "AI CMC/이야.mp4": {
     "category": "visual",
     "inputLufs": -15.18,
@@ -3129,6 +3189,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.56,
     "bytes": 4194839,
     "mtimeMs": 1785275161056
+  },
+  "AI CMC/즐겨요.mp4": {
+    "category": "visual",
+    "inputLufs": -13.73,
+    "truePeakDb": -1.62,
+    "gainDb": -4.27,
+    "measurement": "loudnorm",
+    "duration": 1.92,
+    "bytes": 4958537,
+    "mtimeMs": 1785787491770
   },
   "AI CMC/진심이야(물음표).mp4": {
     "category": "visual",
@@ -3432,6 +3502,26 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 1827047,
     "mtimeMs": 1784874101585
   },
+  "AI CMC/하지마.mp4": {
+    "category": "visual",
+    "inputLufs": -14.24,
+    "truePeakDb": -0.04,
+    "gainDb": -3.76,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3795320,
+    "mtimeMs": 1785779246478
+  },
+  "AI CMC/하지마2.mp4": {
+    "category": "visual",
+    "inputLufs": -13.72,
+    "truePeakDb": -0.57,
+    "gainDb": -4.28,
+    "measurement": "loudnorm",
+    "duration": 1.09,
+    "bytes": 3079071,
+    "mtimeMs": 1785779285493
+  },
   "AI CMC/하하하.mp4": {
     "category": "visual",
     "inputLufs": -20.48,
@@ -3519,6 +3609,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.75,
     "bytes": 4328252,
     "mtimeMs": 1781046070627
+  },
+  "AI CMC/해피.mp4": {
+    "category": "visual",
+    "inputLufs": -14.14,
+    "truePeakDb": -0.09,
+    "gainDb": -3.86,
+    "measurement": "loudnorm",
+    "duration": 1.81,
+    "bytes": 5438669,
+    "mtimeMs": 1785787431356
   },
   "AI CMC/행복해.mp4": {
     "category": "visual",
@@ -3676,6 +3776,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.75,
     "bytes": 4497143,
     "mtimeMs": 1781046193534
+  },
+  "AI CMC/흥분.mp4": {
+    "category": "visual",
+    "inputLufs": -10.98,
+    "truePeakDb": -0.07,
+    "gainDb": -7.02,
+    "measurement": "loudnorm",
+    "duration": 1.71,
+    "bytes": 4301438,
+    "mtimeMs": 1785787471749
   },
   "AI CMC/희망.mp4": {
     "category": "visual",

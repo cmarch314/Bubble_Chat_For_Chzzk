@@ -127,10 +127,10 @@ class HuntHunterTurnExecutor {
 
     static preparationAudioCue(action) {
         const id = String(action?.id || '');
-        // One charge-air cue covers the three-stage draw chain. The old
-        // per-stage string-pull clips were tiring and stacked in autobattle.
-        if (id === 'bow.draw_1') return 'bow_charge_start';
-        if (/^bow\.draw_[23]$/.test(id)) return null;
+        // Bow draw stages are deliberately silent. Even the labelled World
+        // charge-air source retains an audible string/creak component when it
+        // is repeated by the autobattler, so it must not be routed here.
+        if (/^bow\.draw_[123]$/.test(id)) return null;
         if (id === 'bow.charging_sidestep') return 'bow_charge_step';
         if (/^bow\./.test(id)) return null;
         if (action?.audioCue && action.audioCue !== 'none') return action.audioCue;
@@ -188,20 +188,11 @@ class HuntHunterTurnExecutor {
             w.shockTraps--;
             engine.updateHunterItemUI?.(w);
             w.itemDuration = 12;
-            const trapTicks = engine.consumeTrapDuration(40);
-            if (engine.interruptMonsterMovement) engine.interruptMonsterMovement('trap');
-            else {
-                engine.pendingMonsterAction = null;
-                engine.pendingMonsterImpact = null;
-            }
-            engine.monsterState = 'knocked_down';
-            engine.monsterKnockdownDuration = Math.max(Number(engine.monsterKnockdownDuration || 0), trapTicks);
-            engine.monsterAtb = 0;
+            const trapEffect = engine.beginMonsterTrapControl('shocktrap', 40);
+            const trapTicks = trapEffect.durationTicks;
             engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
-            engine.updateMonsterAtbUI(0);
             engine.updateMonsterStateUI('마비함정', `⚡ 마비함정에 걸린 ${engine.selectedMonster.nameKO} ⚡`, { color: '#ffe66d', bg: 'rgba(255,230,80,.14)' });
-            engine.triggerEnvironmentEffect('shocktrap', w.index);
-            engine.callbacks?.onTriggerMonsterKnockdownAnim?.();
+            engine.triggerEnvironmentEffect('shocktrap', w.index, trapEffect);
             engine.addLog(`⚡ [마비함정] ${w.hunterName}이(가) 뇌광충으로 만든 덫을 설치했습니다! (${(trapTicks / 10).toFixed(1)}초 · 누적 내성 ${engine.monsterTrapUseCount}단계)`, '#ffe66d');
             return;
         }
@@ -218,11 +209,21 @@ class HuntHunterTurnExecutor {
                 engine.pendingMonsterAction = null;
                 engine.pendingMonsterImpact = null;
             }
-            engine.monsterAtb = 0;
-            engine.updateMonsterAtbUI(0);
+            const controlAtb = typeof engine.setMonsterAtbForControl === 'function'
+                ? engine.setMonsterAtbForControl.bind(engine)
+                : (typeof engine.applyMonsterControlAtb === 'function'
+                    ? engine.applyMonsterControlAtb.bind(engine)
+                    : null);
+            const retainedFlashAtb = controlAtb ? controlAtb('flash') : 50;
+            if (!controlAtb) {
+                engine.monsterAtb = retainedFlashAtb;
+                engine.updateMonsterAtbUI?.(retainedFlashAtb);
+            }
             const wasAirborne = engine.monsterFlightState === 'airborne';
             if (wasAirborne && engine.monsterFlightRuntime) {
-                engine.monsterFlightRuntime.forceLanding(engine, 'flash');
+                engine.monsterFlightRuntime.forceLanding(engine, 'flash', null, {
+                    retainedAtb: retainedFlashAtb
+                });
             }
             engine.updateHunterItemUI?.(w);
             engine.playSFX?.('flash_pod', null, {
@@ -324,16 +325,11 @@ class HuntHunterTurnExecutor {
                 && (!w.trapsUsed || w.trapsUsed < 2)) {
                 w.trapsUsed = (w.trapsUsed || 0) + 1;
                 w.itemDuration = 20;
-                const trapTicks = engine.consumeTrapDuration(40);
-                engine.monsterKnockdownDuration = trapTicks;
-                engine.monsterState = 'knocked_down';
-                engine.monsterAtb = 0;
+                const trapEffect = engine.beginMonsterTrapControl('pitfall', 40);
+                const trapTicks = trapEffect.durationTicks;
                 engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
-                engine.updateMonsterAtbUI(0);
                 engine.updateMonsterStateUI('구멍함정 상태', `🕸️ 함정에 빠진 ${engine.selectedMonster.nameKO} 🕸`, { color: '#ff9500', bg: 'rgba(255,149,0,0.1)' });
-                
-                if (engine.callbacks.onTriggerMonsterKnockdownAnim) engine.callbacks.onTriggerMonsterKnockdownAnim();
-                engine.triggerEnvironmentEffect('pitfall', w.index);
+                engine.triggerEnvironmentEffect('pitfall', w.index, trapEffect);
 
                 engine.addLog(`🕸️ [함정 설치] ${w.hunterName}이(가) 구멍함정으로 몬스터를 구속했습니다! (${(trapTicks / 10).toFixed(1)}초 · 누적 내성 ${engine.monsterTrapUseCount}단계)`, '#e0ffa3');
                 // Verified trap-impact audio will be added when a labelled event is available.

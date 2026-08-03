@@ -23,6 +23,48 @@ class HuntBattleTickExecutor {
         else if (kind === 'encounter') engine.pendingMonsterEncounterRoar = true;
     }
 
+    static actionStateTransitionLocked(engine) {
+        return Boolean(
+            engine.pendingMonsterAction
+            || engine.pendingMonsterImpact
+            || engine.monsterTraversalState
+            || engine.monsterBurrowState
+            || Number(engine.monsterRecoveryDuration || 0) > 0
+            || Number(engine.monsterActionLockTicks || 0) > 0
+        );
+    }
+
+    static rageCadenceTime(engine) {
+        return Math.max(0,
+            Number(engine?.battleTime || 0)
+            - Math.max(0, Number(engine?.monsterRageCadenceOffsetTicks || 0))
+        );
+    }
+
+    static timedMonsterState(engine) {
+        return HuntMonsterRules.stateForBattleTime(
+            HuntBattleTickExecutor.rageCadenceTime(engine),
+            engine?.monsterBehavior
+        );
+    }
+
+    static resolveTimedMonsterState(engine) {
+        const nextState = HuntBattleTickExecutor.timedMonsterState(engine);
+        const currentState = String(engine?.monsterState || 'normal');
+        const cadenceState = currentState === 'normal' || currentState === 'enraged';
+        if (cadenceState
+            && nextState !== currentState
+            && HuntBattleTickExecutor.actionStateTransitionLocked(engine)) {
+            // Hold the cadence at its boundary. Otherwise a long attack can
+            // skip the complete normal recovery window and appear permanently
+            // enraged when the absolute clock has already wrapped around.
+            engine.monsterRageCadenceOffsetTicks = Math.max(0,
+                Number(engine.monsterRageCadenceOffsetTicks || 0)) + 1;
+            return currentState;
+        }
+        return nextState;
+    }
+
     static flushTransitionRoar(engine) {
         const kind = engine.pendingMonsterEncounterRoar
             ? 'encounter'
@@ -515,9 +557,11 @@ class HuntBattleTickExecutor {
         // Long pressure arc: opening read, sustained rage, brief exhaustion.
         if (!engine.selectedMonster.id.includes('valstrax')
             && !engine.monsterStaminaRuntime?.isExhausted?.(engine)) {
-            const nextState = HuntMonsterRules.stateForBattleTime(engine.battleTime, engine.monsterBehavior);
+            const nextState = HuntBattleTickExecutor.resolveTimedMonsterState(engine);
 
-            if (engine.monsterState !== 'knocked_down' && engine.monsterState !== 'stunned' && nextState !== engine.monsterState) {
+            if (engine.monsterState !== 'knocked_down'
+                && engine.monsterState !== 'stunned'
+                && nextState !== engine.monsterState) {
                 engine.monsterState = nextState;
                 if (engine.monsterState === 'enraged') {
                     engine.monsterUltimateUsedInRage = false;
@@ -607,7 +651,7 @@ class HuntBattleTickExecutor {
                 // Recovery from knockdown
                 const restoreState = engine.monsterStaminaRuntime?.isExhausted?.(engine)
                     ? 'exhausted'
-                    : HuntMonsterRules.stateForBattleTime(engine.battleTime, engine.monsterBehavior);
+                    : HuntBattleTickExecutor.timedMonsterState(engine);
 
                 engine.monsterState = restoreState;
                 engine.monsterSpeed = engine.getMonsterSpeedForState(restoreState);
@@ -637,7 +681,7 @@ class HuntBattleTickExecutor {
                 // Recovery from stun
                 const restoreState = engine.monsterStaminaRuntime?.isExhausted?.(engine)
                     ? 'exhausted'
-                    : HuntMonsterRules.stateForBattleTime(engine.battleTime, engine.monsterBehavior);
+                    : HuntBattleTickExecutor.timedMonsterState(engine);
 
                 engine.monsterState = restoreState;
                 engine.monsterSpeed = engine.getMonsterSpeedForState(restoreState);

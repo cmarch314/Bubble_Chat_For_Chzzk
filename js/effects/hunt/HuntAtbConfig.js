@@ -71,7 +71,7 @@ class HuntAtbConfig {
             stun: 1,
             paralysis: 1,
             sleep: 1,
-            flash: 0,
+            flash: 0.5,
             stumble: 0.5
         });
     }

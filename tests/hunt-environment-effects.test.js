@@ -13,6 +13,7 @@ const effect = read('js/effects/HuntEffect.js');
 const hunterTurns = read('js/effects/hunt/HuntHunterTurnExecutor.js');
 const tactics = read('js/effects/hunt/HuntChatTactics.js');
 const perks = read('js/effects/hunt/HuntPerkRuntime.js');
+const flight = read('js/effects/hunt/HuntMonsterFlightRuntime.js');
 const css = require('./helpers/hunt-css');
 const combatRenderer = read('js/effects/hunt/HuntRenderer.js');
 
@@ -132,6 +133,15 @@ assert.match(css, /\.environment-bomb/, 'barrel bombs need a dedicated explosion
 assert.match(engine, /consumeTrapDuration\(baseTicks\)/, 'all trap sources need one shared diminishing-duration owner');
 assert.match(engine, /beginMonsterTrapControl\(kind,\s*baseTicks\)/,
     'trap duration, diminishing ATB loss and visual lifetime need one shared runtime owner');
+for (const [owner, source] of [
+    ['hunter AI traps', hunterTurns],
+    ['perk traps', perks],
+    ['viewer support traps', tactics],
+    ['landing traps', flight]
+]) {
+    assert.match(source, /beginMonsterTrapControl\(/,
+        `${owner} must enter the shared half-ATB trap lifecycle`);
+}
 assert.match(animator, /kind === 'trap-release'[\s\S]*?environment-pitfall[\s\S]*?monster-shocktrap-caught/,
     'trap visuals must be explicitly released by ATB recovery instead of a fixed wall-clock timeout');
 assert.match(animator, /kind !== 'pitfall' && kind !== 'shocktrap'/,
@@ -152,6 +162,8 @@ assert.match(animator, /monster-pitfall-struggling/,
     'pitfall entry must transition into a persistent struggle pose');
 assert.match(css, /monster-pitfall-caught\.monster-pitfall-struggling[\s\S]*?infinite/,
     'pitfall struggle animation must continue until the trapped state is released');
+assert.match(css, /\.monster-shocktrap-caught\s*\{[\s\S]*?monster-shocktrap-held[\s\S]*?infinite/,
+    'shock-trap spasms must continue until the shared trap lifecycle releases them');
 assert.match(combatRenderer, /remove\('monster-pitfall-caught', 'monster-pitfall-struggling'\)/,
     'pitfall animation classes must be released with the monster state');
 assert.doesNotMatch(combatRenderer, /id="status-tag-\$\{w\.index\}"/,

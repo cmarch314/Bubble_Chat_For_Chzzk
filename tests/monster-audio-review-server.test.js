@@ -16,6 +16,12 @@ const {
     saveGroupReview
 } = require('../tools/monster-audio-review-server');
 
+const reviewUi = fs.readFileSync(path.join(__dirname, '..', 'tools', 'monster-audio-review.html'), 'utf8');
+assert.match(reviewUi, /\['미완료',[\s\S]*\['검수 완료'/,
+    'monster dropdown must separate pending and completed reviews');
+assert.match(reviewUi, /document\.createElement\('optgroup'\)/,
+    'review status sections must use accessible native optgroups');
+
 const event = {
     chunk: 'chunkG0',
     bank: 'em001_vo',
@@ -72,6 +78,23 @@ const grouped = groupEvents({
 assert.strictEqual(grouped.length, 1);
 assert.deepStrictEqual(grouped[0].structures, ['random', 'layer']);
 assert.deepStrictEqual(grouped[0].groupTags, ['monster_roar']);
+
+const nonBaseChunkEvent = { ...event, chunk: 'chunkG3', eventId: 124 };
+const groupedFromInstalledChunk = groupEvents({
+    events: [nonBaseChunkEvent],
+    deduplication: { aliases: [] }
+}, { records: [] });
+assert.strictEqual(groupedFromInstalledChunk.length, 1,
+    'World monster review must include installed banks outside chunkG0');
+
+const groupedWithoutSilentSource = groupEvents({
+    events: [event],
+    deduplication: { aliases }
+}, {
+    excludedSourceIds: [11],
+    records: []
+});
+assert.deepStrictEqual(groupedWithoutSilentSource[0].sources.map(source => source.sourceId), [10, 12]);
 
 const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'bubblechat-audio-review-'));
 const labelsPath = path.join(temporaryRoot, 'labels.json');

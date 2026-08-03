@@ -143,7 +143,8 @@ class HuntCombatAnimator {
         const visual = document.createElement('div');
         visual.className = 'monster-part-break-visual';
         visual.dataset.partKind = partKind;
-        visual.setAttribute('aria-label', `${partKind} 파괴`);
+        const partLabel = material?.shortLabel || '부위';
+        visual.setAttribute('aria-label', `${partLabel} 파괴`);
         const source = String(material?.path || '');
         for (const side of ['left', 'right']) {
             const half = document.createElement('span');
@@ -158,7 +159,7 @@ class HuntCombatAnimator {
             visual.appendChild(half);
         }
         const label = document.createElement('strong');
-        label.textContent = `${String(partKind).slice(0, 3)} 파괴`;
+        label.textContent = `${partLabel} 파괴`;
         visual.appendChild(label);
         stage.appendChild(visual);
         this.monsterPartBreakVisualActive = true;

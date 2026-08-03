@@ -59,6 +59,7 @@ Update this section in the same patch when ownership changes.
 - Weapon actions obey authored resources/combos/locks/reactions/cancels. ATB recovers during locks; turn spends and tick recovers/gates. Targeted effects use live image bounds.
 - `HuntMonsterArchetypeCatalog` owns phases/skeletons, `HuntMonsterActionPolicy` movement/targets/impacts, and `HuntMonsterTraitRuntime` cross-action state/hazards. Data supplies values; executors never branch on monster IDs.
 - Typed data and isolated image transforms drive movement/facing/returns. Shared owners handle ATB, telegraphs, interruptions, landings, parts, recovery, targets, and trap immunity.
+- Full-turn monster actions preserve their accumulated rotation while translating home; the motion owner removes the transform only after completion, so no recovery segment may interpolate backward to `rotate(0)`.
 - `monster-kits/` owns review stages/editions/mechanics; registry/resolver/release policy reject fictional hooks and fail closed. Windup metadata drives telegraphs and state modifiers before impact.
 - `data/hunt/monster-implementation-standard.md` owns shared monster contracts only. Keep monster-specific evidence, interview decisions, and open questions in `data/hunt/monster-kits/notes/<id>.md`; read the shared standard plus only the active monster note. Runtime owners and contract tests remain authoritative.
 - Audio uses verified cues or silence. BGM prefers verified themes then habitat pools. Hunter voices keep one profile and use labelled/extracted action banks only; exclude dialogue/NPC/gesture/video sources.
@@ -76,6 +77,7 @@ Canonical chain:
 - Action routes require semantic evidence; never fill gaps with unrelated or duration-matched sounds. VO, roars, pain, and death remain monster-identity-bound: reviewed subspecies/special forms may inherit only their base-species VO, never another species. Missing wing and physical-action SE may use audition-confirmed semantic fallback pools temporarily; elemental delivery stays exact. Preserve fallback provenance, and reject every other unresolved SE.
 - Attack VO may accompany action start; non-vocal attack SE plays only from its authored impact, projectile, or explosion event. Verify delayed and multi-hit timelines do not emit SE when merely scheduled.
 - Weapon fallback stays within the same weapon; item fallback stays within its semantic family and records surrogates.
+- Bow draw stages stay silent: never route `wp_bow_cmn` string-pull clips or the rejected charge-air surrogate. Charging sidestep uses only an audition/evidence-confirmed locomotion cue; tests pin both rules.
 - Taxonomy/importers own identity and event evidence; graph/review tooling preserves HIRC recipes and atomic event-group labels. Explicit individual auditions remain authoritative.
 - Manifests separate semantic, bank, and review evidence. Keep bulk data in ignored SQLite and generate compact runtime outputs.
 

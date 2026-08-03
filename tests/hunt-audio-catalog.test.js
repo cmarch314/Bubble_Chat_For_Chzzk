@@ -1,6 +1,8 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const {
     HUNT_WEAPON_AUDIO_CUES,
     HUNT_ROAR_ROUTE,
@@ -19,7 +21,13 @@ const {
 assert.deepStrictEqual(HUNT_WEAPON_AUDIO_CUES, {}, 'unverified generic hunt fallbacks must stay disabled');
 assert.ok(HUNT_PROTECTED_CLASSIC_AUDIO.includes('Unified_SFX/Potion Drink.mp3'));
 assert.strictEqual(HUNT_ROAR_ROUTE.furious_rajang, 'rajang');
-assert.ok(HUNT_WORLD_MONSTER_SILENT_VOICE_IDS.includes('rajang'));
+assert.ok(!HUNT_WORLD_MONSTER_SILENT_VOICE_IDS.includes('rajang'),
+    'decoded Rajang VO must remain available for event-group review');
+assert.match(
+    fs.readFileSync(path.join(__dirname, '..', 'js', 'effects', 'hunt', 'HuntAudioManager.js'), 'utf8'),
+    /'charge_stride_step'/,
+    'the dedicated Tigrex stride route must not collapse into the broad attack pool'
+);
 assert.strictEqual(HUNT_ROAR_ROUTE.rathian, 'rathalos',
     'Rathian roar playback must resolve through the exact Rathalos route');
 assert.strictEqual(HUNT_VERIFIED_LOCAL_ITEM_CUES.flash_pod[0].label, 'Flash pod explosion');
@@ -52,7 +60,7 @@ for (const [route, variants] of entries) {
         assert.ok(variant.label && variant.evidence, `${route} must retain its semantic evidence`);
         assert.ok(Array.isArray(variant.layers) && variant.layers.length, `${route} needs playable layers`);
         for (const [audioPath, volume, delayMs] of variant.layers) {
-            assert.match(audioPath, /^local_assets\/monster_hunter\/world\/weapon\//);
+            assert.match(audioPath, /^local_assets\/monster_hunter\/world\/(?:weapon\/|unknown\/common\/pl_prop_cmn_nbnk_104_449143534\.mp3$)/);
             assert.ok(!/gimmick|laser/i.test(audioPath), `${route} must not route gimmick/laser banks`);
             assert.ok(volume > 0 && volume <= 1);
             assert.ok(delayMs >= 0);
@@ -62,6 +70,15 @@ for (const [route, variants] of entries) {
 
 assert.ok(HUNT_VERIFIED_LOCAL_WEAPON_CUES['bow:dragon_piercer'][0].layers.length >= 2,
     'dragon piercer must keep its labelled shot and hit layers together');
+assert.strictEqual(HUNT_VERIFIED_LOCAL_WEAPON_CUES['bow:bow_charge_start'], undefined,
+    'bow draw must stay silent instead of restoring a string-pull or charge-air surrogate');
+const bowStep = HUNT_VERIFIED_LOCAL_WEAPON_CUES['bow:bow_charge_step'][0];
+assert.strictEqual(bowStep.label, 'Quick dash begin/stop');
+assert.match(bowStep.layers[0][0], /pl_prop_cmn_nbnk_104_449143534/);
+assert.ok(bowStep.maxDurationMs > 0 && bowStep.maxDurationMs <= 700,
+    'charging sidestep must stop inside its movement window');
+assert.ok(!/string pull|304692171/i.test(`${bowStep.label} ${bowStep.evidence} ${bowStep.layers[0][0]}`),
+    'charging sidestep must never reuse the rejected bow draw source');
 assert.match(HUNT_VERIFIED_LOCAL_WEAPON_CUES['great_sword:charge_tier_1'][0].layers[0][0], /_010_739955564/);
 assert.match(HUNT_VERIFIED_LOCAL_WEAPON_CUES['great_sword:charge_tier_2'][0].layers[0][0], /_002_285500585/);
 assert.match(HUNT_VERIFIED_LOCAL_WEAPON_CUES['great_sword:charge_tier_3'][0].layers[0][0], /_009_701005050/,
@@ -70,7 +87,7 @@ assert.match(HUNT_VERIFIED_LOCAL_WEAPON_CUES['great_sword:charge_tier_3'][0].lay
 const monsterEntries = Object.entries(HUNT_VERIFIED_LOCAL_MONSTER_CUES);
 assert.ok(monsterEntries.length >= 3, 'verified monster catalog must retain proven attack and audition-confirmed routes');
 for (const [route, variants] of monsterEntries) {
-    assert.match(route, /^[a-z0-9_]+:(?:roar|attack|ultimate|burrow|telegraph|knockdown|trap|flinch|death|blast_scale_explosion)$/);
+    assert.match(route, /^[a-z0-9_]+:(?:roar|attack|ultimate|burrow|telegraph|knockdown|trap|flinch|death|blast_scale_explosion|charge_stride_step|projectile_launch)$/);
     for (const variant of variants) {
         assert.ok(variant.label && variant.evidence, `${route} must retain exact event evidence`);
         for (const [audioPath, volume, delayMs] of variant.layers) {
@@ -146,6 +163,18 @@ for (const requiredPath of [
 assert.match(HUNT_VERIFIED_LOCAL_MONSTER_CUES['rathalos:death'][0].layers[0][0], /045_265716738/);
 assert.match(HUNT_VERIFIED_LOCAL_MONSTER_CUES['diablos:roar'][0].layers[0][0], /056_543762063/,
     'Diablos must use the audition-confirmed signature roar');
+assert.ok(HUNT_VERIFIED_LOCAL_MONSTER_CUES['tigrex:roar'].some(variant =>
+    variant.layers.some(([audioPath]) => /em032(?:_01)?_vo_/.test(audioPath))),
+    'Tigrex must retain at least one audition-confirmed vocal roar clip');
+assert.ok(HUNT_VERIFIED_LOCAL_MONSTER_CUES['bazelgeuse:roar'].some(variant =>
+    variant.layers.some(([audioPath]) => /em118_vo_/.test(audioPath))),
+    'Bazelgeuse must retain its recovered audition-confirmed roar route');
+assert.ok(HUNT_VERIFIED_LOCAL_MONSTER_CUES['bazelgeuse:attack'].some(variant =>
+    variant.layers.some(([audioPath]) => /em118_vo_/.test(audioPath))),
+    'Bazelgeuse attack actions must retain their recovered species-bound voice pool');
+assert.ok(HUNT_VERIFIED_LOCAL_MONSTER_CUES['seething_bazelgeuse:roar'].some(variant =>
+    variant.layers.some(([audioPath]) => /em118_vo_/.test(audioPath))),
+    'Seething Bazelgeuse must inherit only the base-species reviewed voice');
 assert.match(HUNT_VERIFIED_LOCAL_MONSTER_CUES['diablos:burrow'][0].layers[0][0], /056_205431218/,
     'Diablos burrow must use the user-confirmed ground rumble');
 assert.strictEqual(HUNT_VERIFIED_LOCAL_MONSTER_CUES['yian_garuga:roar'].length, 1,

@@ -41,6 +41,7 @@ assert.strictEqual(swarm.aliveUnits().length, 2);
     HuntMonsterTurnExecutor.selectPattern = () => ({ id: 'small.bite', name: '물어뜯기', windupTicks: 4 });
     const engine = {
         pendingMonsterAction: null,
+        selectedWeapons: [{ index: 0, status: 'alive' }],
         smallMonsterSwarm: turnSwarm,
         monsterAtb: 100,
         monsterState: 'normal',

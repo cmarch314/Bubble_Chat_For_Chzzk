@@ -11,6 +11,16 @@ assert.deepStrictEqual(
     { kind: 'blast_scale_explosion', volume: 0.74 },
     'the user-confirmed blast-scale explosion tag must have a dedicated runtime route'
 );
+assert.deepStrictEqual(
+    TAG_ROUTES.charge_stride_step,
+    { kind: 'charge_stride_step', volume: 0.58 },
+    'reviewed Tigrex stride steps need a dedicated route outside the broad attack pool'
+);
+assert.deepStrictEqual(
+    TAG_ROUTES.projectile_launch,
+    { kind: 'projectile_launch', volume: 0.62 },
+    'reviewed projectile release audio must stay separate from impact audio'
+);
 
 const labels = {
     tagAliases: {

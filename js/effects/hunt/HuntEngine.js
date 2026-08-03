@@ -739,6 +739,7 @@ class HuntEngine {
     }
 
     beginMonsterTrapControl(kind, baseTicks) {
+        this.interruptMonsterMovement?.(`trap:${kind}`);
         const trapEffect = this.consumeTrapEffect(baseTicks);
         const atbConfig = typeof HuntAtbConfig !== 'undefined'
             ? HuntAtbConfig

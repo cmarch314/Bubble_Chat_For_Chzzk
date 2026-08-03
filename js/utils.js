@@ -197,27 +197,19 @@ function findCMCVideosInMessage(message) {
         // 1. Exact match
         let match = CMC_COMMANDS.find(f => f.toLowerCase() === term);
         if (match) return match;
-        // 2. Starts with / Ends with / Includes
+        // 2. Command starts with term (e.g. #수호룡 -> 수호룡삭제)
         match = CMC_COMMANDS.find(f => f.toLowerCase().startsWith(term));
         if (match) return match;
+        // 3. Term starts with command (e.g. #하지마요 -> 하지마)
         match = CMC_COMMANDS.find(f => term.startsWith(f.toLowerCase()));
         if (match) return match;
-        match = CMC_COMMANDS.find(f => f.toLowerCase().includes(term));
+        // 4. Full command containment of length >= 2 (e.g. #아하지마 -> 하지마)
+        match = CMC_COMMANDS.find(f => f.length >= 2 && term.includes(f.toLowerCase()));
         if (match) return match;
-        match = CMC_COMMANDS.find(f => term.includes(f.toLowerCase()));
+        // 5. Command contains full term of length >= 2
+        match = CMC_COMMANDS.find(f => term.length >= 2 && f.toLowerCase().includes(term));
         if (match) return match;
-        // 3. Common substring of length >= 2
-        match = CMC_COMMANDS.find(f => {
-            const fLower = f.toLowerCase();
-            for (let len = Math.min(fLower.length, term.length); len >= 2; len--) {
-                for (let i = 0; i <= fLower.length - len; i++) {
-                    const sub = fLower.substring(i, i + len);
-                    if (term.includes(sub)) return true;
-                }
-            }
-            return false;
-        });
-        return match || null;
+        return null;
     };
 
     const videoQueue = [];

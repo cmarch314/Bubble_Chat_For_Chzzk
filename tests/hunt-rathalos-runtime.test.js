@@ -15,6 +15,7 @@ const TurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
 
 const rathalos = profiles.rathalos;
 const byId = id => rathalos.find(pattern => pattern.id === id);
+assert.ok(byId('rathalos.bite').tags.includes('weak'), 'Rathalos bite must use the weak-hit contract');
 
 assert.deepStrictEqual(rathalos.map(pattern => pattern.id), [
     'rathalos.roar',

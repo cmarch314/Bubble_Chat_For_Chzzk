@@ -4,8 +4,8 @@
   "records": [
     { "id": "bazelgeuse", "count": 8, "sha256": "a7865851a29dc8cf9e8d8347dd7fe50435857336112188dc97ed5da8ada06a5c" },
     { "id": "chameleos", "count": 7, "sha256": "9f4f25f47b85191543939bf8e9f58393ef2c4ece76993ce9640093345a70f4c9" },
-    { "id": "rathian", "count": 13, "sha256": "e58ea2644f0e6aa6022bbe216e9c961e8e1e00521a1cafbd50348ff76a759fb4" },
-    { "id": "rathalos", "count": 12, "sha256": "744705f1a674a36fde2e7975e4c86fd59fa2016dc7e1989cbff20974354474b8" },
+    { "id": "rathian", "count": 13, "sha256": "77545500ddba7def3dd5c763ebe47fce6f81a49d42c38a5d5d655173a9c4d867" },
+    { "id": "rathalos", "count": 12, "sha256": "60f86b8dbf59c39b428b2eee313c70afe6cff7f24950eda8226385a9d35c4f34" },
     { "id": "diablos", "count": 10, "sha256": "c6009fa59fb26c3f80dddb979f8166282a470e0a4539d68951dd946a5d7851b0" },
     { "id": "black_diablos", "count": 10, "sha256": "ce220737fdf477e85dcde42240dc5fca8a82d00a4738b9f627da81f3b3d4b247" },
     { "id": "legiana", "count": 10, "sha256": "c31f72f4883a1a8574d6dd25541e21fe1c0776d24fe5d13ade6aec415cc90308" },
@@ -13,14 +13,14 @@
     { "id": "paolumu", "count": 5, "sha256": "3efc8baa995f670c33a931c184b41e752241404d919a28e7b36f113e511a8ab9" },
     { "id": "nightshade_paolumu", "count": 7, "sha256": "3fe701035cdf751ef1ce20608c6f0d51b72c0fcfdd18edbf81af42af551b077b" },
     { "id": "seething_bazelgeuse", "count": 10, "sha256": "6ae6e7f3ff5b446367325161b40526180ecaab658076ec35db846dcd10b936b0" },
-    { "id": "tigrex", "count": 10, "sha256": "dcc78c5bf4a9490b7d4e821d899fa412c2c858792f68babae93a2c6a9f2a54c6" },
-    { "id": "brute_tigrex", "count": 12, "sha256": "e0678d13528afe7e47078c3e5211dcb8ee084950a4a37369681463876f19a805" },
+    { "id": "tigrex", "count": 10, "sha256": "ba4f74e99883a8616f14454cb5e601f29db14e8fc5bb30c2a83453b8207b842e" },
+    { "id": "brute_tigrex", "count": 12, "sha256": "bffad9c7e1f4b3e1e60ab9530041a42f4a89f0084513f65e757dc7c33e1908fa" },
     { "id": "nargacuga", "count": 5, "sha256": "a3d9bade5a21b060d38dd975f64b2f701062703f95d0d394e31e4ac148f00d70" },
     { "id": "barioth", "count": 6, "sha256": "2fe56ea045906548a7506dc88e407dbc26137092fed95291a24675b3981d9726" },
     { "id": "frostfang_barioth", "count": 8, "sha256": "ee399c00b0d443b825de4a05b95c915fad005c0f73e768d46f8a7838a2ea35e9" },
-    { "id": "pink_rathian", "count": 14, "sha256": "c222cb1d4a354f3195d7d423ff2387ba17eedd7a5cff64d5cc9f7808e7705cbc" },
-    { "id": "gold_rathian", "count": 15, "sha256": "665faf9192fa6c51f7e50eb0e56e9fb46960bc0dc9343642b055db0f261296e1" },
-    { "id": "azure_rathalos", "count": 13, "sha256": "70f5f1e1c477c5e6ff919253c443b8abcfec5bc2e39120e7e9f07a5ea354cb8b" },
-    { "id": "silver_rathalos", "count": 14, "sha256": "d75be94b7650e7dee5d3aa17a7c8a0e725fbe8c05d1baa59e64264669c607464" }
+    { "id": "pink_rathian", "count": 14, "sha256": "ccb594655a74a38addebb36c566eb3c6c41f0db40b75dbc886f0f7ed4e5272e1" },
+    { "id": "gold_rathian", "count": 15, "sha256": "26b61303388b97ea9cef5e813eec1b6abdc2622be26566f174989c5cc3258dd4" },
+    { "id": "azure_rathalos", "count": 13, "sha256": "baaea7f732c82780523c75be1553bf19e3eadf88ace552b9862b36b7530aec87" },
+    { "id": "silver_rathalos", "count": 14, "sha256": "b8e3c917f2cf736acd9b4d1ffd0e947fd6f7bf89d68213cbc3ea8bf9b26e0115" }
   ]
 }

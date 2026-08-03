@@ -4690,51 +4690,6 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       "label": "tigrex monster_roar",
       "evidence": "world-user-audition-event-group",
       "semanticTag": "monster_roar",
-      "sourceBank": "em032_vo",
-      "eventId": 3235591343,
-      "sourceId": 704952435,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_121_328522138.mp3",
-          0.78,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex monster_roar",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "monster_roar",
-      "sourceBank": "em032_01_vo",
-      "eventId": 3659753839,
-      "sourceId": 121042081,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_005_121042081.mp3",
-          0.78,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex monster_roar",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "monster_roar",
-      "sourceBank": "em032_01_vo",
-      "eventId": 3659753839,
-      "sourceId": 91276484,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_003_91276484.mp3",
-          0.78,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex monster_roar",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "monster_roar",
       "sourceBank": "em032_01_vo",
       "eventId": 2677224995,
       "sourceId": 693686256,
@@ -4763,36 +4718,6 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
     }
   ],
   "tigrex:attack": [
-    {
-      "label": "tigrex physical_attack",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_attack",
-      "sourceBank": "em032_vo",
-      "eventId": 3893339916,
-      "sourceId": 616198421,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_079_616198421.mp3",
-          0.64,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex physical_attack",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_attack",
-      "sourceBank": "em032_vo",
-      "eventId": 3893339916,
-      "sourceId": 234378500,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_033_234378500.mp3",
-          0.64,
-          0
-        ]
-      ]
-    },
     {
       "label": "tigrex physical_attack",
       "evidence": "world-user-audition-event-group",
@@ -4933,36 +4858,6 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       "evidence": "world-user-audition-event-group",
       "semanticTag": "physical_attack_vocal",
       "sourceBank": "em032_vo",
-      "eventId": 2923253360,
-      "sourceId": 56764999,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_009_56764999.mp3",
-          0.65,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex physical_attack_vocal",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_attack_vocal",
-      "sourceBank": "em032_vo",
-      "eventId": 2923253360,
-      "sourceId": 704952435,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_121_328522138.mp3",
-          0.65,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex physical_attack_vocal",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_attack_vocal",
-      "sourceBank": "em032_vo",
       "eventId": 2280690157,
       "sourceId": 709100618,
       "layers": [
@@ -5008,11 +4903,11 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       "evidence": "world-user-audition-event-group",
       "semanticTag": "physical_impact",
       "sourceBank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 709999311,
+      "eventId": 59349000,
+      "sourceId": 235320834,
       "layers": [
         [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_257_709999311.mp3",
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
           0.62,
           0
         ]
@@ -5023,52 +4918,7 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       "evidence": "world-user-audition-event-group",
       "semanticTag": "physical_impact",
       "sourceBank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 902414029,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_326_902414029.mp3",
-          0.62,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex physical_impact",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_impact",
-      "sourceBank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 457423698,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_168_457423698.mp3",
-          0.62,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex physical_impact",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_impact",
-      "sourceBank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 80444631,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_027_80444631.mp3",
-          0.62,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex physical_impact",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_impact",
-      "sourceBank": "em032_se",
-      "eventId": 2660492538,
+      "eventId": 59349000,
       "sourceId": 85678699,
       "layers": [
         [
@@ -5083,26 +4933,11 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       "evidence": "world-user-audition-event-group",
       "semanticTag": "physical_impact",
       "sourceBank": "em032_se",
-      "eventId": 2660492538,
+      "eventId": 59349000,
       "sourceId": 598853864,
       "layers": [
         [
           "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_226_598853864.mp3",
-          0.62,
-          0
-        ]
-      ]
-    },
-    {
-      "label": "tigrex physical_impact",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_impact",
-      "sourceBank": "em032_se",
-      "eventId": 59349000,
-      "sourceId": 235320834,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
           0.62,
           0
         ]
@@ -5169,6 +5004,86 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       ]
     },
     {
+      "label": "tigrex bite_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "bite_vocal",
+      "sourceBank": "em032_vo",
+      "eventId": 3893339916,
+      "sourceId": 616198421,
+      "patternKeywords": [
+        "bite"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_079_616198421.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex bite_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "bite_vocal",
+      "sourceBank": "em032_vo",
+      "eventId": 3893339916,
+      "sourceId": 234378500,
+      "patternKeywords": [
+        "bite"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_033_234378500.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em032_01_vo",
+      "eventId": 3659753839,
+      "sourceId": 121042081,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_005_121042081.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em032_01_vo",
+      "eventId": 3659753839,
+      "sourceId": 91276484,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_003_91276484.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
       "label": "tigrex breath",
       "evidence": "world-user-audition-event-group",
       "semanticTag": "breath",
@@ -5213,16 +5128,673 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       ]
     },
     {
-      "label": "tigrex physical_attack",
+      "label": "tigrex bite_vocal",
       "evidence": "world-user-audition-event-group",
-      "semanticTag": "physical_attack",
-      "sourceBank": "em032_01_se",
-      "eventId": 3229357962,
-      "sourceId": 635324224,
+      "semanticTag": "bite_vocal",
+      "sourceBank": "em032_vo",
+      "eventId": 2047953935,
+      "sourceId": 86505012,
+      "patternKeywords": [
+        "bite"
+      ],
       "layers": [
         [
-          "local_assets/monster_hunter/world/monster/em032/em032_01_se_nbnk_004_635324224.mp3",
-          0.64,
+          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_013_86505012.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex bite_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "bite_vocal",
+      "sourceBank": "em032_vo",
+      "eventId": 2047953935,
+      "sourceId": 274374301,
+      "patternKeywords": [
+        "bite"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_039_274374301.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex bite_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "bite_vocal",
+      "sourceBank": "em032_vo",
+      "eventId": 2047953935,
+      "sourceId": 491077462,
+      "patternKeywords": [
+        "bite"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_063_491077462.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex bite_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "bite_vocal",
+      "sourceBank": "em032_vo",
+      "eventId": 2047953935,
+      "sourceId": 673883317,
+      "patternKeywords": [
+        "bite"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_089_673883317.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 801247111,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_296_801247111.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 735321148,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_273_735321148.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 15916291,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_009_15916291.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 754037267,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_282_754037267.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 162309118,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_054_162309118.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 725235156,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_267_725235156.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 249398672,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_086_249398672.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 744084147,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_277_744084147.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 515689077,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_191_515689077.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 332209445,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_122_332209445.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 295278610,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_108_295278610.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 545743947,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_197_545743947.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 635468719,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_241_635468719.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 417850902,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_154_417850902.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 165209550,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_057_165209550.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 979636485,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_349_979636485.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 16791734,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_010_16791734.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 917809194,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_332_917809194.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 969668231,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_345_969668231.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 782338671,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_289_782338671.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 753156656,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_280_753156656.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 566826419,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_207_566826419.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 185701084,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_063_185701084.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 599505749,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_227_599505749.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 146389261,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_048_146389261.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 406953875,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_150_406953875.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 161943049,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_052_161943049.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 383378433,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_141_383378433.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 1047783279,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_368_1047783279.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 308571385,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_114_308571385.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 253437045,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_088_253437045.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 13533300,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_008_13533300.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 360434487,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_133_360434487.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 712277052,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_258_712277052.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 786098825,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_293_786098825.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 156885250,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_050_156885250.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 755298531,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_283_755298531.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 88824087,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_033_88824087.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 382217210,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_140_382217210.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex physical_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 430348886,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_158_430348886.mp3",
+          0.62,
           0
         ]
       ]
@@ -5288,21 +5860,6 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
           0
         ]
       ]
-    },
-    {
-      "label": "tigrex small_flinch_vocal",
-      "evidence": "world-user-audition-event-group",
-      "semanticTag": "small_flinch_vocal",
-      "sourceBank": "em032_vo",
-      "eventId": 325134089,
-      "sourceId": 909459873,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_122_909459873.mp3",
-          0.62,
-          0
-        ]
-      ]
     }
   ],
   "tigrex:death": [
@@ -5363,6 +5920,21 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       "layers": [
         [
           "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_092_680070544.mp3",
+          0.68,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex trapped_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "trapped_vocal",
+      "sourceBank": "em032_vo",
+      "eventId": 3799475962,
+      "sourceId": 1043197902,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_136_1043197902.mp3",
           0.68,
           0
         ]
@@ -7525,6 +8097,1952 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
         [
           "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_068_675251350.mp3",
           0.72,
+          0
+        ]
+      ]
+    }
+  ],
+  "tigrex:projectile_launch": [
+    {
+      "label": "tigrex projectile_launch",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "projectile_launch",
+      "sourceBank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 709999311,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_257_709999311.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex projectile_launch",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "projectile_launch",
+      "sourceBank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 902414029,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_326_902414029.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex projectile_launch",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "projectile_launch",
+      "sourceBank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 457423698,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_168_457423698.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex projectile_launch",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "projectile_launch",
+      "sourceBank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 80444631,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_027_80444631.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex projectile_launch",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "projectile_launch",
+      "sourceBank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 85678699,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_030_85678699.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex projectile_launch",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "projectile_launch",
+      "sourceBank": "em032_se",
+      "eventId": 2660492538,
+      "sourceId": 598853864,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_226_598853864.mp3",
+          0.62,
+          0
+        ]
+      ]
+    }
+  ],
+  "tigrex:charge_stride_step": [
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3849171692,
+      "sourceId": 596529739,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_225_596529739.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3849171692,
+      "sourceId": 296184562,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_110_296184562.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3698786900,
+      "sourceId": 719729467,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_266_719729467.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3698786900,
+      "sourceId": 316698978,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_117_316698978.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 133614821,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_046_133614821.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 310275042,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_116_310275042.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 197493141,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_068_197493141.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 431135933,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_160_431135933.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "tigrex charge_stride_step",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "charge_stride_step",
+      "sourceBank": "em032_se",
+      "eventId": 3041916650,
+      "sourceId": 111458175,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_040_111458175.mp3",
+          0.58,
+          0
+        ]
+      ]
+    }
+  ],
+  "rajang:roar": [
+    {
+      "label": "rajang monster_roar",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "monster_roar",
+      "sourceBank": "em023_vo",
+      "eventId": 2239163290,
+      "sourceId": 815649512,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em023/em023_vo_nbnk_104_815649512.mp3",
+          0.78,
+          0
+        ]
+      ]
+    }
+  ],
+  "bazelgeuse:flinch": [
+    {
+      "label": "bazelgeuse small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 4148339283,
+      "sourceId": 64300403,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_006_64300403.mp3",
+          0.62,
+          0
+        ]
+      ]
+    }
+  ],
+  "seething_bazelgeuse:flinch": [
+    {
+      "label": "seething_bazelgeuse small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 4148339283,
+      "sourceId": 64300403,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_006_64300403.mp3",
+          0.62,
+          0
+        ]
+      ]
+    }
+  ],
+  "bazelgeuse:death": [
+    {
+      "label": "bazelgeuse death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 4038990684,
+      "sourceId": 375786278,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_028_375786278.mp3",
+          0.72,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 488266263,
+      "sourceId": 848223578,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_068_848223578.mp3",
+          0.72,
+          0
+        ]
+      ]
+    }
+  ],
+  "seething_bazelgeuse:death": [
+    {
+      "label": "seething_bazelgeuse death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 4038990684,
+      "sourceId": 375786278,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_028_375786278.mp3",
+          0.72,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 488266263,
+      "sourceId": 848223578,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_068_848223578.mp3",
+          0.72,
+          0
+        ]
+      ]
+    }
+  ],
+  "bazelgeuse:attack": [
+    {
+      "label": "bazelgeuse aerial_attack_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "aerial_attack_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 3623329482,
+      "sourceId": 139680426,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "dive"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_010_139680426.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3567738029,
+      "sourceId": 159015252,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_014_159015252.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3567738029,
+      "sourceId": 96065718,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_007_96065718.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 838575270,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_067_838575270.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 32076891,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_003_32076891.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 379099446,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_030_379099446.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3283357056,
+      "sourceId": 444535259,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_037_444535259.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse aerial_attack_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "aerial_attack_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 1841360141,
+      "sourceId": 645954412,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "dive"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_050_645954412.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 417118413,
+      "sourceId": 627501455,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_049_627501455.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 470750966,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_108_401120340.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 223473159,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_001_2084295.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 419687109,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_234_811585818.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 445947746,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_243_829550040.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 1067689534,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_211_819217086.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 770041581,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_189_770041581.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 941995433,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_238_941995433.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 164701204,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_044_164701204.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 461087013,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_119_461087013.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 845292340,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_012_36174566.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 180351430,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em024/em024_se_nbnk_150_535597085.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 1063916993,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_047_161481404.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 744930022,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_213_825899246.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 1012695912,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_093_317665478.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 414245490,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_032_107536897.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 1061468205,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_069_232240353.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 542690694,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_255_986869603.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 925605907,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_125_449044942.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 397623422,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_126_456540373.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 704731334,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_002_6520764.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 1010445229,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_248_1010445229.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 410130058,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_104_410130058.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 21891287,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em043/em043_se_nbnk_112_452905998.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 856682766,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_224_862979264.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 133439873,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_064_219332029.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 167652134,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_079_266355107.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 583886316,
+      "sourceId": 590283719,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_148_590283719.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 583886316,
+      "sourceId": 839572263,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_203_839572263.mp3",
+          0.64,
+          0
+        ]
+      ]
+    }
+  ],
+  "seething_bazelgeuse:attack": [
+    {
+      "label": "seething_bazelgeuse aerial_attack_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "aerial_attack_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 3623329482,
+      "sourceId": 139680426,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "dive"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_010_139680426.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3567738029,
+      "sourceId": 159015252,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_014_159015252.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3567738029,
+      "sourceId": 96065718,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_007_96065718.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 838575270,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_067_838575270.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 32076891,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_003_32076891.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3461955295,
+      "sourceId": 379099446,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_030_379099446.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 3283357056,
+      "sourceId": 444535259,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_037_444535259.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse aerial_attack_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "aerial_attack_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 1841360141,
+      "sourceId": 645954412,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "dive"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_050_645954412.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_vo",
+      "eventId": 417118413,
+      "sourceId": 627501455,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_049_627501455.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 470750966,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_108_401120340.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 223473159,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_001_2084295.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 419687109,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_234_811585818.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 445947746,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_243_829550040.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 4183714183,
+      "sourceId": 1067689534,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_211_819217086.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 770041581,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_189_770041581.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 941995433,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_238_941995433.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 164701204,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_044_164701204.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 461087013,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_119_461087013.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 845292340,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_012_36174566.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 180351430,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em024/em024_se_nbnk_150_535597085.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_impact",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_impact",
+      "sourceBank": "em118_se",
+      "eventId": 4183714177,
+      "sourceId": 1063916993,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile",
+        "impact"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_047_161481404.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 744930022,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_213_825899246.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 1012695912,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_093_317665478.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 414245490,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_032_107536897.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 1061468205,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_069_232240353.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 542690694,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_255_986869603.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 925605907,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_125_449044942.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 397623422,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_126_456540373.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 704731334,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_002_6520764.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 1010445229,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_248_1010445229.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 410130058,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_104_410130058.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 21891287,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em043/em043_se_nbnk_112_452905998.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 856682766,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_224_862979264.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 133439873,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_064_219332029.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse wing_flap",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 167652134,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_079_266355107.mp3",
+          0.58,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 583886316,
+      "sourceId": 590283719,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_148_590283719.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse breath_shot",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_shot",
+      "sourceBank": "em118_se",
+      "eventId": 583886316,
+      "sourceId": 839572263,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_203_839572263.mp3",
+          0.64,
+          0
+        ]
+      ]
+    }
+  ],
+  "bazelgeuse:roar": [
+    {
+      "label": "bazelgeuse monster_roar",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "monster_roar",
+      "sourceBank": "em118_vo",
+      "eventId": 3016774578,
+      "sourceId": 1000217927,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_079_1000217927.mp3",
+          0.78,
+          0
+        ]
+      ]
+    }
+  ],
+  "seething_bazelgeuse:roar": [
+    {
+      "label": "seething_bazelgeuse monster_roar",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "monster_roar",
+      "sourceBank": "em118_vo",
+      "eventId": 3016774578,
+      "sourceId": 1000217927,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_079_1000217927.mp3",
+          0.78,
+          0
+        ]
+      ]
+    }
+  ],
+  "bazelgeuse:telegraph": [
+    {
+      "label": "bazelgeuse breath_charge",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_charge",
+      "sourceBank": "em118_vo",
+      "eventId": 2385751720,
+      "sourceId": 119188586,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_009_119188586.mp3",
+          0.66,
+          0
+        ]
+      ]
+    }
+  ],
+  "seething_bazelgeuse:telegraph": [
+    {
+      "label": "seething_bazelgeuse breath_charge",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath_charge",
+      "sourceBank": "em118_vo",
+      "eventId": 2385751720,
+      "sourceId": 119188586,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_009_119188586.mp3",
+          0.66,
+          0
+        ]
+      ]
+    }
+  ],
+  "bazelgeuse:trap": [
+    {
+      "label": "bazelgeuse trapped_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "trapped_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 2038625480,
+      "sourceId": 153685996,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_012_153685996.mp3",
+          0.68,
+          0
+        ]
+      ]
+    }
+  ],
+  "seething_bazelgeuse:trap": [
+    {
+      "label": "seething_bazelgeuse trapped_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "trapped_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 2038625480,
+      "sourceId": 153685996,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_012_153685996.mp3",
+          0.68,
+          0
+        ]
+      ]
+    }
+  ],
+  "bazelgeuse:knockdown": [
+    {
+      "label": "bazelgeuse knockdown_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "knockdown_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 1735132301,
+      "sourceId": 239831573,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_018_239831573.mp3",
+          0.68,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse knockdown_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "knockdown_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 142471643,
+      "sourceId": 665516075,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_053_665516075.mp3",
+          0.68,
+          0
+        ]
+      ]
+    }
+  ],
+  "seething_bazelgeuse:knockdown": [
+    {
+      "label": "seething_bazelgeuse knockdown_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "knockdown_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 1735132301,
+      "sourceId": 239831573,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_018_239831573.mp3",
+          0.68,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse knockdown_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "knockdown_vocal",
+      "sourceBank": "em118_vo",
+      "eventId": 142471643,
+      "sourceId": 665516075,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_053_665516075.mp3",
+          0.68,
           0
         ]
       ]
@@ -9784,33 +12302,6 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
   },
   {
     "monsterId": "tigrex",
-    "routeKey": "tigrex:roar",
-    "tag": "monster_roar",
-    "bank": "em032_vo",
-    "eventId": 3235591343,
-    "sourceId": 704952435,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_121_328522138.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_attack",
-    "bank": "em032_vo",
-    "eventId": 3893339916,
-    "sourceId": 616198421,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_079_616198421.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_attack",
-    "bank": "em032_vo",
-    "eventId": 3893339916,
-    "sourceId": 234378500,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_033_234378500.mp3"
-  },
-  {
-    "monsterId": "tigrex",
     "routeKey": "tigrex:attack",
     "tag": "physical_attack",
     "bank": "em032_vo",
@@ -9913,24 +12404,6 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "routeKey": "tigrex:attack",
     "tag": "physical_attack_vocal",
     "bank": "em032_vo",
-    "eventId": 2923253360,
-    "sourceId": 56764999,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_009_56764999.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_attack_vocal",
-    "bank": "em032_vo",
-    "eventId": 2923253360,
-    "sourceId": 704952435,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_121_328522138.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_attack_vocal",
-    "bank": "em032_vo",
     "eventId": 2280690157,
     "sourceId": 709100618,
     "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_096_709100618.mp3"
@@ -10000,15 +12473,6 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
   },
   {
     "monsterId": "tigrex",
-    "routeKey": "tigrex:flinch",
-    "tag": "small_flinch_vocal",
-    "bank": "em032_vo",
-    "eventId": 325134089,
-    "sourceId": 909459873,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_122_909459873.mp3"
-  },
-  {
-    "monsterId": "tigrex",
     "routeKey": "tigrex:attack",
     "tag": "physical_attack",
     "bank": "em032_vo",
@@ -10021,43 +12485,16 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "routeKey": "tigrex:attack",
     "tag": "physical_impact",
     "bank": "em032_se",
-    "eventId": 2660492538,
-    "sourceId": 709999311,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_257_709999311.mp3"
+    "eventId": 59349000,
+    "sourceId": 235320834,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3"
   },
   {
     "monsterId": "tigrex",
     "routeKey": "tigrex:attack",
     "tag": "physical_impact",
     "bank": "em032_se",
-    "eventId": 2660492538,
-    "sourceId": 902414029,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_326_902414029.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_impact",
-    "bank": "em032_se",
-    "eventId": 2660492538,
-    "sourceId": 457423698,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_168_457423698.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_impact",
-    "bank": "em032_se",
-    "eventId": 2660492538,
-    "sourceId": 80444631,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_027_80444631.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_impact",
-    "bank": "em032_se",
-    "eventId": 2660492538,
+    "eventId": 59349000,
     "sourceId": 85678699,
     "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_030_85678699.mp3"
   },
@@ -10066,18 +12503,9 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "routeKey": "tigrex:attack",
     "tag": "physical_impact",
     "bank": "em032_se",
-    "eventId": 2660492538,
+    "eventId": 59349000,
     "sourceId": 598853864,
     "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_226_598853864.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_impact",
-    "bank": "em032_se",
-    "eventId": 59349000,
-    "sourceId": 235320834,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3"
   },
   {
     "monsterId": "tigrex",
@@ -10120,42 +12548,6 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "routeKey": "tigrex:roar",
     "tag": "monster_roar",
     "bank": "em032_01_vo",
-    "eventId": 3659753839,
-    "sourceId": 121042081,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_005_121042081.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:roar",
-    "tag": "monster_roar",
-    "bank": "em032_01_vo",
-    "eventId": 3659753839,
-    "sourceId": 91276484,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_003_91276484.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "breath",
-    "bank": "em032_01_vo",
-    "eventId": 3659753833,
-    "sourceId": 283785836,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_007_283785836.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "breath",
-    "bank": "em032_01_vo",
-    "eventId": 3659753833,
-    "sourceId": 110695309,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_004_110695309.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:roar",
-    "tag": "monster_roar",
-    "bank": "em032_01_vo",
     "eventId": 2677224995,
     "sourceId": 693686256,
     "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_008_693686256.mp3"
@@ -10168,15 +12560,6 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "eventId": 2677224995,
     "sourceId": 749318444,
     "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_009_749318444.mp3"
-  },
-  {
-    "monsterId": "tigrex",
-    "routeKey": "tigrex:attack",
-    "tag": "physical_attack",
-    "bank": "em032_01_se",
-    "eventId": 3229357962,
-    "sourceId": 635324224,
-    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_se_nbnk_004_635324224.mp3"
   },
   {
     "monsterId": "jyuratodus",
@@ -11383,9 +13766,1577 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "eventId": 3836985661,
     "sourceId": 778477451,
     "path": "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_028_778477451.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "bite_vocal",
+    "bank": "em032_vo",
+    "eventId": 3893339916,
+    "sourceId": 616198421,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_079_616198421.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "bite_vocal",
+    "bank": "em032_vo",
+    "eventId": 3893339916,
+    "sourceId": 234378500,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_033_234378500.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:trap",
+    "tag": "trapped_vocal",
+    "bank": "em032_vo",
+    "eventId": 3799475962,
+    "sourceId": 1043197902,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_136_1043197902.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "breath",
+    "bank": "em032_01_vo",
+    "eventId": 3659753839,
+    "sourceId": 121042081,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_005_121042081.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "breath",
+    "bank": "em032_01_vo",
+    "eventId": 3659753839,
+    "sourceId": 91276484,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_003_91276484.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "breath",
+    "bank": "em032_01_vo",
+    "eventId": 3659753833,
+    "sourceId": 283785836,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_007_283785836.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "breath",
+    "bank": "em032_01_vo",
+    "eventId": 3659753833,
+    "sourceId": 110695309,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_01_vo_nbnk_004_110695309.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:projectile_launch",
+    "tag": "projectile_launch",
+    "bank": "em032_se",
+    "eventId": 2660492538,
+    "sourceId": 709999311,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_257_709999311.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:projectile_launch",
+    "tag": "projectile_launch",
+    "bank": "em032_se",
+    "eventId": 2660492538,
+    "sourceId": 902414029,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_326_902414029.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:projectile_launch",
+    "tag": "projectile_launch",
+    "bank": "em032_se",
+    "eventId": 2660492538,
+    "sourceId": 457423698,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_168_457423698.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:projectile_launch",
+    "tag": "projectile_launch",
+    "bank": "em032_se",
+    "eventId": 2660492538,
+    "sourceId": 80444631,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_027_80444631.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:projectile_launch",
+    "tag": "projectile_launch",
+    "bank": "em032_se",
+    "eventId": 2660492538,
+    "sourceId": 85678699,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_030_85678699.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:projectile_launch",
+    "tag": "projectile_launch",
+    "bank": "em032_se",
+    "eventId": 2660492538,
+    "sourceId": 598853864,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_226_598853864.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "bite_vocal",
+    "bank": "em032_vo",
+    "eventId": 2047953935,
+    "sourceId": 86505012,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_013_86505012.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "bite_vocal",
+    "bank": "em032_vo",
+    "eventId": 2047953935,
+    "sourceId": 274374301,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_039_274374301.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "bite_vocal",
+    "bank": "em032_vo",
+    "eventId": 2047953935,
+    "sourceId": 491077462,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_063_491077462.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "bite_vocal",
+    "bank": "em032_vo",
+    "eventId": 2047953935,
+    "sourceId": 673883317,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_089_673883317.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3849171692,
+    "sourceId": 596529739,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_225_596529739.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3849171692,
+    "sourceId": 296184562,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_110_296184562.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3698786900,
+    "sourceId": 719729467,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_266_719729467.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3698786900,
+    "sourceId": 316698978,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_117_316698978.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 801247111,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_296_801247111.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 735321148,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_273_735321148.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 15916291,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_009_15916291.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 754037267,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_282_754037267.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 162309118,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_054_162309118.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 725235156,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_267_725235156.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 249398672,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_086_249398672.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 744084147,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_277_744084147.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 515689077,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_191_515689077.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 332209445,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_122_332209445.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 295278610,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_108_295278610.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 545743947,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_197_545743947.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 635468719,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_241_635468719.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 417850902,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_154_417850902.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 165209550,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_057_165209550.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 979636485,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_349_979636485.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 16791734,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_010_16791734.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 917809194,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_332_917809194.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 969668231,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_345_969668231.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 782338671,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_289_782338671.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 753156656,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_280_753156656.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 566826419,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_207_566826419.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 185701084,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_063_185701084.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 599505749,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_227_599505749.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 146389261,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_048_146389261.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 406953875,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_150_406953875.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 161943049,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_052_161943049.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 383378433,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_141_383378433.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 1047783279,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_368_1047783279.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 308571385,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_114_308571385.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 253437045,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_088_253437045.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 13533300,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_008_13533300.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 360434487,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_133_360434487.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 712277052,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_258_712277052.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 786098825,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_293_786098825.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 156885250,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_050_156885250.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 755298531,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_283_755298531.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 88824087,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_033_88824087.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 382217210,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_140_382217210.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:attack",
+    "tag": "physical_impact",
+    "bank": "em032_se",
+    "eventId": 3336006033,
+    "sourceId": 430348886,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_158_430348886.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3041916650,
+    "sourceId": 133614821,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_046_133614821.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3041916650,
+    "sourceId": 310275042,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_116_310275042.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3041916650,
+    "sourceId": 197493141,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_068_197493141.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3041916650,
+    "sourceId": 431135933,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_160_431135933.mp3"
+  },
+  {
+    "monsterId": "tigrex",
+    "routeKey": "tigrex:charge_stride_step",
+    "tag": "charge_stride_step",
+    "bank": "em032_se",
+    "eventId": 3041916650,
+    "sourceId": 111458175,
+    "path": "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_040_111458175.mp3"
+  },
+  {
+    "monsterId": "rajang",
+    "routeKey": "rajang:roar",
+    "tag": "monster_roar",
+    "bank": "em023_vo",
+    "eventId": 2239163290,
+    "sourceId": 815649512,
+    "path": "local_assets/monster_hunter/world/monster/em023/em023_vo_nbnk_104_815649512.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em118_vo",
+    "eventId": 4148339283,
+    "sourceId": 64300403,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_006_64300403.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em118_vo",
+    "eventId": 4148339283,
+    "sourceId": 64300403,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_006_64300403.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:death",
+    "tag": "death_vocal",
+    "bank": "em118_vo",
+    "eventId": 4038990684,
+    "sourceId": 375786278,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_028_375786278.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:death",
+    "tag": "death_vocal",
+    "bank": "em118_vo",
+    "eventId": 4038990684,
+    "sourceId": 375786278,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_028_375786278.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "aerial_attack_vocal",
+    "bank": "em118_vo",
+    "eventId": 3623329482,
+    "sourceId": 139680426,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_010_139680426.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "aerial_attack_vocal",
+    "bank": "em118_vo",
+    "eventId": 3623329482,
+    "sourceId": 139680426,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_010_139680426.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3567738029,
+    "sourceId": 159015252,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_014_159015252.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3567738029,
+    "sourceId": 159015252,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_014_159015252.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3567738029,
+    "sourceId": 96065718,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_007_96065718.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3567738029,
+    "sourceId": 96065718,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_007_96065718.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3461955295,
+    "sourceId": 838575270,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_067_838575270.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3461955295,
+    "sourceId": 838575270,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_067_838575270.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3461955295,
+    "sourceId": 32076891,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_003_32076891.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3461955295,
+    "sourceId": 32076891,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_003_32076891.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3461955295,
+    "sourceId": 379099446,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_030_379099446.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3461955295,
+    "sourceId": 379099446,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_030_379099446.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3283357056,
+    "sourceId": 444535259,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_037_444535259.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 3283357056,
+    "sourceId": 444535259,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_037_444535259.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:roar",
+    "tag": "monster_roar",
+    "bank": "em118_vo",
+    "eventId": 3016774578,
+    "sourceId": 1000217927,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_079_1000217927.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:roar",
+    "tag": "monster_roar",
+    "bank": "em118_vo",
+    "eventId": 3016774578,
+    "sourceId": 1000217927,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_079_1000217927.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:telegraph",
+    "tag": "breath_charge",
+    "bank": "em118_vo",
+    "eventId": 2385751720,
+    "sourceId": 119188586,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_009_119188586.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:telegraph",
+    "tag": "breath_charge",
+    "bank": "em118_vo",
+    "eventId": 2385751720,
+    "sourceId": 119188586,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_009_119188586.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:trap",
+    "tag": "trapped_vocal",
+    "bank": "em118_vo",
+    "eventId": 2038625480,
+    "sourceId": 153685996,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_012_153685996.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:trap",
+    "tag": "trapped_vocal",
+    "bank": "em118_vo",
+    "eventId": 2038625480,
+    "sourceId": 153685996,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_012_153685996.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "aerial_attack_vocal",
+    "bank": "em118_vo",
+    "eventId": 1841360141,
+    "sourceId": 645954412,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_050_645954412.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "aerial_attack_vocal",
+    "bank": "em118_vo",
+    "eventId": 1841360141,
+    "sourceId": 645954412,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_050_645954412.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:knockdown",
+    "tag": "knockdown_vocal",
+    "bank": "em118_vo",
+    "eventId": 1735132301,
+    "sourceId": 239831573,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_018_239831573.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:knockdown",
+    "tag": "knockdown_vocal",
+    "bank": "em118_vo",
+    "eventId": 1735132301,
+    "sourceId": 239831573,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_018_239831573.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:death",
+    "tag": "death_vocal",
+    "bank": "em118_vo",
+    "eventId": 488266263,
+    "sourceId": 848223578,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_068_848223578.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:death",
+    "tag": "death_vocal",
+    "bank": "em118_vo",
+    "eventId": 488266263,
+    "sourceId": 848223578,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_068_848223578.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 417118413,
+    "sourceId": 627501455,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_049_627501455.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_vo",
+    "eventId": 417118413,
+    "sourceId": 627501455,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_049_627501455.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:knockdown",
+    "tag": "knockdown_vocal",
+    "bank": "em118_vo",
+    "eventId": 142471643,
+    "sourceId": 665516075,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_053_665516075.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:knockdown",
+    "tag": "knockdown_vocal",
+    "bank": "em118_vo",
+    "eventId": 142471643,
+    "sourceId": 665516075,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_vo_nbnk_053_665516075.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 470750966,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_108_401120340.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 470750966,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_108_401120340.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 223473159,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_001_2084295.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 223473159,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_001_2084295.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 419687109,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_234_811585818.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 419687109,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_234_811585818.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 445947746,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_243_829550040.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 445947746,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_243_829550040.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 1067689534,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_211_819217086.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 4183714183,
+    "sourceId": 1067689534,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_211_819217086.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 770041581,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_189_770041581.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 770041581,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_189_770041581.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 941995433,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_238_941995433.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 941995433,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_238_941995433.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 164701204,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_044_164701204.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 164701204,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_044_164701204.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 461087013,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_119_461087013.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 461087013,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_119_461087013.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 845292340,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_012_36174566.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 845292340,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_012_36174566.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 180351430,
+    "path": "local_assets/monster_hunter/world/monster/em024/em024_se_nbnk_150_535597085.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 180351430,
+    "path": "local_assets/monster_hunter/world/monster/em024/em024_se_nbnk_150_535597085.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 1063916993,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_047_161481404.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_impact",
+    "bank": "em118_se",
+    "eventId": 4183714177,
+    "sourceId": 1063916993,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_047_161481404.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 4081047443,
+    "sourceId": 744930022,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_213_825899246.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 4081047443,
+    "sourceId": 744930022,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_213_825899246.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 4081047443,
+    "sourceId": 1012695912,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_093_317665478.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 4081047443,
+    "sourceId": 1012695912,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_093_317665478.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 4081047443,
+    "sourceId": 414245490,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_032_107536897.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 4081047443,
+    "sourceId": 414245490,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_032_107536897.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 1061468205,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_069_232240353.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 1061468205,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_069_232240353.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 542690694,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_255_986869603.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 542690694,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_255_986869603.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 925605907,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_125_449044942.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 925605907,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_125_449044942.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 397623422,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_126_456540373.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 397623422,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_126_456540373.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 704731334,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_002_6520764.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 2771979026,
+    "sourceId": 704731334,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_002_6520764.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_se",
+    "eventId": 1160500916,
+    "sourceId": 1010445229,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_248_1010445229.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_se",
+    "eventId": 1160500916,
+    "sourceId": 1010445229,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_248_1010445229.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_se",
+    "eventId": 1160500916,
+    "sourceId": 410130058,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_104_410130058.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_se",
+    "eventId": 1160500916,
+    "sourceId": 410130058,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_104_410130058.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_se",
+    "eventId": 1160500916,
+    "sourceId": 21891287,
+    "path": "local_assets/monster_hunter/world/monster/em043/em043_se_nbnk_112_452905998.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "physical_attack",
+    "bank": "em118_se",
+    "eventId": 1160500916,
+    "sourceId": 21891287,
+    "path": "local_assets/monster_hunter/world/monster/em043/em043_se_nbnk_112_452905998.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 1086345477,
+    "sourceId": 856682766,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_224_862979264.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 1086345477,
+    "sourceId": 856682766,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_224_862979264.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 1086345477,
+    "sourceId": 133439873,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_064_219332029.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 1086345477,
+    "sourceId": 133439873,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_064_219332029.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 1086345477,
+    "sourceId": 167652134,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_079_266355107.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "wing_flap",
+    "bank": "em118_se",
+    "eventId": 1086345477,
+    "sourceId": 167652134,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_079_266355107.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 583886316,
+    "sourceId": 590283719,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_148_590283719.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 583886316,
+    "sourceId": 590283719,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_148_590283719.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 583886316,
+    "sourceId": 839572263,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_203_839572263.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:attack",
+    "tag": "breath_shot",
+    "bank": "em118_se",
+    "eventId": 583886316,
+    "sourceId": 839572263,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_203_839572263.mp3"
   }
 ]);
-const HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED = Object.freeze([]);
+const HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED = Object.freeze([
+  {
+    "bank": "em032_vo",
+    "eventId": 2923253360,
+    "sourceId": 56764999,
+    "tag": "돌진 준비 음성",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3918228905,
+    "sourceId": 1046290488,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3918228905,
+    "sourceId": 549607774,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3918228905,
+    "sourceId": 774907858,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3918228905,
+    "sourceId": 459208440,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3918228905,
+    "sourceId": 879048427,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3918228905,
+    "sourceId": 841821012,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3752459436,
+    "sourceId": 432709767,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3752459436,
+    "sourceId": 535128452,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3752459436,
+    "sourceId": 688128197,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3752459436,
+    "sourceId": 646154479,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3752459436,
+    "sourceId": 1015956041,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_se",
+    "eventId": 3752459436,
+    "sourceId": 675216915,
+    "tag": "불똥폭발",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 106962102,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 970377002,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 27102425,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 306459759,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 419288118,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 1010936356,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 84053471,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 645614758,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  },
+  {
+    "bank": "em118_05_se",
+    "eventId": 1285714277,
+    "sourceId": 475915758,
+    "tag": "폭린가열",
+    "reason": "unrouted-semantic-tag"
+  }
+]);
 
 const HUNT_WORLD_MONSTER_SE_FALLBACKS = Object.freeze({
   "wing_flap": [
@@ -12101,26 +16052,262 @@ const HUNT_WORLD_MONSTER_SE_FALLBACKS = Object.freeze({
       ],
       "temporaryFallback": true,
       "reuseScope": "cross-species-semantic-se"
-    }
-  ],
-  "physical_attack": [
+    },
     {
-      "label": "physical_attack temporary semantic SE fallback",
+      "label": "wing_flap temporary semantic SE fallback",
       "evidence": "world-user-audition-semantic-se-fallback",
-      "semanticTag": "physical_attack",
-      "sourceBank": "em032_01_se",
-      "eventId": 3229357962,
-      "sourceId": 635324224,
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 744930022,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
       "layers": [
         [
-          "local_assets/monster_hunter/world/monster/em032/em032_01_se_nbnk_004_635324224.mp3",
-          0.64,
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_213_825899246.mp3",
+          0.58,
           0
         ]
       ],
       "temporaryFallback": true,
       "reuseScope": "cross-species-semantic-se"
     },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 1012695912,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_093_317665478.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 4081047443,
+      "sourceId": 414245490,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_032_107536897.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 1061468205,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_069_232240353.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 542690694,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_255_986869603.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 925605907,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_125_449044942.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 397623422,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_126_456540373.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 2771979026,
+      "sourceId": 704731334,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_002_6520764.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 856682766,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_224_862979264.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 133439873,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_064_219332029.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "wing_flap temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "wing_flap",
+      "sourceBank": "em118_se",
+      "eventId": 1086345477,
+      "sourceId": 167652134,
+      "patternKeywords": [
+        "air",
+        "flight",
+        "glide",
+        "wing"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_079_266355107.mp3",
+          0.58,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    }
+  ],
+  "physical_attack": [
     {
       "label": "physical_attack temporary semantic SE fallback",
       "evidence": "world-user-audition-semantic-se-fallback",
@@ -12273,6 +16460,57 @@ const HUNT_WORLD_MONSTER_SE_FALLBACKS = Object.freeze({
       ],
       "temporaryFallback": true,
       "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_attack temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 1010445229,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_248_1010445229.mp3",
+          0.64,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_attack temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 410130058,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_104_410130058.mp3",
+          0.64,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_attack temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em118_se",
+      "eventId": 1160500916,
+      "sourceId": 21891287,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em043/em043_se_nbnk_112_452905998.mp3",
+          0.64,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
     }
   ],
   "physical_impact": [
@@ -12298,11 +16536,11 @@ const HUNT_WORLD_MONSTER_SE_FALLBACKS = Object.freeze({
       "evidence": "world-user-audition-semantic-se-fallback",
       "semanticTag": "physical_impact",
       "sourceBank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 709999311,
+      "eventId": 59349000,
+      "sourceId": 235320834,
       "layers": [
         [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_257_709999311.mp3",
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
           0.62,
           0
         ]
@@ -12315,58 +16553,7 @@ const HUNT_WORLD_MONSTER_SE_FALLBACKS = Object.freeze({
       "evidence": "world-user-audition-semantic-se-fallback",
       "semanticTag": "physical_impact",
       "sourceBank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 902414029,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_326_902414029.mp3",
-          0.62,
-          0
-        ]
-      ],
-      "temporaryFallback": true,
-      "reuseScope": "cross-species-semantic-se"
-    },
-    {
-      "label": "physical_impact temporary semantic SE fallback",
-      "evidence": "world-user-audition-semantic-se-fallback",
-      "semanticTag": "physical_impact",
-      "sourceBank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 457423698,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_168_457423698.mp3",
-          0.62,
-          0
-        ]
-      ],
-      "temporaryFallback": true,
-      "reuseScope": "cross-species-semantic-se"
-    },
-    {
-      "label": "physical_impact temporary semantic SE fallback",
-      "evidence": "world-user-audition-semantic-se-fallback",
-      "semanticTag": "physical_impact",
-      "sourceBank": "em032_se",
-      "eventId": 2660492538,
-      "sourceId": 80444631,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_027_80444631.mp3",
-          0.62,
-          0
-        ]
-      ],
-      "temporaryFallback": true,
-      "reuseScope": "cross-species-semantic-se"
-    },
-    {
-      "label": "physical_impact temporary semantic SE fallback",
-      "evidence": "world-user-audition-semantic-se-fallback",
-      "semanticTag": "physical_impact",
-      "sourceBank": "em032_se",
-      "eventId": 2660492538,
+      "eventId": 59349000,
       "sourceId": 85678699,
       "layers": [
         [
@@ -12383,28 +16570,11 @@ const HUNT_WORLD_MONSTER_SE_FALLBACKS = Object.freeze({
       "evidence": "world-user-audition-semantic-se-fallback",
       "semanticTag": "physical_impact",
       "sourceBank": "em032_se",
-      "eventId": 2660492538,
+      "eventId": 59349000,
       "sourceId": 598853864,
       "layers": [
         [
           "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_226_598853864.mp3",
-          0.62,
-          0
-        ]
-      ],
-      "temporaryFallback": true,
-      "reuseScope": "cross-species-semantic-se"
-    },
-    {
-      "label": "physical_impact temporary semantic SE fallback",
-      "evidence": "world-user-audition-semantic-se-fallback",
-      "semanticTag": "physical_impact",
-      "sourceBank": "em032_se",
-      "eventId": 59349000,
-      "sourceId": 235320834,
-      "layers": [
-        [
-          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
           0.62,
           0
         ]
@@ -12473,6 +16643,686 @@ const HUNT_WORLD_MONSTER_SE_FALLBACKS = Object.freeze({
       "layers": [
         [
           "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_183_496612831.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 801247111,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_296_801247111.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 735321148,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_273_735321148.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 15916291,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_009_15916291.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 754037267,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_282_754037267.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 162309118,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_054_162309118.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 725235156,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_267_725235156.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 249398672,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_086_249398672.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 744084147,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_277_744084147.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 515689077,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_191_515689077.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 332209445,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_122_332209445.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 295278610,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_108_295278610.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 545743947,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_197_545743947.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 635468719,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_241_635468719.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 417850902,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_154_417850902.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 165209550,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_057_165209550.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 979636485,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_349_979636485.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 16791734,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_010_16791734.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 917809194,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_332_917809194.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 969668231,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_345_969668231.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 782338671,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_289_782338671.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 753156656,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_280_753156656.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 566826419,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_207_566826419.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 185701084,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_063_185701084.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 599505749,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_227_599505749.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 146389261,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_048_146389261.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 406953875,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_150_406953875.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 161943049,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_052_161943049.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 383378433,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_141_383378433.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 1047783279,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_368_1047783279.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 308571385,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_114_308571385.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 253437045,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_088_253437045.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 13533300,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_008_13533300.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 360434487,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_133_360434487.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 712277052,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_258_712277052.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 786098825,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_293_786098825.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 156885250,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_050_156885250.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 755298531,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_283_755298531.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 88824087,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_033_88824087.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 382217210,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_140_382217210.mp3",
+          0.62,
+          0
+        ]
+      ],
+      "temporaryFallback": true,
+      "reuseScope": "cross-species-semantic-se"
+    },
+    {
+      "label": "physical_impact temporary semantic SE fallback",
+      "evidence": "world-user-audition-semantic-se-fallback",
+      "semanticTag": "physical_impact",
+      "sourceBank": "em032_se",
+      "eventId": 3336006033,
+      "sourceId": 430348886,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_158_430348886.mp3",
           0.62,
           0
         ]
@@ -12585,9 +17435,7 @@ const HUNT_WORLD_MONSTER_SE_FALLBACKS = Object.freeze({
   ]
 });
 
-const HUNT_WORLD_MONSTER_SILENT_VOICE_IDS = Object.freeze([
-  "rajang"
-]);
+const HUNT_WORLD_MONSTER_SILENT_VOICE_IDS = Object.freeze([]);
 const HUNT_WORLD_MONSTER_VOICE_FALLBACK_FAMILIES = Object.freeze([]);
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { HUNT_WORLD_MONSTER_REVIEW_ROUTES, HUNT_WORLD_MONSTER_REVIEW_EVIDENCE, HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED, HUNT_WORLD_MONSTER_SE_FALLBACKS, HUNT_WORLD_MONSTER_SILENT_VOICE_IDS, HUNT_WORLD_MONSTER_VOICE_FALLBACK_FAMILIES };
