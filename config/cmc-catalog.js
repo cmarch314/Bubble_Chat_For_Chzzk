@@ -54,7 +54,8 @@ window.HIVE_CMC_FILES = [
     "깔깔", "하하하", "하하하2", "하하하3", "하하하4",
     "슬픔", "슬픔2",
     "내맘", "서둘", "시간없", "시간없2", "싫은데", "제발2",
-    "몬헌하라1", "몬헌하라2", "몬헌하라3", "몬헌하라4"
+    "몬헌하라1", "몬헌하라2", "몬헌하라3", "몬헌하라4",
+    "빨리", "도망쳐"
 ];
 
 // Windows-safe filenames use readable marker words for punctuation and optional
