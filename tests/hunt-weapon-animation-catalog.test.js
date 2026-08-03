@@ -62,6 +62,14 @@ const extract = HuntWeaponAnimationCatalog.PROFILES['insect_glaive.extract_red']
 assert.strictEqual(extract.animateWeapon, false, 'extract harvest moves only the kinsect');
 assert.strictEqual(extract.kinsect, 'extract');
 assert.strictEqual(HuntWeaponAnimationCatalog.PROFILES['insect_glaive.tornado_slash'].kinsect, 'assault');
+for (const action of HuntWeaponMechanics.actionsFor('insect_glaive')) {
+    const profile = HuntWeaponAnimationCatalog.resolve('insect_glaive', action);
+    assert.strictEqual(
+        profile.durationMs * 1.25,
+        action.durationTicks * 100,
+        `${action.id} visual duration must match its action ownership`
+    );
+}
 assert.strictEqual(
     HuntWeaponAnimationCatalog.shieldMotion(HuntWeaponAnimationCatalog.PROFILES['sword_shield.shield_bash_1']),
     'split_shield_bash'
@@ -97,8 +105,22 @@ const hammerChargeFrames = HuntWeaponAnimationCatalog.keyframes(
     HuntWeaponAnimationCatalog.PROFILES['hammer.charge_2'],
     0
 );
+assert.match(hammerChargeFrames[0].transform, /rotate\(-78deg\)/,
+    'Hammer charge levels after the first must begin from the held pose instead of returning to idle');
 assert.match(hammerChargeFrames.at(-1).transform, /rotate\(-78deg\)/,
     'Hammer charge must finish in a tilted held pose instead of snapping back to idle');
+assert.strictEqual(
+    HuntWeaponAnimationCatalog.PROFILES['hammer.charge_1'].motion,
+    'hammer_charge_raise',
+    'only the first Hammer charge stage may raise the weapon from idle'
+);
+for (const actionId of ['hammer.charge_2', 'hammer.charge_3', 'hammer.mighty_charge']) {
+    assert.strictEqual(
+        HuntWeaponAnimationCatalog.PROFILES[actionId].motion,
+        'hammer_charge_hold',
+        `${actionId} must preserve the existing tilted charge pose`
+    );
+}
 for (const actionId of [
     'hammer.release_1', 'hammer.release_2', 'hammer.release_3', 'hammer.mighty_charge_slam'
 ]) {

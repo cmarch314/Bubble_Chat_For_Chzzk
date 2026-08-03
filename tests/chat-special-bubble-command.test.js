@@ -37,17 +37,21 @@ const clownA = bubble();
 const normalC = bubble();
 assert.deepStrictEqual({ ...allocator._claimBubbleSlots(normalA, 1) }, { start: 0, span: 1 });
 assert.deepStrictEqual({ ...allocator._claimBubbleSlots(normalB, 1) }, { start: 1, span: 1 });
-assert.deepStrictEqual({ ...allocator._claimBubbleSlots(clownA, 2) }, { start: 2, span: 2 });
-assert.deepStrictEqual({ ...allocator._claimBubbleSlots(normalC, 1) }, { start: 4, span: 1 });
+assert.deepStrictEqual({ ...allocator._claimBubbleSlots(clownA, 1) }, { start: 2, span: 1 });
+assert.deepStrictEqual({ ...allocator._claimBubbleSlots(normalC, 1) }, { start: 3, span: 1 });
 const clownB = bubble();
-assert.deepStrictEqual({ ...allocator._claimBubbleSlots(clownB, 2) }, { start: 0, span: 2 });
-assert.strictEqual(normalA.removed, true);
-assert.strictEqual(normalB.removed, true);
+assert.deepStrictEqual({ ...allocator._claimBubbleSlots(clownB, 1) }, { start: 4, span: 1 });
+assert.strictEqual(normalA.removed, false);
+assert.strictEqual(normalB.removed, false);
 
 const cssSource = fs.readFileSync(path.resolve(__dirname, '../style.css'), 'utf8');
-assert.match(cssSource, /광대\.jpg'\) center center \/ cover no-repeat/);
-assert.match(cssSource, /\.chat-box\.chat-box--clown\s*\{[\s\S]*?width:\s*600px;[\s\S]*?max-width:\s*40vw;/);
+assert.match(cssSource, /광대\.jpg'\) right 14px center \/ 112% auto no-repeat/);
+assert.doesNotMatch(cssSource, /\.chat-box\.chat-box--clown|chat-line-inner--clown\s*\{[\s\S]*?width:\s*600px;/,
+    'clown bubbles must retain the ordinary chat width');
 assert.match(cssSource, /\.message\.message--clown\s*\{[\s\S]*?text-align:\s*center;[\s\S]*?margin-top:\s*auto;/);
 assert.match(rendererSource, /specialBubble\?\.kind === 'clown'[\s\S]*?fontSize = 3\.6;[\s\S]*?messageEle\.style\.fontSize =/);
+const clownBranch = rendererSource.match(/if \(specialBubble\?\.kind === 'clown'\)[\s\S]*?else if/)?.[0] || '';
+assert.doesNotMatch(clownBranch, /slotSpan\s*=\s*2|chat-box--clown/,
+    'clown bubbles must claim one ordinary chat slot');
 
 console.log('[test] Special clown chat bubble command passed.');

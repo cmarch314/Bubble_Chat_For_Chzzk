@@ -80,10 +80,35 @@ const HUNT_VERIFIED_LOCAL_WEAPON_CUES = {
         { label: 'full burst five shells', evidence: 'World wp07 shell event label', layers: [['local_assets/monster_hunter/world/weapon/gunlance/wp07_gun_epvsp_shell_nbnk_009_272642002.mp3', 0.76, 0]] },
         { label: 'wyrmstake cannon explosion', evidence: 'World wp07 shell event label', layers: [['local_assets/monster_hunter/world/weapon/gunlance/wp07_gun_epvsp_shell_nbnk_040_932229979.mp3', 0.76, 0]] }
     ],
-    'bow:bow_shot': [
-        { label: 'arrow shot', evidence: 'World wp11 shell event label', layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_012_217590158.mp3', 0.66, 0]] },
-        { label: 'power shot', evidence: 'World wp11 shell event label', layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_047_766270597.mp3', 0.66, 0]] }
-    ],
+    // The common-bank string-pull clips are deliberately excluded. Charging
+    // uses only the labelled charge-air effect, trimmed to its action window.
+    'bow:bow_charge_start': [{
+        label: 'Charge air cone',
+        evidence: 'MHW Audio Modding workbook exact World wp11 event 2976616266 / source 304692171',
+        maxDurationMs: 1050,
+        layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_019_304692171.mp3', 0.52, 0]]
+    }],
+    'bow:bow_charge_step': [{
+        label: 'Charge air cone',
+        evidence: 'same-bow charge continuation surrogate; exact World wp11 event 2976616266 / source 304692171',
+        maxDurationMs: 550,
+        layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_019_304692171.mp3', 0.48, 0]]
+    }],
+    'bow:bow_shot': [{
+        label: 'arrow shot',
+        evidence: 'MHW Audio Modding workbook exact World wp11 event 978594604 / source 217590158',
+        layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_012_217590158.mp3', 0.66, 0]]
+    }],
+    'bow:bow_charged_shot': [{
+        label: 'Shoot charge max arrow',
+        evidence: 'MHW Audio Modding workbook exact World wp11 event 798551537 / source 191401661',
+        layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_011_191401661.mp3', 0.68, 0]]
+    }],
+    'bow:bow_power_shot': [{
+        label: 'Power shot arrows shot',
+        evidence: 'MHW Audio Modding workbook exact World wp11 event 1882850457 / source 766270597',
+        layers: [['local_assets/monster_hunter/world/weapon/bow/wp11_bow_epvsp_shell_nbnk_047_766270597.mp3', 0.68, 0]]
+    }],
     'bow:dragon_piercer': [{
         label: 'dragon piercer shot and hit', evidence: 'World wp11 shell event labels',
         layers: [

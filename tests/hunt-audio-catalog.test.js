@@ -70,7 +70,7 @@ assert.match(HUNT_VERIFIED_LOCAL_WEAPON_CUES['great_sword:charge_tier_3'][0].lay
 const monsterEntries = Object.entries(HUNT_VERIFIED_LOCAL_MONSTER_CUES);
 assert.ok(monsterEntries.length >= 3, 'verified monster catalog must retain proven attack and audition-confirmed routes');
 for (const [route, variants] of monsterEntries) {
-    assert.match(route, /^[a-z0-9_]+:(?:roar|attack|ultimate|burrow|telegraph|knockdown|trap|flinch|death)$/);
+    assert.match(route, /^[a-z0-9_]+:(?:roar|attack|ultimate|burrow|telegraph|knockdown|trap|flinch|death|blast_scale_explosion)$/);
     for (const variant of variants) {
         assert.ok(variant.label && variant.evidence, `${route} must retain exact event evidence`);
         for (const [audioPath, volume, delayMs] of variant.layers) {

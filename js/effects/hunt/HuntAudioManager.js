@@ -529,12 +529,36 @@ class HuntAudioManager {
         let scheduled = false;
         variant.layers.forEach(([path, volume = 0.65, delayMs = 0]) => {
             if (!path) return;
-            const play = () => this.playLocalEntry({ path }, { volume });
+            const play = () => this.playLocalEntry({ path }, {
+                volume,
+                maxDurationMs: variant.maxDurationMs
+            });
             if (Number(delayMs) > 0) this.timers.timeout(play, Number(delayMs));
             else play();
             scheduled = true;
         });
         return scheduled;
+    }
+
+    monsterCueLayersForPhase(variant, audioPhase = null) {
+        const layers = Array.isArray(variant?.layers) ? variant.layers : [];
+        if (!audioPhase) return layers;
+        const phase = String(audioPhase).toLowerCase();
+        if (!['action-start', 'impact'].includes(phase)) return layers;
+        const explicitPhase = String(variant.audioPhase || '').toLowerCase();
+        if (explicitPhase) return explicitPhase === phase ? layers : [];
+        const wantsVocal = phase === 'action-start';
+        const semanticTag = String(variant.semanticTag || '').toLowerCase();
+        const sourceBank = String(variant.sourceBank || '').toLowerCase();
+        const taggedVocal = /(?:vocal|voice)/.test(semanticTag) || /(?:^|_)vo(?:_|$)/.test(sourceBank);
+        const taggedSoundEffect = /(?:^|_)se(?:_|$)/.test(sourceBank);
+        return layers.filter(([audioPath]) => {
+            const path = String(audioPath || '').toLowerCase();
+            const isVocal = path.includes('_vo_') || taggedVocal;
+            const isSoundEffect = path.includes('_se_') || taggedSoundEffect;
+            if (wantsVocal) return isVocal && !isSoundEffect;
+            return isSoundEffect && !isVocal;
+        });
     }
 
     verifiedMonsterCue(monster, kind = 'attack', options = {}) {
@@ -546,7 +570,12 @@ class HuntAudioManager {
         if (!monsterId) return null;
         const normalizedKind = String(kind || 'attack').toLowerCase();
         const roarRoutes = globalScope.HUNT_ROAR_ROUTE || {};
-        const routedMonsterId = normalizedKind === 'roar' ? roarRoutes[monsterId] : null;
+        // Family routing may supply an exact reviewed semantic cue (roar,
+        // Bazelgeuse scale explosion, etc.). Broad `attack` pools stay local so
+        // variant-specific physical/elemental SE cannot leak across forms.
+        const routedMonsterId = ['roar', 'blast_scale_explosion'].includes(normalizedKind)
+            ? roarRoutes[monsterId]
+            : null;
         const routeKeys = [`${monsterId}:${normalizedKind}`];
         if (routedMonsterId && routedMonsterId !== monsterId) routeKeys.push(`${routedMonsterId}:${normalizedKind}`);
         let variants = routeKeys.flatMap(key => Array.isArray(catalog[key]) ? catalog[key] : []);
@@ -559,20 +588,33 @@ class HuntAudioManager {
                 : [];
         }
         if (!variants.length) return null;
-        const patternText = [options.patternId, options.patternName, options.patternType, normalizedKind]
+        const patternText = [
+            options.patternId,
+            options.patternName,
+            options.patternType,
+            ...(Array.isArray(options.patternTags) ? options.patternTags : []),
+            options.patternDelivery,
+            normalizedKind
+        ]
             .filter(Boolean)
             .join(' ')
             .toLowerCase();
         const matched = variants.filter(variant => {
             if (!Array.isArray(variant.patternKeywords) || !variant.patternKeywords.length) return true;
             return variant.patternKeywords.some(keyword => patternText.includes(String(keyword).toLowerCase()));
-        });
+        }).filter(variant => this.monsterCueLayersForPhase(variant, options.audioPhase).length > 0);
         if (!matched.length) return null;
         return matched[Math.floor(Math.random() * matched.length)] || null;
     }
 
     playVerifiedMonsterCue(monster, kind = 'attack', options = {}) {
         const variant = this.verifiedMonsterCue(monster, kind, options);
+        if (variant && options.audioPhase) {
+            return this.playVerifiedLayers({
+                ...variant,
+                layers: this.monsterCueLayersForPhase(variant, options.audioPhase)
+            });
+        }
         // A roar is one creature voice event. Layering a second VO/SE clip here
         // sounds like unrelated ambience under the roar and can linger after it.
         if (String(kind).toLowerCase() === 'roar' && Array.isArray(variant?.layers)) {
@@ -611,6 +653,15 @@ class HuntAudioManager {
         // Action effect banks (epvsp) are prioritized over common banks, and non-attack clips
         // (gimmick, wirebug, sheathing, slinger, ui) are strictly excluded.
         if (this.playVerifiedWeaponCue(weaponId, cue)) return true;
+
+        // Never fall back to the generic bow bank for draw/release cues: it
+        // contains the removed string-pull and creak layers.
+        const exactOnlyBowCues = new Set([
+            'bow_charge_start', 'bow_charge_step', 'bow_shot',
+            'bow_charged_shot', 'bow_power_shot', 'dragon_piercer'
+        ]);
+        if (weaponId === 'bow' && exactOnlyBowCues.has(String(cue))) return false;
+
         if (this.playEvidenceRankedWeaponAction(weaponId, context.actionId)) return true;
 
         const nonAttackExclusions = ['gimmick', 'wirebug', 'slinger', 'sheath', 'ui'];
@@ -701,6 +752,9 @@ class HuntAudioManager {
     }
 
     playGenericMonsterSeFallback(kind, options = {}) {
+        // Physical/wing SE belongs to contact or authored movement events. Playing
+        // it while an action is merely announced makes every hit sound early.
+        if (String(options.audioPhase || '').toLowerCase() === 'action-start') return false;
         const tag = this.monsterSeFallbackTag(kind, options);
         if (!tag) return false;
         const globalScope = typeof window !== 'undefined' ? window : globalThis;
@@ -870,7 +924,9 @@ class HuntAudioManager {
 
     playMonsterRoar(monster) {
         if (!monster) return;
-        if (this.playMonsterAction(monster, 'roar')) return;
+        // Roars are creature VO at action start. Without an explicit phase an
+        // audition group containing impact SE could be selected instead.
+        if (this.playMonsterAction(monster, 'roar', { audioPhase: 'action-start' })) return;
         // Old downloaded roar files contain several misidentified/non-MH clips.
         // Silence is safer than assigning the wrong creature while the verified
         // extracted catalog is still being expanded.
@@ -893,6 +949,11 @@ class HuntAudioManager {
         if (fileName === 'monster_death' || fileName === 'monster_knockdown'
             || fileName === 'monster_trap' || fileName === 'monster_flinch') {
             this.playMonsterAction(context.monsterId, fileName.replace('monster_', ''), context);
+            return;
+        }
+        if (/^monster_[a-z0-9_]+$/i.test(fileName || '')) {
+            const semanticKind = fileName.replace(/^monster_/i, '');
+            this.playVerifiedMonsterCue(context.monsterId, semanticKind, context);
             return;
         }
         if (fileName === 'dragon_piercer') {

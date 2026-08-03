@@ -30,7 +30,7 @@ assert.deepStrictEqual(
     {
         type: 'part_break_topple',
         visualType: 'part_break_topple',
-        durationTicks: 35,
+        durationTicks: 40,
         label: '부위 파괴 넘어짐'
     },
     'every grounded part break uses the shared short topple reaction'
@@ -40,7 +40,7 @@ assert.deepStrictEqual(
     {
         type: 'tail_sever_roll',
         visualType: 'tail_sever_roll',
-        durationTicks: 55,
+        durationTicks: 60,
         label: '꼬리 절단 나뒹굴기'
     },
     'tail severing uses the stronger shared rolling reaction'
@@ -80,7 +80,8 @@ assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'head'), { x: .18,
 assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'left-wing'), { x: .53, y: .20, kind: 'left-wing' });
 for (const id of ['diablos', 'black_diablos']) {
     const reviewedDiablos = Catalog.find({ id });
-    const slots = Catalog.partDisplaySlots(Catalog.createPartState(reviewedDiablos));
+    const partState = Catalog.createPartState(reviewedDiablos);
+    const slots = Catalog.partDisplaySlots(partState);
     assert.deepStrictEqual(
         slots.map(part => part.kind),
         ['head', 'head', 'back', 'tail'],
@@ -92,6 +93,16 @@ for (const id of ['diablos', 'black_diablos']) {
         `${id} must not invent leg or wing break slots`
     );
     assert.match(reviewedDiablos.evidence.breakContract, /horns-back-tail/);
+    assert.deepStrictEqual(
+        partState.find(part => part.kind === 'head').hitzones,
+        { slash: .45, blunt: .63, pierce: .40 },
+        `${id} combat anatomy must keep the soft head separate from its breakable horns`
+    );
+    assert.strictEqual(
+        partState.find(part => part.kind === 'left-horn').hitzones.blunt,
+        .42,
+        `${id} horn blunt hitzone must use the reviewed World value`
+    );
 }
 
 const reviewedWorldFamilies = {
@@ -128,8 +139,32 @@ for (const id of ['bazelgeuse', 'seething_bazelgeuse', 'tigrex', 'brute_tigrex',
     'nargacuga', 'barioth', 'frostfang_barioth']) {
     assert.strictEqual(Catalog.find({ id }).tailSeverable, true, `${id} tail must be severable`);
 }
-assert.deepStrictEqual(Catalog.visualPoint({ id: 'shrieking_legiana' }, 'head'), { x: .52, y: .27, kind: 'head' });
-assert.deepStrictEqual(Catalog.visualPoint({ id: 'brute_tigrex' }, 'tail'), { x: .74, y: .26, kind: 'tail' });
+const legianaVisualContract = Object.freeze({
+    head: { x: .52, y: .27, kind: 'head' },
+    'left-wing': { x: .25, y: .42, kind: 'left-wing' },
+    'right-wing': { x: .78, y: .42, kind: 'right-wing' },
+    tail: { x: .53, y: .84, kind: 'tail' }
+});
+for (const id of ['legiana', 'shrieking_legiana']) {
+    for (const [partKind, expectedPoint] of Object.entries(legianaVisualContract)) {
+        assert.deepStrictEqual(
+            Catalog.visualPoint({ id }, partKind),
+            expectedPoint,
+            `${id} ${partKind} must stay aligned to the reviewed front-facing sprite silhouette`
+        );
+    }
+}
+assert.deepStrictEqual(Catalog.visualPoint({ id: 'brute_tigrex' }, 'tail'), { x: .62, y: .28, kind: 'tail' });
+assert.deepStrictEqual(
+    Catalog.visualPoint({ id: 'bazelgeuse' }, 'mouth'),
+    { x: .50, y: .58, kind: 'mouth' },
+    'Bazelgeuse gas breath must originate from its central, slightly lowered mouth'
+);
+assert.deepStrictEqual(
+    Catalog.visualPoint({ id: 'seething_bazelgeuse' }, 'mouth'),
+    { x: .50, y: .58, kind: 'mouth' },
+    'Seething Bazelgeuse must inherit the same species mouth anchor'
+);
 
 let endgameBreakCoverage = 0;
 for (let seed = 1; seed <= 50; seed++) {

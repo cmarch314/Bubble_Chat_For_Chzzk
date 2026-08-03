@@ -1,5 +1,5 @@
 class HuntTierRules {
-    static resolve(tier, stage = 'initial') {
+    static resolve(tier, stage = 'initial', monster = null) {
         const initial = {
             normal: { hp: 15600, stunThreshold: 390, damageMod: 0.9, atbSpeedMod: 1.15, label: '대형 몬스터' },
             small: { hp: 6500, stunThreshold: 140, damageMod: 0.3, atbSpeedMod: 0.7, label: '소형 몬스터' },
@@ -15,6 +15,13 @@ class HuntTierRules {
             colossal: { hp: 46800, stunThreshold: 975, damageMod: 2.0, atbSpeedMod: 0.7, label: '초대형 몬스터' }
         };
         const profile = stage === 'consecutive' ? consecutive : initial;
-        return Object.freeze({ ...(profile[tier] || profile.normal) });
+        const resolved = { ...(profile[tier] || profile.normal) };
+        const monsterId = String(monster?.id || '').trim().toLowerCase();
+        const hpMultiplier = /^(?:bazelgeuse|seething_bazelgeuse)$/.test(monsterId) ? 1.2 : 1;
+        if (hpMultiplier !== 1) {
+            resolved.hp = Math.round(resolved.hp * hpMultiplier);
+            resolved.hpMultiplier = hpMultiplier;
+        }
+        return Object.freeze(resolved);
     }
 }

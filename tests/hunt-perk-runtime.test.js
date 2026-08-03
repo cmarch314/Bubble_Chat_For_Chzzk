@@ -36,6 +36,12 @@ const affinityHunter = {
 };
 assert.strictEqual(runtime.outgoingDamage(affinityHunter, {}, 100), 125,
     'weapon affinity must drive the same real critical-hit chance shown in the hunter HUD');
+assert.strictEqual(affinityHunter.lastAttackCritical, true,
+    'the resolved affinity roll must be exposed to the impact renderer');
+const ordinaryHunter = { id: 'long_sword', hp: 100, maxHp: 100, atb: 0, perks: [] };
+assert.strictEqual(runtime.outgoingDamage(ordinaryHunter, {}, 100), 100);
+assert.strictEqual(ordinaryHunter.lastAttackCritical, false,
+    'ordinary hits must explicitly clear the transient critical marker');
 
 const lost = { index: 1, hunterName: 'LOST', hp: 100, maxHp: 100, potions: 10, sharpness: 100, atb: 0, perks: [{ name: '길치' }] };
 runtime.initialize(lost);

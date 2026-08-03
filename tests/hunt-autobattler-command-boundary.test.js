@@ -6,7 +6,7 @@ const HuntChatTactics = require('../js/effects/hunt/HuntChatTactics.js');
 const root = path.resolve(__dirname, '..');
 const read = relative => fs.readFileSync(path.join(root, relative), 'utf8');
 const tactics = new HuntChatTactics();
-const retiredReservations = ['!물약', '!가루', '!폭탄', '!숫돌', '!점프', '!귀환옥', '!예약취소'];
+const retiredReservations = ['!물약', '!가루', '!폭탄', '!숫돌', '!점프', '!귀환옥', '!예약취소', '!회피', '!가드'];
 
 for (const command of retiredReservations) {
     assert.strictEqual(tactics.parse(command), null, `${command} must not reserve a hunter action`);

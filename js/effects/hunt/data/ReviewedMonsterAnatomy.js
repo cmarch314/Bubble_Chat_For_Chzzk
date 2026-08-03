@@ -62,8 +62,9 @@ const HUNT_REVIEWED_MONSTER_ANATOMY = Object.freeze({
                 ])
             }),
             parts: Object.freeze([
-                Object.freeze({ id: 'diablos:left-horn', kind: 'left-horn', health: 310, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .15, pierce: .20 }) }),
-                Object.freeze({ id: 'diablos:right-horn', kind: 'right-horn', health: 310, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .15, pierce: .20 }) }),
+                Object.freeze({ id: 'diablos:head', kind: 'head', health: 760, breakable: false, hitzones: Object.freeze({ slash: .45, blunt: .63, pierce: .40 }) }),
+                Object.freeze({ id: 'diablos:left-horn', kind: 'left-horn', health: 310, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .42, pierce: .20 }) }),
+                Object.freeze({ id: 'diablos:right-horn', kind: 'right-horn', health: 310, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .42, pierce: .20 }) }),
                 Object.freeze({ id: 'diablos:back', kind: 'back', health: 520, breakable: true, hitzones: Object.freeze({ slash: .23, blunt: .42, pierce: .20 }) }),
                 Object.freeze({ id: 'diablos:belly', kind: 'belly', health: 900, breakable: false, hitzones: Object.freeze({ slash: .68, blunt: .75, pierce: .40 }) }),
                 Object.freeze({ id: 'diablos:tail', kind: 'tail', health: 560, breakable: false, hitzones: Object.freeze({ slash: .50, blunt: .24, pierce: .60 }) })
@@ -82,8 +83,9 @@ const HUNT_REVIEWED_MONSTER_ANATOMY = Object.freeze({
                 ])
             }),
             parts: Object.freeze([
-                Object.freeze({ id: 'black_diablos:left-horn', kind: 'left-horn', health: 335, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .15, pierce: .20 }) }),
-                Object.freeze({ id: 'black_diablos:right-horn', kind: 'right-horn', health: 335, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .15, pierce: .20 }) }),
+                Object.freeze({ id: 'black_diablos:head', kind: 'head', health: 820, breakable: false, hitzones: Object.freeze({ slash: .45, blunt: .63, pierce: .40 }) }),
+                Object.freeze({ id: 'black_diablos:left-horn', kind: 'left-horn', health: 335, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .42, pierce: .20 }) }),
+                Object.freeze({ id: 'black_diablos:right-horn', kind: 'right-horn', health: 335, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .42, pierce: .20 }) }),
                 Object.freeze({ id: 'black_diablos:back', kind: 'back', health: 560, breakable: true, hitzones: Object.freeze({ slash: .23, blunt: .42, pierce: .20 }) }),
                 Object.freeze({ id: 'black_diablos:belly', kind: 'belly', health: 960, breakable: false, hitzones: Object.freeze({ slash: .68, blunt: .75, pierce: .40 }) }),
                 Object.freeze({ id: 'black_diablos:tail', kind: 'tail', health: 600, breakable: false, hitzones: Object.freeze({ slash: .50, blunt: .24, pierce: .60 }) })
@@ -161,8 +163,8 @@ const HUNT_REVIEWED_MONSTER_ANATOMY = Object.freeze({
             }),
             parts: Object.freeze([
                 Object.freeze({ id: 'tigrex:head', kind: 'head', health: 430, breakable: true, hitzones: Object.freeze({ slash: .65, blunt: .70, pierce: .55 }) }),
-                Object.freeze({ id: 'tigrex:left-front-leg', kind: 'left-front-leg', health: 380, breakable: true, hitzones: Object.freeze({ slash: .45, blunt: .40, pierce: .35 }) }),
-                Object.freeze({ id: 'tigrex:right-front-leg', kind: 'right-front-leg', health: 380, breakable: true, hitzones: Object.freeze({ slash: .45, blunt: .40, pierce: .35 }) }),
+                Object.freeze({ id: 'tigrex:left-front-leg', kind: 'left-front-leg', health: 380, breakable: true, repeatToppleHealthMultiplier: 1.5, hitzones: Object.freeze({ slash: .45, blunt: .40, pierce: .35 }) }),
+                Object.freeze({ id: 'tigrex:right-front-leg', kind: 'right-front-leg', health: 380, breakable: true, repeatToppleHealthMultiplier: 1.5, hitzones: Object.freeze({ slash: .45, blunt: .40, pierce: .35 }) }),
                 Object.freeze({ id: 'tigrex:tail', kind: 'tail', health: 510, breakable: false, hitzones: Object.freeze({ slash: .50, blunt: .40, pierce: .45 }) })
             ])
         }),

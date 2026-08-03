@@ -5,7 +5,11 @@ function huntPattern(id, name, type, damageRatio, options = {}) {
         requiredState: options.state, maxHpRatio: options.maxHpRatio, sourceGame: options.sourceGame,
         sourceActionClass: options.actionClass || null,
         sourceMoveNameJA: options.sourceMoveNameJA || null, sourceUrl: options.sourceUrl || null,
-        delivery: options.delivery || null, forbiddenStates: options.forbiddenStates || [],
+        delivery: options.delivery || null,
+        projectileVisual: options.projectileVisual || null,
+        projectileEventKinds: options.projectileEventKinds || null,
+        roarVisual: options.roarVisual || null,
+        forbiddenStates: options.forbiddenStates || [],
         forbiddenWhenBroken: options.forbiddenWhenBroken || [],
         weightWhenBroken: options.weightWhenBroken || null,
         brokenPartDamageModifiers: options.brokenPartDamageModifiers || null,
@@ -14,6 +18,7 @@ function huntPattern(id, name, type, damageRatio, options = {}) {
         statusBlockedWhenBroken: options.statusBlockedWhenBroken || [],
         monsterAtbCost: options.monsterAtbCost,
         monsterAtbCostMultiplier: options.monsterAtbCostMultiplier,
+        postActionRecoverySeconds: options.postActionRecoverySeconds,
         targetDamageRatios: options.targetDamageRatios || null,
         interference: options.interference || null,
         repeatWhenEnraged: options.repeatWhenEnraged || 1,
@@ -30,13 +35,40 @@ function huntPattern(id, name, type, damageRatio, options = {}) {
         chargeMode: options.chargeMode || null,
         impact: options.impact || null,
         impactTimeline: options.impactTimeline || null,
+        impactTimelineByState: options.impactTimelineByState || null,
         flightTransition: options.flightTransition || null,
         flight: options.flight || null,
         suppressPrepareAudio: Boolean(options.suppressPrepareAudio),
         animationProfile: options.animationProfile || null,
         animationDurationMs: options.animationDurationMs || null,
         animationGeometry: options.animationGeometry || null,
+        chargeLaunchStyle: options.chargeLaunchStyle || null,
         originPart: options.originPart || null,
+        projectileLaunchDelayTicks: options.projectileLaunchDelayTicks || null,
+        branchKind: options.branchKind || null,
+        branchLabel: options.branchLabel || null,
+        staminaCostProfile: options.staminaCostProfile || null,
+        stateMachine: options.stateMachine || null,
+        visualAnchors: options.visualAnchors || null,
+        habitatVariants: options.habitatVariants || null,
+        directDamageScope: options.directDamageScope || null,
+        partUse: options.partUse || null,
+        requiresPreviousPattern: options.requiresPreviousPattern || null,
+        ...(options.maxConsecutiveUsesByState
+            ? { maxConsecutiveUsesByState: options.maxConsecutiveUsesByState } : {}),
+        ...(options.weightByState ? { weightByState: options.weightByState } : {}),
+        ...(options.selectionChanceByState
+            ? { selectionChanceByState: options.selectionChanceByState } : {}),
+        ...(options.selectionChancePenaltyPerBrokenPart
+            ? { selectionChancePenaltyPerBrokenPart: options.selectionChancePenaltyPerBrokenPart } : {}),
+        ...(options.scaleDropsByPart ? { scaleDropsByPart: options.scaleDropsByPart } : {}),
+        ...(options.scaleSlotMode ? { scaleSlotMode: options.scaleSlotMode } : {}),
+        ...(options.scaleDropTiming ? { scaleDropTiming: options.scaleDropTiming } : {}),
+        ...(options.ignitesScaleTarget ? { ignitesScaleTarget: true } : {}),
+        ...(options.ignitesAllScales ? { ignitesAllScales: true } : {}),
+        ...(options.defenseMode ? { defenseMode: options.defenseMode } : {}),
+        ...(options.telegraphFx ? { telegraphFx: options.telegraphFx } : {}),
+        ...(options.fixedWindup ? { fixedWindup: true } : {}),
         evidence: options.evidence || (options.actionClass ? 'installed-game-action-class' : 'web-reference'),
         confidence: options.confidence || (options.actionClass ? 'extracted-action' : 'curated-behavior') };
 }
@@ -182,27 +214,110 @@ const pilot = (sourceGame, sourceUrl, definitions) => huntProfile(sourceGame,
     }));
 const RATHALOS_ATTACK_ATB_COST_MULTIPLIER = 1.10;
 
+// Reviewed World high-rank Bazelgeuse kit.
 HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCES.bazelgeuse, [
-    ['bazelgeuse.roar', '포효', 'roar', 0, { maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar'], weight: 0.28 }],
-    ['bazelgeuse.bite', '물어뜯기', 'physical', 0.25, { sourceMoveNameJA: '噛みつき', recovery: 7 }],
-    ['bazelgeuse.tail_sweep', '꼬리 휘두르기', 'area', 0.30, { sourceMoveNameJA: '尻尾振り', maxTargets: 3, tags: ['area', 'tail'], brokenPartTargetCaps: { tail: 1 } }],
-    ['bazelgeuse.fire_breath', '화염 브레스', 'projectile', 0.29, {
-        sourceMoveNameJA: 'ブレス', maxTargets: 2, tags: ['projectile', 'elemental', 'fire'],
-        delivery: 'projectile', forbiddenStates: ['exhausted']
+    ['bazelgeuse.roar', '포효', 'roar', 0, {
+        maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar'],
+        weight: 0.08, active: 40, recovery: 1, animationProfile: 'roar',
+        animationDurationMs: 3200, impact: { visualRatio: .43 },
+        ignitesAllScales: true
     }],
-    ['bazelgeuse.scale_scatter', '폭발성 비늘 살포', 'area', 0.34, {
-        sourceMoveNameJA: '爆鱗撒布', minTargets: 2, maxTargets: 4, cooldown: 38,
-        tags: ['area', 'blast', 'scale'], weightWhenBroken: { head: 0.58, tail: 0.58 },
-        brokenPartDamageModifiers: { head: 0.9, tail: 0.9 }
+    ['bazelgeuse.bite', '깨물기', 'physical', 0.25, {
+        sourceMoveNameJA: '噛みつき', weight: 20, active: 30, recovery: 1,
+        weightByState: { normal: 20, enraged: 10 },
+        tags: ['physical', 'ground-only', 'target-contact', 'ignites-scale-target'],
+        animationProfile: 'close-strike', animationDurationMs: 2400,
+        impact: { visualRatio: .46 },
+        maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
+        ignitesScaleTarget: true
     }],
-    ['bazelgeuse.aerial_bombing', '공중 폭격', 'projectile', 0.36, {
-        sourceMoveNameJA: '爆鱗飛散', minTargets: 2, maxTargets: 4, windup: 7, recovery: 11,
-        tags: ['projectile', 'blast', 'scale', 'flight-only', 'multi-hit'],
-        weightWhenBroken: { head: 0.62, tail: 0.62 }, brokenPartTargetCaps: { head: 3, tail: 3 }
+    ['bazelgeuse.charge', '돌진', 'charge', 0.35, {
+        sourceMoveNameJA: '突進', weight: 20, active: 50, recovery: 1,
+        weightByState: { normal: 20, enraged: 25 },
+        tags: ['charge', 'ground-only', 'target-contact', 'blast-scale-source', 'ignites-scale-target'],
+        animationProfile: 'ground-charge', animationDurationMs: 4000,
+        movement: { kind: 'ground-charge', ticks: 50, untargetable: true },
+        impact: { visualRatio: .38 },
+        scaleDropsByPart: { body: 1, head: 1, tail: 1 }, scaleSlotMode: 'target-adjacent',
+        maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
+        ignitesScaleTarget: true
     }],
-    ['bazelgeuse.dive_crash', '급강하 폭격', 'charge', 0.48, {
-        sourceMoveNameJA: '急降下爆撃', minTargets: 2, maxTargets: 4, windup: 11, recovery: 16,
-        cooldown: 70, state: 'enraged', tags: ['charge', 'blast', 'flight-only', 'cross-charge']
+    ['bazelgeuse.side_tackle', '측면 몸통박치기', 'physical', 0.40, {
+        sourceMoveNameJA: '体当たり', weight: 15, active: 40, recovery: 1,
+        weightByState: { normal: 15, enraged: 15 },
+        tags: ['physical', 'ground-only', 'target-contact', 'blast-scale-source', 'ignites-scale-target'],
+        animationProfile: 'side-tackle-contact', animationDurationMs: 3200,
+        movement: { kind: 'side-tackle-contact', ticks: 40 },
+        impact: { visualRatio: .58 },
+        scaleDropsByPart: { body: 1, head: 1, tail: 1 }, scaleSlotMode: 'target-adjacent',
+        maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
+        ignitesScaleTarget: true
+    }],
+    ['bazelgeuse.tail_sweep', '꼬리 휩쓸기', 'area', 0.30, {
+        sourceMoveNameJA: '尻尾振り', weight: 15, active: 40, recovery: 1,
+        weightByState: { normal: 15, enraged: 15 },
+        maxTargets: 1,
+        tags: ['area', 'tail', 'ground-only', 'target-contact', 'blast-scale-source', 'ignites-scale-target'],
+        animationProfile: 'tail-sweep', animationDurationMs: 3200,
+        impact: { visualRatio: .58 },
+        scaleDropsByPart: { body: 1, tail: 2 }, scaleSlotMode: 'target-adjacent',
+        brokenPartDamageModifiers: { tail: 0.5 },
+        maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
+        ignitesScaleTarget: true
+    }],
+    ['bazelgeuse.body_press', '바디 프레스', 'physical', 0.45, {
+        sourceMoveNameJA: '押しつぶし', weight: 15, active: 30, recovery: 1,
+        weightByState: { normal: 15, enraged: 15 },
+        maxTargets: 1,
+        tags: ['physical', 'ground-only', 'target-contact', 'blast-scale-source', 'ignites-scale-target'],
+        animationProfile: 'leap-slam', animationDurationMs: 2400,
+        movement: { kind: 'leap-slam', ticks: 30 },
+        postActionRecoverySeconds: 1,
+        impact: { visualRatio: .73 },
+        scaleDropsByPart: { body: 3, head: 1, tail: 1 }, scaleSlotMode: 'target-adjacent',
+        secondaryInterference: { kind: 'tremor', size: 'small', scope: 'all-other' },
+        maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
+        ignitesScaleTarget: true
+    }],
+    ['bazelgeuse.breath', '브레스', 'elemental', 0.10, {
+        sourceMoveNameJA: '火炎ブレス', weight: 15, active: 40, recovery: 1,
+        weightByState: { normal: 15, enraged: 20 },
+        maxTargets: 1,
+        tags: ['elemental', 'fire', 'ground-only', 'blast-scale-source', 'ignites-scale-target'],
+        delivery: 'gas', forbiddenStates: ['exhausted'], originPart: 'mouth',
+        animationProfile: 'ranged-cast', animationDurationMs: 3200,
+        impact: { visualRatio: .70, survivesInterruption: true },
+        impactTimeline: [
+            {
+                atTicks: 10, damageScale: 0, eventKind: 'blast-scale-volley',
+                suppressStatus: true
+            },
+            { atTicks: 28, damageScale: 1, eventKind: 'breath-impact' }
+        ],
+        scaleDropsByPart: { body: 1, head: 2 }, scaleSlotMode: 'target-adjacent',
+        scaleDropTiming: 'before-impact',
+        maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
+        ignitesScaleTarget: true
+    }],
+    ['bazelgeuse.carpet_bombing', '융단폭격', 'charge', 0.60, {
+        sourceMoveNameJA: '爆鱗絨毯爆撃', weight: 0.01, active: 120, recovery: 1,
+        cooldown: 450, maxTargets: 1, forbiddenStates: ['exhausted'],
+        tags: ['charge', 'ground-only', 'tracking', 'high-flight-sequence', 'blast-scale-airdrop'],
+        movement: { kind: 'bazel-carpet-bombing', ticks: 120, untargetable: true },
+        targeting: { mode: 'bazel-carpet' },
+        animationProfile: 'bazel-carpet-bombing', animationDurationMs: 9600,
+        selectionChanceByState: { normal: 0.20, enraged: 0.45 },
+        selectionChancePenaltyPerBrokenPart: { partPattern: 'wing', amount: 0.05 },
+        scaleDropsByPart: { body: 2, head: 1, tail: 1 }, scaleSlotMode: 'all',
+        impactTimeline: [
+            { atTicks: 12, damageScale: 0.583333, eventKind: 'initial-charge' },
+            {
+                atTicks: 91, damageScale: 1, eventKind: 'carpet-dive',
+                targetMode: 'runtime-dive',
+                defenseMode: 'emergency-jump',
+                secondaryInterference: { kind: 'tremor', size: 'large', scope: 'all' }
+            }
+        ]
     }]
 ]);
 
@@ -230,7 +345,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.chameleos = pilot('rise_sunbreak', PILOT_SOURCES.
 
 HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.rathalos, [
     ['rathalos.roar', '포효', 'roar', 0, {
-        maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'air-compatible'],
+        maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar'],
         weight: 0.16, cooldown: 90, monsterAtbCost: 0.5
     }],
     ['rathalos.bite', '물어뜯기', 'physical', 0.24, {
@@ -247,7 +362,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
     ['rathalos.fireball', '화염구 브레스', 'projectile', 0.50, {
         sourceMoveNameJA: '火球ブレス', maxTargets: 1, recovery: 1, monsterAtbCost: 0.38,
         tags: ['projectile', 'elemental', 'fire', 'ground-only'], delivery: 'projectile',
-        impact: { delayTicks: 8, survivesInterruption: true }, animationProfile: 'rathalos-fireball', originPart: 'head',
+        impact: { delayTicks: 17, survivesInterruption: true }, animationProfile: 'rathalos-fireball', originPart: 'head',
+        projectileLaunchDelayTicks: 10,
         brokenPartDamageModifiers: { head: 0.60 },
         brokenPartAccuracyModifiers: { head: 0.75 }
     }],
@@ -255,7 +371,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         sourceMoveNameJA: '空中火球ブレス', maxTargets: 1, recovery: 1, cooldown: 24,
         monsterAtbCost: 0.44,
         tags: ['projectile', 'elemental', 'fire', 'flight-only'], delivery: 'projectile',
-        impact: { delayTicks: 9, survivesInterruption: true },
+        impact: { delayTicks: 17, survivesInterruption: true },
+        projectileLaunchDelayTicks: 10,
         animationProfile: 'rathalos-fireball', originPart: 'head',
         brokenPartDamageModifiers: { head: 0.60 },
         brokenPartAccuracyModifiers: { head: 0.75 }
@@ -264,7 +381,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         sourceMoveNameJA: 'バックブレス', minTargets: 1, maxTargets: 1, cooldown: 48,
         recovery: 1, state: 'enraged', monsterAtbCost: 0.55,
         tags: ['projectile', 'elemental', 'fire', 'ground-only', 'rage-opener'],
-        delivery: 'projectile', impact: { delayTicks: 9, survivesInterruption: true },
+        delivery: 'projectile', impact: { delayTicks: 17, survivesInterruption: true },
+        projectileLaunchDelayTicks: 10,
         flightTransition: 'takeoff', animationProfile: 'rathalos-backstep-fireball', originPart: 'head',
         secondaryInterference: { kind: 'wind', size: 'large' },
         guaranteedWhenInterference: 'roar',
@@ -279,8 +397,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
     ['rathalos.tail_sweep', '꼬리 회전', 'area', 0.31, {
         sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 3, recovery: 1,
         tags: ['area', 'tail', 'ground-only', 'target-contact'],
-        monsterAtbCost: 0.62, movement: { ticks: 30 }, targeting: { mode: 'lane' },
-        impact: { delayRatio: 0.62 }, animationProfile: 'tail-sweep',
+        monsterAtbCost: 0.62, movement: { ticks: 38 }, targeting: { mode: 'lane' },
+        impactTimeline: [{ atTicks: 14 }, { atTicks: 24 }],
+        animationProfile: 'rathalos-tail-sweep-double', animationDurationMs: 3800,
         brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.50 }
     }],
     ['rathalos.aerial_tail_sweep', '공중 꼬리 휩쓸기', 'area', 0.32, {
@@ -326,31 +445,33 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
 // Final World-original Rathian review. Only this record is exported to runtime.
 HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.rathian, [
     ['rathian.roar', '포효', 'roar', 0, {
-        maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'air-compatible'],
+        maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar'],
         weight: 0.14, cooldown: 90, monsterAtbCost: 0.48
     }],
     ['rathian.bite', '물어뜯기', 'physical', 0.22, {
         sourceMoveNameJA: '噛みつき', recovery: 1,
         tags: ['physical', 'ground-only', 'target-contact'], monsterAtbCost: 0.30,
         movement: { ticks: 20 }, impact: { delayRatio: 0.60 },
-        animationProfile: 'rathalos-bite-contact', maxConsecutiveUses: 1
+        animationProfile: 'rathalos-bite-contact', animationDurationMs: 2400,
+        maxConsecutiveUses: 1
     }],
     ['rathian.tail_sweep', '이단 꼬리 회전', 'area', 0.27, {
         sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 3, recovery: 1,
         tags: ['area', 'tail', 'ground-only', 'target-contact'], monsterAtbCost: 0.58,
-        movement: { ticks: 34 }, targeting: { mode: 'lane' },
+        movement: { ticks: 42 }, targeting: { mode: 'lane' },
         impactTimeline: [
-            { atTicks: 12, damageScale: 1 },
-            { atTicks: 22, damageScale: 1 }
+            { atTicks: 14, damageScale: 1 },
+            { atTicks: 24, damageScale: 1 }
         ],
-        animationProfile: 'tail-sweep-double',
+        animationProfile: 'tail-sweep-double', animationDurationMs: 4200,
         brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.70 }
     }],
     ['rathian.fireball', '화염구 브레스', 'projectile', 0.34, {
         sourceMoveNameJA: '炎ブレス', maxTargets: 1, recovery: 1,
         tags: ['projectile', 'elemental', 'fire', 'ground-only'], monsterAtbCost: 0.38,
         forbiddenStates: ['enraged', 'exhausted'],
-        delivery: 'projectile', impact: { delayTicks: 8, survivesInterruption: true },
+        delivery: 'projectile', impact: { delayTicks: 17, survivesInterruption: true },
+        projectileLaunchDelayTicks: 10,
         animationProfile: 'rathalos-fireball', originPart: 'head',
         brokenPartDamageModifiers: { head: 0.80 },
         brokenPartAccuracyModifiers: { head: 0.75 }
@@ -362,11 +483,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         monsterAtbCost: 0.68, targeting: { mode: 'center-left-right' }, delivery: 'projectile',
         movement: { ticks: 28 },
         impactTimeline: [
-            { atTicks: 13, targetMode: 'sequential', damageScale: 1 },
-            { atTicks: 18, targetMode: 'sequential', damageScale: 1 },
-            { atTicks: 23, targetMode: 'sequential', damageScale: 1 }
+            { atTicks: 17, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 22, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 27, targetMode: 'sequential', damageScale: 1 }
         ],
         animationProfile: 'rathian-triple-fireball', animationDurationMs: 2800, originPart: 'head',
+        projectileLaunchDelayTicks: 10,
         brokenPartDamageModifiers: { head: 0.80 },
         brokenPartAccuracyModifiers: { head: 0.75 }
     }],
@@ -384,7 +506,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         forbiddenStates: ['enraged'],
         tags: ['charge', 'ground-only', 'target-contact'], monsterAtbCost: 0.52,
         movement: { ticks: 24, untargetable: true }, targeting: { mode: 'adjacent-lane' },
-        impact: { delayRatio: 0.58 }, animationProfile: 'ground-charge'
+        impact: { delayRatio: 0.58 }, animationProfile: 'ground-charge', animationDurationMs: 3000
     }],
     ['rathian.triple_charge', '삼연속 돌진', 'charge', 0.30, {
         sourceMoveNameJA: '三連突進', minTargets: 1, maxTargets: 2, windup: 5, recovery: 1,
@@ -393,7 +515,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         movement: { kind: 'rathian-triple-charge', ticks: 98, untargetable: true },
         targeting: { mode: 'triple-adjacent-passes' },
         impact: { passRatios: [0.18, 0.50, 0.78], completePathOnTargetLoss: true },
-        animationProfile: 'ground-charge-triple'
+        animationProfile: 'ground-charge-triple', animationDurationMs: 9000
     }],
     ['rathian.somersault', '독가시 서머솔트', 'physical', 0.48, {
         sourceMoveNameJA: 'サマーソルト尻尾攻撃', maxTargets: 1, windup: 8, recovery: 1,
@@ -402,7 +524,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         tags: ['physical', 'poison', 'tail', 'flight-only', 'target-contact', 'strong'],
         monsterAtbCost: 0.72, movement: { ticks: 25 },
         impactTimeline: [{ atTicks: 10, damageScale: 1, audioCue: 'somersault' }],
-        animationProfile: 'rathian-somersault', animationDurationMs: 2500,
+        animationProfile: 'rathian-somersault', animationDurationMs: 3200,
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.70 },
         flightTransition: 'land', flight: { takeoffInterference: null },
@@ -418,7 +540,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
             { atTicks: 10, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' },
             { atTicks: 32, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' }
         ],
-        animationProfile: 'rathian-somersault-double', animationDurationMs: 5000, originPart: 'tail',
+        animationProfile: 'rathian-somersault-double', animationDurationMs: 6400, originPart: 'tail',
         statusBlockedWhenBroken: ['tail'], brokenPartTargetCaps: { tail: 1 },
         brokenPartDamageModifiers: { tail: 0.70 },
         flightTransition: 'land', flight: { takeoffInterference: null },
@@ -433,7 +555,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
             { atTicks: 15, damageScale: 0.50, ignoreBrokenPartDamage: true, suppressStatus: true },
             { atTicks: 40, damageScale: 1, audioCue: 'somersault' }
         ],
-        animationProfile: 'rathian-bite-somersault', animationDurationMs: 5500,
+        animationProfile: 'rathian-bite-somersault', animationDurationMs: 6600,
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.70 },
         flightTransition: 'land',
@@ -454,7 +576,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
                 secondaryInterference: { kind: 'wind', size: 'small', scope: 'adjacent' }
             }
         ],
-        animationProfile: 'rathian-somersault-glide', animationDurationMs: 6500,
+        animationProfile: 'rathian-somersault-glide', animationDurationMs: 7800,
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.70 },
         flightTransition: 'land', flight: { takeoffInterference: null },
@@ -469,7 +591,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
             atTicks: 28, damageScale: 1,
             secondaryInterference: { kind: 'wind', size: 'small', scope: 'adjacent' }
         }],
-        animationProfile: 'rathian-glide', animationDurationMs: 4000,
+        animationProfile: 'rathian-glide', animationDurationMs: 4800,
         flightTransition: 'land',
         flight: { takeoffInterference: { kind: 'wind', size: 'small' } }
     }]
@@ -497,15 +619,16 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = HUNT_MONSTER_PATTERN_OVERRIDES.rathian.
 
 HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.diablos, [
     ['diablos.roar', '포효', 'roar', 0, {
-        maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'interference-large'],
+        maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar', 'interference-large'],
         weight: 0.12, cooldown: 95, monsterAtbCost: 0.50, interference: { kind: 'roar', size: 'large' }
     }],
     ['diablos.horn_charge', '뿔 돌진', 'charge', 0.40, {
         sourceMoveNameJA: '突進', maxTargets: 3, windup: 7, recovery: 1,
         tags: ['charge', 'horn', 'strong'], monsterAtbCost: 0.70,
-        movement: { ticks: 24, untargetable: true },
+        movement: { ticks: 42, untargetable: true },
         targeting: { mode: 'adjacent-lane' },
-        animationProfile: 'ground-charge',
+        chargeLaunchStyle: 'stomp-burst',
+        animationProfile: 'ground-charge', animationDurationMs: 3360,
         brokenPartDamageModifiers: { 'left-horn': 0.935, 'right-horn': 0.935 }
     }],
     ['diablos.burrow_enter', '지중 잠행', 'burrow', 0, {
@@ -547,26 +670,28 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.d
     }],
     ['diablos.tail_sweep', '꼬리 휘두르기', 'area', 0.30, {
         sourceMoveNameJA: '尻尾振り', minTargets: 2, maxTargets: 2, recovery: 1,
-        tags: ['area', 'tail', 'target-contact'], monsterAtbCost: 0.65, repeatWhenEnraged: 2,
-        enragedTargetCount: 3,
-        movement: { ticks: 31, enragedTicks: 46 },
-        targeting: { mode: 'lane' },
-        attachedFx: { emoji: '🌀', className: 'tail-vortex' },
+        tags: ['area', 'tail', 'target-contact', 'charge-follow-up'], monsterAtbCost: 0.65,
+        requiresPreviousPattern: 'diablos.horn_charge', weight: 4,
+        movement: { ticks: 32 }, targeting: { mode: 'lane' },
+        impactTimeline: [{ atTicks: 14 }, { atTicks: 24 }],
+        animationProfile: 'diablos-tail-cross', animationDurationMs: 3200,
+        animationGeometry: { approachX: 0.15, approachY: 0.15 },
         brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.76 }
     }],
     ['diablos.rage_charge', '분노 연속 돌진', 'charge', 0.45, {
         sourceMoveNameJA: '怒り連続突進', minTargets: 2, maxTargets: 4, windup: 8, recovery: 1,
         cooldown: 65, state: 'enraged', tags: ['charge', 'horn', 'cross-charge', 'multi-hit'],
         monsterAtbCost: 0.80,
-        movement: { kind: 'diablos-return-charge', ticks: 114, untargetable: true },
+        movement: { kind: 'diablos-return-charge', ticks: 133, untargetable: true },
         targeting: { mode: 'return-adjacent-passes' },
         impact: {
             // One telegraph owns both passes. Resolve defense only as each
             // off-board traversal physically crosses its locked hunter lane.
-            passRatios: [0.18, 0.62],
+            passRatios: [0.357, 0.773],
             completePathOnTargetLoss: true
         },
-        animationProfile: 'ground-charge-double',
+        chargeLaunchStyle: 'stomp-burst',
+        animationProfile: 'ground-charge-double', animationDurationMs: 10640,
         whiffReaction: {
             pass: 'last', result: 'dodge',
             disabledWhenAllBroken: ['left-horn', 'right-horn'],
@@ -601,6 +726,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos.splice(-1, 0, huntPattern(
         cooldown: 38,
         tags: ['tail', 'tail-slam-rock', 'projectile'],
         delivery: 'projectile',
+        projectileVisual: 'rock',
         monsterAtbCost: 0.60,
         movement: { ticks: 34 },
         targeting: { mode: 'lane' },
@@ -646,6 +772,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos.splice(-1, 0,
         evidence: 'verified-complete-action',
         confidence: 'cross-checked-behavior'
     })
+);
+
+HUNT_MONSTER_PATTERN_OVERRIDES.diablos = HUNT_MONSTER_PATTERN_OVERRIDES.diablos.map(pattern =>
+    pattern.id === 'diablos.tail_sweep'
+        ? { ...pattern, name: '후방 X자 꼬리치기' }
+        : pattern
 );
 
 // Black Diablos shares the verified body-plan mechanics, but keeps a separate,
@@ -699,25 +831,77 @@ const worldVariant = (baseId, variantId, damageMultiplier, extras = [], transfor
 };
 
 HUNT_MONSTER_PATTERN_OVERRIDES.legiana = worldFlying([
-    ['legiana.roar', '포효', 'roar', 0, { maxTargets: 4, actionClass: 'Roar', tags: ['roar', 'air-compatible'], weight: .18 }],
-    ['legiana.claw_sweep', '발톱 휩쓸기', 'physical', .25, {
-        maxTargets: 2, actionClass: 'SideAttackL', tags: ['physical', 'target-contact'], movement: { ticks: 18 }, impact: { delayRatio: .64 }
+    ['legiana.roar', '포효', 'roar', 0, {
+        maxTargets: 4, actionClass: 'Roar', tags: ['roar', 'transition-roar'], weight: .12,
+        interference: { kind: 'roar', size: 'large' }, monsterAtbCost: .50
     }],
-    ['legiana.ice_fan', '냉기 부채꼴', 'area', .29, {
-        maxTargets: 3, actionClass: 'WideChillAttack', tags: ['area', 'ice', 'elemental'], delivery: 'cone',
-        brokenPartDamageModifiers: { head: .72 }, brokenPartAccuracyModifiers: { head: .75 }, statusBlockedWhenBroken: ['head']
+    ['legiana.bite', '깨물기', 'physical', .27, {
+        maxTargets: 1, actionClass: 'Bite', tags: ['physical', 'ground-only', 'target-contact', 'weak'],
+        windup: 2, monsterAtbCost: .30, maxConsecutiveUses: 3,
+        movement: { ticks: 14, returnsToOrigin: true, returnTicks: 8 }, impact: { delayRatio: .56 },
+        animationProfile: 'legiana-hop-strike', animationDurationMs: 1400
     }],
-    ['legiana.aerial_ice_sweep', '공중 냉기 휩쓸기', 'area', .32, {
-        minTargets: 2, maxTargets: 4, actionClass: 'ChillAttackFly', tags: ['flight-only', 'area', 'ice', 'elemental'],
-        delivery: 'cone', animationProfile: 'aerial-sweep'
+    ['legiana.hop_claw', '도약 발톱치기', 'physical', .30, {
+        maxTargets: 1, actionClass: 'SideAttackL/SideAttackR',
+        tags: ['physical', 'ground-only', 'target-contact', 'weak', 'claw'], originPart: 'claw',
+        windup: 2, monsterAtbCost: .32, maxConsecutiveUses: 3,
+        movement: { ticks: 15, returnsToOrigin: true, returnTicks: 8 }, impact: { delayRatio: .54 },
+        animationProfile: 'legiana-hop-strike', animationDurationMs: 1500
     }],
-    ['legiana.aerial_kick', '공중 발톱 급습', 'charge', .35, {
-        maxTargets: 2, actionClass: 'VerticalKickFly', tags: ['flight-only', 'charge', 'target-contact'],
-        chargeMode: 'single', movement: { ticks: 26, returnsToOrigin: true, returnTicks: 14 }, impact: { delayRatio: .62 }
+    ['legiana.ground_charge', '지상 돌진', 'charge', .34, {
+        minTargets: 1, maxTargets: 2, actionClass: 'Rush',
+        tags: ['charge', 'ground-only', 'target-contact'], monsterAtbCost: .52,
+        targeting: { mode: 'adjacent-lane' }, movement: { ticks: 30, returnsToOrigin: true, returnTicks: 14 },
+        impact: { delayRatio: .50 }, animationProfile: 'ground-charge', animationDurationMs: 2600
     }],
-    ['legiana.dive_landing', '냉기 급강하 착지', 'charge', .39, {
-        maxTargets: 3, actionClass: 'HoverRushG2F', tags: ['flight-only', 'charge', 'ice', 'elemental', 'landing-only'],
-        flightTransition: 'land', chargeMode: 'wide', animationProfile: 'aerial-dive-return'
+    ['legiana.tail_spin', '지상 꼬리 회전', 'area', .31, {
+        minTargets: 1, maxTargets: 2, actionClass: 'TailAttack',
+        tags: ['area', 'tail', 'ground-only', 'target-contact'], monsterAtbCost: .48,
+        targeting: { mode: 'adjacent-lane' }, brokenPartDamageModifiers: { tail: .7 },
+        brokenPartTargetCaps: { tail: 1 }, animationProfile: 'tail-sweep', animationDurationMs: 2200,
+        originPart: 'tail'
+    }],
+    ['legiana.aerial_claw', '공중 발톱 공격', 'physical', .30, {
+        maxTargets: 1, actionClass: 'VerticalKickFly',
+        tags: ['flight-only', 'physical', 'target-contact', 'weak', 'aerial-reposition', 'claw'], originPart: 'claw',
+        windup: 2, monsterAtbCost: .42, maxConsecutiveUses: 3,
+        targeting: { avoidPreviousTargetOnRepeat: true },
+        movement: { ticks: 18, returnsToOrigin: true, returnTicks: 10 }, impact: { delayRatio: .56 },
+        animationProfile: 'aerial-dive', animationDurationMs: 1800
+    }],
+    ['legiana.aerial_cold_sweep', '냉기 휩쓸기', 'area', .36, {
+        minTargets: 1, maxTargets: 3, actionClass: 'ChillAttackFly',
+        tags: ['flight-only', 'area', 'ice', 'elemental', 'weak', 'aerial-reposition'],
+        delivery: 'gas', originPart: 'body',
+        targeting: { mode: 'primary-adjacent-both', avoidPreviousTargetOnRepeat: true },
+        monsterAtbCost: .54, maxConsecutiveUses: 3, windup: 4, fixedWindup: true,
+        telegraphFx: { emoji: '❄️', className: 'legiana-ice-charge', durationMs: 800 },
+        animationProfile: 'lateral-sweep', animationDurationMs: 2200
+    }],
+    ['legiana.cold_tail_slam', '냉기 꼬리 내려찍기', 'area', .48, {
+        minTargets: 1, maxTargets: 3, actionClass: 'TailAttackFly',
+        tags: ['flight-only', 'area', 'tail', 'ice', 'elemental', 'strong', 'aerial-reposition'],
+        delivery: 'gas', originPart: 'tail', targeting: { mode: 'primary-adjacent-both' },
+        targetDamageRatios: [.48, .24, .24], monsterAtbCost: .68, windup: 5, fixedWindup: true,
+        telegraphFx: { emoji: '❄️', className: 'legiana-ice-charge', durationMs: 800 },
+        animationProfile: 'aerial-dive', animationDurationMs: 2500
+    }],
+    ['legiana.drill_cross', '회전 급강하', 'charge', .54, {
+        minTargets: 1, maxTargets: 4, actionClass: 'HoverRushF2F',
+        tags: ['flight-only', 'charge', 'wide-charge', 'screen-crossing', 'ice', 'elemental', 'strong', 'aerial-reposition'],
+        targeting: { mode: 'screen-sweep' }, chargeMode: 'wide', monsterAtbCost: .82,
+        delivery: 'attached',
+        windup: 6, fixedWindup: true, movement: { ticks: 32, untargetable: true },
+        impact: { delayRatio: .58, contactLeadRatio: .28 },
+        animationProfile: 'legiana-drill-cross', animationDurationMs: 3000,
+        telegraphFx: { emoji: '❄️', className: 'legiana-ice-charge', durationMs: 700 }
+    }],
+    ['legiana.dive_landing', '강한 발톱 착지', 'charge', .46, {
+        maxTargets: 1, actionClass: 'HoverRushG2F',
+        tags: ['flight-only', 'charge', 'target-contact', 'strong', 'landing-only', 'claw'], originPart: 'claw',
+        flightTransition: 'land', chargeMode: 'single', monsterAtbCost: .72,
+        postActionRecoverySeconds: 2, movement: { ticks: 26 }, impact: { delayRatio: .60 },
+        animationProfile: 'aerial-dive', animationDurationMs: 2800
     }]
 ]);
 
@@ -734,7 +918,7 @@ worldVariant('legiana', 'shrieking_legiana', 1.08, [
 }));
 
 HUNT_MONSTER_PATTERN_OVERRIDES.paolumu = worldFlying([
-    ['paolumu.roar', '포효', 'roar', 0, { maxTargets: 4, actionClass: 'Roar', tags: ['roar', 'air-compatible'], weight: .18 }],
+    ['paolumu.roar', '포효', 'roar', 0, { maxTargets: 4, actionClass: 'Roar', tags: ['roar'], weight: .18 }],
     ['paolumu.tail_sweep', '꼬리 휘두르기', 'area', .25, {
         maxTargets: 2, actionClass: 'TailAttack', tags: ['area', 'tail'], brokenPartDamageModifiers: { tail: .7 }, brokenPartTargetCaps: { tail: 1 }
     }],
@@ -782,37 +966,164 @@ worldVariant('bazelgeuse', 'seething_bazelgeuse', 1.08, [
     weightWhenBroken: pattern.tags?.includes('scale') ? { head: .6, tail: .6 } : pattern.weightWhenBroken
 }));
 
+const TIGREX_ANCHORS = Object.freeze({
+    mouth: Object.freeze({ x: .43, y: .72 }),
+    rightFrontLeg: Object.freeze({ x: .72, y: .70 }),
+    leftFrontLeg: Object.freeze({ x: .25, y: .28 }),
+    tail: Object.freeze({ x: .62, y: .28 })
+});
+
+function tigrexChargeBranch(id, branchKind, branchLabel, weightByState, normalFinal, enragedFinal) {
+    const branchProfile = branchKind === 'rock' ? 'tigrex-rock-hop'
+        : branchKind === 'spin' ? 'tigrex-sliding-spin'
+            : 'tigrex-running-double-bite';
+    const branchScale = branchKind === 'rock' ? .75 : branchKind === 'spin' ? 1.25 : .625;
+    const finalEvent = (tick, secondBite = false) => ({
+        atTicks: tick,
+        damageScale: branchScale,
+        targetMode: 'repeat-previous',
+        targetShape: secondBite ? null
+            : branchKind === 'rock' ? 'center-left-right'
+                : branchKind === 'spin' ? 'primary-adjacent-both' : null,
+        eventKind: `tigrex-${branchKind}${secondBite ? '-second' : ''}`,
+        displayName: branchLabel,
+        animationProfile: branchProfile,
+        animationDurationMs: branchKind === 'spin' ? 2600 : branchKind === 'rock' ? 2200 : 1800,
+        animationImpactRatio: branchKind === 'rock' ? .70 : branchKind === 'spin' ? .68 : .34,
+        audioCue: branchKind === 'rock' ? 'physical' : null
+    });
+    const normalTimeline = [
+        { atTicks: 15, damageScale: 1, eventKind: 'tigrex-charge-pass' },
+        { atTicks: 42, damageScale: 1, eventKind: 'tigrex-charge-return' },
+        finalEvent(normalFinal)
+    ];
+    const enragedTimeline = [
+        { atTicks: 14, damageScale: 1, eventKind: 'tigrex-charge-pass' },
+        { atTicks: 34, damageScale: 1, eventKind: 'tigrex-charge-return' },
+        { atTicks: 54, damageScale: 1, eventKind: 'tigrex-charge-pass' },
+        finalEvent(enragedFinal)
+    ];
+    const exhaustedTimeline = [
+        { atTicks: 28, damageScale: 1, eventKind: 'tigrex-charge-pass' },
+        {
+            atTicks: 58,
+            damageScale: 0,
+            eventKind: 'tigrex-exhausted-trip',
+            displayName: '돌진 실족',
+            animationProfile: 'tigrex-exhausted-trip',
+            animationDurationMs: 5000
+        }
+    ];
+    if (branchKind === 'bite') {
+        normalTimeline.push(finalEvent(normalFinal + 5, true));
+        enragedTimeline.push(finalEvent(enragedFinal + 5, true));
+    }
+    return ['tigrex.charge_' + id, '연속 돌진', 'charge', .40, {
+        maxTargets: 1,
+        actionClass: branchKind === 'rock' ? 'AfterRushRockLauncher'
+            : branchKind === 'spin' ? 'AfterRushSpin' : 'AfterRushBite',
+        tags: ['charge', 'multi-hit', 'ground-only', 'strong', 'tigrex-charge-chain'],
+        weightByState,
+        cooldown: 1,
+        maxConsecutiveUses: 99,
+        monsterAtbCost: branchKind === 'spin' ? 1 : branchKind === 'rock' ? .95 : .88,
+        staminaCostProfile: 'timeline-atb',
+        targeting: { mode: 'independent-passes', passCountByState: { normal: 2, enraged: 3, exhausted: 2 } },
+        movement: { kind: 'tigrex-charge-chain', ticks: 100, ticksByState: { normal: 100, enraged: 86, exhausted: 92 }, untargetable: true },
+        impactTimelineByState: { normal: normalTimeline, enraged: enragedTimeline, exhausted: exhaustedTimeline },
+        animationProfile: 'tigrex-charge-chain',
+        animationDurationMs: 8500,
+        projectileVisual: branchKind === 'rock' ? 'rock' : null,
+        projectileEventKinds: branchKind === 'rock' ? ['tigrex-rock'] : null,
+        branchKind,
+        branchLabel,
+        visualAnchors: TIGREX_ANCHORS,
+        stateMachine: {
+            normalPasses: 2,
+            enragedPasses: 3,
+            exhaustedPasses: 2,
+            firstTelegraphMs: 1000,
+            passDurationMs: 2500,
+            enragedSpeedMultiplier: 1.20,
+            offscreenGapMs: 600,
+            enragedOffscreenGapMs: 400,
+            finalApproachDealsDamage: false,
+            exhaustedReturnTrip: { beforeImpact: true, recoveryMs: 5000 },
+            secondReturnDodgeStuck: { chance: .30, recoveryMs: 7000 }
+        }
+    }];
+}
+
 HUNT_MONSTER_PATTERN_OVERRIDES.tigrex = worldFlying([
-    ['tigrex.roar', '근거리 음파 포효', 'roar', .18, {
-        maxTargets: 4, actionClass: 'Roar', tags: ['roar', 'sonic'], interference: { kind: 'roar-large' }, cooldown: 58
+    ['tigrex.roar', '포효', 'roar', .40, {
+        maxTargets: 4, actionClass: 'Roar', tags: ['roar', 'sonic', 'combat-roar', 'strong', 'ground-only'],
+        state: 'enraged', interference: { kind: 'roar-large', directHitSupersedes: true },
+        cooldown: 150, weight: .25, maxConsecutiveUses: 99, monsterAtbCost: .50,
+        postActionRecoverySeconds: 1.5, animationDurationMs: 2500,
+        directDamageScope: 'engaged-melee', brokenPartDamageModifiers: { head: .75 },
+        roarVisual: 'sonic-impact',
+        visualAnchors: TIGREX_ANCHORS
     }],
-    ['tigrex.bite', '달려들어 깨물기', 'physical', .27, {
-        maxTargets: 2, actionClass: 'Bite', tags: ['physical', 'target-contact'], movement: { ticks: 22 }, impact: { delayRatio: .65 }
+    ['tigrex.foreleg_slam', '앞발 내려찍기', 'physical', .25, {
+        maxTargets: 1, actionClass: 'FootAttack', tags: ['physical', 'target-contact', 'weak', 'ground-only'],
+        cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .32,
+        postActionRecoverySeconds: 1, movement: { ticks: 20, returnsToOrigin: true },
+        impact: { visualRatio: .56 }, animationProfile: 'tigrex-foreleg-slam', animationDurationMs: 2000,
+        partUse: { mode: 'random-front-leg', brokenDamageMultiplier: .70 }, visualAnchors: TIGREX_ANCHORS
     }],
-    ['tigrex.charge', '연속 돌진', 'charge', .36, {
-        maxTargets: 3, actionClass: 'Rush', tags: ['charge', 'multi-hit'], chargeMode: 'wide',
-        repeatWhenEnraged: 2, maxConsecutiveUses: 2, animationProfile: 'ground-charge-chain'
+    ['tigrex.bite', '깨물기', 'physical', .25, {
+        maxTargets: 1, actionClass: 'Bite', tags: ['physical', 'target-contact', 'weak', 'ground-only'],
+        cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .34,
+        postActionRecoverySeconds: 1, movement: { ticks: 22, returnsToOrigin: true },
+        impact: { visualRatio: .58 }, brokenPartDamageModifiers: { head: .75 },
+        animationProfile: 'tigrex-bite', animationDurationMs: 1800, visualAnchors: TIGREX_ANCHORS
     }],
-    ['tigrex.spin_finish', '돌진 회전 마무리', 'area', .34, {
-        minTargets: 2, maxTargets: 4, actionClass: 'AfterRushSpin', tags: ['area', 'multi-hit'], cooldown: 34
+    ['tigrex.double_bite', '연속 깨물기', 'physical', .25, {
+        maxTargets: 1, actionClass: 'DoubleBite', tags: ['physical', 'target-contact', 'weak', 'multi-hit', 'ground-only'],
+        cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .42,
+        postActionRecoverySeconds: 1.5, movement: { ticks: 30, returnsToOrigin: true },
+        impactTimeline: [{ atTicks: 10 }, { atTicks: 15 }],
+        brokenPartDamageModifiers: { head: .75 }, animationProfile: 'tigrex-double-bite', animationDurationMs: 2400, visualAnchors: TIGREX_ANCHORS
     }],
-    ['tigrex.rock_shot', '암석 파편', 'projectile', .28, {
-        maxTargets: 2, actionClass: 'AfterRushRockLauncher', tags: ['projectile'], delivery: 'projectile'
+    ...[
+        tigrexChargeBranch('rock', 'rock', '바위 날리기', { normal: .0875, enraged: .0375, exhausted: .0875 }, 78, 80),
+        tigrexChargeBranch('spin', 'spin', '전신 회전', { normal: .0625, enraged: .1375, exhausted: .0625 }, 78, 80),
+        tigrexChargeBranch('bite', 'bite', '연속 깨물기', { normal: .10, enraged: .075, exhausted: .10 }, 78, 80)
+    ],
+    ['tigrex.spin', '전신 회전', 'area', .50, {
+        minTargets: 1, maxTargets: 3, actionClass: 'SpinAttack', tags: ['area', 'tail', 'strong', 'ground-only'],
+        cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .62,
+        postActionRecoverySeconds: 3, targeting: { mode: 'primary-adjacent-both' },
+        impact: { visualRatio: .82 },
+        brokenPartTargetCaps: { tail: 2 }, animationProfile: 'tigrex-clockwise-spin', animationDurationMs: 2000,
+        visualAnchors: TIGREX_ANCHORS
     }],
-    ['tigrex.leap', '도약 덮치기', 'charge', .38, {
-        maxTargets: 2, actionClass: 'JumpAttack', tags: ['charge', 'target-contact'], chargeMode: 'single',
-        movement: { ticks: 24, returnsToOrigin: true, returnTicks: 15 }, impact: { delayRatio: .68 }
+    ['tigrex.rock_shot', '바위 날리기', 'projectile', .30, {
+        minTargets: 1, maxTargets: 3, actionClass: 'RockLauncher', tags: ['projectile', 'strong', 'ground-only'],
+        delivery: 'projectile', cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .48,
+        projectileVisual: 'rock',
+        postActionRecoverySeconds: 2, targeting: { mode: 'primary-adjacent-both' },
+        impact: { visualRatio: .55 }, animationDurationMs: 2200,
+        brokenPartTargetCaps: { 'right-front-leg': 1 }, partUse: { fixed: 'right-front-leg' },
+        habitatVariants: { snow: 'ice', volcanic: 'fire', wet: 'water', default: 'raw' },
+        animationProfile: 'tigrex-rock-shot', visualAnchors: TIGREX_ANCHORS
+    }],
+    ['tigrex.leap', '도약 덮치기', 'charge', .50, {
+        maxTargets: 1, actionClass: 'JumpAttack', tags: ['charge', 'target-contact', 'strong', 'ground-only'],
+        chargeMode: 'single', cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .58,
+        postActionRecoverySeconds: 3, movement: { ticks: 24, returnsToOrigin: true, returnTicks: 15 },
+        impact: { visualRatio: .68 }, animationProfile: 'tigrex-leap', animationDurationMs: 2400, visualAnchors: TIGREX_ANCHORS
     }]
 ]);
 
 worldVariant('tigrex', 'brute_tigrex', 1.08, [
     ['brute_tigrex.charge_roar', '돌진 급정지 포효', 'area', .36, {
-        minTargets: 2, maxTargets: 4, actionClass: 'AfterRushSuperRoarR', tags: ['area', 'roar', 'sonic', 'charge-chain'],
+        minTargets: 2, maxTargets: 4, actionClass: 'AfterRushSuperRoarR', tags: ['area', 'roar', 'sonic', 'combat-roar', 'charge-chain'],
         interference: { kind: 'roar-large' }, cooldown: 44
     }],
     ['brute_tigrex.sweeping_roar', '전방 휩쓸기 포효', 'area', .46, {
         minTargets: 2, maxTargets: 4, actionClass: 'AfterRushMaxRoar', requiredState: 'enraged',
-        tags: ['area', 'roar', 'sonic'], interference: { kind: 'roar-large' }, delivery: 'cone',
+        tags: ['area', 'roar', 'sonic', 'combat-roar'], interference: { kind: 'roar-large' }, delivery: 'cone',
         cooldown: 66, windup: 10, recovery: 15
     }]
 ], pattern => ({

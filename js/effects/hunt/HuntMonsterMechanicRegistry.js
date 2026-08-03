@@ -11,10 +11,12 @@ class HuntMonsterMechanicRegistry {
             matches: pattern => pattern.flightTransition
                 || pattern.tags?.includes('flight-only')
                 || pattern.tags?.includes('air-compatible')
+                || pattern.tags?.includes('high-flight-sequence')
         }),
         'blast-scales': Object.freeze({
             owner: 'HuntMonsterTraitRuntime',
-            matches: pattern => pattern.tags?.includes('blast') && pattern.tags?.includes('scale')
+            matches: pattern => (pattern.tags?.includes('blast') && pattern.tags?.includes('scale'))
+                || pattern.tags?.some(tag => /^blast-scale(?:-|$)/.test(String(tag)))
         }),
         elder: Object.freeze({
             owner: 'HuntMonsterRules',

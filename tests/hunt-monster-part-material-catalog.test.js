@@ -40,13 +40,41 @@ assert.strictEqual(diablosRightWing.side, 'right');
 assert.strictEqual(Catalog.resolve({ id: 'rathalos', name: '리오레우스' }, { kind: 'claw' }).label, '리오레우스 발톱');
 assert.strictEqual(Catalog.resolve({ id: 'unreviewed' }, { kind: 'tail' }).tint, 'grayscale(1) brightness(1.08)');
 for (const monster of releasedMonsters) {
-    const tint = Catalog.resolve(monster, { kind: 'head' }).tint;
+    const material = Catalog.resolve(monster, { kind: 'head' });
+    const tint = material.tint;
     assert.match(tint, /^brightness\([^)]+\) sepia\(1\)/,
         `${monster.id} must lower white luminance before tinting the opaque icon interior`);
     assert.doesNotMatch(tint, /^grayscale/,
         `${monster.id} must not silently fall back to a white material icon`);
+    assert.match(material.color, /^#[0-9a-f]{6}$/i,
+        `${monster.id} must provide a solid alpha-mask fill instead of relying on hue rotation`);
 }
 assert.match(Catalog.resolve({ id: 'azure_rathalos' }, { kind: 'head' }).tint,
     /^brightness\(\.72\) sepia\(1\) saturate\(6\.2\) hue-rotate\(158deg\)/);
+assert.strictEqual(Catalog.resolve({ id: 'azure_rathalos' }, { kind: 'head' }).palette.base, '#176fc1');
+assert.strictEqual(Catalog.resolve({ id: 'rathalos' }, { kind: 'head' }).palette.base, '#b72b20');
+const bazelMaterial = Catalog.resolve({ id: 'bazelgeuse' }, { kind: 'head' });
+assert.match(bazelMaterial.tint, /saturate\(0\)/,
+    'base Bazelgeuse material details must stay neutral grey');
+assert.deepStrictEqual(bazelMaterial.palette, {
+    base: '#73797b', highlight: '#c8ced0', shadow: '#2d3234', glow: '#959da0'
+}, 'base Bazelgeuse must use a neutral gunmetal material palette');
+assert.notStrictEqual(
+    bazelMaterial.palette.base,
+    Catalog.resolve({ id: 'seething_bazelgeuse' }, { kind: 'head' }).palette.base,
+    'Seething Bazelgeuse must retain its distinct heated palette'
+);
+assert.notStrictEqual(
+    Catalog.resolve({ id: 'rathalos' }, { kind: 'head' }).palette.base,
+    Catalog.resolve({ id: 'azure_rathalos' }, { kind: 'head' }).palette.base,
+    'base species and subspecies must have visibly distinct solid-mask fills'
+);
+for (const monster of releasedMonsters) {
+    const palette = Catalog.resolve(monster, { kind: 'head' }).palette;
+    assert.match(palette.base, /^#[0-9a-f]{6}$/i);
+    assert.match(palette.highlight, /^#[0-9a-f]{6}$/i);
+    assert.match(palette.shadow, /^#[0-9a-f]{6}$/i);
+    assert.match(palette.glow, /^#[0-9a-f]{6}$/i);
+}
 
 console.log('[test] Monster parts use hash-audited neutral templates with per-monster tinting.');

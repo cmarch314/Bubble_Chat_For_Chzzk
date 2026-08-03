@@ -61,6 +61,33 @@ const smallSelector = new HuntMonsterPatternSelector(() => 0);
 const smallPick = smallSelector.select(monster, catalog.test_monster, { state: 'normal', monsterTier: 'small' });
 assert.notStrictEqual(smallPick.type, 'roar', 'small monsters must never select roar patterns');
 
+{
+    const transitionRoar = {
+        id: 'rathalos.roar', type: 'roar', tags: ['roar'], weight: 100
+    };
+    const ordinaryAttack = {
+        id: 'rathalos.aerial_fireball', type: 'projectile',
+        tags: ['projectile', 'flight-only'], weight: 1
+    };
+    const transitionSelector = new HuntMonsterPatternSelector(() => 0);
+    assert.strictEqual(transitionSelector.select(
+        { id: 'rathalos' },
+        [transitionRoar, ordinaryAttack],
+        { state: 'enraged', monsterTier: 'large', flightState: 'airborne' }
+    ).id, ordinaryAttack.id,
+    'encounter/rage roars must not leak into the random action pool, even while airborne');
+
+    const combatRoar = {
+        id: 'tigrex.roar', type: 'roar', tags: ['roar', 'combat-roar'], weight: 100
+    };
+    assert.strictEqual(new HuntMonsterPatternSelector(() => 0).select(
+        { id: 'tigrex' },
+        [combatRoar, ordinaryAttack],
+        { state: 'normal', monsterTier: 'large', flightState: 'grounded' }
+    ).id, combatRoar.id,
+    'an explicitly authored combat roar must remain selectable');
+}
+
 const pitySelector = new HuntMonsterPatternSelector(() => 0.99);
 let pityPick = null;
 for (let turn = 0; turn < 5; turn++) {
@@ -97,8 +124,11 @@ assert.strictEqual(HuntMonsterTurnExecutor.monsterAttackAccuracy(
     curated.find(pattern => pattern.id === 'rathalos.fireball'),
     { monsterPartState: [{ kind: 'head', broken: true }] }
 ), .75, 'a broken Rathalos head must reduce fireball accuracy by 25%');
-assert.strictEqual(curated.find(pattern => pattern.id === 'rathalos.tail_sweep').impactTimeline, null,
-    'original Rathalos uses a single tail sweep action rather than a fabricated double combo');
+assert.deepStrictEqual(
+    curated.find(pattern => pattern.id === 'rathalos.tail_sweep').impactTimeline.map(event => event.atTicks),
+    [14, 24],
+    'the authored repeated sweep resolves as two 180-degree contacts across one complete turn'
+);
 assert.strictEqual(curated.find(pattern => pattern.id === 'rathalos.tail_sweep').brokenPartDamageModifiers.tail, 0.50);
 assert.strictEqual(curated.find(pattern => pattern.id === 'rathalos.backstep_fireball').flightTransition, 'takeoff',
     'backstep breath must preserve its data-driven transition into flight');
@@ -193,10 +223,164 @@ assert.ok(pilotCatalog.black_diablos.every(pattern =>
 assert.strictEqual(pilotCatalog.chameleos.find(pattern => pattern.id === 'chameleos.poison_mist').delivery, 'gas');
 const exhaustedBazelSelector = new HuntMonsterPatternSelector(() => 0);
 const exhaustedBazel = exhaustedBazelSelector.select({ id: 'bazelgeuse' }, [
-    pilotCatalog.bazelgeuse.find(pattern => pattern.id === 'bazelgeuse.fire_breath'),
+    pilotCatalog.bazelgeuse.find(pattern => pattern.id === 'bazelgeuse.breath'),
     pilotCatalog.bazelgeuse.find(pattern => pattern.id === 'bazelgeuse.bite')
 ], { state: 'exhausted', flightState: 'grounded' });
 assert.strictEqual(exhaustedBazel.id, 'bazelgeuse.bite', 'exhausted Bazelgeuse must fail to use its breath');
+const bazelPatterns = pilotCatalog.bazelgeuse;
+assert.ok(bazelPatterns.find(pattern => pattern.id === 'bazelgeuse.roar').tags.includes('transition-roar'));
+assert.ok(!bazelPatterns.find(pattern => pattern.id === 'bazelgeuse.roar').tags.includes('combat-roar'),
+    'Bazelgeuse roar is a transition event, not a random combat action');
+for (const monsterId of ['diablos', 'legiana', 'rathalos', 'rathian', 'bazelgeuse']) {
+    const roar = pilotCatalog[monsterId].find(pattern => pattern.type === 'roar');
+    assert.ok(roar?.tags.includes('transition-roar'),
+        `${monsterId} roar must be owned by encounter/rage transitions`);
+    assert.ok(!roar?.tags.includes('combat-roar'),
+        `${monsterId} roar must stay out of the ordinary action pool`);
+}
+for (const patternId of ['bazelgeuse.charge', 'bazelgeuse.side_tackle', 'bazelgeuse.body_press']) {
+    const pattern = bazelPatterns.find(candidate => candidate.id === patternId);
+    assert.ok(Number(pattern?.movement?.ticks) > 0,
+        `${patternId} must travel to contact instead of striking from the idle anchor`);
+}
+assert.strictEqual(
+    bazelPatterns.find(pattern => pattern.id === 'bazelgeuse.breath').originPart,
+    'mouth',
+    'Bazelgeuse breath must use the reviewed mouth anchor instead of the part-break head point'
+);
+assert.deepStrictEqual(
+    bazelPatterns.map(pattern => pattern.id),
+    [
+        'bazelgeuse.roar',
+        'bazelgeuse.bite',
+        'bazelgeuse.charge',
+        'bazelgeuse.side_tackle',
+        'bazelgeuse.tail_sweep',
+        'bazelgeuse.body_press',
+        'bazelgeuse.breath',
+        'bazelgeuse.carpet_bombing'
+    ],
+    'the reviewed Bazelgeuse kit must replace the old fictional split bombing actions'
+);
+assert.deepStrictEqual(
+    bazelPatterns
+        .filter(pattern => pattern.weightByState)
+        .map(pattern => [pattern.id, pattern.weightByState.normal, pattern.weightByState.enraged]),
+    [
+        ['bazelgeuse.bite', 20, 10],
+        ['bazelgeuse.charge', 20, 25],
+        ['bazelgeuse.side_tackle', 15, 15],
+        ['bazelgeuse.tail_sweep', 15, 15],
+        ['bazelgeuse.body_press', 15, 15],
+        ['bazelgeuse.breath', 15, 20]
+    ]
+);
+const carpet = bazelPatterns.find(pattern => pattern.id === 'bazelgeuse.carpet_bombing');
+assert.deepStrictEqual(
+    Object.fromEntries(bazelPatterns
+        .filter(pattern => pattern.scaleDropsByPart)
+        .map(pattern => [pattern.id, pattern.scaleDropsByPart])),
+    {
+        'bazelgeuse.charge': { body: 1, head: 1, tail: 1 },
+        'bazelgeuse.side_tackle': { body: 1, head: 1, tail: 1 },
+        'bazelgeuse.tail_sweep': { body: 1, tail: 2 },
+        'bazelgeuse.body_press': { body: 3, head: 1, tail: 1 },
+        'bazelgeuse.breath': { body: 1, head: 2 },
+        'bazelgeuse.carpet_bombing': { body: 2, head: 1, tail: 1 }
+    },
+    'Bazelgeuse scale counts must separate permanent base drops from breakable head/tail drops'
+);
+const bazelBreath = bazelPatterns.find(pattern => pattern.id === 'bazelgeuse.breath');
+assert.strictEqual(HuntMonsterTurnExecutor.actionPolicy().impactTimeline(bazelBreath)[0].damageScale, 0,
+    'the pre-breath scale volley is a visual hazard drop and must not deal an early phantom hit');
+assert.strictEqual(bazelBreath.scaleDropTiming, 'before-impact');
+assert.deepStrictEqual(
+    bazelBreath.impactTimeline.map(event => [event.eventKind, event.atTicks]),
+    [['blast-scale-volley', 10], ['breath-impact', 28]],
+    'breath scales must visibly land before the breath ignites its target slot'
+);
+assert.strictEqual(carpet.activeTicks, 120);
+assert.strictEqual(
+    HuntAtbConfig.scaleVisualDurationMs(carpet.animationDurationMs),
+    12000,
+    'the bombing sequence must remain twelve seconds after the global monster tempo scale'
+);
+assert.strictEqual(carpet.cooldownTicks, 450);
+assert.deepStrictEqual(
+    carpet.impactTimeline.map(event => [event.eventKind, event.atTicks]),
+    [['initial-charge', 12], ['carpet-dive', 91]],
+    'the opening collision and diagonal crash must resolve on their matching animation frames'
+);
+assert.strictEqual(
+    carpet.impactTimeline.find(event => event.eventKind === 'carpet-dive').targetMode,
+    'runtime-dive',
+    'the diagonal crash must use its separately authored dive target instead of reusing the opening target'
+);
+{
+    const targetable = [0, 1, 2, 3].map(index => ({ index }));
+    let roll = 0;
+    const rolls = [.1, .74];
+    const plan = HuntMonsterTurnExecutor.actionPolicy().resolveTargeting({
+        targetable,
+        count: 1,
+        random: () => rolls[roll++],
+        mode: 'bazel-carpet',
+        defaultTargets: [targetable[0]]
+    });
+    assert.strictEqual(plan.targets[0].index, 0);
+    assert.strictEqual(plan.runtime.runtimeSweepDirection, 'left-to-right');
+    assert.strictEqual(plan.runtime.runtimeDiveTargetIndex, 2,
+        'the carpet dive must have an independently selected visual and damage target');
+}
+assert.deepStrictEqual(
+    Object.fromEntries(bazelPatterns
+        .filter(pattern => pattern.id !== 'bazelgeuse.carpet_bombing')
+        .map(pattern => [pattern.id, HuntMonsterTurnExecutor.impactDelayTicks(pattern)])),
+    {
+        'bazelgeuse.roar': 17,
+        'bazelgeuse.bite': 14,
+        'bazelgeuse.charge': 19,
+        'bazelgeuse.side_tackle': 23,
+        'bazelgeuse.tail_sweep': 23,
+        'bazelgeuse.body_press': 22,
+        'bazelgeuse.breath': 28
+    },
+    'every reviewed Bazelgeuse action must resolve on its authored visual contact frame'
+);
+{
+    const hunters = [
+        { index: 0, status: 'alive', hitDuration: 8 },
+        { index: 1, status: 'alive', hitDuration: 0 },
+        { index: 2, status: 'alive', hitDuration: 0 }
+    ];
+    const resolved = HuntMonsterTurnExecutor.resolveImpactEventTargetIndices({
+        selectedWeapons: hunters,
+        random: () => .75,
+        perkRuntime: null
+    }, { targetMode: 'random-live' }, [0]);
+    assert.deepStrictEqual(resolved, [2],
+        'late retargeting must prefer a live hunter who is not already tumbling');
+}
+assert.deepStrictEqual(carpet.selectionChanceByState, { normal: .20, enraged: .45 });
+assert.deepStrictEqual(carpet.selectionChancePenaltyPerBrokenPart, {
+    partPattern: 'wing',
+    amount: .05
+});
+assert.strictEqual(new HuntMonsterPatternSelector(() => .19).select(
+    { id: 'bazelgeuse' },
+    [bazelPatterns.find(pattern => pattern.id === 'bazelgeuse.bite'), carpet],
+    { state: 'normal', flightState: 'grounded', partState: [] }
+).id, 'bazelgeuse.carpet_bombing');
+assert.notStrictEqual(new HuntMonsterPatternSelector(() => .16).select(
+    { id: 'bazelgeuse' },
+    [bazelPatterns.find(pattern => pattern.id === 'bazelgeuse.bite'), carpet],
+    {
+        state: 'normal',
+        flightState: 'grounded',
+        partState: [{ kind: 'left-wing', broken: true }]
+    }
+).id, 'bazelgeuse.carpet_bombing',
+'each broken wing must lower the carpet-bomb selection chance by five percentage points');
 const brokenEngine = { monsterPartState: [{ id: 'head', kind: 'head', broken: true }] };
 const diablosBurrowEnter = pilotCatalog.diablos.find(pattern => pattern.id === 'diablos.burrow_enter');
 assert.ok(diablosBurrowEnter?.tags.includes('burrow-enter'), 'Diablos must spend a separate action entering the ground');

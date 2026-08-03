@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('assert');
+const HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
 const HuntWeaponMechanics = require('../js/effects/hunt/HuntWeaponMechanics.js');
 const HuntWeaponActionSelector = require('../js/effects/hunt/HuntWeaponActionSelector.js');
 
@@ -357,8 +358,8 @@ assert.strictEqual(selector.isEligible(longSword, longSwordActions.find(action =
     'Helm Breaker must remain forbidden below red spirit level 3');
 const specialSheathe = selector.select(longSword, longSwordActions, { monsterAtb: 90, monsterState: 'enraged' }).action;
 assert.strictEqual(specialSheathe.id, 'long_sword.special_sheathe');
-assert.strictEqual(specialSheathe.activeTicks, 20, 'Special Sheathe must keep its counter wait window open twice as long');
-assert.strictEqual(specialSheathe.durationTicks, 24, 'the doubled active window must be included in total action ownership');
+assert.strictEqual(specialSheathe.activeTicks, 60, 'Special Sheathe must keep its counter wait window open for 6 seconds');
+assert.strictEqual(specialSheathe.durationTicks, 64, 'the 6 second active window must be included in total action ownership');
 mechanics.applyAction(engine, longSword, specialSheathe);
 assert.strictEqual(longSword.specialSheatheReady, true);
 const expiredSheathe = selector.select(longSword, longSwordActions, { monsterAtb: 0 }).action;
@@ -510,15 +511,21 @@ assert.ok(traces.insect_glaive.includes('insect_glaive.descending_thrust'), 'Ins
 assert.ok(traces.insect_glaive.includes('insect_glaive.strong_descending_slash'), 'Wilds Insect Glaive must charge and release Strong Descending Slash');
 assert.ok(traces.insect_glaive.includes('insect_glaive.rising_spiral_slash'), 'Strong Descending Slash must cash triple extract out into Rising Spiral Slash');
 const glaiveActions = HuntWeaponMechanics.actionsFor('insect_glaive');
-assert.ok(glaiveActions.filter(row => row.id.startsWith('insect_glaive.extract_')).every(row => row.effects.atbAfterAction === 65),
-    'extract collection must leave enough ATB recovery space to keep the glaive readable');
 assert.deepStrictEqual(
-    glaiveActions.filter(row => row.id.startsWith('insect_glaive.descending_charge_')).map(row => row.effects.atbAfterAction),
-    [70, 68],
-    'Strong Descending Slash charge beats must be fast without becoming back-to-back flashes'
+    glaiveActions.map(row => row.durationTicks),
+    [14, 14, 14, 18, 24, 30, 10, 10, 34, 38, 30],
+    'Insect Glaive occupancy must scale from extract commands through aerial finishers'
 );
-assert.strictEqual(glaiveActions.find(row => row.id === 'insect_glaive.strong_descending_slash').effects.atbAfterAction, 45,
-    'the heavy glaive payoff must have a visible recovery beat');
+assert.deepStrictEqual(
+    glaiveActions.filter(row => row.id.startsWith('insect_glaive.descending_charge_')).map(row => row.durationTicks),
+    [10, 10],
+    'Strong Descending Slash charge beats must each own a full readable second'
+);
+assert.ok(
+    HuntAtbConfig.actionCostGauge(glaiveActions.find(row => row.id === 'insect_glaive.rising_spiral_slash'))
+        > HuntAtbConfig.actionCostGauge(glaiveActions.find(row => row.id === 'insect_glaive.rising_slash')),
+    'the aerial finisher must spend substantially more ATB than the combo opener'
+);
 assert.ok(traces.light_bowgun.includes('light_bowgun.reload'), 'Light Bowgun magazine must cause an explicit reload');
 assert.ok(traces.light_bowgun.includes('light_bowgun.chaser'), 'Light Bowgun Chaser Shot must accelerate Rapid Fire gauge recovery');
 assert.ok(traces.light_bowgun.includes('light_bowgun.enter_rapid'), 'Light Bowgun must explicitly enter Wilds Rapid Fire Mode');

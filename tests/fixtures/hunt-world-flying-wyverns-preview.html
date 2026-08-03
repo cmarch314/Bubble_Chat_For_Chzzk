@@ -16,7 +16,7 @@
     .review-meta{position:absolute;z-index:30;top:72px;left:40px;font:800 19px/1.35 sans-serif;color:#c8d3c4}
     #monster-name{font-size:30px;color:#fff}
     #move-name{color:#ffdf88}
-    #monster-stage{position:absolute;z-index:12;inset:110px 0 260px;display:grid;place-items:center;overflow:visible}
+    #monster-showcase-panel{position:absolute;z-index:12;inset:110px 0 260px;display:grid;place-items:center;overflow:visible}
     .hunt-monster-motion-stage{position:relative;width:980px;height:510px;display:grid;place-items:center;overflow:visible}
     .hunt-monster-facing-layer,.hunt-monster-attack-motion{width:100%;height:100%;display:grid;place-items:center;overflow:visible}
     #fight-monster-img{width:410px;height:410px;object-fit:contain;filter:drop-shadow(0 28px 26px #000c)}
@@ -41,7 +41,7 @@
       <span id="move-name"></span>
     </div>
     <div id="part-list" aria-label="파괴 가능 부위"></div>
-    <section id="monster-stage" class="game-hunt-monster-showcase">
+    <section id="monster-showcase-panel" class="game-hunt-monster-showcase">
       <div class="hunt-monster-motion-stage">
         <div class="hunt-monster-facing-layer">
           <div class="hunt-monster-attack-motion">
@@ -59,6 +59,7 @@
   </main>
   <footer class="chat-safe">OBS 채팅 안전영역 · 하단 15%</footer>
   <script src="../../js/effects/hunt/data/ReviewedMonsterAnatomy.js"></script>
+  <script src="../../js/effects/hunt/HuntAtbConfig.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterArchetypeCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterAnatomyCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterProfiles.js"></script>
@@ -70,8 +71,10 @@
     const owner={card:document.getElementById('preview'),selectedMonster:null,animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)},clear(id){clearTimeout(id)}}};
     const animator=new HuntMonsterAttackAnimator(owner,()=>{});
     const requestedMonster=new URLSearchParams(location.search).get('monster');
+    const requestedAction=new URLSearchParams(location.search).get('action');
     let monsterIndex=Math.max(0,roster.indexOf(requestedMonster));
     let actionIndex=0;
+    let previewTimer=null;
     function renderParts(id){
       const profile=HuntMonsterAnatomyCatalog.find({id});
       const parts=HuntMonsterAnatomyCatalog.partDisplaySlots(HuntMonsterAnatomyCatalog.createPartState(profile));
@@ -91,7 +94,9 @@
       document.getElementById('monster-name').textContent=names[id];
       document.getElementById('review-count').textContent=`${monsterIndex+1} / ${roster.length}`;
       renderParts(id);
-      actionIndex=0;
+      const patterns=window.HUNT_MONSTER_PATTERN_OVERRIDES?.[id]||HUNT_MONSTER_PATTERN_OVERRIDES[id]||[];
+      actionIndex=Math.max(0,patterns.findIndex(pattern=>
+        pattern.id===`${id}.${requestedAction}`||pattern.id===requestedAction));
       playAction();
     }
     function playAction(){
@@ -101,11 +106,16 @@
       const pattern=patterns[actionIndex++%patterns.length];
       document.getElementById('move-name').textContent=pattern.name;
       const targets=Array.from({length:Math.max(1,Math.min(4,pattern.maxTargets||1))},(_,index)=>({index,result:index===3?'dodge':'hit'}));
-      animator.triggerMonsterAttack(pattern.type,pattern.tags?.includes('ice')?'❄️':pattern.tags?.includes('fire')?'🔥':'💥',targets,pattern.name,pattern);
+      const trigger=()=>animator.triggerMonsterAttack(pattern.type,pattern.tags?.includes('ice')?'❄️':pattern.tags?.includes('fire')?'🔥':'💥',targets,pattern.name,pattern);
+      if(previewTimer)clearTimeout(previewTimer);
+      if(pattern.telegraphFx){
+        animator.triggerMonsterTelegraphFx(pattern.telegraphFx);
+        previewTimer=setTimeout(trigger,Number(pattern.telegraphFx.durationMs||800));
+      }else trigger();
     }
     addEventListener('load',()=>{
       showMonster();
-      setInterval(playAction,3200);
+      if(!requestedAction)setInterval(playAction,3200);
       if(!requestedMonster)setInterval(()=>{monsterIndex=(monsterIndex+1)%roster.length;showMonster()},12800);
     });
   </script>

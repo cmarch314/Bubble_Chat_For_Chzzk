@@ -45,7 +45,7 @@ class HuntMonsterArchetypeCatalog {
             roarSize: 'small',
             rageStartTick: 800,
             rageDurationTicks: 1200,
-            exhaustionDurationTicks: 300,
+            rageRecoveryDurationTicks: 300,
             naturalLandingPatternId: null,
             maxEffectiveFlashes: 4,
             flightMode: 'short-chain',
@@ -63,7 +63,7 @@ class HuntMonsterArchetypeCatalog {
             roarSize: 'small',
             rageStartTick: 800,
             rageDurationTicks: 1200,
-            exhaustionDurationTicks: 300,
+            rageRecoveryDurationTicks: 300,
             rageOpenerPatternId: 'rathalos.backstep_fireball',
             rageOpenerRetryTicks: 450,
             naturalLandingPatternId: 'rathalos.stomp',
@@ -74,14 +74,26 @@ class HuntMonsterArchetypeCatalog {
         legiana: Object.freeze({
             sourceGame: 'world_iceborne',
             enragedDamageMultiplier: 1.10,
-            roarSize: 'small',
-            rageDurationTicks: 1000,
+            roarSize: 'large',
+            rageDurationTicks: 900,
+            rageOpenerTakeoff: true,
+            flightGroundActionRange: Object.freeze([1, 2]),
+            flightActionCountByState: Object.freeze({ normal: 2, enraged: 3 }),
+            takeoffInterference: Object.freeze({ kind: 'wind', size: 'small' }),
+            aerialRepositionRecoveryTicks: 10,
             naturalLandingPatternId: 'legiana.dive_landing',
             maxEffectiveFlashes: 4,
             flightFailureChanceByBrokenWings: Object.freeze([0, .30, .65]),
             flightFailureStaggerTicks: 45,
             traits: Object.freeze([
-                Object.freeze({ kind: 'ice-coat' })
+                Object.freeze({
+                    kind: 'ice-coat',
+                    attackFx: Object.freeze({
+                        emoji: '❄️',
+                        className: 'legiana-rage-ice-release',
+                        durationMs: 850
+                    })
+                })
             ])
         }),
         shrieking_legiana: Object.freeze({
@@ -94,7 +106,14 @@ class HuntMonsterArchetypeCatalog {
             flightFailureChanceByBrokenWings: Object.freeze([0, .25, .55]),
             flightFailureStaggerTicks: 42,
             traits: Object.freeze([
-                Object.freeze({ kind: 'ice-coat' })
+                Object.freeze({
+                    kind: 'ice-coat',
+                    attackFx: Object.freeze({
+                        emoji: '❄️',
+                        className: 'legiana-rage-ice-release',
+                        durationMs: 950
+                    })
+                })
             ])
         }),
         paolumu: Object.freeze({
@@ -131,16 +150,22 @@ class HuntMonsterArchetypeCatalog {
             sourceGame: 'world_iceborne',
             enragedDamageMultiplier: 1.10,
             roarSize: 'large',
-            rageDurationTicks: 1100,
+            rageDurationTicks: 900,
+            rageRecoveryDurationTicks: 300,
             naturalLandingPatternId: null,
             maxEffectiveFlashes: 4,
-            flightFailureChanceByBrokenWings: Object.freeze([0, .25, .55]),
+            flightFailureChanceByBrokenWings: Object.freeze([0, 0, 0]),
             flightFailureStaggerTicks: 44,
             traits: Object.freeze([
                 Object.freeze({
-                    kind: 'blast-scales', dropCount: 2, heatedDropCount: 3,
-                    delayTicks: 22, delayVarianceTicks: 14, damageRatio: .08,
-                    heatedDamageRatio: .11, maxPending: 6, maxHeat: 3, criticalHeat: 3
+                    kind: 'blast-scales',
+                    totalLifetimeTicks: 300,
+                    heatedFuseTicks: 30,
+                    chainDelayTicks: 10,
+                    explosionAudioDelayMs: 1000,
+                    damageRatio: .30,
+                    maxPending: 4,
+                    visualPalette: 'red'
                 })
             ])
         }),
@@ -156,17 +181,27 @@ class HuntMonsterArchetypeCatalog {
             traits: Object.freeze([
                 Object.freeze({
                     kind: 'blast-scales', dropCount: 3, heatedDropCount: 4,
-                    delayTicks: 18, delayVarianceTicks: 12, damageRatio: .10,
-                    heatedDamageRatio: .14, maxPending: 7, maxHeat: 4, criticalHeat: 3
+                    delayTicks: 18, delayVarianceTicks: 12, damageRatio: .20,
+                    explosionAudioDelayMs: 1000,
+                    heatedDamageRatio: .28, maxPending: 7, maxHeat: 4, criticalHeat: 3,
+                    visualPalette: 'purple'
                 })
             ])
         }),
         tigrex: Object.freeze({
             sourceGame: 'world_iceborne',
             enragedDamageMultiplier: 1.10,
+            exhaustedDamageMultiplier: .70,
+            enragedAtbMultiplier: 1.20,
+            exhaustedAtbMultiplier: .70,
+            enragedAnimationDurationMultiplier: 1 / 1.20,
+            exhaustedAnimationDurationMultiplier: 1.30,
+            rageDurationTicks: 900,
+            rageRoarConsumesFullAtb: true,
             roarSize: 'large',
+            stamina: Object.freeze({ max: 80, exhaustDurationTicks: 600, pantTicks: 50 }),
             traits: Object.freeze([
-                Object.freeze({ kind: 'charge-fatigue', stumbleTicks: 28 })
+                Object.freeze({ kind: 'charge-fatigue', stumbleTicks: 50 })
             ])
         }),
         brute_tigrex: Object.freeze({

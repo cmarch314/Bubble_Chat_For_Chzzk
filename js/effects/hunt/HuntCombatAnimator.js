@@ -3,9 +3,11 @@ class HuntCombatAnimator {
         this.owner = owner;
         this.activeWeaponAnimations = new Map();
         this.weaponAnimationGenerations = new Map();
+        this.monsterPartBreakVisualQueue = [];
+        this.monsterPartBreakVisualActive = false;
         this.monsterAttackAnimator = new HuntMonsterAttackAnimator(
             owner,
-            () => this.triggerMonsterRoar()
+            pattern => this.triggerMonsterRoar(pattern)
         );
     }
 
@@ -39,8 +41,12 @@ class HuntCombatAnimator {
         ).forEach(layer => layer.classList.remove('large-hit-anim', 'small-hit-anim'));
         this.card.querySelectorAll('.hunt-action-effect').forEach(effect => effect.remove());
         this.card.querySelectorAll('.hunt-environment-effect').forEach(effect => effect.remove());
+        this.card.querySelectorAll('.hunt-hit-impact').forEach(effect => effect.remove());
         this.card.querySelectorAll('.hunt-damage-number').forEach(number => number.remove());
         this.card.querySelectorAll('.hunt-guard-impact').forEach(effect => effect.remove());
+        this.card.querySelectorAll('.monster-part-break-visual').forEach(effect => effect.remove());
+        this.monsterPartBreakVisualQueue = [];
+        this.monsterPartBreakVisualActive = false;
         this.card.querySelectorAll('.ig-kinsect').forEach(kinsect => {
             kinsect.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
         });
@@ -55,10 +61,12 @@ class HuntCombatAnimator {
     }
 
     resolveMonsterImpactTimeline(pattern, targetIndices) {
-        return this.monsterAttackAnimator?.resolveScreenCrossImpactTimeline(pattern, targetIndices) || null;
+        return this.monsterAttackAnimator?.resolveBazelCarpetImpactTimeline(pattern, targetIndices)
+            || this.monsterAttackAnimator?.resolveScreenCrossImpactTimeline(pattern, targetIndices)
+            || null;
     }
 
-    showDamageAtImpact(monsterImg, damage, hitzoneValue = 45, partKind = null) {
+    showDamageAtImpact(monsterImg, damage, hitzoneValue = 45, partKind = null, isCritical = false) {
         const stage = this.card?.querySelector?.('#monster-showcase-panel');
         const amount = Math.max(0, Math.round(Number(damage) || 0));
         if (!stage || !monsterImg || amount <= 0) return;
@@ -80,18 +88,86 @@ class HuntCombatAnimator {
             ? HuntMonsterAnatomyCatalog
             : null;
         const partPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, partKind, sequence);
+        const impact = document.createElement('div');
+        impact.className = `hunt-hit-impact ${isCritical ? 'is-critical' : 'is-normal'}`;
+        impact.setAttribute('aria-hidden', 'true');
+        if (isCritical) {
+            const slash = document.createElement('i');
+            slash.className = 'hunt-critical-slash';
+            impact.appendChild(slash);
+        } else {
+            for (let particle = 0; particle < 5; particle++) {
+                impact.appendChild(document.createElement('i'));
+            }
+        }
         if (hasMeasuredPosition) {
             const localX = Number(partPoint?.x ?? .55);
             const localY = Number(partPoint?.y ?? .36);
-            number.style.left = `${targetRect.left - stageRect.left + targetRect.width * localX + spreadX}px`;
-            number.style.top = `${targetRect.top - stageRect.top + targetRect.height * localY + spreadY}px`;
+            const impactX = targetRect.left - stageRect.left + targetRect.width * localX;
+            const impactY = targetRect.top - stageRect.top + targetRect.height * localY;
+            impact.style.left = `${impactX}px`;
+            impact.style.top = `${impactY}px`;
+            number.style.left = `${impactX + spreadX}px`;
+            number.style.top = `${impactY + spreadY}px`;
         } else {
+            impact.style.left = '50%';
+            impact.style.top = '42%';
             number.style.left = `calc(50% + ${spreadX}px)`;
             number.style.top = `calc(42% + ${spreadY}px)`;
         }
 
+        stage.appendChild(impact);
         stage.appendChild(number);
+        this.animationTimers.timeout(() => impact.remove(), isCritical ? 850 : 520);
         this.animationTimers.timeout(() => number.remove(), 1050);
+    }
+
+    queueMonsterPartBreakVisual(partKind) {
+        if (!partKind || typeof document === 'undefined') return;
+        this.monsterPartBreakVisualQueue.push(String(partKind));
+        this.playNextMonsterPartBreakVisual();
+    }
+
+    playNextMonsterPartBreakVisual() {
+        if (this.monsterPartBreakVisualActive || !this.monsterPartBreakVisualQueue.length) return;
+        const stage = this.card?.querySelector?.('#monster-showcase-panel');
+        if (!stage || typeof document === 'undefined') return;
+        const partKind = this.monsterPartBreakVisualQueue.shift();
+        const materialCatalog = typeof HuntMonsterPartMaterialCatalog !== 'undefined'
+            ? HuntMonsterPartMaterialCatalog
+            : null;
+        const material = materialCatalog?.resolve?.(
+            this.owner?.selectedMonster,
+            { kind: partKind || 'part' }
+        );
+        const visual = document.createElement('div');
+        visual.className = 'monster-part-break-visual';
+        visual.dataset.partKind = partKind;
+        visual.setAttribute('aria-label', `${partKind} 파괴`);
+        const source = String(material?.path || '');
+        for (const side of ['left', 'right']) {
+            const half = document.createElement('span');
+            half.className = `monster-part-break-half is-${side}`;
+            const image = document.createElement('img');
+            image.className = 'hunt-monster-part-image';
+            image.src = source;
+            image.alt = '';
+            image.style.setProperty('--hunt-part-tint', material?.tint || 'none');
+            image.style.filter = `${material?.tint || 'grayscale(1) brightness(1.08)'} brightness(1.25) contrast(1.12)`;
+            half.appendChild(image);
+            visual.appendChild(half);
+        }
+        const label = document.createElement('strong');
+        label.textContent = `${String(partKind).slice(0, 3)} 파괴`;
+        visual.appendChild(label);
+        stage.appendChild(visual);
+        this.monsterPartBreakVisualActive = true;
+        const visualDurationMs = 2500;
+        this.animationTimers.timeout(() => {
+            visual.remove();
+            this.monsterPartBreakVisualActive = false;
+            this.playNextMonsterPartBreakVisual();
+        }, visualDurationMs + 80);
     }
 
     showSkillBubble(idxOrMonster, content) {
@@ -156,7 +232,7 @@ class HuntCombatAnimator {
         this.animationTimers.timeout(() => impact.remove(), 620);
     }
 
-    triggerMonsterRoar() {
+    triggerMonsterRoar(pattern = null) {
         if (!this.card) return;
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
         const showcase = this.card.querySelector('#monster-showcase-panel');
@@ -168,21 +244,31 @@ class HuntCombatAnimator {
         monsterImg.classList.add('monster-roar-vibrate');
         this.animationTimers.timeout(() => monsterImg.classList.remove('monster-roar-vibrate'), 1200);
 
-        // Spawn a large shaking speaker emoji that fades out
-        const speaker = document.createElement('div');
-        speaker.className = 'roar-speaker-emoji';
-        speaker.textContent = '🔊';
-        showcase.appendChild(speaker);
+        const sonicImpact = pattern?.roarVisual === 'sonic-impact';
+        let speaker = null;
+        if (!sonicImpact) {
+            speaker = document.createElement('div');
+            speaker.className = 'roar-speaker-emoji';
+            speaker.textContent = '🔊';
+            showcase.appendChild(speaker);
+        }
+        const showcaseRect = showcase.getBoundingClientRect();
+        const monsterRect = monsterImg.getBoundingClientRect();
+        const centerX = monsterRect.left + monsterRect.width * .48 - showcaseRect.left;
+        const centerY = monsterRect.top + monsterRect.height * .58 - showcaseRect.top;
 
         // Spawn concentric sound wave rings
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < (sonicImpact ? 5 : 3); i++) {
             this.animationTimers.timeout(() => {
                 if (!this.card) return;
                 const ring = document.createElement('div');
-                ring.className = 'roar-wave-ring';
+                ring.className = `roar-wave-ring${sonicImpact ? ' is-sonic-impact' : ''}`;
+                ring.style.left = `${centerX}px`;
+                ring.style.top = `${centerY}px`;
+                ring.style.setProperty('--roar-ring-index', String(i));
                 showcase.appendChild(ring);
-                this.animationTimers.timeout(() => ring.remove(), 1000);
-            }, i * 300);
+                this.animationTimers.timeout(() => ring.remove(), sonicImpact ? 1250 : 1000);
+            }, i * (sonicImpact ? 115 : 300));
         }
 
         // Vibrate all hunter cards during the roar
@@ -193,7 +279,7 @@ class HuntCombatAnimator {
         }, 1500);
 
         this.animationTimers.timeout(() => {
-            speaker.remove();
+            speaker?.remove();
         }, 1500);
     }
 
@@ -210,6 +296,10 @@ class HuntCombatAnimator {
 
     triggerMonsterAttack(type, emoji, targets, attackName = '', pattern = null) {
         return this.monsterAttackAnimator.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
+    }
+
+    triggerMonsterTelegraphFx(effect) {
+        return this.monsterAttackAnimator.triggerMonsterTelegraphFx(effect);
     }
 
     triggerMonsterBurrowPhase(phase, targetIndex, durationMs) {
@@ -232,6 +322,9 @@ class HuntCombatAnimator {
     }
     triggerHitAnimation(idx, w, reaction = {}) {
         if (!this.card || !w || w.hp <= 0) return;
+        // A damaging hit replaces roar, tremor, and wind-pressure presentation.
+        // Keep this defensive cleanup even when the runtime callback arrives late.
+        this.triggerHunterInterference(idx, '', '', false);
         this.interruptWeaponVisual(idx, w);
         this.cancelHitAnimation(idx);
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
@@ -429,6 +522,10 @@ class HuntCombatAnimator {
         this.clearMonsterAnimations('knockdown');
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
         if (monsterImg) {
+            // An authored part reaction owns the current knockdown pose. A
+            // later generic state refresh must not erase a tail-cut tumble.
+            if (monsterImg.classList.contains('monster-tail-sever-roll')
+                || monsterImg.classList.contains('monster-part-break-topple')) return;
             monsterImg.dataset.partBreakReactionGeneration = String(
                 Number(monsterImg.dataset.partBreakReactionGeneration || 0) + 1
             );
@@ -446,14 +543,17 @@ class HuntCombatAnimator {
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted')
             || this.card.querySelector('#fight-monster-img');
         if (!monsterImg) return;
+        this.queueMonsterPartBreakVisual(partKind);
 
-        const reactionClass = kind === 'tail_sever_roll'
+        const reactionClass = kind === 'tail_sever_roll' || /(^|[-_])tail($|[-_])/.test(String(partKind || ''))
             ? 'monster-tail-sever-roll'
             : 'monster-part-break-topple';
         const durationMs = Math.max(900, Number(durationTicks || 1) * 100);
         const generation = Number(monsterImg.dataset.partBreakReactionGeneration || 0) + 1;
         monsterImg.dataset.partBreakReactionGeneration = String(generation);
-        monsterImg.dataset.partBreakReaction = kind || 'part_break_topple';
+        monsterImg.dataset.partBreakReaction = reactionClass === 'monster-tail-sever-roll'
+            ? 'tail_sever_roll'
+            : (kind || 'part_break_topple');
         if (partKind) monsterImg.dataset.partBreakKind = String(partKind);
         else delete monsterImg.dataset.partBreakKind;
         monsterImg.classList.remove(
@@ -603,7 +703,13 @@ class HuntCombatAnimator {
                 });
 
                 if (monsterImg && profile.impact) {
-                    this.showDamageAtImpact(monsterImg, hitContext.damage, hitzoneVal, hitContext.partKind);
+                    this.showDamageAtImpact(
+                        monsterImg,
+                        hitContext.damage,
+                        hitzoneVal,
+                        hitContext.partKind,
+                        hitContext.critical === true && hitContext.bounced !== true
+                    );
                     monsterImg.classList.remove('small-hit-anim', 'large-hit-anim');
                     void monsterImg.offsetWidth;
                     monsterImg.classList.add(hitzoneVal >= 45 ? 'large-hit-anim' : 'small-hit-anim');
@@ -645,9 +751,10 @@ class HuntCombatAnimator {
             if (kinsectImg && w?.id === 'insect_glaive') {
                 kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
                 if (profile.kinsect !== 'none') {
+                    kinsectImg.style.setProperty('--ig-kinsect-duration', `${profile.durationMs}ms`);
                     void kinsectImg.offsetWidth;
                     kinsectImg.classList.add(profile.kinsect === 'extract' ? 'ig-kinsect-extract' : 'ig-kinsect-assault');
-                    animDuration = Math.max(animDuration, profile.kinsect === 'extract' ? 1080 : 760);
+                    animDuration = Math.max(animDuration, profile.durationMs);
                 }
             }
 
@@ -659,7 +766,10 @@ class HuntCombatAnimator {
                 if (w && w.status !== 'dead') {
                     if (weaponImg) this.cancelWeaponAnimation(weaponImg);
                     if (shieldImg) this.cancelWeaponAnimation(shieldImg);
-                    if (kinsectImg) kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
+                    if (kinsectImg) {
+                        kinsectImg.classList.remove('ig-kinsect-extract', 'ig-kinsect-assault');
+                        kinsectImg.style.removeProperty('--ig-kinsect-duration');
+                    }
                     if (['great_sword', 'hammer'].includes(w.id)) {
                         const weaponContainer = weaponImg?.closest?.('.game-hunt-weapon-img-container');
                         if (weaponContainer?.dataset) delete weaponContainer.dataset.weaponChargeReleaseStage;
@@ -679,10 +789,86 @@ class HuntCombatAnimator {
         }, 150);
     }
 
-    triggerEnvironmentEffect(kind) {
+    triggerEnvironmentEffect(kind, hunterIndex = null, details = null) {
         if (!this.card) return;
+        if (String(kind || '').startsWith('blast-scale-')) {
+            const targetCard = Number.isInteger(Number(hunterIndex))
+                ? this.card.querySelector(`#fight-card-${Number(hunterIndex)}`)
+                : null;
+            const anchor = targetCard?.querySelector('.game-hunt-weapon-img-container') || targetCard;
+            if (!anchor) return;
+            let hazard = anchor.querySelector('.hunt-blast-scale-hazard');
+            if (kind === 'blast-scale-place') {
+                if (hazard) return;
+                hazard = document.createElement('div');
+                hazard.className = 'hunt-blast-scale-hazard';
+                hazard.classList.add(
+                    details?.visualPalette === 'purple' ? 'palette-purple' : 'palette-red'
+                );
+                hazard.setAttribute('aria-hidden', 'true');
+                hazard.innerHTML = '<i></i><b></b><span></span>';
+                anchor.appendChild(hazard);
+                const monsterImg = this.card.querySelector(
+                    '.hunt-small-monster.is-targeted, #fight-monster-img'
+                );
+                const monsterRect = monsterImg?.getBoundingClientRect?.();
+                const anchorRect = anchor.getBoundingClientRect?.();
+                if (monsterRect && anchorRect && hazard.style?.setProperty) {
+                    const sourcePart = String(details?.sourcePart || 'body');
+                    const sourceRatio = sourcePart === 'head'
+                        ? { x: .28, y: .56 }
+                        : sourcePart === 'tail'
+                            ? { x: .76, y: .58 }
+                            : { x: .50, y: .52 };
+                    const sourceX = monsterRect.left + monsterRect.width * sourceRatio.x;
+                    const sourceY = monsterRect.top + monsterRect.height * sourceRatio.y;
+                    const groundX = anchorRect.left + anchorRect.width / 2;
+                    const groundY = anchorRect.bottom - 2;
+                    const deltaX = Math.round(sourceX - groundX);
+                    const deltaY = Math.round(sourceY - groundY);
+                    hazard.style.setProperty('--blast-scale-source-x', `${deltaX}px`);
+                    hazard.style.setProperty('--blast-scale-source-y', `${deltaY}px`);
+                    hazard.style.setProperty('--blast-scale-arc-x', `${Math.round(deltaX * .52)}px`);
+                    hazard.style.setProperty(
+                        '--blast-scale-arc-y',
+                        `${Math.round(Math.min(deltaY - 72, -108))}px`
+                    );
+                }
+                void hazard.offsetWidth;
+                hazard.classList.add('is-placed');
+                this.animationTimers.timeout(() => hazard?.classList?.add('has-landed'), 1380);
+                return;
+            }
+            if (!hazard) return;
+            if (kind === 'blast-scale-cancel') {
+                hazard.classList.add('is-cancelled');
+                this.animationTimers.timeout(() => hazard.remove(), 180);
+                return;
+            }
+            if (kind === 'blast-scale-heat') {
+                hazard.classList.add('is-heated');
+                return;
+            }
+            if (kind === 'blast-scale-explode') {
+                hazard.classList.add('is-heated', 'is-exploding');
+                this.animationTimers.timeout(() => hazard.remove(), 950);
+                return;
+            }
+        }
         const showcase = this.card.querySelector('#monster-showcase-panel');
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
+        if (kind === 'trap-release') {
+            showcase?.querySelectorAll(
+                '.environment-pitfall, .environment-shocktrap, .environment-shocktrap-pending'
+            )?.forEach(effect => effect.remove());
+            monsterImg?.classList?.remove(
+                'monster-pitfall-caught',
+                'monster-pitfall-struggling',
+                'monster-flash-hit',
+                'monster-shocktrap-caught'
+            );
+            return;
+        }
         if (!showcase || !monsterImg || !['pitfall', 'rockfall', 'flash', 'shocktrap', 'shocktrap-pending', 'bomb'].includes(kind)) return;
 
         showcase.querySelectorAll('.hunt-environment-effect').forEach(effect => effect.remove());
@@ -721,7 +907,7 @@ class HuntCombatAnimator {
             effect.innerHTML = '<div class="hunt-shock-trap hunt-ground-web is-triggered"><i></i></div>';
             monsterImg.classList.remove('monster-flash-hit');
             void monsterImg.offsetWidth;
-            monsterImg.classList.add('monster-flash-hit');
+            monsterImg.classList.add('monster-flash-hit', 'monster-shocktrap-caught');
             this.animationTimers.timeout(() => monsterImg.classList.remove('monster-flash-hit'), 1600);
         } else if (kind === 'flash') {
             effect.innerHTML = '<div class="hunt-flash-burst">✨</div><strong>섬광!</strong>';
@@ -759,8 +945,15 @@ class HuntCombatAnimator {
                 this.card?.classList.remove('hunt-rockfall-shake');
             }, 1900);
         }
+        if (kind === 'pitfall' || kind === 'shocktrap') {
+            effect.classList.add('is-atb-bound');
+            effect.style?.setProperty?.('--trap-retained-atb', String(Number(details?.retainedAtb || 0)));
+            effect.dataset.trapUseCount = String(Number(details?.useCount || 1));
+        }
         showcase.appendChild(effect);
-        this.animationTimers.timeout(() => effect.remove(), kind === 'flash' ? 1400 : (kind === 'pitfall' ? 2500 : 2300));
+        if (kind !== 'pitfall' && kind !== 'shocktrap') {
+            this.animationTimers.timeout(() => effect.remove(), kind === 'flash' ? 1400 : 2300);
+        }
     }
 
     resolveWeaponTargetVector(weaponImg, target) {
@@ -832,6 +1025,10 @@ class HuntCombatAnimator {
         if (typeof document === 'undefined') return null;
         const kind = profile?.effect;
         if (!kind || kind === 'none') return null;
+        // Physical contact already gets an impact-anchored dust/critical effect.
+        // The old moving sever arc and green counter square duplicated that
+        // feedback and made a critical look like a projectile leaving the hit.
+        if (['sever', 'blunt', 'counter', 'multi'].includes(kind)) return null;
         const effect = document.createElement('span');
         effect.className = `hunt-action-effect hunt-action-effect-${kind}`;
         effect.dataset.actionId = String(profile.actionId || '');
@@ -893,4 +1090,3 @@ class HuntCombatAnimator {
 
 if (typeof module !== 'undefined' && module.exports) module.exports = HuntCombatAnimator;
 else globalThis.HuntCombatAnimator = HuntCombatAnimator;
-

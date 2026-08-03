@@ -7011,6 +7011,524 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
         ]
       ]
     }
+  ],
+  "bazelgeuse:blast_scale_explosion": [
+    {
+      "label": "bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 329955462,
+      "sourceId": 457291258,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_147_539512701.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1369674560,
+      "sourceId": 676863950,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_172_676863950.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1369674560,
+      "sourceId": 154999830,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_040_154999830.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1369674560,
+      "sourceId": 94184838,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_023_94184838.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1646912344,
+      "sourceId": 929211688,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_235_929211688.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1646912344,
+      "sourceId": 573643063,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_147_573643063.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1646912344,
+      "sourceId": 119548103,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_030_119548103.mp3",
+          0.74,
+          0
+        ]
+      ]
+    }
+  ],
+  "seething_bazelgeuse:blast_scale_explosion": [
+    {
+      "label": "seething_bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 329955462,
+      "sourceId": 457291258,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_147_539512701.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1369674560,
+      "sourceId": 676863950,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_172_676863950.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1369674560,
+      "sourceId": 154999830,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_040_154999830.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1369674560,
+      "sourceId": 94184838,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_023_94184838.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1646912344,
+      "sourceId": 929211688,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_235_929211688.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1646912344,
+      "sourceId": 573643063,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_147_573643063.mp3",
+          0.74,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "seething_bazelgeuse blast_scale_explosion",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "blast_scale_explosion",
+      "sourceBank": "em118_se",
+      "eventId": 1646912344,
+      "sourceId": 119548103,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_030_119548103.mp3",
+          0.74,
+          0
+        ]
+      ]
+    }
+  ],
+  "legiana:flinch": [
+    {
+      "label": "legiana small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em111_vo",
+      "eventId": 4114590055,
+      "sourceId": 76314627,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_009_76314627.mp3",
+          0.62,
+          0
+        ]
+      ]
+    }
+  ],
+  "legiana:roar": [
+    {
+      "label": "legiana monster_roar",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "monster_roar",
+      "sourceBank": "em111_vo",
+      "eventId": 3411438907,
+      "sourceId": 386696490,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_040_386696490.mp3",
+          0.78,
+          0
+        ]
+      ]
+    }
+  ],
+  "legiana:attack": [
+    {
+      "label": "legiana physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em111_vo",
+      "eventId": 2859019915,
+      "sourceId": 660399003,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_066_660399003.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em111_vo",
+      "eventId": 2848381055,
+      "sourceId": 987525133,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_113_987525133.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em111_vo",
+      "eventId": 2822432008,
+      "sourceId": 808226650,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_089_808226650.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em111_vo",
+      "eventId": 2822432008,
+      "sourceId": 891653597,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_100_891653597.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em111_vo",
+      "eventId": 2765797071,
+      "sourceId": 164328779,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_017_164328779.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em111_vo",
+      "eventId": 2765797071,
+      "sourceId": 367937005,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_035_367937005.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em111_vo",
+      "eventId": 2622531251,
+      "sourceId": 397927528,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_042_397927528.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana physical_attack",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "physical_attack",
+      "sourceBank": "em111_vo",
+      "eventId": 2622531251,
+      "sourceId": 483503586,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_051_483503586.mp3",
+          0.64,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em111_05_se",
+      "eventId": 1545209983,
+      "sourceId": 264040908,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_009_264040908.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em111_05_se",
+      "eventId": 1564401912,
+      "sourceId": 879365226,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_033_879365226.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em111_05_se",
+      "eventId": 1564401912,
+      "sourceId": 686487186,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_026_686487186.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em111_05_se",
+      "eventId": 1564401912,
+      "sourceId": 823414065,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_029_823414065.mp3",
+          0.66,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "legiana breath",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "breath",
+      "sourceBank": "em111_05_se",
+      "eventId": 3836985661,
+      "sourceId": 778477451,
+      "patternKeywords": [
+        "breath",
+        "fireball",
+        "gas",
+        "projectile",
+        "tornado"
+      ],
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_028_778477451.mp3",
+          0.66,
+          0
+        ]
+      ]
+    }
+  ],
+  "legiana:death": [
+    {
+      "label": "legiana death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em111_vo",
+      "eventId": 2321416505,
+      "sourceId": 675251350,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_068_675251350.mp3",
+          0.72,
+          0
+        ]
+      ]
+    }
   ]
 });
 const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
@@ -10595,6 +11113,276 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "eventId": 236867272,
     "sourceId": 294845443,
     "path": "local_assets/monster_hunter/world/monster/em043/em043_vo_nbnk_058_294845443.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 329955462,
+    "sourceId": 457291258,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_147_539512701.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 329955462,
+    "sourceId": 457291258,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_147_539512701.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1369674560,
+    "sourceId": 676863950,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_172_676863950.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1369674560,
+    "sourceId": 676863950,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_172_676863950.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1369674560,
+    "sourceId": 154999830,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_040_154999830.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1369674560,
+    "sourceId": 154999830,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_040_154999830.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1369674560,
+    "sourceId": 94184838,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_023_94184838.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1369674560,
+    "sourceId": 94184838,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_023_94184838.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1646912344,
+    "sourceId": 929211688,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_235_929211688.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1646912344,
+    "sourceId": 929211688,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_235_929211688.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1646912344,
+    "sourceId": 573643063,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_147_573643063.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1646912344,
+    "sourceId": 573643063,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_147_573643063.mp3"
+  },
+  {
+    "monsterId": "bazelgeuse",
+    "routeKey": "bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1646912344,
+    "sourceId": 119548103,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_030_119548103.mp3"
+  },
+  {
+    "monsterId": "seething_bazelgeuse",
+    "routeKey": "seething_bazelgeuse:blast_scale_explosion",
+    "tag": "blast_scale_explosion",
+    "bank": "em118_se",
+    "eventId": 1646912344,
+    "sourceId": 119548103,
+    "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_030_119548103.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em111_vo",
+    "eventId": 4114590055,
+    "sourceId": 76314627,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_009_76314627.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:roar",
+    "tag": "monster_roar",
+    "bank": "em111_vo",
+    "eventId": 3411438907,
+    "sourceId": 386696490,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_040_386696490.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "physical_attack",
+    "bank": "em111_vo",
+    "eventId": 2859019915,
+    "sourceId": 660399003,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_066_660399003.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "breath",
+    "bank": "em111_vo",
+    "eventId": 2848381055,
+    "sourceId": 987525133,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_113_987525133.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "breath",
+    "bank": "em111_vo",
+    "eventId": 2822432008,
+    "sourceId": 808226650,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_089_808226650.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "breath",
+    "bank": "em111_vo",
+    "eventId": 2822432008,
+    "sourceId": 891653597,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_100_891653597.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "physical_attack",
+    "bank": "em111_vo",
+    "eventId": 2765797071,
+    "sourceId": 164328779,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_017_164328779.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "physical_attack",
+    "bank": "em111_vo",
+    "eventId": 2765797071,
+    "sourceId": 367937005,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_035_367937005.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "physical_attack",
+    "bank": "em111_vo",
+    "eventId": 2622531251,
+    "sourceId": 397927528,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_042_397927528.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "physical_attack",
+    "bank": "em111_vo",
+    "eventId": 2622531251,
+    "sourceId": 483503586,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_051_483503586.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:death",
+    "tag": "death_vocal",
+    "bank": "em111_vo",
+    "eventId": 2321416505,
+    "sourceId": 675251350,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_068_675251350.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "breath",
+    "bank": "em111_05_se",
+    "eventId": 1545209983,
+    "sourceId": 264040908,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_009_264040908.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "breath",
+    "bank": "em111_05_se",
+    "eventId": 1564401912,
+    "sourceId": 879365226,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_033_879365226.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "breath",
+    "bank": "em111_05_se",
+    "eventId": 1564401912,
+    "sourceId": 686487186,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_026_686487186.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "breath",
+    "bank": "em111_05_se",
+    "eventId": 1564401912,
+    "sourceId": 823414065,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_029_823414065.mp3"
+  },
+  {
+    "monsterId": "legiana",
+    "routeKey": "legiana:attack",
+    "tag": "breath",
+    "bank": "em111_05_se",
+    "eventId": 3836985661,
+    "sourceId": 778477451,
+    "path": "local_assets/monster_hunter/world/monster/em111/em111_05_se_nbnk_028_778477451.mp3"
   }
 ]);
 const HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED = Object.freeze([]);

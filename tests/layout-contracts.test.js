@@ -91,20 +91,24 @@ assert.match(css, /\.hunt-monster-part-label\s*\{[^}]*background:rgba\(4,4,3,.94
     'part labels must keep high contrast on the dark auxiliary panel');
 assert.match(css, /\.hunt-monster-part::before\s*\{[^}]*radial-gradient[^}]*rgba\(255,239,181,\.38\)/s,
     'dark extracted materials need a warm backing glow for OBS readability');
-assert.match(css, /\.hunt-monster-part-image\s*\{[^}]*var\(--hunt-part-tint[^}]*brightness\(1\.2\)[^}]*contrast\(1\.12\)/s,
-    'neutral part templates must retain detail while receiving the monster tint');
-assert.doesNotMatch(css, /\.hunt-monster-part(?:\.is-broken)?\s*\{[^}]*grayscale/s,
-    'part-break state must use the diagonal strike rather than hiding the icon with grayscale');
+assert.match(css, /\.hunt-monster-part-art::before\s*\{[^}]*var\(--hunt-part-base[^}]*mask-image:var\(--hunt-part-mask\)/s,
+    'neutral part templates must receive a solid alpha-mask fill that also colours white interior pixels');
+assert.match(css, /\.hunt-monster-part-image\s*\{[^}]*filter:var\(--hunt-part-tint,none\)[^}]*opacity:\.94/s,
+    'the source image must tint its opaque interior instead of remaining gray');
 assert.match(huntRenderer, /HuntMonsterPartMaterialCatalog\.resolve\(this\.selectedMonster, part\)/,
     'part status must resolve the current monster material instead of an anatomy emoji');
 assert.match(huntRenderer, /icon\.dataset\.materialSourceId = material\?\.sourceId/,
     'rendered part items must retain their audited source identity');
 assert.match(huntRenderer, /icon\.dataset\.materialShape = material\?\.shapeFamily/,
     'rendered part items must expose their audited silhouette family');
+assert.match(huntRenderer, /icon\.style\.setProperty\('--hunt-part-tint', material\?\.tint/,
+    'the audited monster tint must be applied to the visible source pixels');
 assert.match(huntRenderer, /caption\.className = 'hunt-monster-part-label'[\s\S]*?caption\.textContent = shortLabel[\s\S]*?slot\.appendChild\(caption\)/,
     'every material icon must render its compact part name directly underneath');
-assert.match(huntRenderer, /--hunt-part-tint', material\?\.tint/,
-    'one neutral material set must receive the current monster tint');
+assert.match(huntRenderer, /--hunt-part-mask', `url\("\$\{material\?\.path/,
+    'the part renderer must bind the extracted icon alpha mask');
+assert.match(huntRenderer, /--hunt-part-base', material\?\.palette\?\.base/,
+    'one neutral material set must receive the current monster solid palette');
 assert.doesNotMatch(huntRenderer, /const icons = \{[^}]*🐲|slot\.textContent = icons/,
     'anatomy emoji must never substitute for available material icons');
 assert.match(huntPartMaterials, /爵銀龍の銀角[\s\S]*?爵銀龍の重殻[\s\S]*?爵銀龍の剛翼[\s\S]*?爵銀龍の三又尾/,
@@ -113,6 +117,9 @@ assert.match(css, /\.hunter-interference-overlay\s*\{[^}]*inset:3px[^}]*z-index:
     'roar, wind, and tremor overlays must match the weapon image and sit immediately above its layers');
 assert.match(css, /\.hunter-interference-overlay\.is-small\s*\{[^}]*opacity:\.88/);
 assert.match(css, /\.hunter-interference-overlay\.is-large\s*\{[^}]*opacity:\.98/);
+assert.match(css,
+    /\.hunter-interference-active \.game-hunt-weapon-img:not\(\.small-hit-anim\):not\(\.large-hit-anim\)/,
+    'hit knockback animations must override stale roar, tremor, or wind wobble selectors');
 for (const kind of ['roar', 'tremor', 'wind']) {
     assert.match(css, new RegExp(`\\.hunter-interference-overlay\\.is-${kind}[^}]*--hunter-interference-color`),
         `${kind} interference needs its own high-contrast color`);
@@ -364,6 +371,18 @@ assert.doesNotMatch(css, /\.game-hunt-weapon-img\.cb-shield-charged-img\s*\{[^}]
     'charge blade shield charge must not override action animations');
 assert.match(css, /\.hunt-damage-number\s*\{[\s\S]*?position:\s*absolute[\s\S]*?hunt-damage-number-pop/,
     'successful hits must render a readable damage number at the impact coordinate');
+assert.match(huntAnimator, /hitContext\.critical === true && hitContext\.bounced !== true/,
+    'confirmed critical hits must reach the impact renderer without decorating bounced attacks');
+assert.match(css, /\.hunt-hit-impact\.is-normal i\s*\{[\s\S]*?hunt-hit-dust/,
+    'ordinary hunter hits must use a restrained dust impact');
+assert.match(css, /\.hunt-critical-slash\s*\{[\s\S]*?clip-path:\s*polygon/,
+    'the critical slash must taper toward its endpoint');
+assert.match(css, /\.hunt-critical-slash\s*\{[\s\S]*?#[eEfF][0-9a-fA-F]{5}[\s\S]*?transform:\s*translate\(-50%, -50%\) rotate\(45deg\) scale\(/,
+    'critical hits must flash as a red tapered slash fixed to the impact coordinate');
+assert.doesNotMatch(css, /@keyframes hunt-critical-slash[\s\S]{0,900}scaleX\(/,
+    'critical hits must not grow outward like a travelling sword beam');
+assert.match(huntAnimator, /\['sever', 'blunt', 'counter', 'multi'\]\.includes\(kind\)\) return null/,
+    'ordinary contact and counters must not add the old moving arc or green square above impact feedback');
 assert.match(huntRenderer, /data-small-monster-index="\$\{index\}"/,
     'small monsters must expose a stable target coordinate for damage numbers');
 assert.match(huntRenderer, /renderHunterProbabilityBadges\(hunter = \{\}\)/,

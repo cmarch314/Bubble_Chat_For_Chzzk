@@ -122,6 +122,29 @@ assert.match(battleTickSource, /pendingSharpnessRestore[\s\S]{0,260}?playSFX\?\.
 assert.match(battleTickSource, /showSkillBubble\(w\.index,\s*'예리도 회복!'\)/,
     'successful sharpening must finish with the exact recovery phrase');
 
+assert.match(monsterTurnSource, /audioPhase:\s*'action-start'/,
+    'monster action entry must request vocal-only audio');
+assert.match(monsterTurnSource, /requiresDelayedImpact\(pattern\)[\s\S]*?return;[\s\S]*?audioPhase:\s*'impact'/,
+    'monster SE must be requested after delayed-impact scheduling and therefore at the committed impact');
+assert.match(monsterTurnSource, /audioPhase:\s*'impact'[\s\S]*?targetsToHit\.forEach/,
+    'monster impact SE must be aligned with the same execution pass that resolves hunter hits');
+
+const legianaBreathSe = manager.verifiedMonsterCue('legiana', 'attack', {
+    patternId: 'legiana.aerial_cold_sweep',
+    patternName: '냉기 휘쓸기',
+    patternType: 'area',
+    patternTags: ['flight-only', 'ice', 'elemental'],
+    patternDelivery: 'gas',
+    audioPhase: 'impact'
+});
+assert.ok(legianaBreathSe, 'Legiana cold release must resolve the reviewed breath event group');
+assert.match(legianaBreathSe.sourceBank, /^em111(?:_05)?_se$/,
+    'the cold release frame must select reviewed Legiana SE rather than a vocal layer');
+assert.strictEqual(manager.monsterCueLayersForPhase(legianaBreathSe, 'action-start').length, 0,
+    'the reviewed release SE must not play at action preparation');
+assert.match(monsterTurnSource, /patternTags:\s*pattern\.tags[\s\S]{0,100}?patternDelivery:\s*pattern\.delivery/,
+    'monster actions must pass authored delivery semantics into audio routing');
+
 // Weakspot sever hit routing
 manager.playMHAsset('hit_impact', null, { weaponType: 'sever', hitzoneValue: 65 });
 assert.strictEqual(playedHit, 'sever_weakspot', 'hitzone 65 sever should trigger sever_weakspot');

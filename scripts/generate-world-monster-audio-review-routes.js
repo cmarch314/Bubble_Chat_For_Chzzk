@@ -30,7 +30,8 @@ const TAG_ROUTES = Object.freeze({
     somersault_vocal: { kind: 'attack', volume: 0.7, keywords: ['somersault', 'tail'] },
     physical_attack_vocal: { kind: 'attack', volume: 0.65 },
     physical_attack: { kind: 'attack', volume: 0.64 },
-    physical_impact: { kind: 'attack', volume: 0.62 }
+    physical_impact: { kind: 'attack', volume: 0.62 },
+    blast_scale_explosion: { kind: 'blast_scale_explosion', volume: 0.74 }
 });
 
 function readJson(file, fallback = {}) {

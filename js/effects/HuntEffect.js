@@ -207,6 +207,7 @@ class HuntEffect extends BaseEffect {
             currentConsecutiveIndex: this.currentConsecutiveIndex,
             consecutiveQueue: this.consecutiveQueue,
             selectedMonster: this.selectedMonster,
+            monsterHabitatId: this.audioManager.lastBgmResolution?.habitatId || 'arena',
             questTier: currentTier,
             journey: this.huntMode === 'journey' ? {
                 stage: Number(this.runDirector?.state?.stageIndex || 0) + 1,
@@ -594,22 +595,26 @@ class HuntEffect extends BaseEffect {
                     this.renderer.spawnCombatChatBubble(hunter.index, '🔒 준비됨');
                     return true;
                 }
-                const previousWeaponId = hunter.id;
                 const previousPersonality = hunter.personality;
                 if (change.personality) hunter.personality = change.personality;
                 if (change.personality) this.initializer.syncLoadoutItems(hunter);
                 let weaponId = change.weaponId;
+                let weaponReplaced = false;
                 if (!weaponId && change.recommend) {
                     const recommendation = this.loadoutAdvisor.recommend(hunter, this.selectedMonster, this.selectedWeapons);
                     weaponId = recommendation && recommendation.id;
                 }
-                if (weaponId) this.initializer.replaceHunterWeapon(hunter, weaponId);
+                if (weaponId) weaponReplaced = this.initializer.replaceHunterWeapon(hunter, weaponId);
                 this.renderer.updateLoadoutCard(hunter);
-                const label = this.renderer.getPersonalityLabel(hunter.personality);
-                this.renderer.spawnCombatChatBubble(hunter.index, `✅ ${hunter.name} · ${label}`);
-                const weaponChanged = hunter.id !== previousWeaponId;
+                // Re-selecting the same weapon kind still rolls a new weapon instance,
+                // so the refreshed weapon data must receive the same visual confirmation.
+                const weaponChanged = weaponReplaced;
                 const personalityChanged = hunter.personality !== previousPersonality;
                 if (weaponChanged || personalityChanged) {
+                    this.renderer.highlightLoadoutChanges(hunter.index, {
+                        weaponChanged,
+                        personalityChanged
+                    });
                     this.audioManager.playLoadoutConfirmationVoice(hunter, { weaponChanged, personalityChanged });
                 }
                 return true;
@@ -921,7 +926,7 @@ class HuntEffect extends BaseEffect {
         this.audioManager.playMHAudioFile('Unified_SFX/MH - Hunters Depart (MH3U).mp3');
 
         this.monsterTier = this.initializer.getMonsterTier(this.selectedMonster);
-        const tierRules = HuntTierRules.resolve(this.monsterTier, 'initial');
+        const tierRules = HuntTierRules.resolve(this.monsterTier, 'initial', this.selectedMonster);
         const baseHp = tierRules.hp;
         const baseStunThreshold = tierRules.stunThreshold;
         this.monsterDamageMod = tierRules.damageMod;
@@ -982,6 +987,7 @@ class HuntEffect extends BaseEffect {
             monsterHp: baseHp,
             monsterMaxHp: baseHp,
             smallMonsterCount: this.smallMonsterCount,
+            monsterAtb: HuntAtbConfig.monsterEncounterStartAtb(),
             monsterSpeed: HuntAtbConfig.FILL_PER_TICK * this.monsterAtbSpeedMod,
             monsterState: 'normal',
             monsterDamageMod: this.monsterDamageMod,
@@ -997,6 +1003,7 @@ class HuntEffect extends BaseEffect {
             monsterSpeedMultiplier: this.config.getHuntConfig()?.monsterSpeedMultiplier !== undefined ? this.config.getHuntConfig().monsterSpeedMultiplier : 1.0,
             timeLimit: timeLimitVal,
             sharedSupply: journeySupply,
+            schedule: (callback, delay) => this.timers.timeout(callback, delay),
             callbacks: {
                 onLog: (text, color) => this.addCombatLog(text, color),
                 onPlaySFX: (fileName, fallbackKey, context) => this.audioManager.playMHAsset(fileName, fallbackKey, context),
@@ -1047,6 +1054,7 @@ class HuntEffect extends BaseEffect {
                 onTriggerMonsterAttack: (type, emoji, targets, attackName, pattern) => {
                     this.renderer.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
                 },
+                onTriggerMonsterTelegraphFx: effect => this.renderer.triggerMonsterTelegraphFx(effect),
                 onResolveMonsterImpactTimeline: (pattern, targetIndices) =>
                     this.renderer.resolveMonsterImpactTimeline(pattern, targetIndices),
                 onTriggerMonsterBurrowPhase: (phase, targetIndex, durationMs) => {
@@ -1101,7 +1109,8 @@ class HuntEffect extends BaseEffect {
                 },
                 onTriggerMonsterTraitReaction: (kind, durationTicks) =>
                     this.renderer.triggerMonsterTraitReaction(kind, durationTicks),
-                onTriggerEnvironmentEffect: (kind) => this.renderer.triggerEnvironmentEffect(kind),
+                onTriggerEnvironmentEffect: (kind, hunterIndex, details) =>
+                    this.renderer.triggerEnvironmentEffect(kind, hunterIndex, details),
                 onGameEnd: (victory, winner) => this.endGame(container, victory, winner),
                 onNextConsecutive: () => this.spawnNextConsecutiveMonster(container),
                 onTriggerValstraxAmbush: () => {
@@ -1276,7 +1285,7 @@ class HuntEffect extends BaseEffect {
 
         // Update stats in engine
         this.monsterTier = this.initializer.getMonsterTier(this.selectedMonster);
-        const tierRules = HuntTierRules.resolve(this.monsterTier, 'consecutive');
+        const tierRules = HuntTierRules.resolve(this.monsterTier, 'consecutive', this.selectedMonster);
         const baseHp = tierRules.hp;
         const baseStunThreshold = tierRules.stunThreshold;
         this.monsterDamageMod = tierRules.damageMod;
@@ -1296,11 +1305,14 @@ class HuntEffect extends BaseEffect {
         this.engine.monsterTier = this.monsterTier;
         this.engine.monsterHp = baseHp;
         this.engine.monsterMaxHp = baseHp;
+        const encounterStartAtb = HuntAtbConfig.monsterEncounterStartAtb();
         this.engine.smallMonsterSwarm = this.monsterTier === 'small' && typeof HuntSmallMonsterSwarm !== 'undefined'
-            ? new HuntSmallMonsterSwarm(this.smallMonsterCount, baseHp)
+            ? new HuntSmallMonsterSwarm(this.smallMonsterCount, baseHp, encounterStartAtb)
             : null;
         this.engine.battleTime = 0; // Reset countdown timer for each monster!
-        this.engine.monsterAtb = 0;
+        this.engine.monsterAtb = encounterStartAtb;
+        this.engine.pendingMonsterEncounterRoar = false;
+        this.engine.pendingMonsterRageRoar = false;
         this.engine.monsterState = 'normal';
         this.engine.monsterSpeed = HuntAtbConfig.FILL_PER_TICK * this.monsterAtbSpeedMod;
         this.engine.monsterDamageMod = this.monsterDamageMod;
@@ -1312,6 +1324,7 @@ class HuntEffect extends BaseEffect {
         this.engine.monsterKnockdownDuration = 0;
         this.engine.monsterDeathCuePlayed = false;
         this.engine.monsterTrapUseCount = 0;
+        this.engine.activeTrapControl = null;
         this.engine.monsterKnockdownTriggered = { 80: false, 60: false, 40: false, 20: false };
 
         if (this.selectedMonster.id.includes('valstrax')) {

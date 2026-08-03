@@ -12,10 +12,12 @@ assert.strictEqual(parser.parsePerkReroll('!리롤 대검'), null, 'perk reroll 
 assert.strictEqual(parser.parsePerkReroll('리롤'), null, 'perk reroll must remain an explicit command');
 assert.deepStrictEqual(parser.parsePerkLock('!잠금 1'), { perkIndex: 0 });
 assert.deepStrictEqual(parser.parsePerkLock('！ 잠금 3'), { perkIndex: 2 });
+assert.deepStrictEqual(parser.parsePerkLock('!잠금3'), { perkIndex: 2 }, 'accepts lock command without spaces');
 assert.strictEqual(parser.parsePerkLock('!잠금'), null, 'perk lock requires a visible one-based perk number');
 assert.strictEqual(parser.parsePerkLock('!잠금 첫번째'), null, 'perk lock accepts numeric positions only');
 assert.deepStrictEqual(parser.parsePerkUnlock('!해제 1'), { perkIndex: 0 });
 assert.deepStrictEqual(parser.parsePerkUnlock('！ 해제 3'), { perkIndex: 2 });
+assert.deepStrictEqual(parser.parsePerkUnlock('!해제3'), { perkIndex: 2 }, 'accepts unlock command without spaces');
 assert.strictEqual(parser.parsePerkUnlock('!잠금 1'), null, 'lock must never toggle an existing lock off');
 assert.strictEqual(parser.parsePerkUnlock('!잠금해제 1'), null, 'unlock must use the explicit !해제 command');
 assert.strictEqual(parser.parsePerkUnlock('!해제'), null, 'perk unlock requires a visible one-based perk number');

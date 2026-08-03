@@ -9,6 +9,9 @@ for (const count of [3, 4, 5]) {
     assert.ok(swarm.units.every(unit => unit.hp === unit.maxHp && unit.alive));
     assert.ok(swarm.units.every(unit => unit.atb === 0));
 }
+const encounterSwarm = new HuntSmallMonsterSwarm(4, 400, 75);
+assert.ok(encounterSwarm.units.every(unit => unit.atb === 75),
+    'every small monster must support the shared 25%-depleted encounter start');
 const swarm = new HuntSmallMonsterSwarm(4, 400);
 assert.strictEqual(swarm.activeAttackerIndex, -1, 'no small monster should appear to be attacking before its gauge is ready');
 assert.deepStrictEqual([0, 1, 2, 3, 0].map(() => swarm.nextAttacker().index), [0, 1, 2, 3, 0],

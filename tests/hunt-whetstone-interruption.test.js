@@ -4,6 +4,7 @@ const assert = require('assert');
 const HuntActionStateMachine = require('../js/effects/hunt/HuntActionStateMachine.js');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
 const HuntMonsterTurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
+global.HuntMonsterRules = require('../js/effects/hunt/HuntMonsterRules.js');
 
 const noop = () => {};
 const hunter = {
@@ -51,7 +52,7 @@ const engine = {
     actionStateMachine: new HuntActionStateMachine(),
     telemetry: { recordMonsterPattern: noop },
     monsterPatternSelector: null,
-    weaponMechanics: { onHit: noop },
+    weaponMechanics: { onHit: noop, tick: noop },
     interruptHunterItemAction: HuntEngine.prototype.interruptHunterItemAction,
     playSFX: noop,
     updateMonsterHpUI: noop,
@@ -76,4 +77,91 @@ assert.strictEqual(hunter.itemDuration, 0, 'the hit must end the sharpening item
 assert.strictEqual(cancelledAudio, 1, 'the hit must invalidate delayed whetstone scraping audio');
 assert.ok(logs.some(text => text.includes('[숫돌질 실패]')), 'the interruption must be readable in combat logs');
 
-console.log('[test] Whetstone hit interruption contract passed.');
+const evadingHunter = {
+    ...hunter,
+    hp: 100,
+    pendingSharpnessRestore: true,
+    itemDuration: 20,
+    actionState: 'idle',
+    currentAction: null,
+    hitDuration: 0
+};
+let evadeCancelledAudio = 0;
+const evadeEngine = {
+    ...engine,
+    selectedWeapons: [evadingHunter],
+    monsterHp: 1000,
+    monsterAtb: 100,
+    random: () => 0,
+    callbacks: {
+        ...engine.callbacks,
+        onCancelWhetstoneCue: () => { evadeCancelledAudio++; }
+    }
+};
+
+HuntMonsterTurnExecutor.execute(evadeEngine);
+
+assert.strictEqual(evadingHunter.hp, evadingHunter.maxHp, 'a sharpening hunter may evade the incoming attack');
+assert.strictEqual(evadingHunter.pendingSharpnessRestore, false, 'evading must revoke pending sharpness restoration');
+assert.strictEqual(evadingHunter.itemDuration, 0, 'evading must end the sharpening item lock');
+assert.strictEqual(evadeCancelledAudio, 1, 'evading must invalidate delayed whetstone scraping audio');
+
+// Test 0-damage hit interruption
+const zeroDmgHunter = {
+    ...hunter,
+    hp: 100,
+    sharpness: 10,
+    pendingSharpnessRestore: true,
+    itemDuration: 20,
+    hitDuration: 0
+};
+const zeroDmgPattern = {
+    id: 'test.zerodmg',
+    name: '0데미지 공격',
+    type: 'melee',
+    damageRatio: 0,
+    minTargets: 1,
+    maxTargets: 1
+};
+const zeroDmgEngine = {
+    ...engine,
+    selectedWeapons: [zeroDmgHunter],
+    preparedMonsterTargetIndex: 0,
+    preparedMonsterPattern: zeroDmgPattern,
+    MONSTER_PATTERNS: {
+        test_monster: [zeroDmgPattern]
+    },
+    random: () => 0.99
+};
+HuntMonsterTurnExecutor.execute(zeroDmgEngine, zeroDmgPattern);
+assert.strictEqual(zeroDmgHunter.pendingSharpnessRestore, false, '0-damage hits must also revoke pending sharpness restoration');
+assert.strictEqual(zeroDmgHunter.itemDuration, 0, '0-damage hits must cancel item lock');
+
+// Test tick completion safety check when hunter is in hitstun
+const HuntBattleTickExecutor = require('../js/effects/hunt/HuntBattleTickExecutor.js');
+const tickInterruptedHunter = {
+    ...hunter,
+    sharpness: 10,
+    maxSharpness: 100,
+    pendingSharpnessRestore: true,
+    itemDuration: 1,
+    hitDuration: 5
+};
+const tickEngine = {
+    ...engine,
+    selectedWeapons: [tickInterruptedHunter],
+    colossalPhaseRuntime: null,
+    updateTimerUI: noop,
+    updateMonsterAtbUI: noop,
+    getRemainingSeconds: () => 180,
+    callbacks: {
+        ...engine.callbacks,
+        onTriggerStunUI: noop,
+        onTriggerDeathTag: noop
+    }
+};
+HuntBattleTickExecutor.execute(tickEngine);
+assert.strictEqual(tickInterruptedHunter.pendingSharpnessRestore, false, 'tick completion must not restore sharpness if hunter is interrupted');
+assert.strictEqual(tickInterruptedHunter.sharpness, 10, 'sharpness must remain unchanged when interrupted');
+
+console.log('[test] Whetstone hit and evade interruption contracts passed.');

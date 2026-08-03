@@ -1,7 +1,16 @@
 'use strict';
 
 const assert = require('assert');
-const { runtimeRoutes } = require('../scripts/generate-world-monster-audio-review-routes');
+const {
+    TAG_ROUTES,
+    runtimeRoutes
+} = require('../scripts/generate-world-monster-audio-review-routes');
+
+assert.deepStrictEqual(
+    TAG_ROUTES.blast_scale_explosion,
+    { kind: 'blast_scale_explosion', volume: 0.74 },
+    'the user-confirmed blast-scale explosion tag must have a dedicated runtime route'
+);
 
 const labels = {
     tagAliases: {

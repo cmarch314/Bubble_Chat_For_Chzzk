@@ -18,6 +18,8 @@ const engine = {
 const runtime = new HuntHunterBlightRuntime(engine);
 
 const cases = [
+    [{ id: 'bazelgeuse.breath', name: '브레스', type: 'elemental', tags: ['elemental', 'fire'] }, 'fire'],
+    [{ id: 'trait.delayed_blast_scale', name: '폭린 폭발', type: 'field', tags: ['blast', 'elemental', 'fire'] }, 'fire'],
     [{ id: 'rathalos.fireball', name: '화염구 브레스', type: 'projectile', tags: ['projectile', 'elemental'] }, 'fire'],
     [{ id: 'mizutsune.water_laser', name: '고압 수류', tags: ['elemental'] }, 'water'],
     [{ id: 'lagiacrus.thunder_breath', name: '뇌격 브레스', tags: ['elemental'] }, 'thunder'],
@@ -54,7 +56,8 @@ const turnSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/H
 assert.match(turnSource, /blightRuntime\.fromAttack\(pattern\)/, 'all monster status-tagged attacks must route through the ailment runtime');
 assert.match(turnSource, /damage > 0 && !isGuard && !isDodge && engine\.blightRuntime/,
     'successful guards and evasions must block elemental and status payloads even when guard chip remains');
-assert.match(turnSource, /damage > 0 && !isGuard && !isDodge && target\.status === 'alive'/,
-    'successful guards and evasions must bypass the hunter stun roll');
+assert.match(turnSource,
+    /damage > 0 && !isGuard && !isDodge && !hazardHpOnly && target\.status === 'alive'/,
+    'successful guards, evasions, and HP-only hazards must bypass the hunter stun roll');
 
 console.log('[test] Elemental and poison/paralysis/sleep hunter ailments passed.');

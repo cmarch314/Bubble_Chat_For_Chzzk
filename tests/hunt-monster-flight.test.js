@@ -65,7 +65,7 @@ assert.strictEqual(runtime.onPartBreak(
 assert.strictEqual(engine.monsterFlightState, 'grounded');
 assert.strictEqual(engine.monsterState, 'knocked_down');
 assert.strictEqual(engine.monsterAtb, 50,
-    'an airborne part break must retain half of the pre-break ATB');
+    'an airborne part break must reset the monster to half ATB');
 assert.strictEqual(engine.monsterKnockdownDuration, 105, 'aerial knockdowns must last 1.5x the normal 70-tick knockdown');
 assert.strictEqual(engine.pendingMonsterAction, null);
 assert.ok(events.includes('격추 대경직'));
@@ -137,6 +137,7 @@ const trappedLanding = {
     monsterFlightTicksRemaining: 10,
     pendingLandingTrap: { hunterIndex: 0 },
     monsterKnockdownDuration: 0,
+    monsterAtb: -120,
     consumeTrapDuration: () => 40
 };
 runtime.land(trappedLanding, false);
@@ -144,6 +145,8 @@ assert.strictEqual(trappedLanding.pendingLandingTrap, null);
 assert.strictEqual(trappedLanding.monsterState, 'knocked_down');
 assert.strictEqual(trappedLanding.monsterKnockdownDuration, 40,
     'only one installed trap must trigger when the monster lands');
+assert.strictEqual(trappedLanding.monsterAtb, 50,
+    'a landing trap must replace negative action debt with the fixed half gauge');
 const transitionEngine = {
     ...engine,
     monsterFlightState: 'grounded',

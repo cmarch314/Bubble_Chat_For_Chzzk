@@ -41,8 +41,16 @@ assert.ok(byId('rathalos.hop_stomp').tags.includes('ground-only'));
 assert.ok(byId('rathalos.stomp').tags.includes('landing-only'));
 assert.strictEqual(byId('rathalos.backstep_fireball').flightTransition, 'takeoff');
 assert.strictEqual(byId('rathalos.stomp').flightTransition, 'land');
+assert.deepStrictEqual(byId('rathalos.tail_sweep').impactTimeline.map(event => event.atTicks), [14, 24]);
+assert.strictEqual(byId('rathalos.tail_sweep').animationDurationMs, 3800);
 assert.strictEqual(byId('rathalos.fireball').delivery, 'projectile');
 assert.strictEqual(byId('rathalos.aerial_fireball').delivery, 'projectile');
+for (const id of ['rathalos.fireball', 'rathalos.aerial_fireball', 'rathalos.backstep_fireball']) {
+    assert.strictEqual(byId(id).projectileLaunchDelayTicks, 10,
+        `${id} must turn toward its target for one second before firing`);
+    assert.strictEqual(byId(id).impact.delayTicks, 17,
+        `${id} damage must follow the delayed projectile instead of resolving before launch`);
+}
 
 const anatomy = AnatomyCatalog.find({ id: 'rathalos' });
 assert.deepStrictEqual(
@@ -86,5 +94,11 @@ assert.ok(cues['rathalos:telegraph']?.some(cue =>
     cue.patternKeywords?.includes('fireball')));
 assert.ok(cues['rathalos:attack']?.some(cue =>
     cue.patternKeywords?.includes('glide')));
+
+const css = require('fs').readFileSync(require('path').join(__dirname, '..', 'styles', 'hunt-runtime.css'), 'utf8');
+const tailFrames = css.match(/@keyframes monster-motion-rathalos-tail-sweep-double\s*\{([^}]*(?:\}[^@]*)?)/)?.[0] || '';
+assert.match(tailFrames, /rotate\(168deg\)/);
+assert.doesNotMatch(tailFrames, /rotate\((?:708|720)deg\)/,
+    'Rathalos must perform two 180-degree sweeps, not two independent full spins');
 
 console.log('[test] Reviewed World Rathalos runtime contract passed.');

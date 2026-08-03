@@ -25,6 +25,10 @@ assert.strictEqual(HuntWeaponInstanceCatalog.rawMultiplier({ sharpnessProfile: {
 assert.strictEqual(HuntWeaponInstanceCatalog.minimumColorForHitzone(.20), 'white');
 assert.strictEqual(HuntWeaponInstanceCatalog.bounceCheck({ sharpnessProfile: { red: 10, blue: 10 }, sharpness: 20, perks: [] }, .20, {}).bounced, true);
 assert.strictEqual(HuntWeaponInstanceCatalog.bounceCheck({ sharpnessProfile: { red: 10, white: 10 }, sharpness: 20, perks: [] }, .20, {}).bounced, false);
+assert.strictEqual(HuntWeaponInstanceCatalog.bounceCheck({ sharpnessProfile: { red: 10, white: 10 }, sharpness: 20, perks: [] }, .21, {}).bounced, false,
+    'white sharpness must not bounce from the reviewed Diablos horn sever hitzone');
+assert.strictEqual(HuntWeaponInstanceCatalog.bounceCheck({ sharpnessProfile: { red: 10, white: 10 }, sharpness: 20, perks: [] }, .42, {}).bounced, false,
+    'white sharpness must not bounce from the reviewed Diablos horn blunt hitzone');
 assert.strictEqual(HuntWeaponInstanceCatalog.bounceCheck({ sharpnessProfile: { red: 10 }, sharpness: 10, perks: [{ name: '심안' }] }, .10, {}).bounced, false);
 const whetstoneProfile = { red: 50, orange: 50, yellow: 50, green: 50, blue: 50, white: 50, purple: 0 };
 assert.strictEqual(HuntWeaponInstanceCatalog.sharpenThreshold({ sharpnessProfile: whetstoneProfile, maxSharpness: 300, personality: 'offensive' }), 240);
@@ -38,6 +42,8 @@ assert.strictEqual(HuntWeaponInstanceCatalog.shouldSharpen(thinWhiteOffensive, (
 assert.strictEqual(HuntWeaponInstanceCatalog.shouldSharpen({ ...thinWhiteOffensive, sharpness: 241 }, () => 0), false);
 assert.strictEqual(HuntWeaponInstanceCatalog.shouldSharpen({ ...thinWhiteOffensive, sharpness: 240 }, () => 0), true,
     'offensive sharpening is based on relative wear, independent of color bands');
-assert.strictEqual(HuntWeaponInstanceCatalog.shouldSharpen({ ...thinWhiteOffensive, sharpness: 25, personality: 'newbie' }, () => 0), false,
-    'newbie hunters must never choose automatic whetstone use, even at red sharpness');
+assert.strictEqual(HuntWeaponInstanceCatalog.shouldSharpen({ ...thinWhiteOffensive, sharpness: 120, personality: 'newbie' }, () => 0), false,
+    'newbie hunters do not sharpen when sharpness is above red');
+assert.strictEqual(HuntWeaponInstanceCatalog.shouldSharpen({ ...thinWhiteOffensive, sharpness: 25, personality: 'newbie' }, () => 0), true,
+    'newbie hunters sharpen when sharpness reaches red level');
 console.log('[test] 439 extracted Wilds weapon instances and sharpness profiles passed.');

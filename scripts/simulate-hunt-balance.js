@@ -44,6 +44,10 @@ const HuntSeededRandom = require('../js/effects/hunt/HuntSeededRandom.js');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
 
 const runs = Math.max(1, Number(process.argv[2] || 50));
+const forcedHornArgument = process.argv.find(argument => /^--horns=\d+$/.test(argument));
+const forcedHornCount = forcedHornArgument
+    ? Math.max(0, Math.min(4, Number(forcedHornArgument.split('=')[1])))
+    : null;
 const comboList = HuntWeaponCatalog.build(window.HUNT_COMBO_LIST);
 const monsterPatterns = HuntMonsterPatternCatalog.build(window.MONSTER_ATTACKS, window.MONSTER_DATA);
 const weapons = window.HUNT_WEAPONS?.length
@@ -87,7 +91,15 @@ function run(seed) {
     const random = () => seeded.next();
     const monster = monsters[Math.floor(random() * monsters.length)];
     const start = Math.floor(random() * weapons.length);
-    const selectedWeapons = Array.from({ length: 4 }, (_, index) => makeHunter(weapons[(start + index) % weapons.length], index, random));
+    const horn = weapons.find(weapon => weapon.id === 'hunting_horn');
+    const nonHorns = weapons.filter(weapon => weapon.id !== 'hunting_horn');
+    const selectedWeapons = forcedHornCount === null
+        ? Array.from({ length: 4 }, (_, index) => makeHunter(weapons[(start + index) % weapons.length], index, random))
+        : Array.from({ length: 4 }, (_, index) => makeHunter(
+            index < forcedHornCount ? horn : nonHorns[(start + index) % nonHorns.length],
+            index,
+            random
+        ));
     let ended = false;
     let victory = false;
     const engine = new HuntEngine({
@@ -123,6 +135,9 @@ function run(seed) {
         partsBroken: breakableParts.filter(part => part.broken || part.severed).length,
         partsAvailable: breakableParts.length,
         weapons: selectedWeapons.map(weapon => weapon.id),
+        hornCount: selectedWeapons.filter(weapon => weapon.id === 'hunting_horn').length,
+        firstExhaustionTick: Number(engine.monsterExhaustionHistory?.[0]?.tick || 0),
+        exhaustionCount: Number(engine.monsterExhaustionCount || 0),
         telemetry: engine.telemetry.summary()
     };
 }
@@ -150,7 +165,13 @@ for (const result of results) {
 
 const partBreakRate = results.reduce((sum, result) =>
     sum + result.partsBroken / Math.max(1, result.partsAvailable), 0) / results.length;
-console.log(`[hunt-sim] runs=${runs} wins=${wins.length} winRate=${(wins.length / runs * 100).toFixed(1)}% avgTicks=${average(results.map(result => result.ticks)).toFixed(1)} avgCarts=${average(results.map(result => result.carts)).toFixed(2)} avgPartBreak=${(partBreakRate * 100).toFixed(1)}%`);
+console.log(`[hunt-sim] runs=${runs} horns=${forcedHornCount ?? 'random'} wins=${wins.length} winRate=${(wins.length / runs * 100).toFixed(1)}% avgTicks=${average(results.map(result => result.ticks)).toFixed(1)} avgCarts=${average(results.map(result => result.carts)).toFixed(2)} avgPartBreak=${(partBreakRate * 100).toFixed(1)}%`);
+[0, 1, 2, 3, 4].forEach(hornCount => {
+    const group = results.filter(result => result.hornCount === hornCount);
+    if (!group.length) return;
+    const exhausted = group.filter(result => result.firstExhaustionTick > 0);
+    console.log(`  exhaust horns=${hornCount} hunts=${group.length} triggered=${exhausted.length} firstTick=${exhausted.length ? average(exhausted.map(result => result.firstExhaustionTick)).toFixed(1) : '-'} avgCount=${average(group.map(result => result.exhaustionCount)).toFixed(2)}`);
+});
 Object.entries(weaponStats).sort(([a], [b]) => a.localeCompare(b)).forEach(([weaponId, stat]) => {
     console.log(`  ${weaponId.padEnd(16)} hunts=${String(stat.hunts).padStart(4)} win=${(stat.wins / stat.hunts * 100).toFixed(1).padStart(5)}% avgTicks=${(stat.ticks / stat.hunts).toFixed(1).padStart(6)} carts=${(stat.carts / stat.hunts).toFixed(2)} dmg/action=${((stat.damage || 0) / Math.max(1, stat.actions || 0)).toFixed(1)}`);
 });

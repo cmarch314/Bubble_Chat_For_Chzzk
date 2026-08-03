@@ -7,6 +7,7 @@ const HuntMonsterActionPolicy = require('../js/effects/hunt/HuntMonsterActionPol
 const HuntHunterTurnExecutor = require('../js/effects/hunt/HuntHunterTurnExecutor.js');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
 const HuntMonsterAnimationCatalog = require('../js/effects/hunt/HuntMonsterAnimationCatalog.js');
+const HuntMonsterPatternSelector = require('../js/effects/hunt/HuntMonsterPatternSelector.js');
 const profiles = require('../js/effects/hunt/HuntMonsterProfiles.js');
 
 const enter = profiles.diablos.find(pattern => pattern.id === 'diablos.burrow_enter');
@@ -24,6 +25,8 @@ for (const idSuffix of ['.horn_charge', '.rage_charge']) {
     const pattern = profiles.diablos.find(candidate => candidate.id.endsWith(idSuffix));
     assert.deepStrictEqual([pattern.minTargets, pattern.maxTargets], [1, 2],
         `${pattern.id} must stay within the one-to-two hunter lane`);
+    assert.strictEqual(pattern.chargeLaunchStyle, 'stomp-burst',
+        `${pattern.id} must hold during the stomp telegraph and launch without creeping`);
 }
 assert.strictEqual(HuntAtbConfig.monsterActionCostGauge(enter), 45);
 assert.strictEqual(HuntAtbConfig.interferenceCostGauge('small'), 50);
@@ -42,14 +45,14 @@ assert.deepStrictEqual(
     HuntMonsterActionPolicy.movement(
         profiles.diablos.find(pattern => pattern.id.endsWith('.horn_charge'))
     ),
-    { kind: 'diablos.horn_charge', ticks: 24, untargetable: true }
+    { kind: 'diablos.horn_charge', ticks: 42, untargetable: true }
 );
 assert.deepStrictEqual(
     HuntMonsterActionPolicy.movement(
         profiles.diablos.find(pattern => pattern.id.endsWith('.rage_charge'))
     ),
-    { kind: 'diablos-return-charge', ticks: 114, untargetable: true },
-    'the enraged double-charge lock must cover the full half-speed visual route'
+    { kind: 'diablos-return-charge', ticks: 133, untargetable: true },
+    'the enraged double-charge lock must include the two-second off-screen pause'
 );
 {
     const rageCharge = profiles.diablos.find(pattern => pattern.id.endsWith('.rage_charge'));
@@ -59,7 +62,7 @@ assert.deepStrictEqual(
     }, 'enraged');
     assert.strictEqual(timeline.length, 2,
         'Diablos enraged consecutive charge is exactly one outbound and one return pass');
-    assert.deepStrictEqual(timeline.map(event => event.atTicks), [21, 71],
+    assert.deepStrictEqual(timeline.map(event => event.atTicks), [47, 103],
         'each charge hit must resolve at its visible hunter-crossing point');
     assert.deepStrictEqual(timeline.map(event => event.targetIndices), [[0], [1]]);
     assert.strictEqual(rageCharge.impact.completePathOnTargetLoss, true,
@@ -115,15 +118,21 @@ assert.deepStrictEqual(
     assert.strictEqual(animationCalls[0][2][0].result, 'pending');
     assert.strictEqual(animationCalls[0][4].runtimeImpactPending, true);
 }
-assert.deepStrictEqual(
-    HuntMonsterTurnExecutor.repeatTargetsForState(
-        [{ index: 1 }, { index: 2 }],
-        profiles.diablos.find(pattern => pattern.id.endsWith('.tail_sweep')),
-        'enraged'
-    ).map(target => target.index),
-    [1, 2, 1, 2],
-    'the authored enraged repeat count must drive both tail-sweep passes'
-);
+{
+    const tailCross = profiles.diablos.find(pattern => pattern.id.endsWith('.tail_sweep'));
+    assert.strictEqual(tailCross.name, '후방 X자 꼬리치기');
+    assert.strictEqual(tailCross.requiresPreviousPattern, 'diablos.horn_charge');
+    assert.strictEqual(tailCross.animationProfile, 'diablos-tail-cross');
+    assert.deepStrictEqual(HuntMonsterActionPolicy.impactTimeline(tailCross).map(event => event.atTicks), [14, 24]);
+    const selector = new HuntMonsterPatternSelector(() => 0);
+    assert.strictEqual(selector.select({ id: 'diablos' }, [tailCross], { state: 'normal' }), null,
+        'the rear X sweep must not appear as an unrelated standalone attack');
+    selector.lastPatternByMonster.set('diablos', 'diablos.horn_charge');
+    assert.strictEqual(selector.select({ id: 'diablos' }, [tailCross], { state: 'normal' }).id, tailCross.id,
+        'the rear X sweep becomes eligible immediately after the normal charge');
+    const blackTail = profiles.black_diablos.find(pattern => pattern.id.endsWith('.tail_sweep'));
+    assert.strictEqual(blackTail.name, '후방 X자 꼬리치기');
+}
 assert.ok(profiles.black_diablos.every(pattern => pattern.id.startsWith('black_diablos.')));
 {
     const tailRock = profiles.diablos.find(pattern => pattern.id.endsWith('.tail_slam_rock'));
@@ -142,6 +151,8 @@ assert.ok(profiles.black_diablos.every(pattern => pattern.id.startsWith('black_d
         'the tail contact and launched rock must resolve as two visible, sequential impacts'
     );
     assert.strictEqual(tailRock.delivery, 'projectile');
+    assert.strictEqual(tailRock.projectileVisual, 'rock',
+        'Diablos must route its physical rock through the dedicated rock visual instead of the elemental orb renderer');
     assert.deepStrictEqual(
         HuntMonsterActionPolicy.movement(tailRock),
         { kind: 'diablos.tail_slam_rock', ticks: 34, untargetable: false }
@@ -396,6 +407,27 @@ function interferenceHarness({ atb = 100, random = 0.99, shield = false, resiste
     hunter.atb = 100;
     assert.strictEqual(engine.clearHunterInterference(hunter), true);
     assert.strictEqual(hunter.interference, null);
+}
+
+for (const [kind, size] of [['roar', 'large'], ['tremor', 'large'], ['wind', 'small']]) {
+    const { engine, hunter, calls } = interferenceHarness({ atb: 85 });
+    assert.strictEqual(engine.applyHunterInterference(hunter, kind, size), true);
+    assert.strictEqual(engine.clearHunterInterference(hunter, 'hit'), true);
+    assert.strictEqual(hunter.interference, null,
+        `${kind} reaction must yield immediately to a damaging hit`);
+    assert.strictEqual(hunter.roarStunned, false);
+    assert.deepStrictEqual(calls.visuals.at(-1), [hunter.index, kind, size, false],
+        `${kind} overlay must be removed before hit knockback starts`);
+}
+
+{
+    const { engine, hunter, calls } = interferenceHarness();
+    hunter.roarStunned = true;
+    hunter.roarStunDuration = 12;
+    assert.strictEqual(engine.clearHunterInterference(hunter, 'hit'), true,
+        'legacy roar-only state must also yield to hit recovery');
+    assert.strictEqual(hunter.roarStunned, false);
+    assert.deepStrictEqual(calls.visuals.at(-1), [hunter.index, 'roar', 'large', false]);
 }
 
 {

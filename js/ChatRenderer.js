@@ -79,8 +79,6 @@ class ChatRenderer {
         let timeout = 10000;
 
         if (specialBubble?.kind === 'clown') {
-            slotSpan = 2;
-            chatBox.classList.add('chat-box--clown');
             chatLineInner.classList.add('chat-line-inner--clown');
             messageEle.classList.add('message--clown');
             messageEle.textContent = specialBubble.text;

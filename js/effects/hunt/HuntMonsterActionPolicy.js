@@ -61,6 +61,15 @@ class HuntMonsterActionPolicy {
         return [anchor, neighbour];
     }
 
+    static primaryAdjacentBothTargets(targetable, count, random = Math.random) {
+        const ordered = this.orderedTargets(targetable);
+        if (!ordered.length) return [];
+        const anchor = ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
+        const neighbours = ordered.filter(target =>
+            target.index !== anchor.index && Math.abs(Number(target.index) - Number(anchor.index)) === 1);
+        return [anchor, ...neighbours].slice(0, Math.max(1, Number(count || 1)));
+    }
+
     static returnAdjacentPasses(targetable, totalTargets, random = Math.random) {
         const lane = this.adjacentLaneTargets(
             targetable,
@@ -125,6 +134,9 @@ class HuntMonsterActionPolicy {
         if (mode === 'adjacent-lane') {
             return { targets: this.adjacentLaneTargets(targetable, count, random), runtime: {} };
         }
+        if (mode === 'primary-adjacent-both') {
+            return { targets: this.primaryAdjacentBothTargets(targetable, count, random), runtime: {} };
+        }
         if (mode === 'lane') {
             return { targets: this.laneTargets(targetable, count, random, false), runtime: {} };
         }
@@ -136,6 +148,20 @@ class HuntMonsterActionPolicy {
                 targets,
                 runtime: {
                     runtimeSweepDirection: leftToRight ? 'left-to-right' : 'right-to-left'
+                }
+            };
+        }
+        if (mode === 'bazel-carpet') {
+            const leftToRight = random() < .5;
+            const divePool = targetable.length ? targetable : defaultTargets;
+            const diveTarget = divePool.length
+                ? divePool[Math.floor(random() * divePool.length)]
+                : null;
+            return {
+                targets: [...defaultTargets],
+                runtime: {
+                    runtimeSweepDirection: leftToRight ? 'left-to-right' : 'right-to-left',
+                    runtimeDiveTargetIndex: diveTarget?.index
                 }
             };
         }
@@ -183,9 +209,8 @@ class HuntMonsterActionPolicy {
             };
         }
         if (mode === 'independent-passes') {
-            const pool = this.laneTargets(targetable, Math.max(1, count), random, false);
             const passes = this.independentTargetPasses(
-                pool,
+                targetable,
                 passCount,
                 random
             );
@@ -258,6 +283,21 @@ class HuntMonsterActionPolicy {
     static impactDelayTicks(pattern = {}, monsterState = 'normal') {
         const authoredTicks = Number(pattern.impact?.delayTicks ?? pattern.impactDelayTicks ?? 0);
         if (authoredTicks > 0) return Math.max(1, Math.round(authoredTicks));
+        const visualRatio = Number(pattern.impact?.visualRatio);
+        const authoredVisualMs = Number(pattern.animationDurationMs || 0);
+        if (visualRatio > 0 && authoredVisualMs > 0) {
+            const timing = typeof HuntAtbConfig !== 'undefined'
+                ? HuntAtbConfig
+                : (typeof require === 'function' ? require('./HuntAtbConfig.js') : null);
+            const scaledVisualMs = timing?.scaleVisualDurationMs
+                ? timing.scaleVisualDurationMs(authoredVisualMs)
+                : authoredVisualMs;
+            const ticksPerSecond = Number(timing?.TICKS_PER_SECOND || 10);
+            return Math.max(1, Math.round(
+                scaledVisualMs / 1000 * ticksPerSecond
+                * Math.max(0.01, Math.min(1, visualRatio))
+            ));
+        }
         const movement = this.movement(pattern, monsterState);
         const type = String(pattern.type || '').toLowerCase();
         const defaultRatio = ['projectile', 'charge'].includes(type) ? .58
@@ -271,7 +311,10 @@ class HuntMonsterActionPolicy {
     }
 
     static impactTimeline(pattern = {}, monsterState = 'normal') {
-        const authored = Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : null;
+        const stateTimeline = pattern.impactTimelineByState?.[monsterState];
+        const authored = Array.isArray(stateTimeline)
+            ? stateTimeline
+            : (Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : null);
         if (authored?.length) {
             return authored.map((entry, index) => {
                 const source = typeof entry === 'number' ? { atTicks: entry } : (entry || {});
@@ -284,11 +327,19 @@ class HuntMonsterActionPolicy {
                         ? source.targetIndices.filter(Number.isInteger)
                         : null,
                     targetMode: String(source.targetMode || ''),
-                    damageScale: Number(source.damageScale || 1),
+                    targetShape: String(source.targetShape || ''),
+                    damageScale: Number(source.damageScale ?? 1),
                     secondaryInterference: source.secondaryInterference || null,
                     audioCue: source.audioCue || null,
+                    eventKind: source.eventKind || null,
+                    defenseMode: source.defenseMode || null,
+                    sourcePart: source.sourcePart || null,
                     ignoreBrokenPartDamage: source.ignoreBrokenPartDamage === true,
-                    suppressStatus: source.suppressStatus === true
+                    suppressStatus: source.suppressStatus === true,
+                    displayName: source.displayName || null,
+                    animationProfile: source.animationProfile || null,
+                    animationDurationMs: Number(source.animationDurationMs || 0) || null,
+                    animationImpactRatio: Number(source.animationImpactRatio || 0) || null
                 };
             }).sort((a, b) => a.atTicks - b.atTicks);
         }

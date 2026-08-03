@@ -18,14 +18,23 @@ class HuntMonsterPatternSelector {
         if (!patterns || !patterns.length) return null;
         const monsterId = monster.id || 'default';
         const lastId = this.lastPatternByMonster.get(monsterId);
-        const isAllowed = pattern => context.monsterTier !== 'small'
-            || (pattern.type !== 'roar' && !pattern.tags?.includes('roar'));
+        const isRoarPattern = pattern =>
+            pattern.type === 'roar' || pattern.tags?.includes('roar');
+        const isCombatRoar = pattern => pattern.tags?.includes('combat-roar');
+        const isAllowed = pattern => {
+            if (context.monsterTier === 'small') return !isRoarPattern(pattern);
+            return !isRoarPattern(pattern) || isCombatRoar(pattern);
+        };
         const brokenParts = new Set((context.partState || [])
             .filter(part => part?.broken || part?.severed)
             .map(part => String(part.kind || part.id || '').toLowerCase()));
+        const brokenPartKinds = (context.partState || [])
+            .filter(part => part?.broken || part?.severed)
+            .map(part => String(part.kind || part.id || '').toLowerCase());
         const activeTraits = new Set(context.traits || []);
         const matchesContext = pattern =>
             (!pattern.requiredState || pattern.requiredState === context.state)
+            && (!pattern.requiresPreviousPattern || pattern.requiresPreviousPattern === lastId)
             && !(pattern.forbiddenStates || []).includes(context.state)
             && (pattern.requiredTraits || []).every(trait => activeTraits.has(trait))
             && !(pattern.forbiddenTraits || []).some(trait => activeTraits.has(trait))
@@ -56,7 +65,11 @@ class HuntMonsterPatternSelector {
         const consecutiveUses = Number(this.consecutiveUsesByMonster.get(monsterId) || 0);
         const withoutRepeat = candidates.filter(pattern =>
             pattern.id !== lastId
-            || consecutiveUses < Math.max(1, Number(pattern.maxConsecutiveUses || 1))
+            || consecutiveUses < Math.max(1, Number(
+                pattern.maxConsecutiveUsesByState?.[context.state]
+                ?? pattern.maxConsecutiveUses
+                ?? 1
+            ))
         );
         if (withoutRepeat.length) candidates = withoutRepeat;
         if (context.state !== 'enraged') {
@@ -70,6 +83,27 @@ class HuntMonsterPatternSelector {
                 : pattern.tags.includes('flight-only') || pattern.tags.includes('air-compatible'));
             if (aerial.length) candidates = aerial;
         }
+        const chanceCandidates = candidates.filter(pattern =>
+            Number.isFinite(Number(pattern.selectionChanceByState?.[context.state])));
+        if (chanceCandidates.length) {
+            const selectedByChance = chanceCandidates.find(pattern => {
+                const penalty = pattern.selectionChancePenaltyPerBrokenPart || {};
+                const partPattern = String(penalty.partPattern || '').toLowerCase();
+                const brokenCount = partPattern
+                    ? brokenPartKinds.filter(kind => kind.includes(partPattern)).length
+                    : 0;
+                const chance = Math.max(0, Math.min(1,
+                    Number(pattern.selectionChanceByState[context.state] || 0)
+                    - brokenCount * Number(penalty.amount || 0)
+                ));
+                return this.random() < chance;
+            });
+            if (selectedByChance) candidates = [selectedByChance];
+            else {
+                const withoutChance = candidates.filter(pattern => !chanceCandidates.includes(pattern));
+                if (withoutChance.length) candidates = withoutChance;
+            }
+        }
         const ultimateCandidates = context.ultimateUsedInRage
             ? []
             : candidates.filter(pattern => pattern.tags.includes('ultimate'));
@@ -79,7 +113,11 @@ class HuntMonsterPatternSelector {
         }
         const weighted = candidates.map(pattern => ({
             pattern,
-            weight: Math.max(0.05, Number(pattern.weight || 1)
+            weight: Math.max(0.05, Number(
+                pattern.weightByState?.[context.state]
+                ?? pattern.weight
+                ?? 1
+            )
                 * (context.state === 'enraged' && pattern.tags.includes('ultimate') ? 3 : 1)
                 * (context.state === 'exhausted' && pattern.tags.includes('charge') ? 0.45 : 1)
                 * (context.state === 'exhausted' && pattern.tags.includes('burrow-enter') ? 0.28 : 1)

@@ -130,11 +130,19 @@ assert.match(effectSource, /parsePerkUnlock\(msg\)[\s\S]*?selectedPerk\.id !== h
     'only explicit !해제 with the locked perk number may clear and persist a perk lock');
 assert.match(effectSource, /materializeBattleStartPerks\(this\.selectedWeapons\)[\s\S]*?renderFight\([\s\S]*?saveNow\(hunter\)[\s\S]*?💩🌈 퍽 발현/,
     'an empty loadout jackpot must reveal and immediately persist the bound emoji perk at combat start');
-assert.match(effectSource, /const weaponChanged = hunter\.id !== previousWeaponId;[\s\S]*?const personalityChanged = hunter\.personality !== previousPersonality;[\s\S]*?if \(weaponChanged \|\| personalityChanged\)[\s\S]*?playLoadoutConfirmationVoice\(hunter/,
-    'an accepted loadout mutation must trigger one hunter confirmation line only when the value changed');
-const loadoutMutationVoiceBlock = effectSource.match(/const weaponChanged = hunter\.id !== previousWeaponId;[\s\S]*?return true;/)?.[0] || '';
+assert.match(effectSource, /let weaponReplaced = false;[\s\S]*?weaponReplaced = this\.initializer\.replaceHunterWeapon\(hunter, weaponId\)[\s\S]*?const weaponChanged = weaponReplaced;[\s\S]*?const personalityChanged = hunter\.personality !== previousPersonality;[\s\S]*?if \(weaponChanged \|\| personalityChanged\)[\s\S]*?playLoadoutConfirmationVoice\(hunter/,
+    'an accepted loadout mutation must trigger one hunter confirmation line for refreshed weapon data or a changed personality');
+const loadoutMutationVoiceBlock = effectSource.match(/let weaponReplaced = false;[\s\S]*?return true;/)?.[0] || '';
 assert.strictEqual((loadoutMutationVoiceBlock.match(/playLoadoutConfirmationVoice\(hunter/g) || []).length, 1,
     'a combined weapon and personality command must not duplicate its confirmation voice');
+assert.match(loadoutMutationVoiceBlock, /const weaponChanged = weaponReplaced/,
+    're-selecting the same weapon kind must still highlight its newly rolled weapon instance');
+assert.match(loadoutMutationVoiceBlock, /highlightLoadoutChanges\(hunter\.index,[\s\S]*?weaponChanged[\s\S]*?personalityChanged/,
+    'accepted loadout mutations must highlight only the changed weapon and personality fields');
+assert.doesNotMatch(loadoutMutationVoiceBlock, /spawnCombatChatBubble/,
+    'accepted loadout mutations must not cover the card with a redundant confirmation bubble');
+assert.match(rendererSource, /highlightLoadoutChanges\(hunterIndex,[\s\S]*?hunt-loadout-weapon-icon[\s\S]*?hunt-loadout-weapon-name[\s\S]*?hunt-loadout-personality[\s\S]*?hunt-loadout-change-flash/,
+    'the renderer must pulse the changed weapon and personality fields instead of the whole hunter card');
 assert.match(effectSource, /departWhenLoadoutReady\(\)[\s\S]*?every\(hunter => Boolean\(hunter\.loadoutReady\)\)[\s\S]*?startFight/,
     'the party must depart immediately when every selected hunter is ready');
 assert.match(effectSource, /startFight\(container\)\s*\{\s*this\.renderer\.clearLobbyTimer\(\);\s*if \(this\.phase !== 'loadout'\) return;/,

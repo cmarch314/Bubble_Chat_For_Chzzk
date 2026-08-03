@@ -67,14 +67,17 @@ class HuntMonsterAnimationCatalog {
                 'agile-leap-chain': 3600,
                 'low-glide-sweep': 4000
             };
-            const runtimeProfile = authoredRuntimeProfiles[authoredProfile] || authoredProfile;
+            const isTailCrossProfile = /tail-cross$/i.test(authoredProfile);
+            const runtimeProfile = isTailCrossProfile
+                ? 'tail-sweep-double'
+                : (authoredRuntimeProfiles[authoredProfile] || authoredProfile);
             const anchor = authoredProfile.includes('burrow-enter') ? 'center'
                 : authoredProfile.includes('sweep') ? 'sweep'
                 : 'target';
             return this.profile(
                 runtimeProfile,
                 ultimate,
-                Number(pattern.animationDurationMs || authoredDurations[authoredProfile] || 1050),
+                Number(pattern.animationDurationMs || authoredDurations[authoredProfile] || (isTailCrossProfile ? 3200 : 1050)),
                 anchor,
                 rig,
                 delivery
@@ -126,8 +129,8 @@ class HuntMonsterAnimationCatalog {
         if (/毒霧|독무|독안개|poison\s*mist|mist|gas/i.test(text)) return 'gas';
         if (/laser|beam|waterpressure|レーザー|ビーム|광선|레이저|고압\s*수류/i.test(text)) return 'beam';
         if (/fireball|bullet|shell|shoot|ball|火球|弾|탄환|화염구|포말/i.test(text)) return 'projectile';
-        if (/flamethrow|continuous|sweep|ブレス|분사|방출|브레스/i.test(text)) return 'stream';
-        return pattern.type === 'projectile' || pattern.tags?.includes('projectile') ? 'projectile' : 'stream';
+        if (/flamethrow|continuous|sweep|ブレス|분사|방출|브레스/i.test(text)) return 'gas';
+        return pattern.type === 'projectile' || pattern.tags?.includes('projectile') ? 'projectile' : 'gas';
     }
 
     static resolveRig(monster = null) {

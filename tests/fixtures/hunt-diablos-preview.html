@@ -41,6 +41,7 @@
         <button data-phase="rageTail">분노 꼬리 2회</button>
         <button data-phase="tailRock">☁️ 🪨</button>
         <button data-phase="sideTackle">💥 철산고</button>
+        <button data-phase="charge">일반 돌진</button>
         <button data-phase="rageCharge">분노 왕복 돌진</button>
       </nav>
       <section class="hunt-monster-vitals">
@@ -84,7 +85,8 @@
       if(phase==='rageTail') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'hit'},{index:1,result:'hit'},{index:2,result:'hit'}],'꼬리 휘두르기',{id:'diablos.tail_sweep',name:'꼬리 휘두르기',tags:['tail','double-sweep','multi-hit']});
       if(phase==='tailRock') animator.triggerMonsterAttack('physical','💥',[{index:1,result:'hit'},{index:2,result:'hit'}],'꼬리 내려찍기·바위 날리기',{id:'diablos.tail_slam_rock',name:'꼬리 내려찍기·바위 날리기',type:'projectile',tags:['tail','tail-slam-rock','projectile'],delivery:'projectile',animationProfile:'tail-slam-rock'});
       if(phase==='sideTackle') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'hit'},{index:1,result:'hit'}],'철산고',{id:'diablos.side_tackle',name:'철산고',tags:['physical','side-tackle','target-contact'],animationProfile:'side-tackle-contact'});
-      if(phase==='rageCharge') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'dodge'},{index:1,result:'hit'},{index:3,result:'dodge'}],'분노 연속 돌진',{id:'diablos.rage_charge',name:'분노 연속 돌진',type:'charge',tags:['charge','cross-charge','multi-hit'],animationProfile:'ground-charge-double',runtimeChargeAnchors:[0,3],runtimeChargePassSizes:[2,1]});
+      if(phase==='charge') animator.triggerMonsterAttack('physical','💨',[{index:1,result:'hit'}],'뿔 돌진',{id:'diablos.horn_charge',name:'뿔 돌진',type:'charge',tags:['charge','horn','strong'],chargeLaunchStyle:'stomp-burst',animationProfile:'ground-charge'});
+      if(phase==='rageCharge') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'dodge'},{index:1,result:'hit'},{index:3,result:'dodge'}],'분노 연속 돌진',{id:'diablos.rage_charge',name:'분노 연속 돌진',type:'charge',tags:['charge','cross-charge','multi-hit'],chargeLaunchStyle:'stomp-burst',animationProfile:'ground-charge-double',animationDurationMs:10640,impact:{passRatios:[.357,.773]},runtimeChargeAnchors:[0,3],runtimeChargePassSizes:[2,1]});
     }
     document.querySelectorAll('[data-phase]').forEach(button=>button.addEventListener('click',()=>previewPhase(button.dataset.phase)));
     addEventListener('load',()=>previewPhase('tailRock'));

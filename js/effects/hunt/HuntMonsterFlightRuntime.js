@@ -1,5 +1,9 @@
 'use strict';
 
+const HuntMonsterFlightAtbConfig = typeof HuntAtbConfig !== 'undefined'
+    ? HuntAtbConfig
+    : (typeof require === 'function' ? require('./HuntAtbConfig.js') : null);
+
 class HuntMonsterFlightRuntime {
     static AIRBORNE_EVADE_CHANCE = .5;
     static FLIGHT_DURATION_TICKS = 600;
@@ -234,6 +238,16 @@ class HuntMonsterFlightRuntime {
         engine.monsterFlightTurns = 0;
         engine.monsterGroundTurns = 0;
         engine.monsterJustTookOff = true;
+        const interference = engine.monsterBehavior?.takeoffInterference;
+        if (interference) {
+            (engine.selectedWeapons || [])
+                .filter(hunter => hunter?.status === 'alive')
+                .forEach(hunter => engine.applyHunterInterference?.(
+                    hunter,
+                    interference.kind,
+                    interference.size
+                ));
+        }
         engine.addLog(`🪽 [비행] ${engine.selectedMonster.nameKO}(이)가 공중 패턴에 돌입합니다.`, '#8fdcff');
         engine.showSkillBubble('monster', '🪽 비행');
         this.updateFlightUI(engine);
@@ -255,7 +269,20 @@ class HuntMonsterFlightRuntime {
             this.land(engine, false);
             return;
         }
-        if (engine.monsterFlightState === 'airborne') engine.monsterFlightTurns++;
+        if (engine.monsterFlightState === 'airborne') {
+            engine.monsterFlightTurns++;
+            const actionCounts = engine.monsterBehavior?.flightActionCountByState;
+            const stateKey = engine.monsterState === 'enraged' ? 'enraged' : 'normal';
+            const actionLimit = Math.max(0, Number(actionCounts?.[stateKey] || 0));
+            const landingPatternId = engine.monsterBehavior?.naturalLandingPatternId;
+            if (actionLimit > 0
+                && engine.monsterFlightTurns >= actionLimit
+                && landingPatternId
+                && !engine.monsterLandingPending) {
+                engine.monsterLandingPending = true;
+                engine.forcedMonsterPatternId = landingPatternId;
+            }
+        }
     }
 
     cooldownTicks(engine) {
@@ -288,9 +315,13 @@ class HuntMonsterFlightRuntime {
             Number(engine.monsterKnockdownDuration || 0),
             trapTicks
         );
-        engine.monsterAtb = 0;
+        if (HuntMonsterFlightAtbConfig?.applyMonsterControlAtb) {
+            HuntMonsterFlightAtbConfig.applyMonsterControlAtb(engine, 'trap');
+        } else {
+            engine.monsterAtb = 50;
+            engine.updateMonsterAtbUI?.(50);
+        }
         engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
-        engine.updateMonsterAtbUI?.(0);
         engine.triggerEnvironmentEffect?.('shocktrap', pendingTrap.hunterIndex);
         engine.callbacks?.onTriggerMonsterKnockdownAnim?.();
         engine.addLog?.(`🪤 [착지 함정] ${engine.selectedMonster.nameKO}(이)가 설치된 함정을 밟았습니다!`, '#ffe66d');

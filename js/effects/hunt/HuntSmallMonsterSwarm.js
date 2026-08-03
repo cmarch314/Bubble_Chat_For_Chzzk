@@ -1,12 +1,18 @@
 class HuntSmallMonsterSwarm {
-    constructor(count, totalHp) {
+    constructor(count, totalHp, initialAtb = 0) {
         this.count = Math.max(3, Math.min(5, Math.floor(Number(count) || 3)));
         this.maxHp = Math.max(this.count, Math.floor(Number(totalHp) || this.count));
         const base = Math.floor(this.maxHp / this.count);
         let remainder = this.maxHp - base * this.count;
         this.units = Array.from({ length: this.count }, (_, index) => {
             const maxHp = base + (remainder-- > 0 ? 1 : 0);
-            return { index, hp: maxHp, maxHp, alive: true, atb: 0 };
+            return {
+                index,
+                hp: maxHp,
+                maxHp,
+                alive: true,
+                atb: Math.max(0, Math.min(100, Number(initialAtb) || 0))
+            };
         });
         this.targetIndex = 0;
         this.attackerCursor = -1;

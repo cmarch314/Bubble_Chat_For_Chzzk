@@ -105,6 +105,7 @@ class HuntMonsterAnatomyCatalog {
             baseFacing: 'front',
             parts: Object.freeze({
                 head: Object.freeze({ x: .50, y: .70 }),
+                mouth: Object.freeze({ x: .50, y: .58 }),
                 torso: Object.freeze({ x: .50, y: .39 }),
                 'left-wing': Object.freeze({ x: .23, y: .45 }),
                 'right-wing': Object.freeze({ x: .77, y: .45 }),
@@ -115,11 +116,12 @@ class HuntMonsterAnatomyCatalog {
             sourceSize: Object.freeze({ width: 512, height: 512 }),
             baseFacing: 'left',
             parts: Object.freeze({
-                head: Object.freeze({ x: .24, y: .73 }),
+                head: Object.freeze({ x: .43, y: .68 }),
+                mouth: Object.freeze({ x: .43, y: .72 }),
                 torso: Object.freeze({ x: .52, y: .54 }),
-                'left-wing': Object.freeze({ x: .18, y: .38 }),
-                'right-wing': Object.freeze({ x: .73, y: .69 }),
-                tail: Object.freeze({ x: .74, y: .26 })
+                'left-front-leg': Object.freeze({ x: .25, y: .28 }),
+                'right-front-leg': Object.freeze({ x: .72, y: .70 }),
+                tail: Object.freeze({ x: .62, y: .28 })
             })
         }),
         nargacuga: Object.freeze({
@@ -208,11 +210,14 @@ class HuntMonsterAnatomyCatalog {
         if (!geometry) return null;
         const rawKind = String(partKind || '').toLowerCase();
         let key = rawKind;
-        if (/head|horn|chin/.test(rawKind)) key = 'head';
+        if (/mouth|muzzle/.test(rawKind)) key = 'mouth';
+        else if (/head|horn|chin/.test(rawKind)) key = 'head';
         else if (/tail/.test(rawKind)) key = 'tail';
         else if (/left.*wing|wing.*left/.test(rawKind)) key = 'left-wing';
         else if (/right.*wing|wing.*right/.test(rawKind)) key = 'right-wing';
         else if (/wing/.test(rawKind)) key = Number(sequence || 0) % 2 ? 'right-wing' : 'left-wing';
+        else if (/left.*(?:front.*)?(?:foot|leg|claw)|(?:foot|leg|claw).*left/.test(rawKind)) key = 'left-front-leg';
+        else if (/right.*(?:front.*)?(?:foot|leg|claw)|(?:foot|leg|claw).*right/.test(rawKind)) key = 'right-front-leg';
         else if (/foot|leg|claw/.test(rawKind)) key = 'foot';
         else if (/torso|body|back|chest/.test(rawKind)) key = 'torso';
         const part = geometry.parts[key];
@@ -318,6 +323,7 @@ class HuntMonsterAnatomyCatalog {
     }
 
     static breakReaction(monsterId, partKind, airborne = false) {
+        const id = this.normalize(monsterId);
         const kind = String(partKind || '').toLowerCase();
         const tailSever = /tail/.test(kind);
         if (airborne) {
@@ -332,14 +338,22 @@ class HuntMonsterAnatomyCatalog {
             return {
                 type: 'tail_sever_roll',
                 visualType: 'tail_sever_roll',
-                durationTicks: 55,
+                durationTicks: 60,
                 label: '꼬리 절단 나뒹굴기'
+            };
+        }
+        if (id === 'tigrex' && /(?:left|right)-front-leg/.test(kind)) {
+            return {
+                type: 'knockdown',
+                visualType: 'part_break_topple',
+                durationTicks: 80,
+                label: '앞발 파괴 대경직'
             };
         }
         return {
             type: 'part_break_topple',
             visualType: 'part_break_topple',
-            durationTicks: 35,
+            durationTicks: 40,
             label: '부위 파괴 넘어짐'
         };
     }
@@ -367,6 +381,8 @@ class HuntMonsterAnatomyCatalog {
                 severed: false,
                 broken: false,
                 damageAccumulated: 0,
+                repeatToppleHealthMultiplier: Number(part.repeatToppleHealthMultiplier || 0),
+                postBreakDamageAccumulated: 0,
                 essence: part.essence || null,
                 hitzones: { ...(override.hitzones || part.hitzones || {}) },
                 breakHitzones: override.breakHitzones
@@ -432,6 +448,8 @@ class HuntMonsterAnatomyCatalog {
             ? Math.max(0, Number(rawDamage) || 0) * Math.max(0, Number(scale) || 0) * hitzonePartRate
             : 0;
         const wasBroken = part.broken;
+        const repeatThreshold = Number(part.maxHealth || part.health || 0)
+            * Math.max(1, Number(part.repeatToppleHealthMultiplier || 0));
         part.damageAccumulated += applied;
         part.health = Math.max(0, part.health - applied);
         if ((part.breakable || part.severable) && part.health <= 0) part.broken = true;
@@ -439,7 +457,15 @@ class HuntMonsterAnatomyCatalog {
         if (!wasBroken && part.broken && part.breakHitzones) {
             part.hitzones = { ...part.breakHitzones };
         }
-        return { part, damageType, hitzone, applied, newlyBroken: !wasBroken && part.broken, newlySevered: !wasBroken && part.severed };
+        let repeatedTopple = false;
+        if (wasBroken && repeatThreshold > 0) {
+            part.postBreakDamageAccumulated = Number(part.postBreakDamageAccumulated || 0) + applied;
+            if (part.postBreakDamageAccumulated >= repeatThreshold) {
+                part.postBreakDamageAccumulated -= repeatThreshold;
+                repeatedTopple = true;
+            }
+        }
+        return { part, damageType, hitzone, applied, newlyBroken: !wasBroken && part.broken, newlySevered: !wasBroken && part.severed, repeatedTopple };
     }
 }
 

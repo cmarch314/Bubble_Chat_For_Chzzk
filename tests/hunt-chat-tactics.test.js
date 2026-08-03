@@ -25,12 +25,9 @@ assert.strictEqual(engine.teamTactic, 'support');
 assert.strictEqual(tactics.supportGauge, 8);
 
 result = tactics.handle(engine, { nickname: 'Tester' }, '!회피');
-assert.strictEqual(result.accepted, false, 'per-user cooldown should stop command spam');
-
-engine.battleTime = 20;
-result = tactics.handle(engine, { nickname: 'Tester' }, '!회피');
-assert.strictEqual(result.accepted, true);
-assert.strictEqual(hunter.nextEvadeBoost, 0.18);
+assert.deepStrictEqual(result, { handled: false }, 'viewer dodge preparation must remain retired');
+result = tactics.handle(engine, { nickname: 'Tester' }, '!가드');
+assert.deepStrictEqual(result, { handled: false }, 'viewer guard preparation must remain retired');
 
 tactics.supportGauge = 40;
 engine.battleTime = 30;

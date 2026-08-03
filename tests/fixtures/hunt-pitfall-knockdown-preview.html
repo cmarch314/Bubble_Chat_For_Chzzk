@@ -3,33 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>구멍함정 · 대경직 지속 미리보기</title>
+  <title>덫 · ATB 회복 미리보기</title>
   <link rel="stylesheet" href="../../styles/hunt-runtime.css">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #101319; color: #fff; font-family: sans-serif; }
-    main { position: relative; height: 918px; background: radial-gradient(circle at 50% 40%, #4b3928, #15171b 62%); }
-    h1 { position: absolute; top: 42px; width: 100%; margin: 0; text-align: center; font-size: 42px; }
-    .monster-stage { position: absolute; inset: 120px 240px 90px; display: grid; place-items: center; }
-    .pitfall-hole { position: absolute; top: 64%; left: 50%; width: 390px; height: 105px; transform: translate(-50%, -50%); border-radius: 50%; background: #080604; box-shadow: 0 0 0 18px #6a4426, 0 16px 38px #000; }
-    #fight-monster-img { position: relative; z-index: 3; width: 580px; max-height: 480px; object-fit: contain; }
-    .monster-atb { position: absolute; left: 50%; bottom: 38px; width: 440px; height: 18px; transform: translateX(-50%); overflow: hidden; border: 3px solid #402f0b; border-radius: 5px; background: #241e15; }
-    .monster-atb::after { content: ""; display: block; height: 100%; width: 100%; transform-origin: left; background: #ffd12e; animation: fill-atb 5s linear both; }
-    .caption { position: absolute; bottom: 4px; width: 100%; text-align: center; color: #ffe37a; font-size: 26px; }
-    footer { height: 162px; display: grid; place-items: center; color: #718096; font-size: 24px; }
-    @keyframes fill-atb { from { transform: scaleX(.08); } to { transform: scaleX(1); } }
+    body { margin:0; width:1920px; height:1080px; overflow:hidden; background:#101319; color:#fff; font-family:sans-serif; }
+    main { position:relative; height:918px; background:radial-gradient(circle at 50% 40%,#4b3928,#15171b 62%); }
+    h1 { position:absolute; top:42px; width:100%; margin:0; text-align:center; font-size:42px; }
+    #monster-showcase-panel { position:absolute; inset:120px 240px 90px; display:grid; place-items:center; overflow:visible; }
+    #fight-monster-img { position:relative; z-index:21; width:580px; max-height:480px; object-fit:contain; }
+    .hunt-environment-effect { z-index:20; }
+    .monster-atb { position:absolute; z-index:25; left:50%; bottom:38px; width:440px; height:18px; transform:translateX(-50%); overflow:hidden; border:3px solid #402f0b; border-radius:5px; background:#241e15; }
+    .monster-atb::after { content:""; display:block; height:100%; transform-origin:left; background:#ffd12e; animation:fill-atb 4s linear both; }
+    .caption { position:absolute; z-index:25; bottom:4px; width:100%; text-align:center; color:#ffe37a; font-size:26px; }
+    footer { height:162px; display:grid; place-items:center; color:#8d9aae; font-size:24px; }
+    @keyframes fill-atb { from { transform:scaleX(.5); } to { transform:scaleX(1); } }
   </style>
 </head>
 <body>
   <main>
     <h1>🪤 구멍함정 · ATB 회복 중</h1>
-    <section class="monster-stage">
-      <div class="pitfall-hole"></div>
+    <section id="monster-showcase-panel">
+      <div class="hunt-environment-effect environment-pitfall is-atb-bound" aria-hidden="true">
+        <div class="pitfall-crack"></div>
+        <div class="pitfall-hole"></div>
+        <div class="pitfall-net">🕸️</div>
+      </div>
       <img id="fight-monster-img"
-           class="game-hunt-monster-img monster-knockdown-anim monster-pitfall-caught monster-pitfall-struggling"
+           class="game-hunt-monster-img monster-pitfall-caught monster-pitfall-struggling"
            src="../../img/monsters/diablos.png" alt="구멍함정에 빠진 디아블로스">
       <div class="monster-atb" aria-label="회복 중인 몬스터 ATB"></div>
-      <div class="caption">행동은 봉인 · 자세 애니메이션과 ATB 회복은 지속</div>
+      <div class="caption">덫 효과는 노란 ATB가 완충될 때까지 유지</div>
     </section>
   </main>
   <footer>OBS 채팅 안전영역 · 하단 15%</footer>

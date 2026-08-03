@@ -51,7 +51,11 @@ const context = vm.createContext({
         });
     },
     window: {
-        HUNT_WEAPON_AUDIO_CUES: {}, HUNT_ROAR_ROUTE: { furious_rajang: 'rajang', rathian: 'rathalos' },
+        HUNT_WEAPON_AUDIO_CUES: {}, HUNT_ROAR_ROUTE: {
+            furious_rajang: 'rajang',
+            rathian: 'rathalos',
+            seething_bazelgeuse: 'bazelgeuse'
+        },
         HUNT_WORLD_MONSTER_SILENT_VOICE_IDS: ['rajang'],
         HUNT_VERIFIED_GENERIC_MONSTER_SE_CUES: {
             physical_attack: [{
@@ -73,7 +77,23 @@ const context = vm.createContext({
             'great_sword:slash_heavy': [{ label: 'test', evidence: 'unit', layers: [['local/verified-gs.mp3', 0.7, 0]] }],
             'great_sword:charge_tier_1': [{ label: 'test charge tier 1', evidence: 'unit', layers: [['local/verified-gs-charge-1.mp3', 0.62, 0]] }],
             'bow:dragon_piercer': [{ label: 'test', evidence: 'unit', layers: [['local/verified-dragon.mp3', 0.7, 0]] }],
-            'bow:bow_shot': [{ label: 'test', evidence: 'unit', layers: [['local/verified-bow.mp3', 0.7, 0]] }]
+            'bow:bow_shot': [{ label: 'test', evidence: 'unit', layers: [['local/verified-bow.mp3', 0.7, 0]] }],
+            'bow:bow_charge_start': [{
+                label: 'charge air only', evidence: 'unit', maxDurationMs: 1050,
+                layers: [['local/verified-bow-charge-air.mp3', 0.52, 0]]
+            }],
+            'bow:bow_charge_step': [{
+                label: 'charge-step air only', evidence: 'unit', maxDurationMs: 550,
+                layers: [['local/verified-bow-charge-step.mp3', 0.48, 0]]
+            }],
+            'bow:bow_charged_shot': [{
+                label: 'charged arrow release', evidence: 'unit',
+                layers: [['local/verified-bow-charged-shot.mp3', 0.68, 0]]
+            }],
+            'bow:bow_power_shot': [{
+                label: 'power arrow release', evidence: 'unit',
+                layers: [['local/verified-bow-power-shot.mp3', 0.68, 0]]
+            }]
         },
         HUNT_VERIFIED_LOCAL_ITEM_CUES: {
             flash_pod: [{ label: 'test flash', evidence: 'unit', layers: [['local/flash-pod.mp3', 0.82, 0]] }],
@@ -90,7 +110,26 @@ const context = vm.createContext({
                 ['local/verified-roar.mp3', 0.78, 0],
                 ['local/forbidden-roar-background.mp3', 0.78, 20]
             ] }],
+            'rathalos:attack': [
+                {
+                    label: 'phase test vocal',
+                    evidence: 'unit',
+                    patternKeywords: ['phase-test'],
+                    layers: [['local/em002_vo_phase-test.mp3', 0.68, 0]]
+                },
+                {
+                    label: 'phase test impact',
+                    evidence: 'unit',
+                    patternKeywords: ['phase-test'],
+                    layers: [['local/em002_se_phase-test.mp3', 0.68, 0]]
+                }
+            ],
             'rajang:roar': [{ label: 'test rajang', evidence: 'unit', layers: [['local/verified-rajang.mp3', 0.78, 0]] }],
+            'bazelgeuse:blast_scale_explosion': [{
+                label: 'reviewed blast-scale explosion',
+                evidence: 'unit',
+                layers: [['local/bazel-scale-explosion.mp3', 0.74, 0]]
+            }],
             'nargacuga:attack': [{ label: 'tail slam', evidence: 'unit', patternKeywords: ['꼬리'], layers: [['local/narga-tail.mp3', 0.7, 0]] }],
             'safi_jiiva:ultimate': [{ label: 'sapphire star', evidence: 'unit', patternKeywords: ['ultimate'], layers: [['local/safi-breath.mp3', 0.7, 0], ['local/safi-explosion.mp3', 0.8, 0]] }]
         },
@@ -141,6 +180,27 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
         'Rathian must play the exact shared Rathalos roar route');
     assert.ok(!played.some(item => item.audioPath === 'local/forbidden-roar-background.mp3'),
         'roars must discard every secondary ambience/SE layer');
+    const phasedAttackStart = played.length;
+    assert.strictEqual(manager.playMonsterAction({ id: 'rathalos' }, 'attack', {
+        patternName: 'phase-test',
+        audioPhase: 'action-start'
+    }), true);
+    assert.strictEqual(manager.playMonsterAction({ id: 'rathalos' }, 'attack', {
+        patternName: 'phase-test',
+        audioPhase: 'impact'
+    }), true);
+    assert.deepStrictEqual(
+        played.slice(phasedAttackStart).map(item => item.audioPath),
+        ['local/em002_vo_phase-test.mp3', 'local/em002_se_phase-test.mp3'],
+        'monster vocals belong to action start while non-vocal SE belongs to impact'
+    );
+    const earlyFallbackStart = played.length;
+    assert.strictEqual(manager.playMonsterAction({ id: 'rathalos' }, 'physical', {
+        patternName: 'unmapped charge',
+        audioPhase: 'action-start'
+    }), false);
+    assert.strictEqual(played.length, earlyFallbackStart,
+        'generic physical SE must never fire at action start');
     assert.strictEqual(manager.playMonsterAction({ id: 'furious_rajang' }, 'roar'), false,
         'Rajang and its routed variant must stay silent when audition found no monster voice');
     assert.strictEqual(manager.playMonsterAction({ id: 'rathalos' }, 'physical', { patternName: '돌진' }), true,
@@ -155,6 +215,8 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     assert.deepStrictEqual(played.map(item => item.audioPath), [
         'local/verified-roar.mp3',
         'local/verified-roar.mp3',
+        'local/em002_vo_phase-test.mp3',
+        'local/em002_se_phase-test.mp3',
         'local/reviewed-physical-impact-se.mp3',
         'local/narga-tail.mp3',
         'local/reviewed-physical-action-se.mp3',
@@ -162,6 +224,17 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
         'local/safi-explosion.mp3',
         'local/verified-gs.mp3'
     ]);
+    const blastScaleStart = played.length;
+    manager.playMHAsset('monster_blast_scale_explosion', null, {
+        monsterId: 'seething_bazelgeuse',
+        patternType: 'blast_scale_explosion'
+    });
+    await Promise.resolve();
+    assert.deepStrictEqual(
+        played.slice(blastScaleStart).map(item => item.audioPath),
+        ['local/bazel-scale-explosion.mp3'],
+        'Bazelgeuse variants must share the confirmed family blast-scale explosion route'
+    );
     manager.playMHAudioFile('Unified_SFX/MH - Item Found.mp3', null, 1);
     await Promise.resolve();
     assert.strictEqual(played.at(-1).options.baseVolume, 0.7, 'item acquisition cues must be 30% below their mastered level');
@@ -240,6 +313,38 @@ vm.runInContext(source, context, { filename: 'HuntAudioManager.js' });
     await Promise.resolve();
     assert.ok(played.some(item => item.audioPath === 'local/verified-bow.mp3'));
     assert.ok(!played.some(item => item.audioPath === 'local/bow-laser-gimmick.mp3'), 'bow attacks must never select laser-like gimmick banks');
+    const bowCueStart = played.length;
+    manager.playMHAsset('bow_charge_start', null, {
+        weaponId: 'bow', hunterIndex: 0, actionId: 'bow.draw_1'
+    });
+    manager.playMHAsset('bow_charge_step', null, {
+        weaponId: 'bow', hunterIndex: 0, actionId: 'bow.charging_sidestep'
+    });
+    manager.playMHAsset('bow_charged_shot', null, {
+        weaponId: 'bow', hunterIndex: 0, actionId: 'bow.charged_shot'
+    });
+    manager.playMHAsset('bow_power_shot', null, {
+        weaponId: 'bow', hunterIndex: 0, actionId: 'bow.power_shot'
+    });
+    await Promise.resolve();
+    assert.deepStrictEqual(played.slice(bowCueStart).map(item => item.audioPath), [
+        'local/verified-bow-charge-air.mp3',
+        'local/verified-bow-charge-step.mp3',
+        'local/verified-bow-charged-shot.mp3',
+        'local/verified-bow-power-shot.mp3'
+    ], 'bow charge, charging sidestep, charged release, and power release must remain separate semantic routes');
+    assert.ok(!played.some(item => /string[-_ ]?pull|bow[-_ ]?draw/i.test(item.audioPath)),
+        'removed bowstring-pull audio must not leak back through the generic weapon fallback');
+
+    const missingExactBowStart = played.length;
+    const savedBowChargeRoutes = context.window.HUNT_VERIFIED_LOCAL_WEAPON_CUES['bow:bow_charge_start'];
+    delete context.window.HUNT_VERIFIED_LOCAL_WEAPON_CUES['bow:bow_charge_start'];
+    assert.strictEqual(manager.playWeaponAction('bow', 'bow_charge_start', {
+        actionId: 'bow.draw_1'
+    }), false, 'missing exact bow charge audio must fail closed');
+    assert.strictEqual(played.length, missingExactBowStart,
+        'missing exact bow charge audio must never fall through to string-pull or generic bow banks');
+    context.window.HUNT_VERIFIED_LOCAL_WEAPON_CUES['bow:bow_charge_start'] = savedBowChargeRoutes;
 
     const fullParty = [0, 1, 2, 3].map(index => ({
         index,

@@ -90,7 +90,8 @@ class HuntWeaponAnimationCatalog {
         add('dual_blades', ['archdemon_flurry'], 'dual_flurry', 580, 'multi');
         add('dual_blades', ['archdemon_slash'], 'archdemon_slash', 650, 'multi');
 
-        add('hammer', ['charge_1', 'charge_2', 'charge_3', 'mighty_charge'], 'hammer_charge', chargeStageVisualMs, 'none');
+        add('hammer', ['charge_1'], 'hammer_charge_raise', chargeStageVisualMs, 'none');
+        add('hammer', ['charge_2', 'charge_3', 'mighty_charge'], 'hammer_charge_hold', chargeStageVisualMs, 'none');
         add('hammer', ['release_1'], 'hammer_charged_side_swing', 520, 'blunt', {
             releaseChargePose: true, trackTarget: true
         });
@@ -174,14 +175,14 @@ class HuntWeaponAnimationCatalog {
         add('charge_blade', ['saed'], 'saed', 1160, 'explosive');
         add('charge_blade', ['savage_axe'], 'savage_axe', 850, 'multi');
 
-        add('insect_glaive', ['extract_red', 'extract_white', 'extract_orange'], 'kinsect_command', 1080, 'none', { animateWeapon: false, kinsect: 'extract' });
-        add('insect_glaive', ['rising_slash'], 'glaive_rising', 580, 'multi', { kinsect: 'assault' });
-        add('insect_glaive', ['tornado_slash'], 'glaive_tornado', 760, 'multi', { kinsect: 'assault' });
-        add('insect_glaive', ['descending_thrust'], 'descending_thrust', 930, 'multi', { kinsect: 'assault' });
-        add('insect_glaive', ['descending_charge_1', 'descending_charge_2'], 'glaive_charge', 440, 'none', { kinsect: 'none' });
-        add('insect_glaive', ['strong_descending_slash'], 'descending_thrust', 1040, 'multi', { kinsect: 'assault' });
-        add('insect_glaive', ['rising_spiral_slash'], 'glaive_tornado', 1120, 'multi', { kinsect: 'assault' });
-        add('insect_glaive', ['focus_thrust'], 'descending_thrust', 880, 'multi', { kinsect: 'extract' });
+        add('insect_glaive', ['extract_red', 'extract_white', 'extract_orange'], 'kinsect_command', 1120, 'none', { animateWeapon: false, kinsect: 'extract' });
+        add('insect_glaive', ['rising_slash'], 'glaive_rising', 1440, 'multi', { kinsect: 'assault' });
+        add('insect_glaive', ['tornado_slash'], 'glaive_tornado', 1920, 'multi', { kinsect: 'assault' });
+        add('insect_glaive', ['descending_thrust'], 'descending_thrust', 2400, 'multi', { kinsect: 'assault' });
+        add('insect_glaive', ['descending_charge_1', 'descending_charge_2'], 'glaive_charge', 800, 'none', { kinsect: 'none' });
+        add('insect_glaive', ['strong_descending_slash'], 'descending_thrust', 2720, 'multi', { kinsect: 'assault' });
+        add('insect_glaive', ['rising_spiral_slash'], 'glaive_tornado', 3040, 'multi', { kinsect: 'assault' });
+        add('insect_glaive', ['focus_thrust'], 'descending_thrust', 2400, 'multi', { kinsect: 'extract' });
 
         add('light_bowgun', ['normal_shot'], 'light_recoil', 460, 'projectile');
         add('light_bowgun', ['pierce_shot'], 'rapid_recoil', 560, 'projectile');
@@ -313,7 +314,8 @@ class HuntWeaponAnimationCatalog {
             blade_dance_drive: [idle, [.14, .18, .24, -85, 1.02, 0, 0], [.32, .4, .5, 125, 1.07, 0, 0], [.5, .64, .7, -210, 1.1, 0, 0], [.7, .9, .94, 315, 1.13, 0, 0], [.86, 1, 1, -390, 1.14, 0, 0], end],
             blade_dance: [idle, [.18, .25, .35, 120, 1.03, 0, 0], [.42, .62, .72, 320, 1.08, 0, 0], [.7, 1, 1, 620, 1.14, 0, 0], [.86, .84, .82, 720, 1.08, 0, 0], [1, 0, 0, 720, 1, 0, 0]],
             archdemon_slash: [idle, [.25, 0, 0, -70, .98, -20, 8], [.6, 1, 1, 210, 1.13, 0, 0], [.8, .84, .82, 310, 1.08, 0, 0], [1, 0, 0, 360, 1, 0, 0]],
-            hammer_charge: [idle, [.28, 0, 0, -36, .92, -13, 12], [.62, 0, 0, -68, 1.08, -20, 1], [.82, 0, 0, -82, 1.1, -24, -7], [1, 0, 0, -78, 1.08, -22, -6]],
+            hammer_charge_raise: [idle, [.28, 0, 0, -36, .92, -13, 12], [.62, 0, 0, -68, 1.08, -20, 1], [.82, 0, 0, -82, 1.1, -24, -7], [1, 0, 0, -78, 1.08, -22, -6]],
+            hammer_charge_hold: [[0, 0, 0, -78, 1.08, -22, -6], [.38, 0, 0, -83, 1.1, -24, -8], [.72, 0, 0, -74, 1.05, -20, -4], [1, 0, 0, -78, 1.08, -22, -6]],
             hammer_overhead_chain: [idle, [.24, 0, 0, -108, 1.05, -28, 18], [.6, .72, .78, -35, 1.12, 0, -4], [.76, 1, 1, 44, 1.18, 0, 0], end],
             hammer_big_bang: [idle, [.22, 0, 0, -88, 1.03, -24, 12], [.56, .3, .36, -48, 1.12, 0, -8], [.7, 1, 1, 38, 1.2, 0, 2], [.86, .72, .74, 30, 1.07, 0, 5], end],
             hammer_big_bang_finish: [idle, [.18, 0, 0, -112, 1.08, -34, 10], [.42, .34, .38, -55, 1.18, 0, -12], [.58, 1, 1, 55, 1.3, 0, 0], [.72, .82, .88, -36, 1.2, 0, -6], [.86, 1, 1, 64, 1.28, 0, 3], end],

@@ -55,6 +55,15 @@ const HuntMonsterAttackAnimator = require('../js/effects/hunt/HuntMonsterAttackA
 }
 
 {
+    const slotOneArc = HuntMonsterAttackAnimator.projectileArc(960, 360, 240, 720);
+    assert.strictEqual(slotOneArc.startX, 720,
+        'a rock aimed at slot 1 must begin on the monster-facing right side of that target');
+    assert.strictEqual(slotOneArc.startY, -360);
+    assert.ok(slotOneArc.midX > 0 && slotOneArc.midX < slotOneArc.startX,
+        'the rock arc must converge from the live monster origin toward the target');
+}
+
+{
     const monsterRect = { left: 760, top: 120, width: 400, height: 300 };
     const hunterCenters = [240, 720, 1200, 1680];
     const monsterImg = {
@@ -101,6 +110,15 @@ const HuntMonsterAttackAnimator = require('../js/effects/hunt/HuntMonsterAttackA
     assert.deepStrictEqual(reverse.timeline.map(event => event.atTicks), [12, 16, 20, 24]);
     assert.deepStrictEqual(reverse.timeline.map(event => event.targetIndices[0]), [3, 2, 1, 0]);
     assert.strictEqual(reverse.runtimeSweepVector, -1);
+
+    const leadingEdge = animator.resolveScreenCrossImpactTimeline({
+        tags: ['screen-crossing'],
+        movement: { ticks: 40 },
+        impact: { contactLeadRatio: .25 },
+        runtimeSweepDirection: 'left-to-right'
+    }, [0, 1, 2, 3]);
+    assert.deepStrictEqual(leadingEdge.timeline.map(event => event.atTicks), [11, 15, 19, 23],
+        'authored collision depth must resolve when the leading body edge reaches each hunter');
 }
 
 const cases = [
@@ -110,7 +128,9 @@ const cases = [
 ];
 cases.forEach(([name, expected]) => assert.strictEqual(Catalog.resolve({ name }, name, 'physical').id, expected, name));
 assert.strictEqual(Catalog.resolve({ id: 'diablos.horn_uppercut', tags: ['horn', 'target-contact'] }).duration, 2800);
-assert.strictEqual(Catalog.resolve({ id: 'diablos.tail_sweep', tags: ['tail'] }).duration, 3100);
+assert.strictEqual(Catalog.resolve({
+    id: 'diablos.tail_sweep', tags: ['tail'], animationProfile: 'diablos-tail-cross'
+}).duration, 4000);
 assert.strictEqual(Catalog.resolve({
     id: 'future_monster.tail_slam_rock', tags: ['tail', 'projectile'], animationProfile: 'tail-slam-rock'
 }).id, 'tail-slam-rock');
@@ -146,7 +166,16 @@ assert.strictEqual(Catalog.resolve({ name: '화염 브레스 쓸기', tags: ['ar
 assert.strictEqual(Catalog.resolve({ name: '연속 발톱 공격', tags: ['multi-hit'] }).id, 'pounce-chain');
 
 const css = require('./helpers/hunt-css');
-for (const id of ['ground-charge-zigzag', 'ground-charge-double', 'aerial-charge-cross', 'lateral-sweep', 'pounce-chain', 'burrow-enter', 'burrow-emerge', 'tail-sweep-double', 'tail-slam-rock', 'side-tackle-contact', 'horn-sweep-contact']) {
+assert.strictEqual(HuntMonsterAttackAnimator.usesElementalDelivery('physical', {
+    type: 'projectile',
+    delivery: 'projectile',
+    projectileVisual: 'rock'
+}), false, 'dedicated physical rocks must never fall through to the purple elemental projectile renderer');
+assert.strictEqual(HuntMonsterAttackAnimator.usesElementalDelivery('elemental', {
+    type: 'projectile',
+    delivery: 'projectile'
+}), true, 'elemental projectiles must retain the shared projectile renderer');
+for (const id of ['ground-charge-zigzag', 'ground-charge-double', 'aerial-charge-cross', 'lateral-sweep', 'pounce-chain', 'burrow-enter', 'burrow-emerge', 'tail-sweep-double', 'tail-slam-rock', 'side-tackle-contact', 'horn-sweep-contact', 'diablos-tail-cross']) {
     assert(css.includes(`.monster-motion-${id}`), `${id} class must exist`);
     assert(css.includes(`@keyframes monster-motion-${id}`), `${id} keyframes must exist`);
 }
@@ -164,6 +193,10 @@ assert(css.includes('var(--monster-lane-x)'), 'wide motions must scale to the av
 assert(css.includes('.hunt-monster-attack-motion'), 'monster attacks need an isolated transform owner outside the status-effect image');
 assert(css.includes('.hunt-monster-facing-layer'), 'direction changes need a nested layer isolated from travel and hit transforms');
 assert(css.includes('.monster-local-action-fx.tail-vortex'), 'Diablos tail sweep needs its local vortex emoji layer');
+assert(css.includes('--tail-rock-start-x'),
+    'Diablos rocks must launch from the live monster position instead of a fixed off-screen offset');
+assert(css.includes('--tail-rock-mid-x'),
+    'Diablos rocks must preserve their authored arc while travelling toward each hunter slot');
 assert(css.includes('var(--monster-charge-second-x)'), 'return charge needs a separately locked second target lane');
 assert(css.includes('var(--monster-charge-cross-y)'), 'wide aerial charges need a hunter-row crossing route');
 assert(css.includes('.monster-uppercut-launched'), 'uppercut launch reactions must be reusable across monsters');
@@ -184,20 +217,24 @@ assert.ok(!/rotate\(90deg\)/.test(ironMountainFrames), 'Iron Mountain must not r
     const doubleChargeFrames = css.match(/@keyframes monster-motion-ground-charge-double\s*\{([\s\S]*?)\n\}/)?.[1] || '';
     assert.doesNotMatch(doubleChargeFrames, /\b14%\b/,
         'Diablos return charge must not spend an opening segment on an anticipation pose');
-    assert.doesNotMatch(doubleChargeFrames, /\b35%\b/,
-        'the first pass must not stop at the hunter before leaving the board');
-    assert.match(doubleChargeFrames, /38%[^}]*--monster-charge-bottom/,
-        'the first pass must travel directly off-board from its home position');
+    assert.match(doubleChargeFrames, /34%[^}]*--monster-charge-first-exit-y/,
+        'the first pass must continue along its target vector to a measured off-board exit');
+    assert.match(doubleChargeFrames, /35%[^}]*--monster-charge-first-exit-y/,
+        'the first pass may disappear only after reaching that off-board exit');
     assert.match(doubleChargeFrames, /18%[^}]*--monster-charge-first-y/,
         'the first collision frame must cross the locked hunter position');
-    assert.match(doubleChargeFrames, /40%[^}]*--monster-charge-bottom/,
+    assert.match(doubleChargeFrames, /40%[^}]*--monster-charge-first-exit-y/,
         'the return pass must launch immediately from off-board without a second telegraph');
-    assert.match(doubleChargeFrames, /40%[^}]*--monster-charge-first-x/,
+    assert.match(doubleChargeFrames, /40%[^}]*--monster-charge-first-exit-x/,
         'the return pass must inherit the first pass off-board exit instead of pre-positioning below its next hunter');
     assert.doesNotMatch(doubleChargeFrames, /40%[^}]*--monster-charge-second-x/,
         'the return pass must not teleport to the next hunter lane before launching');
     assert.match(doubleChargeFrames, /62%[^}]*--monster-charge-second-y/,
         'the return collision frame must cross its separately locked hunter');
+    assert.match(doubleChargeFrames, /78%[^}]*--monster-charge-second-exit-y/,
+        'the return pass must continue through its hunter and leave the opposite edge before home recovery');
+    assert.doesNotMatch(doubleChargeFrames, /rotate\(180deg\)/,
+        'the shared facing layer must turn return charges without flipping the monster upside down');
     assert.match(css, /\.monster-motion-ground-charge-double\s*\{[^}]*\slinear\s/,
         'both charge passes must keep continuous speed through hunter collision frames');
 }

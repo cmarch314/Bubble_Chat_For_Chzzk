@@ -29,7 +29,7 @@ vm.runInNewContext(
     { window: generatedWindow }
 );
 const generated = generatedWindow.HIVE_AUDIO_LEVELS;
-assert.strictEqual(Object.keys(generated).length, 1715, 'every runtime audio/video file needs a profile');
+assert.strictEqual(Object.keys(generated).length, 1724, 'every runtime audio/video file needs a profile');
 assert.strictEqual(generated['SFX/MonsterHunter_Hunters/mh_reload.mp3'].silent, true);
 assert.strictEqual(generated['Video/GodGame.mp4'].measurement, 'silence');
 assert.strictEqual(generated['SFX/Chzzk_Signatures/DDuk.mp3'].measurement, 'volume-fallback');

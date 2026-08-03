@@ -9,8 +9,8 @@
     html,body{margin:0;min-height:100%;background:#080a0b;color:#f8ecd1;font-family:"Malgun Gothic",sans-serif}
     main{box-sizing:border-box;width:100%;height:918px;padding:28px 64px;overflow:hidden}
     h1{margin:0 0 6px;font-size:34px} p{margin:0 0 16px;color:#c8b994;font-size:18px}
-    .audit-row{display:grid;grid-template-columns:190px repeat(6,168px);gap:12px;align-items:center;margin:8px 0}
-    .audit-name{font-size:26px;font-weight:900}.audit-cell{display:grid;grid-template-columns:72px 1fr;grid-template-rows:1fr auto;align-items:center;gap:2px 8px;height:126px;box-sizing:border-box;padding:8px;border:2px solid #9b7a43;border-radius:14px;background:#19150f}
+    .audit-row{display:grid;grid-template-columns:190px repeat(6,168px);gap:12px;align-items:center;margin:5px 0}
+    .audit-name{font-size:26px;font-weight:900}.audit-cell{display:grid;grid-template-columns:72px 1fr;grid-template-rows:1fr auto;align-items:center;gap:2px 8px;height:108px;box-sizing:border-box;padding:8px;border:2px solid #9b7a43;border-radius:14px;background:#19150f}
     .audit-cell .hunt-monster-part{grid-row:1 / 3}.audit-cell b{font-size:18px}.audit-cell code{font-size:11px;color:#c9b992}
     .hunt-monster-part{margin:0}
     footer{position:fixed;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa66;background:#000c;display:grid;place-items:center;color:#929b96;font-size:20px}
@@ -29,7 +29,9 @@
     { id: 'neutral', name: '흰색 원본' },
     { id: 'rathalos', name: '리오레우스' },
     { id: 'diablos', name: '디아블로스' },
-    { id: 'black_diablos', name: '흑디아블로스' }
+    { id: 'black_diablos', name: '흑디아블로스' },
+    { id: 'bazelgeuse', name: '바젤기우스' },
+    { id: 'seething_bazelgeuse', name: '홍련의 솟구치는 바젤기우스' }
   ];
   const kinds = ['head', 'back', 'leg', 'left-wing', 'right-wing', 'tail'];
   const audit = document.querySelector('#audit');
@@ -41,7 +43,7 @@
       const material = HuntMonsterPartMaterialCatalog.resolve(monster, { kind });
       const cell = document.createElement('div');
       cell.className = 'audit-cell';
-      cell.innerHTML = `<span class="hunt-monster-part" data-material-kind="${material.kind}" data-material-side="${material.side}"><img class="hunt-monster-part-image" src="../../${material.path}" style="--hunt-part-tint:${material.tint}" alt=""></span><b>${material.label}</b><code>${material.sourceId} · ${material.shapeFamily}</code>`;
+      cell.innerHTML = `<span class="hunt-monster-part" data-material-kind="${material.kind}" data-material-side="${material.side}"><span class="hunt-monster-part-art" style="--hunt-part-mask:url('../../${material.path}');--hunt-part-base:${material.palette.base};--hunt-part-highlight:${material.palette.highlight};--hunt-part-shadow:${material.palette.shadow};--hunt-part-glow:${material.palette.glow}"><img class="hunt-monster-part-image" style="--hunt-part-tint:${material.tint}" src="../../${material.path}" alt=""></span></span><b>${material.label}</b><code>${material.sourceId} · ${material.shapeFamily}</code>`;
       row.appendChild(cell);
     });
     audit.appendChild(row);

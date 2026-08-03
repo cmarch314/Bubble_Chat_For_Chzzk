@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,initial-scale=1">
+  <title>수렵 적중 이펙트 미리보기</title>
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:#090705;color:#fff;font-family:sans-serif}
+    #preview{position:relative;width:1848px;height:880px;margin:24px 36px;border:3px solid #876a3b;border-radius:18px;background:radial-gradient(circle at 50% 40%,#423326,#17110d 68%);overflow:hidden}
+    h1{margin:28px 36px 8px;color:#f3d89b;font-size:34px}
+    p{margin:0 36px;color:#cbbb9d;font-size:20px}
+    #monster-showcase-panel{position:absolute;inset:100px 120px 70px;overflow:visible}
+    #fight-monster-img{position:absolute;left:50%;top:50%;width:560px;height:430px;transform:translate(-50%,-50%);border-radius:48% 55% 45% 52%;background:radial-gradient(ellipse at 42% 38%,#9d7749,#49351f 55%,#17100b 78%);filter:drop-shadow(0 28px 16px #000c)}
+    .controls{position:absolute;left:50%;bottom:32px;z-index:700;display:flex;gap:18px;transform:translateX(-50%)}
+    button{padding:15px 28px;border:2px solid #c69a54;border-radius:9px;background:#21170f;color:#fff;font-size:22px;font-weight:900}
+    .chat-safe{position:fixed;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa88;background:#000b;display:grid;place-items:center;color:#77d8b5;font-size:22px;font-weight:900}
+  </style>
+</head>
+<body>
+  <main id="preview">
+    <h1>적중 좌표 이펙트</h1>
+    <p>일반 타격은 먼지만, 회심은 같은 적중점에 고정된 붉은 ＼ 슬래시만 표시함.</p>
+    <section id="monster-showcase-panel">
+      <div id="fight-monster-img" aria-label="몬스터 시험 실루엣"></div>
+    </section>
+    <div class="controls">
+      <button id="normal-hit" type="button">일반 타격</button>
+      <button id="critical-hit" type="button">회심 타격</button>
+    </div>
+  </main>
+  <footer class="chat-safe">OBS 채팅 안전영역 · 하단 15%</footer>
+  <script>
+    class HuntMonsterAttackAnimator {}
+  </script>
+  <script src="../../js/effects/hunt/HuntCombatAnimator.js"></script>
+  <script>
+    const owner = {
+      card: document.getElementById('preview'),
+      animationTimers: { timeout(fn, ms) { return setTimeout(fn, ms); } }
+    };
+    const animator = new HuntCombatAnimator(owner);
+    const monster = document.getElementById('fight-monster-img');
+    document.getElementById('normal-hit').addEventListener('click', () =>
+      animator.showDamageAtImpact(monster, 124, 45, null, false));
+    document.getElementById('critical-hit').addEventListener('click', () =>
+      animator.showDamageAtImpact(monster, 218, 65, null, true));
+  </script>
+</body>
+</html>

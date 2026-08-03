@@ -17,7 +17,6 @@ class HuntChatTactics {
             '!공격': 'offensive', '!공세': 'offensive',
             '!안전': 'defensive', '!수비': 'defensive',
             '!지원': 'support', '!응원': 'support',
-            '!회피': 'evade', '!가드': 'guard',
             '!회복': 'heal', '!함정': 'trap', '!섬광': 'flash', '!낙석': 'rockfall'
         };
         return commands[normalized] || null;
@@ -57,26 +56,12 @@ class HuntChatTactics {
             return { handled: true, accepted: false, feedback: '⏳ 대기' };
         }
         this.userCooldowns.set(nickname, currentTick + this.userCooldownTicks);
-        const hunter = engine.selectedWeapons.find(item => item.hunterName === nickname);
-
         if (['offensive', 'defensive', 'support'].includes(command)) {
             this.updateStrategy(engine, command);
             this.addGauge(command === 'support' ? 8 : 4);
             const labels = { offensive: '⚔️ 공격 집중', defensive: '🛡️ 생존 우선', support: '💚 지원 집중' };
             engine.addLog(`📣 [작전 투표] ${nickname}: ${labels[command]} (현재 지원 게이지 ${this.supportGauge}/100)`, '#7fe7ff');
             return { handled: true, accepted: true, feedback: labels[command] };
-        }
-
-        if (command === 'evade' || command === 'guard') {
-            if (!hunter || hunter.status !== 'alive') {
-                return { handled: true, accepted: false, feedback: '🚫 참가자 전용' };
-            }
-            if (command === 'evade') hunter.nextEvadeBoost = Math.max(hunter.nextEvadeBoost || 0, 0.18);
-            else hunter.nextGuardBoost = Math.max(hunter.nextGuardBoost || 0, 0.18);
-            this.addGauge(3);
-            const feedback = command === 'evade' ? '🌀 회피 준비' : '🛡️ 가드 준비';
-            engine.addLog(`${feedback}: ${nickname}`, '#86ffbf');
-            return { handled: true, accepted: true, feedback };
         }
 
         if (command === 'heal') {

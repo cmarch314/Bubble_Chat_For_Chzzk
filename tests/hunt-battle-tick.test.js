@@ -77,6 +77,29 @@ function createEngine(overrides = {}) {
 }
 
 {
+    let roars = 0;
+    let turns = 0;
+    const { engine } = createEngine({
+        battleTime: 9,
+        monsterTier: 'large',
+        monsterAtb: 84,
+        triggerEncounterRoar() {
+            roars++;
+            this.monsterRoarDuration = 12;
+        },
+        prepareMonsterTurn() { turns++; }
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.pendingMonsterEncounterRoar, true);
+    assert.strictEqual(roars, 0, 'encounter roar must wait for the remaining ATB quarter');
+    assert.strictEqual(turns, 0, 'a normal attack must not bypass a queued encounter roar');
+    engine.monsterAtb = 100;
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(roars, 1, 'encounter roar must begin after the opening ATB reaches full');
+    assert.strictEqual(turns, 0);
+}
+
+{
     let resolved = null;
     const pattern = { id: 'test.telegraph', name: '예고 공격', windupTicks: 3 };
     const { engine } = createEngine({
@@ -109,6 +132,95 @@ function createEngine(overrides = {}) {
     assert.deepStrictEqual(resolutions, [[impactPattern, null, 0]],
         'the collision tick must resolve against the originally approached hunter');
     assert.strictEqual(engine.pendingMonsterImpact, null);
+}
+
+{
+    const volleys = [];
+    const resolutions = [];
+    const { engine } = createEngine({
+        pendingMonsterImpact: {
+            pattern: {
+                id: 'bazelgeuse.breath',
+                tags: ['blast-scale-source'],
+                scaleDropsByPart: { body: 1, head: 2 },
+                scaleDropTiming: 'before-impact',
+                runtimeImpactCommit: true,
+                runtimeImpactTimelineEvent: true
+            },
+            remainingTicks: 1,
+            totalTicks: 1,
+            attackerIndex: null,
+            targetIndex: 0,
+            nextEventIndex: 0,
+            events: [
+                { atTicks: 1, targetIndices: [0], damageScale: 0, eventKind: 'blast-scale-volley' },
+                { atTicks: 3, targetIndices: [0], damageScale: 1, eventKind: 'breath-impact' }
+            ]
+        },
+        monsterTraitRuntime: {
+            dropScalesForAction(_engine, pattern, targets) {
+                volleys.push({ pattern, targets });
+            },
+            onImpactEvent() {}
+        },
+        executeMonsterTurn: (...args) => resolutions.push(args)
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(volleys.length, 1);
+    assert.deepStrictEqual(
+        JSON.parse(JSON.stringify(volleys[0].targets)),
+        [{ index: 0, result: 'pending-impact' }]
+    );
+    assert.strictEqual(resolutions.length, 0,
+        'the scale volley must not deal breath damage before the authored impact frame');
+    context.HuntBattleTickExecutor.execute(engine);
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(resolutions.length, 1);
+    assert.strictEqual(resolutions[0][0].runtimeImpactEventKind, 'breath-impact');
+}
+
+{
+    const previousTurns = context.HuntMonsterTurnExecutor;
+    context.HuntMonsterTurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
+    const hunters = [0, 1, 2].map(index => ({
+        index,
+        id: 'great_sword',
+        status: 'alive',
+        hp: 100,
+        maxHp: 100,
+        atb: 0,
+        hitDuration: index === 1 ? 8 : 0
+    }));
+    const resolutions = [];
+    const { engine } = createEngine({
+        selectedWeapons: hunters,
+        random: () => .99,
+        pendingMonsterImpact: {
+            pattern: {
+                id: 'bazelgeuse.carpet_bombing',
+                runtimeImpactCommit: true,
+                runtimeImpactTimelineEvent: true
+            },
+            remainingTicks: 1,
+            totalTicks: 1,
+            attackerIndex: null,
+            targetIndex: 0,
+            events: [{
+                atTicks: 1,
+                targetIndices: null,
+                targetMode: 'random-live',
+                eventKind: 'carpet-dive',
+                defenseMode: 'emergency-jump'
+            }],
+            nextEventIndex: 0
+        },
+        executeMonsterTurn: (...args) => resolutions.push(args)
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.deepStrictEqual(resolutions[0][0].runtimeImpactTargetIndices, [2],
+        'Bazelgeuse must acquire the dive target at the crash event, not at takeoff');
+    assert.strictEqual(resolutions[0][2], 2);
+    context.HuntMonsterTurnExecutor = previousTurns;
 }
 
 {
@@ -196,13 +308,15 @@ function createEngine(overrides = {}) {
     const { engine } = createEngine({
         monsterKnockdownDuration: 5,
         monsterState: 'knocked_down',
+        monsterAtb: 100,
         pendingMonsterAction: { pattern: { id: 'test.cancel', name: '취소될 공격' }, remainingTicks: 1 },
         prepareMonsterTurn() { resolved = true; }
     });
     context.HuntBattleTickExecutor.execute(engine);
     assert.strictEqual(resolved, false, 'knockdown must cancel a telegraphed monster action');
     assert.strictEqual(engine.pendingMonsterAction, null);
-    assert.strictEqual(engine.monsterAtb, 1, 'monster ATB must start recovering as soon as the interrupted attack is cleared');
+    assert.strictEqual(engine.monsterAtb, 100,
+        'a true knockdown must keep its already-filled ATB while the interrupted attack is cleared');
 }
 
 {
@@ -218,6 +332,21 @@ function createEngine(overrides = {}) {
     context.HuntBattleTickExecutor.execute(engine);
     assert.strictEqual(engine.monsterAtb, 100, 'knockdown recovery may fill and hold the monster ATB gauge');
     assert.strictEqual(resolved, false, 'a full ATB gauge must not act before knockdown recovery ends');
+}
+
+{
+    let resolved = false;
+    const { engine } = createEngine({
+        monsterStunDuration: 3,
+        monsterState: 'stunned',
+        monsterAtb: 98,
+        prepareMonsterTurn() { resolved = true; }
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.monsterAtb, 99, 'monster ATB must recover during the stun animation');
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.monsterAtb, 100, 'stun recovery may fill and hold the monster ATB gauge');
+    assert.strictEqual(resolved, false, 'a full ATB gauge must not act before stun recovery ends');
 }
 
 {
@@ -278,12 +407,63 @@ function createEngine(overrides = {}) {
     hunter.id = 'insect_glaive';
     hunter.speedGroup = 'fast';
     context.HuntBattleTickExecutor.execute(engine);
-    assert.ok(Math.abs(hunter.atb - 1.725) < 0.001,
-        'Insect Glaive extract setup may be nimble without changing the ten-second shared baseline');
+    assert.ok(Math.abs(hunter.atb - 1.5) < 0.001,
+        'Insect Glaive extract setup must not bypass the shared ten-second ATB cadence');
     hunter.atb = 0;
     hunter.extractDuration = 30;
     context.HuntBattleTickExecutor.execute(engine);
     assert.ok(Math.abs(hunter.atb - 1.5) < 0.001, 'triple extract must retain the shared ten-second ATB cadence');
+}
+
+{
+    let rageRoars = 0;
+    const pattern = { id: 'rathalos.fireball', name: 'Fireball' };
+    const { engine } = createEngine({
+        battleTime: 799,
+        monsterTier: 'large',
+        monsterBehavior: {
+            rageStartTick: 800,
+            rageDurationTicks: 1200,
+            rageRecoveryDurationTicks: 300,
+            rageOpenerPatternId: 'rathalos.backstep_fireball'
+        },
+        pendingMonsterAction: { pattern, remainingTicks: 2, totalTicks: 2 },
+        triggerMonsterRoarFlinch: () => { rageRoars++; }
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.monsterState, 'enraged');
+    assert.strictEqual(rageRoars, 0,
+        'rage must not roar over an attack that is still in progress');
+    assert.strictEqual(engine.pendingMonsterRageRoar, true);
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(rageRoars, 1,
+        'the queued rage roar must fire exactly once after the current attack completes');
+    assert.strictEqual(engine.pendingMonsterRageRoar, false);
+    assert.strictEqual(engine.forcedMonsterPatternId, 'rathalos.backstep_fireball',
+        'Rathalos rage opener must be queued after its rage roar');
+}
+
+{
+    let rageRoars = 0;
+    const { engine } = createEngine({
+        battleTime: 799,
+        monsterTier: 'large',
+        monsterFlightState: 'airborne',
+        monsterBehavior: {
+            rageStartTick: 800,
+            rageDurationTicks: 1200,
+            rageRecoveryDurationTicks: 300
+        },
+        triggerMonsterRoarFlinch: () => { rageRoars++; }
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(rageRoars, 0,
+        'a flying monster must not emit a transition roar in midair');
+    assert.strictEqual(engine.pendingMonsterRageRoar, true);
+    engine.monsterFlightState = 'grounded';
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(rageRoars, 1,
+        'the deferred rage roar must fire after landing');
 }
 
 {
@@ -403,6 +583,33 @@ function createEngine(overrides = {}) {
     assert.strictEqual(calls.gameEnd.length, 0, 'third-cart result must wait for the cart animation');
     context.HuntBattleTickExecutor.execute(engine);
     assert.deepStrictEqual(calls.gameEnd, [[false]], 'quest failure must resolve after the cart cinematic window');
+}
+
+{
+    const effects = [];
+    const { engine } = createEngine({
+        monsterAtb: 75,
+        monsterState: 'knocked_down',
+        monsterKnockdownDuration: 2,
+        activeTrapControl: {
+            kind: 'shocktrap',
+            durationTicks: 2,
+            recoveryPerTick: 12.5,
+            retainedAtb: 75,
+            useCount: 3
+        },
+        triggerEnvironmentEffect: (...args) => effects.push(args)
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.monsterAtb, 87.5);
+    assert.ok(engine.activeTrapControl,
+        'the trap visual state must remain active while its ATB recovery is incomplete');
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.monsterAtb, 100);
+    assert.strictEqual(engine.activeTrapControl, null);
+    assert.strictEqual(JSON.stringify(effects),
+        JSON.stringify([['trap-release', null, { kind: 'shocktrap', useCount: 3 }]]),
+        'the trap visual must release on the exact tick the monster ATB becomes full');
 }
 
 console.log('[test] Hunt battle tick terminal-transition contract passed.');

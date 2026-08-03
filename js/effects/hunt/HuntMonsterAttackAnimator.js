@@ -12,6 +12,45 @@ class HuntMonsterAttackAnimator {
 
     get animationTimers() { return this.owner.animationTimers; }
 
+    static projectileArc(originX, originY, targetX, targetY) {
+        const startX = Number(originX || 0) - Number(targetX || 0);
+        const startY = Number(originY || 0) - Number(targetY || 0);
+        return {
+            startX,
+            startY,
+            midX: startX * .18,
+            midY: startY * .18 - 70
+        };
+    }
+
+    static targetFacingOrigin(monsterRect, targetRect, partPoint = null, baseFacing = 'front') {
+        const monsterCenterX = monsterRect.left + monsterRect.width / 2;
+        const targetCenterX = targetRect.left + targetRect.width / 2;
+        const authoredX = Number(partPoint?.x ?? .5);
+        let resolvedX = authoredX;
+        if (baseFacing === 'left') {
+            resolvedX = targetCenterX >= monsterCenterX ? 1 - authoredX : authoredX;
+        } else if (baseFacing === 'right') {
+            resolvedX = targetCenterX >= monsterCenterX ? authoredX : 1 - authoredX;
+        }
+        return {
+            x: monsterRect.left + monsterRect.width * resolvedX,
+            y: monsterRect.top + monsterRect.height * Number(partPoint?.y ?? .5)
+        };
+    }
+
+    static projectileLaunchDelayMs(pattern, impactTicks, firstImpactTicks, ticksPerSecond, visualTravelMs) {
+        const tickMs = 1000 / Math.max(1, Number(ticksPerSecond || 10));
+        const authoredTicks = Number(pattern?.projectileLaunchDelayTicks || 0);
+        if (authoredTicks > 0) {
+            return Math.max(0, Math.round(
+                authoredTicks * tickMs
+                + Math.max(0, Number(impactTicks || 0) - Number(firstImpactTicks || 0)) * tickMs
+            ));
+        }
+        return Math.max(0, Math.round(Number(impactTicks || 0) * tickMs - visualTravelMs));
+    }
+
     resolveMotionElement(monsterImg) {
         const closest = monsterImg?.closest?.('.hunt-monster-attack-motion');
         if (closest?.classList?.contains?.('hunt-monster-attack-motion')) return closest;
@@ -49,18 +88,29 @@ class HuntMonsterAttackAnimator {
         const monsterImg = this.card.querySelector?.('#fight-monster-img');
         const geometry = this.screenCrossGeometry(monsterImg, pattern);
         if (!geometry) return null;
+        const monsterRect = monsterImg?.getBoundingClientRect?.();
         const movementTicks = Math.max(1, Math.round(Number(pattern.movement?.ticks || 40)));
         const visibleStart = .10;
         const visibleEnd = .82;
         const routeWidth = geometry.endX - geometry.startX;
         if (Math.abs(routeWidth) < 1) return null;
+        // A crossing monster contacts the hunter with its leading body edge,
+        // not after its sprite centre has already passed the weapon slot. Kits
+        // can author the visible collision depth without coupling the runtime
+        // to a monster id or a fixed pixel offset.
+        const contactLeadRatio = Math.max(0, Math.min(.45, Number(
+            pattern.impact?.contactLeadRatio || 0
+        )));
+        const contactLeadX = Number(monsterRect?.width || 0)
+            * contactLeadRatio
+            * geometry.direction;
 
         const timeline = targetIndices.map(targetIndex => {
             const targetCard = this.card.querySelector?.(`#fight-card-${targetIndex}`);
             const targetAnchor = targetCard?.querySelector?.('.game-hunt-weapon-img-container') || targetCard;
             const targetRect = targetAnchor?.getBoundingClientRect?.();
             if (!targetRect) return null;
-            const targetX = targetRect.left + targetRect.width / 2;
+            const targetX = targetRect.left + targetRect.width / 2 - contactLeadX;
             const routeProgress = Math.max(0, Math.min(1,
                 (targetX - geometry.startX) / routeWidth
             ));
@@ -79,6 +129,61 @@ class HuntMonsterAttackAnimator {
         };
     }
 
+    resolveBazelCarpetImpactTimeline(pattern = {}, targetIndices = []) {
+        if (!pattern?.tags?.includes?.('high-flight-sequence') || !this.card) return null;
+        const orderedCards = [...this.card.querySelectorAll('.game-hunt-weapon-card')]
+            .map(card => {
+                const anchor = card.querySelector('.game-hunt-weapon-img-container') || card;
+                const rect = anchor.getBoundingClientRect?.();
+                const index = Number(card.id.replace(/\D+/g, ''));
+                return rect && Number.isInteger(index)
+                    ? { index, x: rect.left + rect.width / 2 }
+                    : null;
+            })
+            .filter(Boolean)
+            .sort((a, b) => a.x - b.x);
+        if (!orderedCards.length) return null;
+
+        const leftToRight = pattern.runtimeSweepDirection !== 'right-to-left';
+        const route = leftToRight ? orderedCards : [...orderedCards].reverse();
+        const minX = Math.min(...orderedCards.map(card => card.x));
+        const maxX = Math.max(...orderedCards.map(card => card.x));
+        const span = Math.max(1, maxX - minX);
+        const sources = Object.entries(pattern.scaleDropsByPart || {})
+            .flatMap(([part, count]) =>
+                Array.from({ length: Math.max(0, Number(count || 0)) }, () => part)
+            );
+        const drops = route.map((card, index) => {
+            const normalized = leftToRight
+                ? (card.x - minX) / span
+                : (maxX - card.x) / span;
+            return {
+                atTicks: Math.max(28, Math.min(66, Math.round(28 + normalized * 38))),
+                targetIndices: [card.index],
+                damageScale: 0,
+                eventKind: 'blast-scale-drop',
+                sourcePart: sources[index] || 'body'
+            };
+        });
+        const authoredImpacts = (pattern.impactTimeline || []).map(entry => (
+            entry?.eventKind === 'carpet-dive'
+                && Number.isInteger(pattern.runtimeDiveTargetIndex)
+                ? {
+                    ...entry,
+                    targetMode: '',
+                    targetIndices: [pattern.runtimeDiveTargetIndex]
+                }
+                : { ...entry }
+        ));
+        return {
+            timeline: [
+                ...authoredImpacts,
+                ...drops
+            ].sort((a, b) => a.atTicks - b.atTicks),
+            runtimeSweepVector: leftToRight ? 1 : -1
+        };
+    }
+
     facingPlan(profile, pattern, attackX = 0, secondX = 0) {
         const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
             ? HuntMonsterAnatomyCatalog
@@ -93,9 +198,40 @@ class HuntMonsterAttackAnimator {
         const horizontalDirection = authoredDirection || (Math.abs(attackX) >= 12 ? Math.sign(attackX) : 0);
         const id = String(profile?.id || '');
 
-        if (['ground-charge-cross', 'aerial-charge-cross', 'ground-charge'].includes(id)) {
+        if (id === 'tigrex-charge-chain') {
+            const directions = (pattern?.runtimeTigrexFacingDirections || [])
+                .map(Number).map(Math.sign).filter(Boolean);
+            if (!directions.length) return null;
+            if (directions.length >= 3) return [
+                { offset: 0, direction: directions[0] },
+                { offset: .30, direction: directions[0] },
+                { offset: .31, direction: directions[1] || directions[0] },
+                { offset: .54, direction: directions[1] || directions[0] },
+                { offset: .55, direction: directions[2] || directions[1] || directions[0] },
+                { offset: 1, direction: directions[2] || directions[1] || directions[0] }
+            ];
+            return [
+                { offset: 0, direction: directions[0] },
+                { offset: .36, direction: directions[0] },
+                { offset: .37, direction: directions[1] || directions[0] },
+                { offset: 1, direction: directions[1] || directions[0] }
+            ];
+        }
+
+        if (id === 'bazel-carpet-bombing') {
+            const direction = authoredDirection || (horizontalDirection || 1);
+            return [
+                { offset: 0, direction },
+                { offset: .46, direction },
+                { offset: .47, direction: -direction },
+                { offset: .68, direction: -direction },
+                { offset: .69, direction: 0 },
+                { offset: 1, direction: 0 }
+            ];
+        }
+        if (['ground-charge-cross', 'aerial-charge-cross', 'legiana-drill-cross', 'ground-charge'].includes(id)) {
             if (!horizontalDirection) return null;
-            const hideOffset = id === 'aerial-charge-cross' ? .65 : .73;
+            const hideOffset = ['aerial-charge-cross', 'legiana-drill-cross'].includes(id) ? .65 : .73;
             return [
                 { offset: 0, direction: horizontalDirection },
                 { offset: hideOffset, direction: horizontalDirection },
@@ -109,6 +245,19 @@ class HuntMonsterAttackAnimator {
                 ? Math.sign(secondX - attackX)
                 : -firstDirection;
             if (!firstDirection && !betweenDirection) return null;
+            const isStompBurst = pattern?.chargeLaunchStyle === 'stomp-burst';
+            if (isStompBurst) {
+                return [
+                    { offset: 0, direction: firstDirection || betweenDirection },
+                    { offset: .460, direction: firstDirection || betweenDirection },
+                    { offset: .461, direction: 0 },
+                    { offset: .610, direction: 0 },
+                    { offset: .611, direction: betweenDirection || firstDirection },
+                    { offset: .909, direction: betweenDirection || firstDirection },
+                    { offset: .910, direction: 0 },
+                    { offset: 1, direction: 0 }
+                ];
+            }
             return [
                 { offset: 0, direction: firstDirection || betweenDirection },
                 { offset: .39, direction: firstDirection || betweenDirection },
@@ -176,6 +325,9 @@ class HuntMonsterAttackAnimator {
         const baseFacing = HuntMonsterAnatomyCatalog.baseFacing(this.owner?.selectedMonster);
         const scaleFor = direction => direction === 0 ? 1
             : (baseFacing === 'left' ? (direction < 0 ? 1 : -1) : (direction > 0 ? 1 : -1));
+        const initialFlip = scaleFor(plan[0]?.direction ?? 0);
+        layer.style.setProperty('--monster-facing-flip', String(initialFlip));
+        monsterImg?.style?.setProperty?.('--monster-facing-flip', String(initialFlip));
         const keyframes = plan.map(step => ({
             offset: step.offset,
             transform: `scaleX(${scaleFor(step.direction)})`
@@ -187,7 +339,17 @@ class HuntMonsterAttackAnimator {
         if (!animation) layer.style.transform = keyframes[0].transform;
         const cleanup = () => {
             try { animation?.cancel(); } catch (_) { /* detached OBS node */ }
-            layer.style.removeProperty('transform');
+            const retainLastFacing = profile?.id === 'tigrex-charge-chain';
+            const finalTransform = keyframes[keyframes.length - 1]?.transform;
+            if (retainLastFacing && finalTransform) {
+                layer.style.transform = finalTransform;
+                layer.dataset.monsterRetainedFacing = finalTransform;
+            } else {
+                layer.style.removeProperty('transform');
+                delete layer.dataset.monsterRetainedFacing;
+            }
+            layer.style.removeProperty('--monster-facing-flip');
+            monsterImg?.style?.removeProperty?.('--monster-facing-flip');
             delete layer.dataset.monsterFacingPlan;
         };
         if (activeMotion) activeMotion.finishers.push(cleanup);
@@ -224,6 +386,7 @@ class HuntMonsterAttackAnimator {
         active.element.style.removeProperty('animation');
         active.element.style.removeProperty('transform');
         active.element.style.removeProperty('transition');
+        delete active.element.dataset.tigrexChargePasses;
         this.card?.querySelectorAll?.('.monster-local-action-fx')?.forEach(node => node.remove());
         active.finishers.forEach(finisher => finisher());
         this.traceMonsterMotion('complete', {
@@ -238,7 +401,12 @@ class HuntMonsterAttackAnimator {
     startMonsterMotion(motionElement, motionClass, duration, onFinish = null, metadata = {}) {
         this.clearActiveMonsterMotion(null, 'replaced');
         motionElement.classList.remove(...Array.from(motionElement.classList).filter(name => name.startsWith('monster-motion-')));
-        void motionElement.offsetWidth;
+        if (metadata.preservedTransform && metadata.preservedTransform !== 'none') {
+            motionElement.style.setProperty('--tigrex-branch-start-transform', metadata.preservedTransform);
+        }
+        // A charge branch begins at the final approach pose of the charge. Do
+        // not paint/reflow the wrapper at its origin between the two classes.
+        if (!metadata.preservePoseOnReplace) void motionElement.offsetWidth;
         motionElement.classList.add(motionClass);
         const generation = ++this.motionGeneration;
         const computedStyle = typeof getComputedStyle === 'function' ? getComputedStyle(motionElement) : null;
@@ -315,8 +483,8 @@ class HuntMonsterAttackAnimator {
         return cleared;
     }
 
-    triggerMonsterRoar() {
-        this.onRoar();
+    triggerMonsterRoar(pattern = null) {
+        this.onRoar(pattern);
     }
 
     playPatternMotion(monsterImg, targetCard, pattern, attackName, type) {
@@ -375,13 +543,45 @@ class HuntMonsterAttackAnimator {
         }
         motionElement.style.setProperty('--monster-motion-duration', `${profile.duration}ms`);
         motionElement.dataset.monsterRig = profile.rig.id;
+        if (pattern?.chargeLaunchStyle) {
+            motionElement.dataset.chargeLaunchStyle = pattern.chargeLaunchStyle;
+        } else {
+            delete motionElement.dataset.chargeLaunchStyle;
+        }
         let secondFacingX = 0;
+        if (profile.id === 'bazel-carpet-bombing') {
+            const cardRect = this.card.getBoundingClientRect();
+            const direction = pattern?.runtimeSweepDirection === 'right-to-left' ? -1 : 1;
+            const sideDistance = Math.max(1150, cardRect.width * .72 + monsterRect.width);
+            const diveCard = Number.isInteger(pattern?.runtimeDiveTargetIndex)
+                ? this.card.querySelector(`#fight-card-${pattern.runtimeDiveTargetIndex}`)
+                : targetCard;
+            const diveAnchor = diveCard?.querySelector?.('.game-hunt-weapon-img-container')
+                || diveCard
+                || targetAnchor;
+            const diveRect = diveAnchor.getBoundingClientRect();
+            const diveX = Math.max(-maxX, Math.min(maxX,
+                diveRect.left + diveRect.width / 2 - (monsterRect.left + monsterRect.width / 2)));
+            const diveY = Math.max(-240, Math.min(430,
+                diveRect.top + diveRect.height / 2 - (monsterRect.top + monsterRect.height / 2)));
+            motionElement.style.setProperty('--monster-charge-bottom',
+                `${Math.max(620, cardRect.bottom - monsterRect.top + monsterRect.height)}px`);
+            motionElement.style.setProperty('--monster-carpet-opening-x', `${attackX}px`);
+            motionElement.style.setProperty('--monster-carpet-opening-y', `${attackY}px`);
+            motionElement.style.setProperty('--monster-carpet-dive-x', `${diveX}px`);
+            motionElement.style.setProperty('--monster-carpet-dive-y', `${diveY}px`);
+            motionElement.style.setProperty('--monster-carpet-start-x', `${direction * -sideDistance}px`);
+            motionElement.style.setProperty('--monster-carpet-end-x', `${direction * sideDistance}px`);
+            motionElement.style.setProperty('--monster-carpet-flight-y',
+                `${Math.max(-160, cardRect.top - monsterRect.bottom - 120)}px`);
+        }
         if (profile.id === 'ground-charge' || profile.id === 'ground-charge-cross'
             || profile.id === 'ground-charge-zigzag' || profile.id === 'ground-charge-double'
-            || profile.id === 'ground-charge-triple' || profile.id === 'aerial-charge-cross') {
+            || profile.id === 'ground-charge-triple' || profile.id === 'aerial-charge-cross'
+            || profile.id === 'legiana-drill-cross' || profile.id === 'tigrex-charge-chain') {
             const cardRect = this.card.getBoundingClientRect();
             const targetIndex = Number(targetCard.id.replace(/\D+/g, '')) || 0;
-            const crossGeometry = profile.id === 'aerial-charge-cross'
+            const crossGeometry = ['aerial-charge-cross', 'legiana-drill-cross'].includes(profile.id)
                 ? this.screenCrossGeometry(monsterImg, pattern)
                 : null;
             const authoredDirection = String(pattern?.runtimeSweepDirection || '');
@@ -389,13 +589,57 @@ class HuntMonsterAttackAnimator {
                 || (authoredDirection === 'left-to-right' ? 1
                 : authoredDirection === 'right-to-left' ? -1
                     : targetIndex < 2 ? -1 : 1);
-            motionElement.style.setProperty('--monster-charge-bottom', `${Math.max(620, cardRect.bottom - monsterRect.top + monsterRect.height)}px`);
-            motionElement.style.setProperty('--monster-charge-top', `${Math.max(420, monsterRect.bottom - cardRect.top + monsterRect.height)}px`);
+            const chargeBottom = Math.max(620, cardRect.bottom - monsterRect.top + monsterRect.height);
+            const chargeTop = Math.max(420, monsterRect.bottom - cardRect.top + monsterRect.height);
+            const chargeSide = Math.max(1150, cardRect.width * .72 + monsterRect.width);
+            const clampRouteX = value => Math.max(-chargeSide * 1.35, Math.min(chargeSide * 1.35, value));
+            const routePoint = rect => ({
+                x: Math.max(-maxX, Math.min(maxX,
+                    rect.left + rect.width / 2 - (monsterRect.left + monsterRect.width / 2))),
+                y: Math.max(-240, Math.min(430,
+                    rect.top + rect.height / 2 - (monsterRect.top + monsterRect.height / 2)))
+            });
+            const exitFromHome = point => {
+                const scale = chargeBottom / Math.max(80, Math.abs(point.y));
+                return { x: clampRouteX(point.x * scale), y: chargeBottom };
+            };
+            const exitPastPoint = (start, point) => {
+                const dx = point.x - start.x;
+                const dy = point.y - start.y;
+                const boundaryY = dy >= 0 ? chargeBottom : -chargeTop;
+                const verticalScale = Math.abs(dy) > 1
+                    ? (boundaryY - point.y) / dy
+                    : 0;
+                if (Math.abs(dy) > 1 && verticalScale >= 0) {
+                    return {
+                        x: clampRouteX(point.x + dx * verticalScale),
+                        y: boundaryY
+                    };
+                }
+                const boundaryX = dx >= 0 ? chargeSide : -chargeSide;
+                const horizontalScale = Math.abs(dx) > 1
+                    ? (boundaryX - point.x) / dx
+                    : 1;
+                return {
+                    x: boundaryX,
+                    y: Math.max(-chargeTop, Math.min(chargeBottom, point.y + dy * horizontalScale))
+                };
+            };
+            const firstPoint = routePoint(targetRect);
+            const firstExit = exitFromHome(firstPoint);
+            motionElement.style.setProperty('--monster-charge-bottom', `${chargeBottom}px`);
+            motionElement.style.setProperty('--monster-charge-top', `${chargeTop}px`);
             motionElement.style.setProperty('--monster-charge-side', `${crossGeometry?.endOffset
-                ?? direction * Math.max(1150, cardRect.width * .72 + monsterRect.width)}px`);
+                ?? direction * chargeSide}px`);
             motionElement.style.setProperty('--monster-charge-start-side', `${crossGeometry?.startOffset
                 ?? direction * -Math.max(1050, cardRect.width * .68 + monsterRect.width)}px`);
-            if (profile.id === 'aerial-charge-cross') {
+            motionElement.style.setProperty('--monster-charge-first-x', `${firstPoint.x}px`);
+            motionElement.style.setProperty('--monster-charge-first-y', `${firstPoint.y}px`);
+            motionElement.style.setProperty('--monster-charge-first-exit-x', `${firstExit.x}px`);
+            motionElement.style.setProperty('--monster-charge-first-exit-y', `${firstExit.y}px`);
+            motionElement.style.setProperty('--monster-charge-return-x', `${firstExit.x * -.12}px`);
+            motionElement.style.setProperty('--monster-charge-return-y', `${-chargeTop}px`);
+            if (['aerial-charge-cross', 'legiana-drill-cross'].includes(profile.id)) {
                 const targetRows = (pattern?.runtimeSweepDirection
                     ? [...this.card.querySelectorAll('.game-hunt-weapon-card')]
                     : [targetCard])
@@ -403,25 +647,35 @@ class HuntMonsterAttackAnimator {
                 const rowY = targetRows.length
                     ? targetRows.reduce((sum, rect) => sum + rect.top + rect.height / 2, 0) / targetRows.length
                     : targetRect.top + targetRect.height / 2;
-                const crossY = Math.max(-80, Math.min(430, rowY - (monsterRect.top + monsterRect.height / 2)));
+                const monsterCenterY = monsterRect.top + monsterRect.height / 2;
+                const rotatedScaledRadius = Math.hypot(monsterRect.width, monsterRect.height) * .56;
+                const safeCrossMax = cardRect.bottom - monsterCenterY - rotatedScaledRadius - 3;
+                const crossY = Math.max(-80, Math.min(safeCrossMax,
+                    rowY - monsterCenterY));
                 motionElement.style.setProperty('--monster-charge-cross-y', `${crossY}px`);
                 motionElement.style.setProperty('--monster-charge-tilt', `${direction * 7}deg`);
             }
             if (profile.id === 'ground-charge-double') {
                 const anchors = Array.isArray(pattern?.runtimeChargeAnchors) ? pattern.runtimeChargeAnchors : [];
+                const firstTarget = this.card.querySelector(`#fight-card-${anchors[0]}`);
+                const firstAnchor = firstTarget?.querySelector('.game-hunt-weapon-img-container') || firstTarget || targetAnchor;
                 const secondTarget = this.card.querySelector(`#fight-card-${anchors[1]}`);
                 const secondAnchor = secondTarget?.querySelector('.game-hunt-weapon-img-container') || secondTarget || targetAnchor;
+                const authoredFirstPoint = routePoint(firstAnchor.getBoundingClientRect());
                 const secondRect = secondAnchor.getBoundingClientRect();
-                const firstX = Math.max(-maxX, Math.min(maxX, dx * .92));
-                const secondX = Math.max(-maxX, Math.min(maxX,
-                    secondRect.left + secondRect.width / 2 - (monsterRect.left + monsterRect.width / 2)));
-                secondFacingX = secondX;
-                const secondY = Math.max(-240, Math.min(430,
-                    secondRect.top + secondRect.height / 2 - (monsterRect.top + monsterRect.height / 2)));
-                motionElement.style.setProperty('--monster-charge-first-x', `${firstX}px`);
-                motionElement.style.setProperty('--monster-charge-first-y', `${attackY}px`);
-                motionElement.style.setProperty('--monster-charge-second-x', `${secondX}px`);
-                motionElement.style.setProperty('--monster-charge-second-y', `${secondY}px`);
+                const authoredFirstExit = exitFromHome(authoredFirstPoint);
+                const secondPoint = routePoint(secondRect);
+                const secondExit = exitPastPoint(authoredFirstExit, secondPoint);
+                secondFacingX = secondPoint.x;
+                motionElement.style.setProperty('--monster-charge-first-x', `${authoredFirstPoint.x}px`);
+                motionElement.style.setProperty('--monster-charge-first-y', `${authoredFirstPoint.y}px`);
+                motionElement.style.setProperty('--monster-charge-first-exit-x', `${authoredFirstExit.x}px`);
+                motionElement.style.setProperty('--monster-charge-first-exit-y', `${authoredFirstExit.y}px`);
+                motionElement.style.setProperty('--monster-charge-second-x', `${secondPoint.x}px`);
+                motionElement.style.setProperty('--monster-charge-second-y', `${secondPoint.y}px`);
+                motionElement.style.setProperty('--monster-charge-second-exit-x', `${secondExit.x}px`);
+                motionElement.style.setProperty('--monster-charge-second-exit-y', `${secondExit.y}px`);
+                motionElement.style.setProperty('--monster-charge-return-x', `${secondExit.x * -.12}px`);
             }
             if (profile.id === 'ground-charge-triple') {
                 const anchors = Array.isArray(pattern?.runtimeChargeAnchors) ? pattern.runtimeChargeAnchors : [];
@@ -433,15 +687,9 @@ class HuntMonsterAttackAnimator {
                 const firstRect = anchorRect(anchors[0], targetRect);
                 const secondRect = anchorRect(anchors[1], firstRect);
                 const thirdRect = anchorRect(anchors[2], secondRect);
-                const point = rect => ({
-                    x: Math.max(-maxX, Math.min(maxX,
-                        rect.left + rect.width / 2 - (monsterRect.left + monsterRect.width / 2))),
-                    y: Math.max(-240, Math.min(430,
-                        rect.top + rect.height / 2 - (monsterRect.top + monsterRect.height / 2)))
-                });
-                const first = point(firstRect);
-                const second = point(secondRect);
-                const third = point(thirdRect);
+                const first = routePoint(firstRect);
+                const second = routePoint(secondRect);
+                const third = routePoint(thirdRect);
                 secondFacingX = second.x;
                 motionElement.style.setProperty('--monster-charge-first-x', `${first.x}px`);
                 motionElement.style.setProperty('--monster-charge-first-y', `${first.y}px`);
@@ -449,6 +697,55 @@ class HuntMonsterAttackAnimator {
                 motionElement.style.setProperty('--monster-charge-second-y', `${second.y}px`);
                 motionElement.style.setProperty('--monster-charge-third-x', `${third.x}px`);
                 motionElement.style.setProperty('--monster-charge-third-y', `${third.y}px`);
+            }
+            if (profile.id === 'tigrex-charge-chain') {
+                const sequence = Array.isArray(pattern?.runtimeImpactTargetSequence)
+                    ? pattern.runtimeImpactTargetSequence
+                    : [];
+                const passCount = Math.max(2, Math.min(3,
+                    Number(pattern?.targeting?.passCountByState?.[this.owner.monsterState])
+                    || sequence.length
+                    || 2));
+                const sequenceIndex = passIndex => {
+                    const pass = sequence[passIndex];
+                    if (Array.isArray(pass)) return Number(pass[0]?.index ?? pass[0]);
+                    return Number(pass?.index ?? pass);
+                };
+                const pointForPass = (passIndex, fallback) => {
+                    const index = sequenceIndex(passIndex);
+                    const card = Number.isInteger(index)
+                        ? this.card.querySelector(`#fight-card-${index}`)
+                        : null;
+                    const anchor = card?.querySelector('.game-hunt-weapon-img-container') || card;
+                    return anchor?.getBoundingClientRect
+                        ? routePoint(anchor.getBoundingClientRect())
+                        : fallback;
+                };
+                const points = [pointForPass(0, firstPoint)];
+                points.push(pointForPass(1, points[0]));
+                if (passCount === 3) points.push(pointForPass(2, points[1]));
+                pattern.runtimeTigrexFacingDirections = points.map(point => Math.sign(point.x) || -1);
+                const exits = [];
+                exits.push(exitPastPoint({ x: 0, y: 0 }, points[0]));
+                for (let index = 1; index < points.length; index += 1) {
+                    exits.push(exitPastPoint(exits[index - 1], points[index]));
+                }
+                points.forEach((point, index) => {
+                    const ordinal = index + 1;
+                    motionElement.style.setProperty(`--tigrex-pass-${ordinal}-x`, `${point.x}px`);
+                    motionElement.style.setProperty(`--tigrex-pass-${ordinal}-y`, `${point.y}px`);
+                    motionElement.style.setProperty(`--tigrex-exit-${ordinal}-x`, `${exits[index].x}px`);
+                    motionElement.style.setProperty(`--tigrex-exit-${ordinal}-y`, `${exits[index].y}px`);
+                });
+                const lastPoint = points[points.length - 1];
+                const lastExit = exits[exits.length - 1];
+                const branchApproachRatio = .84;
+                motionElement.style.setProperty('--tigrex-branch-x',
+                    `${lastExit.x + (lastPoint.x - lastExit.x) * branchApproachRatio}px`);
+                motionElement.style.setProperty('--tigrex-branch-y',
+                    `${lastExit.y + (lastPoint.y - lastExit.y) * branchApproachRatio}px`);
+                motionElement.dataset.tigrexChargePasses = String(passCount);
+                secondFacingX = points[points.length - 1]?.x ?? points[0].x;
             }
         }
         const motionClass = `monster-motion-${profile.id}`;
@@ -568,16 +865,24 @@ class HuntMonsterAttackAnimator {
         );
     }
 
-    createChargeSpectacle(monsterImg, targets, crossScreen, durationMs = 0) {
+    createChargeSpectacle(monsterImg, targets, crossScreen, durationMs = 0, pattern = null) {
         const stage = monsterImg.closest('.hunt-monster-motion-stage');
         if (!stage) return;
         const motionDuration = Math.max(900, Number(durationMs || (crossScreen ? 2150 : 2000)));
+        const isStompBurst = stage.querySelector('[data-charge-launch-style="stomp-burst"]') !== null;
+        const multiPassCharge = Array.isArray(this._activeChargePassSizes);
+        const launchRatio = multiPassCharge ? .317 : .476;
         const track = document.createElement('div');
-        track.className = `monster-charge-track${crossScreen ? ' is-cross' : ' is-forward'}`;
+        track.className = `monster-charge-track${crossScreen ? ' is-cross' : ' is-forward'}${isStompBurst ? ' is-delayed' : ''}`;
+        if (isStompBurst) {
+            track.style.setProperty('--charge-track-delay', `${Math.round(motionDuration * launchRatio)}ms`);
+        }
         track.innerHTML = Array.from({ length: 9 }, (_, index) => `<i style="--step:${index};--stagger:${index % 2}"></i>`).join('');
         stage.appendChild(track);
-        for (let i = 0; i < 4; i++) {
-            this.createLocalEmojiFx(stage, '💨', `charge-wind wind-${i}`, motionDuration);
+        if (!isStompBurst) {
+            for (let i = 0; i < 4; i++) {
+                this.createLocalEmojiFx(stage, '💨', `charge-wind wind-${i}`, motionDuration);
+            }
         }
         this.card.classList.remove('monster-charge-rumble');
         void this.card.offsetWidth;
@@ -598,10 +903,81 @@ class HuntMonsterAttackAnimator {
                 hitCard.classList.add('element-impact-shake');
             });
         };
-        const firstImpactProgress = Array.isArray(this._activeChargePassSizes) ? .22 : .36;
+        if (isStompBurst) {
+            const stompRatios = multiPassCharge ? [.075, .17, .275] : [.09, .235, .39];
+            const footRatios = [.34, .66, .50];
+            stompRatios.forEach((ratio, index) => {
+                this.animationTimers.timeout(() => {
+                    if (!monsterImg.isConnected || !stage.isConnected) return;
+                    const stageRect = stage.getBoundingClientRect();
+                    const monsterRect = monsterImg.getBoundingClientRect();
+                    const dust = document.createElement('div');
+                    dust.className = `monster-stomp-dust stomp-${index + 1}${index === 2 ? ' is-final' : ''}`;
+                    dust.style.left = `${monsterRect.left - stageRect.left + monsterRect.width * footRatios[index]}px`;
+                    dust.style.top = `${monsterRect.bottom - stageRect.top - monsterRect.height * .04}px`;
+                    dust.style.setProperty('--stomp-width', `${Math.max(90, monsterRect.width * (index === 2 ? .48 : .34))}px`);
+                    dust.style.setProperty('--stomp-drift', `${index === 0 ? -34 : (index === 1 ? 34 : 0)}px`);
+                    stage.appendChild(dust);
+                    this.animationTimers.timeout(() => dust.remove(), 820);
+                    this.card.classList.remove('monster-charge-rumble');
+                    void this.card.offsetWidth;
+                    this.card.classList.add('monster-charge-rumble');
+                }, Math.round(motionDuration * ratio));
+            });
+        }
+        const impactRatios = Array.isArray(pattern?.impact?.passRatios)
+            ? pattern.impact.passRatios
+            : null;
+        const firstImpactProgress = Array.isArray(this._activeChargePassSizes)
+            ? Number(impactRatios?.[0] ?? .22)
+            : .36;
+        const secondImpactProgress = Number(impactRatios?.[1] ?? .68);
         this.animationTimers.timeout(() => shakeTargets(0), Math.round(motionDuration * firstImpactProgress));
         if (Array.isArray(this._activeChargePassSizes)) {
-            this.animationTimers.timeout(() => shakeTargets(1), Math.round(motionDuration * .68));
+            this.animationTimers.timeout(() => shakeTargets(1), Math.round(motionDuration * secondImpactProgress));
+        }
+        if (pattern?.runtimeWhiffStuck) {
+            this.animationTimers.timeout(() => {
+                const motionElement = stage.querySelector('[data-monster-rig]') || stage;
+                const secondExitX = motionElement.style.getPropertyValue('--monster-charge-second-exit-x')
+                    || motionElement.style.getPropertyValue('--monster-charge-first-exit-x')
+                    || '400px';
+                const secondExitY = motionElement.style.getPropertyValue('--monster-charge-second-exit-y')
+                    || motionElement.style.getPropertyValue('--monster-charge-first-exit-y')
+                    || '-120px';
+
+                monsterImg.dataset.hornStuck = 'true';
+                monsterImg.style.setProperty('--stuck-x', secondExitX);
+                monsterImg.style.setProperty('--stuck-y', secondExitY);
+
+                this.card.classList.remove('card-heavy-shake-anim');
+                void this.card.offsetWidth;
+                this.card.classList.add('card-heavy-shake-anim');
+
+                const wallParticles = [
+                    { emoji: '🧱', dx: '-30px', dy: '-20px', rot: '-20deg' },
+                    { emoji: '🪨', dx: '30px', dy: '-30px', rot: '35deg' },
+                    { emoji: '💥', dx: '0px', dy: '-10px', rot: '0deg' },
+                    { emoji: '💨', dx: '-15px', dy: '20px', rot: '15deg' }
+                ];
+                wallParticles.forEach(p => {
+                    const fx = document.createElement('div');
+                    fx.className = 'monster-wall-stuck-fx';
+                    fx.textContent = p.emoji;
+                    fx.style.setProperty('--fx-x', secondExitX);
+                    fx.style.setProperty('--fx-y', secondExitY);
+                    fx.style.setProperty('--drift-x', p.dx);
+                    fx.style.setProperty('--drift-y', p.dy);
+                    fx.style.setProperty('--rot', p.rot);
+                    fx.style.left = '50%';
+                    fx.style.top = '50%';
+                    stage.appendChild(fx);
+                    this.animationTimers.timeout(() => fx.remove(), 850);
+                });
+
+                monsterImg.classList.remove('monster-knockdown-anim');
+                monsterImg.classList.add('monster-horn-stuck-anim');
+            }, Math.round(motionDuration * 0.82));
         }
         this.animationTimers.timeout(() => {
             track.remove();
@@ -625,12 +1001,103 @@ class HuntMonsterAttackAnimator {
         return fx;
     }
 
+    createRockProjectile(monsterImg, targetCard, pattern = {}, durationMs = 720) {
+        const stage = monsterImg?.closest?.('.hunt-monster-motion-stage');
+        const stageRect = stage?.getBoundingClientRect?.();
+        const monsterRect = monsterImg?.getBoundingClientRect?.();
+        const targetAnchor = targetCard?.querySelector?.('.game-hunt-weapon-img-container') || targetCard;
+        const targetRect = targetAnchor?.getBoundingClientRect?.();
+        if (!stage || !stageRect || !monsterRect || !targetRect) return null;
+        const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
+            ? HuntMonsterAnatomyCatalog
+            : null;
+        const originKind = pattern.originPart || pattern.partUse?.fixed || 'right-front-leg';
+        const originPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, originKind, 0);
+        const originX = monsterRect.left + monsterRect.width * (originPoint?.x ?? .5);
+        const originY = monsterRect.top + monsterRect.height * (originPoint?.y ?? .58);
+        const targetX = targetRect.left + targetRect.width / 2;
+        const targetY = targetRect.top + targetRect.height / 2;
+        const arc = HuntMonsterAttackAnimator.projectileArc(originX, originY, targetX, targetY);
+        const rockGlyph = pattern.runtimeProjectileVariant === 'ice' ? '❄️'
+            : pattern.runtimeProjectileVariant === 'fire' ? '🔥'
+                : pattern.runtimeProjectileVariant === 'water' ? '🪨💧' : '🪨';
+        const rockFx = this.createLocalEmojiFx(
+            stage,
+            rockGlyph,
+            `tail-rock-projectile physical-rock-projectile is-${pattern.runtimeProjectileVariant || 'raw'}`,
+            durationMs,
+            {
+                left: `${targetX - stageRect.left}px`,
+                top: `${targetY - stageRect.top}px`
+            }
+        );
+        rockFx?.style.setProperty('--tail-rock-start-x', `${arc.startX}px`);
+        rockFx?.style.setProperty('--tail-rock-start-y', `${arc.startY}px`);
+        rockFx?.style.setProperty('--tail-rock-mid-x', `${arc.midX}px`);
+        rockFx?.style.setProperty('--tail-rock-mid-y', `${arc.midY}px`);
+        return rockFx;
+    }
+
+    scheduleTigrexBranchMotion(monsterImg, pattern = {}) {
+        if (!pattern.tags?.includes('tigrex-charge-chain') || !pattern.runtimeImpactPending) return;
+        const timeline = Array.isArray(pattern.runtimeResolvedImpactTimeline)
+            ? pattern.runtimeResolvedImpactTimeline
+            : [];
+        const branchEvent = timeline.find(event => /^tigrex-(?:rock|spin|bite)$/.test(event.eventKind || ''));
+        if (!branchEvent?.animationProfile) return;
+        const expectedGeneration = this.activeMonsterMotion?.generation;
+        const ticksPerSecond = typeof HuntAtbConfig !== 'undefined'
+            ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10)
+            : 10;
+        const impactLeadMs = Number(branchEvent.animationDurationMs || 0)
+            * Math.max(0, Math.min(1, Number(branchEvent.animationImpactRatio || .6)));
+        const delayMs = Math.max(0,
+            Number(branchEvent.atTicks || 0) * 1000 / ticksPerSecond - impactLeadMs);
+        this.animationTimers.timeout(() => {
+            if (!this.card || this.activeMonsterMotion?.generation !== expectedGeneration) return;
+            const Catalog = typeof HuntMonsterAnimationCatalog !== 'undefined'
+                ? HuntMonsterAnimationCatalog
+                : null;
+            const profile = Catalog?.resolve?.({
+                animationProfile: branchEvent.animationProfile,
+                animationDurationMs: branchEvent.animationDurationMs
+            }, branchEvent.displayName || '', 'physical', this.owner.selectedMonster);
+            const motionElement = this.resolveMotionElement(monsterImg);
+            if (!profile || !motionElement) return;
+            const preservedTransform = typeof getComputedStyle === 'function'
+                ? getComputedStyle(motionElement).transform
+                : null;
+            this.startMonsterMotion(
+                motionElement,
+                `monster-motion-${profile.id}`,
+                profile.duration,
+                null,
+                {
+                    patternId: `${pattern.id}:${branchEvent.eventKind}`,
+                    preservePoseOnReplace: true,
+                    preservedTransform
+                }
+            );
+        }, delayMs);
+    }
+
     createMonsterAttachedEmojiFx(monsterImg, emoji, extraClass, durationMs) {
         const motionElement = this.resolveMotionElement(monsterImg);
         const container = motionElement !== monsterImg
             ? motionElement
             : monsterImg?.closest?.('.hunt-monster-motion-stage');
         return this.createLocalEmojiFx(container, emoji, extraClass, durationMs);
+    }
+
+    triggerMonsterTelegraphFx(effect = {}) {
+        const monsterImg = this.card?.querySelector?.('#fight-monster-img');
+        if (!monsterImg) return null;
+        return this.createMonsterAttachedEmojiFx(
+            monsterImg,
+            effect.emoji || '❄️',
+            effect.className || 'attached-action',
+            Number(effect.durationMs || 800)
+        );
     }
 
     getElementalTheme(attackName = '', pattern = null) {
@@ -662,9 +1129,17 @@ class HuntMonsterAttackAnimator {
         if (/毒霧|독무|독안개|poison\s*mist|mist|gas/i.test(evidence)) return 'gas';
         if (/Laser|Beam|WaterPressure|CrossLaser|StraightThunder|레이저|광선|고압\s*수류|직선\s*뇌격|십자\s*수류/i.test(evidence)) return 'beam';
         if (/Fireball|Bullet|Ball|Shoot|Threeway|SingleBreath|BubbleBreath|화염구|탄환|포말|연사|삼연|삼방향/i.test(evidence)) return 'projectile';
-        if (/Sweep|FlameThrow|Continuous|쓸기|휩쓸|지속|분사|방출|화염\s*브레스|겁염/i.test(evidence)) return 'stream';
+        if (/Sweep|FlameThrow|Continuous|쓸기|휩쓸|지속|분사|방출|화염\s*브레스|겁염/i.test(evidence)) return 'gas';
         if (pattern?.tags?.includes('projectile') || pattern?.type === 'projectile') return 'projectile';
-        return 'stream';
+        return 'gas';
+    }
+
+    static usesElementalDelivery(type = '', pattern = null) {
+        if (pattern?.projectileVisual) return false;
+        return type === 'elemental'
+            || pattern?.type === 'projectile'
+            || pattern?.tags?.includes('elemental')
+            || ['projectile', 'beam', 'stream', 'gas', 'field'].includes(pattern?.delivery);
     }
 
     createElementalAttack(monsterCenter, containerRect, targetCard, target, attackName, fallbackEmoji, order, pattern = null) {
@@ -709,30 +1184,36 @@ class HuntMonsterAttackAnimator {
         muzzle.innerHTML = '<i></i><i></i>';
         fx.appendChild(muzzle);
 
-        const deliveryBody = document.createElement('div');
+        let deliveryBody = null;
         if (delivery === 'projectile') {
             // A fireball is a detached body, not a beam restyled into a circle.
             // Keeping it out of the beam DOM prevents stale or competing OBS CSS
             // from ever revealing a full-length laser for projectile attacks.
+            deliveryBody = document.createElement('div');
             deliveryBody.className = 'monster-element-projectile';
-        } else {
+        } else if (delivery !== 'gas') {
+            deliveryBody = document.createElement('div');
             deliveryBody.className = 'monster-element-beam';
             deliveryBody.innerHTML = '<i class="beam-aura"></i><i class="beam-body"></i><i class="beam-core"></i><i class="beam-ripple"></i>';
         }
-        fx.appendChild(deliveryBody);
+        if (deliveryBody) fx.appendChild(deliveryBody);
 
         if (delivery === 'gas') {
-            for (let i = 0; i < 9; i++) {
-                const progress = (i + 1) / 10;
-                const lateral = ((i % 3) - 1) * 34;
+            const perpendicularX = -dy / distance;
+            const perpendicularY = dx / distance;
+            for (let i = 0; i < 15; i++) {
+                const row = Math.floor(i / 3);
+                const progress = (row + 1) / 6;
+                const lane = (i % 3) - 1;
+                const lateral = lane * (22 + progress * 68);
                 const cloud = document.createElement('i');
                 cloud.className = 'monster-gas-cloud';
-                cloud.style.setProperty('--gas-start-x', `${dx * progress * .22}px`);
-                cloud.style.setProperty('--gas-start-y', `${dy * progress * .22 + lateral * .4}px`);
-                cloud.style.setProperty('--gas-x', `${dx * progress}px`);
-                cloud.style.setProperty('--gas-y', `${dy * progress + lateral}px`);
-                cloud.style.setProperty('--gas-size', `${82 + (i % 4) * 18}px`);
-                cloud.style.setProperty('--gas-delay', `${order * 35 + i * 38}ms`);
+                cloud.style.setProperty('--gas-start-x', `${dx * progress * .12}px`);
+                cloud.style.setProperty('--gas-start-y', `${dy * progress * .12}px`);
+                cloud.style.setProperty('--gas-x', `${dx * progress + perpendicularX * lateral}px`);
+                cloud.style.setProperty('--gas-y', `${dy * progress + perpendicularY * lateral}px`);
+                cloud.style.setProperty('--gas-size', `${76 + row * 15 + (i % 3) * 7}px`);
+                cloud.style.setProperty('--gas-delay', `${order * 35 + row * 58 + (i % 3) * 22}ms`);
                 fx.appendChild(cloud);
             }
         }
@@ -774,6 +1255,23 @@ class HuntMonsterAttackAnimator {
                 this.animationTimers.timeout(() => targetCard.classList.remove('element-impact-shake'), 440);
             }, 420 + order * 35);
         }
+    }
+
+    resolveLiveElementalOrigin(monsterImg, targetCard, pattern, fallback) {
+        const monsterRect = monsterImg?.getBoundingClientRect?.();
+        const targetAnchor = targetCard?.querySelector?.('.game-hunt-weapon-img-container') || targetCard;
+        const targetRect = targetAnchor?.getBoundingClientRect?.();
+        if (!monsterRect || !targetRect || monsterRect.width <= 0 || monsterRect.height <= 0) {
+            return fallback;
+        }
+        const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
+            ? HuntMonsterAnatomyCatalog
+            : null;
+        const originPart = pattern?.originPart || 'head';
+        const partPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, originPart, 0);
+        const baseFacing = anatomy?.baseFacing?.(this.owner?.selectedMonster) || 'front';
+        return HuntMonsterAttackAnimator.targetFacingOrigin(
+            monsterRect, targetRect, partPoint, baseFacing);
     }
 
     createUltimateSpectacle(monsterCenter, containerRect, attackName, emoji, pattern, elemental) {
@@ -867,10 +1365,7 @@ class HuntMonsterAttackAnimator {
             ? HuntMonsterAnatomyCatalog
             : null;
         const authoredDelivery = this.getBreathDelivery(attackName, pattern);
-        const isElementalDelivery = type === 'elemental'
-            || pattern?.type === 'projectile'
-            || pattern?.tags?.includes('elemental')
-            || ['projectile', 'beam', 'stream', 'gas', 'field'].includes(pattern?.delivery);
+        const isElementalDelivery = HuntMonsterAttackAnimator.usesElementalDelivery(type, pattern);
         const originPart = pattern?.originPart || (isElementalDelivery ? 'head' : null);
         const originPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, originPart, 0);
         const monsterCenter = originPoint ? {
@@ -881,11 +1376,12 @@ class HuntMonsterAttackAnimator {
         const isValstraxAmbush = pattern?.id === 'valstrax.crimson_comet_ambush'
             || /붉은 혜성 강습/.test(attackName);
         const motionProfile = this.playPatternMotion(monsterImg, targetCard, pattern, attackName, type);
+        this.scheduleTigrexBranchMotion(monsterImg, pattern);
         const isRoar = type === 'roar'
             || pattern?.type === 'roar'
             || pattern?.tags?.includes('roar');
         if (isRoar) {
-            if (!pattern?.runtimeImpactPending) this.triggerMonsterRoar();
+            if (!pattern?.runtimeImpactPending) this.triggerMonsterRoar(pattern);
             return;
         }
         this._activeChargePassSizes = Array.isArray(pattern?.runtimeChargePassSizes)
@@ -907,10 +1403,28 @@ class HuntMonsterAttackAnimator {
                 const rockCard = this.card.querySelector(`#fight-card-${rockTarget.index}`) || targetCard;
                 const rockRect = (rockCard.querySelector('.game-hunt-weapon-img-container') || rockCard).getBoundingClientRect();
                 const stageRect = stage?.getBoundingClientRect();
-                this.createLocalEmojiFx(stage, '🪨', 'tail-rock-projectile', Math.max(700, duration * .42), stageRect ? {
-                    left: `${rockRect.left + rockRect.width / 2 - stageRect.left}px`,
-                    top: `${rockRect.top + rockRect.height / 2 - stageRect.top}px`
-                } : {});
+                const liveMonsterRect = monsterImg.getBoundingClientRect();
+                const tailPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, 'tail', 0);
+                const originX = liveMonsterRect.left + liveMonsterRect.width * (tailPoint?.x ?? .5);
+                const originY = liveMonsterRect.top + liveMonsterRect.height * (tailPoint?.y ?? .55);
+                const targetX = rockRect.left + rockRect.width / 2;
+                const targetY = rockRect.top + rockRect.height / 2;
+                const arc = HuntMonsterAttackAnimator.projectileArc(
+                    originX, originY, targetX, targetY);
+                const rockFx = this.createLocalEmojiFx(
+                    stage,
+                    '🪨',
+                    'tail-rock-projectile',
+                    Math.max(700, duration * .42),
+                    stageRect ? {
+                        left: `${targetX - stageRect.left}px`,
+                        top: `${targetY - stageRect.top}px`
+                    } : {}
+                );
+                rockFx?.style.setProperty('--tail-rock-start-x', `${arc.startX}px`);
+                rockFx?.style.setProperty('--tail-rock-start-y', `${arc.startY}px`);
+                rockFx?.style.setProperty('--tail-rock-mid-x', `${arc.midX}px`);
+                rockFx?.style.setProperty('--tail-rock-mid-y', `${arc.midY}px`);
             }, Math.round(duration * .51));
         } else if (motionProfile?.id === 'horn-uppercut') {
             this.createLocalEmojiFx(stage, '☁️', 'uppercut-dust', motionProfile?.duration || 2800);
@@ -941,6 +1455,40 @@ class HuntMonsterAttackAnimator {
         // must still be created before the impact commit. Launch late enough for
         // the 720 ms projectile animation to arrive at the authored impact tick.
         if (pattern?.runtimeImpactPending) {
+            if (pattern.projectileVisual === 'rock') {
+                const ticksPerSecond = typeof HuntAtbConfig !== 'undefined'
+                    ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10)
+                    : 10;
+                const travelMs = 720;
+                const timeline = Array.isArray(pattern.runtimeResolvedImpactTimeline)
+                    ? pattern.runtimeResolvedImpactTimeline
+                    : [{
+                        atTicks: pattern.runtimeImpactDelayTicks,
+                        targetIndices: targets.map(target => target.index),
+                        eventKind: null
+                    }];
+                const requiredKinds = new Set(pattern.projectileEventKinds || []);
+                const rockEvents = timeline.filter(event =>
+                    Number(event?.damageScale ?? 1) > 0
+                    && (requiredKinds.size === 0 || requiredKinds.has(event.eventKind))
+                );
+                rockEvents.forEach(event => {
+                    const launchDelayMs = Math.max(0,
+                        Number(event.atTicks || pattern.runtimeImpactDelayTicks || 0)
+                            * 1000 / ticksPerSecond - travelMs);
+                    this.animationTimers.timeout(() => {
+                        if (!this.card) return;
+                        const indices = Array.isArray(event.targetIndices) && event.targetIndices.length
+                            ? event.targetIndices
+                            : targets.map(target => target.index);
+                        indices.forEach(index => {
+                            const liveCard = this.card.querySelector(`#fight-card-${index}`);
+                            if (liveCard) this.createRockProjectile(monsterImg, liveCard, pattern, travelMs);
+                        });
+                    }, launchDelayMs);
+                });
+                return;
+            }
             const delivery = authoredDelivery;
             const usesDetachedDelivery = isElementalDelivery
                 && ['projectile', 'stream', 'beam', 'gas'].includes(delivery);
@@ -950,19 +1498,28 @@ class HuntMonsterAttackAnimator {
                     : 10;
                 const visualTravelMs = delivery === 'projectile' ? 720 : 900;
                 const timeline = Array.isArray(pattern.impactTimeline) && pattern.impactTimeline.length
-                    ? pattern.impactTimeline
+                    ? pattern.impactTimeline.filter(event =>
+                        Number(event?.damageScale ?? 1) > 0
+                        && event?.eventKind !== 'blast-scale-volley'
+                    )
                     : [{ atTicks: pattern.runtimeImpactDelayTicks }];
                 const targetSequence = Array.isArray(pattern.runtimeImpactTargetSequence)
                     ? pattern.runtimeImpactTargetSequence
                     : null;
+                const firstImpactTicks = Number(
+                    timeline[0]?.atTicks ?? pattern.runtimeImpactDelayTicks ?? 0);
                 timeline.forEach((event, eventIndex) => {
                     const impactTicks = Number(event.atTicks ?? pattern.runtimeImpactDelayTicks ?? 0);
-                    const launchDelayMs = Math.max(
-                        0,
-                        Math.round(impactTicks * (1000 / ticksPerSecond) - visualTravelMs)
+                    const launchDelayMs = HuntMonsterAttackAnimator.projectileLaunchDelayMs(
+                        pattern,
+                        impactTicks,
+                        firstImpactTicks,
+                        ticksPerSecond,
+                        visualTravelMs
                     );
                     this.animationTimers.timeout(() => {
                         if (!this.card) return;
+                        const liveContainerRect = this.card.getBoundingClientRect();
                         const sequenced = targetSequence?.[eventIndex];
                         const pendingTargets = Array.isArray(sequenced)
                             ? sequenced.map(index => ({ index, result: 'pending' }))
@@ -983,8 +1540,9 @@ class HuntMonsterAttackAnimator {
                                 })
                             };
                             this.createElementalAttack(
-                                monsterCenter,
-                                containerRect,
+                                this.resolveLiveElementalOrigin(
+                                    monsterImg, phantomCard, pattern, monsterCenter),
+                                liveContainerRect,
                                 phantomCard,
                                 { index: -1, result: 'dodge' },
                                 attackName,
@@ -998,8 +1556,9 @@ class HuntMonsterAttackAnimator {
                             const pendingCard = this.card.querySelector(`#fight-card-${pendingTarget.index}`);
                             if (!pendingCard) return;
                             this.createElementalAttack(
-                                monsterCenter,
-                                containerRect,
+                                this.resolveLiveElementalOrigin(
+                                    monsterImg, pendingCard, pattern, monsterCenter),
+                                liveContainerRect,
                                 pendingCard,
                                 pendingTarget,
                                 attackName,
@@ -1013,6 +1572,19 @@ class HuntMonsterAttackAnimator {
             }
             return;
         }
+        // Explicit gas attacks layer their elemental plume over their authored
+        // body motion. Tail/sweep/charge branches below must not swallow it.
+        const layeredGasDelivery = isElementalDelivery && pattern?.delivery === 'gas';
+        if (layeredGasDelivery) {
+            targets.forEach((target, order) => {
+                const liveTargetCard = this.card.querySelector(`#fight-card-${target.index}`);
+                if (!liveTargetCard) return;
+                this.createElementalAttack(
+                    monsterCenter, containerRect, liveTargetCard, target,
+                    attackName, emoji, order, pattern
+                );
+            });
+        }
         if (isUltimate && !isValstraxAmbush) {
             const elementalUltimate = pattern?.tags?.includes('elemental') || type === 'elemental';
             this.createUltimateSpectacle(monsterCenter, containerRect, attackName, emoji, pattern, elementalUltimate);
@@ -1023,8 +1595,15 @@ class HuntMonsterAttackAnimator {
         }
         if (motionProfile?.id === 'ground-charge' || motionProfile?.id === 'ground-charge-cross'
             || motionProfile?.id === 'ground-charge-zigzag' || motionProfile?.id === 'ground-charge-double'
-            || motionProfile?.id === 'ground-charge-triple' || motionProfile?.id === 'aerial-charge-cross') {
-            this.createChargeSpectacle(monsterImg, targets, motionProfile.id !== 'ground-charge', motionProfile.duration);
+            || motionProfile?.id === 'ground-charge-triple' || motionProfile?.id === 'aerial-charge-cross'
+            || motionProfile?.id === 'legiana-drill-cross') {
+            this.createChargeSpectacle(
+                monsterImg,
+                targets,
+                motionProfile.id !== 'ground-charge',
+                motionProfile.duration,
+                pattern
+            );
             return;
         }
 
@@ -1055,7 +1634,7 @@ class HuntMonsterAttackAnimator {
             // 1. Roar attack
             if (cleanName.includes('포효') || cleanName.includes('울음') || cleanName.includes('노성') || cleanName.includes('소리') || cleanName.includes('음파') || cleanName.includes('폭효')) {
                 if (pattern?.runtimeImpactPending) return;
-                this.triggerMonsterRoar();
+                this.triggerMonsterRoar(pattern);
                 return;
             }
 
@@ -1148,7 +1727,7 @@ class HuntMonsterAttackAnimator {
             }
         }
 
-        if (isElementalDelivery) {
+        if (isElementalDelivery && !layeredGasDelivery) {
             targets.forEach((t, order) => {
                 const curTargetCard = this.card.querySelector(`#fight-card-${t.index}`);
                 if (!curTargetCard) return;

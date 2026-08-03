@@ -3,7 +3,7 @@ class HuntHunterBlightRuntime {
         fire: { emoji: '🔥', label: '화상', ticks: 120 },
         water: { emoji: '💧', label: '수상', ticks: 140 },
         thunder: { emoji: '⚡', label: '뢰상', ticks: 120 },
-        ice: { emoji: '❄️', label: '빙상', ticks: 140 },
+        ice: { emoji: '❄️', label: '빙상', ticks: 200 },
         dragon: { emoji: '🐉', label: '용상', ticks: 120 },
         poison: { emoji: '☠️', label: '독', ticks: 120 },
         paralysis: { emoji: '⚡', label: '마비', ticks: 38, actionLock: true },
@@ -94,7 +94,7 @@ class HuntHunterBlightRuntime {
     staminaDelta(hunter, delta) {
         if (!Number.isFinite(Number(delta)) || !delta) return Number(delta || 0);
         if (delta > 0 && this.active(hunter, 'water')) return delta * .35;
-        if (delta < 0 && this.active(hunter, 'ice')) return delta * 1.5;
+        if (delta < 0 && this.active(hunter, 'ice')) return delta * 1.25;
         return delta;
     }
 

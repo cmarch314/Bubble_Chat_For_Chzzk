@@ -65,6 +65,31 @@ class HuntMonsterPartMaterialCatalog {
         frostfang_barioth: 'brightness(1.02) sepia(1) saturate(2.1) hue-rotate(153deg) contrast(1.14)'
     });
 
+    // Solid colours are rendered through the extracted icon's alpha mask.
+    // This prevents white source interiors from surviving a CSS filter while
+    // the original luminance detail remains as a restrained overlay.
+    static MONSTER_PALETTES = Object.freeze({
+        rathalos: { base: '#a6332b', highlight: '#e48a5d', shadow: '#4d1717', glow: '#ff7658' },
+        azure_rathalos: { base: '#286da8', highlight: '#80c4e5', shadow: '#153954', glow: '#65c8ff' },
+        silver_rathalos: { base: '#aeb9c4', highlight: '#f1f5f7', shadow: '#505b66', glow: '#dcecff' },
+        rathian: { base: '#57883b', highlight: '#b7d77a', shadow: '#273f21', glow: '#aeea6d' },
+        pink_rathian: { base: '#bd6687', highlight: '#f0aec4', shadow: '#633044', glow: '#ff98bd' },
+        gold_rathian: { base: '#bd8e27', highlight: '#f5db79', shadow: '#60430e', glow: '#ffd85a' },
+        diablos: { base: '#b69a70', highlight: '#ead5a8', shadow: '#5c4931', glow: '#f1cc85' },
+        black_diablos: { base: '#343238', highlight: '#77727d', shadow: '#141318', glow: '#a494b1' },
+        bazelgeuse: { base: '#776c61', highlight: '#b7aa96', shadow: '#38322d', glow: '#d7ad72' },
+        seething_bazelgeuse: { base: '#774058', highlight: '#cf829e', shadow: '#321b29', glow: '#f06ca4' },
+        legiana: { base: '#7fb6c9', highlight: '#d8f3f6', shadow: '#395f76', glow: '#9cecff' },
+        shrieking_legiana: { base: '#9fcbd5', highlight: '#eefcff', shadow: '#4d7480', glow: '#caf7ff' },
+        paolumu: { base: '#d1b8b6', highlight: '#fff0e8', shadow: '#756164', glow: '#ffd5cf' },
+        nightshade_paolumu: { base: '#405571', highlight: '#869ab5', shadow: '#1d2739', glow: '#758fc1' },
+        tigrex: { base: '#c58b45', highlight: '#f2c775', shadow: '#68451f', glow: '#f5b958' },
+        brute_tigrex: { base: '#6e493e', highlight: '#ae7764', shadow: '#30201c', glow: '#d37b5e' },
+        nargacuga: { base: '#343b45', highlight: '#777f8a', shadow: '#151a20', glow: '#8da0b6' },
+        barioth: { base: '#d6d2c2', highlight: '#fffcec', shadow: '#77766d', glow: '#e8f7ef' },
+        frostfang_barioth: { base: '#c9dce0', highlight: '#f5ffff', shadow: '#667b82', glow: '#c8f4ff' }
+    });
+
     static PART_LABELS = Object.freeze({
         head: '머리', back: '등', leg: '발톱', wing: '날개', tail: '꼬리', part: '부위'
     });
@@ -105,6 +130,9 @@ class HuntMonsterPartMaterialCatalog {
             label: `${monsterName ? `${monsterName} ` : ''}${this.PART_LABELS[kind] || this.PART_LABELS.part}`,
             path: `${this.ITEM_ROOT}${template.sourceId}.png`,
             tint: this.MONSTER_TINTS[monsterId] || 'grayscale(1) brightness(1.08)',
+            palette: Object.freeze(this.MONSTER_PALETTES[monsterId] || {
+                base: '#8e9298', highlight: '#e8edf2', shadow: '#3f444a', glow: '#b9c1ca'
+            }),
             evidence: 'rise-kiranico-neutral-material-template-with-hash-audit'
         });
     }

@@ -38,7 +38,8 @@ for (const id of ['diablos', 'black_diablos', 'tigrex', 'brute_tigrex', 'nargacu
 
 for (const id of ['legiana', 'shrieking_legiana', 'paolumu', 'nightshade_paolumu',
     'bazelgeuse', 'seething_bazelgeuse', 'rathalos', 'azure_rathalos', 'silver_rathalos']) {
-    assert(profiles[id].some(pattern => pattern.tags.includes('flight-only')),
+    assert(profiles[id].some(pattern =>
+        pattern.tags.includes('flight-only') || pattern.tags.includes('high-flight-sequence')),
         `${id} needs authored airborne attacks`);
 }
 

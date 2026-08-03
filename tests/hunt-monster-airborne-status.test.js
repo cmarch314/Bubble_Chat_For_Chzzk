@@ -4,6 +4,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const HuntMonsterFlightRuntime = require('../js/effects/hunt/HuntMonsterFlightRuntime.js');
+const HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
 
 const engineSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntEngine.js'), 'utf8');
 const start = engineSource.indexOf('    enterMonsterControlState(');
@@ -34,6 +35,9 @@ class Harness {
         this.events.push(['interrupt', reason]);
     }
     updateMonsterAtbUI(value) { this.events.push(['atb', value]); }
+    setMonsterAtbForControl(kind) {
+        return HuntAtbConfig.applyMonsterControlAtb(this, kind);
+    }
     updateMonsterStateUI(state) { this.events.push(['state', state]); }
     addLog(text) { this.events.push(['log', text]); }
 }
@@ -50,7 +54,8 @@ for (const [kind, expectedState, durationField, ticks] of [
     assert.strictEqual(engine.monsterFlightTicksRemaining, 0);
     assert.strictEqual(engine.monsterState, expectedState);
     assert.strictEqual(engine[durationField], ticks);
-    assert.strictEqual(engine.monsterAtb, 0);
+    assert.strictEqual(engine.monsterAtb, 100,
+        `${kind} must hold a full gauge while grounded in the control pose`);
     assert.strictEqual(engine.pendingMonsterAction, null);
     assert.strictEqual(engine.pendingMonsterImpact, null);
     assert.ok(engine.events.some(event => event[0] === 'interrupt' && event[1] === `status:${kind}`));

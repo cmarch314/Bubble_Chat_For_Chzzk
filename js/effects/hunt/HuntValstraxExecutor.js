@@ -137,6 +137,9 @@ class HuntValstraxExecutor {
                         target.guardDuration = 6;
                         attackResults.push({ index: target.index, result: 'guard' });
                     } else {
+                        // Direct impact replaces ear-covering, tremor, and wind
+                        // reactions so the knockback animation remains visible.
+                        engine.clearHunterInterference?.(target, 'hit');
                         if (engine.weaponMechanics) engine.weaponMechanics.onHit(target);
                         target.atb = 0;
                         engine.updateWeaponAtbUI(target.index, 0);

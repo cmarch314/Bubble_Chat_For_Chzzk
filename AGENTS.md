@@ -28,7 +28,7 @@ Reject an elegant change if it adds routine streamer work or harms silent-viewer
 - `config.js` owns primitives, `config/` media catalogs, and `LocalCompanionEndpoint.js` the browser-facing companion origin.
 - `MessageRouter.js` routes chat; `VisualDirector.js` owns stacking; feature loaders own lazy DOM/effects; chat renderer/media controller own ordered rendering and cleanup.
 - `ChzzkGateway.js` owns discovery/auth/socket recovery. `AudioManager.js` and `js/audio/` own playback/preloads; audio analysis owns measured gains.
-- Hunt code lives under `js/effects/hunt/`; `HuntEffect.js` coordinates. Domain modules own perks, ATB, items, monsters, profiles, and browser I/O. Chat sets tactics, never individual attacks.
+- Hunt code lives under `js/effects/hunt/`; `HuntEffect.js` coordinates. Domain modules own perks, ATB, items, monsters, profiles, and browser I/O; `HuntMonsterStaminaRuntime` owns hidden monster stamina, exhaust drain caps, resistance, and exhaustion transitions. Chat sets tactics, never individual attacks.
 - Hunt/audio/monster importers own private evidence and compact runtime graphs. The audio review server atomically saves labels and regenerates reviewed runtime routes; keep hunt assets lazy and test load order/replay.
 
 Update this section in the same patch when ownership changes.
@@ -60,6 +60,7 @@ Update this section in the same patch when ownership changes.
 - `HuntMonsterArchetypeCatalog` owns phases/skeletons, `HuntMonsterActionPolicy` movement/targets/impacts, and `HuntMonsterTraitRuntime` cross-action state/hazards. Data supplies values; executors never branch on monster IDs.
 - Typed data and isolated image transforms drive movement/facing/returns. Shared owners handle ATB, telegraphs, interruptions, landings, parts, recovery, targets, and trap immunity.
 - `monster-kits/` owns review stages/editions/mechanics; registry/resolver/release policy reject fictional hooks and fail closed. Windup metadata drives telegraphs and state modifiers before impact.
+- `data/hunt/monster-implementation-standard.md` owns shared monster contracts only. Keep monster-specific evidence, interview decisions, and open questions in `data/hunt/monster-kits/notes/<id>.md`; read the shared standard plus only the active monster note. Runtime owners and contract tests remain authoritative.
 - Audio uses verified cues or silence. BGM prefers verified themes then habitat pools. Hunter voices keep one profile and use labelled/extracted action banks only; exclude dialogue/NPC/gesture/video sources.
 - CMC is an ordinary random fixed actor sourced only from `HIVE_CMC_VOICE_COMMANDS`; nickname ownership is UI metadata. Cart timing remains config-owned.
 

@@ -50,17 +50,16 @@ class HuntMonsterRules {
     static stateForBattleTime(battleTime, behavior = {}) {
         const tick = Math.max(0, Number(battleTime || 0));
         const rageDuration = Number(behavior.rageDurationTicks || 0);
-        const exhaustionDuration = Number(behavior.exhaustionDurationTicks || 0);
-        if (rageDuration > 0 && exhaustionDuration > 0) {
+        const rageRecoveryDuration = Number(behavior.rageRecoveryDurationTicks || 0);
+        if (rageDuration > 0 && rageRecoveryDuration > 0) {
             const rageStart = Math.max(0, Number(behavior.rageStartTick || 800));
             if (tick < rageStart) return 'normal';
-            const phaseTick = (tick - rageStart) % (rageDuration + exhaustionDuration);
-            return phaseTick < rageDuration ? 'enraged' : 'exhausted';
+            const phaseTick = (tick - rageStart) % (rageDuration + rageRecoveryDuration);
+            return phaseTick < rageDuration ? 'enraged' : 'normal';
         }
         if (tick < 800) return 'normal';
-        // Once provoked, large monsters stay dangerous. Exhaustion is a short
-        // punish window, not another equal-length quarter of a clock loop.
-        if (tick >= 1900 && tick < 2200) return 'exhausted';
+        // Exhaustion is stamina-driven and must never be synthesized from the
+        // rage clock. Monsters without authored cadence remain enraged here.
         return 'enraged';
     }
 

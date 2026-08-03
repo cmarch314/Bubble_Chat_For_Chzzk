@@ -63,7 +63,9 @@ class HuntActionStateMachine {
 
     canEvade(hunter) {
         if (!hunter || hunter.status !== 'alive' || hunter.roarStunned || hunter.interference) return false;
-        if (hunter.pendingSharpnessRestore) return false;
+        // Sharpening is an interruptible item action. An evade cancels the
+        // pending restore instead of forcing the hunter to finish sharpening.
+        if (hunter.pendingSharpnessRestore) return true;
         const action = hunter.currentAction;
         if (!action) return true;
         if (action.tags.includes('counter') || action.tags.includes('guard-point')) return false;

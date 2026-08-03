@@ -554,6 +554,28 @@ class HuntRenderer {
             <div class="hunt-perk-lock-capacity">🔒 ${hunter.lockedPerkId ? 1 : 0}/1</div>`;
     }
 
+    highlightLoadoutChanges(hunterIndex, changes = {}) {
+        const card = this.card?.querySelector?.(`#hunt-opt-${hunterIndex}`);
+        if (!card) return;
+        const targets = [];
+        if (changes.weaponChanged) {
+            targets.push(card.querySelector('.hunt-loadout-weapon-icon'));
+            targets.push(card.querySelector('.hunt-loadout-weapon-name'));
+        }
+        if (changes.personalityChanged) {
+            targets.push(card.querySelector('.hunt-loadout-personality'));
+        }
+        targets.filter(Boolean).forEach(target => {
+            target.classList.remove('hunt-loadout-change-flash');
+            void target.offsetWidth;
+            target.classList.add('hunt-loadout-change-flash');
+            this.animationTimers.timeout(
+                () => target.classList.remove('hunt-loadout-change-flash'),
+                1450
+            );
+        });
+    }
+
     updatePhaseTimer(timeLeft, label) {
         if (!this.container) return;
         const timer = this.container.querySelector('.game-timer');
@@ -841,7 +863,7 @@ class HuntRenderer {
                     <b>${index + 1}</b>
                 </div>`).join('')}</div>`
             : `<div class="hunt-monster-attack-motion">
-                    <div class="hunt-monster-facing-layer">
+                    <div class="hunt-monster-facing-layer" data-monster-id="${this.escapeHTML(selectedMonster.id)}">
                         <img class="game-hunt-monster-img" id="fight-monster-img" src="${this.escapeHTML(this.monsterImagePath(selectedMonster))}" onerror="this.src='img/monsters/rathalos.png';" style="width:380px;height:380px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.85));transition:transform .15s ease;position:relative;z-index:2;" />
                     </div>
                 </div>`;
@@ -1390,10 +1412,17 @@ class HuntRenderer {
             icon.dataset.materialSourceId = material?.sourceId || '';
             icon.dataset.materialShape = material?.shapeFamily || '';
             icon.style.setProperty('--hunt-part-tint', material?.tint || 'none');
-            icon.style.filter = `${material?.tint || 'grayscale(1) brightness(1.08)'} brightness(1.2) contrast(1.12) drop-shadow(0 3px 4px #000) drop-shadow(0 0 7px rgba(255,224,143,.62))`;
+            const art = document.createElement('span');
+            art.className = 'hunt-monster-part-art';
+            art.style.setProperty('--hunt-part-mask', `url("${material?.path || ''}")`);
+            art.style.setProperty('--hunt-part-base', material?.palette?.base || '#8e9298');
+            art.style.setProperty('--hunt-part-highlight', material?.palette?.highlight || '#e8edf2');
+            art.style.setProperty('--hunt-part-shadow', material?.palette?.shadow || '#3f444a');
+            art.style.setProperty('--hunt-part-glow', material?.palette?.glow || '#b9c1ca');
             slot.dataset.materialKind = material?.kind || '';
             slot.dataset.materialSide = material?.side || 'center';
-            slot.appendChild(icon);
+            art.appendChild(icon);
+            slot.appendChild(art);
             const caption = document.createElement('small');
             caption.className = 'hunt-monster-part-label';
             caption.textContent = shortLabel;
@@ -1437,10 +1466,13 @@ class HuntRenderer {
         if (hpCenterText) hpCenterText.style.color = '';
 
         if (monsterImg) {
+            const facingLayer = monsterImg.closest('.hunt-monster-facing-layer');
             if (stateName.includes('분노')) {
                 monsterImg.classList.add('enraged');
+                facingLayer?.classList.toggle('tigrex-local-enrage', this.selectedMonster?.id === 'tigrex');
             } else {
                 monsterImg.classList.remove('enraged');
+                facingLayer?.classList.remove('tigrex-local-enrage');
             }
 
             if (stateName.includes('기절')) {
@@ -1459,7 +1491,9 @@ class HuntRenderer {
             }
 
             if (stateName.includes('대경직') || stateName.includes('함정')) {
-                monsterImg.classList.add('monster-knockdown-anim');
+                const authoredPartReaction = monsterImg.classList.contains('monster-tail-sever-roll')
+                    || monsterImg.classList.contains('monster-part-break-topple');
+                monsterImg.classList.toggle('monster-knockdown-anim', !authoredPartReaction);
             } else {
                 monsterImg.classList.remove('monster-knockdown-anim');
             }
@@ -1589,7 +1623,9 @@ class HuntRenderer {
         return this.combatAnimator.triggerMonsterPartBreakReaction(kind, durationTicks, partKind);
     }
 
-    triggerEnvironmentEffect(kind) { return this.combatAnimator.triggerEnvironmentEffect(kind); }
+    triggerEnvironmentEffect(kind, hunterIndex = null, details = null) {
+        return this.combatAnimator.triggerEnvironmentEffect(kind, hunterIndex, details);
+    }
 
     restoreBorder(wIndex, w) { return this.combatAnimator.restoreBorder(wIndex, w); }
 

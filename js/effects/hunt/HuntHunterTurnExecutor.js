@@ -127,9 +127,11 @@ class HuntHunterTurnExecutor {
 
     static preparationAudioCue(action) {
         const id = String(action?.id || '');
-        // Bow preparation is intentionally silent. Only the release/impact
-        // action may play bow audio; repeated draw and charge-step strings are
-        // fatiguing in an autonomous battle.
+        // One charge-air cue covers the three-stage draw chain. The old
+        // per-stage string-pull clips were tiring and stacked in autobattle.
+        if (id === 'bow.draw_1') return 'bow_charge_start';
+        if (/^bow\.draw_[23]$/.test(id)) return null;
+        if (id === 'bow.charging_sidestep') return 'bow_charge_step';
         if (/^bow\./.test(id)) return null;
         if (action?.audioCue && action.audioCue !== 'none') return action.audioCue;
         const greatSwordChargeTier = id.match(/^great_sword\.(?:strong_|true_)?charge_([123])$/)?.[1];
@@ -208,6 +210,9 @@ class HuntHunterTurnExecutor {
             w.flashPods--;
             engine.monsterFlashUseCount = Number(engine.monsterFlashUseCount || 0) + 1;
             w.itemDuration = 8;
+            if (engine.monsterTraitState?.atomicFlightActive) {
+                engine.monsterTraitRuntime?.cancelInFlightScales?.(engine);
+            }
             if (engine.interruptMonsterMovement) engine.interruptMonsterMovement('flash');
             else {
                 engine.pendingMonsterAction = null;

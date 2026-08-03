@@ -152,9 +152,7 @@ body {
 .chat-line .chat-line-inner.chat-line-inner--clown {
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.70) 100%),
-    url('img/광대.jpg') center center / cover no-repeat !important;
-  width: 600px;
-  max-width: 40vw;
+    url('img/광대.jpg') right 14px center / 112% auto no-repeat !important;
   min-height: 330px;
   box-sizing: border-box;
   border: 4px solid #000;
@@ -164,11 +162,6 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-.chat-box.chat-box--clown {
-  width: 600px;
-  max-width: 40vw;
 }
 
 .message.message--clown {
@@ -4715,4 +4708,4 @@ body {
     transform: translateY(-0.08em); /* Micro alignment adjustment */
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)) brightness(1.3);
 }
-
+

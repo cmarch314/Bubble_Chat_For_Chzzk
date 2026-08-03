@@ -6,9 +6,49 @@ const path = require('path');
 const vm = require('vm');
 const HuntMonsterTurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
 
+for (const pattern of [
+    { type: 'roar', tags: ['roar'], name: '포효[대]' },
+    { type: 'tremor', tags: ['tremor'], name: '지진[대]' },
+    { type: 'wind', tags: ['wind'], name: '풍압[소]' },
+    { type: 'physical', tags: ['interference'], name: '행동 방해' },
+    { type: 'physical', tags: [], name: '분노 포효' },
+    { type: 'physical', tags: [], name: '착지 지진' },
+    { type: 'physical', tags: [], name: '이륙 풍압' }
+]) {
+    assert.strictEqual(
+        HuntMonsterTurnExecutor.canInflictHunterStun(pattern),
+        false,
+        `${pattern.name} must not contribute hunter stun`
+    );
+}
+
+for (const kind of ['roar', 'tremor', 'wind']) {
+    const target = {
+        status: 'alive',
+        interference: { kind, size: 'large' }
+    };
+    assert.strictEqual(HuntMonsterTurnExecutor.isHunterDefenseLocked(target), true,
+        `${kind} reaction must remain vulnerable without allowing a fresh defense roll`);
+    assert.deepStrictEqual(
+        HuntMonsterTurnExecutor.planHunterResponseIntent({}, target, { type: 'physical', tags: [] }),
+        { attempted: false, preferred: 'none' },
+        `${kind} reaction must not plan a guard or evade before an incoming hit`
+    );
+}
+assert.strictEqual(
+    HuntMonsterTurnExecutor.canInflictHunterStun({ type: 'physical', tags: ['target-contact'], name: '머리 들이받기' }),
+    true,
+    'an ordinary physical impact must retain its hunter-stun chance'
+);
+
 assert.deepStrictEqual(
     HuntMonsterTurnExecutor.hitReactionForPattern({ tags: ['weak'] }, { index: 0 }),
     { kind: 'weak', durationTicks: 15, knockbackDirection: -1 }
+);
+assert.deepStrictEqual(
+    HuntMonsterTurnExecutor.hitReactionForPattern({ tags: ['butt-stumble'] }, { index: 3 }),
+    { kind: 'weak', durationTicks: 15, knockbackDirection: 1 },
+    'blast-scale explosions must use the short butt-stumble reaction'
 );
 assert.deepStrictEqual(
     HuntMonsterTurnExecutor.hitReactionForPattern({}, { index: 3 }),
@@ -21,6 +61,23 @@ assert.strictEqual(
     'an authored incoming direction must throw the weapon in the opposite direction'
 );
 assert.strictEqual(HuntMonsterTurnExecutor.isHunterHitRecovering({ hitDuration: 1 }), true);
+assert.strictEqual(
+    HuntMonsterTurnExecutor.isHunterHitRecovering({ status: 'stunned', hitDuration: 15 }),
+    false,
+    'stun must remain vulnerable even when an overlapping tumble timer is present'
+);
+assert.deepStrictEqual(
+    HuntMonsterTurnExecutor.resolveImpactEventTargetIndices({
+        selectedWeapons: [
+            { index: 0, status: 'stunned', hitDuration: 15 },
+            { index: 1, status: 'alive', hitDuration: 15 }
+        ],
+        perkRuntime: null,
+        random: () => 0
+    }, { targetMode: 'random-live' }, []),
+    [0],
+    'a delayed hazard must retain a stunned hunter as a valid vulnerable target'
+);
 
 const tickPath = path.resolve(__dirname, '../js/effects/hunt/HuntBattleTickExecutor.js');
 const context = vm.createContext({ console });
@@ -107,5 +164,15 @@ const turnSource = fs.readFileSync(
 );
 assert.match(turnSource, /isHunterHitRecovering\(target\)[\s\S]*?result: 'invulnerable'[\s\S]*?return;/,
     'repeat hits must silently pass through a recovering hunter before damage/status resolution');
+assert.match(turnSource,
+    /clearHunterInterference\?\.\(target, 'hit'\)[\s\S]*?actionMachine\.cancel\(target, 'hitstun'\)[\s\S]*?target\.hitDuration = hitReaction\.durationTicks/,
+    'ordinary damaging hits must replace roar, tremor, and wind reactions before knockback');
+const valstraxSource = fs.readFileSync(
+    path.resolve(__dirname, '../js/effects/hunt/HuntValstraxExecutor.js'),
+    'utf8'
+);
+assert.match(valstraxSource,
+    /clearHunterInterference\?\.\(target, 'hit'\)[\s\S]*?target\.hitDuration = hitReaction\.durationTicks/,
+    'Valstrax direct impacts must obey the same interference-to-hit priority');
 
 console.log('[test] Hunter weak/strong hit recovery and state priority passed.');

@@ -23,7 +23,7 @@ assert.strictEqual(machine.canEvade(hunter), true);
 
 hunter.pendingSharpnessRestore = true;
 hunter.itemDuration = 20;
-assert.strictEqual(machine.canEvade(hunter), false, 'sharpening must not roll through an incoming attack');
+assert.strictEqual(machine.canEvade(hunter), true, 'sharpening may be cancelled into an evade');
 assert.strictEqual(machine.canGuard(hunter), false, 'sharpening must not guard an incoming attack');
 hunter.pendingSharpnessRestore = false;
 hunter.itemDuration = 0;
