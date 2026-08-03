@@ -1563,6 +1563,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 2273011,
     "mtimeMs": 1785741628712
   },
+  "AI CMC/빨리않.mp4": {
+    "category": "visual",
+    "inputLufs": -13.23,
+    "truePeakDb": -2.59,
+    "gainDb": -4.77,
+    "measurement": "loudnorm",
+    "duration": 1.11,
+    "bytes": 3202940,
+    "mtimeMs": 1785742407010
+  },
   "AI CMC/빨리잡.mp4": {
     "category": "visual",
     "inputLufs": -16.18,
@@ -2864,6 +2874,26 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.64,
     "bytes": 1859955,
     "mtimeMs": 1784902775021
+  },
+  "AI CMC/일해라.mp4": {
+    "category": "visual",
+    "inputLufs": -10.79,
+    "truePeakDb": -0.04,
+    "gainDb": -7.21,
+    "measurement": "loudnorm",
+    "duration": 1.64,
+    "bytes": 4245998,
+    "mtimeMs": 1785742321383
+  },
+  "AI CMC/일해일.mp4": {
+    "category": "visual",
+    "inputLufs": -10.15,
+    "truePeakDb": 0.4,
+    "gainDb": -7.85,
+    "measurement": "loudnorm",
+    "duration": 2.26,
+    "bytes": 5666003,
+    "mtimeMs": 1785742394401
   },
   "AI CMC/잇쇼.mp4": {
     "category": "visual",
