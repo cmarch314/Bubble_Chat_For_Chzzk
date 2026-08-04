@@ -28,3 +28,10 @@
 - `AI CMC` 폴더에 새로운 비디오 클립(.mp4)을 추가하거나 삭제할 경우, **반드시 `config.js`의 `window.HIVE_CMC_FILES` 배열에 파일명(확장자 제외)을 추가/삭제해야 합니다.**
 - 개별 JS 파일(예: `ChatRenderer.js`, `SoundQuizEffect.js`, `CommandsScrollEffect.js` 등)에 하드코딩된 비디오 파일명 배열을 선언하지 마십시오. 항상 `window.HIVE_CMC_FILES`를 사용하여 동적으로 가져와야 합니다.
 - 이 규칙을 통해 시청자의 `@` 반응형 비디오 재생, 사운드/비디오 퀴즈 및 `!커맨드` 리스트 스크롤 기능의 키워드가 일괄적이고 동기화된 상태로 자동 유지 관리됩니다.
+
+---
+
+## 5. 다중 에이전트 동시 작업 충돌 방지
+- Codex·Claude·Antigravity가 한 폴더를 공유하므로, 다른 에이전트가 언제든 편집·커밋·서버 실행 중일 수 있다고 가정합니다.
+- **상세 규칙은 `AGENTS.md` §12 (Concurrent Agent Coordination)가 권위이며, 이 문서는 포인터입니다.**
+- 요지: 에이전트별 브랜치/worktree 격리, `git add -A`/`-u`/`commit -a` 금지(내가 바꾼 파일만 명시 스테이징), 타 에이전트 미완 작업·생성물 churn(`js/audio-levels.generated.js` 등)·`__pycache__`/`*.pyc`·`scratch/` 커밋 금지, 생성물은 스크립트로 재생성, 서버는 에이전트별 `--port`, 미기동 프로세스 종료 금지, force-push 금지.

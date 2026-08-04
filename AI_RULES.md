@@ -3,6 +3,10 @@
 > **이 파일은 AI 에이전트가 작업 시 반드시 따라야 하는 규칙입니다.**
 > 세션 시작 시 이 파일과 `audio_guidelines.md`를 가장 먼저 읽으세요.
 
+> ⚠️ **다중 에이전트 동시 작업 (Codex·Claude·Antigravity가 한 폴더 공유):**
+> 커밋·브랜치·포트 충돌 방지 규칙은 **`AGENTS.md` §12 (Concurrent Agent Coordination)가 권위**입니다.
+> 핵심: `git add -A`/`-u`/`commit -a` 금지 — 내가 바꾼 파일만 명시 스테이징(타 에이전트 미완·생성물 churn·`.pyc`·`scratch/` 흡수 금지), 서버는 에이전트별 `--port`, 미기동 프로세스 종료 금지.
+
 ---
 
 ## 🚨 CRITICAL: 작업 전 체크리스트
