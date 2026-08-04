@@ -147,7 +147,14 @@ class HuntMonsterFlightRuntime {
         engine.monsterGroundTurns++;
         const chance = engine.monsterState === 'enraged' ? .58 : .34;
         if (engine.monsterGroundTurns >= 2 && this.random() < chance) {
-            return this.attemptTakeOff(engine) !== 'failed';
+            const result = this.attemptTakeOff(engine);
+            if (result === 'failed') return false;
+            // Legiana's takeoff is a visible stance transition, not an attack.
+            // Keep the ready gauge intact and select/pay for the first aerial
+            // action on the following tick instead of hiding both events in
+            // one empty-looking ATB spend.
+            if (engine.monsterBehavior?.takeoffPreservesReadyAtb) return false;
+            return true;
         }
         return true;
     }

@@ -51,6 +51,7 @@ assert.deepStrictEqual(
 
 const fireball = byId('rathian.fireball');
 const tripleFireball = byId('rathian.triple_fireball');
+const fireballFizzle = byId('rathian.fireball_fizzle');
 const fizzle = byId('rathian.fireball_fizzle');
 assert.deepStrictEqual(fireball.forbiddenStates, ['enraged', 'exhausted']);
 assert.strictEqual(tripleFireball.requiredState, 'enraged');
@@ -62,6 +63,8 @@ assert.deepStrictEqual(
 );
 assert.strictEqual(fireball.projectileLaunchDelayTicks, 10);
 assert.strictEqual(tripleFireball.projectileLaunchDelayTicks, 10);
+assert.strictEqual(fireballFizzle.originPart, 'head',
+    'exhausted breath smoke must originate from Rathian mouth rather than a fixed wing coordinate');
 assert.ok(Math.abs((tripleFireball.damageRatio * 1.10) / fireball.damageRatio - 1.30) < .01,
     'each enraged shot must finish 30% stronger after the shared rage modifier');
 assert.strictEqual(fireball.brokenPartDamageModifiers.head, .80);
@@ -100,7 +103,8 @@ assert.deepStrictEqual(doubleSomersault.impactTimeline.map(event => event.audioC
 assert.deepStrictEqual(somersault.impactTimeline.map(event => event.atTicks), [19]);
 assert.deepStrictEqual(doubleSomersault.impactTimeline.map(event => event.atTicks), [22, 53]);
 assert.deepStrictEqual(biteSomersault.impactTimeline.map(event => event.atTicks), [20, 54]);
-assert.deepStrictEqual(somersaultGlide.impactTimeline.map(event => event.atTicks), [21, 80]);
+assert.deepStrictEqual(somersaultGlide.impactTimeline.map(event => event.atTicks), [21, 56]);
+assert.strictEqual(somersaultGlide.movement.ticks, 78);
 assert.strictEqual(biteSomersault.impactTimeline[0].suppressStatus, true);
 assert.strictEqual(biteSomersault.impactTimeline[0].ignoreBrokenPartDamage, true);
 assert.strictEqual(somersaultGlide.impactTimeline[1].secondaryInterference.scope, 'adjacent');
@@ -109,6 +113,11 @@ assert.ok(byId('rathian.bite').tags.includes('weak'), 'Rathian bite must use the
 assert.deepStrictEqual(byId('rathian.tail_sweep').impactTimeline.map(event => event.atTicks), [24, 34]);
 assert.strictEqual(byId('rathian.tail_sweep').animationDurationMs, 4200);
 assert.strictEqual(byId('rathian.tail_sweep').animationProfile, 'rathian-tail-sweep-double');
+assert.strictEqual(byId('rathian.tail_sweep').targeting.mode, 'left-right-halves');
+assert.strictEqual(byId('rathian.tail_sweep').maxTargets, 4);
+assert.deepStrictEqual(byId('rathian.tail_sweep').animationGeometry, {
+    anchor: 'arena-center-lower', yRatio: 0.56, approachX: 1, approachY: 1
+});
 assert.strictEqual(byId('rathian.triple_charge').animationDurationMs, 9000);
 assert.strictEqual(byId('rathian.triple_charge').movement.ticks, 113);
 assert.strictEqual(byId('rathian.charge').animationProfile, 'rathian-ground-charge');
@@ -128,7 +137,18 @@ assert.deepStrictEqual(
     [-1, -1, 1, 1, -1, -1],
     'each Rathian triple-charge pass must use its independently measured travel direction'
 );
-assert.strictEqual(byId('rathian.glide').impactTimeline[0].atTicks, 42);
+assert.deepStrictEqual(
+    facingAnimator.facingPlan({ id: 'ground-charge-triple' }, {
+        runtimeChargeFacingDirections: [-1, 1, -1]
+    }).filter(step => step.direction !== 0 && [0, .30, .61].includes(step.offset)),
+    [
+        { offset: 0, direction: -1 },
+        { offset: .30, direction: 1 },
+        { offset: .61, direction: -1 }
+    ],
+    'Rathian must choose its next facing exactly when each off-screen charge leg begins'
+);
+assert.strictEqual(byId('rathian.glide').impactTimeline[0].atTicks, 33);
 assert.strictEqual(doubleSomersault.animationDurationMs, 6400,
     'Rathian multi-step motions must not be compressed by the shared animation defaults');
 
@@ -263,14 +283,16 @@ for (const animationName of [
 const somersaultFrames = css.match(/@keyframes monster-motion-rathian-somersault\s*\{([\s\S]*?)\n\}/)?.[1] || '';
 assert.match(somersaultFrames, /36%\{[^}]*rotate\(0deg\)/,
     'Rathian must finish approaching the target before beginning the somersault');
-assert.match(somersaultFrames, /48%\{[^}]*rotate\(calc\(-108deg\*var\(--monster-facing-flip,1\)\)\)/,
+assert.match(somersaultFrames, /41%\{[^}]*rotate\(calc\(-45deg\*var\(--monster-facing-flip,1\)\)\)/,
+    'Rathian must briefly bend opposite the upward somersault direction');
+assert.match(somersaultFrames, /48%\{[^}]*rotate\(calc\(90deg\*var\(--monster-facing-flip,1\)\)\)/,
     'the tail impact must rise only after the approach has finished');
 assert.doesNotMatch(somersaultFrames, /rotate\((?:150|200|250)deg\)/,
     'the somersault must not reach the same pose by sweeping the tail downward first');
 for (const [animationName, impactAngle] of [
-    ['rathian-somersault-double', '-108deg'],
-    ['rathian-bite-somersault', '-108deg'],
-    ['rathian-somersault-glide', '-108deg']
+    ['rathian-somersault-double', '90deg'],
+    ['rathian-bite-somersault', '90deg'],
+    ['rathian-somersault-glide', '90deg']
 ]) {
     const frames = css.match(new RegExp(`@keyframes monster-motion-${animationName}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] || '';
     assert.match(frames, new RegExp(`rotate\\(calc\\(${impactAngle.replace('-', '\\-')}\\*var\\(--monster-facing-flip,1\\)\\)\\)`),
@@ -279,10 +301,18 @@ for (const [animationName, impactAngle] of [
         `${animationName} must complete its approach before rotating`);
 }
 const somersaultGlideFrames = css.match(/@keyframes monster-motion-rathian-somersault-glide\s*\{([\s\S]*?)\n\}/)?.[1] || '';
-for (const percent of ['8%', '15%', '22%', '30%']) {
+for (const percent of ['8%', '15%', '18%', '22%', '30%']) {
     assert.match(somersaultGlideFrames, new RegExp(`${percent.replace('%', '%')}[^}]*opacity:1`),
         `Rathian must stay fully visible through the somersault at ${percent}`);
 }
+assert.match(somersaultGlideFrames, /40%[^}]*--monster-glide-x[^}]*-225px/,
+    'Rathian must create distance after the somersault before beginning its glide charge');
+assert.match(somersaultGlideFrames, /72%[^}]*--monster-glide-x[^}]*--monster-glide-y/,
+    'the follow-up glide must collide at its independently selected second target');
+const glideFrames = css.match(/@keyframes monster-motion-rathian-glide\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+assert.match(glideFrames, /31%[^}]*115px\*var\(--monster-facing-flip,1\)/);
+assert.match(glideFrames, /51%[^}]*85px\*var\(--monster-facing-flip,1\)/,
+    'ordinary low glide must visibly cross an S route before contact');
 for (const [percent, variable] of [
     ['29%', '--monster-charge-first-exit-y'],
     ['61%', '--monster-charge-second-exit-y'],
@@ -298,6 +328,16 @@ const animatorSource = fs.readFileSync(
     'utf8'
 );
 assert.match(animatorSource, /runtimeImpactTargetSequence/);
+const geometryChoreographySource = fs.readFileSync(
+    path.join(__dirname, '..', 'js', 'effects', 'hunt', 'HuntMonsterGeometryChoreography.js'),
+    'utf8'
+);
+assert.match(geometryChoreographySource, /'rathian-triple-fireball'/,
+    'Rathian triple fireballs must calculate facing independently for every shot');
+assert.match(geometryChoreographySource, /runtimeProjectileFacingDirections/,
+    'the body facing plan and target-aware projectile head origin must share each shot direction');
+assert.match(animatorSource, /pattern\.originPart \|\| null/,
+    'monster-attached effects must receive their authored anatomy origin');
 assert.match(animatorSource, /runtimeImpactAllowEmptySequence/);
 assert.match(animatorSource, /const phantomCard/,
     'empty left/right lanes still need a visible off-screen fireball');

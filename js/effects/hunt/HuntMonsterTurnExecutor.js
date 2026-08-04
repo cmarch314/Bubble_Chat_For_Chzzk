@@ -214,6 +214,16 @@ class HuntMonsterTurnExecutor {
         return catalog?.displayName ? catalog.displayName(pattern, monster) : String(pattern?.name || '');
     }
 
+    // The phase-standard impact slot key for the current impact commit. Must match
+    // tools/hunt-audio-pattern-map.js patternAudioSlots so a mapped sound resolves.
+    static impactSlotKey(pattern) {
+        const cue = pattern?.runtimeImpactAudioCue;
+        if (cue && cue !== 'none') return `impact:${cue}`;
+        const total = Array.isArray(pattern?.impactTimeline) ? pattern.impactTimeline.length : 1;
+        const index = Number(pattern?.runtimeImpactTimelineIndex || 0);
+        return total > 1 ? `impact-${index + 1}` : 'impact';
+    }
+
     static targetableHunters(engine) {
         const Rules = typeof HuntMonsterRules !== 'undefined'
             ? HuntMonsterRules
@@ -684,6 +694,12 @@ class HuntMonsterTurnExecutor {
                     retainedAtb: Number(engine.monsterAtb || 0)
                 }
             ].slice(-24);
+            // A burrowed monster must not stay hidden underground while it waits
+            // out an empty party: surface at home so it is visible and vulnerable
+            // again instead of freezing below ground until a hunter returns.
+            if (engine.monsterBurrowState) {
+                return HuntMonsterTurnExecutor.cancelPreparedTargetAction(engine);
+            }
             return false;
         }
         const monsterKey = engine.selectedMonster.id.replace(/-/g, '_').replace(/'/g, '');
@@ -908,6 +924,28 @@ class HuntMonsterTurnExecutor {
                 patternTags: pattern.tags,
                 audioPhase: 'action-start'
             });
+        }
+
+        // Phase-slot triggers (타격/후딜): fire the user-mapped pattern override at
+        // the exact impact frame and again for recovery on the final hit. These are
+        // overrideOnly, so they stay silent until a sound is assigned in the tool.
+        if (isImpactCommit && pattern.type !== 'roar') {
+            engine.playSFX?.('monster_impact', null, {
+                monsterId: engine.selectedMonster.id,
+                patternId: pattern.id,
+                patternName: pattern.name,
+                patternSlot: HuntMonsterTurnExecutor.impactSlotKey(pattern),
+                overrideOnly: true
+            });
+            if (pattern.runtimeImpactTimelineFinal !== false) {
+                engine.playSFX?.('monster_recovery', null, {
+                    monsterId: engine.selectedMonster.id,
+                    patternId: pattern.id,
+                    patternName: pattern.name,
+                    patternSlot: 'recovery',
+                    overrideOnly: true
+                });
+            }
         }
 
         const isUltimate = pattern.type === 'ultimate' || pattern.tags?.includes('ultimate');

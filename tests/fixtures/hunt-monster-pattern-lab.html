@@ -184,6 +184,14 @@
     let currentState='normal';
     let activePatternId='';
     let labAudio=null;
+    let pendingFlightTransitionTimer=null;
+
+    function clearPendingFlightTransition(){
+      if(pendingFlightTransitionTimer!==null){
+        clearTimeout(pendingFlightTransitionTimer);
+        pendingFlightTransitionTimer=null;
+      }
+    }
 
     function clearStateClasses(){
       const image=document.getElementById('fight-monster-img');
@@ -192,6 +200,7 @@
       stage.classList.remove('monster-flight-stage-airborne');
     }
     function applyState(state, fromPattern=false){
+      if(!fromPattern)clearPendingFlightTransition();
       animator.clearMonsterAnimations?.('pattern-lab-state');
       clearStateClasses();
       currentState=state;
@@ -279,6 +288,7 @@
       return tags.has('fire')?'🔥':tags.has('ice')?'❄️':tags.has('water')?'💧':tags.has('thunder')?'⚡':tags.has('dragon')?'🐉':tags.has('poison')?'☠️':'💥';
     }
     function playPattern(patternId){
+      clearPendingFlightTransition();
       const source=(HUNT_MONSTER_PATTERN_OVERRIDES[owner.selectedMonster.id]||[]).find(pattern=>pattern.id===patternId);
       if(!source)return;
       const pattern={...source,tags:[...(source.tags||[])],targeting:source.targeting?{...source.targeting}:null};
@@ -295,6 +305,17 @@
       document.getElementById('run-readout').textContent=`${pattern.name} · ${targetMode==='auto'?'자동 ':''}${selection.indices.map(index=>index+1).join('·')}번`;
       labAudio?.playPattern(pattern,pattern.runtimeResolvedImpactTimeline||[]);
       animator.triggerMonsterAttack(pattern.type,patternEmoji(pattern),selection.targets,pattern.name,pattern);
+      if(pattern.flightTransition==='takeoff'){
+        pendingFlightTransitionTimer=setTimeout(()=>{
+          pendingFlightTransitionTimer=null;
+          applyState('airborne',true);
+        },Math.max(1,Number(pattern.animationDurationMs||1800)));
+      }else if(pattern.flightTransition==='land'){
+        pendingFlightTransitionTimer=setTimeout(()=>{
+          pendingFlightTransitionTimer=null;
+          applyState('normal',true);
+        },Math.max(1,Number(pattern.animationDurationMs||1800)));
+      }
     }
     function showMonster(id){
       labAudio?.cancelPatternAudio();
@@ -366,6 +387,7 @@
     function initialize(){
       renderCombatChrome();
       labAudio=new HuntMonsterPatternLabAudio({monsterProvider:()=>owner.selectedMonster});
+      owner.onMonsterProjectileLaunchAudio=(monster,pattern)=>labAudio?.playProjectileLaunch(monster,pattern);
       labAudio.installToggle(document.querySelector('.target-panel'));
       monsterSelect.replaceChildren(...released.map(monster=>{
         const option=document.createElement('option');option.value=monster.id;option.textContent=monster.nameKO;return option;

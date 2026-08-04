@@ -24,8 +24,17 @@ class HuntEffect extends BaseEffect {
         this.audioManager = new HuntAudioManager(director, this.config);
         this.renderer.onMonsterStrideAudio = monster =>
             this.audioManager.playMonsterAction(monster, 'charge_stride_step');
-        this.renderer.onMonsterProjectileLaunchAudio = monster =>
-            this.audioManager.playMonsterAction(monster, 'projectile_launch');
+        this.renderer.onMonsterProjectileLaunchAudio = (monster, pattern = {}) => {
+            const context = {
+                patternId: pattern.id,
+                patternName: pattern.name,
+                patternType: pattern.type,
+                patternTags: pattern.tags,
+                patternDelivery: pattern.delivery
+            };
+            if (this.audioManager.playMonsterAction(monster, 'projectile_launch', context)) return;
+            this.audioManager.playMonsterAction(monster, 'telegraph', context);
+        };
         const SeededRandom = typeof HuntSeededRandom !== 'undefined'
             ? HuntSeededRandom
             : class { next() { return Math.random(); } };

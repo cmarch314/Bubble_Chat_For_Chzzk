@@ -384,6 +384,14 @@ const HUNT_VERIFIED_LOCAL_MONSTER_CUES = {
         patternKeywords: ['bite'],
         layers: [['local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_124_948696462.mp3', 0.68, 0]]
     },
+    {
+        label: 'Rathian fireball ground impact',
+        evidence: 'User-audition-confirmed World em001 ground-fire event',
+        semanticTag: 'ground_fire',
+        audioPhase: 'impact',
+        patternKeywords: ['fireball', '화염구', 'projectile'],
+        layers: [['local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_012_44522100.mp3', 0.62, 0]]
+    },
     ...[
         'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_107_840416626.mp3',
         'local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_046_267272460.mp3',

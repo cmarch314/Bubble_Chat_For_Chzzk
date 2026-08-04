@@ -154,6 +154,13 @@ class HuntMonsterPatternLabAudio {
         });
     }
 
+    playProjectileLaunch(monster, pattern = {}) {
+        if (!this.enabled || !monster) return false;
+        const context = this.audioContext(pattern, null);
+        if (this.audioManager.playMonsterAction(monster, 'projectile_launch', context)) return true;
+        return this.audioManager.playMonsterAction(monster, 'telegraph', context);
+    }
+
     playState(state) {
         if (!this.enabled) return;
         const monster = this.monsterProvider();

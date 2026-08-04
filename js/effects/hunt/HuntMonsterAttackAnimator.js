@@ -303,126 +303,27 @@ class HuntMonsterAttackAnimator {
         const horizontalDirection = authoredDirection || (Math.abs(attackX) >= 12 ? Math.sign(attackX) : 0);
         const id = String(profile?.id || '');
 
-        if (id === 'tigrex-charge-chain') {
-            const directions = (pattern?.runtimeTigrexFacingDirections || [])
-                .map(Number).map(Math.sign).filter(Boolean);
-            if (!directions.length) return null;
-            const passCount = Math.max(2, Math.min(3,
-                Number(pattern?.targeting?.passCountByState?.[this.owner.monsterState]) || 2));
-            if (passCount === 3) return [
-                { offset: 0, direction: directions[0] },
-                { offset: .339, direction: directions[0] },
-                { offset: .34, direction: directions[1] || directions[0] },
-                { offset: .569, direction: directions[1] || directions[0] },
-                { offset: .57, direction: directions[2] || directions[1] || directions[0] },
-                { offset: .689, direction: directions[2] || directions[1] || directions[0] },
-                { offset: .69, direction: directions[3] || directions[2] || directions[1] || directions[0] },
-                { offset: 1, direction: directions[3] || directions[2] || directions[1] || directions[0] }
-            ];
-            return [
-                { offset: 0, direction: directions[0] },
-                { offset: .419, direction: directions[0] },
-                { offset: .42, direction: directions[1] || directions[0] },
-                { offset: .639, direction: directions[1] || directions[0] },
-                { offset: .64, direction: directions[2] || directions[1] || directions[0] },
-                { offset: 1, direction: directions[2] || directions[1] || directions[0] }
-            ];
+        const choreography = typeof HuntMonsterFacingChoreography !== 'undefined'
+            ? HuntMonsterFacingChoreography
+            : (typeof require === 'function' ? require('./HuntMonsterFacingChoreography.js') : null);
+        const buildFacingPlan = choreography?.[id];
+        if (buildFacingPlan) {
+            return buildFacingPlan({
+                id,
+                pattern,
+                profile,
+                horizontalDirection,
+                authoredDirection,
+                attackX,
+                secondX,
+                monsterState: this.owner?.monsterState,
+                ticksPerSecond: typeof HuntAtbConfig !== 'undefined'
+                    ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10)
+                    : 10,
+                projectileLaunchDelayMs: HuntMonsterAttackAnimator.projectileLaunchDelayMs
+            });
         }
 
-        if (id === 'bazel-carpet-bombing') {
-            const direction = authoredDirection || (horizontalDirection || 1);
-            return [
-                { offset: 0, direction },
-                { offset: .46, direction },
-                { offset: .47, direction: -direction },
-                { offset: .68, direction: -direction },
-                { offset: .69, direction: 0 },
-                { offset: 1, direction: 0 }
-            ];
-        }
-        if (['ground-charge-cross', 'aerial-charge-cross', 'legiana-drill-cross',
-            'ground-charge', 'rathian-ground-charge'].includes(id)) {
-            if (!horizontalDirection) return null;
-            const hideOffset = ['aerial-charge-cross', 'legiana-drill-cross'].includes(id) ? .65 : .73;
-            return [
-                { offset: 0, direction: horizontalDirection },
-                { offset: hideOffset, direction: horizontalDirection },
-                { offset: Math.min(.99, hideOffset + .01), direction: 0 },
-                { offset: 1, direction: 0 }
-            ];
-        }
-        if (id === 'ground-charge-double') {
-            const firstDirection = horizontalDirection;
-            const betweenDirection = Math.abs(secondX - attackX) >= 12
-                ? Math.sign(secondX - attackX)
-                : -firstDirection;
-            if (!firstDirection && !betweenDirection) return null;
-            const isStompBurst = pattern?.chargeLaunchStyle === 'stomp-burst';
-            if (isStompBurst) {
-                return [
-                    { offset: 0, direction: firstDirection || betweenDirection },
-                    { offset: .460, direction: firstDirection || betweenDirection },
-                    { offset: .461, direction: 0 },
-                    { offset: .610, direction: 0 },
-                    { offset: .611, direction: betweenDirection || firstDirection },
-                    { offset: .909, direction: betweenDirection || firstDirection },
-                    { offset: .910, direction: 0 },
-                    { offset: 1, direction: 0 }
-                ];
-            }
-            return [
-                { offset: 0, direction: firstDirection || betweenDirection },
-                { offset: .39, direction: firstDirection || betweenDirection },
-                { offset: .40, direction: betweenDirection || firstDirection },
-                { offset: .78, direction: betweenDirection || firstDirection },
-                { offset: .79, direction: 0 },
-                { offset: 1, direction: 0 }
-            ];
-        }
-        if (id === 'ground-charge-triple') {
-            const authoredDirections = (pattern?.runtimeChargeFacingDirections || [])
-                .map(Number).map(Math.sign);
-            const firstDirection = authoredDirections[0] || horizontalDirection || -1;
-            const secondDirection = authoredDirections[1] || -firstDirection;
-            const thirdDirection = authoredDirections[2] || -secondDirection;
-            return [
-                { offset: 0, direction: firstDirection },
-                { offset: .30, direction: firstDirection },
-                { offset: .31, direction: secondDirection },
-                { offset: .62, direction: secondDirection },
-                { offset: .63, direction: thirdDirection },
-                { offset: .89, direction: thirdDirection },
-                { offset: .90, direction: 0 },
-                { offset: 1, direction: 0 }
-            ];
-        }
-        if (id === 'ground-charge-zigzag') {
-            return [
-                { offset: 0, direction: -1 }, { offset: .25, direction: -1 },
-                { offset: .26, direction: 1 }, { offset: .43, direction: 1 },
-                { offset: .44, direction: -1 }, { offset: .61, direction: -1 },
-                { offset: .62, direction: 1 }, { offset: .79, direction: 1 },
-                { offset: .80, direction: 0 }, { offset: 1, direction: 0 }
-            ];
-        }
-        if (id === 'lateral-sweep') {
-            return [
-                { offset: 0, direction: -1 }, { offset: .14, direction: -1 },
-                { offset: .15, direction: 1 }, { offset: .42, direction: 1 },
-                { offset: .43, direction: -1 }, { offset: .68, direction: -1 },
-                { offset: .69, direction: 1 }, { offset: .84, direction: 1 },
-                { offset: .85, direction: -1 }, { offset: 1, direction: 0 }
-            ];
-        }
-        if (id === 'pounce-chain') {
-            return [
-                { offset: 0, direction: -1 }, { offset: .15, direction: -1 },
-                { offset: .16, direction: 1 }, { offset: .51, direction: 1 },
-                { offset: .52, direction: -1 }, { offset: .70, direction: -1 },
-                { offset: .71, direction: 1 }, { offset: .86, direction: 1 },
-                { offset: .87, direction: -1 }, { offset: 1, direction: 0 }
-            ];
-        }
         if (profile?.aim !== 'target' || !horizontalDirection) return null;
         return [
             { offset: 0, direction: horizontalDirection },
@@ -648,8 +549,17 @@ class HuntMonsterAttackAnimator {
         const monsterRect = monsterImg.getBoundingClientRect();
         const targetAnchor = targetCard.querySelector?.('.game-hunt-weapon-img-container') || targetCard;
         const targetRect = targetAnchor.getBoundingClientRect();
-        const dx = targetRect.left + targetRect.width / 2 - (monsterRect.left + monsterRect.width / 2);
-        const dy = targetRect.top + targetRect.height / 2 - (monsterRect.top + monsterRect.height / 2);
+        const geometry = pattern?.animationGeometry || {};
+        let dx = targetRect.left + targetRect.width / 2 - (monsterRect.left + monsterRect.width / 2);
+        let dy = targetRect.top + targetRect.height / 2 - (monsterRect.top + monsterRect.height / 2);
+        if (geometry.anchor === 'arena-center-lower') {
+            const arenaRect = this.card?.getBoundingClientRect?.();
+            if (arenaRect) {
+                dx = arenaRect.left + arenaRect.width / 2 - (monsterRect.left + monsterRect.width / 2);
+                dy = arenaRect.top + arenaRect.height * Number(geometry.yRatio || .56)
+                    - (monsterRect.top + monsterRect.height / 2);
+            }
+        }
         const stage = monsterImg.closest('.hunt-monster-motion-stage');
         const maxX = Math.max(150, ((stage?.clientWidth || 720) - monsterRect.width) / 2 + 130);
         motionElement?.style?.setProperty?.('--monster-lane-x', `${maxX}px`);
@@ -658,7 +568,6 @@ class HuntMonsterAttackAnimator {
         const contactMotion = pattern?.tags?.includes('target-contact')
             || ['close-strike', 'horn-uppercut', 'horn-sweep-contact', 'side-tackle-contact'].includes(profile.id);
         const isTailMotion = ['tail-sweep', 'tail-sweep-double', 'tail-slam-rock'].includes(profile.id);
-        const geometry = pattern?.animationGeometry || {};
         const geometryNumber = (value, fallback) => Number.isFinite(Number(value))
             ? Number(value)
             : fallback;
@@ -698,43 +607,26 @@ class HuntMonsterAttackAnimator {
         let secondFacingX = 0;
         let tigrexRouteKeyframes = null;
         let tigrexStrideDelayMs = 0;
-        if (profile.id === 'bazel-carpet-bombing') {
-            const cardRect = this.card.getBoundingClientRect();
-            const direction = pattern?.runtimeSweepDirection === 'right-to-left' ? -1 : 1;
-            const sideDistance = Math.max(1150, cardRect.width * .72 + monsterRect.width);
-            const diveCard = Number.isInteger(pattern?.runtimeDiveTargetIndex)
-                ? this.card.querySelector(`#fight-card-${pattern.runtimeDiveTargetIndex}`)
-                : targetCard;
-            const diveAnchor = diveCard?.querySelector?.('.game-hunt-weapon-img-container')
-                || diveCard
-                || targetAnchor;
-            const diveRect = diveAnchor.getBoundingClientRect();
-            const diveX = Math.max(-maxX, Math.min(maxX,
-                diveRect.left + diveRect.width / 2 - (monsterRect.left + monsterRect.width / 2)));
-            const diveY = Math.max(-240, Math.min(430,
-                diveRect.top + diveRect.height / 2 - (monsterRect.top + monsterRect.height / 2)));
-            motionElement.style.setProperty('--monster-charge-bottom',
-                `${Math.max(620, cardRect.bottom - monsterRect.top + monsterRect.height)}px`);
-            motionElement.style.setProperty('--monster-carpet-opening-x', `${attackX}px`);
-            motionElement.style.setProperty('--monster-carpet-opening-y', `${attackY}px`);
-            motionElement.style.setProperty('--monster-carpet-dive-x', `${diveX}px`);
-            motionElement.style.setProperty('--monster-carpet-dive-y', `${diveY}px`);
-            motionElement.style.setProperty('--monster-carpet-start-x', `${direction * -sideDistance}px`);
-            motionElement.style.setProperty('--monster-carpet-end-x', `${direction * sideDistance}px`);
-            motionElement.style.setProperty('--monster-carpet-flight-y',
-                `${Math.max(-160, cardRect.top - monsterRect.bottom - 120)}px`);
-        }
-        if (profile.id === 'tigrex-double-bite') {
-            const mouthPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, 'mouth', 0)
-                || { x: .5, y: .5 };
-            const biteRoute = HuntMonsterAttackAnimator.tigrexBiteRoute(
-                { x: 0, y: 0 }, { x: attackX, y: attackY }, monsterRect, mouthPoint);
-            motionElement.style.setProperty('--tigrex-bite-contact-x', `${biteRoute.contact.x}px`);
-            motionElement.style.setProperty('--tigrex-bite-contact-y', `${biteRoute.contact.y}px`);
-            motionElement.style.setProperty('--tigrex-bite-finish-x', `${biteRoute.finish.x}px`);
-            motionElement.style.setProperty('--tigrex-bite-finish-y', `${biteRoute.finish.y}px`);
-            motionElement.dataset.tigrexBiteRoute = 'standalone';
-        }
+        const geometryChoreography = typeof HuntMonsterGeometryChoreography !== 'undefined'
+            ? HuntMonsterGeometryChoreography
+            : (typeof require === 'function' ? require('./HuntMonsterGeometryChoreography.js') : null);
+        geometryChoreography?.[profile.id]?.({
+            animator: this,
+            motionElement,
+            monsterImg,
+            monsterRect,
+            targetCard,
+            targetAnchor,
+            targetRect,
+            pattern,
+            profile,
+            maxX,
+            dx,
+            dy,
+            attackX,
+            attackY,
+            anatomy
+        });
         if (profile.id === 'ground-charge' || profile.id === 'rathian-ground-charge' || profile.id === 'ground-charge-cross'
             || profile.id === 'ground-charge-zigzag' || profile.id === 'ground-charge-double'
             || profile.id === 'ground-charge-triple' || profile.id === 'aerial-charge-cross'
@@ -959,8 +851,6 @@ class HuntMonsterAttackAnimator {
                         || { x: .5, y: .5 };
                     const biteRoute = HuntMonsterAttackAnimator.tigrexBiteRoute(
                         lastExit, lastPoint, monsterRect, mouthPoint);
-                    motionElement.style.setProperty('--tigrex-bite-target-x', `${lastPoint.x}px`);
-                    motionElement.style.setProperty('--tigrex-bite-target-y', `${lastPoint.y}px`);
                     motionElement.style.setProperty('--tigrex-bite-contact-x', `${biteRoute.contact.x}px`);
                     motionElement.style.setProperty('--tigrex-bite-contact-y', `${biteRoute.contact.y}px`);
                     motionElement.style.setProperty('--tigrex-bite-finish-x', `${biteRoute.finish.x}px`);
@@ -1454,12 +1344,24 @@ class HuntMonsterAttackAnimator {
         }, approachDelayMs);
     }
 
-    createMonsterAttachedEmojiFx(monsterImg, emoji, extraClass, durationMs) {
+    createMonsterAttachedEmojiFx(monsterImg, emoji, extraClass, durationMs, originPart = null) {
         const motionElement = this.resolveMotionElement(monsterImg);
-        const container = motionElement !== monsterImg
-            ? motionElement
-            : monsterImg?.closest?.('.hunt-monster-motion-stage');
-        return this.createLocalEmojiFx(container, emoji, extraClass, durationMs);
+        const facingLayer = this.resolveFacingLayer(monsterImg);
+        const container = originPart && facingLayer
+            ? facingLayer
+            : motionElement !== monsterImg
+                ? motionElement
+                : monsterImg?.closest?.('.hunt-monster-motion-stage');
+        const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
+            ? HuntMonsterAnatomyCatalog
+            : null;
+        const point = originPart
+            ? anatomy?.visualPoint?.(this.owner?.selectedMonster, originPart, 0)
+            : null;
+        return this.createLocalEmojiFx(container, emoji, extraClass, durationMs, point ? {
+            left: `${Number(point.x) * 100}%`,
+            top: `${Number(point.y) * 100}%`
+        } : {});
     }
 
     triggerMonsterTelegraphFx(effect = {}) {
@@ -1766,7 +1668,8 @@ class HuntMonsterAttackAnimator {
                 monsterImg,
                 pattern.attachedFx.emoji || '💥',
                 pattern.attachedFx.className || 'attached-action',
-                Number(pattern.attachedFx.durationMs || motionProfile?.duration || 900)
+                Number(pattern.attachedFx.durationMs || motionProfile?.duration || 900),
+                pattern.originPart || null
             );
         } else if (motionProfile?.id === 'tail-slam-rock') {
             const duration = Number(motionProfile?.duration || 3400);

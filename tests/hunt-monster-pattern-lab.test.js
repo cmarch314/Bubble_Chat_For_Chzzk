@@ -28,6 +28,8 @@ for (const audioScript of [
 }
 assert.match(html, /labAudio\?\.playPattern\(pattern,pattern\.runtimeResolvedImpactTimeline\|\|\[\]\)/,
     'preview audio must follow the resolved multi-impact timeline');
+assert.match(html, /onMonsterProjectileLaunchAudio=.*playProjectileLaunch/,
+    'the pattern lab must reproduce projectile launch audio callbacks');
 assert.match(html, /\.lab-controls\{position:fixed;z-index:2147483647;/,
     'the inspection console must float in its own top layer without changing combat geometry');
 assert.match(html, /backdrop-filter:blur\(6px\);[^}]*opacity:\.76/,
@@ -54,6 +56,10 @@ assert.match(html, /HuntMonsterActionPolicy\.resolveTargeting/,
     'automatic and manual targets must use the shared target policy');
 assert.match(html, /runtimeResolvedImpactTimeline/,
     'multi-impact animations must receive the same resolved timeline used in combat');
+assert.match(html, /pattern\.flightTransition==='land'/,
+    'pattern lab must reproduce authored landing transitions after landing actions');
+assert.match(html, /applyState\('normal',true\)/,
+    'landing previews must visibly return the monster to its grounded state');
 assert.match(html, /--target-color/);
 assert.match(html, /classList\.toggle\('is-targeted'/,
     'random target selection must illuminate the matching hunter card');

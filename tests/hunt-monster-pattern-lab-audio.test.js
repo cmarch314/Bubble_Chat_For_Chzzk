@@ -8,10 +8,10 @@ global.ManagedTimers = class {
     clearAll() { this.jobs = []; }
 };
 global.HuntAudioManager = class {
-    constructor() { this.calls = []; global.audioManagerProbe = this; }
+    constructor() { this.calls = []; this.results = {}; global.audioManagerProbe = this; }
     playMonsterAction(monster, kind, context) {
         this.calls.push({ monster, kind, context });
-        return true;
+        return this.results[kind] ?? true;
     }
 };
 
@@ -48,5 +48,14 @@ const beforeRoarImpact = global.audioManagerProbe.calls.length;
 roarImpactJob.callback();
 assert.strictEqual(global.audioManagerProbe.calls.length, beforeRoarImpact,
     'roar patterns must not invent a physical impact SE');
+
+global.audioManagerProbe.results.projectile_launch = false;
+assert.strictEqual(controller.playProjectileLaunch({ id: 'rathian' }, {
+    id: 'rathian.fireball', name: '화염구 브레스', type: 'projectile',
+    tags: ['fire', 'projectile'], delivery: 'projectile'
+}), true);
+assert.deepStrictEqual(global.audioManagerProbe.calls.slice(-2).map(call => call.kind),
+    ['projectile_launch', 'telegraph'],
+    'a projectile without an exact launch SE must use its reviewed species telegraph at launch');
 
 console.log('[test] Monster pattern lab audio timing contract passed.');

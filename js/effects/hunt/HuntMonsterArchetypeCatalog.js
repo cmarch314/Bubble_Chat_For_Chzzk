@@ -77,6 +77,7 @@ class HuntMonsterArchetypeCatalog {
             roarSize: 'large',
             rageDurationTicks: 900,
             rageOpenerTakeoff: true,
+            takeoffPreservesReadyAtb: true,
             flightGroundActionRange: Object.freeze([1, 2]),
             flightActionCountByState: Object.freeze({ normal: 2, enraged: 3 }),
             takeoffInterference: Object.freeze({ kind: 'wind', size: 'small' }),

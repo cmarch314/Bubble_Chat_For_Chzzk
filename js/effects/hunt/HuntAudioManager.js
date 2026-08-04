@@ -582,7 +582,10 @@ class HuntAudioManager {
         // Exact semantic routes win as a set. Mixing the broad attack pool into
         // an existing telegraph/reaction route made confirmed release voices
         // randomly lose to generic aerial or body sounds.
-        if (!variants.length && normalizedKind !== 'roar' && normalizedKind !== 'attack') {
+        if (!variants.length
+            && normalizedKind !== 'roar'
+            && normalizedKind !== 'attack'
+            && normalizedKind !== 'projectile_launch') {
             variants = Array.isArray(catalog[`${monsterId}:attack`])
                 ? catalog[`${monsterId}:attack`]
                 : [];
@@ -765,9 +768,42 @@ class HuntAudioManager {
         return this.playVerifiedLayers(selected);
     }
 
+    // User-mapped per-pattern audio (review tool) wins over every catalog route.
+    // Keyed monster -> patternId -> phase slot; see monster-audio-phase-standard.md.
+    patternAudioRoute(monsterId, patternId, slot) {
+        if (!monsterId || !patternId || !slot) return null;
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const map = globalScope.HUNT_MONSTER_PATTERN_AUDIO_ROUTES;
+        if (!map) return null;
+        const candidates = [monsterId, String(monsterId).toLowerCase(), this.monsterGroup?.(monsterId)];
+        for (const id of candidates) {
+            const route = id && map[id]?.[patternId]?.[slot];
+            if (route && Array.isArray(route.layers) && route.layers.length) return route;
+        }
+        return null;
+    }
+
+    static resolveOverrideSlot(kind, options = {}) {
+        if (options.patternSlot) return options.patternSlot;
+        const normalized = String(kind || '').toLowerCase();
+        if (normalized === 'telegraph') return 'telegraph';
+        if (normalized === 'projectile_launch') return 'launch';
+        if (normalized === 'charge_stride_step') return 'travel';
+        if (normalized === 'roar') return 'roar';
+        if (normalized === 'burrow') return 'burrow';
+        if (String(options.audioPhase || '').toLowerCase() === 'action-start') return 'start';
+        return null;
+    }
+
     playMonsterAction(monster, kind = 'attack', options = {}) {
         const actionKind = this.normalizedMonsterAudioKind(kind);
         const monsterId = monster && monster.id ? monster.id : monster;
+        const overrideSlot = HuntAudioManager.resolveOverrideSlot(kind, options);
+        if (options.patternId && overrideSlot) {
+            const route = this.patternAudioRoute(monsterId, options.patternId, overrideSlot);
+            if (route) return this.playVerifiedLayers(route);
+            if (options.overrideOnly) return false;
+        }
         const normalizedMonsterId = String(monsterId || '').toLowerCase().replace(/[-']/g, '_');
         const globalScope = typeof window !== 'undefined' ? window : globalThis;
         const silentVoiceIds = new Set(globalScope.HUNT_WORLD_MONSTER_SILENT_VOICE_IDS || []);
@@ -944,6 +980,13 @@ class HuntAudioManager {
         }
         if (fileName === 'monster_telegraph') {
             this.playMonsterAction(context.monsterId, 'telegraph', context);
+            return;
+        }
+        // Phase-slot cues (타격/후딜/이동) route through playMonsterAction so the
+        // user-mapped pattern override is honoured; overrideOnly keeps them silent
+        // until a sound is assigned in the review tool.
+        if (fileName === 'monster_impact' || fileName === 'monster_recovery' || fileName === 'monster_travel') {
+            this.playMonsterAction(context.monsterId, fileName.replace('monster_', ''), context);
             return;
         }
         if (fileName === 'monster_death' || fileName === 'monster_knockdown'

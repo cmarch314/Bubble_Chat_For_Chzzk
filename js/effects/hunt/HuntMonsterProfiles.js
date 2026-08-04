@@ -456,14 +456,15 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         maxConsecutiveUses: 1
     }],
     ['rathian.tail_sweep', '이단 꼬리 회전', 'area', 0.27, {
-        sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 3, recovery: 1,
+        sourceMoveNameJA: '尻尾回転', minTargets: 4, maxTargets: 4, recovery: 1,
         tags: ['area', 'tail', 'ground-only', 'target-contact'], monsterAtbCost: 0.58,
-        movement: { ticks: 42 }, targeting: { mode: 'lane' },
+        movement: { ticks: 42 }, targeting: { mode: 'left-right-halves' },
         impactTimeline: [
             { atTicks: 24, damageScale: 1 },
             { atTicks: 34, damageScale: 1 }
         ],
         animationProfile: 'rathian-tail-sweep-double', animationDurationMs: 4200,
+        animationGeometry: { anchor: 'arena-center-lower', yRatio: 0.56, approachX: 1, approachY: 1 },
         brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.70 }
     }],
     ['rathian.fireball', '화염구 브레스', 'projectile', 0.34, {
@@ -497,7 +498,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         state: 'exhausted',
         tags: ['ground-only', 'fire', 'no-impact', 'exhausted-fizzle'],
         monsterAtbCost: 0.38, movement: { ticks: 18 },
-        animationProfile: 'rathalos-fireball', animationDurationMs: 1800,
+        animationProfile: 'rathalos-fireball', animationDurationMs: 1800, originPart: 'head',
         attachedFx: { emoji: '☁️', className: 'breath-fizzle', durationMs: 1800 },
         suppressPrepareAudio: true
     }],
@@ -566,12 +567,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         sourceMoveNameJA: 'サマーソルト・滑空突進', minTargets: 2, maxTargets: 2,
         windup: 8, recovery: 1, state: 'enraged', weight: 0.32,
         tags: ['physical', 'poison', 'tail', 'flight-only', 'target-contact', 'multi-hit', 'strong'],
-        monsterAtbCost: 0.88, movement: { ticks: 65, untargetable: true },
+        monsterAtbCost: 0.88, movement: { ticks: 78, untargetable: true },
         targeting: { mode: 'independent-passes', passCount: 2 },
         impactTimeline: [
             { atTicks: 21, targetMode: 'sequential', damageScale: 1, audioCue: 'somersault' },
             {
-                atTicks: 80, targetMode: 'sequential', damageScale: 0.583,
+                atTicks: 56, targetMode: 'sequential', damageScale: 0.583,
                 ignoreBrokenPartDamage: true, suppressStatus: true,
                 secondaryInterference: { kind: 'wind', size: 'small', scope: 'adjacent' }
             }
@@ -588,7 +589,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         tags: ['charge', 'flight-only', 'target-contact'], monsterAtbCost: 0.58,
         movement: { ticks: 40, untargetable: true },
         impactTimeline: [{
-            atTicks: 42, damageScale: 1,
+            atTicks: 33, damageScale: 1,
             secondaryInterference: { kind: 'wind', size: 'small', scope: 'adjacent' }
         }],
         animationProfile: 'rathian-glide', animationDurationMs: 4800,

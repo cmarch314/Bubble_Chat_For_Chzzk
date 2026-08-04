@@ -132,6 +132,12 @@ assert.ok(
         .every(variant => !variant.layers.some(([audioPath]) => audioPath.includes('137441638'))),
     'the corrected somersault vocal must not remain routed as a Rathalos fireball cue'
 );
+const rathianFireballImpact = HUNT_VERIFIED_LOCAL_MONSTER_CUES['rathian:attack']
+    .find(variant => variant.semanticTag === 'ground_fire');
+assert.ok(rathianFireballImpact, 'Rathian fireballs must retain their reviewed ground-fire impact SE');
+assert.strictEqual(rathianFireballImpact.audioPhase, 'impact',
+    'the fireball impact SE must never play at announcement or projectile launch');
+assert.match(rathianFireballImpact.layers[0][0], /44522100/);
 assert.deepStrictEqual(
     HUNT_VERIFIED_LOCAL_MONSTER_CUES['rathalos:attack']
         .filter(variant => variant.patternKeywords?.includes('bite'))

@@ -168,13 +168,16 @@ assert.strictEqual(labels.tagAliases.브레스적중, 'breath_impact');
 const htmlPath = path.join(__dirname, '..', 'tools', 'monster-audio-review.html');
 if (fs.existsSync(htmlPath)) {
     const html = fs.readFileSync(htmlPath, 'utf8');
-    assert.ok(html.includes('이벤트 묶음 단위 검수'));
+    assert.ok(html.includes('패턴 슬롯 매핑'));
     assert.ok(html.includes('포효'));
     assert.ok(html.includes('구성 음원 '));
     assert.ok(html.includes('음성 없음 ✓'));
     assert.ok(html.includes('완료 ✓'));
     assert.ok(html.includes('id="completeReview"'));
     assert.ok(html.includes('/api/review-completion'));
+    assert.ok(html.includes('/api/hunt-patterns'));
+    assert.ok(html.includes('/api/hunt-pattern-route'));
+    assert.ok(html.includes('class="slot-pick"'));
 }
 
 console.log('monster audio event-group review server tests passed');

@@ -43,6 +43,7 @@ const behavior = global.HuntMonsterArchetypeCatalog.behavior({ id: 'legiana' });
 assert.strictEqual(behavior.roarSize, 'large');
 assert.strictEqual(behavior.rageDurationTicks, 900);
 assert.strictEqual(behavior.rageOpenerTakeoff, true);
+assert.strictEqual(behavior.takeoffPreservesReadyAtb, true);
 assert.deepStrictEqual([...behavior.flightGroundActionRange], [1, 2]);
 assert.deepStrictEqual({ ...behavior.flightActionCountByState }, { normal: 2, enraged: 3 });
 assert.deepStrictEqual({ ...behavior.takeoffInterference }, { kind: 'wind', size: 'small' });
@@ -127,6 +128,7 @@ const flightEngine = {
     monsterBehavior: behavior,
     monsterCanFly: true,
     monsterFlightState: 'grounded',
+    monsterAtb: 100,
     monsterFlightCooldown: 0,
     monsterState: 'normal',
     monsterPartState: [],
@@ -140,8 +142,11 @@ const flightEngine = {
 };
 assert.strictEqual(flight.beforeTurn(flightEngine, legiana), true);
 assert.strictEqual(flightEngine.monsterFlightState, 'grounded', 'one ground action must occur before takeoff');
-assert.strictEqual(flight.beforeTurn(flightEngine, legiana), true);
+assert.strictEqual(flight.beforeTurn(flightEngine, legiana), false,
+    'Legiana takeoff must finish as its own state transition before an aerial attack starts');
 assert.strictEqual(flightEngine.monsterFlightState, 'airborne');
+assert.strictEqual(flightEngine.monsterAtb, 100,
+    'takeoff must preserve the ready ATB; the following aerial action spends it');
 assert.deepStrictEqual(events, [[0, 'wind', 'small'], [1, 'wind', 'small']]);
 flight.afterAction(flightEngine, coldSweep);
 assert.strictEqual(flightEngine.forcedMonsterPatternId, undefined);

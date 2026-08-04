@@ -69,10 +69,11 @@ class HuntMonsterAnimationCatalog {
                 'agile-leap-chain': 3600,
                 'low-glide-sweep': 4000
             };
+            // A `*-tail-cross` profile keeps its own dedicated motion class instead
+            // of collapsing into the shared spinning tail-sweep-double, so an
+            // X-shaped rear tail whip can be authored independently of the sweep.
             const isTailCrossProfile = /tail-cross$/i.test(authoredProfile);
-            const runtimeProfile = isTailCrossProfile
-                ? 'tail-sweep-double'
-                : (authoredRuntimeProfiles[authoredProfile] || authoredProfile);
+            const runtimeProfile = authoredRuntimeProfiles[authoredProfile] || authoredProfile;
             const anchor = authoredProfile.includes('burrow-enter') ? 'center'
                 : authoredProfile.includes('sweep') ? 'sweep'
                 : 'target';

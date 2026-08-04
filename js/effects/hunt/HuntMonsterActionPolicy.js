@@ -123,6 +123,16 @@ class HuntMonsterActionPolicy {
         ]);
     }
 
+    static leftRightHalfPasses(targetable, count = 4, random = Math.random) {
+        const ordered = this.orderedTargets(targetable);
+        if (!ordered.length) return [[], []];
+        if (Number(count || 1) <= 1) {
+            const target = ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
+            return [[target], []];
+        }
+        return [ordered.slice(0, 2), ordered.slice(2, 4)];
+    }
+
     static resolveTargeting({
         targetable = [],
         count = 1,
@@ -218,6 +228,16 @@ class HuntMonsterActionPolicy {
                 targets: passes.flat(),
                 runtime: {
                     runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index))
+                }
+            };
+        }
+        if (mode === 'left-right-halves') {
+            const passes = this.leftRightHalfPasses(targetable, count, random);
+            return {
+                targets: passes.flat(),
+                runtime: {
+                    runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index)),
+                    runtimeImpactAllowEmptySequence: true
                 }
             };
         }

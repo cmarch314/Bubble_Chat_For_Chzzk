@@ -7,6 +7,7 @@ const read = relative => fs.readFileSync(path.resolve(__dirname, '..', relative)
 
 const animator = read('js/effects/hunt/HuntCombatAnimator.js');
 const monsterAttackAnimator = read('js/effects/hunt/HuntMonsterAttackAnimator.js');
+const monsterGeometryChoreography = read('js/effects/hunt/HuntMonsterGeometryChoreography.js');
 const renderer = read('js/effects/hunt/HuntRenderer.js');
 const engine = read('js/effects/hunt/HuntEngine.js');
 const effect = read('js/effects/HuntEffect.js');
@@ -29,7 +30,7 @@ assert.match(animator, /sourcePart[\s\S]*?--blast-scale-source-x[\s\S]*?--blast-
     'blast scales must launch from the live transformed monster body toward their ground slot');
 assert.match(css, /\.hunt-blast-scale-hazard\.is-placed:not\(\.has-landed\)[\s\S]*?!important/,
     'heated scales must finish their body-to-ground flight before warning pulses can replace it');
-assert.match(monsterAttackAnimator, /runtimeDiveTargetIndex[\s\S]*?--monster-carpet-dive-x[\s\S]*?--monster-carpet-dive-y/,
+assert.match(monsterGeometryChoreography, /runtimeDiveTargetIndex[\s\S]*?--monster-carpet-dive-x[\s\S]*?--monster-carpet-dive-y/,
     'Bazelgeuse must aim the diagonal crash animation at its independently selected dive target');
 assert.match(css, /76%\s*\{\s*transform:translate\(var\(--monster-carpet-dive-x\),var\(--monster-carpet-dive-y\)\)/,
     'the carpet-bomb crash frame must visually contact the same hunter used by damage resolution');
@@ -43,7 +44,7 @@ assert.match(css, /\.hunt-blast-scale-hazard\.is-placed:not\(\.has-landed\)[\s\S
     'falling scales must remain large and readable long enough to see their body-to-ground route');
 assert.match(monsterAttackAnimator, /Math\.round\(28 \+ normalized \* 38\)/,
     'carpet-bomb drops must be distributed across the long visible traversal instead of one fast burst');
-assert.match(monsterAttackAnimator, /--monster-carpet-flight-y[\s\S]*?Math\.max\(-160,/,
+assert.match(monsterGeometryChoreography, /--monster-carpet-flight-y[\s\S]*?Math\.max\(-160,/,
     'high-altitude bombing must stay visible inside the 1080p combat canvas');
 assert.match(hunterTurns, /atomicFlightActive[\s\S]*?cancelInFlightScales/,
     'a flash interruption during the atomic flight sequence must cancel scales that have not landed');
