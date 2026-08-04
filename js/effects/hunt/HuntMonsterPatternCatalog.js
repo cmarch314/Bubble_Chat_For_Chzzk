@@ -156,12 +156,32 @@ class HuntMonsterPatternCatalog {
                 || pattern.evidence?.startsWith('world-variant-review:')
                 || pattern.runtimePolicy === 'reviewed-variant-kit');
             if (exactOverride) {
-                result[monsterId] = overrides[monsterId].map(pattern => pattern.tags?.includes('ultimate') || pattern.type === 'ultimate'
-                    ? { ...pattern, type: 'ultimate', damageRatio: 0.90, minTargets: 4, maxTargets: 4, weight: 0.55,
-                        cooldownTicks: Math.max(450, Number(pattern.cooldownTicks || 0)),
-                        windupTicks: Math.max(14, Number(pattern.windupTicks || 0)), recoveryTicks: Math.max(18, Number(pattern.recoveryTicks || 0)),
-                        tags: [...new Set([...(pattern.tags || []), 'ultimate', 'all-target'])] }
-                    : { ...pattern });
+                const patterns = [];
+                for (const pattern of overrides[monsterId]) {
+                    const isUltimate = pattern.tags?.includes('ultimate') || pattern.type === 'ultimate';
+                    const basePattern = isUltimate
+                        ? { ...pattern, type: 'ultimate', damageRatio: 0.90, minTargets: 4, maxTargets: 4, weight: 0.55,
+                            cooldownTicks: Math.max(450, Number(pattern.cooldownTicks || 0)),
+                            windupTicks: Math.max(14, Number(pattern.windupTicks || 0)), recoveryTicks: Math.max(18, Number(pattern.recoveryTicks || 0)),
+                            tags: [...new Set([...(pattern.tags || []), 'ultimate', 'all-target'])] }
+                        : { ...pattern };
+                    patterns.push(basePattern);
+                    if (pattern.followUp) {
+                        const followUpId = pattern.followUp.id || (pattern.id.split('.')[0] + '.' + pattern.followUp.idSuffix);
+                        patterns.push({
+                            id: followUpId,
+                            name: pattern.followUp.name || followUpId,
+                            type: pattern.followUp.type || 'charge',
+                            damageRatio: pattern.followUp.damageRatio || 0.46,
+                            windupTicks: pattern.followUp.windupTicks?.normal || 12,
+                            activeTicks: pattern.followUp.activeTicks || 2,
+                            recoveryTicks: pattern.followUp.recoveryTicks || 1,
+                            tags: pattern.followUp.tags || ['charge', 'burrow', 'burrow-emerge'],
+                            impactTimeline: pattern.followUp.impactTimeline || [{ atTicks: pattern.followUp.windupTicks?.normal || 12 }]
+                        });
+                    }
+                }
+                result[monsterId] = patterns;
                 return;
             }
             const releaseRecord = releaseRecords.get(monsterId) || null;

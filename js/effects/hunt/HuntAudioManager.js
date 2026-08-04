@@ -795,13 +795,22 @@ class HuntAudioManager {
         return null;
     }
 
+    playPatternAudioRoute(route) {
+        if (!route || !Array.isArray(route.layers) || !route.layers.length) return false;
+        if ((route.mode === 'random' || route.random === true) && route.layers.length > 1) {
+            const picked = route.layers[Math.floor(Math.random() * route.layers.length)];
+            return this.playVerifiedLayers({ ...route, layers: [picked] });
+        }
+        return this.playVerifiedLayers(route);
+    }
+
     playMonsterAction(monster, kind = 'attack', options = {}) {
         const actionKind = this.normalizedMonsterAudioKind(kind);
         const monsterId = monster && monster.id ? monster.id : monster;
         const overrideSlot = HuntAudioManager.resolveOverrideSlot(kind, options);
         if (options.patternId && overrideSlot) {
             const route = this.patternAudioRoute(monsterId, options.patternId, overrideSlot);
-            if (route) return this.playVerifiedLayers(route);
+            if (route) return this.playPatternAudioRoute(route);
             if (options.overrideOnly) return false;
         }
         const normalizedMonsterId = String(monsterId || '').toLowerCase().replace(/[-']/g, '_');

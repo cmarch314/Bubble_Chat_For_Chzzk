@@ -324,7 +324,21 @@
           ]
         }
       }
+    },
+    "diablos": {
+      "diablos.bite": {
+        "start": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_129_478667416.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      }
     }
   },
-  "updatedAt": "2026-08-04T15:45:23.404Z"
+  "updatedAt": "2026-08-04T16:34:41.890Z"
 }

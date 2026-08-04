@@ -326,6 +326,20 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         ]
       }
     }
+  },
+  "diablos": {
+    "diablos.bite": {
+      "start": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_129_478667416.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    }
   }
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = HUNT_MONSTER_PATTERN_AUDIO_ROUTES;
