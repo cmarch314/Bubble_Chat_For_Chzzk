@@ -109,3 +109,15 @@ Report any required check that fails or is skipped.
 Update this file when an owner/lifecycle/command/directory boundary changes, a failure class repeats, or an expensive discovery would be lost.
 
 Each rule names trigger, owner/action, and verification. Merge near related rules, revise stale text, keep under 16 KiB UTF-8 without BOM with unique headings, and prefer tests over prose.
+
+## 12. Concurrent Agent Coordination
+
+Codex, Claude, and Antigravity share this working directory. Assume another agent may edit files, commit, push, or run servers at any moment.
+
+- Isolation first: one agent works on one branch, ideally its own `git worktree`. Never share a live working branch, and never commit onto a branch another agent is actively editing.
+- Never absorb foreign work: before committing, read `git status` and stage only the files you changed for this task, by explicit path. Never `git add -A`, `git add -u`, or `git commit -a`. Never commit another agent's uncommitted changes, generated churn (`js/audio-levels.generated.js`, `js/audio-gains.runtime.js`), build artifacts (`__pycache__/`, `*.pyc`), or `scratch/`.
+- Honest scoped commits: one logical change per commit; the message states only what actually changed and was verified. Never claim work that is empty, unverified, or another agent's.
+- Integrate, don't clobber: pull/rebase onto the shared branch before pushing; if a file changed under you, re-read and merge rather than overwrite. Resolve conflicts; never force-push a shared branch.
+- Regenerate, don't hand-merge: `*.generated.js` and route/label JSON come from their scripts (`generate:*`, `apply:*`). Regenerate deterministically after data changes; never hand-edit or manually merge generated output.
+- Runtime resources: dev and review servers must pass an agent-specific `--port`; never assume the default port is free, and never kill a process you did not start.
+- Signal ownership: make the files or feature you are actively editing discoverable (descriptive branch name or short claims note) and check for other agents' claims before touching shared hot files (`AGENTS.md`, `HuntAudioManager.js`, `HuntMonsterTurnExecutor.js`, catalogs).

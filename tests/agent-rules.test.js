@@ -19,7 +19,8 @@ const required = [
     '## 7. Monster Hunter Audio Evidence',
     '## 8. Legacy SFX Replacement Policy',
     '## 10. Verification Ladder',
-    '## 11. Self-Maintaining Rules'
+    '## 11. Self-Maintaining Rules',
+    '## 12. Concurrent Agent Coordination'
 ];
 for (const heading of required) assert(text.includes(heading), `Missing section: ${heading}`);
 
@@ -29,5 +30,7 @@ assert(text.includes('Duration is never semantic evidence.'), 'Duration evidence
 assert(text.includes('increase viewer chat participation'), 'Participation north star is missing');
 assert(text.includes('minimize streamer intervention'), 'Streamer-autonomy north star is missing');
 assert(text.includes('Protect all `AI CMC/` media'), 'CMC protection policy is missing');
+assert(/Never `git add -A`|Never absorb foreign work/.test(text), 'Concurrent-agent commit-hygiene rule is missing');
+assert(text.includes('agent-specific `--port`'), 'Concurrent-agent port-isolation rule is missing');
 
 console.log('Agent rules contract tests passed.');
