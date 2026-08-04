@@ -1574,8 +1574,8 @@
 .monster-motion-rathian-somersault { animation:monster-motion-rathian-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-somersault-double { animation:monster-motion-rathian-somersault-double var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-bite-somersault { animation:monster-motion-rathian-bite-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
-.monster-motion-rathian-somersault-glide { animation:monster-motion-rathian-somersault-glide var(--monster-motion-duration) cubic-bezier(.16,.74,.15,1) both !important; transform-origin:58% 62%; }
-.monster-motion-rathian-glide { animation:monster-motion-rathian-glide var(--monster-motion-duration) cubic-bezier(.16,.72,.18,1) both !important; }
+.monster-motion-rathian-somersault-glide { animation:monster-motion-rathian-somersault-glide var(--monster-motion-duration) cubic-bezier(.33,0,.2,1) both !important; transform-origin:58% 62%; }
+.monster-motion-rathian-glide { animation:monster-motion-rathian-glide var(--monster-motion-duration) cubic-bezier(.33,0,.2,1) both !important; }
 .monster-motion-rath-flight-stagger { animation:monster-motion-rath-flight-stagger var(--monster-motion-duration) ease-in-out both !important; }
 .monster-motion-rath-flight-wobble { animation:monster-motion-rath-flight-wobble var(--monster-motion-duration) ease-in-out both !important; }
 .monster-motion-bazel-carpet-bombing {
@@ -2162,9 +2162,12 @@
     22%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 40px)) rotate(calc(90deg*var(--monster-facing-flip,1))) scale(1.28);filter:brightness(1.38);opacity:1}
     30%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 140px)) rotate(calc(315deg*var(--monster-facing-flip,1))) scale(1.0);opacity:1}
     40%{transform:translate(calc(var(--monster-glide-x)*.16),-225px) rotate(calc(360deg*var(--monster-facing-flip,1))) scale(.76);opacity:1}
-    52%{transform:translate(calc(var(--monster-glide-x)*.34 + 105px*var(--monster-facing-flip,1)),calc(var(--monster-glide-y)*.18 - 145px)) rotate(calc(360deg*var(--monster-facing-flip,1))) scale(.84);opacity:1}
-    63%{transform:translate(calc(var(--monster-glide-x)*.70 - 80px*var(--monster-facing-flip,1)),calc(var(--monster-glide-y)*.58 - 55px)) rotate(calc(360deg*var(--monster-facing-flip,1))) scale(1.02);opacity:1}
-    72%{transform:translate(var(--monster-glide-x),var(--monster-glide-y)) rotate(calc(360deg*var(--monster-facing-flip,1))) scale(1.23);filter:brightness(1.28);opacity:1}
+    46%{transform:translate(calc(var(--monster-glide-x)*.25 + 52px*var(--monster-facing-flip,1)),calc(var(--monster-glide-y)*.08 - 185px)) rotate(calc(360deg*var(--monster-facing-flip,1) + 4deg)) scale(.80);opacity:1}
+    52%{transform:translate(calc(var(--monster-glide-x)*.34 + 105px*var(--monster-facing-flip,1)),calc(var(--monster-glide-y)*.18 - 145px)) rotate(calc(360deg*var(--monster-facing-flip,1) + 9deg)) scale(.84);opacity:1}
+    58%{transform:translate(calc(var(--monster-glide-x)*.52 + 35px*var(--monster-facing-flip,1)),calc(var(--monster-glide-y)*.38 - 100px)) rotate(calc(360deg*var(--monster-facing-flip,1) + 1deg)) scale(.93);opacity:1}
+    63%{transform:translate(calc(var(--monster-glide-x)*.70 - 80px*var(--monster-facing-flip,1)),calc(var(--monster-glide-y)*.58 - 55px)) rotate(calc(360deg*var(--monster-facing-flip,1) - 8deg)) scale(1.02);opacity:1}
+    67%{transform:translate(calc(var(--monster-glide-x)*.86 - 30px*var(--monster-facing-flip,1)),calc(var(--monster-glide-y)*.80 - 22px)) rotate(calc(360deg*var(--monster-facing-flip,1) - 2deg)) scale(1.13);opacity:1}
+    72%{transform:translate(var(--monster-glide-x),var(--monster-glide-y)) rotate(calc(360deg*var(--monster-facing-flip,1) + 3deg)) scale(1.23);filter:brightness(1.28);opacity:1}
     83%{transform:translate(calc(var(--monster-glide-x)*1.22),calc(var(--monster-glide-y) + 520px)) rotate(calc(360deg*var(--monster-facing-flip,1))) scale(1.42);opacity:1}
     84%{opacity:0}
     92%{transform:translate(0,-190px) rotate(calc(360deg*var(--monster-facing-flip,1))) scale(.78);opacity:0}
@@ -2173,9 +2176,12 @@
 }
 @keyframes monster-motion-rathian-glide {
     0%,100%{transform:none;opacity:1}
-    12%{transform:translate(calc(var(--monster-attack-x)*-.16),-155px) rotate(calc(-7deg*var(--monster-facing-flip,1))) scale(.78);opacity:1}
-    31%{transform:translate(calc(var(--monster-attack-x)*.28 + 115px*var(--monster-facing-flip,1)),calc(var(--monster-attack-y)*.14 - 115px)) rotate(calc(8deg*var(--monster-facing-flip,1))) scale(.88);opacity:1}
-    51%{transform:translate(calc(var(--monster-attack-x)*.66 - 85px*var(--monster-facing-flip,1)),calc(var(--monster-attack-y)*.54 - 48px)) rotate(calc(-7deg*var(--monster-facing-flip,1))) scale(1.02);opacity:1}
+    12%{transform:translate(calc(var(--monster-attack-x)*-.16),-155px) rotate(calc(-8deg*var(--monster-facing-flip,1))) scale(.78);opacity:1}
+    21%{transform:translate(calc(var(--monster-attack-x)*.06 + 55px*var(--monster-facing-flip,1)),calc(var(--monster-attack-y)*.06 - 138px)) rotate(calc(4deg*var(--monster-facing-flip,1))) scale(.83);opacity:1}
+    31%{transform:translate(calc(var(--monster-attack-x)*.28 + 115px*var(--monster-facing-flip,1)),calc(var(--monster-attack-y)*.14 - 115px)) rotate(calc(11deg*var(--monster-facing-flip,1))) scale(.88);opacity:1}
+    41%{transform:translate(calc(var(--monster-attack-x)*.48 + 40px*var(--monster-facing-flip,1)),calc(var(--monster-attack-y)*.32 - 82px)) rotate(calc(2deg*var(--monster-facing-flip,1))) scale(.95);opacity:1}
+    51%{transform:translate(calc(var(--monster-attack-x)*.66 - 85px*var(--monster-facing-flip,1)),calc(var(--monster-attack-y)*.54 - 48px)) rotate(calc(-10deg*var(--monster-facing-flip,1))) scale(1.02);opacity:1}
+    60%{transform:translate(calc(var(--monster-attack-x)*.84 - 35px*var(--monster-facing-flip,1)),calc(var(--monster-attack-y)*.78 - 20px)) rotate(calc(-3deg*var(--monster-facing-flip,1))) scale(1.14);opacity:1}
     68%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(calc(4deg*var(--monster-facing-flip,1))) scale(1.25);filter:brightness(1.3);opacity:1}
     82%{transform:translate(calc(var(--monster-attack-x)*1.24),calc(var(--monster-attack-y) + 520px)) rotate(calc(-3deg*var(--monster-facing-flip,1))) scale(1.43);opacity:1}
     83%{opacity:0}

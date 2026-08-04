@@ -7002,20 +7002,6 @@
       "reuseScope": "cross-title-semantic"
     },
     {
-      "monster": "em001",
-      "bank": "em001_vo",
-      "eventId": 3966043439,
-      "sourceId": 780966539,
-      "reference": true,
-      "tags": [
-        "small_flinch_vocal"
-      ],
-      "verdict": "확정",
-      "reviewMethod": "event-group-audition",
-      "sourceLayer": "voice",
-      "reuseScope": "monster-identity"
-    },
-    {
       "monster": "diablos",
       "bank": "em007_vo",
       "eventId": 196629893,
@@ -7168,6 +7154,104 @@
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
       "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "rathian",
+      "bank": "em001_vo",
+      "eventId": 4009315735,
+      "sourceId": 242754270,
+      "reference": true,
+      "tags": [
+        "death_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "rathian",
+      "bank": "em001_vo",
+      "eventId": 3117459821,
+      "sourceId": 1071935854,
+      "reference": true,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "rathian",
+      "bank": "em001_vo",
+      "eventId": 3117459821,
+      "sourceId": 514424814,
+      "reference": false,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "rathian",
+      "bank": "em001_vo",
+      "eventId": 3117459821,
+      "sourceId": 994303284,
+      "reference": false,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "rathian",
+      "bank": "em001_vo",
+      "eventId": 3117459821,
+      "sourceId": 475957448,
+      "reference": false,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "rathian",
+      "bank": "em001_vo",
+      "eventId": 1902115382,
+      "sourceId": 914539034,
+      "reference": true,
+      "tags": [
+        "trapped_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "rathian",
+      "bank": "em001_vo",
+      "eventId": 1902115382,
+      "sourceId": 706235384,
+      "reference": false,
+      "tags": [
+        "trapped_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
     }
   ],
   "tagAliases": {
@@ -7188,7 +7272,7 @@
     "돌진 스탭": "charge_stride_step",
     "바위 발사": "projectile_launch"
   },
-  "updatedAt": "2026-08-04T16:52:17.036Z",
+  "updatedAt": "2026-08-04T17:39:52.745Z",
   "normalizedAt": "2026-08-03T19:00:19.388Z",
   "reusePolicy": {
     "voice": "monster-identity-only",

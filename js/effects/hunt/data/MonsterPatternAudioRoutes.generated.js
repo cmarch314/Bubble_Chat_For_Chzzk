@@ -19,7 +19,7 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_084_660561336.mp3",
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_098_780966539.mp3",
             0.7,
             0
           ]
@@ -28,21 +28,31 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
     },
     "rathian.fireball": {
       "telegraph": {
-        "label": "화염구 · 전조 (모으기) (auditioned:breath_charge)",
+        "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_117_897645699.mp3",
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_115_885867486.mp3",
             0.7,
             0
           ]
         ]
       },
-      "recovery": {
-        "label": "화염구 · 후딜 (잔염) (auditioned:ground_fire)",
+      "launch": {
+        "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_012_44522100.mp3",
-            0.6,
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_155_561006149.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "impact": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_201_777151545.mp3",
+            0.7,
             0
           ]
         ]
@@ -59,16 +69,6 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
           ]
         ]
       },
-      "recovery": {
-        "label": "삼연 화염구 · 후딜 (잔염) (auditioned:ground_fire)",
-        "layers": [
-          [
-            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_012_44522100.mp3",
-            0.6,
-            0
-          ]
-        ]
-      },
       "impact-3": {
         "label": null,
         "layers": [
@@ -78,15 +78,35 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
             0
           ]
         ]
+      },
+      "impact": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_154_558621121.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "launch": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_031_105153997.mp3",
+            0.7,
+            0
+          ]
+        ]
       }
     },
     "rathian.bite_somersault": {
       "start": {
-        "label": "공중 물어뜯기 연계 · 휘두르기 (auditioned:bite_vocal)",
+        "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_124_948696462.mp3",
-            0.72,
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_009_37311349.mp3",
+            0.7,
             0
           ]
         ]
@@ -98,6 +118,36 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         "layers": [
           [
             "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_119_911567613.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "start": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_019_109294670.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "impact-1": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_034_119408387.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "impact-2": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_108_363270520.mp3",
             0.7,
             0
           ]
@@ -134,6 +184,146 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         "layers": [
           [
             "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_135_1041874523.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_114_379835581.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "recovery": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_067_482209788.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.somersault": {
+      "impact:somersault": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_202_791090498.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "start": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_027_137441638.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.fireball_fizzle": {
+      "impact": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_207_802179336.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "start": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_252_961479846.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.triple_charge": {
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_084_660561336.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "travel": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_105_829711342.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "recovery": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_105_829711342.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.double_somersault": {
+      "start": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_027_137441638.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "impact:somersault": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_047_287664299.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.somersault_glide": {
+      "impact:somersault": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_016_96329089.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "start": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_073_525727720.mp3",
             0.7,
             0
           ]
