@@ -660,6 +660,134 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         ]
       }
     }
+  },
+  "tigrex": {
+    "tigrex.foreleg_slam": {
+      "impact": {
+        "label": "앞발 내려찍기 · 타격 (auditioned:physical_impact)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
+            0.85,
+            0
+          ]
+        ]
+      }
+    },
+    "tigrex.bite": {
+      "start": {
+        "label": "깨물기 · 시작 (스윙) (auditioned:bite_vocal)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_079_616198421.mp3",
+            0.72,
+            0
+          ]
+        ]
+      },
+      "impact": {
+        "label": "깨물기 · 타격 (auditioned:physical_impact)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
+            0.85,
+            0
+          ]
+        ]
+      }
+    },
+    "tigrex.double_bite": {
+      "start": {
+        "label": "연속 깨물기 · 시작 (스윙) (auditioned:bite_vocal)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_079_616198421.mp3",
+            0.72,
+            0
+          ]
+        ]
+      },
+      "impact-1": {
+        "label": "연속 깨물기 · 타격 1 (auditioned:physical_impact)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
+            0.85,
+            0
+          ]
+        ]
+      }
+    },
+    "tigrex.charge_rock": {
+      "impact": {
+        "label": "연속 돌진 · 돌진 피격 (auditioned:physical_impact)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
+            0.85,
+            0
+          ]
+        ]
+      }
+    },
+    "tigrex.charge_spin": {
+      "impact": {
+        "label": "연속 돌진 · 돌진 피격 (auditioned:physical_impact)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
+            0.85,
+            0
+          ]
+        ]
+      }
+    },
+    "tigrex.charge_bite": {
+      "start": {
+        "label": "연속 돌진 · 돌진 개시 (auditioned:bite_vocal)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_vo_nbnk_079_616198421.mp3",
+            0.72,
+            0
+          ]
+        ]
+      },
+      "impact": {
+        "label": "연속 돌진 · 돌진 피격 (auditioned:physical_impact)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
+            0.85,
+            0
+          ]
+        ]
+      }
+    },
+    "tigrex.spin": {
+      "impact": {
+        "label": "전신 회전 · 타격 (auditioned:physical_impact)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
+            0.85,
+            0
+          ]
+        ]
+      }
+    },
+    "tigrex.leap": {
+      "impact": {
+        "label": "도약 덮치기 · 돌진 피격 (auditioned:physical_impact)",
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_082_235320834.mp3",
+            0.85,
+            0
+          ]
+        ]
+      }
+    }
   }
 };
 if (typeof module !== 'undefined' && module.exports) module.exports = HUNT_MONSTER_PATTERN_AUDIO_ROUTES;
