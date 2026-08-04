@@ -1,37 +1,37 @@
-# 📜 BubbleChat 개발 가이드라인 및 영구 방지 규칙 (Development Rules)
+# 📜 BubbleChat Development Guidelines and Permanent-Prevention Rules
 
-이 문서는 BubbleChat 오버레이 개발 및 리팩토링 시 기능의 퇴보(Regression)를 막고 스트리머와 시청자의 사용 경험을 저해하는 요소를 영구적으로 배제하기 위한 규칙을 정의합니다.
-
----
-
-## 1. 전투 중단 및 디버그 메시지 출력 제한 (CRITICAL)
-- **현상**: 게임 전투 로그나 디버그 로그가 채팅 말풍선으로 송출되어 스트리머 화면을 가리거나 채팅창을 어지럽힙니다.
-- **방지 규칙**:
-  - `HuntEffect.js` 또는 기타 게임 클래스 내에서 실시간 전투 로그를 `this.director.eventBus.emit('chat:render', ...)` 이벤트를 통해 채팅창으로 보내면 절대 안 됩니다.
-  - 로그는 오직 브라우저 개발자 도구 콘솔(`console.log`)로만 출력해야 합니다.
-  - 리팩토링이나 컴팩션 복구 시에 이 이벤트 발송 코드가 부활해서는 안 됩니다.
-
-## 2. 피격 효과음(SFX) 제어 (CRITICAL)
-- **현상**: 헌터가 몬스터의 공격에 피격당할 때 자극적이거나 시끄러운 신음소리, 또는 귀에 거슬리는 타격음/TTS 사운드가 재생되는 문제가 있었습니다.
-- **방지 규칙**:
-  - 헌터 피격 시(`HuntEngine.js`에서 가드되지 않은 일반 피격 부분) `this.playSFX('mh_hit.mp3', ...)` 같은 불필요한 사운드 함수를 호출하지 않고 **무음**으로 처리해야 합니다.
-  - 피격 시의 시각 효과(화면 흔들림, 빨간색 피격 애니메이션 등)로 충분히 타격감이 전달되므로 피격 시의 사운드는 제거합니다.
+This document defines rules that prevent regressions during BubbleChat overlay development and refactoring, and permanently exclude anything that degrades the streamer's or viewers' experience.
 
 ---
 
-## 3. 사운드 규칙 (기존 audio_guidelines.md 내용 준수)
-- 자극적이거나 야시시한 소리(신음소리 등)의 보이스 사운드는 영구히 배제하고, 건전한 기합 소리나 무기 고유의 메탈릭 사운드만 사용합니다.
+## 1. Restrict combat/debug message output (CRITICAL)
+- **Symptom**: In-game combat logs or debug logs were emitted as chat bubbles, covering the streamer's screen or cluttering the chat panel.
+- **Prevention**:
+  - Never send real-time combat logs to the chat panel from `HuntEffect.js` or any game class via the `this.director.eventBus.emit('chat:render', ...)` event.
+  - Logs must go only to the browser DevTools console (`console.log`).
+  - This emit code must never come back during refactoring or compaction recovery.
+
+## 2. Hit sound effect (SFX) control (CRITICAL)
+- **Symptom**: When a hunter was hit by a monster, a lewd or noisy moan, or a jarring hit/TTS sound, would play.
+- **Prevention**:
+  - On a hunter hit (the ungarded ordinary-hit path in `HuntEngine.js`), do not call unnecessary sound functions such as `this.playSFX('mh_hit.mp3', ...)`; leave it **silent**.
+  - The visual feedback (screen shake, red hit animation, etc.) conveys the impact well enough, so hit sounds are removed.
 
 ---
 
-## 4. 반응형 비디오 명령어(CMC) 관리 규칙
-- `AI CMC` 폴더에 새로운 비디오 클립(.mp4)을 추가하거나 삭제할 경우, **반드시 `config.js`의 `window.HIVE_CMC_FILES` 배열에 파일명(확장자 제외)을 추가/삭제해야 합니다.**
-- 개별 JS 파일(예: `ChatRenderer.js`, `SoundQuizEffect.js`, `CommandsScrollEffect.js` 등)에 하드코딩된 비디오 파일명 배열을 선언하지 마십시오. 항상 `window.HIVE_CMC_FILES`를 사용하여 동적으로 가져와야 합니다.
-- 이 규칙을 통해 시청자의 `@` 반응형 비디오 재생, 사운드/비디오 퀴즈 및 `!커맨드` 리스트 스크롤 기능의 키워드가 일괄적이고 동기화된 상태로 자동 유지 관리됩니다.
+## 3. Sound rules (follow the former audio_guidelines.md)
+- Permanently exclude provocative or suggestive voice sounds (moaning, etc.); use only wholesome effort shouts or weapon-native metallic sounds.
 
 ---
 
-## 5. 다중 에이전트 동시 작업 충돌 방지
-- Codex·Claude·Antigravity가 한 폴더를 공유하므로, 다른 에이전트가 언제든 편집·커밋·서버 실행 중일 수 있다고 가정합니다.
-- **상세 규칙은 `AGENTS.md` §12 (Concurrent Agent Coordination)가 권위이며, 이 문서는 포인터입니다.**
-- 요지: 에이전트별 브랜치/worktree 격리, `git add -A`/`-u`/`commit -a` 금지(내가 바꾼 파일만 명시 스테이징), 타 에이전트 미완 작업·생성물 churn(`js/audio-levels.generated.js` 등)·`__pycache__`/`*.pyc`·`scratch/` 커밋 금지, 생성물은 스크립트로 재생성, 서버는 에이전트별 `--port`, 미기동 프로세스 종료 금지, force-push 금지.
+## 4. Reactive video command (CMC) management rules
+- When adding or deleting a video clip (.mp4) in the `AI CMC` folder, **you must add/remove the file name (without extension) in the `window.HIVE_CMC_FILES` array in `config.js`.**
+- Do not declare hardcoded video-filename arrays in individual JS files (e.g. `ChatRenderer.js`, `SoundQuizEffect.js`, `CommandsScrollEffect.js`). Always read them dynamically from `window.HIVE_CMC_FILES`.
+- This keeps the keywords for the viewer's `@` reactive-video playback, the sound/video quiz, and the `!커맨드` list-scroll feature uniformly synchronized and auto-maintained.
+
+---
+
+## 5. Concurrent multi-agent conflict prevention
+- Codex, Claude, and Antigravity share this working directory, so assume another agent may be editing, committing, or running a server at any moment.
+- **The authoritative rules are in `AGENTS.md` §12 (Concurrent Agent Coordination); this document is only a pointer.**
+- In short: isolate per agent by branch/worktree; never `git add -A`/`-u`/`commit -a` (stage only the files you changed, by explicit path); never commit another agent's unfinished work, generated churn (e.g. `js/audio-levels.generated.js`), `__pycache__`/`*.pyc`, or `scratch/`; regenerate generated files with their scripts; give servers an agent-specific `--port`; never kill a process you did not start; never force-push.

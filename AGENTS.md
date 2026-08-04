@@ -2,7 +2,7 @@
 
 ## 1. Product North Star
 
-BubbleChat is an OBS entertainment overlay. Its highest purpose is to increase viewer chat participation, make the stream fun to watch, and minimize streamer intervention so the streamer can “거저먹는 방송”에 가까워질 수 있게 하는 것이다.
+BubbleChat is an OBS entertainment overlay. Its highest purpose is to increase viewer chat participation, make the stream fun to watch, and minimize streamer intervention so the streamer can approach a “거저먹는 방송” (a stream that practically runs itself).
 
 Evaluate work in this order:
 

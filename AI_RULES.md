@@ -1,222 +1,218 @@
-# 🤖 AI 작업 규칙 (BubbleChat)
+# 🤖 AI Working Rules (BubbleChat)
 
-> **이 파일은 AI 에이전트가 작업 시 반드시 따라야 하는 규칙입니다.**
-> 세션 시작 시 이 파일과 `audio_guidelines.md`를 가장 먼저 읽으세요.
+> **This file defines rules every AI agent must follow while working.**
+> At the start of a session, read this file and `audio_guidelines.md` first.
 
-> ⚠️ **다중 에이전트 동시 작업 (Codex·Claude·Antigravity가 한 폴더 공유):**
-> 커밋·브랜치·포트 충돌 방지 규칙은 **`AGENTS.md` §12 (Concurrent Agent Coordination)가 권위**입니다.
-> 핵심: `git add -A`/`-u`/`commit -a` 금지 — 내가 바꾼 파일만 명시 스테이징(타 에이전트 미완·생성물 churn·`.pyc`·`scratch/` 흡수 금지), 서버는 에이전트별 `--port`, 미기동 프로세스 종료 금지.
+> ⚠️ **Concurrent multi-agent work (Codex, Claude, and Antigravity share one folder):**
+> The authoritative rules for preventing commit/branch/port conflicts are in **`AGENTS.md` §12 (Concurrent Agent Coordination)**.
+> Key points: never `git add -A`/`-u`/`commit -a` — stage only the files you changed, by explicit path (do not absorb another agent's unfinished work, generated churn, `.pyc`, or `scratch/`); give servers an agent-specific `--port`; never kill a process you did not start.
 
 ---
 
-## 🚨 CRITICAL: 작업 전 체크리스트
+## 🚨 CRITICAL: pre-work checklist
 
-세션 시작 시 반드시 아래를 실행하세요:
+At the start of a session, always run:
 
 ```powershell
-# 1. 최근 커밋 확인
+# 1. Check recent commits
 git log --oneline -5
 
-# 2. 미커밋 변경사항 확인 (가장 중요)
+# 2. Check uncommitted changes (most important)
 git status
 
-# 3. 변경 내용 파악
+# 3. Understand the changes
 git diff --stat HEAD
 ```
 
-**미커밋 변경사항이 있으면 반드시 내용을 확인하고 커밋 여부를 결정한 뒤 작업을 시작하세요.**
+**If there are uncommitted changes, always inspect them and decide whether to commit before you begin work.**
 
 ---
 
-## 📌 1. Git 커밋 규칙 (절대 원칙)
+## 📌 1. Git commit rules (absolute principles)
 
-### 1-1. 기능 단위로 즉시 커밋
-- **기능 하나 완성 = 즉시 커밋.** 예외 없음.
-- 커밋 없이 다음 기능 작업 시작 금지.
-- 세션 종료 전 반드시 `git status` 확인.
+### 1-1. Commit each feature immediately
+- **One feature complete = commit immediately.** No exceptions.
+- Do not start the next feature without committing.
+- Always check `git status` before ending a session.
 
-### 1-2. 커밋 타이밍 기준
-| 상황 | 커밋 |
+### 1-2. Commit-timing criteria
+| Situation | Commit |
 |------|------|
-| 기능 하나 구현 완료 | ✅ 즉시 |
-| 버그 수정 완료 | ✅ 즉시 |
-| 대형 파일 일부 수정 완료 | ✅ 즉시 |
-| 스크래치 파일만 변경 | ⬜ 생략 가능 |
+| One feature implemented | ✅ Immediately |
+| Bug fix complete | ✅ Immediately |
+| Part of a large file modified and complete | ✅ Immediately |
+| Only scratch files changed | ⬜ May skip |
 
-### 1-3. 커밋 메시지 형식
+### 1-3. Commit message format
 ```
-feat: [기능명] 설명
-fix: [버그명] 설명
-refact: [대상] 설명
-chore: 설정/파일 정리
+feat: [feature] description
+fix: [bug] description
+refact: [target] description
+chore: config/file cleanup
 ```
 
 ---
 
-## 📌 2. 파일 편집 규칙
+## 📌 2. File-editing rules
 
-### 2-1. 문법 검증 필수
-- JS 파일 편집 후 **반드시 `node -c [파일명]`** 실행.
-- 오류 있으면 커밋 금지. 수정 후 재확인.
+### 2-1. Syntax check required
+- After editing a JS file, **always run `node -c [file]`**.
+- If there is an error, do not commit. Fix and re-check.
 
-### 2-2. 대형 파일 (HuntEffect.js 등 1000줄 이상) 특별 규칙
-- **전체 덮어쓰기(Overwrite) 절대 금지.**
-- `replace_file_content` / `multi_replace_file_content` 도구로 부분 편집만 허용.
-- 한 번에 500줄 이상 변경 금지. 논리 단위로 쪼개서 진행.
-- 편집 후 **반드시 해당 라인 전후를 `view_file`로 확인**.
+### 2-2. Special rules for large files (`HuntEffect.js`, etc., 1000+ lines)
+- **Never overwrite the whole file.**
+- Only partial edits via `replace_file_content` / `multi_replace_file_content`.
+- Do not change 500+ lines at once. Split into logical units.
+- After editing, **always verify the lines around the change with `view_file`**.
 
-### 2-3. 한글/인코딩 주의
-- PowerShell로 파일 직접 쓸 때 한글이 깨질 수 있음.
-- 파일 쓰기 시: `[System.IO.File]::WriteAllText(path, content, [System.Text.Encoding]::UTF8)`
-- 라인 기반 편집 시: `[System.IO.File]::ReadAllLines` + 인덱스로 교체.
+### 2-3. Korean / encoding caution
+- Korean can be corrupted when writing files directly from PowerShell.
+- When writing files: `[System.IO.File]::WriteAllText(path, content, [System.Text.Encoding]::UTF8)`.
+- For line-based edits: `[System.IO.File]::ReadAllLines` + replace by index.
 
 ---
 
-## 📌 3. 절대 하지 말 것
+## 📌 3. Absolutely do not
 
-| 금지 행동 | 이유 |
+| Forbidden action | Reason |
 |----------|------|
-| 기능 구현 후 커밋 없이 다음 작업 | 세션 단절 시 소실 |
-| 파일 전체 덮어쓰기로 대규모 수정 | 기존 기능 삭제 위험 |
-| 기존 동작 코드 삭제하면서 미커밋 | 복구 불가 |
-| `git checkout HEAD -- [파일]` 주의 | 작업 중인 내용 초기화됨 |
-| 세션 종료 전 `git status` 미확인 | 미커밋 소실 |
-| `RacingEffect.js`, `RaidEffect.js` 등 건드리기 | 반드시 diff 확인 먼저 |
+| Starting the next task without committing a finished feature | Lost if the session breaks |
+| Large edits by overwriting the whole file | Risk of deleting existing features |
+| Deleting working code while leaving it uncommitted | Unrecoverable |
+| Careless `git checkout HEAD -- [file]` | Resets in-progress content |
+| Ending a session without checking `git status` | Uncommitted work is lost |
+| Touching `RacingEffect.js`, `RaidEffect.js`, etc. | Always diff-check first |
 
 ---
 
-## 📌 4. 콘텐츠/사운드 규칙
+## 📌 4. Content / sound rules
 
-`audio_guidelines.md` 참조. 요약:
-- 자극적/야릇한 소리 절대 사용 금지 (`Huk.mp3`, `ast5.mp3` 등)
-- 볼륨 최대 `0.7` 이하
-- 새 사운드는 `config.js`의 `HIVE_SOUND_CONFIG`에 등록 후 사용
-
----
-
-## 📌 5. 대규모 작업 진행 방법
-
-1. **스펙 파악** - `scratch/test_*.js` 파일, 대화 로그, 이 문서 확인
-2. **구현 계획 작성** - 무엇을 어떻게 바꿀지 먼저 정리
-3. **단계별 구현** - 기능 1개 → 검증 → 커밋 → 반복
-4. **최종 테스트** - `node scratch/test_*.js` 실행
+See `audio_guidelines.md`. Summary:
+- Never use provocative/suggestive sounds (`Huk.mp3`, `ast5.mp3`, etc.).
+- Keep volume at `0.7` or lower.
+- Register new sounds in `HIVE_SOUND_CONFIG` in `config.js` before use.
 
 ---
 
-## 📌 6. HuntEffect.js 전용 규칙
+## 📌 5. How to run large tasks
 
-- 2000줄 이상 대형 파일. **부분 편집만 허용.**
-- 작업 전 `node -c js/effects/HuntEffect.js` 로 현재 문법 상태 확인.
-- 템플릿 리터럴 내부 HTML 편집 시 PowerShell 라인 교체 방식 사용.
-- 전투 로직 변경 시 `scratch/test_*.js` 테스트 실행으로 검증.
+1. **Understand the spec** — check `scratch/test_*.js` files, conversation logs, and this document.
+2. **Write an implementation plan** — decide what to change and how, first.
+3. **Implement in steps** — one feature → verify → commit → repeat.
+4. **Final test** — run `node scratch/test_*.js`.
 
 ---
 
-## 📌 7. 작업 현황 추적
+## 📌 6. Rules specific to `HuntEffect.js`
 
-### 최신 커밋 현황 (2026-06-07)
-- `b09129a` - 사운드 키 추가, RacingData/MonsterData 스크립트 로드
-- `82bbdd1` - 성향 6종 확장, 대기화면 성향 배지, lifepowder AI, 퀴즈 UI 분리
-- `61a5a8f` - 채팅 사운드 정화 (마지막 안정 커밋)
+- Large file, 2000+ lines. **Partial edits only.**
+- Before working, check current syntax with `node -c js/effects/HuntEffect.js`.
+- When editing HTML inside template literals, use the PowerShell line-replacement method.
+- When changing combat logic, verify with the `scratch/test_*.js` tests.
 
-### 6월 6일 소실 후 복구 진행 중인 기능
-| 기능 | 상태 |
+---
+
+## 📌 7. Work-status tracking
+
+### Latest commit status (2026-06-07)
+- `b09129a` — added sound keys; load RacingData/MonsterData scripts
+- `82bbdd1` — expanded to 6 personalities, waiting-screen personality badge, lifepowder AI, quiz UI split
+- `61a5a8f` — chat-sound cleanup (last stable commit)
+
+### Features being recovered after the June 6 loss (Korean game-feature names kept)
+| Feature | Status |
 |------|------|
-| 성향 6종 (veteran/support/newbie) | ✅ 완료·커밋 |
-| 대기화면 성향 배지 색상 표시 | ✅ 완료·커밋 |
-| lifepowder 아이템 + veteran/support AI | ✅ 완료·커밋 |
-| newbie 실수 로직 | ✅ 완료·커밋 |
-| 차지액스 phial 8콤보 시스템 | ✅ 완료·커밋 |
-| 건랜스 용격포 + 오버히트 시스템 | ✅ 완료·커밋 |
-| 조충곤 진액 버프 시스템 | ✅ 완료·커밋 |
-| 쌍검 귀인화 (데미지1.2x, ATB+20%, 20초) | ✅ 완료·커밋 |
-| 조충곤 차액 시스템 | ✅ 완료·커밋 |
-| 태도 기인 시스템 (spirit level 3단계, 기인베기 배수, 예지베기) | ✅ 완료·커밋 |
-| 전투속도 1/2 감속 | ✅ 완료·커밋 |
-| 수렵 시작 로직 버그 수정 | ✅ 완료·커밋 |
+| 성향 6종 (veteran/support/newbie personalities) | ✅ Done, committed |
+| 대기화면 성향 배지 색상 표시 (waiting-screen personality badge colors) | ✅ Done, committed |
+| lifepowder item + veteran/support AI | ✅ Done, committed |
+| newbie mistake logic | ✅ Done, committed |
+| 차지액스 phial 8-combo system (Charge Blade) | ✅ Done, committed |
+| 건랜스 용격포 + overheat system (Gunlance) | ✅ Done, committed |
+| 조충곤 진액 buff system (Insect Glaive) | ✅ Done, committed |
+| 쌍검 귀인화 (Dual Blades demon mode: dmg 1.2x, ATB +20%, 20s) | ✅ Done, committed |
+| 조충곤 차액 system (Insect Glaive) | ✅ Done, committed |
+| 태도 기인 system (Long Sword spirit level 3 stages, spirit-slash multiplier, foresight slash) | ✅ Done, committed |
+| Combat-speed 1/2 slowdown | ✅ Done, committed |
+| Hunt start-logic bug fix | ✅ Done, committed |
 
-### ⚠️ 소실 사고 경위 (2026-06-06 ~ 2026-06-07)
-1. 6월 6일: AI(이 대화)가 HuntEffect.js를 수백 번 수정 → **커밋 없이 세션 종료**
-2. 6월 7일 새벽: 새 세션에서 AI가 파일을 다시 편집 → **미커밋 상태의 6월 6일 작업 전체 덮어씀**
-3. git reflog 확인 결과: 강제 롤백(reset --hard) 없음. 단순 파일 덮어쓰기로 소실.
+### ⚠️ How the loss happened (2026-06-06 ~ 2026-06-07)
+1. June 6: the AI (this conversation) edited `HuntEffect.js` hundreds of times → **ended the session without committing**.
+2. Early June 7: in a new session the AI edited the file again → **overwrote all of the uncommitted June 6 work**.
+3. `git reflog` showed no forced rollback (`reset --hard`); the loss was from a plain file overwrite.
 
-**→ 이 사고의 원인은 "커밋 없이 세션 종료"이며, 이를 방지하기 위해 이 규칙 문서가 작성됨.**
+**→ The root cause was "ending a session without committing," and this rules document was written to prevent it.**
 
-### 미구현 기능 스펙 참조 파일
-
-- `scratch/test_charge_blade_phials.js` - 차지액스 phial 시스템 스펙
-- `scratch/test_gunlance_overheat.js` - 건랜스 오버히트 스펙
-- `scratch/test_veteran_personality.js` - 베테랑 성향 AI 스펙
-- `scratch/test_support_personality.js` - 서포터 성향 AI 스펙
-- `scratch/test_dual_blades_demon.js` - 쌍검 귀인화 스펙
-
+### Spec reference files for unimplemented features
+- `scratch/test_charge_blade_phials.js` — Charge Blade phial system spec
+- `scratch/test_gunlance_overheat.js` — Gunlance overheat spec
+- `scratch/test_veteran_personality.js` — veteran personality AI spec
+- `scratch/test_support_personality.js` — support personality AI spec
+- `scratch/test_dual_blades_demon.js` — Dual Blades demon-mode spec
 
 ---
 
-## 📌 8. 무한 대기 예방 및 대응 규칙
+## 📌 8. Preventing and handling deadlocks
 
-### 8-1. 사용자 승인 필요성 안내 (가장 중요)
-- 터미널 명령어나 파일 쓰기 등 사용자 승인이 필요한 도구를 호출할 경우, **반드시 사용자에게 어떤 작업을 하려는지 한국어로 명확히 설명하고 승인을 요청하는 텍스트 메시지를 먼저 출력**하세요.
-- 도구를 호출한 뒤 텍스트 설명 없이 대기하면, 사용자는 작업이 끝났거나 멈춘 것으로 오해해 승인 버튼을 누르지 못하고, AI는 계속 대기 상태(Deadlock)에 빠지게 됩니다.
+### 8-1. Announce when user approval is needed (most important)
+- When calling a tool that needs user approval (running a terminal command, writing a file, etc.), **always first print a text message that clearly explains, in Korean, what you are about to do and asks for approval**.
+- If you call a tool and wait with no text explanation, the user may think the work is finished or stuck, fail to press approve, and the AI stays deadlocked.
 
-### 8-2. 비동기 작업에 대한 타이머(Timer) 등록
-- 빌드, 테스트, 또는 서브에이전트(subagent) 호출 등 시간이 오래 걸리거나 비동기로 실행되는 작업을 남겨두고 턴을 넘길(대기할) 때는 **반드시 `schedule` 도구를 사용하여 적절한 시간(예: 30초~60초)의 알림 타이머를 등록**하세요.
-- 백그라운드 작업이나 서버가 조용히 멈추거나 재시작되어 알림이 오지 않는 문제를 예방하여, 타이머가 만료되었을 때 깨어나 상태를 재점검할 수 있습니다.
+### 8-2. Register a timer for async work
+- When you leave long-running or async work (a build, a test, a subagent call) and yield the turn, **always register a suitable notification timer (e.g. 30–60s) with the `schedule` tool**.
+- This prevents the case where a background task or server quietly stops or restarts and no notification arrives — the timer wakes you to re-check state.
 
-### 8-3. 대화형(Interactive) 명령어 실행 금지
-- 터미널에서 사용자의 직접 입력을 대기하는 명령어(예: `-y` 옵션 없는 `npm install`, git push 시 로그인 창, 또는 사용자 확인 프롬프트가 뜨는 툴)는 절대 실행하지 마세요.
-- 항상 자동화 옵션(`-y`, `--yes`, `-q` 등)을 사용하여 멈춤 없이 한 번에 끝나도록 하거나, 필요하다면 파이프라인(`yes | command`)을 활용하세요.
+### 8-3. Do not run interactive commands
+- Never run a terminal command that waits for the user's direct input (e.g. `npm install` without `-y`, a login prompt during git push, or a tool with a confirmation prompt).
+- Always use automation flags (`-y`, `--yes`, `-q`, etc.) so it finishes in one shot, or use a pipeline (`yes | command`) if needed.
 
-### 8-4. 루프 및 폴링(Polling) 방지
-- 동일한 턴 내 또는 턴을 넘어가며 터미널 상태나 파일 변경 여부를 계속 확인하기 위해 `manage_task`나 `run_command`를 반복 호출하는 폴링 루프를 만들지 마세요.
-- 시스템의 리액티브 웨이크업(Reactive Wakeup) 메커니즘을 신뢰하고, 작업이 끝날 때까지 대기하거나 1회성 `schedule` 타이머를 두어 깨어나도록 설계하세요.
+### 8-4. Avoid loops and polling
+- Do not build polling loops that repeatedly call `manage_task` or `run_command` to keep checking terminal state or file changes, within a turn or across turns.
+- Trust the system's reactive-wakeup mechanism; wait for the task to finish, or use a one-shot `schedule` timer to wake up.
 
-### 8-5. 커스텀 스크립트 작성 시 타임아웃(Timeout) 강제 적용
-- 프로젝트 내부 검증용 스크립트나 임시 파일 편집 시 무한 루프가 발생할 가능성이 있는 코드는 절대 작성하지 마세요.
-- 스크립트 내부적으로 일정 시간(예: 5초 또는 10초)이 지나면 자동으로 종료되도록 `setTimeout(() => process.exit(0), 10000)` 등의 안전장치를 반드시 추가하세요.
+### 8-5. Enforce timeouts in custom scripts
+- Never write code that can infinite-loop in project verification scripts or temporary edits.
+- Always add a safeguard so the script auto-exits after a fixed time (e.g. 5 or 10 seconds), such as `setTimeout(() => process.exit(0), 10000)`.
 
-### 8-6. cd 명령어 사용 금지
-- 시스템의 제약사항으로 인해 `run_command`에서 `cd` 명령어 단독 실행은 금지되어 있습니다. 작업 디렉토리 변경이 필요할 경우 도구의 `Cwd` 매개변수를 직접 사용하세요.
+### 8-6. Do not use the `cd` command
+- Due to a system constraint, running `cd` alone in `run_command` is forbidden. When you need to change the working directory, use the tool's `Cwd` parameter directly.
 
-### 8-7. 세션 재시작/재개 시 상태 점검
-- 콤팩션(Compaction)이나 서버 재시작으로 세션이 재개되면, 기존 백그라운드 태스크(예: 개발 서버 등)가 멈춰있을 수 있으므로 **`manage_task` 의 `list` 액션 등을 사용하여 상태를 먼저 점검하고 필요시 재시작**하세요.
+### 8-7. Check state on session restart/resume
+- When a session resumes after compaction or a server restart, existing background tasks (e.g. a dev server) may be stopped, so **first check state with `manage_task`'s `list` action and restart if needed**.
 
 ---
 
-## 📌 9. 프로젝트 구조 요약
-
+## 📌 9. Project structure summary
 
 ```
 d:/BubbleChat/
 ├── js/effects/
-│   ├── HuntEffect.js       ← 수렵 미니게임 핵심 (2000줄+)
-│   ├── MonsterData.js      ← 몬스터 데이터 (별도 파일)
-│   ├── RacingEffect.js     ← 경마 미니게임
-│   ├── RaidEffect.js       ← 레이드 미니게임
-│   └── SoundQuizEffect.js  ← 퀴즈 게임
+│   ├── HuntEffect.js       ← Hunt minigame core (2000+ lines)
+│   ├── MonsterData.js      ← Monster data (separate file)
+│   ├── RacingEffect.js     ← Racing minigame
+│   ├── RaidEffect.js       ← Raid minigame
+│   └── SoundQuizEffect.js  ← Quiz game
 ├── scratch/
-│   └── test_*.js           ← 기능별 테스트 스펙 파일
-├── config.js               ← 사운드 설정
-├── style.css               ← 스타일
-├── AI_RULES.md             ← 이 파일
-└── audio_guidelines.md     ← 사운드 가이드라인
+│   └── test_*.js           ← Per-feature test/spec files
+├── config.js               ← Sound config
+├── style.css               ← Styles
+├── AI_RULES.md             ← This file
+└── audio_guidelines.md     ← Audio guidelines
 ```
 
 ---
 
-## 📌 10. 반응형 비디오 명령어(CMC) 관리 규칙
+## 📌 10. Reactive video command (CMC) management rules
 
-- `AI CMC` 폴더에 새로운 비디오 클립(.mp4)을 추가하거나 삭제할 경우, **반드시 `config.js`의 `window.HIVE_CMC_FILES` 배열에 파일명(확장자 제외)을 추가/삭제해야 합니다.**
-- 개별 JS 파일(예: `ChatRenderer.js`, `SoundQuizEffect.js`, `CommandsScrollEffect.js` 등)에 하드코딩된 비디오 파일명 배열을 선언하지 마십시오. 항상 `window.HIVE_CMC_FILES`를 사용하여 동적으로 가져와야 합니다.
-- 이 규칙을 통해 시청자의 `@` 반응형 비디오 재생, 사운드/비디오 퀴즈 및 `!커맨드` 리스트 스크롤 기능의 키워드가 일괄적이고 동기화된 상태로 자동 유지 관리됩니다.
+- When adding or deleting a video clip (.mp4) in the `AI CMC` folder, **you must add/remove the file name (without extension) in the `window.HIVE_CMC_FILES` array in `config.js`.**
+- Do not declare hardcoded video-filename arrays in individual JS files (e.g. `ChatRenderer.js`, `SoundQuizEffect.js`, `CommandsScrollEffect.js`). Always read them dynamically from `window.HIVE_CMC_FILES`.
+- This keeps the keywords for the viewer's `@` reactive-video playback, the sound/video quiz, and the `!커맨드` list-scroll feature uniformly synchronized and auto-maintained.
 
 ---
 
-## 📌 11. Strict UTF-8 Encoding Without BOM (인코딩 표준 규칙)
+## 📌 11. Strict UTF-8 encoding without BOM
 
-- **모든 텍스트/코드/문서 파일(특히 `.md`, `.js`, `.html`, `.css`, `.json`)은 반드시 UTF-8 (BOM 없음) 인코딩으로 작성 및 저장되어야 합니다.**
-- 윈도우 환경에서 시스템 기본 인코딩인 CP949나 EUC-KR로 파일을 저장하여 GitHub 등에서 한글이 중국어 한자(Mojibake/깨짐 현상)로 보이는 일이 없도록 하십시오.
-- 문서나 설정을 자동 생성/수정하는 스크립트(Python, Node.js 등)를 작성하거나 실행할 때:
-  - 파일 열기 시 항상 `encoding='utf-8'`을 명시적으로 사용하십시오 (예: `open(file, 'w', encoding='utf-8')`).
-  - 윈도우 파이썬의 경우 표준 입출력 및 파일 인코딩이 깨지지 않도록 `PYTHONUTF8=1` 환경 변수를 사용하거나 파이썬 호출 시 `-X utf8` 플래그를 사용하십시오.
-
+- **All text/code/document files (especially `.md`, `.js`, `.html`, `.css`, `.json`) must be authored and saved as UTF-8 without a BOM.**
+- On Windows, do not save files with the system default (CP949 / EUC-KR), which makes Korean appear as Chinese characters (mojibake/corruption) on GitHub, etc.
+- When writing or running scripts (Python, Node.js, etc.) that auto-generate or modify docs/config:
+  - Always pass `encoding='utf-8'` explicitly when opening files (e.g. `open(file, 'w', encoding='utf-8')`).
+  - For Python on Windows, use the `PYTHONUTF8=1` environment variable or the `-X utf8` flag so stdio and file encoding are not corrupted.
