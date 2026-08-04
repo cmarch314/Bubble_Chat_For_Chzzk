@@ -1044,6 +1044,21 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
           0
         ]
       ]
+    },
+    {
+      "label": "rathian small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em001_vo",
+      "eventId": 3966043439,
+      "sourceId": 780966539,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_098_780966539.mp3",
+          0.62,
+          0
+        ]
+      ]
     }
   ],
   "rathalos:flinch": [
@@ -1057,6 +1072,21 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       "layers": [
         [
           "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_121_930577735.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "rathalos small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em001_vo",
+      "eventId": 3966043439,
+      "sourceId": 780966539,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_098_780966539.mp3",
           0.62,
           0
         ]
@@ -15179,6 +15209,24 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "eventId": 583886316,
     "sourceId": 839572263,
     "path": "local_assets/monster_hunter/world/monster/em118/em118_se_nbnk_203_839572263.mp3"
+  },
+  {
+    "monsterId": "rathian",
+    "routeKey": "rathian:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em001_vo",
+    "eventId": 3966043439,
+    "sourceId": 780966539,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_098_780966539.mp3"
+  },
+  {
+    "monsterId": "rathalos",
+    "routeKey": "rathalos:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em001_vo",
+    "eventId": 3966043439,
+    "sourceId": 780966539,
+    "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_098_780966539.mp3"
   }
 ]);
 const HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED = Object.freeze([

@@ -78,7 +78,8 @@ const MONSTER_NAMES = Object.freeze({
     em126: '안-이슈왈다',
     em127: '레셴 · 고대 레셴',
     em118: '바젤기우스 · 홍련의 솟구치는 바젤기우스',
-    em001: '레우스 · 레이아',
+    em001: '리오레이아',
+    em002: '리오레우스',
     em007: '디아블로스',
     em011: '키린',
     em018: '얀가루루가',
@@ -333,14 +334,58 @@ function saveGroupReview({ monster, bank, eventId, sourceIds, category, customLa
     return { tags, savedSources: additions.length };
 }
 
+const HUNT_ID_TO_GRAPH_ID = Object.freeze({
+    rathian: 'em001',
+    rathalos: 'em001',
+    diablos: 'em007',
+    tigrex: 'em032',
+    pukei_pukei: 'em102',
+    legiana: 'em111',
+    bazelgeuse: 'em118',
+    nargacuga: 'em037',
+    barioth: 'em042',
+    zinogre: 'em057',
+    brachydios: 'em063',
+    glavenus: 'em080',
+    anjanath: 'em100'
+});
+
+function resolveGraphId(idOrHuntId) {
+    const id = String(idOrHuntId || '').toLowerCase();
+    return HUNT_ID_TO_GRAPH_ID[id] || id;
+}
+
+const MONSTER_DISPLAY_LIST = [
+    { id: 'rathian', name: '리오레이아', graphId: 'em001' },
+    { id: 'rathalos', name: '리오레우스', graphId: 'em001' },
+    { id: 'diablos', name: '디아블로스', graphId: 'em007' },
+    { id: 'tigrex', name: '티가렉스', graphId: 'em032' },
+    { id: 'legiana', name: '레이기에나', graphId: 'em111' },
+    { id: 'bazelgeuse', name: '바젤기우스', graphId: 'em118' },
+    { id: 'pukei_pukei', name: '푸케푸케', graphId: 'em102' }
+];
+
 function listMonsters(labelsPath = LABELS_PATH) {
     if (!fs.existsSync(GRAPH_ROOT)) return [];
     const runtimePolicy = readJson(labelsPath, { runtimePolicy: {} }).runtimePolicy || {};
     const bankMap = readJson(path.join(ROOT, 'data', 'hunt', 'world-monster-audio-banks.json'), {});
-    return fs.readdirSync(GRAPH_ROOT, { withFileTypes: true })
+    
+    const huntMonsters = MONSTER_DISPLAY_LIST.map(item => {
+        const graphPath = path.join(GRAPH_ROOT, item.graphId, 'audio-graph.json');
+        const graph = fs.existsSync(graphPath) ? readJson(graphPath, { events: [] }) : { events: [] };
+        return {
+            id: item.id,
+            name: item.name,
+            groups: groupEvents(graph, { records: [] }).length,
+            reviewStatus: reviewStatusForGraphId(item.graphId, runtimePolicy, bankMap)
+        };
+    });
+
+    const knownGraphIds = new Set(MONSTER_DISPLAY_LIST.map(item => item.graphId));
+    const otherMonsters = fs.readdirSync(GRAPH_ROOT, { withFileTypes: true })
         .filter(entry => entry.isDirectory())
         .map(entry => entry.name)
-        .filter(id => fs.existsSync(path.join(GRAPH_ROOT, id, 'audio-graph.json')))
+        .filter(id => !knownGraphIds.has(id) && fs.existsSync(path.join(GRAPH_ROOT, id, 'audio-graph.json')))
         .sort()
         .map(id => {
             const graph = readJson(path.join(GRAPH_ROOT, id, 'audio-graph.json'), { events: [] });
@@ -351,6 +396,8 @@ function listMonsters(labelsPath = LABELS_PATH) {
                 reviewStatus: reviewStatusForGraphId(id, runtimePolicy, bankMap)
             };
         });
+
+    return [...huntMonsters, ...otherMonsters];
 }
 
 function isLoopbackHost(value) {
@@ -424,7 +471,8 @@ function createServer(options = {}) {
             if (request.method === 'GET' && url.pathname === '/api/groups') {
                 const monster = String(url.searchParams.get('monster') || '');
                 if (!/^[a-z0-9_-]+$/i.test(monster)) throw new Error('잘못된 몬스터 ID입니다.');
-                const graphPath = path.join(GRAPH_ROOT, monster, 'audio-graph.json');
+                const graphId = resolveGraphId(monster);
+                const graphPath = path.join(GRAPH_ROOT, graphId, 'audio-graph.json');
                 if (!fs.existsSync(graphPath)) {
                     sendJson(response, 404, { error: '아직 이벤트 그래프가 준비되지 않았습니다.' });
                     return;
@@ -433,7 +481,7 @@ function createServer(options = {}) {
                 const labels = readJson(labelsPath, { records: [] });
                 sendJson(response, 200, {
                     monster,
-                    name: MONSTER_NAMES[monster] || monster,
+                    name: MONSTER_DISPLAY_LIST.find(m => m.id === monster)?.name || MONSTER_NAMES[monster] || monster,
                     groups: groupEvents(graph, labels)
                 });
                 return;
@@ -501,6 +549,7 @@ module.exports = {
     createServer,
     evidenceScope,
     groupEvents,
+    listMonsters,
     normalizeStoredLabels,
     normalizeTags,
     orderedSources,

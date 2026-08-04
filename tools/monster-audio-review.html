@@ -27,9 +27,11 @@ header{position:sticky;top:0;z-index:10;padding:18px 26px;background:rgba(9,12,1
 .slot-actions{display:flex;gap:6px}.slot-actions button{height:34px;border:1px solid #46546d;border-radius:8px;background:#1c2534;color:#fff;padding:0 11px;font:inherit;font-weight:800;cursor:pointer}.slot-actions button.assign{border-color:#3dd28a;color:#8ff0bd}.slot-actions button:disabled{opacity:.4;cursor:default}
 #slotPanel{margin-bottom:18px;border:1px solid var(--line);border-radius:12px;background:rgba(21,26,36,.6);padding:6px 14px 10px}#slotPanel>summary{cursor:pointer;font-weight:900;font-size:16px;color:var(--gold);padding:8px 2px;list-style:none}#slotPanel>summary::-webkit-details-marker{display:none}#slotSummary{color:var(--muted);font-size:13px;font-weight:600;margin-left:6px}
 .guide.slim{margin:6px 0 10px;padding:8px 12px;font-size:13px}.fbtx{color:#e0a34a}.ovtx{color:#67e3a5}
-.source{grid-template-columns:44px 78px 1fr 220px}
-.slot-pick{height:34px;border:1px solid #46546d;border-radius:8px;background:#0d1118;color:#fff;font:inherit;font-weight:700;padding:0 8px;max-width:220px}.slot-pick.done{border-color:#3dd28a;color:#8ff0bd;background:#15382b}.slot-pick:disabled{opacity:.4}
-.notwired{color:#e0a34a;font-size:12px;font-weight:800;margin-left:8px}
+.source{grid-template-columns:44px 78px 1fr 220px}.source.assigned-this-source{border-color:#736136;background:#1b1812}
+.slot-pick{height:34px;border:1px solid #46546d;border-radius:8px;background:#0d1118;color:#fff;font:inherit;font-weight:700;padding:0 8px;max-width:220px}.slot-pick.done{border-color:#3dd28a;color:#8ff0bd;background:#15382b}.slot-pick.assigned-this{border-color:var(--gold);color:var(--gold);background:#261f10;font-weight:900;box-shadow:0 0 10px rgba(255,201,92,.35)}.slot-pick:disabled{opacity:.4}
+.jump-file{color:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}.jump-file:hover{color:var(--gold)!important}
+@keyframes flashPulse{0%{box-shadow:0 0 25px var(--gold);border-color:var(--gold);background:#3d3015}50%{box-shadow:0 0 35px var(--gold);border-color:#ffd885;background:#524018}100%{box-shadow:none}}
+.source.flash-jump{animation:flashPulse 1.8s ease-out;border-color:var(--gold)}
 </style>
 </head>
 <body>
@@ -59,29 +61,82 @@ function play(source,group,button){
 function playFile(path){if(path){audio.src='/audio?path='+encodeURIComponent(path);audio.play()}}
 function playGroup(group,button){state.queue=group.sources.filter(item=>item.path).map(source=>({source,group,button}));state.queueIndex=0;playQueued()}
 function playQueued(){const item=state.queue[state.queueIndex];if(!item)return;state.playingButton?.classList.remove('playing');state.playingButton=item.button;item.button.classList.add('playing');audio.src='/audio?path='+encodeURIComponent(item.source.path);audio.play();$('#nowTitle').textContent=item.group.bank+' · EVENT '+item.group.eventId+' · 묶음 재생';$('#nowMeta').textContent=(state.queueIndex+1)+' / '+state.queue.length+' · SOURCE '+item.source.sourceId}
+function jumpToSource(filePath){
+  if(!filePath)return;
+  const target=Array.from(document.querySelectorAll('.source')).find(el=>el.dataset.path===filePath);
+  if(!target){
+    alert('해당 음원 파일을 하단 목록에서 찾을 수 없습니다: '+fileName(filePath));
+    return;
+  }
+  const details=target.closest('details');
+  if(details)details.open=true;
+  target.scrollIntoView({behavior:'smooth',block:'center'});
+  target.classList.add('flash-jump');
+  setTimeout(()=>target.classList.remove('flash-jump'),1800);
+}
 function fileName(path){return String(path||'').split('/').pop()}
 function readyChip(slot){if(slot.runtimeReady===true)return '';if(slot.runtimeReady==='partial')return '<span class="notwired">△ 일부 배선</span>';return '<span class="notwired">⚠ 미배선</span>'}
-function slotStateHtml(slot){const parts=[];if(slot.assigned)parts.push('<span class="ov">지정: '+esc(fileName((slot.assigned.layers[0]||[])[0]))+'</span>');if(slot.current)parts.push('<span class="cur">현재: '+esc(fileName((slot.current.files||[])[0]))+'</span>');if(!slot.assigned&&!slot.current)parts.push('<span class="fb">fallback (전용 사운드 없음)</span>');return parts.join(' · ')+readyChip(slot)}
+function slotStateHtml(slot){
+  const parts=[];
+  if(slot.assigned){
+    const file=(slot.assigned.layers[0]||[])[0];
+    parts.push('<span class="ov">지정: <a class="jump-file" data-path="'+esc(file||'')+'" title="하단 음원 위치로 순간이동">'+esc(fileName(file))+' 🎯</a></span>');
+  }
+  if(slot.current){
+    const file=(slot.current.files||[])[0];
+    parts.push('<span class="cur">현재: <a class="jump-file" data-path="'+esc(file||'')+'" title="하단 음원 위치로 순간이동">'+esc(fileName(file))+' 🎯</a></span>');
+  }
+  if(!slot.assigned&&!slot.current)parts.push('<span class="fb">fallback (전용 사운드 없음)</span>');
+  return parts.join(' · ')+readyChip(slot);
+}
 function slotFile(slot){return (slot.assigned&&(slot.assigned.layers[0]||[])[0])||(slot.current&&(slot.current.files||[])[0])||null}
-function slotOptionsHtml(){return '<option value="">→ 패턴 슬롯 지정</option>'+state.patterns.map(pattern=>'<optgroup label="'+esc(pattern.name)+'">'+pattern.slots.map(slot=>'<option value="'+esc(pattern.id+'|'+slot.slot)+'">'+esc(slot.label)+(slot.assigned?' ✓':'')+'</option>').join('')+'</optgroup>').join('')}
+function slotOptionsHtml(source){const sourcePath=source?.path;return '<option value="">→ 패턴 슬롯 지정</option>'+state.patterns.map(pattern=>'<optgroup label="'+esc(pattern.name)+'">'+pattern.slots.map(slot=>{const assignedPath=(slot.assigned?.layers?.[0]||[])[0];const isThisSource=Boolean(sourcePath&&assignedPath===sourcePath);const isOtherAssigned=Boolean(slot.assigned&&!isThisSource);const mark=isThisSource?' ★ [이 음성]':(isOtherAssigned?' ✓ [다른 음성]':'');return '<option value="'+esc(pattern.id+'|'+slot.slot)+'">'+esc(slot.label)+mark+'</option>'}).join('')+'</optgroup>').join('')}
 function assignedCount(){return state.patterns.reduce((total,pattern)=>total+pattern.slots.filter(slot=>slot.assigned).length,0)}
-function renderPatterns(){const root=$('#patterns');root.textContent='';if(!state.patterns.length){root.innerHTML='<div class="empty">이 몬스터의 패턴을 찾을 수 없습니다.</div>';$('#slotSummary').textContent='';return}for(const pattern of state.patterns){const card=document.createElement('article');card.className='pattern';card.innerHTML='<div class="pattern-head"><span class="pattern-name">'+esc(pattern.name)+'</span><span class="pattern-id">'+esc(pattern.id)+'</span></div>';for(const slot of pattern.slots){const row=document.createElement('div');row.className='slot';row.innerHTML='<div class="slot-label">'+esc(slot.label)+'<small>'+esc(slot.note||slot.slot)+'</small></div><div class="slot-state">'+slotStateHtml(slot)+'</div><div class="slot-actions"><button class="playf" '+(slotFile(slot)?'':'disabled')+'>▶</button><button class="clr" '+(slot.assigned?'':'disabled')+'>✕</button></div>';const file=slotFile(slot);row.querySelector('.playf').onclick=()=>playFile(file);row.querySelector('.clr').onclick=()=>clearSlot(pattern.id,slot.slot);card.appendChild(row)}root.appendChild(card)}$('#slotSummary').textContent='· '+state.patterns.length+'개 패턴 · '+assignedCount()+'개 슬롯 지정됨'}
+function renderPatterns(){const root=$('#patterns');root.textContent='';if(!state.patterns.length){root.innerHTML='<div class="empty">이 몬스터의 패턴을 찾을 수 없습니다.</div>';$('#slotSummary').textContent='';return}for(const pattern of state.patterns){const card=document.createElement('article');card.className='pattern';card.innerHTML='<div class="pattern-head"><span class="pattern-name">'+esc(pattern.name)+'</span><span class="pattern-id">'+esc(pattern.id)+'</span></div>';for(const slot of pattern.slots){const row=document.createElement('div');row.className='slot';row.innerHTML='<div class="slot-label">'+esc(slot.label)+'<small>'+esc(slot.note||slot.slot)+'</small></div><div class="slot-state">'+slotStateHtml(slot)+'</div><div class="slot-actions"><button class="playf" '+(slotFile(slot)?'':'disabled')+'>▶</button><button class="clr" '+(slot.assigned?'':'disabled')+'>✕</button></div>';const file=slotFile(slot);row.querySelector('.playf').onclick=()=>playFile(file);row.querySelector('.clr').onclick=()=>clearSlot(pattern.id,slot.slot);card.appendChild(row)}root.appendChild(card)}root.querySelectorAll('.jump-file').forEach(link=>{link.onclick=(event)=>{event.preventDefault();jumpToSource(link.dataset.path)}});$('#slotSummary').textContent='· '+state.patterns.length+'개 패턴 · '+assignedCount()+'개 슬롯 지정됨'}
+function updateGroupSourcesInPlace(){
+  document.querySelectorAll('.source').forEach(row=>{
+    const filePath=row.dataset.path;
+    if(!filePath)return;
+    const isThisAssigned=Boolean(filePath&&state.patterns.some(pattern=>pattern.slots.some(slot=>(slot.assigned?.layers?.[0]||[])[0]===filePath)));
+    row.classList.toggle('assigned-this-source',isThisAssigned);
+    const pick=row.querySelector('.slot-pick');
+    if(pick){
+      pick.classList.toggle('assigned-this',isThisAssigned);
+      pick.innerHTML=slotOptionsHtml({path:filePath});
+      pick.value='';
+    }
+  });
+}
 async function loadPatterns(){const data=await fetch('/api/hunt-patterns?monster='+encodeURIComponent(state.monster)).then(response=>response.json());if(data.error)throw new Error(data.error);state.huntId=data.huntId;state.patterns=data.patterns||[];renderPatterns()}
-async function assignSource(source,value,select){if(!value)return;const [patternId,slot]=value.split('|');select.disabled=true;try{const data=await fetch('/api/hunt-pattern-route',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({huntId:state.huntId,patternId,slot,files:[source.path]})}).then(response=>response.json());if(!data.ok)throw new Error(data.error||'저장 실패');await loadPatterns();select.classList.add('done');setTimeout(()=>{select.classList.remove('done');select.disabled=false;select.innerHTML=slotOptionsHtml();select.value=''},900)}catch(error){alert(error.message);select.disabled=false;select.value=''}}
-async function clearSlot(patternId,slot){const data=await fetch('/api/hunt-pattern-route',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({huntId:state.huntId,patternId,slot,files:[]})}).then(response=>response.json());if(!data.ok){alert(data.error||'해제 실패');return}await loadPatterns()}
+async function assignSource(source,value,select){if(!value)return;const [patternId,slot]=value.split('|');select.disabled=true;try{const data=await fetch('/api/hunt-pattern-route',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({huntId:state.huntId,patternId,slot,files:[source.path]})}).then(response=>response.json());if(!data.ok)throw new Error(data.error||'저장 실패');await loadPatterns();updateGroupSourcesInPlace();select.classList.add('done');setTimeout(()=>{select.classList.remove('done');select.disabled=false;select.value=''},900)}catch(error){alert(error.message);select.disabled=false;select.value=''}}
+async function clearSlot(patternId,slot){const data=await fetch('/api/hunt-pattern-route',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({huntId:state.huntId,patternId,slot,files:[]})}).then(response=>response.json());if(!data.ok){alert(data.error||'해제 실패');return}await loadPatterns();updateGroupSourcesInPlace()}
 audio.onended=()=>{if(state.queue.length&&++state.queueIndex<state.queue.length)playQueued();else{state.queue=[];state.playingButton?.classList.remove('playing')}};
 function render(){
+  const openGroupKeys=new Set(
+    Array.from(document.querySelectorAll('.group')).filter(card=>card.querySelector('.source-details')?.open).map(card=>card.dataset.groupKey)
+  );
   const root=$('#groups');root.textContent='';
   for(const group of state.groups){
+    const groupKey=group.bank+'|'+group.eventId;
+    const isOpen=openGroupKeys.has(groupKey);
     const selected=category(group.groupTags),card=document.createElement('article');card.className='group'+(group.groupTags.length?' reviewed':'');
+    card.dataset.groupKey=groupKey;
     const scopeChip=group.sourceLayer==='sound-effect'?'<span class="chip reusable">범용 SE 후보</span>':group.sourceLayer==='voice'?'<span class="chip identity">몬스터 전용 VO</span>':'';
-    card.innerHTML='<div class="group-head"><button class="play-all">▶ 전체</button><span class="event">'+esc(group.bank)+' · EVENT '+group.eventId+'</span>'+scopeChip+group.structures.map(value=>'<span class="chip '+esc(value)+'">'+esc(value.toUpperCase())+'</span>').join('')+'<span class="chip">'+group.sources.length+' SOURCES</span><div class="actions"><button data-type="roar">포효</button><button data-type="breath">브레스</button><button data-type="physical">물리공격</button><select class="extra-presets">'+extraOptions(selected)+'</select><input placeholder="직접 입력 (쉼표로 복수 태그)" value="'+esc(selected==='custom'?group.groupTags.join(', '):'')+'"><button data-type="custom">저장</button><button data-type="clear">지우기</button><span class="save"></span></div></div><details class="source-details"><summary>구성 음원 '+group.sources.length+'개 · 펼쳐서 패턴 슬롯에 지정</summary><div class="sources"></div></details>';
+    card.innerHTML='<div class="group-head"><button class="play-all">▶ 전체</button><span class="event">'+esc(group.bank)+' · EVENT '+group.eventId+'</span>'+scopeChip+group.structures.map(value=>'<span class="chip '+esc(value)+'">'+esc(value.toUpperCase())+'</span>').join('')+'<span class="chip">'+group.sources.length+' SOURCES</span><div class="actions"><button data-type="roar">포효</button><button data-type="breath">브레스</button><button data-type="physical">물리공격</button><select class="extra-presets">'+extraOptions(selected)+'</select><input placeholder="직접 입력 (쉼표로 복수 태그)" value="'+esc(selected==='custom'?group.groupTags.join(', '):'')+'"><button data-type="custom">저장</button><button data-type="clear">지우기</button><span class="save"></span></div></div><details class="source-details" '+(isOpen?'open':'')+'><summary>구성 음원 '+group.sources.length+'개 · 펼쳐서 패턴 슬롯에 지정</summary><div class="sources"></div></details>';
     card.querySelector('.play-all').onclick=event=>playGroup(group,event.currentTarget);
     const status=card.querySelector('.save'),input=card.querySelector('input');
     card.querySelectorAll('[data-type]').forEach(button=>{if(button.dataset.type===selected)button.classList.add('selected');button.onclick=()=>save(group,button.dataset.type,input.value,status).catch(error=>status.textContent=error.message)});
     card.querySelector('.extra-presets').onchange=event=>{if(event.target.value)save(group,event.target.value,'',status).catch(error=>status.textContent=error.message)};
     const sources=card.querySelector('.sources');
-    for(const source of group.sources){const row=document.createElement('div');row.className='source';row.innerHTML='<button class="play" '+(source.path?'':'disabled')+'>▶</button><span class="source-id">ID '+source.sourceId+'</span><span class="path" title="'+esc(source.path||'')+'">'+esc(source.path?fileName(source.path):'디코딩 파일 없음')+'</span><select class="slot-pick" '+(source.path&&state.patterns.length?'':'disabled')+'>'+slotOptionsHtml()+'</select>';row.querySelector('.play').onclick=event=>play(source,group,event.currentTarget);const pick=row.querySelector('.slot-pick');if(pick)pick.onchange=()=>assignSource(source,pick.value,pick);sources.appendChild(row)}
+    for(const source of group.sources){
+      const isThisAssigned=Boolean(source.path&&state.patterns.some(pattern=>pattern.slots.some(slot=>(slot.assigned?.layers?.[0]||[])[0]===source.path)));
+      const row=document.createElement('div');row.className='source'+(isThisAssigned?' assigned-this-source':'');row.dataset.path=source.path||'';
+      row.innerHTML='<button class="play" '+(source.path?'':'disabled')+'>▶</button><span class="source-id">ID '+source.sourceId+'</span><span class="path" title="'+esc(source.path||'')+'">'+esc(source.path?fileName(source.path):'디코딩 파일 없음')+'</span><select class="slot-pick" '+(source.path&&state.patterns.length?'':'disabled')+'>'+slotOptionsHtml(source)+'</select>';
+      row.querySelector('.play').onclick=event=>play(source,group,event.currentTarget);
+      const pick=row.querySelector('.slot-pick');
+      if(pick){if(isThisAssigned)pick.classList.add('assigned-this');pick.onchange=()=>assignSource(source,pick.value,pick)}
+      sources.appendChild(row);
+    }
     root.appendChild(card);
   }
   $('#summary').textContent=state.groups.length+'개 이벤트 묶음 · '+state.groups.filter(group=>group.groupTags.length).length+'개 분류됨';

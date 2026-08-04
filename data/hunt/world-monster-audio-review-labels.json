@@ -7000,6 +7000,20 @@
       "reviewMethod": "event-group-audition",
       "sourceLayer": "sound-effect",
       "reuseScope": "cross-title-semantic"
+    },
+    {
+      "monster": "em001",
+      "bank": "em001_vo",
+      "eventId": 3966043439,
+      "sourceId": 780966539,
+      "reference": true,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
     }
   ],
   "tagAliases": {
@@ -7020,7 +7034,7 @@
     "돌진 스탭": "charge_stride_step",
     "바위 발사": "projectile_launch"
   },
-  "updatedAt": "2026-08-03T19:46:49.419Z",
+  "updatedAt": "2026-08-04T15:44:04.013Z",
   "normalizedAt": "2026-08-03T19:00:19.388Z",
   "reusePolicy": {
     "voice": "monster-identity-only",

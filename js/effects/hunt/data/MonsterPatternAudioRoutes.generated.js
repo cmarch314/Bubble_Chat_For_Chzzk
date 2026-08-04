@@ -14,6 +14,16 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
             0
           ]
         ]
+      },
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_084_660561336.mp3",
+            0.7,
+            0
+          ]
+        ]
       }
     },
     "rathian.fireball": {
@@ -58,6 +68,16 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
             0
           ]
         ]
+      },
+      "impact-3": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_012_44522100.mp3",
+            0.7,
+            0
+          ]
+        ]
       }
     },
     "rathian.bite_somersault": {
@@ -67,6 +87,54 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
           [
             "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_124_948696462.mp3",
             0.72,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.tail_sweep": {
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_119_911567613.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.roar": {
+      "roar": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_091_721725382.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.charge": {
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_093_724506165.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.glide": {
+      "start": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_135_1041874523.mp3",
+            0.7,
             0
           ]
         ]

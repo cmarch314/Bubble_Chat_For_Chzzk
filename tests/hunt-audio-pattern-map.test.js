@@ -15,6 +15,10 @@ const {
 // hunt monster id resolves to its World audio-graph bank id.
 assert.strictEqual(huntToGraphId().diablos, 'em007');
 assert.strictEqual(huntToGraphId().tigrex, 'em032');
+assert.ok(loadHuntPatternAudioMap('em002').patterns.length >= 12, 'em002 (Rathalos) must load patterns');
+assert.ok(loadHuntPatternAudioMap('em001').patterns.length >= 13, 'em001 (Rathian) must load patterns');
+assert.ok(loadHuntPatternAudioMap('em032').patterns.length >= 10, 'em032 (Tigrex) must load patterns');
+assert.ok(loadHuntPatternAudioMap('em007').patterns.length >= 10, 'em007 (Diablos) must load patterns');
 
 // slot derivation covers the distinct audio moments per pattern shape.
 const roarSlots = patternAudioSlots({ id: 'x.roar', type: 'roar', tags: ['roar'] }).map(s => s.slot);

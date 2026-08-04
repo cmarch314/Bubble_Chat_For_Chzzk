@@ -94,18 +94,27 @@ function patternAudioSlots(pattern = {}) {
     if (isCharge && Number(pattern.movement?.ticks || 0) > 0) {
         add('travel', 'travel', '질주 (이동)', '돌진 중 발소리 · 현재 티가렉스만 배선');
     }
-    // 4. impact(s) (타격) — one per impactTimeline event
+    // 4. impact(s) (타격)
     const timeline = Array.isArray(pattern.impactTimeline) && pattern.impactTimeline.length
         ? pattern.impactTimeline : [{}];
-    timeline.forEach((event, index) => {
-        const cue = event && event.audioCue && event.audioCue !== 'none' ? event.audioCue : null;
-        const multi = timeline.length > 1;
-        const slot = cue ? `impact:${cue}` : (multi ? `impact-${index + 1}` : 'impact');
-        const base = isProjectile ? '적중' : isSomersault ? '착지 타격' : isCharge ? '돌진 피격' : '타격';
-        add(slot, 'impact', base + (multi ? ` ${index + 1}` : ''),
-            (cue ? `audioCue:${cue}` : '접촉 프레임') + (event.atTicks != null ? ` · ${event.atTicks}틱` : ''),
-            { runtimeReady: cue === 'somersault' || cue === 'tigrex-final-vocal', atTicks: event.atTicks });
-    });
+    const hasUniqueCues = timeline.some(event => event && event.audioCue && event.audioCue !== 'none');
+    if (isProjectile && !hasUniqueCues) {
+        const tickNote = timeline.map(e => e.atTicks).filter(t => t != null).join(', ');
+        add('impact', 'impact', '적중', '브레스/투사체 적중 프레임' + (tickNote ? ` · ${tickNote}틱` : ''), {
+            runtimeReady: false,
+            atTicks: timeline[0]?.atTicks
+        });
+    } else {
+        timeline.forEach((event, index) => {
+            const cue = event && event.audioCue && event.audioCue !== 'none' ? event.audioCue : null;
+            const multi = timeline.length > 1;
+            const slot = cue ? `impact:${cue}` : (multi ? `impact-${index + 1}` : 'impact');
+            const base = isProjectile ? '적중' : isSomersault ? '착지 타격' : isCharge ? '돌진 피격' : '타격';
+            add(slot, 'impact', base + (multi ? ` ${index + 1}` : ''),
+                (cue ? `audioCue:${cue}` : '접촉 프레임') + (event.atTicks != null ? ` · ${event.atTicks}틱` : ''),
+                { runtimeReady: cue === 'somersault' || cue === 'tigrex-final-vocal', atTicks: event.atTicks });
+        });
+    }
     // 5. recovery (후딜)
     if (isCharge) add('recovery', 'recovery', '후딜 (멈춤)', '돌진을 멈추는 마무리음');
     else if (isProjectile && (tags.has('elemental') || tags.has('fire') || pattern.attachedFx)) {
@@ -193,11 +202,28 @@ function loadHuntCatalogs() {
     return cachedCatalogs;
 }
 
-// The review UI selects monsters by their World bank id (em007); accept either
-// that or the hunt id (diablos) and normalise to the hunt id everything else
+const GRAPH_ID_TO_HUNT_ID = {
+    em001: 'rathian',
+    em002: 'rathalos',
+    em007: 'diablos',
+    em032: 'tigrex',
+    em102: 'pukei_pukei',
+    em111: 'legiana',
+    em118: 'bazelgeuse',
+    em037: 'nargacuga',
+    em042: 'barioth',
+    em057: 'zinogre',
+    em063: 'brachydios',
+    em080: 'glavenus',
+    em100: 'anjanath'
+};
+
+// The review UI selects monsters by their World bank id (em007 / em002); accept either
+// that or the hunt id (diablos / rathalos) and normalise to the hunt id everything else
 // keys on.
 function resolveHuntId(idOrGraphId, bankMapPath = BANK_MAP_PATH) {
-    const id = String(idOrGraphId || '');
+    const id = String(idOrGraphId || '').toLowerCase();
+    if (GRAPH_ID_TO_HUNT_ID[id]) return GRAPH_ID_TO_HUNT_ID[id];
     const huntIndex = huntToGraphId(bankMapPath);
     if (huntIndex[id]) return id;
     for (const [huntId, graphId] of Object.entries(huntIndex)) {
