@@ -13,3 +13,7 @@ backup_v1/
 *.wem
 *.bnk
 *.pck
+
+# Python bytecode caches (build artifacts, never commit).
+__pycache__/
+*.pyc

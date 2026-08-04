@@ -49,6 +49,7 @@
     "import:wilds-monster-patterns": "python scripts/import-wilds-monster-patterns.py",
     "generate:monster-baseline": "node scripts/generate-released-monster-baseline.js",
     "generate:monster-pattern-audio": "node scripts/generate-monster-pattern-audio-routes.js",
+    "apply:monster-pattern-audio": "node scripts/apply-monster-pattern-audio-from-labels.js",
     "generate:wilds-monster-behavior": "node scripts/generate-wilds-monster-behavior.js",
     "generate:world-monster-behavior": "node scripts/generate-world-monster-behavior.js",
     "generate:world-shell-behavior": "node scripts/generate-world-shell-behavior.js",
