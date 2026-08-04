@@ -10077,6 +10077,181 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
         ]
       ]
     }
+  ],
+  "diablos:death": [
+    {
+      "label": "diablos death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 196629893,
+      "sourceId": 941647768,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_091_941647768.mp3",
+          0.72,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 1962714898,
+      "sourceId": 961748875,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_095_961748875.mp3",
+          0.72,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 1962714898,
+      "sourceId": 616362085,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_062_616362085.mp3",
+          0.72,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos death_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "death_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 3287902920,
+      "sourceId": 501145725,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_051_501145725.mp3",
+          0.72,
+          0
+        ]
+      ]
+    }
+  ],
+  "diablos:knockdown": [
+    {
+      "label": "diablos knockdown_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "knockdown_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 714162119,
+      "sourceId": 562342054,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_059_562342054.mp3",
+          0.68,
+          0
+        ]
+      ]
+    }
+  ],
+  "diablos:trap": [
+    {
+      "label": "diablos trapped_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "trapped_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 679218911,
+      "sourceId": 452356805,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_047_452356805.mp3",
+          0.68,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos trapped_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "trapped_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 1330032797,
+      "sourceId": 967940364,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_096_967940364.mp3",
+          0.68,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos trapped_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "trapped_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 1330032797,
+      "sourceId": 35060887,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_006_35060887.mp3",
+          0.68,
+          0
+        ]
+      ]
+    }
+  ],
+  "diablos:flinch": [
+    {
+      "label": "diablos small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 999568876,
+      "sourceId": 104185803,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_011_104185803.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 999568876,
+      "sourceId": 385764890,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_039_385764890.mp3",
+          0.62,
+          0
+        ]
+      ]
+    }
+  ],
+  "diablos:roar": [
+    {
+      "label": "diablos monster_roar",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "monster_roar",
+      "sourceBank": "em007_vo",
+      "eventId": 1263597779,
+      "sourceId": 543762063,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_056_543762063.mp3",
+          0.78,
+          0
+        ]
+      ]
+    }
   ]
 });
 const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
@@ -15227,6 +15402,105 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "eventId": 3966043439,
     "sourceId": 780966539,
     "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_098_780966539.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:death",
+    "tag": "death_vocal",
+    "bank": "em007_vo",
+    "eventId": 196629893,
+    "sourceId": 941647768,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_091_941647768.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:knockdown",
+    "tag": "knockdown_vocal",
+    "bank": "em007_vo",
+    "eventId": 714162119,
+    "sourceId": 562342054,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_059_562342054.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:trap",
+    "tag": "trapped_vocal",
+    "bank": "em007_vo",
+    "eventId": 679218911,
+    "sourceId": 452356805,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_047_452356805.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em007_vo",
+    "eventId": 999568876,
+    "sourceId": 104185803,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_011_104185803.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em007_vo",
+    "eventId": 999568876,
+    "sourceId": 385764890,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_039_385764890.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:roar",
+    "tag": "monster_roar",
+    "bank": "em007_vo",
+    "eventId": 1263597779,
+    "sourceId": 543762063,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_056_543762063.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:trap",
+    "tag": "trapped_vocal",
+    "bank": "em007_vo",
+    "eventId": 1330032797,
+    "sourceId": 967940364,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_096_967940364.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:trap",
+    "tag": "trapped_vocal",
+    "bank": "em007_vo",
+    "eventId": 1330032797,
+    "sourceId": 35060887,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_006_35060887.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:death",
+    "tag": "death_vocal",
+    "bank": "em007_vo",
+    "eventId": 1962714898,
+    "sourceId": 961748875,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_095_961748875.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:death",
+    "tag": "death_vocal",
+    "bank": "em007_vo",
+    "eventId": 1962714898,
+    "sourceId": 616362085,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_062_616362085.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:death",
+    "tag": "death_vocal",
+    "bank": "em007_vo",
+    "eventId": 3287902920,
+    "sourceId": 501145725,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_051_501145725.mp3"
   }
 ]);
 const HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED = Object.freeze([

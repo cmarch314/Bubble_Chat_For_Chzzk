@@ -336,9 +336,329 @@
               0
             ]
           ]
+        },
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_008_67093884.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.burrow_emerge": {
+        "impact": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_164_585276800.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_101_369838079.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.horn_uppercut": {
+        "start": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_202_791090498.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "impact": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_274_932409164.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_073_745836525.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.tail_sweep": {
+        "impact-1": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_134_506356234.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "impact-2": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_132_491744172.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_034_352783232.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.side_tackle": {
+        "start": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_175_665610706.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "impact": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_060_224956637.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_020_225609253.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.rage_charge": {
+        "impact": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_260_880157849.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_071_715583457.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "travel": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_052_199648812.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "start": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_132_481806368.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.tail_slam_rock": {
+        "launch": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_120_447652108.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_081_871656419.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "impact-1": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_310_1072088779.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "impact:rock": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_020_60119098.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.burrow_enter": {
+        "burrow": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_025_93463740.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.horn_sweep": {
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_village_nbnk_001_480427754.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "impact-1": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_280_1067129270.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "impact-2": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_082_278557933.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.horn_charge": {
+        "telegraph": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_079_846555421.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "start": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_158_558121140.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "travel": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_099_369560611.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "impact": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_037_150826140.mp3",
+              0.7,
+              0
+            ]
+          ]
+        },
+        "recovery": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_se_nbnk_053_200419830.mp3",
+              0.7,
+              0
+            ]
+          ]
+        }
+      },
+      "diablos.roar": {
+        "roar": {
+          "label": null,
+          "layers": [
+            [
+              "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_056_543762063.mp3",
+              0.7,
+              0
+            ]
+          ]
         }
       }
     }
   },
-  "updatedAt": "2026-08-04T16:34:41.890Z"
+  "updatedAt": "2026-08-04T16:56:50.956Z"
 }

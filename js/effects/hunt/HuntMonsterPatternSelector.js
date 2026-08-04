@@ -33,7 +33,10 @@ class HuntMonsterPatternSelector {
             .map(part => String(part.kind || part.id || '').toLowerCase());
         const activeTraits = new Set(context.traits || []);
         const matchesContext = pattern =>
-            (!pattern.requiredState || pattern.requiredState === context.state)
+            !pattern.isFollowUp
+            && !pattern.isPhasedFollowUp
+            && !(pattern.tags || []).includes('burrow-emerge')
+            && (!pattern.requiredState || pattern.requiredState === context.state)
             && (!pattern.requiresPreviousPattern || pattern.requiresPreviousPattern === lastId)
             && !(pattern.forbiddenStates || []).includes(context.state)
             && (pattern.requiredTraits || []).every(trait => activeTraits.has(trait))

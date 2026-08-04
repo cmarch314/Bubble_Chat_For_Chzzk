@@ -176,6 +176,7 @@ class HuntMonsterPatternCatalog {
                             windupTicks: pattern.followUp.windupTicks?.normal || 12,
                             activeTicks: pattern.followUp.activeTicks || 2,
                             recoveryTicks: pattern.followUp.recoveryTicks || 1,
+                            isFollowUp: true,
                             tags: pattern.followUp.tags || ['charge', 'burrow', 'burrow-emerge'],
                             impactTimeline: pattern.followUp.impactTimeline || [{ atTicks: pattern.followUp.windupTicks?.normal || 12 }]
                         });

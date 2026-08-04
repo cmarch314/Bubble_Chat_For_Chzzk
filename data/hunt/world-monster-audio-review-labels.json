@@ -7014,6 +7014,160 @@
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
       "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 196629893,
+      "sourceId": 941647768,
+      "reference": true,
+      "tags": [
+        "death_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 714162119,
+      "sourceId": 562342054,
+      "reference": true,
+      "tags": [
+        "knockdown_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 679218911,
+      "sourceId": 452356805,
+      "reference": true,
+      "tags": [
+        "trapped_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 999568876,
+      "sourceId": 104185803,
+      "reference": true,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 999568876,
+      "sourceId": 385764890,
+      "reference": false,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 1263597779,
+      "sourceId": 543762063,
+      "reference": true,
+      "tags": [
+        "monster_roar"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 1330032797,
+      "sourceId": 967940364,
+      "reference": true,
+      "tags": [
+        "trapped_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 1330032797,
+      "sourceId": 35060887,
+      "reference": false,
+      "tags": [
+        "trapped_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 1962714898,
+      "sourceId": 961748875,
+      "reference": true,
+      "tags": [
+        "death_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 1962714898,
+      "sourceId": 616362085,
+      "reference": false,
+      "tags": [
+        "death_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 3287902920,
+      "sourceId": 501145725,
+      "reference": true,
+      "tags": [
+        "death_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
     }
   ],
   "tagAliases": {
@@ -7034,7 +7188,7 @@
     "돌진 스탭": "charge_stride_step",
     "바위 발사": "projectile_launch"
   },
-  "updatedAt": "2026-08-04T15:44:04.013Z",
+  "updatedAt": "2026-08-04T16:52:17.036Z",
   "normalizedAt": "2026-08-03T19:00:19.388Z",
   "reusePolicy": {
     "voice": "monster-identity-only",
