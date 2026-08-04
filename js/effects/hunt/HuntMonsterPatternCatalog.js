@@ -178,7 +178,14 @@ class HuntMonsterPatternCatalog {
                             recoveryTicks: pattern.followUp.recoveryTicks || 1,
                             isFollowUp: true,
                             tags: pattern.followUp.tags || ['charge', 'burrow', 'burrow-emerge'],
-                            impactTimeline: pattern.followUp.impactTimeline || [{ atTicks: pattern.followUp.windupTicks?.normal || 12 }]
+                            impactTimeline: pattern.followUp.impactTimeline || [{ atTicks: pattern.followUp.windupTicks?.normal || 12 }],
+                            // A phased follow-up shares its parent's provenance/policy — it is the
+                            // same sourced move, exposed for audio slot mapping and fingerprinting,
+                            // and excluded from standalone selection by HuntMonsterPatternSelector.
+                            evidence: pattern.evidence,
+                            sourceUrl: pattern.sourceUrl,
+                            sourceGame: pattern.sourceGame,
+                            runtimePolicy: pattern.runtimePolicy
                         });
                     }
                 }
