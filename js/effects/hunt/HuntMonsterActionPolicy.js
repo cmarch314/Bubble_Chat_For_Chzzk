@@ -115,6 +115,23 @@ class HuntMonsterActionPolicy {
         ];
     }
 
+    /**
+     * 인접한 두 헌터를 한 쌍으로 묶어 패스를 만든다. 생존자 레인 순서에서
+     * (1,2) (2,3) (3,4) 같은 인접 쌍을 뽑아 서로 다른 쌍을 우선 고르고,
+     * 쌍이 모자라면 남은 쌍을 재사용한다. 생존자가 한 명뿐이면 단독 패스가 된다.
+     */
+    static adjacentPairPivotPasses(targetable, passCount = 2, random = Math.random) {
+        const lanes = [...targetable].sort((a, b) => Number(a.index) - Number(b.index));
+        const passes = Math.max(1, Number(passCount) || 1);
+        if (lanes.length <= 1) {
+            return Array.from({ length: passes }, () => lanes.slice(0, 1));
+        }
+        const pairs = lanes.slice(0, -1).map((lane, i) => [lane, lanes[i + 1]]);
+        const shuffled = [...pairs].sort(() => random() - 0.5);
+        return Array.from({ length: passes }, (_, i) =>
+            shuffled[i % shuffled.length]);
+    }
+
     static independentTargetPasses(targetable, passCount = 2, random = Math.random) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
@@ -228,6 +245,20 @@ class HuntMonsterActionPolicy {
                 targets: passes.flat(),
                 runtime: {
                     runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index))
+                }
+            };
+        }
+        // 회전 공격이 헌터 한 명을 노리는 대신, 인접한 두 명 사이를 축으로 삼아
+        // 그 둘을 함께 훑는다. 타격 범위를 사후 검증하는 대신 축 위치를 미리 정하는
+        // 방식이라, 패스마다 "몇 번과 몇 번을 함께 치는지"가 확정된다.
+        if (mode === 'adjacent-pair-pivot') {
+            const passes = this.adjacentPairPivotPasses(targetable, passCount, random);
+            return {
+                targets: passes.flat(),
+                runtime: {
+                    runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index)),
+                    runtimePivotPairs: passes.map(pass => pass.map(target => target.index)),
+                    runtimeImpactAllowEmptySequence: true
                 }
             };
         }

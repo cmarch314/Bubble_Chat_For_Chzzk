@@ -216,6 +216,9 @@ class HuntMonsterTurnExecutor {
 
     // The phase-standard impact slot key for the current impact commit. Must match
     // tools/hunt-audio-pattern-map.js patternAudioSlots so a mapped sound resolves.
+    /** 근접/원거리 모드가 유지되는 틱 수 (30초 = 300틱). */
+    static get STANCE_CYCLE_TICKS() { return 300; }
+
     static impactSlotKey(pattern) {
         const cue = pattern?.runtimeImpactAudioCue;
         if (cue && cue !== 'none') return `impact:${cue}`;
@@ -662,8 +665,36 @@ class HuntMonsterTurnExecutor {
         const rageEligible = engine.monsterState === 'enraged' && engine.monsterUltimateUsedInRage
             ? eligible.filter(pattern => pattern.type !== 'ultimate' && !pattern.tags?.includes('ultimate'))
             : eligible;
+
+        // 스탠스 사이클: 'stance-switch' 패턴을 가진 몬스터만 근접/원거리 모드를
+        // 번갈아 쓴다. 몬스터 id로 분기하지 않고 태그 존재 여부로만 판정하므로,
+        // 같은 태그를 단 새 몬스터는 코드 수정 없이 이 규칙을 얻는다.
+        // 분노 중에는 모드를 무시하고 분노 패턴 전체에서 고른다.
+        const stanceSwitch = rageEligible.find(pattern => (pattern.tags || []).includes('stance-switch'));
+        const stanceActive = Boolean(stanceSwitch) && engine.monsterState !== 'enraged';
+        let stancePool = rageEligible;
+        if (stanceActive) {
+            const now = Number(engine.battleTime || 0);
+            if (!Number.isFinite(Number(engine.monsterStanceUntil))) {
+                engine.monsterStance = 'melee';
+                engine.monsterStanceUntil = now + HuntMonsterTurnExecutor.STANCE_CYCLE_TICKS;
+            } else if (now >= Number(engine.monsterStanceUntil)) {
+                engine.monsterStance = engine.monsterStance === 'ranged' ? 'melee' : 'ranged';
+                engine.monsterStanceUntil = now + HuntMonsterTurnExecutor.STANCE_CYCLE_TICKS;
+                return stanceSwitch;
+            }
+            const wanted = engine.monsterStance === 'ranged' ? 'stance-ranged' : 'stance-melee';
+            const filtered = rageEligible.filter(pattern => {
+                const tags = pattern.tags || [];
+                if (tags.includes('stance-switch')) return false;
+                const scoped = tags.includes('stance-melee') || tags.includes('stance-ranged');
+                return scoped ? tags.includes(wanted) : true;
+            });
+            if (filtered.length) stancePool = filtered;
+        }
+
         return engine.monsterPatternSelector
-            ? engine.monsterPatternSelector.select(engine.selectedMonster, rageEligible, {
+            ? engine.monsterPatternSelector.select(engine.selectedMonster, stancePool, {
                 state: engine.monsterState,
                 hpRatio: engine.monsterHp / engine.monsterMaxHp,
                 flightState: engine.monsterFlightState,
@@ -674,7 +705,7 @@ class HuntMonsterTurnExecutor {
                 landingPending: Boolean(engine.monsterLandingPending),
                 shortFlightChain: engine.monsterBehavior?.flightMode === 'short-chain'
             })
-            : rageEligible[Math.floor(engine.random() * rageEligible.length)];
+            : stancePool[Math.floor(engine.random() * stancePool.length)];
     }
 
     static prepare(engine) {

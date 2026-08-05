@@ -158,7 +158,7 @@
           "anatomy": true,
           "animationRig": true,
           "roarResolved": true,
-          "audio": false
+          "audio": true
         }
       },
       {
@@ -325,7 +325,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -573,7 +573,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -858,7 +858,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         }
       ]
@@ -923,7 +923,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -1085,7 +1085,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -1208,7 +1208,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -1346,7 +1346,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         }
       ]
@@ -1581,7 +1581,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -1600,7 +1600,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -2003,7 +2003,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -3347,7 +3347,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -4312,7 +4312,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -4547,7 +4547,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -4566,7 +4566,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {
@@ -4975,7 +4975,7 @@
             "anatomy": true,
             "animationRig": true,
             "roarResolved": true,
-            "audio": false
+            "audio": true
           }
         },
         {

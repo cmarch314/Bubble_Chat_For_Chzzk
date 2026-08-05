@@ -69,6 +69,51 @@ const HuntMonsterGeometryChoreography = {
         pattern.runtimeGlideFacingDirection = Math.sign(glideX) || Math.sign(dx) || -1;
     },
 
+    // 회전 축을 헌터 위에 두지 않고 "인접한 두 명 사이"에 놓는다. 각 패스의 쌍
+    // 중점을 --monster-attack-x/y로 덮어써, 회전이 그 둘을 한꺼번에 훑게 만든다.
+    // 두 번째 패스가 있으면 --monster-pivot2-x/y로 함께 넘긴다.
+    'nargacuga-twin-pivot-spin'({ animator, motionElement, pattern, monsterRect, targetRect }) {
+        const pairs = Array.isArray(pattern?.runtimePivotPairs) ? pattern.runtimePivotPairs : [];
+        const monsterCenterX = monsterRect.left + monsterRect.width / 2;
+        const monsterCenterY = monsterRect.top + monsterRect.height / 2;
+        const midpointOf = pair => {
+            const rects = (Array.isArray(pair) ? pair : []).map(index => {
+                const card = animator.card.querySelector(`#fight-card-${index}`);
+                const anchor = card?.querySelector?.('.game-hunt-weapon-img-container') || card;
+                return anchor?.getBoundingClientRect?.() || null;
+            }).filter(Boolean);
+            if (!rects.length) return null;
+            const x = rects.reduce((sum, r) => sum + r.left + r.width / 2, 0) / rects.length;
+            const y = rects.reduce((sum, r) => sum + r.top + r.height / 2, 0) / rects.length;
+            return {
+                x: Math.max(-960, Math.min(960, x - monsterCenterX)),
+                y: Math.max(-240, Math.min(430, y - monsterCenterY))
+            };
+        };
+        const first = midpointOf(pairs[0]) || {
+            x: targetRect.left + targetRect.width / 2 - monsterCenterX,
+            y: targetRect.top + targetRect.height / 2 - monsterCenterY
+        };
+        const second = midpointOf(pairs[1]) || first;
+        motionElement.style.setProperty('--monster-attack-x', `${Math.round(first.x)}px`);
+        motionElement.style.setProperty('--monster-attack-y', `${Math.round(first.y)}px`);
+        motionElement.style.setProperty('--monster-pivot2-x', `${Math.round(second.x)}px`);
+        motionElement.style.setProperty('--monster-pivot2-y', `${Math.round(second.y)}px`);
+    },
+
+    // 평상시 1회전도 같은 규칙으로 두 명 사이를 축으로 삼는다.
+    'nargacuga-pivot-spin'(context) {
+        HuntMonsterGeometryChoreography['nargacuga-twin-pivot-spin'](context);
+    },
+
+    // 견제 도약은 좌/우를 무작위로 고른다. 방향은 패스마다 반대로 뒤집힌다.
+    'nargacuga-stance-hop'({ animator, motionElement, monsterRect }) {
+        const cardRect = animator.card.getBoundingClientRect();
+        const lane = Math.max(220, cardRect.width * .22 + monsterRect.width * .5);
+        const direction = Math.random() < 0.5 ? -1 : 1;
+        motionElement.style.setProperty('--monster-lane-x', `${Math.round(direction * lane)}px`);
+    },
+
     'bazel-carpet-bombing'({ animator, motionElement, pattern, monsterRect, targetCard, targetAnchor, maxX, attackX, attackY }) {
         const cardRect = animator.card.getBoundingClientRect();
         const direction = pattern?.runtimeSweepDirection === 'right-to-left' ? -1 : 1;

@@ -1136,25 +1136,224 @@ worldVariant('tigrex', 'brute_tigrex', 1.08, [
     weight: pattern.tags?.includes('roar') ? Number(pattern.weight || 1) * 1.55 : pattern.weight
 }));
 
-HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = worldFlying([
-    ['nargacuga.roar', '포효', 'roar', 0, { maxTargets: 4, actionClass: 'Roar', tags: ['roar'], weight: .14 }],
-    ['nargacuga.crouch_leap', '자세 낮춘 연속 도약', 'charge', .31, {
-        maxTargets: 2, actionClass: 'PredatorAttackThorn', tags: ['charge', 'multi-hit', 'target-contact'],
-        repeatWhenEnraged: 2, maxConsecutiveUses: 2, chargeMode: 'single', animationProfile: 'agile-leap-chain'
+// 나르가쿠르가 — 흑속의 신속형. 모션 리듬은 표범(웅크림 → 휙! → 착지).
+//
+// 스탠스: 평상시에는 근접/원거리 모드가 30초마다 번갈아 돌아가고, 그 전환은
+// 견제 도약(stance-switch)이 강제 선택되며 이뤄진다. 패턴이 어느 모드에 속하는지는
+// stance-melee / stance-ranged 태그로만 표기한다(공유 코드에 몬스터 id 분기 금지).
+// 태그가 없는 패턴(포효 등)은 양쪽 모드 공용이다.
+// 분노 상태에서는 모드를 무시하고 분노 패턴 전체에서 무작위로 고른다.
+//
+// 시그니처는 "도약 칼날깃 급습": 화면 밖으로 도약해 사라진 뒤 측면·후면에서
+// 한 팔을 내밀며 파고든다. 분노에서는 이탈→공격을 3회 반복하는 연속기가 된다.
+//
+// 모든 impactTimeline의 atTicks는 movement.ticks 이내여야 한다
+// (monster-timing-unification-plan.md INV-2).
+HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
+    'https://monsterhunterrise.wiki.fextralife.com/Nargacuga', [
+    ['nargacuga.roar', '포효', 'roar', 0, {
+        maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar'],
+        weight: 0.13, cooldown: 88, monsterAtbCost: 0.44
     }],
-    ['nargacuga.tail_spin', '꼬리 회전', 'area', .30, {
-        minTargets: 2, maxTargets: 3, actionClass: 'CounterTailAttackL', tags: ['area', 'tail'],
-        repeatWhenEnraged: 2, maxConsecutiveUses: 2, brokenPartDamageModifiers: { tail: .7 }
+
+    // ── 평상시 · 근접 모드 ──────────────────────────────────────────────────
+    ['nargacuga.quick_bite', '재빠른 물어뜯기', 'physical', 0.26, {
+        sourceMoveNameJA: '噛みつき', maxTargets: 1, windup: 5, recovery: 1,
+        forbiddenStates: ['enraged'],
+        tags: ['physical', 'ground-only', 'target-contact', 'weak', 'stance-melee'],
+        monsterAtbCost: 0.30, movement: { ticks: 16 },
+        impactTimeline: [{ atTicks: 11, damageScale: 1 }],
+        animationProfile: 'nargacuga-dash-bite', animationDurationMs: 1600,
+        originPart: 'head', maxConsecutiveUses: 2,
+        brokenPartDamageModifiers: { head: 0.82 }
     }],
-    ['nargacuga.tail_slam', '꼬리 내려찍기', 'physical', .43, {
-        maxTargets: 2, actionClass: 'TailStrike', tags: ['tail', 'target-contact'],
-        repeatWhenEnraged: 2, maxConsecutiveUses: 2, windup: 9, recovery: 13,
-        whiffReaction: { kind: 'stuck', durationTicks: 34 }, brokenPartDamageModifiers: { tail: .65 }
+    // 꼬리는 상단에서 좌상단(←)을 향해 뻗어 있다. 그 꼬리로 찌르듯 135도 반시계로
+    // 쫀득하게 돌려 꽂고, 같은 경로를 역회전으로 되짚어 복귀한다.
+    ['nargacuga.tail_whip', '꼬리 후려치기', 'area', 0.30, {
+        sourceMoveNameJA: '尻尾薙ぎ払い', minTargets: 2, maxTargets: 3, windup: 5, recovery: 1,
+        forbiddenStates: ['enraged'],
+        tags: ['area', 'tail', 'ground-only', 'target-contact', 'stance-melee'],
+        monsterAtbCost: 0.52, movement: { ticks: 24 },
+        targeting: { mode: 'left-right-halves' },
+        impactTimeline: [{ atTicks: 15, damageScale: 1 }],
+        animationProfile: 'nargacuga-tail-whip', animationDurationMs: 2400,
+        originPart: 'tail', statusBlockedWhenBroken: ['tail'],
+        brokenPartDamageModifiers: { tail: 0.68 }
     }],
-    ['nargacuga.spike_volley', '꼬리 가시 발사', 'projectile', .27, {
-        maxTargets: 3, actionClass: 'DTailStrikeBegin', tags: ['projectile', 'tail', 'bleed', 'ground-hazard'],
-        delivery: 'projectile', attachedFx: { emoji: '📌', className: 'tail-spikes', durationMs: 3600 },
-        forbiddenWhenBroken: ['tail']
+    // 오른팔을 축으로 삼으면 좌회전, 왼팔이면 우회전. 1회전.
+    ['nargacuga.tail_sweep', '꼬리 회전', 'area', 0.34, {
+        sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 3, windup: 5, recovery: 1,
+        forbiddenStates: ['enraged'],
+        tags: ['area', 'tail', 'ground-only', 'target-contact', 'stance-melee'],
+        monsterAtbCost: 0.62, movement: { ticks: 26 },
+        targeting: { mode: 'adjacent-pair-pivot' },
+        impactTimeline: [{ atTicks: 18, damageScale: 1 }],
+        animationProfile: 'nargacuga-pivot-spin', animationDurationMs: 2600,
+        originPart: 'tail',
+        brokenPartDamageModifiers: { tail: 0.68 }
+    }],
+    // 분노판과 같은 내려찍기지만 1회. 꼬리가 땅에 박혀 3초(30틱) 후딜을 갖는다.
+    ['nargacuga.spiked_tail_slam', '가시 꼬리 내려찍기', 'physical', 0.47, {
+        sourceMoveNameJA: '棘尻尾叩きつけ', maxTargets: 1, windup: 9, recovery: 30,
+        forbiddenStates: ['enraged'],
+        tags: ['physical', 'tail', 'target-contact', 'strong', 'stance-melee'],
+        monsterAtbCost: 0.72, movement: { ticks: 30 },
+        impactTimeline: [{ atTicks: 22, damageScale: 1 }],
+        animationProfile: 'nargacuga-turn-tail-slam', animationDurationMs: 3000,
+        originPart: 'tail',
+        whiffReaction: { kind: 'stuck', durationTicks: 30 },
+        statusBlockedWhenBroken: ['tail'],
+        brokenPartDamageModifiers: { tail: 0.65 }
+    }],
+
+    // ── 평상시 · 원거리 모드 ────────────────────────────────────────────────
+    // 측면으로 도약한 뒤 표적 방향으로 화면 밖까지 꿰뚫는다.
+    ['nargacuga.cutwing_barrage', '칼날깃 연격', 'charge', 0.34, {
+        sourceMoveNameJA: '斬翅連撃', minTargets: 1, maxTargets: 2, windup: 6, recovery: 1,
+        forbiddenStates: ['enraged'],
+        tags: ['charge', 'ground-only', 'target-contact', 'stance-ranged'],
+        monsterAtbCost: 0.58, movement: { ticks: 34, untargetable: true },
+        targeting: { mode: 'adjacent-lane' },
+        impactTimeline: [{ atTicks: 24, damageScale: 1 }],
+        animationProfile: 'nargacuga-flank-charge', animationDurationMs: 3400,
+        brokenPartDamageModifiers: { 'left-wing': 0.78, 'right-wing': 0.78 }
+    }],
+    // 시그니처. 화면 밖으로 도약해 사라진 뒤 측면·후면에서 한 팔을 내밀며 파고든다.
+    ['nargacuga.leaping_cutwing', '도약 칼날깃 급습', 'charge', 0.42, {
+        sourceMoveNameJA: '跳躍斬翅', minTargets: 1, maxTargets: 1, windup: 8, recovery: 1,
+        forbiddenStates: ['enraged'], cooldown: 46, weight: 1.15,
+        tags: ['charge', 'ambush', 'vanish', 'target-contact', 'strong', 'stance-ranged'],
+        monsterAtbCost: 0.74,
+        movement: { ticks: 40, untargetable: true },
+        impactTimeline: [{ atTicks: 29, damageScale: 1 }],
+        animationProfile: 'nargacuga-leap-ambush', animationDurationMs: 4000,
+        originPart: 'left-wing',
+        brokenPartDamageModifiers: { 'left-wing': 0.76, 'right-wing': 0.76 }
+    }],
+    // 화면 밖으로 빠진 뒤 돌진 모션으로 되돌아온다.
+    ['nargacuga.lunge_chain', '연속 런지 돌진', 'charge', 0.35, {
+        sourceMoveNameJA: '連続突進', minTargets: 1, maxTargets: 2,
+        windup: 6, recovery: 1, forbiddenStates: ['enraged'], cooldown: 40,
+        tags: ['charge', 'ground-only', 'target-contact', 'stance-ranged'],
+        monsterAtbCost: 0.70,
+        movement: { ticks: 42, untargetable: true },
+        impactTimeline: [{ atTicks: 31, damageScale: 1 }],
+        animationProfile: 'nargacuga-offscreen-charge', animationDurationMs: 4200
+    }],
+    ['nargacuga.quill_shot', '가시깃 사출', 'projectile', 0.33, {
+        sourceMoveNameJA: '棘飛ばし', minTargets: 1, maxTargets: 3, windup: 5, recovery: 1,
+        tags: ['projectile', 'tail', 'bleed', 'ground-hazard', 'stance-ranged'],
+        monsterAtbCost: 0.48,
+        delivery: 'projectile', movement: { ticks: 26 },
+        projectileLaunchDelayTicks: 9,
+        impactTimeline: [
+            { atTicks: 15, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 23, targetMode: 'sequential', damageScale: 0.80 }
+        ],
+        animationProfile: 'ranged-cast', animationDurationMs: 2600,
+        originPart: 'tail',
+        // 가시깃은 던지는 칼날이다. 카드 다이아 기호를 CSS에서 남색으로 칠해 쓴다.
+        attachedFx: { emoji: '♦', className: 'tail-spikes', durationMs: 2600 },
+        forbiddenWhenBroken: ['tail'],
+        brokenPartDamageModifiers: { tail: 0.70 }
+    }],
+
+    // ── 모드 전환 ───────────────────────────────────────────────────────────
+    // 30초마다 강제 선택되어 근접↔원거리 모드를 바꾼다. 화면 밖으로 도약해 사라졌다가
+    // 제자리에 Fade in으로 돌아오며, 좌/우를 무작위로 골라 2회 연속으로 뛴다.
+    ['nargacuga.reposition_hop', '견제 도약', 'physical', 0.22, {
+        sourceMoveNameJA: '牽制跳躍', maxTargets: 1, windup: 4, recovery: 1,
+        tags: ['physical', 'mobility', 'vanish', 'stance-switch'],
+        monsterAtbCost: 0.26,
+        movement: { ticks: 30, untargetable: true },
+        impactTimeline: [{ atTicks: 24, damageScale: 1 }],
+        animationProfile: 'nargacuga-stance-hop', animationDurationMs: 3000,
+        weight: 0.35, maxConsecutiveUses: 1
+    }],
+
+    // ── 분노 전용 (모드 무시, 전부 원거리에서 파고든다) ─────────────────────
+    // 도약해 깨물고, 꼬리를 회전시키며 제자리로 돌아온다. 두 동작 모두 타격이다.
+    ['nargacuga.double_bite', '연속 물어뜯기', 'physical', 0.36, {
+        sourceMoveNameJA: '連続噛みつき', minTargets: 1, maxTargets: 2,
+        windup: 5, recovery: 1, state: 'enraged', cooldown: 30,
+        tags: ['physical', 'target-contact', 'multi-hit'], monsterAtbCost: 0.56,
+        movement: { ticks: 36, untargetable: true },
+        targeting: { mode: 'independent-passes', passCount: 2 },
+        impactTimeline: [
+            { atTicks: 16, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 30, targetMode: 'sequential', damageScale: 0.82 }
+        ],
+        animationProfile: 'nargacuga-bite-spin-return', animationDurationMs: 3600,
+        originPart: 'head',
+        brokenPartDamageModifiers: { head: 0.82, tail: 0.74 }
+    }],
+    // 이탈 → 공격을 3회 반복하고 제자리로 회귀한다(회귀 시 후딜 음성).
+    ['nargacuga.leaping_cutwing_triple', '도약 칼날깃 3연 급습', 'charge', 0.42, {
+        sourceMoveNameJA: '跳躍斬翅・三連', minTargets: 1, maxTargets: 3,
+        windup: 9, recovery: 12, state: 'enraged', cooldown: 62, weight: 0.46,
+        tags: ['charge', 'ambush', 'vanish', 'target-contact', 'multi-hit', 'strong'],
+        monsterAtbCost: 0.92,
+        movement: { ticks: 66, untargetable: true },
+        targeting: { mode: 'independent-passes', passCount: 3 },
+        impactTimeline: [
+            { atTicks: 22, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 38, targetMode: 'sequential', damageScale: 0.92 },
+            { atTicks: 54, targetMode: 'sequential', damageScale: 0.92 }
+        ],
+        animationProfile: 'nargacuga-leap-ambush-triple', animationDurationMs: 6600,
+        originPart: 'left-wing',
+        brokenPartDamageModifiers: { 'left-wing': 0.76, 'right-wing': 0.76 }
+    }],
+    // 우측 팔을 축으로 좌회전, 이어서 좌측 팔을 축으로 우회전. 주먹을 휘두르는 느낌.
+    // 축은 헌터 위치가 아니라 인접한 두 명 사이에 놓여, 회전이 그 둘을 함께 훑는다.
+    ['nargacuga.tail_sweep_reverse', '역회전 연계 꼬리 회전', 'area', 0.34, {
+        sourceMoveNameJA: '尻尾回転・逆回転', minTargets: 2, maxTargets: 4,
+        windup: 5, recovery: 1, state: 'enraged', cooldown: 44,
+        tags: ['area', 'tail', 'target-contact', 'multi-hit'],
+        monsterAtbCost: 0.78, movement: { ticks: 44 },
+        targeting: { mode: 'adjacent-pair-pivot', passCount: 2 },
+        impactTimeline: [
+            { atTicks: 18, targetMode: 'pair', damageScale: 1 },
+            { atTicks: 38, targetMode: 'pair', damageScale: 1 }
+        ],
+        animationProfile: 'nargacuga-twin-pivot-spin', animationDurationMs: 4400,
+        originPart: 'tail', brokenPartTargetCaps: { tail: 2 },
+        brokenPartDamageModifiers: { tail: 0.68 }
+    }],
+    // 헌터 앞으로 펄쩍 뛰어 붙고 꼬리를 살랑인 뒤, 뒤돌며 늘어난 형상이 내리꽂힌다.
+    // 뒤돌기와 내려치기는 한 동작으로 매우 빠르게 일어난다. 2회 내려친 뒤 꼬리가
+    // 땅에 박혀 3초(30틱) 후딜을 갖고, 제자리로 뛰어서 복귀한다.
+    ['nargacuga.furious_tail_slam', '격노 연속 꼬리 내려찍기', 'physical', 0.47, {
+        sourceMoveNameJA: '激昂尻尾連続叩きつけ', minTargets: 1, maxTargets: 2,
+        windup: 11, recovery: 30, state: 'enraged', cooldown: 58, weight: 0.52,
+        tags: ['physical', 'tail', 'target-contact', 'multi-hit', 'strong'],
+        monsterAtbCost: 0.88, movement: { ticks: 54 },
+        targeting: { mode: 'independent-passes', passCount: 2 },
+        impactTimeline: [
+            { atTicks: 26, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 44, targetMode: 'sequential', damageScale: 1 }
+        ],
+        animationProfile: 'nargacuga-turn-tail-slam-double', animationDurationMs: 5400,
+        originPart: 'tail',
+        whiffReaction: { kind: 'stuck', durationTicks: 30 },
+        statusBlockedWhenBroken: ['tail'], brokenPartTargetCaps: { tail: 1 },
+        brokenPartDamageModifiers: { tail: 0.65 }
+    }],
+    // 3연 급습과 같은 이탈·급습 리듬이되, 마지막은 평범한 돌진으로 마무리한다.
+    // 복귀 후 후딜과 함께 특유의 연계기 종료 음성이 재생된다.
+    ['nargacuga.lunge_chain_triple', '3연 런지 돌진', 'charge', 0.35, {
+        sourceMoveNameJA: '三連突進', minTargets: 1, maxTargets: 3,
+        windup: 6, recovery: 14, state: 'enraged', cooldown: 56, weight: 0.5,
+        tags: ['charge', 'target-contact', 'multi-hit'],
+        monsterAtbCost: 0.86,
+        movement: { ticks: 72, untargetable: true },
+        targeting: { mode: 'independent-passes', passCount: 3 },
+        impactTimeline: [
+            { atTicks: 22, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 40, targetMode: 'sequential', damageScale: 0.92 },
+            { atTicks: 62, targetMode: 'sequential', damageScale: 1, audioCue: 'narga-combo-finish' }
+        ],
+        animationProfile: 'nargacuga-lunge-finish', animationDurationMs: 7200
     }]
 ]);
 
@@ -1257,7 +1456,7 @@ worldVariant('rathalos', 'silver_rathalos', 1.10, [
     );
 });
 HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga.map(pattern =>
-    pattern.id === 'nargacuga.spike_volley'
+    pattern.id === 'nargacuga.quill_shot'
         ? { ...pattern, weightWhenTraits: { ...(pattern.weightWhenTraits || {}), 'rage-eyes': 1.8 } }
         : pattern
 );

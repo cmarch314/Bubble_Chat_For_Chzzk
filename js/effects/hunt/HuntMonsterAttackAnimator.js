@@ -1390,7 +1390,10 @@ class HuntMonsterAttackAnimator {
             { id: 'dragon', test: /(^|\s)dragon(\s|$)|광룡|용속성|광기|흑룡|용기/, emoji: '🐉', color: '#d641ff', hot: '#ffb8ff', shadow: '#35005f' },
             { id: 'poison', test: /(^|\s)poison(\s|$)|독|맹독|독조|독액/, emoji: '☠️', color: '#b542ff', hot: '#f4d5ff', shadow: '#35005f' },
             { id: 'blast', test: /(^|\s)blast(\s|$)|폭발|폭파|점균|대재앙|혜성/, emoji: '💥', color: '#ff7b22', hot: '#ffffff', shadow: '#a40037' },
-            { id: 'wind', test: /(^|\s)wind(\s|$)|바람|폭풍|회오리|진공|분사/, emoji: '🌪️', color: '#baffdc', hot: '#ffffff', shadow: '#247f75' }
+            { id: 'wind', test: /(^|\s)wind(\s|$)|바람|폭풍|회오리|진공|분사/, emoji: '🌪️', color: '#baffdc', hot: '#ffffff', shadow: '#247f75' },
+            // 던지는 칼날(가시깃 등)은 속성탄이 아니다. 속성 판정을 모두 지나친 뒤에만
+            // 걸리도록 마지막에 둔다. 이게 없으면 arcane 폴백의 보라색 구체가 날아간다.
+            { id: 'quill', test: /(^|\s)bleed(\s|$)|가시깃|가시|열상|칼날|참격/, emoji: '♦', color: '#3a53d8', hot: '#c3d0ff', shadow: '#0b1440' }
         ];
         return themes.find(theme => theme.test.test(name)) || {
             id: 'arcane', emoji: '✨', color: '#d966ff', hot: '#ffffff', shadow: '#5322a8'

@@ -17,7 +17,7 @@
     "verifiedRoarPresence": 171,
     "verifiedRoarAbsence": 87,
     "unresolvedLargeRoar": 0,
-    "verifiedRoarAudio": 8
+    "verifiedRoarAudio": 32
   },
   "unresolved": {
     "images": [],
@@ -280,8 +280,6 @@
       "apex_arzuros",
       "apex_diablos",
       "apex_mizutsune",
-      "apex_rathalos",
-      "apex_rathian",
       "apex_zinogre",
       "arkveld",
       "astalos",
@@ -291,7 +289,6 @@
       "barioth",
       "barroth",
       "basarios",
-      "bazelgeuse",
       "behemoth",
       "beotodus",
       "bishaten",
@@ -301,7 +298,6 @@
       "bloodbath_diablos",
       "boltreaver_astalos",
       "brachydios",
-      "brute_tigrex",
       "chameleos",
       "chaotic_gore_magala",
       "chatacabra",
@@ -311,11 +307,8 @@
       "crimson_glow_valstrax",
       "crystalbeard_uragaan",
       "deadeye_yian_garuga",
-      "deviljho",
       "dodogama",
       "doshaguma",
-      "dreadking_rathalos",
-      "dreadqueen_rathian",
       "drilltusk_tetsucabra",
       "duramboros",
       "ebony_odogaron",
@@ -325,7 +318,6 @@
       "flaming_espinas",
       "frostfang_barioth",
       "fulgur_anjanath",
-      "furious_rajang",
       "gaismagorm",
       "gammoth",
       "garangolm",
@@ -340,23 +332,18 @@
       "guardian_doshaguma",
       "guardian_ebony_odogaron",
       "guardian_fulgur_anjanath",
-      "guardian_rathalos",
       "gypceros",
       "hellblade_glavenus",
       "hirabami",
       "jin_dahaad",
-      "jyuratodus",
       "kecha_wacha",
       "khezu",
       "kulve_taroth",
-      "kushala_daora",
       "lagiacrus",
       "lala_barina",
       "lao_shan_lung",
-      "legiana",
       "lucent_nargacuga",
       "lunagaron",
-      "lunastra",
       "magma_almudron",
       "magnamalo",
       "malfestio",
@@ -365,7 +352,6 @@
       "najarala",
       "nakarkos",
       "namielle",
-      "nargacuga",
       "narwa_the_allmother",
       "nergigante",
       "nightcloak_malfestio",
@@ -381,7 +367,6 @@
       "quematrice",
       "radobaan",
       "raging_brachydios",
-      "rajang",
       "rakna_kadaki",
       "redhelm_arzuros",
       "rey_dau",
@@ -393,25 +378,19 @@
       "rompopolo",
       "ruiner_nergigante",
       "safi'jiiva",
-      "savage_deviljho",
-      "scarred_yian_garuga",
       "scorned_magnamalo",
-      "seething_bazelgeuse",
       "seregios",
       "shagaru_magala",
       "shara_ishvalda",
-      "shrieking_legiana",
       "silverwind_nargacuga",
       "snowbaron_lagombi",
       "somnacanth",
       "soulseer_mizutsune",
       "stygian_zinogre",
-      "teostra",
       "tetranadon",
       "tetsucabra",
       "thunder_serpent_narwa",
       "thunderlord_zinogre",
-      "tigrex",
       "tobi-kadachi",
       "ukanlos",
       "uragaan",
@@ -424,7 +403,6 @@
       "wind_serpent_ibushi",
       "xeno'jiiva",
       "xu_wu",
-      "yian_garuga",
       "yian_kut_ku",
       "zamtrios",
       "zinogre",
@@ -965,7 +943,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "bipedal"
       }
@@ -1217,7 +1195,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -1239,7 +1217,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -1266,7 +1244,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -1519,7 +1497,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -1569,7 +1547,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "serpentine"
       }
@@ -1614,13 +1592,14 @@
           "rathalos-fireball",
           "rathalos-backstep-fireball",
           "rathalos-claw-dive",
+          "rathalos-tail-sweep-double",
           "tail-sweep",
           "rathalos-stomp",
           "aerial-charge-cross",
           "aerial-dive"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "winged"
@@ -1799,7 +1778,7 @@
         ],
         "deliveryProfiles": [
           "projectile",
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -1960,11 +1939,11 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 7,
+        "count": 8,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -1976,13 +1955,15 @@
         "semanticProfiles": [
           "roar",
           "close-strike",
+          "ground-charge",
+          "side-tackle-contact",
           "tail-sweep",
+          "leap-slam",
           "ranged-cast",
-          "area-burst",
-          "aerial-dive"
+          "bazel-carpet-bombing"
         ],
         "deliveryProfiles": [
-          "projectile"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -2139,7 +2120,7 @@
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 10,
+        "count": 11,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -2152,16 +2133,17 @@
           "roar",
           "ground-charge",
           "burrow-enter",
+          "burrow-emerge",
           "horn-uppercut",
           "horn-sweep-contact",
-          "tail-sweep",
+          "diablos-tail-cross",
           "tail-slam-rock",
           "close-strike",
           "side-tackle-contact",
           "ground-charge-double"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "winged"
@@ -2293,7 +2275,7 @@
           "leap-slam"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "quadruped"
@@ -2616,11 +2598,11 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhw-executable-action-enumeration",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 8,
+        "count": 12,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -2632,14 +2614,17 @@
       "animation": {
         "semanticProfiles": [
           "roar",
-          "close-strike",
-          "ground-charge-zigzag",
-          "body-spin",
-          "ground-charge",
-          "leap-slam"
+          "tigrex-foreleg-slam",
+          "tigrex-bite",
+          "tigrex-double-bite",
+          "tigrex-charge-chain",
+          "tigrex-clockwise-spin",
+          "tigrex-rock-shot",
+          "tigrex-leap"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas",
+          "projectile"
         ],
         "rig": "winged"
       }
@@ -2761,7 +2746,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "arthropod"
       }
@@ -2805,7 +2790,7 @@
           "lateral-sweep"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "serpentine"
       }
@@ -2848,7 +2833,7 @@
           "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "serpentine"
       }
@@ -2945,7 +2930,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -3346,7 +3331,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "arthropod"
       }
@@ -3457,7 +3442,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "published-earplugs-test",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -3507,7 +3492,7 @@
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 10,
+        "count": 11,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -3520,16 +3505,17 @@
           "roar",
           "ground-charge",
           "burrow-enter",
+          "burrow-emerge",
           "horn-uppercut",
           "horn-sweep-contact",
-          "tail-sweep",
+          "diablos-tail-cross",
           "tail-slam-rock",
           "close-strike",
           "side-tackle-contact",
           "ground-charge-double"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "winged"
@@ -3642,7 +3628,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mh4info-mhxx-named-attack-table",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -3664,7 +3650,7 @@
           "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -3688,7 +3674,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mh4info-mhxx-named-attack-table",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -3711,7 +3697,7 @@
           "lateral-sweep"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -3844,7 +3830,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "quadruped"
       }
@@ -4068,7 +4054,7 @@
         ],
         "deliveryProfiles": [
           "projectile",
-          "stream",
+          "gas",
           "ground-wave"
         ],
         "rig": "winged"
@@ -4114,7 +4100,7 @@
           "pounce-chain"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "bipedal"
       }
@@ -4140,7 +4126,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -4296,7 +4282,7 @@
           "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "quadruped"
@@ -4761,20 +4747,21 @@
         "semanticProfiles": [
           "roar",
           "rathalos-bite-contact",
-          "tail-sweep-double",
+          "rathian-tail-sweep-double",
           "rathalos-fireball",
           "rathian-triple-fireball",
-          "ground-charge",
+          "rathian-ground-charge",
           "ground-charge-triple",
           "rathian-somersault",
           "rathian-somersault-double",
           "rathian-bite-somersault",
           "rathian-somersault-glide",
           "rathian-glide",
-          "ranged-cast"
+          "ranged-cast",
+          "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile",
           "ground-wave"
         ],
@@ -4823,7 +4810,7 @@
           "body-spin"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -4872,7 +4859,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "quadruped"
       }
@@ -5091,7 +5078,7 @@
           "lateral-sweep"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -5440,7 +5427,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "quadruped"
       }
@@ -5510,7 +5497,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "installed-game-action-id+action-param",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -5577,7 +5564,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -5624,7 +5611,7 @@
           "aerial-dive"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "bipedal"
       }
@@ -5867,7 +5854,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -6059,7 +6046,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -6293,7 +6280,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -6317,7 +6304,7 @@
       "roar": {
         "status": "verified-absent",
         "evidence": "game-e-mhxx-named-attack-pattern-guide",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -6492,7 +6479,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -6514,7 +6501,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -6558,7 +6545,7 @@
           "area-burst"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "serpentine"
       }
@@ -6756,7 +6743,7 @@
       "roar": {
         "status": "verified-absent",
         "evidence": "game-e-mhxx-named-attack-pattern-guide",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -6799,11 +6786,11 @@
       "roar": {
         "status": "verified-present",
         "evidence": "published-earplugs-test",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 6,
+        "count": 10,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -6814,13 +6801,16 @@
       "animation": {
         "semanticProfiles": [
           "roar",
+          "legiana-hop-strike",
+          "ground-charge",
+          "tail-sweep",
+          "aerial-dive",
           "lateral-sweep",
-          "close-strike",
-          "aerial-dive"
+          "legiana-drill-cross"
         ],
         "deliveryProfiles": [
-          "cone",
-          "stream"
+          "gas",
+          "attached"
         ],
         "rig": "winged"
       }
@@ -6999,7 +6989,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "quadruped"
       }
@@ -7023,7 +7013,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "published-earplugs-test",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -7528,7 +7518,7 @@
           "body-spin"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "elder"
@@ -7601,27 +7591,35 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 5,
+        "count": 14,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
         "evidence": [
-          "world-installed-action+ja-web-review"
+          "verified-complete-action"
         ]
       },
       "animation": {
         "semanticProfiles": [
           "roar",
+          "close-strike",
           "pounce-chain",
+          "ground-charge",
+          "nargacuga-leap-ambush",
+          "nargacuga-leap-ambush-triple",
+          "aerial-dive",
           "tail-sweep",
+          "body-spin",
+          "tail-sweep-double",
+          "leap-slam",
           "ranged-cast"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "winged"
@@ -7670,7 +7668,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -7799,7 +7797,7 @@
           "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "serpentine"
@@ -7889,7 +7887,7 @@
           "aerial-charge-cross"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -8066,7 +8064,7 @@
         ],
         "deliveryProfiles": [
           "projectile",
-          "stream"
+          "gas"
         ],
         "rig": "elder"
       }
@@ -8112,7 +8110,7 @@
           "pounce-chain"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "machine"
       }
@@ -8155,7 +8153,7 @@
           "aerial-dive"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -8196,10 +8194,10 @@
         "semanticProfiles": [
           "roar",
           "rathalos-bite-contact",
-          "tail-sweep-double",
+          "rathian-tail-sweep-double",
           "rathalos-fireball",
           "rathian-triple-fireball",
-          "ground-charge",
+          "rathian-ground-charge",
           "ground-charge-triple",
           "rathian-somersault",
           "rathian-somersault-double",
@@ -8209,7 +8207,7 @@
           "lateral-sweep"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "winged"
@@ -8253,7 +8251,7 @@
           "ranged-cast"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "serpentine"
       }
@@ -8431,7 +8429,7 @@
           "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "arthropod"
       }
@@ -8563,7 +8561,7 @@
           "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "arthropod"
       }
@@ -8672,7 +8670,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -8828,12 +8826,13 @@
           "rathalos-fireball",
           "rathalos-backstep-fireball",
           "rathalos-claw-dive",
+          "rathalos-tail-sweep-double",
           "tail-sweep",
           "rathalos-stomp",
           "aerial-charge-cross"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "winged"
@@ -8877,10 +8876,10 @@
         "semanticProfiles": [
           "roar",
           "rathalos-bite-contact",
-          "tail-sweep-double",
+          "rathian-tail-sweep-double",
           "rathalos-fireball",
           "rathian-triple-fireball",
-          "ground-charge",
+          "rathian-ground-charge",
           "ground-charge-triple",
           "rathian-somersault",
           "rathian-somersault-double",
@@ -8889,7 +8888,7 @@
           "rathian-glide"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "winged"
@@ -9208,7 +9207,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -9258,7 +9257,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -9307,7 +9306,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -9400,7 +9399,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "serpentine"
       }
@@ -9484,7 +9483,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "arthropod"
       }
@@ -9552,7 +9551,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "published-earplugs-test",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -9573,7 +9572,7 @@
           "pounce-chain"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "bipedal"
       }
@@ -9597,7 +9596,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "published-earplugs-test",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -9691,11 +9690,11 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 9,
+        "count": 10,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -9708,14 +9707,16 @@
         "semanticProfiles": [
           "roar",
           "close-strike",
+          "ground-charge",
+          "side-tackle-contact",
           "tail-sweep",
+          "leap-slam",
           "ranged-cast",
-          "area-burst",
+          "bazel-carpet-bombing",
           "aerial-dive"
         ],
         "deliveryProfiles": [
-          "projectile",
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -9800,7 +9801,7 @@
           "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "arthropod"
       }
@@ -9898,7 +9899,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -10054,11 +10055,11 @@
       "roar": {
         "status": "verified-present",
         "evidence": "published-earplugs-test",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 7,
+        "count": 11,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -10070,13 +10071,16 @@
       "animation": {
         "semanticProfiles": [
           "roar",
+          "legiana-hop-strike",
+          "ground-charge",
+          "tail-sweep",
+          "aerial-dive",
           "lateral-sweep",
-          "close-strike",
-          "aerial-dive"
+          "legiana-drill-cross"
         ],
         "deliveryProfiles": [
-          "cone",
-          "stream"
+          "gas",
+          "attached"
         ],
         "rig": "winged"
       }
@@ -10124,13 +10128,14 @@
           "rathalos-fireball",
           "rathalos-backstep-fireball",
           "rathalos-claw-dive",
+          "rathalos-tail-sweep-double",
           "tail-sweep",
           "rathalos-stomp",
           "aerial-charge-cross",
           "aerial-dive"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "winged"
@@ -10359,7 +10364,7 @@
         ],
         "deliveryProfiles": [
           "projectile",
-          "stream"
+          "gas"
         ],
         "rig": "serpentine"
       }
@@ -10403,7 +10408,7 @@
           "aerial-dive"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "arthropod"
@@ -10473,7 +10478,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -10495,7 +10500,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -10635,7 +10640,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "serpentine"
       }
@@ -10708,11 +10713,11 @@
       "roar": {
         "status": "verified-present",
         "evidence": "mhrice-installed-move-table-and-internal-species",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 6,
+        "count": 10,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -10723,14 +10728,17 @@
       "animation": {
         "semanticProfiles": [
           "roar",
-          "close-strike",
-          "ground-charge-zigzag",
-          "body-spin",
-          "ground-charge",
-          "leap-slam"
+          "tigrex-foreleg-slam",
+          "tigrex-bite",
+          "tigrex-double-bite",
+          "tigrex-charge-chain",
+          "tigrex-clockwise-spin",
+          "tigrex-rock-shot",
+          "tigrex-leap"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas",
+          "projectile"
         ],
         "rig": "winged"
       }
@@ -11130,7 +11138,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -11387,7 +11395,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "quadruped"
       }
@@ -11646,7 +11654,7 @@
           "area-burst"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "elder"
       }
@@ -11670,7 +11678,7 @@
       "roar": {
         "status": "verified-present",
         "evidence": "game-e-mhxx-named-attack-pattern-guide",
-        "audioStatus": "unresolved"
+        "audioStatus": "verified-exact-or-labelled-shared"
       },
       "patterns": {
         "status": "source-derived-candidate",
@@ -11733,7 +11741,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "winged"
       }
@@ -11776,7 +11784,7 @@
           "close-strike"
         ],
         "deliveryProfiles": [
-          "stream"
+          "gas"
         ],
         "rig": "quadruped"
       }
@@ -11821,7 +11829,7 @@
           "ground-charge"
         ],
         "deliveryProfiles": [
-          "stream",
+          "gas",
           "projectile"
         ],
         "rig": "quadruped"

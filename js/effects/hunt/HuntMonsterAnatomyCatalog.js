@@ -125,14 +125,19 @@ class HuntMonsterAnatomyCatalog {
             })
         }),
         nargacuga: Object.freeze({
+            // 머리는 중앙 하단, 앞발은 하단 좌우, 앞발의 칼날(cutwing)은 그 위로
+            // 좌우 면 전체를 차지한다. 몸통은 중앙, 꼬리는 우상단에서 몸통과
+            // 이어져 좌상단을 향해 뻗는다.
             sourceSize: Object.freeze({ width: 512, height: 512 }),
             baseFacing: 'front',
             parts: Object.freeze({
-                head: Object.freeze({ x: .50, y: .74 }),
+                head: Object.freeze({ x: .50, y: .82 }),
                 torso: Object.freeze({ x: .50, y: .52 }),
-                'left-wing': Object.freeze({ x: .20, y: .56 }),
-                'right-wing': Object.freeze({ x: .80, y: .56 }),
-                tail: Object.freeze({ x: .53, y: .20 })
+                'left-foreleg': Object.freeze({ x: .29, y: .86 }),
+                'right-foreleg': Object.freeze({ x: .71, y: .86 }),
+                'left-wing': Object.freeze({ x: .15, y: .58 }),
+                'right-wing': Object.freeze({ x: .85, y: .58 }),
+                tail: Object.freeze({ x: .30, y: .17 })
             })
         }),
         barioth: Object.freeze({
