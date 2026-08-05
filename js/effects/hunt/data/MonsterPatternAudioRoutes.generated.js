@@ -79,16 +79,6 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
           ]
         ]
       },
-      "impact": {
-        "label": null,
-        "layers": [
-          [
-            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_154_558621121.mp3",
-            0.7,
-            0
-          ]
-        ]
-      },
       "launch": {
         "label": null,
         "layers": [
@@ -98,14 +88,44 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
             0
           ]
         ]
-      }
-    },
-    "rathian.bite_somersault": {
-      "start": {
+      },
+      "impact-1": {
         "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_009_37311349.mp3",
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_012_44522100.mp3",
+            0.7,
+            0
+          ]
+        ]
+      },
+      "impact-2": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_012_44522100.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "rathian.bite_somersault": {
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_047_287664299.mp3",
+            0.72,
+            0
+          ]
+        ]
+      },
+      "impact:somersault": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_202_791090498.mp3",
             0.7,
             0
           ]
@@ -221,12 +241,12 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
           ]
         ]
       },
-      "start": {
+      "telegraph": {
         "label": null,
         "layers": [
           [
             "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_027_137441638.mp3",
-            0.7,
+            0.72,
             0
           ]
         ]
@@ -287,22 +307,22 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
       }
     },
     "rathian.double_somersault": {
-      "start": {
+      "impact:somersault": {
         "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_027_137441638.mp3",
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_202_791090498.mp3",
             0.7,
             0
           ]
         ]
       },
-      "impact:somersault": {
+      "telegraph": {
         "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_047_287664299.mp3",
-            0.7,
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_027_137441638.mp3",
+            0.72,
             0
           ]
         ]
@@ -313,18 +333,28 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_016_96329089.mp3",
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_202_791090498.mp3",
             0.7,
             0
           ]
         ]
       },
-      "start": {
+      "telegraph": {
         "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_073_525727720.mp3",
-            0.7,
+            "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_047_287664299.mp3",
+            0.72,
+            0
+          ]
+        ]
+      },
+      "impact-2": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_202_791090498.mp3",
+            0.62,
             0
           ]
         ]

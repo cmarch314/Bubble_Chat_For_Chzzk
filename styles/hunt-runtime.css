@@ -1574,8 +1574,11 @@
 .monster-motion-rathian-somersault { animation:monster-motion-rathian-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-somersault-double { animation:monster-motion-rathian-somersault-double var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-bite-somersault { animation:monster-motion-rathian-bite-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
-.monster-motion-rathian-somersault-glide { animation:monster-motion-rathian-somersault-glide var(--monster-motion-duration) cubic-bezier(.33,0,.2,1) both !important; transform-origin:58% 62%; }
-.monster-motion-rathian-glide { animation:monster-motion-rathian-glide var(--monster-motion-duration) cubic-bezier(.33,0,.2,1) both !important; }
+/* 활공은 연속 궤적이므로 반드시 linear. cubic-bezier는 키프레임 "구간마다"
+   적용되어 S자 키프레임 하나하나에서 감속→가속이 반복된다(멈칫거리다 튀는 원인).
+   곡선감은 이징이 아니라 키프레임 밀도로 표현한다. */
+.monster-motion-rathian-somersault-glide { animation:monster-motion-rathian-somersault-glide var(--monster-motion-duration) linear both !important; transform-origin:58% 62%; }
+.monster-motion-rathian-glide { animation:monster-motion-rathian-glide var(--monster-motion-duration) linear both !important; }
 .monster-motion-rath-flight-stagger { animation:monster-motion-rath-flight-stagger var(--monster-motion-duration) ease-in-out both !important; }
 .monster-motion-rath-flight-wobble { animation:monster-motion-rath-flight-wobble var(--monster-motion-duration) ease-in-out both !important; }
 .monster-motion-bazel-carpet-bombing {
@@ -1743,10 +1746,14 @@
 }
 @keyframes monster-motion-close-strike-serpentine { 0%,100%{transform:none} 18%{transform:translateX(calc(var(--monster-attack-x)*-.16)) rotate(-10deg) scale(.96,1.02)} 48%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(5deg) scale(1.06,.98)} 70%{transform:translate(calc(var(--monster-attack-x)*.66),calc(var(--monster-attack-y)*.55)) rotate(-7deg)} }
 @keyframes monster-motion-close-strike-arthropod { 0%,100%{transform:none} 14%{transform:translate(-28px,18px) rotate(-5deg) scale(1.06,.86)} 34%{transform:translate(34px,-8px) rotate(5deg) scale(.96,1.05)} 55%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-2deg) scale(1.08)} 72%{transform:translate(calc(var(--monster-attack-x)*.7),0) rotate(2deg)} }
+/* 등속 돌진: 발돋움(12%) 이후 퇴장(57%)까지 변위가 시간에 정비례한다.
+   기존 x는 38%에서 .48로 뒤처졌다가 막판에 몰아쳐 "느리게 출발해 빨라지는" 느낌을 냈다. */
 @keyframes monster-motion-ground-charge {
-    0%{transform:none;opacity:1} 10%{transform:translateY(24px) scale(.9,1.08)}
-    22%{transform:translate(calc(var(--monster-attack-x)*.22),150px) scale(1.08)}
-    38%{transform:translate(calc(var(--monster-attack-x)*.48),360px) scale(1.28)}
+    0%{transform:none;opacity:1} 6%{transform:translateY(24px) scale(.92,1.08)}
+    12%{transform:translateY(-3px) scale(1.03,.97)}
+    23%{transform:translate(calc(var(--monster-attack-x)*.244),calc(var(--monster-charge-bottom)*.244)) scale(1.15)}
+    34%{transform:translate(calc(var(--monster-attack-x)*.489),calc(var(--monster-charge-bottom)*.489)) scale(1.31)}
+    46%{transform:translate(calc(var(--monster-attack-x)*.756),calc(var(--monster-charge-bottom)*.756)) scale(1.48)}
     57%{transform:translate(var(--monster-attack-x),var(--monster-charge-bottom)) scale(1.62);opacity:1}
     58%{transform:translate(var(--monster-attack-x),var(--monster-charge-bottom)) scale(1.62);opacity:0}
     63%{transform:translate(calc(var(--monster-attack-x)*-.28),calc(var(--monster-charge-top)*-1)) scale(.72);opacity:0}
@@ -1910,10 +1917,18 @@
   48.3%{transform:translate(var(--tigrex-pass-2-x),var(--tigrex-pass-2-y)) scale(1.12);opacity:1}
   72.2%,100%{transform:translate(var(--tigrex-exit-2-x),var(--tigrex-exit-2-y)) scale(1.12);opacity:1}
 }
+/* 돌진은 발돋움(12%) 이후 퇴장(73%)까지 등속이다. 느리게 출발해 빨라지지 않는다.
+   exitFromHome()이 접촉점을 양의 배율로 늘린 값이라 홈→접촉→퇴장은 한 직선이므로,
+   변위를 퇴장점의 분수로 찍으면 등속이면서 헌터 위치를 정확히 통과한다.
+   구간 속도 = 0.0164/% 로 전 구간 동일. */
 @keyframes monster-motion-rathian-ground-charge {
-    0%,6%{transform:none;opacity:1}
-    10%{transform:translateY(20px) scale(.94,1.04);opacity:1}
+    0%,4%{transform:none;opacity:1}
+    8%{transform:translateY(20px) scale(.94,1.06);opacity:1}
+    12%{transform:translateY(-4px) scale(1.02,.98);opacity:1}
+    21%{transform:translate(calc(var(--monster-charge-first-x)*.5),calc(var(--monster-charge-first-y)*.5)) scale(1.11);opacity:1}
     30%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-first-y)) scale(1.22);opacity:1}
+    44%{transform:translate(calc(var(--monster-charge-first-x)*.674 + var(--monster-charge-first-exit-x)*.326),calc(var(--monster-charge-first-y)*.674 + var(--monster-charge-first-exit-y)*.326)) scale(1.27);opacity:1}
+    58%{transform:translate(calc(var(--monster-charge-first-x)*.349 + var(--monster-charge-first-exit-x)*.651),calc(var(--monster-charge-first-y)*.349 + var(--monster-charge-first-exit-y)*.651)) scale(1.33);opacity:1}
     73%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.38);opacity:1}
     74%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.38);opacity:0}
     82%{transform:translate(var(--monster-charge-return-x),var(--monster-charge-return-y)) scale(.82);opacity:0}
@@ -2109,14 +2124,25 @@
     58%{transform:translate(0,-21px) rotate(3deg) scale(1.13);filter:brightness(1.55) drop-shadow(0 0 20px #ff7030)}
     74%{transform:translateY(4px) rotate(0deg) scale(1)}
 }
+/* 이단 꼬리 회전: 180도를 "두 번" 후려친다. 한 바퀴 도는 것이 아니다.
+   접촉은 impactTimeline(24/42틱=57%, 34/42틱=81%)에 맞춰 고정하고,
+   두 타격 사이 63~67%에 되감기(정지)를 넣어 두 번으로 읽히게 한다.
+   두 스윙의 각속도는 12.1deg/%로 동일하다. */
 @keyframes monster-motion-rathian-tail-sweep-double {
     0%{transform:none}
-    14%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(0deg) scale(.98)}
-    26%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-18deg) scale(.97)}
-    45%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(162deg) scale(1.12)}
-    46%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(162deg) scale(1.06)}
-    64%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(342deg) scale(1.14)}
-    78%{transform:translate(calc(var(--monster-attack-x)*.42),calc(var(--monster-attack-y)*.35)) rotate(360deg) scale(1.03)}
+    12%{transform:translate(calc(var(--monster-attack-x)*.55),calc(var(--monster-attack-y)*.55)) rotate(0deg) scale(.98)}
+    22%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(1)}
+    40%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-26deg) scale(.97)}
+    49%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(70deg) scale(1.08)}
+    57%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(180deg) scale(1.15);filter:brightness(1.32) drop-shadow(0 0 16px #b6e06a66)}
+    63%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(200deg) scale(1.05)}
+    67%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(190deg) scale(1)}
+    74%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(270deg) scale(1.08)}
+    81%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(360deg) scale(1.15);filter:brightness(1.32) drop-shadow(0 0 16px #b6e06a66)}
+    /* 마무리는 각도를 더 돌리지 않는다. 오버슈트를 주면 100%로 오면서 역회전이 되고,
+       JS cleanup의 transform 제거와 겹쳐 끝에서 튄다. 잔여감은 scale로만 표현한다. */
+    88%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(360deg) scale(1.06,.95)}
+    94%{transform:translate(calc(var(--monster-attack-x)*.42),calc(var(--monster-attack-y)*.35)) rotate(360deg) scale(1.02)}
     100%{transform:translate(0,0) rotate(360deg) scale(1)}
 }
 @keyframes monster-motion-rathian-somersault {

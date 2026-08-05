@@ -657,15 +657,14 @@ class HuntAudioManager {
         // (gimmick, wirebug, sheathing, slinger, ui) are strictly excluded.
         if (this.playVerifiedWeaponCue(weaponId, cue)) return true;
 
-        // Never fall back to the generic bow bank for draw/release cues: it
-        // contains the removed string-pull and creak layers.
-        const exactOnlyBowCues = new Set([
-            'bow_charge_start', 'bow_charge_step', 'bow_shot',
-            'bow_charged_shot', 'bow_power_shot', 'dragon_piercer'
-        ]);
-        if (weaponId === 'bow' && exactOnlyBowCues.has(String(cue))) return false;
-
         if (this.playEvidenceRankedWeaponAction(weaponId, context.actionId)) return true;
+
+        // 활은 라벨이 확인된 경로(큐레이션 cue / evidence-ranked actionId)에서만 소리를 낸다.
+        // 공용 bow 뱅크에는 금지된 시위 당김·삐걱임 레이어가 섞여 있다. 예전에는 cue 이름
+        // allowlist로 막았지만, 실행 경로는 cue를 'attack'으로 넘기고(playMHAsset) 새 cue가
+        // 생길 때마다 목록에서 빠져 구멍이 반복해서 다시 열렸다. 그래서 cue가 아니라
+        // 무기 단위로 폴백 자체를 봉쇄한다. 미매핑 활 동작은 무음이 정답이다.
+        if (weaponId === 'bow') return false;
 
         const nonAttackExclusions = ['gimmick', 'wirebug', 'slinger', 'sheath', 'ui'];
 

@@ -809,12 +809,16 @@ class HuntMonsterTurnExecutor {
         if (pattern.telegraphFx) {
             engine.callbacks?.onTriggerMonsterTelegraphFx?.(pattern.telegraphFx);
         }
-        if (!pattern.suppressPrepareAudio) {
+        // 서머솔트류는 액션 시작음(suppressPrepareAudio)은 막되, 전조 보컬은 준비자세에서
+        // 울려야 한다. 꼬리를 휘두르는 순간이 아니라 몸을 세우는 순간이 울음의 자리다.
+        const hasSomersaultCue = (pattern.impactTimeline || [])
+            .some(event => event?.audioCue === 'somersault');
+        if (!pattern.suppressPrepareAudio || hasSomersaultCue) {
             engine.playSFX?.('monster_telegraph', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
                 patternName: pattern.name,
-                patternType: pattern.type,
+                patternType: hasSomersaultCue ? 'somersault' : pattern.type,
                 durationTicks: windupTicks
             });
         }
@@ -907,13 +911,6 @@ class HuntMonsterTurnExecutor {
                 patternTags: pattern.tags,
                 patternDelivery: pattern.delivery,
                 audioPhase: 'action-start'
-            });
-        } else if (isImpactCommit && pattern.runtimeImpactAudioCue === 'somersault') {
-            engine.playSFX?.('monster_telegraph', null, {
-                monsterId: engine.selectedMonster.id,
-                patternId: pattern.id,
-                patternName: pattern.name,
-                patternType: 'somersault'
             });
         } else if (isImpactCommit && pattern.runtimeImpactAudioCue === 'tigrex-final-vocal') {
             engine.playSFX?.('monster_attack', null, {
