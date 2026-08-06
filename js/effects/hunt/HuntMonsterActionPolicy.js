@@ -136,6 +136,26 @@ class HuntMonsterActionPolicy {
         return Array.from({ length: passes }, (_, i) => pairs[(start + i) % pairs.length]);
     }
 
+    /**
+     * 주 표적 위에 자리를 잡고 좌우로 한 번씩 훑는 회전용. 1패스는 주 표적과
+     * 왼쪽 이웃, 2패스는 주 표적과 오른쪽 이웃이다. 주 표적은 두 패스 모두에
+     * 들어가므로, 회전 축이 바뀌어도 맞는 사람이 이어진다.
+     * 한쪽 끝(1번이나 4번)이면 그쪽 이웃이 없으므로 그 패스는 주 표적만 맞는다.
+     */
+    static primaryFlankPasses(targetable, random = Math.random, primaryIndex = null) {
+        const ordered = this.orderedTargets(targetable);
+        if (!ordered.length) return [];
+        const anchor = ordered.find(target => Number(target.index) === Number(primaryIndex))
+            || ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
+        const byIndex = new Map(ordered.map(target => [Number(target.index), target]));
+        const left = byIndex.get(Number(anchor.index) - 1);
+        const right = byIndex.get(Number(anchor.index) + 1);
+        return [
+            [anchor, left].filter(Boolean),
+            [anchor, right].filter(Boolean)
+        ];
+    }
+
     // distinct를 켜면 패스마다 서로 다른 헌터를 뽑는다(비복원 추출). 3연 급습처럼
     // "세 번 다 다른 대상을 친다"가 연출의 핵심인 패턴용이다. 표적 수가 패스 수보다
     // 적으면 풀을 다시 채우되 직전 대상은 제외해, 같은 헌터를 연달아 치지 않는다.
@@ -260,6 +280,19 @@ class HuntMonsterActionPolicy {
                 runtime: {
                     runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index)),
                     runtimeImpactAllowEmptySequence: true
+                }
+            };
+        }
+        // 주 표적 바로 위에 자리 잡고, 좌회전으로 왼쪽까지 · 우회전으로 오른쪽까지
+        // 훑는다. 축이 바뀌어도 주 표적은 두 번 다 맞는다.
+        if (mode === 'primary-flank-passes') {
+            const passes = this.primaryFlankPasses(targetable, random,
+                Number.isInteger(primaryIndex) ? primaryIndex : defaultTargets[0]?.index);
+            return {
+                targets: passes.flat(),
+                runtime: {
+                    runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index)),
+                    runtimeSpinPrimaryIndex: passes[0]?.[0]?.index ?? null
                 }
             };
         }

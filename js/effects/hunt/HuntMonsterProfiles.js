@@ -1338,14 +1338,16 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         originPart: 'left-wing',
         brokenPartDamageModifiers: { 'left-wing': 0.76, 'right-wing': 0.76 }
     }],
-    // 우측 팔을 축으로 좌회전, 이어서 좌측 팔을 축으로 우회전. 주먹을 휘두르는 느낌.
-    // 축은 헌터 위치가 아니라 인접한 두 명 사이에 놓여, 회전이 그 둘을 함께 훑는다.
+    // 주 표적 바로 위에 자리를 잡고, 그 자리에서 축만 바꿔 두 번 돈다.
+    // 1회전은 하단 좌측 축 · 시계 방향이라 주 표적과 왼쪽 헌터에 닿고,
+    // 2회전은 하단 우측 축 · 반시계 방향이라 주 표적과 오른쪽 헌터에 닿는다.
+    // 주 표적은 두 번 다 맞는다.
     ['nargacuga.tail_sweep_reverse', '역회전 연계 꼬리 회전', 'area', 0.374, {
-        sourceMoveNameJA: '尻尾回転・逆回転', minTargets: 2, maxTargets: 4,
+        sourceMoveNameJA: '尻尾回転・逆回転', minTargets: 2, maxTargets: 3,
         windup: 5, recovery: 1, state: 'enraged', cooldown: 44,
         tags: ['area', 'tail', 'target-contact', 'multi-hit'],
         monsterAtbCost: 0.78, movement: { ticks: 44 },
-        targeting: { mode: 'adjacent-pair-pivot', passCount: 2 },
+        targeting: { mode: 'primary-flank-passes' },
         impactTimeline: [
             { atTicks: 18, targetMode: 'pair', damageScale: 1 },
             { atTicks: 38, targetMode: 'pair', damageScale: 1 }

@@ -51,16 +51,19 @@ function keyframeBlocks(source) {
 const rotationValues = text => [...text.matchAll(
     /rotate\((?:calc\()?\s*([-+]?\d+(?:\.\d+)?)deg/g
 )].map(match => Number(match[1]));
-for (const { name, body } of keyframeBlocks(runtimeStyle)) {
+for (const { name, body: rawBody } of keyframeBlocks(runtimeStyle)) {
     if (!/^(?:monster-motion-|tigrex-)/.test(name || '')) continue;
+    // 주석을 먼저 걷어낸다. 프레임 선택자는 여는 중괄호 앞의 모든 텍스트로 잡히는데,
+    // 주석이 그 앞에 붙으면 "/* ... */ 40.9%"가 통째로 선택자가 되어 퍼센트 파싱이
+    // 실패하고 그 프레임이 조용히 검사에서 빠진다. 접촉 프레임이 그렇게 사라지면
+    // 규칙 전체가 무력화되므로, 값을 읽기 전에 제거한다.
+    const body = rawBody.replace(/\/\*[\s\S]*?\*\//g, '');
     const turns = rotationValues(body);
     const largestTurn = Math.max(0, ...turns.map(Math.abs));
     if (largestTurn < 300) continue;
     const frames = [...body.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
     const finalFrame = frames.find(match => match[1].split(',').some(value => value.trim() === '100%'));
     assert.ok(finalFrame, `${name} must author an explicit 100% recovery frame`);
-    assert.doesNotMatch(finalFrame[2], /transform\s*:\s*none/,
-        `${name} must not reverse-spin into transform:none while returning`);
     // 이 규칙이 막으려는 것은 "복귀하면서 몰래 되감기는 회전"이다. 타격이 끝난 뒤
     // 각도가 풀리면 제자리로 돌아가는 동안 몸이 반대로 도는 게 보인다.
     //
@@ -71,14 +74,16 @@ for (const { name, body } of keyframeBlocks(runtimeStyle)) {
     // 역회전은 허용하되, 복귀 구간의 되감기는 여전히 잡는다.
     //
     // 접촉 프레임은 이 코드베이스 관례상 filter:brightness()로 강조된다.
-    // 회전 각도를 프레임 순서대로 나열한다. 회전이 없는 프레임(transform:none 등)은
-    // 직전 각도를 유지하는 것으로 본다.
+    // 회전 각도를 프레임 순서대로 나열한다.
+    // transform:none은 회전 0도를 뜻한다. 직전 각도를 이어받는 것으로 처리하면
+    // 720도로 돌던 모션이 마지막에 transform:none으로 튕겨 돌아가는 것을 놓친다.
+    // 그 외에 rotate()가 없는 프레임(이동·크기만 바뀌는 프레임)은 직전 각도를 유지한다.
     const framePercent = frame => Math.max(...frame[1].split(',')
         .map(value => Number.parseFloat(value.trim())).filter(Number.isFinite));
     const series = frames
         .map(frame => ({
             percent: framePercent(frame),
-            angle: rotationValues(frame[2]).at(-1),
+            angle: /transform\s*:\s*none/.test(frame[2]) ? 0 : rotationValues(frame[2]).at(-1),
             contact: /filter\s*:\s*brightness\(/.test(frame[2])
         }))
         .filter(entry => Number.isFinite(entry.percent))
@@ -104,11 +109,18 @@ for (const { name, body } of keyframeBlocks(runtimeStyle)) {
     // 접촉 이후로는 그 방향을 유지하거나 멈춰야 한다. 반대로 돌면 제자리로 돌아가는
     // 동안 몸이 되감기는 게 보인다. 도중에 authored된 역회전(역회전 연계 꼬리 회전)은
     // 그 자체가 접촉을 동반하므로 여기에 걸리지 않는다.
+    // 마지막 접촉 뒤에 살짝 되감기는 것은 관성 표현이다(360도를 돌고 15도를
+    // 더 간 뒤 되돌아오는 식). 큰 되감기와 구분하기 위해 총량으로 재고,
+    // 이 한도를 넘으면 복귀 중 몸이 반대로 도는 게 눈에 보인다.
+    const RECOIL_TOLERANCE_DEG = 20;
+    let reversed = 0;
     for (let i = lastContact + 1; i < series.length; i += 1) {
-        const delta = Math.sign(series[i].angle - series[i - 1].angle);
-        assert.ok(delta === 0 || heading === 0 || delta === heading,
+        const step = series[i].angle - series[i - 1].angle;
+        if (heading !== 0 && Math.sign(step) === -heading) reversed += Math.abs(step);
+        assert.ok(reversed <= RECOIL_TOLERANCE_DEG,
             `${name} must not reverse-spin after its final contact `
-            + `(${series[i - 1].percent}% ${series[i - 1].angle}deg -> `
+            + `(누적 역회전 ${reversed}deg > 관성 허용치 ${RECOIL_TOLERANCE_DEG}deg, `
+            + `${series[i - 1].percent}% ${series[i - 1].angle}deg -> `
             + `${series[i].percent}% ${series[i].angle}deg)`);
     }
 }

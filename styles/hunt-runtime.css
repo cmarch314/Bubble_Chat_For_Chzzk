@@ -1651,7 +1651,7 @@
 .monster-motion-nargacuga-turn-tail-slam-double { animation:monster-motion-nargacuga-turn-tail-slam-double var(--monster-motion-duration) linear both !important; transform-origin:50% 62%; --narga-standoff:.96; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-tail-whip { animation:monster-motion-nargacuga-tail-whip var(--monster-motion-duration) linear both !important; transform-origin:50% 58%; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-pivot-spin { animation:monster-motion-nargacuga-pivot-spin var(--monster-motion-duration) linear both !important; transform-origin:71% 86%; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
-.monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+.monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-dash-bite { animation:monster-motion-nargacuga-dash-bite var(--monster-motion-duration) linear both !important; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-flank-charge { animation:monster-motion-nargacuga-flank-charge var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-offscreen-charge { animation:monster-motion-nargacuga-offscreen-charge var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.88; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
@@ -1661,7 +1661,7 @@
 /* 회전은 한쪽 앞발을 축으로 크게 한 바퀴, 이어지는 회전은 반대쪽 앞발이 축이다.
    축 이동은 transform-origin을 키프레임에서 바꿔 표현한다(앞발 좌표 .29/.71, y .86). */
 .monster-motion-nargacuga-pivot-spin { animation:monster-motion-nargacuga-pivot-spin var(--monster-motion-duration) linear both !important; transform-origin:29% 86%; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
-.monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+.monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-rath-flight-stagger { animation:monster-motion-rath-flight-stagger var(--monster-motion-duration) ease-in-out both !important; }
 .monster-motion-rath-flight-wobble { animation:monster-motion-rath-flight-wobble var(--monster-motion-duration) ease-in-out both !important; }
 .monster-motion-bazel-carpet-bombing {
@@ -2398,28 +2398,36 @@
 }
 /* 역회전 연계: 우측 앞발 축 좌회전 → 좌측 앞발 축 우회전. 축은 인접 두 명 사이.
    접촉 18/38 of 44틱 = 40.9% / 86.4%. 누적 -720도는 100%에서 유지. */
+/* 역회전 연계 꼬리 회전. 접촉 18/38 of 44틱 = 40.9% / 86.4%.
+   주 표적 바로 위에 한 번만 자리를 잡고, 그 자리에서 축만 바꿔 두 번 돈다.
+   1회전: 이미지 하단 좌측(20% 88%)을 축으로 시계 방향. 몸이 왼쪽으로 뻗으며
+     주 표적과 그 왼쪽 헌터까지 훑는다.
+   2회전: 이동 없이 하단 우측(80% 88%)으로 축을 옮겨 반시계 방향. 주 표적과
+     오른쪽 헌터까지 훑는다.
+   각 회전은 360도 + 15도를 돌고 15도를 되감아, 멈출 때 관성이 실린다.
+
+   축 전환은 회전이 정확히 360도인 46~50% 구간에서 한다. 360도는 어떤 축으로도
+   항등 변환이라 transform-origin이 보간되어도 그림이 튀지 않는다. 회전 중에
+   축을 바꾸면 |축 거리| x 2sin(각/2) 만큼 순간이동한다. */
 @keyframes monster-motion-nargacuga-twin-pivot-spin {
-    0%,6%{transform:none;transform-origin:71% 86%}
-    12%{transform:translate(calc(var(--monster-attack-x)*.06),22px) rotate(0deg) scale(1.10,.86);transform-origin:71% 86%}
-    17%{transform:translate(calc(var(--monster-attack-x)*.40),calc(var(--monster-attack-y)*.34 - 44px)) rotate(0deg) scale(.86,1.20);transform-origin:71% 86%}
-    24%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1.20,.84);transform-origin:71% 86%}
-    31%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1);transform-origin:71% 86%}
-    36%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1);transform-origin:71% 86%}
-    40.9%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(-300deg) scale(1.04);filter:brightness(1.44);transform-origin:71% 86%}
-    48%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(-360deg) scale(1);transform-origin:71% 86%}
-    /* 축 전환: 반대쪽 앞발로 무게를 옮기고, 회전 방향도 뒤집는다.
-       1회전은 우측 앞발(71%)을 축으로 좌회전(0 -> -360deg),
-       2회전은 좌측 앞발(29%)을 축으로 우회전(-360 -> 0deg)이다.
-       같은 방향으로 두 바퀴 돌면 "역회전 연계"가 아니라 그냥 2회전으로 보인다.
-       접촉(86.4%)은 1회전과 같은 비율로 300도 지난 지점(-60deg)에 둔다. */
-    54%{transform:translate(var(--monster-pivot2-x,var(--monster-attack-x)),var(--monster-pivot2-y,var(--monster-attack-y))) rotate(-360deg) scale(1.14,.88);transform-origin:29% 86%}
-    62%{transform:translate(var(--monster-pivot2-x,var(--monster-attack-x)),var(--monster-pivot2-y,var(--monster-attack-y))) rotate(-360deg) scale(1);transform-origin:29% 86%}
-    74%{transform:translate(var(--monster-pivot2-x,var(--monster-attack-x)),var(--monster-pivot2-y,var(--monster-attack-y))) rotate(-360deg) scale(1);transform-origin:29% 86%}
-    86.4%{transform:translate(var(--monster-pivot2-x,var(--monster-attack-x)),var(--monster-pivot2-y,var(--monster-attack-y))) rotate(-60deg) scale(1.04);filter:brightness(1.48);transform-origin:29% 86%}
-    92%{transform:translate(var(--monster-pivot2-x,var(--monster-attack-x)),var(--monster-pivot2-y,var(--monster-attack-y))) rotate(0deg) scale(1);transform-origin:29% 86%}
-    96%{transform:translate(0,-18px) rotate(0deg) scale(.90,1.16);transform-origin:29% 86%}
-    100%{transform:translate(0,0) rotate(0deg) scale(1);transform-origin:29% 86%}
+    0%,6%{transform:none;transform-origin:20% 88%}
+    12%{transform:translate(calc(var(--narga-hit-x)*.10),24px) rotate(0deg) scale(1.12,.84);transform-origin:20% 88%}
+    17%{transform:translate(calc(var(--narga-hit-x)*.45),calc(var(--narga-hit-y)*.38 - 60px)) rotate(0deg) scale(.86,1.20);transform-origin:20% 88%}
+    24%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1.18,.84);transform-origin:20% 88%}
+    30%,35%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1);transform-origin:20% 88%}
+    /* 1회전: 시계 방향 360 + 15도 */
+    40.9%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(375deg) scale(1.06);filter:brightness(1.44);transform-origin:20% 88%}
+    46%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(360deg) scale(1);transform-origin:20% 88%}
+    /* 축 전환(회전 360도 = 항등, 튐 없음) */
+    50%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(360deg) scale(1);transform-origin:80% 88%}
+    56%,62%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(360deg) scale(1.10,.92);transform-origin:80% 88%}
+    /* 2회전: 반시계 방향 360 + 15도 */
+    86.4%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(-15deg) scale(1.06);filter:brightness(1.48);transform-origin:80% 88%}
+    91%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1);transform-origin:80% 88%}
+    96%{transform:translate(calc(var(--narga-hit-x)*.35),-20px) rotate(0deg) scale(.90,1.16);transform-origin:80% 88%}
+    100%{transform:none;transform-origin:80% 88%}
 }
+
 /* 가시 꼬리 내려찍기(1회). 접촉 22/30틱 = 73.3%.
    튀어올라 붙고 크기가 돌아온 뒤 꼬리를 살랑이다가, 뒤돌며 늘어난 형상이 내리꽂힌다.
    내려친 뒤에는 늘어난 상태를 그대로 유지하고(꼬리가 땅에 박힌 구간),
