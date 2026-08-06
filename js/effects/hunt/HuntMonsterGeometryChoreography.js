@@ -88,13 +88,18 @@ const HuntMonsterGeometryChoreography = {
                 : null;
             const anchor = liveCard?.querySelector?.('.game-hunt-weapon-img-container') || liveCard;
             const rect = anchor?.getBoundingClientRect?.();
-            // 배율과 클램프는 playPatternMotion의 target-contact 규칙(.92/.88,
-            // Y는 -240~430)과 같아야 한다. 다르게 잡으면 1타만 다른 거리에서 멈춘다.
+            // 배율과 클램프는 playPatternMotion과 같아야 한다. 다르게 잡으면
+            // 1타만 다른 거리에서 멈춘다. 패턴이 animationGeometry로 접근 배율을
+            // 덮어썼다면 그 값을 그대로 따라간다.
+            const approachX = Number.isFinite(Number(pattern?.animationGeometry?.approachX))
+                ? Number(pattern.animationGeometry.approachX) : .92;
+            const approachY = Number.isFinite(Number(pattern?.animationGeometry?.approachY))
+                ? Number(pattern.animationGeometry.approachY) : .88;
             const x = rect
-                ? Math.max(-maxX, Math.min(maxX, (rect.left + rect.width / 2 - monsterCenterX) * .92))
+                ? Math.max(-maxX, Math.min(maxX, (rect.left + rect.width / 2 - monsterCenterX) * approachX))
                 : attackX;
             const y = rect
-                ? Math.max(-240, Math.min(430, (rect.top + rect.height / 2 - monsterCenterY) * .88))
+                ? Math.max(-240, Math.min(430, (rect.top + rect.height / 2 - monsterCenterY) * approachY))
                 : attackY;
             motionElement.style.setProperty(`--narga-pass${pass + 1}-x`, `${Math.round(x)}px`);
             motionElement.style.setProperty(`--narga-pass${pass + 1}-y`, `${Math.round(y)}px`);

@@ -1608,15 +1608,19 @@
 /* 급습 공통 좌표.
    --narga-ambush-side: 재진입 방향. -1이면 표적 왼쪽 아래, +1이면 오른쪽 아래.
      geometry choreography가 패턴마다 무작위로 정한다.
-   --narga-ambush-off: 45도 방향 고정 거리(320px)의 x/y 성분(320 * cos45 ≈ 226px).
-   --narga-ambush-out: 접촉 후 90도 꺾어 이탈하는 거리의 성분.
+   --narga-ambush-off: 45도 방향 고정 거리의 x/y 성분. 화면 아래로 완전히 벗어나는
+     거리여야 한다. 예전 값(226px)은 화면 안이라 나르가가 헌터들 사이에서 스르륵
+     나타났다. 700px * cos45 = 495px면 등장 지점이 뷰포트 아래로 빠져, 화면 밖에서
+     Fade In 한 뒤 이미 실체가 된 채로 뛰어든다.
+   --narga-ambush-out: 접촉 후 90도 꺾어 이탈하는 거리의 성분. 같은 이유로 화면을
+     벗어난 뒤에 Fade Out 하도록 같은 크기를 쓴다.
    진입 방향이 (-side, -1)이므로, 여기에 수직이면서 아래를 향하는 이탈 방향은
    (-side, +1)이다. 그래서 이탈 x에는 side를 그대로 빼고 y에는 더한다. */
 .monster-motion-nargacuga-leap-ambush,
 .monster-motion-nargacuga-leap-ambush-triple {
     --narga-ambush-side:1;
-    --narga-ambush-off:226px;
-    --narga-ambush-out:240px;
+    --narga-ambush-off:495px;
+    --narga-ambush-out:495px;
     /* 회전축을 머리에 둔다. 스프라이트 머리는 중앙 하단(50% 88%)이다.
        축이 앞발(71% 86%)에 있으면 135도로 돌 때 머리가 요소 중심 기준 아래
        144px에서 75px로 69px 떠오르고 옆으로도 131px 밀린다. 그래서 헌터
@@ -1625,14 +1629,14 @@
        --narga-hit-x/y가 곧 타격 지점이 된다. */
     transform-origin:50% 88%;
 }
-.monster-motion-nargacuga-leap-ambush { animation:monster-motion-nargacuga-leap-ambush var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.88; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:96px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+.monster-motion-nargacuga-leap-ambush { animation:monster-motion-nargacuga-leap-ambush var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:100px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 /* 3연 급습만 접촉 좌표를 세 벌 갖는다. --narga-passN-x/y는 geometry choreography가
    패스별 표적에서 계산해 넣고, 없으면 기본 표적(--monster-attack-x/y)으로 폴백한다.
    standoff/drop 보정은 단발 급습과 동일하게 여기서 한 번만 적용한다. */
 .monster-motion-nargacuga-leap-ambush-triple {
     animation:monster-motion-nargacuga-leap-ambush-triple var(--monster-motion-duration) linear both !important;
     z-index:18;
-    --narga-standoff:.88; --narga-drop:96px;
+    --narga-standoff:1; --narga-drop:100px;
     --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff));
     --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop));
     --narga-hit1-x:calc(var(--narga-pass1-x,var(--monster-attack-x))*var(--narga-standoff));

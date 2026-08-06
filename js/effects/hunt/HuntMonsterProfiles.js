@@ -1249,6 +1249,10 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         monsterAtbCost: 0.74,
         movement: { ticks: 26, untargetable: true },
         impactTimeline: [{ atTicks: 18, damageScale: 1 }],
+        // 급습은 표적 좌표까지 온전히 도달해야 한다. 기본 접근 배율(.92)은 헌터
+        // 앞에서 멈추라고 넣은 값인데, 45도 아래에서 뛰어드는 이 패턴에서는
+        // 표적 중심에서 안쪽으로 밀려 좌측 헌터를 노릴 때 우측을 때리게 된다.
+        animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-leap-ambush', animationDurationMs: 2600,
         originPart: 'left-wing',
         brokenPartDamageModifiers: { 'left-wing': 0.76, 'right-wing': 0.76 }
@@ -1329,6 +1333,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { atTicks: 38, targetMode: 'sequential', damageScale: 0.92 },
             { atTicks: 54, targetMode: 'sequential', damageScale: 0.92 }
         ],
+        animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-leap-ambush-triple', animationDurationMs: 6600,
         originPart: 'left-wing',
         brokenPartDamageModifiers: { 'left-wing': 0.76, 'right-wing': 0.76 }
