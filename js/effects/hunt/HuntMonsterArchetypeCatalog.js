@@ -75,7 +75,8 @@ class HuntMonsterArchetypeCatalog {
             sourceGame: 'world_iceborne',
             enragedDamageMultiplier: 1.10,
             roarSize: 'large',
-            rageDurationTicks: 900,
+            // 분노 지속이 짧은 쪽(1분).
+            rageDurationTicks: 600,
             rageRecoveryDurationTicks: 300,
             rageOpenerTakeoff: true,
             takeoffPreservesReadyAtb: true,
@@ -200,7 +201,8 @@ class HuntMonsterArchetypeCatalog {
             exhaustedAtbMultiplier: .70,
             enragedAnimationDurationMultiplier: 1 / 1.20,
             exhaustedAnimationDurationMultiplier: 1.30,
-            rageDurationTicks: 900,
+            // 분노 지속이 짧은 쪽(1분).
+            rageDurationTicks: 600,
             rageRecoveryDurationTicks: 300,
             rageRoarConsumesFullAtb: true,
             roarSize: 'large',

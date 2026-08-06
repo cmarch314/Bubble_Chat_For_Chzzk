@@ -377,6 +377,28 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         brokenPartDamageModifiers: { head: 0.60 },
         brokenPartAccuracyModifiers: { head: 0.75 }
     }],
+    // 공중에 뜬 채 좌 · 우 · 정면으로 세 발을 연달아 쏜다. 지상 삼연 브레스(레이아)와
+    // 같은 리듬이되 착지하지 않는다. 사출 타이밍(애니메이션의 밝기 강조 프레임)과
+    // 착탄(impactTimeline)은 레이아와 같은 간격을 쓴다: 발사 후 약 9~10틱 뒤 착탄.
+    ['rathalos.aerial_triple_fireball', '공중 삼연 화염구', 'projectile', 0.44, {
+        sourceMoveNameJA: '空中三連火球ブレス', minTargets: 1, maxTargets: 3, recovery: 1,
+        cooldown: 46, monsterAtbCost: 0.72,
+        tags: ['projectile', 'elemental', 'fire', 'flight-only', 'multi-hit'],
+        // 분노 상태에서 더 자주 나오되, 평상시 비행 중에도 쓸 수 있게 둔다.
+        // state로 잠그면 '분노 && 비행'이라는 좁은 교집합에서만 나와 거의 보이지 않는다.
+        weightByState: { enraged: 1.4 },
+        targeting: { mode: 'center-left-right' }, delivery: 'projectile',
+        movement: { ticks: 30 },
+        impactTimeline: [
+            { atTicks: 17, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 22, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 27, targetMode: 'sequential', damageScale: 1 }
+        ],
+        animationProfile: 'rathalos-triple-fireball', animationDurationMs: 3000, originPart: 'head',
+        projectileLaunchDelayTicks: 10,
+        brokenPartDamageModifiers: { head: 0.80 },
+        brokenPartAccuracyModifiers: { head: 0.75 }
+    }],
     ['rathalos.backstep_fireball', '백스텝 브레스', 'projectile', 0.70, {
         sourceMoveNameJA: 'バックブレス', minTargets: 1, maxTargets: 1, cooldown: 48,
         recovery: 1, state: 'enraged', monsterAtbCost: 0.55,
