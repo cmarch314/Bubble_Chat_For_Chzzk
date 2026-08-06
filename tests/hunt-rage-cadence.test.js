@@ -1,59 +1,75 @@
 'use strict';
 
-// 분노 주기는 세 값이 모두 있어야 성립한다. 예전에는 rageDurationTicks만 적고
-// rageRecoveryDurationTicks를 빠뜨리면 HuntMonsterRules.stateForBattleTime이
-// 주기 계산 분기를 통째로 건너뛰어, "지속 900틱"이라고 적어둔 몬스터가 실제로는
-// 800틱 이후 영구 분노로 동작했다. 값은 적혀 있는데 아무 효과가 없으니
-// 조정해도 화면이 바뀌지 않는, 찾기 어려운 종류의 버그였다.
+// 분노는 언제나 주기다. 영구 분노인 몬스터는 존재하지 않으며, 지속은 두 값만 쓴다:
+// 표준 1분 30초(900틱), 짧은 쪽 1분(600틱). 진정은 30초(300틱)다.
 //
-// 런타임은 이제 회복 길이가 없으면 표준값으로 메우지만, 데이터는 명시적으로
-// 남겨야 의도가 읽힌다. 그래서 양쪽을 다 검사한다.
+// 예전에는 두 가지 경로로 영구 분노가 새어 나왔다.
+//   1. rageDurationTicks만 적고 rageRecoveryDurationTicks를 빠뜨리면
+//      주기 계산 분기를 통째로 건너뛰었다. legiana(900), shrieking_legiana(1100),
+//      seething_bazelgeuse(1200), tigrex(900)이 여기 걸려, 적어둔 값이 아무
+//      효과 없이 800틱 이후 영원히 분노 상태였다.
+//   2. 주기를 아예 저작하지 않은 몬스터(paolumu, barioth, 아종 다수, 그리고
+//      MONSTER_BEHAVIORS에 없는 모든 몬스터)는 애초에 영구 분노가 기본값이었다.
+//
+// 이제 런타임이 비어 있는 저작을 표준 주기로 메우므로 두 경로 모두 막혔다.
+// 이 테스트는 그 불변식과 "지속은 900 아니면 600" 규칙을 함께 지킨다.
 
 const assert = require('node:assert');
 const HuntMonsterRules = require('../js/effects/hunt/HuntMonsterRules.js');
 const HuntMonsterArchetypeCatalog = require('../js/effects/hunt/HuntMonsterArchetypeCatalog.js');
 
 const behaviors = HuntMonsterArchetypeCatalog.MONSTER_BEHAVIORS;
+const ALLOWED_DURATIONS = [
+    HuntMonsterRules.DEFAULT_RAGE_DURATION_TICKS,
+    HuntMonsterRules.SHORT_RAGE_DURATION_TICKS
+];
 
+assert.strictEqual(HuntMonsterRules.DEFAULT_RAGE_DURATION_TICKS, 900,
+    '표준 분노 지속은 1분 30초다');
+assert.strictEqual(HuntMonsterRules.SHORT_RAGE_DURATION_TICKS, 600,
+    '짧은 분노 지속은 1분이다');
+
+// 저작된 값은 허용된 두 가지 중 하나여야 한다. 1100, 1200 같은 중간값이 다시
+// 들어오면 "짧은 편/보통" 구분이 흐려진다.
 for (const [monsterId, behavior] of Object.entries(behaviors)) {
     const duration = Number(behavior.rageDurationTicks || 0);
-    const recovery = Number(behavior.rageRecoveryDurationTicks || 0);
-    if (!duration && !recovery) continue;
+    if (!duration) continue;
+    assert.ok(ALLOWED_DURATIONS.includes(duration),
+        `${monsterId}: 분노 지속은 ${ALLOWED_DURATIONS.join(' 또는 ')}틱만 쓴다 (현재 ${duration}).`);
+}
 
-    assert.ok(duration > 0 && recovery > 0,
-        `${monsterId}: 분노 지속과 회복은 함께 저작해야 한다 `
-        + `(지속 ${duration || '없음'}, 회복 ${recovery || '없음'}). `
-        + '한쪽만 적으면 주기가 무효가 되고 영구 분노로 읽힌다.');
-
-    // 저작한 주기가 실제로 관측되는지 확인한다. 값이 있는데 상태가 한 번도
-    // 돌아오지 않으면 위 계약이 어딘가에서 다시 끊긴 것이다.
+// 영구 분노는 어떤 경로로도 나오면 안 된다. 등록된 몬스터 전부와, 저작이
+// 아예 없는 경우({})까지 한 주기를 돌려 진정 구간이 실제로 관측되는지 본다.
+const cases = [...Object.entries(behaviors), ['(저작 없음)', {}]];
+for (const [monsterId, behavior] of cases) {
+    const duration = Number(behavior.rageDurationTicks || 0)
+        || HuntMonsterRules.DEFAULT_RAGE_DURATION_TICKS;
+    const recovery = Number(behavior.rageRecoveryDurationTicks || 0)
+        || HuntMonsterRules.DEFAULT_RAGE_RECOVERY_TICKS;
     const start = Math.max(0, Number(behavior.rageStartTick || 800));
+
     const states = new Set();
     for (let tick = start; tick <= start + duration + recovery; tick += 10) {
         states.add(HuntMonsterRules.stateForBattleTime(tick, behavior));
     }
-    assert.ok(states.has('enraged') && states.has('normal'),
-        `${monsterId}: 한 주기 안에 분노와 진정이 모두 관측되어야 한다 `
-        + `(관측: ${[...states].join(', ')}).`);
+    assert.ok(states.has('enraged'),
+        `${monsterId}: 한 주기 안에 분노 구간이 있어야 한다.`);
+    assert.ok(states.has('normal'),
+        `${monsterId}: 한 주기 안에 진정 구간이 있어야 한다 (영구 분노 금지).`);
+
+    // 상태는 분노/평상시 둘뿐이다. 탈진은 스태미나가 만드는 것이지 분노 시계가
+    // 합성해내는 것이 아니다.
+    states.forEach(state => assert.ok(['normal', 'enraged'].includes(state),
+        `${monsterId}: 분노 시계가 만들 수 있는 상태는 normal/enraged뿐이다 (${state}).`));
 }
 
-// 런타임 방어: 회복을 빠뜨려도 영구 분노로 떨어지지 않는다.
-{
-    const partial = { rageStartTick: 100, rageDurationTicks: 200 };
-    const observed = new Set();
-    for (let tick = 100; tick <= 700; tick += 10) {
-        observed.add(HuntMonsterRules.stateForBattleTime(tick, partial));
-    }
-    assert.ok(observed.has('normal'),
-        '회복 길이가 없어도 표준값으로 메워 주기가 돌아야 한다 (영구 분노 금지).');
-}
-
-// 주기를 아예 저작하지 않은 몬스터는 종전대로 800틱 이후 분노를 유지한다.
-assert.strictEqual(HuntMonsterRules.stateForBattleTime(900, {}), 'enraged',
-    '주기 미저작 몬스터의 기존 동작은 유지되어야 한다');
+// 분노 시작 전에는 평상시다.
 assert.strictEqual(HuntMonsterRules.stateForBattleTime(700, {}), 'normal',
-    '주기 미저작 몬스터도 800틱 전에는 평상시다');
+    '800틱 전에는 평상시여야 한다');
+assert.strictEqual(HuntMonsterRules.stateForBattleTime(900, {}), 'enraged',
+    '800틱 이후 첫 주기는 분노여야 한다');
 
-const cadenced = Object.entries(behaviors)
-    .filter(([, behavior]) => Number(behavior.rageDurationTicks || 0) > 0);
-console.log(`[test] Hunt rage cadence contract passed (${cadenced.length} monsters authored).`);
+const short = Object.entries(behaviors).filter(([, behavior]) =>
+    Number(behavior.rageDurationTicks || 0) === HuntMonsterRules.SHORT_RAGE_DURATION_TICKS);
+console.log(`[test] Hunt rage cadence contract passed `
+    + `(${cases.length - 1} monsters, ${short.length} short-rage, 영구 분노 없음).`);
