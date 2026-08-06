@@ -857,7 +857,11 @@ class HuntMonsterTurnExecutor {
             engine.callbacks.onUpdateSmallMonsterSwarmUI(engine.smallMonsterSwarm.snapshot());
         }
         const displayName = HuntMonsterTurnExecutor.displayPatternName(pattern, engine.selectedMonster);
-        engine.showSkillBubble('monster', `⚠ ${displayName}`);
+        // 화면에 뜨는 말풍선은 기술명만 둔다. 경고 기호와 "공격 예고 / 준비에
+        // 들어갑니다" 같은 문구는 붙이지 않는다.
+        // addLog는 화면이 아니라 개발자 콘솔로만 나가는 기록이므로(HuntEffect의
+        // addCombatLog가 console.log만 한다) 다른 기록과 같은 서술형을 유지한다.
+        engine.showSkillBubble('monster', displayName);
         engine.addLog(`⚠️ [공격 예고] ${engine.selectedMonster.nameKO}이(가) ${displayName} 준비에 들어갑니다!`, '#ffc857');
         return true;
     }
@@ -1066,7 +1070,7 @@ class HuntMonsterTurnExecutor {
             );
         }
 
-        // 기술명 말풍선은 준비 단계(prepare)에서 "⚠ 이름"으로 한 번만 띄운다.
+        // 기술명 말풍선은 준비 단계(prepare)에서 한 번만 띄운다.
         // 여기서 다시 띄우면 행동 하나에 말풍선이 두 번 떠, 준비 알림인지 실행
         // 알림인지 구분이 안 되고 같은 공격이 두 번 오는 것처럼 읽힌다.
         // 실행 단계에 도달하는 경로는 모두 prepare를 거치므로 알림이 누락되지 않는다.
