@@ -1605,6 +1605,19 @@
 .monster-motion-rathian-somersault-glide { animation:monster-motion-rathian-somersault-glide var(--monster-motion-duration) linear both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-glide { animation:monster-motion-rathian-glide var(--monster-motion-duration) linear both !important; }
 /* 나르가쿠르가 전용 모션. 연속 궤적이므로 전부 linear(구간마다 걸리는 이징 금지). */
+/* 급습 공통 좌표.
+   --narga-ambush-side: 재진입 방향. -1이면 표적 왼쪽 아래, +1이면 오른쪽 아래.
+     geometry choreography가 패턴마다 무작위로 정한다.
+   --narga-ambush-off: 45도 방향 고정 거리(320px)의 x/y 성분(320 * cos45 ≈ 226px).
+   --narga-ambush-out: 접촉 후 90도 꺾어 이탈하는 거리의 성분.
+   진입 방향이 (-side, -1)이므로, 여기에 수직이면서 아래를 향하는 이탈 방향은
+   (-side, +1)이다. 그래서 이탈 x에는 side를 그대로 빼고 y에는 더한다. */
+.monster-motion-nargacuga-leap-ambush,
+.monster-motion-nargacuga-leap-ambush-triple {
+    --narga-ambush-side:1;
+    --narga-ambush-off:226px;
+    --narga-ambush-out:240px;
+}
 .monster-motion-nargacuga-leap-ambush { animation:monster-motion-nargacuga-leap-ambush var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.88; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); transform-origin:71% 86%; }
 /* 3연 급습만 접촉 좌표를 세 벌 갖는다. --narga-passN-x/y는 geometry choreography가
    패스별 표적에서 계산해 넣고, 없으면 기본 표적(--monster-attack-x/y)으로 폴백한다.
@@ -2496,74 +2509,76 @@
    가까이(200px)에서 시작한다.
    회전 없이 좌/우 이탈 -> 숨은 동안 180도 -> 팍! (180+15) -> 이탈 -> 중앙 Fade In. */
 @keyframes monster-motion-nargacuga-leap-ambush {
+    /* 웅크림 -> 회전 없이 좌/우로 화면 이탈 */
     0%,10%{transform:none;opacity:1}
-    17%{transform:translate(0,26px) rotate(0deg) scale(1.12,.84);opacity:1}
-    23%{transform:translate(0,26px) rotate(0deg) scale(1.12,.84);opacity:1}
+    17%,23%{transform:translate(0,26px) rotate(0deg) scale(1.12,.84);opacity:1}
     27%{transform:translate(calc(var(--narga-exit-x,-620px)*.45),-60px) rotate(0deg) scale(.86,1.20);opacity:1}
-    31%{transform:translate(var(--narga-exit-x,-620px),-70px) rotate(0deg) scale(.76,1.10);opacity:0}
-    45%{transform:translate(var(--narga-exit-x,-620px),calc(var(--narga-hit-y) + 150px)) rotate(180deg) scale(.80);opacity:0}
-    58%{transform:translate(calc(var(--narga-hit-x) + 200px),calc(var(--narga-hit-y) + 130px)) rotate(186deg) scale(.90,1.18);opacity:1}
-    69.2%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.24,.84);filter:brightness(1.5);opacity:1}
-    77%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.06,.98);opacity:1}
-    85%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.06,.98);opacity:1}
-    90%{transform:translate(calc(var(--narga-exit-x,-620px)*-.55),calc(var(--narga-hit-y)*.35 - 50px)) rotate(190deg) scale(.82,1.16);opacity:0}
+    /* 화면 밖으로 완전히 나간 뒤에 Fade Out 한다(나가면서 흐려지지 않는다) */
+    31%{transform:translate(var(--narga-exit-x,-620px),-70px) rotate(0deg) scale(.86,1.14);opacity:1}
+    36%{transform:translate(var(--narga-exit-x,-620px),-70px) rotate(0deg) scale(.86,1.14);opacity:0}
+    /* 표적 기준 45도 아래, 좌/우 고정 거리 지점에서 머리를 표적으로 향한 채 Fade In */
+    46%{transform:translate(calc(var(--narga-hit-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.94);opacity:0}
+    53%{transform:translate(calc(var(--narga-hit-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1);opacity:1}
+    /* 도약 준비(웅크림 유지) -> 헌터 아랫부분으로 Leap */
+    57%,61%{transform:translate(calc(var(--narga-hit-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.12,.86);opacity:1}
+    69.2%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.22,.84);filter:brightness(1.5);opacity:1}
+    75%,80%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.06,.98);opacity:1}
+    /* 진입 방향에 수직인 아래쪽(-side, +1)으로 Leap 이탈한 뒤 Fade Out */
+    88%{transform:translate(calc(var(--narga-hit-x) - var(--narga-ambush-side)*var(--narga-ambush-out)),calc(var(--narga-hit-y) + var(--narga-ambush-out))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.88,1.16);opacity:1}
+    92%{transform:translate(calc(var(--narga-hit-x) - var(--narga-ambush-side)*var(--narga-ambush-out)),calc(var(--narga-hit-y) + var(--narga-ambush-out))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.88,1.16);opacity:0}
+    /* 제자리로 돌아와 똑바로 선 채 Fade In */
     96%{transform:translate(0,-26px) rotate(0deg) scale(.92,1.08);opacity:.5}
     100%{transform:none;opacity:1}
 }
-/* 도약 칼날깃 3연 급습: 단발 급습의 리듬을 그대로 세 번 반복한다.
-   접촉 22/38/54 of 66틱 = 33.3% / 57.6% / 81.8%. 1% = 66ms.
+/* 도약 칼날깃 3연 급습: 단발 급습과 같은 한 주기를 세 번 반복한다.
+   접촉 22/38/54 of 66틱 = 33.3% / 57.6% / 81.8%. 1% = 66ms. 접촉 간격 24.2%.
 
-   이전 판은 2·3타가 미끄러졌다. 원인은 두 가지였다.
-   (1) 후속 타에는 웅크림-도약 준비가 없어, 착지 자세에서 곧장 화면 밖 좌표로
-       보간되었다. 스프링의 압축 구간이 없으니 튀어오르는 느낌이 사라진다.
-   (2) opacity 0->1 구간이 10~11%(660~730ms)에 걸쳐 있었다. 이 동안 몸이 계속
-       이동하므로 반투명한 채 미끄러져 들어온다. 단발판은 이 구간이 4%(104ms)다.
-
-   그래서 매 타를 동일한 7단계로 통일한다.
-     웅크림(hold) -> 뻗으며 도약 -> 화면 밖 소멸(~1.4%) -> 은신 이동
-     -> 재진입 출현(~1.6%) -> 팍!(접촉) -> 착지 자세 정지(hold) -> 이탈
-   접촉 간격이 24.2%이므로 각 구간이 그대로 들어간다.
-   좌우는 타마다 뒤집는다: 1타 EX쪽, 2타 반대쪽(회전 165도), 3타 다시 EX쪽. */
+   한 주기 = 표적 기준 45도 아래(좌/우) 고정 거리에서 Fade In -> 머리를 표적으로
+   향한 채 웅크림 -> 헌터 아랫부분으로 Leap -> 착지 정지 -> 진입 방향에 수직인
+   아래쪽으로 Leap 이탈 -> Fade Out.
+   재진입 방향은 타마다 좌우가 뒤집힌다(A -> B -> A). */
 @keyframes monster-motion-nargacuga-leap-ambush-triple {
-    /* --- 1타: 화면 밖 이탈 --- */
-    0%,5%{transform:none;opacity:1}
-    11%{transform:translate(0,28px) rotate(0deg) scale(1.14,.82);opacity:1}
-    14.5%{transform:translate(0,28px) rotate(0deg) scale(1.14,.82);opacity:1}
-    18%{transform:translate(calc(var(--narga-exit-x,-620px)*.45),-60px) rotate(0deg) scale(.86,1.20);opacity:1}
-    20%{transform:translate(var(--narga-exit-x,-620px),-70px) rotate(0deg) scale(.76,1.10);opacity:0}
-    /* 1타: 은신 -> 팍! -> 멈춤 */
-    26%{transform:translate(var(--narga-exit-x,-620px),calc(var(--narga-hit1-y) + 150px)) rotate(180deg) scale(.80);opacity:0}
-    27.3%{transform:translate(calc(var(--narga-hit1-x) + 260px),calc(var(--narga-hit1-y) + 165px)) rotate(184deg) scale(.88,1.20);opacity:1}
-    28.9%{transform:translate(calc(var(--narga-hit1-x) + 200px),calc(var(--narga-hit1-y) + 130px)) rotate(186deg) scale(.90,1.18);opacity:1}
-    33.3%{transform:translate(var(--narga-hit1-x),var(--narga-hit1-y)) rotate(195deg) scale(1.22,.84);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
-    35.3%{transform:translate(var(--narga-hit1-x),var(--narga-hit1-y)) rotate(195deg) scale(1.06,.98);opacity:1}
-    37.7%{transform:translate(var(--narga-hit1-x),var(--narga-hit1-y)) rotate(195deg) scale(1.06,.98);opacity:1}
-    /* 1타 -> 2타: 반대편으로 이탈 */
-    39%{transform:translate(calc(var(--narga-hit1-x)*.55),calc(var(--narga-hit1-y)*.40 - 50px)) rotate(192deg) scale(.82,1.16);opacity:1}
-    40.3%{transform:translate(calc(var(--narga-exit-x,-620px)*-1),calc(var(--narga-hit1-y)*.20 - 70px)) rotate(190deg) scale(.76,1.10);opacity:0}
-    /* 2타: 은신 -> 팍! -> 멈춤 */
-    50.4%{transform:translate(calc(var(--narga-exit-x,-620px)*-1),calc(var(--narga-hit2-y) + 150px)) rotate(174deg) scale(.80);opacity:0}
-    51.6%{transform:translate(calc(var(--narga-hit2-x) - 260px),calc(var(--narga-hit2-y) + 165px)) rotate(176deg) scale(.88,1.20);opacity:1}
-    53.2%{transform:translate(calc(var(--narga-hit2-x) - 200px),calc(var(--narga-hit2-y) + 130px)) rotate(174deg) scale(.90,1.18);opacity:1}
-    57.6%{transform:translate(var(--narga-hit2-x),var(--narga-hit2-y)) rotate(165deg) scale(1.22,.84);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
-    59.6%{transform:translate(var(--narga-hit2-x),var(--narga-hit2-y)) rotate(165deg) scale(1.06,.98);opacity:1}
-    62%{transform:translate(var(--narga-hit2-x),var(--narga-hit2-y)) rotate(165deg) scale(1.06,.98);opacity:1}
-    /* 2타 -> 3타: 다시 EX쪽으로 이탈 */
-    63.3%{transform:translate(calc(var(--narga-hit2-x)*.55),calc(var(--narga-hit2-y)*.40 - 50px)) rotate(168deg) scale(.82,1.16);opacity:1}
-    64.6%{transform:translate(var(--narga-exit-x,-620px),calc(var(--narga-hit2-y)*.20 - 70px)) rotate(170deg) scale(.76,1.10);opacity:0}
-    /* 3타: 은신 -> 팍! -> 멈춤 */
-    74.6%{transform:translate(var(--narga-exit-x,-620px),calc(var(--narga-hit3-y) + 150px)) rotate(186deg) scale(.80);opacity:0}
-    75.8%{transform:translate(calc(var(--narga-hit3-x) + 260px),calc(var(--narga-hit3-y) + 165px)) rotate(184deg) scale(.88,1.20);opacity:1}
-    77.4%{transform:translate(calc(var(--narga-hit3-x) + 200px),calc(var(--narga-hit3-y) + 130px)) rotate(186deg) scale(.90,1.18);opacity:1}
-    81.8%{transform:translate(var(--narga-hit3-x),var(--narga-hit3-y)) rotate(195deg) scale(1.26,.82);filter:brightness(1.56) drop-shadow(0 0 20px #9b6ad988);opacity:1}
-    83.8%{transform:translate(var(--narga-hit3-x),var(--narga-hit3-y)) rotate(195deg) scale(1.06,.98);opacity:1}
-    86.2%{transform:translate(var(--narga-hit3-x),var(--narga-hit3-y)) rotate(195deg) scale(1.06,.98);opacity:1}
-    /* 회귀: 화면 밖으로 빠진 뒤 중앙에서 Fade In */
-    88%{transform:translate(calc(var(--narga-hit3-x)*.55),calc(var(--narga-hit3-y)*.40 - 50px)) rotate(192deg) scale(.82,1.16);opacity:1}
-    89.4%{transform:translate(calc(var(--narga-exit-x,-620px)*-.60),calc(var(--narga-hit3-y)*.20 - 90px)) rotate(190deg) scale(.76,1.10);opacity:0}
-    95%{transform:translate(0,-26px) rotate(0deg) scale(.92,1.08);opacity:.5}
+    /* 회전 없이 좌/우로 화면 이탈한 뒤, 나가고 나서 Fade Out */
+    0%,4%{transform:none;opacity:1}
+    8%,11%{transform:translate(0,28px) rotate(0deg) scale(1.14,.82);opacity:1}
+    14%{transform:translate(calc(var(--narga-exit-x,-620px)*.45),-60px) rotate(0deg) scale(.86,1.20);opacity:1}
+    16.5%{transform:translate(var(--narga-exit-x,-620px),-70px) rotate(0deg) scale(.86,1.14);opacity:1}
+    18.5%{transform:translate(var(--narga-exit-x,-620px),-70px) rotate(0deg) scale(.86,1.14);opacity:0}
+    /* 1타: 표적 45도 아래 A측 고정 거리에서 Fade In -> Leap -> 90도 이탈 -> Fade Out */
+    19.8%{transform:translate(calc(var(--narga-hit1-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit1-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.94);opacity:0}
+    22.3%{transform:translate(calc(var(--narga-hit1-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit1-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1);opacity:1}
+    24.3%{transform:translate(calc(var(--narga-hit1-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit1-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.12,.86);opacity:1}
+    25.8%{transform:translate(calc(var(--narga-hit1-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit1-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.12,.86);opacity:1}
+    33.3%{transform:translate(var(--narga-hit1-x),var(--narga-hit1-y)) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.22,.84);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
+    35.3%{transform:translate(var(--narga-hit1-x),var(--narga-hit1-y)) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.06,.98);opacity:1}
+    37.3%{transform:translate(var(--narga-hit1-x),var(--narga-hit1-y)) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.06,.98);opacity:1}
+    40.3%{transform:translate(calc(var(--narga-hit1-x) - var(--narga-ambush-side)*var(--narga-ambush-out)),calc(var(--narga-hit1-y) + var(--narga-ambush-out))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.88,1.16);opacity:1}
+    42.8%{transform:translate(calc(var(--narga-hit1-x) - var(--narga-ambush-side)*var(--narga-ambush-out)),calc(var(--narga-hit1-y) + var(--narga-ambush-out))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.88,1.16);opacity:0}
+    /* 2타: 표적 45도 아래 B측 고정 거리에서 Fade In -> Leap -> 90도 이탈 -> Fade Out */
+    44.1%{transform:translate(calc(var(--narga-hit2-x) + calc(var(--narga-ambush-side)*-1)*var(--narga-ambush-off)),calc(var(--narga-hit2-y) + var(--narga-ambush-off))) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(.94);opacity:0}
+    46.6%{transform:translate(calc(var(--narga-hit2-x) + calc(var(--narga-ambush-side)*-1)*var(--narga-ambush-off)),calc(var(--narga-hit2-y) + var(--narga-ambush-off))) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(1);opacity:1}
+    48.6%{transform:translate(calc(var(--narga-hit2-x) + calc(var(--narga-ambush-side)*-1)*var(--narga-ambush-off)),calc(var(--narga-hit2-y) + var(--narga-ambush-off))) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(1.12,.86);opacity:1}
+    50.1%{transform:translate(calc(var(--narga-hit2-x) + calc(var(--narga-ambush-side)*-1)*var(--narga-ambush-off)),calc(var(--narga-hit2-y) + var(--narga-ambush-off))) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(1.12,.86);opacity:1}
+    57.6%{transform:translate(var(--narga-hit2-x),var(--narga-hit2-y)) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(1.22,.84);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
+    59.6%{transform:translate(var(--narga-hit2-x),var(--narga-hit2-y)) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(1.06,.98);opacity:1}
+    61.6%{transform:translate(var(--narga-hit2-x),var(--narga-hit2-y)) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(1.06,.98);opacity:1}
+    64.6%{transform:translate(calc(var(--narga-hit2-x) - calc(var(--narga-ambush-side)*-1)*var(--narga-ambush-out)),calc(var(--narga-hit2-y) + var(--narga-ambush-out))) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(.88,1.16);opacity:1}
+    67.1%{transform:translate(calc(var(--narga-hit2-x) - calc(var(--narga-ambush-side)*-1)*var(--narga-ambush-out)),calc(var(--narga-hit2-y) + var(--narga-ambush-out))) rotate(calc(calc(var(--narga-ambush-side)*-1)*135deg)) scale(.88,1.16);opacity:0}
+    /* 3타: 표적 45도 아래 A측 고정 거리에서 Fade In -> Leap -> 90도 이탈 -> Fade Out */
+    68.3%{transform:translate(calc(var(--narga-hit3-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit3-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.94);opacity:0}
+    70.8%{transform:translate(calc(var(--narga-hit3-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit3-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1);opacity:1}
+    72.8%{transform:translate(calc(var(--narga-hit3-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit3-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.12,.86);opacity:1}
+    74.3%{transform:translate(calc(var(--narga-hit3-x) + var(--narga-ambush-side)*var(--narga-ambush-off)),calc(var(--narga-hit3-y) + var(--narga-ambush-off))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.12,.86);opacity:1}
+    81.8%{transform:translate(var(--narga-hit3-x),var(--narga-hit3-y)) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.22,.84);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
+    83.8%{transform:translate(var(--narga-hit3-x),var(--narga-hit3-y)) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.06,.98);opacity:1}
+    85.8%{transform:translate(var(--narga-hit3-x),var(--narga-hit3-y)) rotate(calc(var(--narga-ambush-side)*135deg)) scale(1.06,.98);opacity:1}
+    88.8%{transform:translate(calc(var(--narga-hit3-x) - var(--narga-ambush-side)*var(--narga-ambush-out)),calc(var(--narga-hit3-y) + var(--narga-ambush-out))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.88,1.16);opacity:1}
+    91.3%{transform:translate(calc(var(--narga-hit3-x) - var(--narga-ambush-side)*var(--narga-ambush-out)),calc(var(--narga-hit3-y) + var(--narga-ambush-out))) rotate(calc(var(--narga-ambush-side)*135deg)) scale(.88,1.16);opacity:0}
+    /* 제자리로 돌아와 똑바로 선 채 Fade In */
+    96%{transform:translate(0,-26px) rotate(0deg) scale(.92,1.08);opacity:.5}
     100%{transform:none;opacity:1}
 }
+
 /* 연속 물어뜯기(분노). 접촉 16/30 of 36틱 = 44.4% / 83.3%.
    1타는 도약 착지가 곧 깨물기다. 2타는 복귀하며 도는 꼬리 회전. */
 @keyframes monster-motion-nargacuga-bite-spin-return {

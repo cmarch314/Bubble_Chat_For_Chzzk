@@ -230,7 +230,26 @@ for (const id of ['nargacuga-turn-tail-slam', 'nargacuga-turn-tail-slam-double']
     };
 }
 
-for (const id of ['nargacuga-dash-bite', 'nargacuga-leap-ambush', 'nargacuga-leap-ambush-triple']) {
+// 급습 계열은 재진입 위치가 "표적 기준 45도 아래, 좌/우 무작위, 고정 거리"로
+// 정해져 있다. 머리 방향도 그 자리에서 표적을 향하도록 키프레임이 ±135도로
+// 고정하므로, 표적 좌표에서 각을 계산하는 nargacuga-aim은 쓰지 않는다.
+// 둘을 겹쳐 걸면 겨냥 레이어 회전이 더해져 몸이 과하게 꺾인다.
+for (const id of ['nargacuga-leap-ambush', 'nargacuga-leap-ambush-triple']) {
+    const existing = HuntMonsterGeometryChoreography[id];
+    HuntMonsterGeometryChoreography[id] = context => {
+        if (existing) existing(context);
+        const side = Math.random() < 0.5 ? -1 : 1;
+        context.motionElement.style.setProperty('--narga-ambush-side', String(side));
+        // 최초 화면 이탈은 표적에서 먼 쪽으로 빠진다.
+        const away = context.dx >= 0 ? -1 : 1;
+        context.motionElement.style.setProperty('--narga-exit-x', `${away * 620}px`);
+        // 겨냥 레이어가 이전 패턴의 각을 들고 있을 수 있으므로 명시적으로 편다.
+        const aimLayer = context.animator?.resolveAimLayer?.(context.monsterImg);
+        (aimLayer || context.motionElement).style.setProperty('--narga-aim-deg', '0deg');
+    };
+}
+
+for (const id of ['nargacuga-dash-bite']) {
     const existing = HuntMonsterGeometryChoreography[id];
     HuntMonsterGeometryChoreography[id] = context => {
         if (existing) existing(context);
