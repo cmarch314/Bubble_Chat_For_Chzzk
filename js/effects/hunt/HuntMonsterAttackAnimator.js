@@ -447,6 +447,47 @@ class HuntMonsterAttackAnimator {
         return true;
     }
 
+    /**
+     * 분노한 나르가쿠르가의 붉은 눈 잔상.
+     *
+     * 잔상을 직접 그리는 대신, 모션 요소와 "같은 클래스 · 같은 CSS 변수"를 가진
+     * 빈 복제본을 형제로 두고 animation-delay만 준다. CSS 애니메이션은 지연된 시간만큼
+     * 과거의 프레임을 그리므로, 복제본은 몬스터가 조금 전에 있던 자리에 놓인다.
+     * 복제본에는 몸 이미지 없이 눈 점만 있으므로 붉은 선 두 줄이 궤적으로 남는다.
+     *
+     * 요소는 두 개뿐이고 각각 점 두 개를 가상 요소로 그리므로 비용이 작다.
+     * 트레이트(rage-eyes)를 가진 몬스터가 분노 상태일 때만 만든다. 몬스터 id로
+     * 분기하지 않는다.
+     */
+    spawnEyeTrail(motionElement, motionClass, active) {
+        const image = motionElement.querySelector?.('.game-hunt-monster-img');
+        if (!image?.classList?.contains?.('monster-trait-rage-eyes')) return;
+        const stage = motionElement.parentElement;
+        if (!stage) return;
+        // CSS 애니메이션을 끈 경로(동적 경로 키프레임을 쓰는 돌진)는 클래스 애니메이션이
+        // 돌지 않으므로 잔상도 따라갈 수 없다. 제자리에 붉은 점만 남기지 않도록 건너뛴다.
+        if (String(motionElement.style?.animation || '').includes('none')) return;
+        // 좌표 계산에 쓰이는 커스텀 속성만 물려받는다. cssText를 통째로 복사하면
+        // transform이나 animation 같은 확정값까지 따라와 잔상이 제 경로를 그리지 못한다.
+        const variables = Array.from(motionElement.style || [])
+            .filter(name => String(name).startsWith('--'))
+            .map(name => [name, motionElement.style.getPropertyValue(name)]);
+        const ghosts = [];
+        for (let index = 1; index <= 2; index += 1) {
+            const ghost = document.createElement('div');
+            ghost.className = `hunt-monster-eye-trail ${motionClass}`;
+            ghost.dataset.trail = String(index);
+            ghost.setAttribute('aria-hidden', 'true');
+            variables.forEach(([name, value]) => ghost.style.setProperty(name, value));
+            ghost.style.animationDelay = `${index * 70}ms`;
+            ghost.style.animationFillMode = 'both';
+            ghost.innerHTML = '<div class="hunt-monster-eye-glow"></div>';
+            stage.appendChild(ghost);
+            ghosts.push(ghost);
+        }
+        active.finishers.push(() => ghosts.forEach(ghost => ghost.remove()));
+    }
+
     startMonsterMotion(motionElement, motionClass, duration, onFinish = null, metadata = {}) {
         this.clearActiveMonsterMotion(null, 'replaced');
         motionElement.classList.remove(...Array.from(motionElement.classList).filter(name => name.startsWith('monster-motion-')));
@@ -498,6 +539,7 @@ class HuntMonsterAttackAnimator {
                 event?.type === 'animationcancel' ? 'animationcancel' : (event ? 'animationend' : 'watchdog')
             );
         };
+        this.spawnEyeTrail(motionElement, motionClass, active);
         this.activeMonsterMotion = active;
         motionElement.addEventListener?.('animationend', active.finish);
         motionElement.addEventListener?.('animationcancel', active.finish);
@@ -530,7 +572,7 @@ class HuntMonsterAttackAnimator {
             layer.style?.removeProperty?.('transform');
             delete layer.dataset.monsterFacingPlan;
         });
-        this.card?.querySelectorAll?.('.monster-local-action-fx,.monster-charge-track,.monster-burrow-dust')
+        this.card?.querySelectorAll?.('.monster-local-action-fx,.monster-charge-track,.monster-burrow-dust,.hunt-monster-eye-trail')
             ?.forEach(node => node.remove());
         return cleared;
     }
