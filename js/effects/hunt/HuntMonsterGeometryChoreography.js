@@ -239,7 +239,7 @@ for (const id of ['nargacuga-turn-tail-slam', 'nargacuga-turn-tail-slam-double']
 // 정해져 있다. 머리 방향도 그 자리에서 표적을 향하도록 키프레임이 ±135도로
 // 고정하므로, 표적 좌표에서 각을 계산하는 nargacuga-aim은 쓰지 않는다.
 // 둘을 겹쳐 걸면 겨냥 레이어 회전이 더해져 몸이 과하게 꺾인다.
-for (const id of ['nargacuga-leap-ambush', 'nargacuga-leap-ambush-triple']) {
+for (const id of ['nargacuga-leap-ambush', 'nargacuga-leap-ambush-triple', 'nargacuga-lunge-finish']) {
     const existing = HuntMonsterGeometryChoreography[id];
     HuntMonsterGeometryChoreography[id] = context => {
         if (existing) existing(context);

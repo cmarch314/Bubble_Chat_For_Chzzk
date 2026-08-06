@@ -1387,6 +1387,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { atTicks: 40, targetMode: 'sequential', damageScale: 0.92 },
             { atTicks: 62, targetMode: 'sequential', damageScale: 1, audioCue: 'narga-combo-finish' }
         ],
+        // 1·2타가 급습과 같은 구조이므로 접근 배율도 같이 맞춘다(표적 좌표까지 온전히 도달).
+        animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-lunge-finish', animationDurationMs: 7200
     }]
 ]);
