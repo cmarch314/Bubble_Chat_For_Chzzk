@@ -1617,15 +1617,22 @@
     --narga-ambush-side:1;
     --narga-ambush-off:226px;
     --narga-ambush-out:240px;
+    /* 회전축을 머리에 둔다. 스프라이트 머리는 중앙 하단(50% 88%)이다.
+       축이 앞발(71% 86%)에 있으면 135도로 돌 때 머리가 요소 중심 기준 아래
+       144px에서 75px로 69px 떠오르고 옆으로도 131px 밀린다. 그래서 헌터
+       하단부를 노리도록 좌표를 잡아도 실제로는 상단을 때렸다.
+       축을 머리에 두면 회전이 머리를 전혀 움직이지 않으므로,
+       --narga-hit-x/y가 곧 타격 지점이 된다. */
+    transform-origin:50% 88%;
 }
-.monster-motion-nargacuga-leap-ambush { animation:monster-motion-nargacuga-leap-ambush var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.88; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); transform-origin:71% 86%; }
+.monster-motion-nargacuga-leap-ambush { animation:monster-motion-nargacuga-leap-ambush var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.88; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:96px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 /* 3연 급습만 접촉 좌표를 세 벌 갖는다. --narga-passN-x/y는 geometry choreography가
    패스별 표적에서 계산해 넣고, 없으면 기본 표적(--monster-attack-x/y)으로 폴백한다.
    standoff/drop 보정은 단발 급습과 동일하게 여기서 한 번만 적용한다. */
 .monster-motion-nargacuga-leap-ambush-triple {
     animation:monster-motion-nargacuga-leap-ambush-triple var(--monster-motion-duration) linear both !important;
-    z-index:18; transform-origin:71% 86%;
-    --narga-standoff:.88; --narga-drop:62px;
+    z-index:18;
+    --narga-standoff:.88; --narga-drop:96px;
     --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff));
     --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop));
     --narga-hit1-x:calc(var(--narga-pass1-x,var(--monster-attack-x))*var(--narga-standoff));
