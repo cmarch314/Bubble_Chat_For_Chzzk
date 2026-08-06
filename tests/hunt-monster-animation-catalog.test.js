@@ -61,9 +61,56 @@ for (const { name, body } of keyframeBlocks(runtimeStyle)) {
     assert.ok(finalFrame, `${name} must author an explicit 100% recovery frame`);
     assert.doesNotMatch(finalFrame[2], /transform\s*:\s*none/,
         `${name} must not reverse-spin into transform:none while returning`);
+    // 이 규칙이 막으려는 것은 "복귀하면서 몰래 되감기는 회전"이다. 타격이 끝난 뒤
+    // 각도가 풀리면 제자리로 돌아가는 동안 몸이 반대로 도는 게 보인다.
+    //
+    // 처음에는 "마지막 프레임이 최대 회전량을 유지할 것"으로 적었는데, 그러면
+    // 역회전이 연출의 핵심인 기술을 금지하게 된다(나르가 역회전 연계 꼬리 회전은
+    // 1회전을 좌회전, 2회전을 우회전으로 되돌리는 것이 기술 정의 그 자체다).
+    // 그래서 "마지막 접촉 이후로는 각도가 변하지 않을 것"으로 좁힌다. 중간에 authored된
+    // 역회전은 허용하되, 복귀 구간의 되감기는 여전히 잡는다.
+    //
+    // 접촉 프레임은 이 코드베이스 관례상 filter:brightness()로 강조된다.
+    // 회전 각도를 프레임 순서대로 나열한다. 회전이 없는 프레임(transform:none 등)은
+    // 직전 각도를 유지하는 것으로 본다.
+    const framePercent = frame => Math.max(...frame[1].split(',')
+        .map(value => Number.parseFloat(value.trim())).filter(Number.isFinite));
+    const series = frames
+        .map(frame => ({
+            percent: framePercent(frame),
+            angle: rotationValues(frame[2]).at(-1),
+            contact: /filter\s*:\s*brightness\(/.test(frame[2])
+        }))
+        .filter(entry => Number.isFinite(entry.percent))
+        .sort((a, b) => a.percent - b.percent);
+    let carried = 0;
+    series.forEach(entry => {
+        if (Number.isFinite(entry.angle)) carried = entry.angle;
+        else entry.angle = carried;
+    });
+
+    const lastContact = series.map(entry => entry.contact).lastIndexOf(true);
     const finalTurns = rotationValues(finalFrame[2]);
-    assert.ok(Math.max(0, ...finalTurns.map(Math.abs)) >= largestTurn,
-        `${name} must preserve its accumulated rotation through recovery`);
+    if (lastContact < 0) {
+        assert.ok(Math.max(0, ...finalTurns.map(Math.abs)) >= largestTurn,
+            `${name} must preserve its accumulated rotation through recovery`);
+        continue;
+    }
+    // 마지막 접촉으로 들어가던 회전 방향.
+    let heading = 0;
+    for (let i = lastContact; i > 0 && !heading; i -= 1) {
+        heading = Math.sign(series[i].angle - series[i - 1].angle);
+    }
+    // 접촉 이후로는 그 방향을 유지하거나 멈춰야 한다. 반대로 돌면 제자리로 돌아가는
+    // 동안 몸이 되감기는 게 보인다. 도중에 authored된 역회전(역회전 연계 꼬리 회전)은
+    // 그 자체가 접촉을 동반하므로 여기에 걸리지 않는다.
+    for (let i = lastContact + 1; i < series.length; i += 1) {
+        const delta = Math.sign(series[i].angle - series[i - 1].angle);
+        assert.ok(delta === 0 || heading === 0 || delta === heading,
+            `${name} must not reverse-spin after its final contact `
+            + `(${series[i - 1].percent}% ${series[i - 1].angle}deg -> `
+            + `${series[i].percent}% ${series[i].angle}deg)`);
+    }
 }
 assert.match(animatorSource, /easing: 'step-end'/,
     'direction changes must flip the image discretely without a scale-through-zero squash');

@@ -136,12 +136,31 @@ class HuntMonsterActionPolicy {
         return Array.from({ length: passes }, (_, i) => pairs[(start + i) % pairs.length]);
     }
 
-    static independentTargetPasses(targetable, passCount = 2, random = Math.random) {
+    // distinct를 켜면 패스마다 서로 다른 헌터를 뽑는다(비복원 추출). 3연 급습처럼
+    // "세 번 다 다른 대상을 친다"가 연출의 핵심인 패턴용이다. 표적 수가 패스 수보다
+    // 적으면 풀을 다시 채우되 직전 대상은 제외해, 같은 헌터를 연달아 치지 않는다.
+    static independentTargetPasses(targetable, passCount = 2, random = Math.random, distinct = false) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
-        return Array.from({ length: Math.max(1, Number(passCount || 1)) }, () => [
-            ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))]
-        ]);
+        const passes = Math.max(1, Number(passCount || 1));
+        if (!distinct) {
+            return Array.from({ length: passes }, () => [
+                ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))]
+            ]);
+        }
+        const result = [];
+        let pool = [];
+        let last = null;
+        for (let pass = 0; pass < passes; pass += 1) {
+            if (!pool.length) {
+                pool = ordered.filter(target => ordered.length === 1 || target !== last);
+            }
+            const pick = pool[Math.min(pool.length - 1, Math.floor(random() * pool.length))];
+            pool = pool.filter(target => target !== pick);
+            last = pick;
+            result.push([pick]);
+        }
+        return result;
     }
 
     static leftRightHalfPasses(targetable, count = 4, random = Math.random) {
@@ -163,7 +182,9 @@ class HuntMonsterActionPolicy {
         defaultTargets = [],
         // 회전 축처럼 "지정한 헌터"가 결과를 좌우하는 모드용. defaultTargets[0]은
         // 호출부에 따라 중앙 정렬된 레인 창의 시작점일 수 있어 표적과 다르다.
-        primaryIndex = null
+        primaryIndex = null,
+        // independent-passes에서 패스마다 다른 헌터를 뽑을지 여부.
+        distinctPasses = false
     } = {}) {
         if (mode === 'adjacent-lane') {
             return { targets: this.adjacentLaneTargets(targetable, count, random), runtime: {} };
@@ -246,7 +267,8 @@ class HuntMonsterActionPolicy {
             const passes = this.independentTargetPasses(
                 targetable,
                 passCount,
-                random
+                random,
+                distinctPasses
             );
             return {
                 targets: passes.flat(),

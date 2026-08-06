@@ -69,6 +69,38 @@ const HuntMonsterGeometryChoreography = {
         pattern.runtimeGlideFacingDirection = Math.sign(glideX) || Math.sign(dx) || -1;
     },
 
+    // 3연 급습은 패스마다 다른 헌터를 노린다. 그런데 CSS 애니메이션은 하나뿐이라
+    // 좌표 한 쌍(--narga-hit-x/y)만으로는 세 타가 같은 자리를 때린다.
+    // 패스별 좌표를 --narga-pass1..3-x/y로 따로 넘겨, 각 접촉 프레임이 자기
+    // 표적을 참조하게 한다. 시퀀스가 없으면(패턴 랩 단독 재생 등) 기본 표적으로
+    // 폴백하므로 종전 동작 그대로다.
+    'nargacuga-leap-ambush-triple'({ animator, motionElement, pattern, monsterRect, maxX, attackX, attackY }) {
+        const sequence = Array.isArray(pattern?.runtimeImpactTargetSequence)
+            ? pattern.runtimeImpactTargetSequence
+            : [];
+        const monsterCenterX = monsterRect.left + monsterRect.width / 2;
+        const monsterCenterY = monsterRect.top + monsterRect.height / 2;
+        for (let pass = 0; pass < 3; pass += 1) {
+            const raw = Array.isArray(sequence[pass]) ? sequence[pass][0] : sequence[pass];
+            const targetIndex = Number(raw?.index ?? raw);
+            const liveCard = Number.isInteger(targetIndex)
+                ? animator.card?.querySelector?.(`#fight-card-${targetIndex}`)
+                : null;
+            const anchor = liveCard?.querySelector?.('.game-hunt-weapon-img-container') || liveCard;
+            const rect = anchor?.getBoundingClientRect?.();
+            // 배율과 클램프는 playPatternMotion의 target-contact 규칙(.92/.88,
+            // Y는 -240~430)과 같아야 한다. 다르게 잡으면 1타만 다른 거리에서 멈춘다.
+            const x = rect
+                ? Math.max(-maxX, Math.min(maxX, (rect.left + rect.width / 2 - monsterCenterX) * .92))
+                : attackX;
+            const y = rect
+                ? Math.max(-240, Math.min(430, (rect.top + rect.height / 2 - monsterCenterY) * .88))
+                : attackY;
+            motionElement.style.setProperty(`--narga-pass${pass + 1}-x`, `${Math.round(x)}px`);
+            motionElement.style.setProperty(`--narga-pass${pass + 1}-y`, `${Math.round(y)}px`);
+        }
+    },
+
     // 회전 축을 헌터 위에 두지 않고 "인접한 두 명 사이"에 놓는다. 각 패스의 쌍
     // 중점을 --monster-attack-x/y로 덮어써, 회전이 그 둘을 한꺼번에 훑게 만든다.
     // 두 번째 패스가 있으면 --monster-pivot2-x/y로 함께 넘긴다.

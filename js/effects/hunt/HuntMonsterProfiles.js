@@ -1299,7 +1299,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         tags: ['charge', 'ambush', 'vanish', 'target-contact', 'multi-hit', 'strong'],
         monsterAtbCost: 0.92,
         movement: { ticks: 66, untargetable: true },
-        targeting: { mode: 'independent-passes', passCount: 3 },
+        // 세 번의 급습이 각각 다른 헌터를 노린다. 같은 대상을 두 번 치면
+        // 화면 밖으로 빠졌다 되돌아오는 연출의 의미가 없어진다.
+        targeting: { mode: 'independent-passes', passCount: 3, distinctPasses: true },
         impactTimeline: [
             { atTicks: 22, targetMode: 'sequential', damageScale: 1 },
             { atTicks: 38, targetMode: 'sequential', damageScale: 0.92 },

@@ -1030,7 +1030,8 @@ class HuntMonsterTurnExecutor {
                     || pattern.impactTimeline?.length || 2),
                 random: engine.random.bind(engine),
                 mode: targetingMode,
-                defaultTargets: targetsToHit
+                defaultTargets: targetsToHit,
+                distinctPasses: Boolean(pattern.targeting?.distinctPasses)
             });
         targetsToHit = targetPlan.targets;
         if (Object.keys(targetPlan.runtime).length) {
@@ -1065,7 +1066,11 @@ class HuntMonsterTurnExecutor {
             );
         }
 
-        if (!isImpactCommit) engine.showSkillBubble('monster', attackName);
+        // 기술명 말풍선은 준비 단계(prepare)에서 "⚠ 이름"으로 한 번만 띄운다.
+        // 여기서 다시 띄우면 행동 하나에 말풍선이 두 번 떠, 준비 알림인지 실행
+        // 알림인지 구분이 안 되고 같은 공격이 두 번 오는 것처럼 읽힌다.
+        // 실행 단계에 도달하는 경로는 모두 prepare를 거치므로 알림이 누락되지 않는다.
+        // (impact commit과 트레이트 지연 피해는 애초에 isImpactCommit으로 걸러진다.)
 
         if (HuntMonsterTurnExecutor.requiresDelayedImpact(pattern)) {
             const uniqueTargets = targetsToHit.filter((target, index, list) =>

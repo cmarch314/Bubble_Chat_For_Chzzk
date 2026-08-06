@@ -217,6 +217,13 @@ class HuntMonsterArchetypeCatalog {
             sourceGame: 'world_iceborne',
             enragedDamageMultiplier: 1.10,
             roarSize: 'small',
+            // 분노 지속은 1분(600틱)으로 짧은 편이다. 세 값이 모두 있어야
+            // HuntMonsterRules.stateForBattleTime의 주기 계산이 작동한다.
+            // rageRecoveryDurationTicks가 없으면 그 분기를 통째로 건너뛰어
+            // 800틱 이후 영구 분노가 된다.
+            rageStartTick: 800,
+            rageDurationTicks: 600,
+            rageRecoveryDurationTicks: 300,
             traits: Object.freeze([
                 Object.freeze({ kind: 'rage-eyes' }),
                 Object.freeze({ kind: 'conditional-trap', trap: 'pitfall', allowedStates: Object.freeze(['enraged']) })
