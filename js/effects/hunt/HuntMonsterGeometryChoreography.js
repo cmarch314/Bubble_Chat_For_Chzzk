@@ -137,14 +137,39 @@ const HuntMonsterGeometryChoreography = {
         motionElement.style.setProperty('--monster-attack-y', `${Math.round(y)}px`);
     },
 
+    // 칼날깃 연격은 "레인을 가로지르는 돌진"이다. 예전에는 집에서 표적으로 대각선
+    // 하강한 뒤 아래로 빠져, 돌진이 아니라 내리꽂기로 보였다. 표적 반대편 화면 밖에서
+    // 출발해 표적의 높이를 그대로 유지한 채 수평으로 통과하고 반대쪽으로 빠진다.
+    //
+    // 퇴장 지점은 CSS가 출발점과 접촉점만으로 계산한다(등속 유지). 여기서는 표적
+    // 반대편 화면 밖 출발점과 달릴 높이만 정한다.
+    'nargacuga-flank-charge'({ motionElement, pattern, monsterRect, targetRect }) {
+        const monsterCenterX = monsterRect.left + monsterRect.width / 2;
+        const monsterCenterY = monsterRect.top + monsterRect.height / 2;
+        const hitX = targetRect.left + targetRect.width / 2 - monsterCenterX;
+        const laneY = Math.max(-240, Math.min(430,
+            targetRect.top + targetRect.height / 2 - monsterCenterY));
+        // 표적이 있는 쪽의 반대편에서 출발해야 파티를 가로지른다.
+        const direction = Math.sign(hitX) || -1;
+        motionElement.style.setProperty('--narga-run-start-x', `${Math.round(hitX - direction * 1000)}px`);
+        motionElement.style.setProperty('--narga-run-y', `${Math.round(laneY)}px`);
+        // 진행 방향은 출발점에서 표적을 향한다.
+        pattern.runtimeChargeFacingDirection = direction;
+    },
+
     // 평상시 1회전도 주 표적 바로 위에서 도는 것은 같다. 다만 방향이 하나뿐이라,
     // 어느 쪽 이웃을 고른 패스인지에 따라 회전 방향과 축이 함께 뒤집힌다.
     // +1이면 하단 좌측 축 · 시계 회전(왼쪽까지), -1이면 하단 우측 축 · 반시계(오른쪽까지).
     'nargacuga-pivot-spin'(context) {
         HuntMonsterGeometryChoreography['nargacuga-twin-pivot-spin'](context);
-        const direction = Number(context.pattern?.runtimeSpinDirection);
+        const raw = Number(context.pattern?.runtimeSpinDirection);
+        const direction = Number.isFinite(raw) && raw ? Math.sign(raw) : 1;
+        context.motionElement.style.setProperty('--narga-spin-dir', String(direction));
+        // 축 위치는 계산식이 아니라 값으로 넘긴다. CSS에서 calc(50% - var(--dir)*30%)로
+        // 쓰면 dir이 -1일 때 "- -1"로 연산자가 연속돼 문법 오류가 되고, 선언 전체가
+        // 무효화되어 손이 아니라 이미지 중앙(50% 50%)을 축으로 돌아버린다.
         context.motionElement.style.setProperty(
-            '--narga-spin-dir', String(Number.isFinite(direction) && direction ? direction : 1));
+            '--narga-spin-origin-x', direction > 0 ? '20%' : '80%');
     },
 
     // 대상 헌터를 겨누는 각도. 나르가 스프라이트는 머리가 아래(중앙 하단)를 향하므로
@@ -243,7 +268,8 @@ for (const id of ['nargacuga-turn-tail-slam', 'nargacuga-turn-tail-slam-double']
 // 정해져 있다. 머리 방향도 그 자리에서 표적을 향하도록 키프레임이 ±135도로
 // 고정하므로, 표적 좌표에서 각을 계산하는 nargacuga-aim은 쓰지 않는다.
 // 둘을 겹쳐 걸면 겨냥 레이어 회전이 더해져 몸이 과하게 꺾인다.
-for (const id of ['nargacuga-leap-ambush', 'nargacuga-leap-ambush-triple', 'nargacuga-lunge-finish']) {
+for (const id of ['nargacuga-leap-ambush', 'nargacuga-leap-ambush-triple',
+    'nargacuga-lunge-finish', 'nargacuga-offscreen-charge']) {
     const existing = HuntMonsterGeometryChoreography[id];
     HuntMonsterGeometryChoreography[id] = context => {
         if (existing) existing(context);

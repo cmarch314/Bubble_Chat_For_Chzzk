@@ -1270,6 +1270,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { atTicks: 24, targetMode: 'sequential', damageScale: 1 },
             { atTicks: 48, targetMode: 'sequential', damageScale: 1 }
         ],
+        // 1타가 급습과 같은 구조이므로 접근 배율도 같이 맞춘다(표적 좌표까지 온전히 도달).
+        animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-offscreen-charge', animationDurationMs: 5600
     }],
     ['nargacuga.quill_shot', '가시깃 사출', 'projectile', 0.363, {
