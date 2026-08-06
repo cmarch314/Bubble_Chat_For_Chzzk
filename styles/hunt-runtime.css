@@ -1673,7 +1673,28 @@
 .monster-motion-nargacuga-turn-tail-slam { animation:monster-motion-nargacuga-turn-tail-slam var(--monster-motion-duration) linear both !important; }
 .monster-motion-nargacuga-turn-tail-slam-double { animation:monster-motion-nargacuga-turn-tail-slam-double var(--monster-motion-duration) linear both !important; }
 
-.monster-motion-nargacuga-tail-whip { animation:monster-motion-nargacuga-tail-whip var(--monster-motion-duration) linear both !important; transform-origin:75% 88%; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+/* 꼬리 후려치기.
+   회전축은 앞발 하나가 아니라 두 앞발 사이 중간(50% 82%)이다. 한쪽 앞발을 축으로
+   삼으면 몸이 그 발에 매달려 도는 것처럼 보인다.
+
+   꼬리 끝은 좌상단(20% 12%)이고 꼬리는 ㄱ자로 이미지 상단 전체를 차지한다.
+   이 축에서 -175도를 돌면 꼬리 끝이 요소 중심 기준 오른쪽 90px · 아래 397px에
+   놓인다. 그래서 요소를 표적에서 그만큼 반대로 옮겨야(--narga-whip-comp) 꼬리가
+   표적을 찌른다. 결과적으로 몸통은 헌터보다 한참 위에 뜨고 꼬리만 내려와 닿는다.
+   --narga-hit-x/y는 "꼬리가 닿을 자리"(= 헌터), --narga-whip-x/y는 "요소를 놓을 자리"다.
+   Y의 75px은 playPatternMotion 세로 클램프(430)와 실제 거리(약 505)의 차이다. */
+.monster-motion-nargacuga-tail-whip {
+    animation:monster-motion-nargacuga-tail-whip var(--monster-motion-duration) linear both !important;
+    transform-origin:50% 82%;
+    --narga-standoff:1;
+    --narga-drop:75px;
+    --narga-whip-comp-x:-90px;
+    --narga-whip-comp-y:-397px;
+    --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff));
+    --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop));
+    --narga-whip-x:calc(var(--narga-hit-x) + var(--narga-whip-comp-x));
+    --narga-whip-y:calc(var(--narga-hit-y) + var(--narga-whip-comp-y));
+}
 .monster-motion-nargacuga-pivot-spin { animation:monster-motion-nargacuga-pivot-spin var(--monster-motion-duration) linear both !important; --narga-spin-dir:1; --narga-spin-origin-x:20%; transform-origin:var(--narga-spin-origin-x) 88%; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-dash-bite { animation:monster-motion-nargacuga-dash-bite var(--monster-motion-duration) linear both !important; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
@@ -2384,24 +2405,27 @@
 /* 꼬리 후려치기. 접촉 15/24틱 = 62.5%.
    튀어올라 접근 -> 크기 복귀 -> 제자리에서 135도 반시계로 찌름 -> 같은 경로로 회전 복귀
    -> 회전이 0으로 돌아온 뒤에야 제자리로 Leap. 회전 복귀와 귀환을 겹치지 않는다. */
+/* 접촉 15/24틱 = 62.5%.
+   밋밋한 한 방향 회전이 아니라 반동 -> 후려침 -> 관성 되감기의 세 박자다.
+   40~46%에 반대쪽으로 +22도 감았다가(반동) 62.5%에 -190도까지 휘두르고,
+   68%에 -175도로 되감으며 멈춘다. 되감기 15도는 관성 표현이다. */
 @keyframes monster-motion-nargacuga-tail-whip {
     0%,10%{transform:none}
-    18%{transform:translate(calc(var(--monster-attack-x)*.06),22px) rotate(0deg) scale(1.10,.86)}
-    26%{transform:translate(calc(var(--monster-attack-x)*.06),22px) rotate(0deg) scale(1.10,.86)}
-    30%{transform:translate(calc(var(--monster-attack-x)*.34),calc(var(--monster-attack-y)*.30 - 44px)) rotate(0deg) scale(.86,1.20)}
-    38%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1.20,.84)}
-    46%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
-    54%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
-    62.5%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(-175deg) scale(1.04);filter:brightness(1.45) drop-shadow(0 0 16px #9b6ad966)}
-    70%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(-175deg) scale(1)}
-    /* 회전 복귀 — 아직 제자리로 가지 않는다 */
-    80%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
-    86%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
-    /* 회전이 끝난 뒤에야 제자리로 Leap */
-    91%{transform:translate(calc(var(--narga-hit-x)*.45),-26px) rotate(0deg) scale(.88,1.18)}
-    97%{transform:translate(0,0) rotate(0deg) scale(1.14,.86)}
+    18%,24%{transform:translate(calc(var(--narga-whip-x)*.08),24px) rotate(0deg) scale(1.10,.86)}
+    30%{transform:translate(calc(var(--narga-whip-x)*.45),calc(var(--narga-whip-y)*.42 - 30px)) rotate(0deg) scale(.86,1.20)}
+    37%{transform:translate(var(--narga-whip-x),var(--narga-whip-y)) rotate(0deg) scale(1.16,.88)}
+    /* 반동: 휘두를 방향의 반대로 감는다 */
+    43%,47%{transform:translate(var(--narga-whip-x),var(--narga-whip-y)) rotate(22deg) scale(1.04,.98)}
+    /* 후려침 */
+    62.5%{transform:translate(var(--narga-whip-x),var(--narga-whip-y)) rotate(-190deg) scale(1.10,.94);filter:brightness(1.46) drop-shadow(0 0 16px #9b6ad966)}
+    68%{transform:translate(var(--narga-whip-x),var(--narga-whip-y)) rotate(-175deg) scale(1)}
+    76%{transform:translate(var(--narga-whip-x),var(--narga-whip-y)) rotate(-175deg) scale(1)}
+    /* 회전을 되돌린 뒤에야 제자리로 Leap */
+    84%{transform:translate(var(--narga-whip-x),var(--narga-whip-y)) rotate(0deg) scale(1)}
+    91%{transform:translate(calc(var(--narga-whip-x)*.45),-26px) rotate(0deg) scale(.88,1.18)}
     100%{transform:none}
 }
+
 /* 꼬리 회전: 한쪽 앞발을 축으로 한 바퀴. 접촉 18/26틱 = 69.2%.
    앞 반회전(180도)을 제자리에서 끝내 타격하고, 남은 반회전을 하는 동안 제자리로 돌아온다. */
 /* 평상시 꼬리 회전. 접촉 18/26틱 = 69.2%.

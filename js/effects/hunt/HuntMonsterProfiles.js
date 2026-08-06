@@ -1199,6 +1199,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         // 지정한 대상을 겨눠 찌르는 기술이라 좌/우 절반 고정 분배(left-right-halves)를
         // 쓰면 안 된다. 그 모드는 표적을 무시하고 늘 1·2 / 3·4로만 나눈다.
         impactTimeline: [{ atTicks: 15, damageScale: 1 }],
+        // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
+        animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-tail-whip', animationDurationMs: 2400,
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.68 }
