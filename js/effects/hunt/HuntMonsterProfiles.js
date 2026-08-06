@@ -1157,7 +1157,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     }],
 
     // ── 평상시 · 근접 모드 ──────────────────────────────────────────────────
-    ['nargacuga.quick_bite', '재빠른 물어뜯기', 'physical', 0.26, {
+    ['nargacuga.quick_bite', '재빠른 물어뜯기', 'physical', 0.286, {
         sourceMoveNameJA: '噛みつき', maxTargets: 1, windup: 5, recovery: 1,
         forbiddenStates: ['enraged'],
         tags: ['physical', 'ground-only', 'target-contact', 'weak', 'stance-melee'],
@@ -1169,7 +1169,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     }],
     // 꼬리는 상단에서 좌상단(←)을 향해 뻗어 있다. 그 꼬리로 찌르듯 135도 반시계로
     // 쫀득하게 돌려 꽂고, 같은 경로를 역회전으로 되짚어 복귀한다.
-    ['nargacuga.tail_whip', '꼬리 후려치기', 'area', 0.30, {
+    ['nargacuga.tail_whip', '꼬리 후려치기', 'area', 0.33, {
         sourceMoveNameJA: '尻尾薙ぎ払い', minTargets: 2, maxTargets: 3, windup: 5, recovery: 1,
         forbiddenStates: ['enraged'],
         tags: ['area', 'tail', 'ground-only', 'target-contact', 'stance-melee'],
@@ -1182,7 +1182,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         brokenPartDamageModifiers: { tail: 0.68 }
     }],
     // 오른팔을 축으로 삼으면 좌회전, 왼팔이면 우회전. 1회전.
-    ['nargacuga.tail_sweep', '꼬리 회전', 'area', 0.34, {
+    ['nargacuga.tail_sweep', '꼬리 회전', 'area', 0.374, {
         sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 3, windup: 5, recovery: 1,
         forbiddenStates: ['enraged'],
         tags: ['area', 'tail', 'ground-only', 'target-contact', 'stance-melee'],
@@ -1194,7 +1194,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         brokenPartDamageModifiers: { tail: 0.68 }
     }],
     // 분노판과 같은 내려찍기지만 1회. 꼬리가 땅에 박혀 3초(30틱) 후딜을 갖는다.
-    ['nargacuga.spiked_tail_slam', '가시 꼬리 내려찍기', 'physical', 0.47, {
+    ['nargacuga.spiked_tail_slam', '가시 꼬리 내려찍기', 'physical', 0.517, {
         sourceMoveNameJA: '棘尻尾叩きつけ', maxTargets: 1, windup: 9, recovery: 30,
         forbiddenStates: ['enraged'],
         tags: ['physical', 'tail', 'target-contact', 'strong', 'stance-melee'],
@@ -1209,7 +1209,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
 
     // ── 평상시 · 원거리 모드 ────────────────────────────────────────────────
     // 측면으로 도약한 뒤 표적 방향으로 화면 밖까지 꿰뚫는다.
-    ['nargacuga.cutwing_barrage', '칼날깃 연격', 'charge', 0.34, {
+    ['nargacuga.cutwing_barrage', '칼날깃 연격', 'charge', 0.374, {
         sourceMoveNameJA: '斬翅連撃', minTargets: 1, maxTargets: 2, windup: 6, recovery: 1,
         forbiddenStates: ['enraged'],
         tags: ['charge', 'ground-only', 'target-contact', 'stance-ranged'],
@@ -1220,7 +1220,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         brokenPartDamageModifiers: { 'left-wing': 0.78, 'right-wing': 0.78 }
     }],
     // 시그니처. 화면 밖으로 도약해 사라진 뒤 측면·후면에서 한 팔을 내밀며 파고든다.
-    ['nargacuga.leaping_cutwing', '도약 칼날깃 급습', 'charge', 0.42, {
+    ['nargacuga.leaping_cutwing', '도약 칼날깃 급습', 'charge', 0.462, {
         sourceMoveNameJA: '跳躍斬翅', minTargets: 1, maxTargets: 1, windup: 8, recovery: 1,
         forbiddenStates: ['enraged'], cooldown: 46, weight: 1.15,
         tags: ['charge', 'ambush', 'vanish', 'target-contact', 'strong', 'stance-ranged'],
@@ -1232,7 +1232,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         brokenPartDamageModifiers: { 'left-wing': 0.76, 'right-wing': 0.76 }
     }],
     // 화면 밖으로 빠진 뒤 돌진 모션으로 되돌아온다.
-    ['nargacuga.lunge_chain', '연속 런지 돌진', 'charge', 0.35, {
+    ['nargacuga.lunge_chain', '연속 런지 돌진', 'charge', 0.385, {
         sourceMoveNameJA: '連続突進', minTargets: 1, maxTargets: 2,
         windup: 6, recovery: 1, forbiddenStates: ['enraged'], cooldown: 40,
         tags: ['charge', 'ground-only', 'target-contact', 'stance-ranged'],
@@ -1245,7 +1245,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         ],
         animationProfile: 'nargacuga-offscreen-charge', animationDurationMs: 5600
     }],
-    ['nargacuga.quill_shot', '가시깃 사출', 'projectile', 0.33, {
+    ['nargacuga.quill_shot', '가시깃 사출', 'projectile', 0.363, {
         sourceMoveNameJA: '棘飛ばし', minTargets: 1, maxTargets: 3, windup: 5, recovery: 1,
         tags: ['projectile', 'tail', 'bleed', 'ground-hazard', 'stance-ranged'],
         monsterAtbCost: 0.48,
@@ -1266,7 +1266,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     // ── 모드 전환 ───────────────────────────────────────────────────────────
     // 30초마다 강제 선택되어 근접↔원거리 모드를 바꾼다. 화면 밖으로 도약해 사라졌다가
     // 제자리에 Fade in으로 돌아오며, 좌/우를 무작위로 골라 2회 연속으로 뛴다.
-    ['nargacuga.reposition_hop', '견제 도약', 'physical', 0.22, {
+    ['nargacuga.reposition_hop', '견제 도약', 'physical', 0.242, {
         sourceMoveNameJA: '牽制跳躍', maxTargets: 1, windup: 4, recovery: 1,
         tags: ['physical', 'mobility', 'vanish', 'stance-switch'],
         monsterAtbCost: 0.26,
@@ -1278,7 +1278,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
 
     // ── 분노 전용 (모드 무시, 전부 원거리에서 파고든다) ─────────────────────
     // 도약해 깨물고, 꼬리를 회전시키며 제자리로 돌아온다. 두 동작 모두 타격이다.
-    ['nargacuga.double_bite', '연속 물어뜯기', 'physical', 0.36, {
+    ['nargacuga.double_bite', '연속 물어뜯기', 'physical', 0.396, {
         sourceMoveNameJA: '連続噛みつき', minTargets: 1, maxTargets: 2,
         windup: 5, recovery: 1, state: 'enraged', cooldown: 30,
         tags: ['physical', 'target-contact', 'multi-hit'], monsterAtbCost: 0.56,
@@ -1293,7 +1293,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         brokenPartDamageModifiers: { head: 0.82, tail: 0.74 }
     }],
     // 이탈 → 공격을 3회 반복하고 제자리로 회귀한다(회귀 시 후딜 음성).
-    ['nargacuga.leaping_cutwing_triple', '도약 칼날깃 3연 급습', 'charge', 0.42, {
+    ['nargacuga.leaping_cutwing_triple', '도약 칼날깃 3연 급습', 'charge', 0.462, {
         sourceMoveNameJA: '跳躍斬翅・三連', minTargets: 1, maxTargets: 3,
         windup: 9, recovery: 12, state: 'enraged', cooldown: 62, weight: 0.46,
         tags: ['charge', 'ambush', 'vanish', 'target-contact', 'multi-hit', 'strong'],
@@ -1311,7 +1311,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     }],
     // 우측 팔을 축으로 좌회전, 이어서 좌측 팔을 축으로 우회전. 주먹을 휘두르는 느낌.
     // 축은 헌터 위치가 아니라 인접한 두 명 사이에 놓여, 회전이 그 둘을 함께 훑는다.
-    ['nargacuga.tail_sweep_reverse', '역회전 연계 꼬리 회전', 'area', 0.34, {
+    ['nargacuga.tail_sweep_reverse', '역회전 연계 꼬리 회전', 'area', 0.374, {
         sourceMoveNameJA: '尻尾回転・逆回転', minTargets: 2, maxTargets: 4,
         windup: 5, recovery: 1, state: 'enraged', cooldown: 44,
         tags: ['area', 'tail', 'target-contact', 'multi-hit'],
@@ -1328,7 +1328,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     // 헌터 앞으로 펄쩍 뛰어 붙고 꼬리를 살랑인 뒤, 뒤돌며 늘어난 형상이 내리꽂힌다.
     // 뒤돌기와 내려치기는 한 동작으로 매우 빠르게 일어난다. 2회 내려친 뒤 꼬리가
     // 땅에 박혀 3초(30틱) 후딜을 갖고, 제자리로 뛰어서 복귀한다.
-    ['nargacuga.furious_tail_slam', '격노 연속 꼬리 내려찍기', 'physical', 0.47, {
+    ['nargacuga.furious_tail_slam', '격노 연속 꼬리 내려찍기', 'physical', 0.517, {
         sourceMoveNameJA: '激昂尻尾連続叩きつけ', minTargets: 1, maxTargets: 2,
         windup: 11, recovery: 30, state: 'enraged', cooldown: 58, weight: 0.52,
         tags: ['physical', 'tail', 'target-contact', 'multi-hit', 'strong'],
@@ -1346,7 +1346,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     }],
     // 3연 급습과 같은 이탈·급습 리듬이되, 마지막은 평범한 돌진으로 마무리한다.
     // 복귀 후 후딜과 함께 특유의 연계기 종료 음성이 재생된다.
-    ['nargacuga.lunge_chain_triple', '3연 런지 돌진', 'charge', 0.35, {
+    ['nargacuga.lunge_chain_triple', '3연 런지 돌진', 'charge', 0.385, {
         sourceMoveNameJA: '三連突進', minTargets: 1, maxTargets: 3,
         windup: 6, recovery: 14, state: 'enraged', cooldown: 56, weight: 0.5,
         tags: ['charge', 'target-contact', 'multi-hit'],

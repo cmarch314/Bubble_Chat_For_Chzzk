@@ -83,7 +83,8 @@ class HuntMonsterAnimationCatalog {
                 Number(pattern.animationDurationMs || authoredDurations[authoredProfile] || (isTailCrossProfile ? 3200 : 1050)),
                 anchor,
                 rig,
-                delivery
+                delivery,
+                pattern
             );
         }
 
@@ -155,8 +156,22 @@ class HuntMonsterAnimationCatalog {
         return Object.freeze({ id, evidence });
     }
 
-    static profile(id, ultimate, duration, aim, rig = this.resolveRig(), delivery = null) {
+    // VISUAL_DURATION_SCALE(1.25)은 틱 시스템 이전에 "감으로" 적어둔 길이를
+    // 실제 재생 시간으로 늘려주기 위한 보정이다. 그런데 movement.ticks에서
+    // 파생된 길이(animationDurationMs === ticks * 100)에 이걸 다시 곱하면
+    // 애니메이션이 자기 틱 창보다 25% 길어진다. 턴이 끝나면 모션 클래스가
+    // 제거되므로 그 25%가 잘려나가고, 마무리 동작 없이 뚝 끊긴 뒤 제자리로
+    // 순간이동한 것처럼 보인다(3연 런지 1800ms, 3연 급습 1650ms 손실).
+    // 이미 실시간 단위인 길이는 그대로 쓴다. monster-timing-unification-plan.md INV-4.
+    static isTickDerivedDuration(pattern, duration) {
+        const ticks = Number(pattern?.movement?.ticks || 0);
+        const ticksPerSecond = Number(HuntMonsterAnimationTiming?.TICKS_PER_SECOND || 10);
+        return ticks > 0 && Math.round(duration) === Math.round(ticks * 1000 / ticksPerSecond);
+    }
+
+    static profile(id, ultimate, duration, aim, rig = this.resolveRig(), delivery = null, pattern = null) {
         const scaledDuration = HuntMonsterAnimationTiming?.scaleVisualDurationMs
+            && !this.isTickDerivedDuration(pattern, duration)
             ? HuntMonsterAnimationTiming.scaleVisualDurationMs(duration)
             : duration;
         return Object.freeze({ id, ultimate: Boolean(ultimate), duration: scaledDuration, aim, rig, delivery });

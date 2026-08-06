@@ -2460,26 +2460,58 @@
     96%{transform:translate(0,-26px) rotate(0deg) scale(.92,1.08);opacity:.5}
     100%{transform:none;opacity:1}
 }
-/* 도약 칼날깃 3연 급습: 위 훅을 세 번 반복한다.
-   이탈>훅>이탈>훅>이탈>훅>회귀. 접촉 22/38/54 of 66틱 = 33.3% / 57.6% / 81.8%. */
+/* 도약 칼날깃 3연 급습: 단발 급습의 리듬을 그대로 세 번 반복한다.
+   접촉 22/38/54 of 66틱 = 33.3% / 57.6% / 81.8%. 1% = 66ms.
+
+   이전 판은 2·3타가 미끄러졌다. 원인은 두 가지였다.
+   (1) 후속 타에는 웅크림-도약 준비가 없어, 착지 자세에서 곧장 화면 밖 좌표로
+       보간되었다. 스프링의 압축 구간이 없으니 튀어오르는 느낌이 사라진다.
+   (2) opacity 0->1 구간이 10~11%(660~730ms)에 걸쳐 있었다. 이 동안 몸이 계속
+       이동하므로 반투명한 채 미끄러져 들어온다. 단발판은 이 구간이 4%(104ms)다.
+
+   그래서 매 타를 동일한 7단계로 통일한다.
+     웅크림(hold) -> 뻗으며 도약 -> 화면 밖 소멸(~1.4%) -> 은신 이동
+     -> 재진입 출현(~1.6%) -> 팍!(접촉) -> 착지 자세 정지(hold) -> 이탈
+   접촉 간격이 24.2%이므로 각 구간이 그대로 들어간다.
+   좌우는 타마다 뒤집는다: 1타 EX쪽, 2타 반대쪽(회전 165도), 3타 다시 EX쪽. */
 @keyframes monster-motion-nargacuga-leap-ambush-triple {
+    /* --- 1타: 화면 밖 이탈 --- */
     0%,5%{transform:none;opacity:1}
-    10%{transform:translate(calc(var(--monster-attack-x)*-.06),28px) rotate(0deg) scale(1.14,.82);opacity:1}
-    13%{transform:translate(calc(var(--monster-attack-x)*-.55),-300px) rotate(0deg) scale(.84,1.24);opacity:1}
-    16%{transform:translate(calc(var(--monster-attack-x)*-.95),-500px) rotate(174deg) scale(.48);opacity:0}
-    24%{transform:translate(calc(var(--monster-attack-x) + 900px),calc(var(--monster-attack-y) + 430px)) rotate(0deg) scale(.50);opacity:0}
-    28%{transform:translate(calc(var(--narga-hit-x) + 400px),calc(var(--narga-hit-y) + 260px)) rotate(186deg) scale(.90,1.18);opacity:1}
-    33.3%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.16,.92);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
-    37%{transform:translate(calc(var(--narga-hit-x)*.94),calc(var(--narga-hit-y)*.94)) rotate(198deg) scale(1.06,.98);opacity:1}
-    41%{transform:translate(calc(var(--monster-attack-x) - 880px),calc(var(--monster-attack-y) + 410px)) rotate(0deg) scale(.50);opacity:0}
-    51%{transform:translate(calc(var(--narga-hit-x) - 400px),calc(var(--narga-hit-y) + 250px)) rotate(174deg) scale(.90,1.18);opacity:1}
-    57.6%{transform:translate(calc(var(--narga-hit-x)*1.04),calc(var(--narga-hit-y)*1.02)) rotate(165deg) scale(1.16,.92);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
-    62%{transform:translate(calc(var(--narga-hit-x)*.98),calc(var(--narga-hit-y)*.96)) rotate(162deg) scale(1.06,.98);opacity:1}
-    65%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) + 560px)) rotate(0deg) scale(.50);opacity:0}
-    76%{transform:translate(calc(var(--narga-hit-x)*.98),calc(var(--narga-hit-y) + 300px)) rotate(188deg) scale(.90,1.18);opacity:1}
-    81.8%{transform:translate(calc(var(--narga-hit-x)*.94),calc(var(--narga-hit-y)*1.04)) rotate(195deg) scale(1.18,.90);filter:brightness(1.56) drop-shadow(0 0 20px #9b6ad988);opacity:1}
-    87%{transform:translate(calc(var(--narga-hit-x)*.88),calc(var(--narga-hit-y)*.96)) rotate(198deg) scale(1.06,.98);opacity:1}
-    93%{transform:translate(calc(var(--narga-hit-x)*.45),calc(var(--narga-hit-y)*.38 - 50px)) rotate(0deg) scale(.88,1.18);opacity:1}
+    11%{transform:translate(0,28px) rotate(0deg) scale(1.14,.82);opacity:1}
+    14.5%{transform:translate(0,28px) rotate(0deg) scale(1.14,.82);opacity:1}
+    18%{transform:translate(calc(var(--narga-exit-x,-620px)*.45),-60px) rotate(0deg) scale(.86,1.20);opacity:1}
+    20%{transform:translate(var(--narga-exit-x,-620px),-70px) rotate(0deg) scale(.76,1.10);opacity:0}
+    /* 1타: 은신 -> 팍! -> 멈춤 */
+    26%{transform:translate(var(--narga-exit-x,-620px),calc(var(--narga-hit-y) + 150px)) rotate(180deg) scale(.80);opacity:0}
+    27.3%{transform:translate(calc(var(--narga-hit-x) + 260px),calc(var(--narga-hit-y) + 165px)) rotate(184deg) scale(.88,1.20);opacity:1}
+    28.9%{transform:translate(calc(var(--narga-hit-x) + 200px),calc(var(--narga-hit-y) + 130px)) rotate(186deg) scale(.90,1.18);opacity:1}
+    33.3%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.22,.84);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
+    35.3%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.06,.98);opacity:1}
+    37.7%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.06,.98);opacity:1}
+    /* 1타 -> 2타: 반대편으로 이탈 */
+    39%{transform:translate(calc(var(--narga-hit-x)*.55),calc(var(--narga-hit-y)*.40 - 50px)) rotate(192deg) scale(.82,1.16);opacity:1}
+    40.3%{transform:translate(calc(var(--narga-exit-x,-620px)*-1),calc(var(--narga-hit-y)*.20 - 70px)) rotate(190deg) scale(.76,1.10);opacity:0}
+    /* 2타: 은신 -> 팍! -> 멈춤 */
+    50.4%{transform:translate(calc(var(--narga-exit-x,-620px)*-1),calc(var(--narga-hit-y) + 150px)) rotate(174deg) scale(.80);opacity:0}
+    51.6%{transform:translate(calc(var(--narga-hit-x) - 260px),calc(var(--narga-hit-y) + 165px)) rotate(176deg) scale(.88,1.20);opacity:1}
+    53.2%{transform:translate(calc(var(--narga-hit-x) - 200px),calc(var(--narga-hit-y) + 130px)) rotate(174deg) scale(.90,1.18);opacity:1}
+    57.6%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(165deg) scale(1.22,.84);filter:brightness(1.5) drop-shadow(0 0 18px #9b6ad977);opacity:1}
+    59.6%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(165deg) scale(1.06,.98);opacity:1}
+    62%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(165deg) scale(1.06,.98);opacity:1}
+    /* 2타 -> 3타: 다시 EX쪽으로 이탈 */
+    63.3%{transform:translate(calc(var(--narga-hit-x)*.55),calc(var(--narga-hit-y)*.40 - 50px)) rotate(168deg) scale(.82,1.16);opacity:1}
+    64.6%{transform:translate(var(--narga-exit-x,-620px),calc(var(--narga-hit-y)*.20 - 70px)) rotate(170deg) scale(.76,1.10);opacity:0}
+    /* 3타: 은신 -> 팍! -> 멈춤 */
+    74.6%{transform:translate(var(--narga-exit-x,-620px),calc(var(--narga-hit-y) + 150px)) rotate(186deg) scale(.80);opacity:0}
+    75.8%{transform:translate(calc(var(--narga-hit-x) + 260px),calc(var(--narga-hit-y) + 165px)) rotate(184deg) scale(.88,1.20);opacity:1}
+    77.4%{transform:translate(calc(var(--narga-hit-x) + 200px),calc(var(--narga-hit-y) + 130px)) rotate(186deg) scale(.90,1.18);opacity:1}
+    81.8%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.26,.82);filter:brightness(1.56) drop-shadow(0 0 20px #9b6ad988);opacity:1}
+    83.8%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.06,.98);opacity:1}
+    86.2%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(195deg) scale(1.06,.98);opacity:1}
+    /* 회귀: 화면 밖으로 빠진 뒤 중앙에서 Fade In */
+    88%{transform:translate(calc(var(--narga-hit-x)*.55),calc(var(--narga-hit-y)*.40 - 50px)) rotate(192deg) scale(.82,1.16);opacity:1}
+    89.4%{transform:translate(calc(var(--narga-exit-x,-620px)*-.60),calc(var(--narga-hit-y)*.20 - 90px)) rotate(190deg) scale(.76,1.10);opacity:0}
+    95%{transform:translate(0,-26px) rotate(0deg) scale(.92,1.08);opacity:.5}
     100%{transform:none;opacity:1}
 }
 /* 연속 물어뜯기(분노). 접촉 16/30 of 36틱 = 44.4% / 83.3%.

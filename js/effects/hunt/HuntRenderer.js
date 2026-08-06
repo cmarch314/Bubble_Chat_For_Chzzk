@@ -864,8 +864,9 @@ class HuntRenderer {
                 </div>`).join('')}</div>`
             : `<div class="hunt-monster-attack-motion">
                     <div class="hunt-monster-aim-layer">
-                    <div class="hunt-monster-facing-layer" data-monster-id="${this.escapeHTML(selectedMonster.id)}">
-                        <img class="game-hunt-monster-img" id="fight-monster-img" src="${this.escapeHTML(this.monsterImagePath(selectedMonster))}" onerror="this.src='img/monsters/rathalos.png';" style="width:380px;height:380px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.85));transition:transform .15s ease;position:relative;z-index:2;" />
+                        <div class="hunt-monster-facing-layer" data-monster-id="${this.escapeHTML(selectedMonster.id)}">
+                            <img class="game-hunt-monster-img" id="fight-monster-img" src="${this.escapeHTML(this.monsterImagePath(selectedMonster))}" onerror="this.src='img/monsters/rathalos.png';" style="width:380px;height:380px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.85));transition:transform .15s ease;position:relative;z-index:2;" />
+                        </div>
                     </div>
                 </div>`;
         const limitSec = timeLimit || 480;
