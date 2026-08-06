@@ -2904,7 +2904,10 @@
     animation: monster-element-projectile .72s cubic-bezier(.18,.62,.2,1) calc(var(--fx-delay) + 90ms) both;
 }
 /* 던지는 칼날(가시깃)은 빛나는 구체가 아니라 금속 날이다. 둥근 발광 대신
-   길쭉한 남색 다이아로 잘라내 쿠나이처럼 보이게 한다. */
+   길쭉한 남색 다이아로 잘라내 쿠나이처럼 보이게 한다.
+   워시 · 총구 링 · 궤적 입자 · 착탄 링은 아예 만들지 않는다(themes의 minimalFx).
+   3표적 패턴이라 인스턴스마다 60개 넘는 요소가 블러 · 블렌드와 함께 애니메이션되어
+   프레임이 떨어졌다. 날 자체도 겹친 drop-shadow 두 겹 대신 한 겹만 쓴다. */
 .monster-element-fx.delivery-projectile.element-quill .monster-element-projectile {
     width: 44px;
     height: 96px;
@@ -2912,10 +2915,8 @@
     clip-path: polygon(50% 0%, 100% 30%, 50% 100%, 0% 30%);
     background: linear-gradient(158deg, #9db0ff 0%, #4a63d8 30%, #26379e 66%, #0b1440 100%);
     box-shadow: none;
-    filter: drop-shadow(0 0 6px #3a53d8cc) drop-shadow(0 0 15px #0b144099);
+    filter: drop-shadow(0 2px 5px #0b1440cc);
 }
-.monster-element-fx.delivery-projectile.element-quill .monster-element-wash,
-.monster-element-fx.delivery-projectile.element-quill .monster-element-muzzle { opacity: .35; }
 .monster-element-fx.delivery-projectile .monster-element-head { display: none; }
 .monster-element-fx.delivery-projectile .monster-element-muzzle { width: 72px; height: 72px; border-style: dashed; }
 

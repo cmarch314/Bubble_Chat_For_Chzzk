@@ -1403,7 +1403,11 @@ class HuntMonsterAttackAnimator {
             { id: 'wind', test: /(^|\s)wind(\s|$)|바람|폭풍|회오리|진공|분사/, emoji: '🌪️', color: '#baffdc', hot: '#ffffff', shadow: '#247f75' },
             // 던지는 칼날(가시깃 등)은 속성탄이 아니다. 속성 판정을 모두 지나친 뒤에만
             // 걸리도록 마지막에 둔다. 이게 없으면 arcane 폴백의 보라색 구체가 날아간다.
-            { id: 'quill', test: /(^|\s)bleed(\s|$)|가시깃|가시|열상|칼날|참격/, emoji: '♦', color: '#3a53d8', hot: '#c3d0ff', shadow: '#0b1440' }
+            // minimalFx: 속성 연출(화면 워시 · 총구 링 · 궤적 입자 · 착탄 링)을 만들지
+            // 않고 날아가는 몸체만 남긴다. 금속 날에는 어차피 어울리지 않는 연출인데,
+            // 3표적짜리 패턴이라 인스턴스마다 60개 넘는 요소가 블러·블렌드와 함께
+            // 애니메이션되어 프레임이 떨어졌다.
+            { id: 'quill', test: /(^|\s)bleed(\s|$)|가시깃|가시|열상|칼날|참격/, emoji: '♦', color: '#3a53d8', hot: '#c3d0ff', shadow: '#0b1440', minimalFx: true }
         ];
         return themes.find(theme => theme.test.test(name)) || {
             id: 'arcane', emoji: '✨', color: '#d966ff', hot: '#ffffff', shadow: '#5322a8'
@@ -1463,14 +1467,19 @@ class HuntMonsterAttackAnimator {
         fx.style.setProperty('--fx-shadow', theme.shadow);
         fx.style.setProperty('--fx-delay', `${order * 35}ms`);
 
-        const wash = document.createElement('div');
-        wash.className = 'monster-element-wash';
-        fx.appendChild(wash);
+        // 속성탄이 아닌 투척물은 부수 연출을 아예 만들지 않는다. display:none으로
+        // 감추는 것과 달리 DOM 생성과 스타일 계산 자체가 없어진다.
+        const minimalFx = Boolean(theme.minimalFx);
+        if (!minimalFx) {
+            const wash = document.createElement('div');
+            wash.className = 'monster-element-wash';
+            fx.appendChild(wash);
 
-        const muzzle = document.createElement('div');
-        muzzle.className = 'monster-element-muzzle';
-        muzzle.innerHTML = '<i></i><i></i>';
-        fx.appendChild(muzzle);
+            const muzzle = document.createElement('div');
+            muzzle.className = 'monster-element-muzzle';
+            muzzle.innerHTML = '<i></i><i></i>';
+            fx.appendChild(muzzle);
+        }
 
         let deliveryBody = null;
         if (delivery === 'projectile') {
@@ -1506,19 +1515,21 @@ class HuntMonsterAttackAnimator {
             }
         }
 
-        const head = document.createElement('div');
-        head.className = 'monster-element-head';
-        head.textContent = theme.emoji || fallbackEmoji;
-        fx.appendChild(head);
+        if (!minimalFx) {
+            const head = document.createElement('div');
+            head.className = 'monster-element-head';
+            head.textContent = theme.emoji || fallbackEmoji;
+            fx.appendChild(head);
+        }
 
-        if (!isDodge) {
+        if (!isDodge && !minimalFx) {
             const impact = document.createElement('div');
             impact.className = 'monster-element-impact';
             impact.innerHTML = `<b>${theme.emoji || fallbackEmoji}</b><i></i><i></i><i></i>`;
             fx.appendChild(impact);
         }
 
-        for (let i = 0; i < (isUltimate ? 18 : 12); i++) {
+        for (let i = 0; !minimalFx && i < (isUltimate ? 18 : 12); i++) {
             const particle = document.createElement('i');
             particle.className = 'monster-element-particle';
             const progress = (i + 1) / (isUltimate ? 19 : 13);
