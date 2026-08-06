@@ -2917,6 +2917,11 @@
     box-shadow: none;
     filter: drop-shadow(0 2px 5px #0b1440cc);
 }
+/* 등속 · 무회전 비행. 사출(9틱)에서 착탄(15틱)까지 0.6초이므로 비행 구간이
+   그 정도를 채우도록 0.75초를 준다. */
+.monster-element-fx.delivery-projectile.element-quill.is-playing .monster-element-projectile {
+    animation: monster-element-projectile-quill .75s linear calc(var(--fx-delay) + 60ms) both;
+}
 .monster-element-fx.delivery-projectile .monster-element-head { display: none; }
 .monster-element-fx.delivery-projectile .monster-element-muzzle { width: 72px; height: 72px; border-style: dashed; }
 
@@ -3394,6 +3399,19 @@
     14% { opacity: 1; transform: translate(-50%,-50%) scale(.82); }
     78% { opacity: 1; transform: translate(calc(var(--fx-dx) - 50%),calc(var(--fx-dy) - 50%)) scale(1.18) rotate(280deg); }
     100% { opacity: 0; transform: translate(calc(var(--fx-dx) - 50%),calc(var(--fx-dy) - 50%)) scale(.35) rotate(360deg); }
+}
+/* 가시깃은 표창이다. 공용 투사체 키프레임은 78%에서 280도, 100%에서 360도를 도는데,
+   불덩이에는 어울려도 날붙이가 팽이처럼 도는 그림이 된다. 회전은 진행 방향으로
+   한 번만 고정한다. 다이아의 뾰족한 끝은 아래(0,1)이므로 --fx-angle에서 90도를 뺀다.
+
+   그리고 공용 키프레임은 14%~78% 구간에 cubic-bezier(.18,.62,.2,1)이 걸려 거리의
+   62%를 시간의 20%에 몰아 쓴다. 0.72초짜리라 실제로 날아가는 모습이 몇 프레임밖에
+   보이지 않았다. 여기서는 linear로 등속 비행하고, 비행 구간을 8~88%로 넓힌다. */
+@keyframes monster-element-projectile-quill {
+    0% { opacity: 0; transform: translate(-50%,-50%) rotate(calc(var(--fx-angle) - 90deg)) scale(.86); }
+    8% { opacity: 1; transform: translate(-50%,-50%) rotate(calc(var(--fx-angle) - 90deg)) scale(1); }
+    88% { opacity: 1; transform: translate(calc(var(--fx-dx) - 50%),calc(var(--fx-dy) - 50%)) rotate(calc(var(--fx-angle) - 90deg)) scale(1); }
+    100% { opacity: 0; transform: translate(calc(var(--fx-dx) - 50%),calc(var(--fx-dy) - 50%)) rotate(calc(var(--fx-angle) - 90deg)) scale(.9); }
 }
 @keyframes monster-element-projectile-reduced {
     0% { opacity: 0; transform: translate(calc(var(--fx-dx) - 50%),calc(var(--fx-dy) - 50%)) scale(.72); }
