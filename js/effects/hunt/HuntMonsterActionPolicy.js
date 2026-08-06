@@ -142,7 +142,7 @@ class HuntMonsterActionPolicy {
      * 들어가므로, 회전 축이 바뀌어도 맞는 사람이 이어진다.
      * 한쪽 끝(1번이나 4번)이면 그쪽 이웃이 없으므로 그 패스는 주 표적만 맞는다.
      */
-    static primaryFlankPasses(targetable, random = Math.random, primaryIndex = null) {
+    static primaryFlankPasses(targetable, random = Math.random, primaryIndex = null, passCount = 2) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
         const anchor = ordered.find(target => Number(target.index) === Number(primaryIndex))
@@ -150,6 +150,12 @@ class HuntMonsterActionPolicy {
         const byIndex = new Map(ordered.map(target => [Number(target.index), target]));
         const left = byIndex.get(Number(anchor.index) - 1);
         const right = byIndex.get(Number(anchor.index) + 1);
+        if (Number(passCount) === 1) {
+            // 1회전짜리는 한 방향만 고른다. 이웃이 한쪽에만 있으면 그쪽으로 돌아야
+            // 회전이 헛돌지 않는다. 양쪽 다 있으면 무작위다.
+            const side = left && right ? (random() < .5 ? left : right) : (left || right);
+            return [[anchor, side].filter(Boolean)];
+        }
         return [
             [anchor, left].filter(Boolean),
             [anchor, right].filter(Boolean)
@@ -287,12 +293,21 @@ class HuntMonsterActionPolicy {
         // 훑는다. 축이 바뀌어도 주 표적은 두 번 다 맞는다.
         if (mode === 'primary-flank-passes') {
             const passes = this.primaryFlankPasses(targetable, random,
-                Number.isInteger(primaryIndex) ? primaryIndex : defaultTargets[0]?.index);
+                Number.isInteger(primaryIndex) ? primaryIndex : defaultTargets[0]?.index,
+                passCount);
+            const anchorIndex = passes[0]?.[0]?.index ?? null;
+            // 1회전짜리는 고른 이웃이 어느 쪽인지를 회전 방향으로 넘긴다.
+            // +1이면 왼쪽 이웃까지 훑는 시계 회전, -1이면 오른쪽 이웃까지 반시계.
+            const companion = passes[0]?.[1]?.index;
+            const spinDirection = Number.isInteger(companion) && Number.isInteger(anchorIndex)
+                ? (Number(companion) < Number(anchorIndex) ? 1 : -1)
+                : 1;
             return {
                 targets: passes.flat(),
                 runtime: {
                     runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index)),
-                    runtimeSpinPrimaryIndex: passes[0]?.[0]?.index ?? null
+                    runtimeSpinPrimaryIndex: anchorIndex,
+                    runtimeSpinDirection: spinDirection
                 }
             };
         }

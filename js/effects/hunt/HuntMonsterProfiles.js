@@ -1203,13 +1203,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.68 }
     }],
-    // 오른팔을 축으로 삼으면 좌회전, 왼팔이면 우회전. 1회전.
+    // 역회전 연계와 같은 방식이되 1회전이다. 주 표적 바로 위에서 제자리로 돌며,
+    // 고른 이웃이 왼쪽이면 하단 좌측 축 · 시계 회전, 오른쪽이면 하단 우측 축 · 반시계.
     ['nargacuga.tail_sweep', '꼬리 회전', 'area', 0.374, {
-        sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 3, windup: 5, recovery: 1,
+        sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 2, windup: 5, recovery: 1,
         forbiddenStates: ['enraged'],
         tags: ['area', 'tail', 'ground-only', 'target-contact', 'stance-melee'],
         monsterAtbCost: 0.62, movement: { ticks: 26 },
-        targeting: { mode: 'adjacent-pair-pivot' },
+        targeting: { mode: 'primary-flank-passes', passCount: 1 },
         impactTimeline: [{ atTicks: 18, damageScale: 1 }],
         animationProfile: 'nargacuga-pivot-spin', animationDurationMs: 2600,
         originPart: 'tail',

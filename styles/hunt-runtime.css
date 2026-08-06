@@ -922,8 +922,6 @@
     100% { opacity: 0; transform: translate(-50%, -10px); }
 }
 
-
-
 /* ==========================================================================
    Long Sword Spirit Levels, Weapon Modes & Attack Animations
    ========================================================================== */
@@ -1650,7 +1648,7 @@
 .monster-motion-nargacuga-turn-tail-slam { animation:monster-motion-nargacuga-turn-tail-slam var(--monster-motion-duration) linear both !important; transform-origin:50% 62%; --narga-standoff:.96; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-turn-tail-slam-double { animation:monster-motion-nargacuga-turn-tail-slam-double var(--monster-motion-duration) linear both !important; transform-origin:50% 62%; --narga-standoff:.96; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-tail-whip { animation:monster-motion-nargacuga-tail-whip var(--monster-motion-duration) linear both !important; transform-origin:50% 58%; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
-.monster-motion-nargacuga-pivot-spin { animation:monster-motion-nargacuga-pivot-spin var(--monster-motion-duration) linear both !important; transform-origin:71% 86%; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+.monster-motion-nargacuga-pivot-spin { animation:monster-motion-nargacuga-pivot-spin var(--monster-motion-duration) linear both !important; --narga-spin-dir:1; transform-origin:calc(50% - var(--narga-spin-dir)*30%) 88%; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-dash-bite { animation:monster-motion-nargacuga-dash-bite var(--monster-motion-duration) linear both !important; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-flank-charge { animation:monster-motion-nargacuga-flank-charge var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
@@ -1660,7 +1658,7 @@
 .monster-motion-nargacuga-stance-hop { animation:monster-motion-nargacuga-stance-hop var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 /* 회전은 한쪽 앞발을 축으로 크게 한 바퀴, 이어지는 회전은 반대쪽 앞발이 축이다.
    축 이동은 transform-origin을 키프레임에서 바꿔 표현한다(앞발 좌표 .29/.71, y .86). */
-.monster-motion-nargacuga-pivot-spin { animation:monster-motion-nargacuga-pivot-spin var(--monster-motion-duration) linear both !important; transform-origin:29% 86%; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+
 .monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-rath-flight-stagger { animation:monster-motion-rath-flight-stagger var(--monster-motion-duration) ease-in-out both !important; }
 .monster-motion-rath-flight-wobble { animation:monster-motion-rath-flight-wobble var(--monster-motion-duration) ease-in-out both !important; }
@@ -2380,22 +2378,27 @@
 }
 /* 꼬리 회전: 한쪽 앞발을 축으로 한 바퀴. 접촉 18/26틱 = 69.2%.
    앞 반회전(180도)을 제자리에서 끝내 타격하고, 남은 반회전을 하는 동안 제자리로 돌아온다. */
+/* 평상시 꼬리 회전. 접촉 18/26틱 = 69.2%.
+   역회전 연계와 같은 방식이다. 주 표적 바로 위에 자리를 잡고 제자리에서 한 바퀴 돈다.
+   방향은 --narga-spin-dir이 정한다. +1이면 하단 좌측(20% 88%)을 축으로 시계 회전이라
+   주 표적과 왼쪽 헌터까지, -1이면 하단 우측(80% 88%)을 축으로 반시계 회전이라
+   주 표적과 오른쪽 헌터까지 닿는다. 축도 같은 변수로 갈린다.
+   360도 + 15도를 돌고 15도를 되감아 멈출 때 관성이 실린다.
+   복귀 프레임을 transform:none이 아니라 360도로 두는 이유는, 0도로 되돌리면
+   제자리로 가는 동안 몸이 한 바퀴 거꾸로 도는 것이 보이기 때문이다. */
 @keyframes monster-motion-nargacuga-pivot-spin {
     0%,10%{transform:none}
-    18%{transform:translate(calc(var(--monster-attack-x)*.06),22px) rotate(0deg) scale(1.10,.86)}
-    26%{transform:translate(calc(var(--monster-attack-x)*.06),22px) rotate(0deg) scale(1.10,.86)}
-    30%{transform:translate(calc(var(--monster-attack-x)*.34),calc(var(--monster-attack-y)*.30 - 44px)) rotate(0deg) scale(.86,1.20)}
+    18%,26%{transform:translate(calc(var(--narga-hit-x)*.06),22px) rotate(0deg) scale(1.10,.86)}
+    30%{transform:translate(calc(var(--narga-hit-x)*.34),calc(var(--narga-hit-y)*.30 - 44px)) rotate(0deg) scale(.86,1.20)}
     38%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1.20,.84)}
-    46%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
-    54%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
-    /* 앞 반회전 — 제자리에서 때린다 */
-    69.2%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(180deg) scale(1.04);filter:brightness(1.42)}
-    /* 남은 반회전을 도는 동안 제자리로 복귀 */
-    78%{transform:translate(calc(var(--narga-hit-x)*.68),calc(var(--narga-hit-y)*.68)) rotate(238deg) scale(1)}
-    87%{transform:translate(calc(var(--narga-hit-x)*.36),calc(var(--narga-hit-y)*.36)) rotate(296deg) scale(1)}
-    95%{transform:translate(calc(var(--narga-hit-x)*.12),-14px) rotate(342deg) scale(.94,1.10)}
-    100%{transform:translate(0,0) rotate(360deg) scale(1)}
+    46%,54%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
+    69.2%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(calc(var(--narga-spin-dir)*375deg)) scale(1.06);filter:brightness(1.42)}
+    78%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(calc(var(--narga-spin-dir)*360deg)) scale(1)}
+    88%{transform:translate(calc(var(--narga-hit-x)*.40),calc(var(--narga-hit-y)*.34)) rotate(calc(var(--narga-spin-dir)*360deg)) scale(1)}
+    95%{transform:translate(calc(var(--narga-hit-x)*.12),-14px) rotate(calc(var(--narga-spin-dir)*360deg)) scale(.94,1.10)}
+    100%{transform:translate(0,0) rotate(calc(var(--narga-spin-dir)*360deg)) scale(1)}
 }
+
 /* 역회전 연계: 우측 앞발 축 좌회전 → 좌측 앞발 축 우회전. 축은 인접 두 명 사이.
    접촉 18/38 of 44틱 = 40.9% / 86.4%. 누적 -720도는 100%에서 유지. */
 /* 역회전 연계 꼬리 회전. 접촉 18/38 of 44틱 = 40.9% / 86.4%.
@@ -4326,9 +4329,6 @@ body.in-hunt #chat {
     display: none !important;
 }
 */
-
-
-
 
 /* ==========================================
    OBS COMPATIBILITY KEYFRAMES (No var() in keyframes)

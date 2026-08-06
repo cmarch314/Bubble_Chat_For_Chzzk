@@ -137,9 +137,14 @@ const HuntMonsterGeometryChoreography = {
         motionElement.style.setProperty('--monster-attack-y', `${Math.round(y)}px`);
     },
 
-    // 평상시 1회전도 같은 규칙으로 두 명 사이를 축으로 삼는다.
+    // 평상시 1회전도 주 표적 바로 위에서 도는 것은 같다. 다만 방향이 하나뿐이라,
+    // 어느 쪽 이웃을 고른 패스인지에 따라 회전 방향과 축이 함께 뒤집힌다.
+    // +1이면 하단 좌측 축 · 시계 회전(왼쪽까지), -1이면 하단 우측 축 · 반시계(오른쪽까지).
     'nargacuga-pivot-spin'(context) {
         HuntMonsterGeometryChoreography['nargacuga-twin-pivot-spin'](context);
+        const direction = Number(context.pattern?.runtimeSpinDirection);
+        context.motionElement.style.setProperty(
+            '--narga-spin-dir', String(Number.isFinite(direction) && direction ? direction : 1));
     },
 
     // 대상 헌터를 겨누는 각도. 나르가 스프라이트는 머리가 아래(중앙 하단)를 향하므로
