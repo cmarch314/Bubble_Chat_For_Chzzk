@@ -1533,7 +1533,7 @@
 .monster-motion-close-strike[data-monster-rig="arthropod"] { animation-name:monster-motion-close-strike-arthropod !important; }
 .monster-motion-ground-charge { animation: monster-motion-ground-charge var(--monster-motion-duration) linear both !important; }
 .monster-motion-ground-charge-cross { animation: monster-motion-ground-charge-cross var(--monster-motion-duration) linear both !important; }
-.monster-motion-ground-charge-zigzag { animation: monster-motion-ground-charge-zigzag var(--monster-motion-duration) cubic-bezier(.2,.7,.18,1) both !important; }
+.monster-motion-ground-charge-zigzag { animation: monster-motion-ground-charge-zigzag var(--monster-motion-duration) linear both !important; }
 .monster-motion-ground-charge-double { animation:monster-motion-ground-charge-double var(--monster-motion-duration) linear both !important; }
 .monster-motion-ground-charge-triple { animation:monster-motion-ground-charge-triple var(--monster-motion-duration) linear both !important; }
 .monster-motion-rathian-ground-charge { animation:monster-motion-rathian-ground-charge var(--monster-motion-duration) linear both !important; }
@@ -1808,10 +1808,11 @@
    기존 x는 38%에서 .48로 뒤처졌다가 막판에 몰아쳐 "느리게 출발해 빨라지는" 느낌을 냈다. */
 @keyframes monster-motion-ground-charge {
     0%{transform:none;opacity:1} 6%{transform:translateY(24px) scale(.92,1.08)}
-    12%{transform:translateY(-3px) scale(1.03,.97)}
-    23%{transform:translate(calc(var(--monster-attack-x)*.244),calc(var(--monster-charge-bottom)*.244)) scale(1.15)}
-    34%{transform:translate(calc(var(--monster-attack-x)*.489),calc(var(--monster-charge-bottom)*.489)) scale(1.31)}
-    46%{transform:translate(calc(var(--monster-attack-x)*.756),calc(var(--monster-charge-bottom)*.756)) scale(1.48)}
+    /* 출발 프레임에만 등가속 곡선(위치 ∝ t²)을 건다. 다음 프레임까지가 가속 구간이다. */
+    12%{transform:translateY(-3px) scale(1.03,.97);animation-timing-function:cubic-bezier(.333,0,.667,.333)}
+    24%{transform:translate(calc(var(--monster-attack-x)*.154),calc(var(--monster-charge-bottom)*.154)) scale(1.16)}
+    34%{transform:translate(calc(var(--monster-attack-x)*.410),calc(var(--monster-charge-bottom)*.410)) scale(1.29)}
+    46%{transform:translate(calc(var(--monster-attack-x)*.718),calc(var(--monster-charge-bottom)*.718)) scale(1.46)}
     57%{transform:translate(var(--monster-attack-x),var(--monster-charge-bottom)) scale(1.62);opacity:1}
     58%{transform:translate(var(--monster-attack-x),var(--monster-charge-bottom)) scale(1.62);opacity:0}
     63%{transform:translate(calc(var(--monster-attack-x)*-.28),calc(var(--monster-charge-top)*-1)) scale(.72);opacity:0}
@@ -1870,7 +1871,23 @@
     82%{transform:translate(var(--monster-side-ready-x),var(--monster-side-ready-y)) scale(1.01)}
 }
 @keyframes monster-motion-horn-sweep-contact { 0%,100%{transform:none} 13%{transform:translate(calc(var(--monster-attack-x)*-.1),calc(var(--monster-attack-y)*-.06)) rotate(-8deg) scale(.94)} 34%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(12deg) scale(1.18)} 49%{transform:translate(calc(var(--monster-attack-x) - 85px),calc(var(--monster-attack-y) + 8px)) rotate(-24deg) scale(1.14)} 64%{transform:translate(calc(var(--monster-attack-x) + 90px),calc(var(--monster-attack-y) - 4px)) rotate(25deg) scale(1.2)} 77%{transform:translate(calc(var(--monster-attack-x) - 42px),calc(var(--monster-attack-y)*.92)) rotate(-13deg) scale(1.1)} 89%{transform:translate(calc(var(--monster-attack-x)*.42),calc(var(--monster-attack-y)*.38)) rotate(4deg) scale(1.03)} }
-@keyframes monster-motion-ground-charge-zigzag { 0%,100%{transform:none;opacity:1} 10%{transform:translateX(calc(var(--monster-lane-x)*-.18)) rotate(-7deg) scale(.94)} 25%{transform:translateX(calc(var(--monster-lane-x)*-.92)) rotate(-11deg) scale(1.08)} 43%{transform:translateX(calc(var(--monster-lane-x)*.78)) translateY(70px) rotate(10deg) scale(1.3)} 61%{transform:translateX(calc(var(--monster-lane-x)*-.72)) translateY(120px) rotate(-9deg) scale(1.43)} 78%{transform:translateX(calc(var(--monster-lane-x)*.94)) translateY(185px) rotate(8deg) scale(1.58);opacity:1} 79%{opacity:0} 86%{transform:translateY(-150px) scale(.78);opacity:0} 91%{opacity:1} }
+/* 지그재그 돌진. 예전에는 클래스에 cubic-bezier(.2,.7,.18,1)이 걸려 있었는데,
+   CSS 이징은 애니메이션 전체가 아니라 "키프레임 구간마다" 적용된다. 그래서 꺾이는
+   지점마다 감속·재가속이 반복되어 미끄러지듯 버벅였다. 이징은 linear로 두고
+   출발 프레임에만 등가속 곡선을 건다. 왕복 경로 길이 기준으로 구간 속도를 다시
+   계산해, 가속이 끝난 뒤로는 꺾여도 속도가 변하지 않는다. */
+@keyframes monster-motion-ground-charge-zigzag {
+    0%{transform:none;opacity:1;animation-timing-function:cubic-bezier(.333,0,.667,.333)}
+    12.5%{transform:translateX(calc(var(--monster-lane-x)*-.504)) rotate(-9deg) scale(1.01)}
+    17.7%{transform:translateX(calc(var(--monster-lane-x)*-.92)) rotate(-11deg) scale(1.08)}
+    38.8%{transform:translateX(calc(var(--monster-lane-x)*.78)) translateY(70px) rotate(10deg) scale(1.3)}
+    57.4%{transform:translateX(calc(var(--monster-lane-x)*-.72)) translateY(120px) rotate(-9deg) scale(1.43)}
+    78%{transform:translateX(calc(var(--monster-lane-x)*.94)) translateY(185px) rotate(8deg) scale(1.58);opacity:1}
+    79%{opacity:0}
+    86%{transform:translateY(-150px) scale(.78);opacity:0}
+    91%{opacity:1}
+    100%{transform:none;opacity:1}
+}
 @keyframes monster-motion-ground-charge-double {
     0%,100%{transform:none;opacity:1}
     /* The first pass is the ordinary charge route: home -> hunter -> off-board. */
@@ -1982,8 +1999,8 @@
 @keyframes monster-motion-rathian-ground-charge {
     0%,4%{transform:none;opacity:1}
     8%{transform:translateY(20px) scale(.94,1.06);opacity:1}
-    12%{transform:translateY(-4px) scale(1.02,.98);opacity:1}
-    21%{transform:translate(calc(var(--monster-charge-first-x)*.5),calc(var(--monster-charge-first-y)*.5)) scale(1.11);opacity:1}
+    12%{transform:translateY(-4px) scale(1.02,.98);opacity:1;animation-timing-function:cubic-bezier(.333,0,.667,.333)}
+    25.3%{transform:translate(calc(var(--monster-charge-first-x)*.586),calc(var(--monster-charge-first-y)*.586)) scale(1.13);opacity:1}
     30%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-first-y)) scale(1.22);opacity:1}
     44%{transform:translate(calc(var(--monster-charge-first-x)*.674 + var(--monster-charge-first-exit-x)*.326),calc(var(--monster-charge-first-y)*.674 + var(--monster-charge-first-exit-y)*.326)) scale(1.27);opacity:1}
     58%{transform:translate(calc(var(--monster-charge-first-x)*.349 + var(--monster-charge-first-exit-x)*.651),calc(var(--monster-charge-first-y)*.349 + var(--monster-charge-first-exit-y)*.651)) scale(1.33);opacity:1}
@@ -2425,10 +2442,9 @@
 @keyframes monster-motion-nargacuga-flank-charge {
     0%,8%{transform:none;opacity:1}
     16%{transform:translateY(26px) scale(1.14,.82);opacity:1}
-    22%{transform:translateY(26px) scale(1.14,.82);opacity:1}
-    26%{transform:translate(calc(var(--monster-charge-first-x)*.08),calc(var(--monster-charge-first-y)*.08 - 26px)) scale(.88,1.18);opacity:1}
-    37%{transform:translate(calc(var(--monster-charge-first-x)*.30),calc(var(--monster-charge-first-y)*.30)) scale(1.06,.96);opacity:1}
-    54%{transform:translate(calc(var(--monster-charge-first-x)*.64),calc(var(--monster-charge-first-y)*.64)) scale(1.10,.94);opacity:1}
+    22%{transform:translateY(26px) scale(1.14,.82);opacity:1;animation-timing-function:cubic-bezier(.333,0,.667,.333)}
+    36.7%{transform:translate(calc(var(--monster-charge-first-x)*.178),calc(var(--monster-charge-first-y)*.178 - 18px)) scale(1.02,1.02);opacity:1}
+    54%{transform:translate(calc(var(--monster-charge-first-x)*.598),calc(var(--monster-charge-first-y)*.598)) scale(1.10,.94);opacity:1}
     70.6%{transform:translate(var(--monster-charge-first-x),var(--monster-charge-first-y)) scale(1.16,.90);filter:brightness(1.45);opacity:1}
     82%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.20,.88);opacity:1}
     84%{transform:translate(var(--monster-charge-first-exit-x),var(--monster-charge-first-exit-y)) scale(1.20,.88);opacity:0}
