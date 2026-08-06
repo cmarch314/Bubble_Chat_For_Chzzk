@@ -163,6 +163,12 @@ class HuntMonsterAttackAnimator {
         return parent?.classList?.contains?.('hunt-monster-attack-motion') ? parent : monsterImg;
     }
 
+    // 겨냥 레이어는 몸 방향 전용이다. 없으면(구형 fixture) null을 돌려 무시한다.
+    resolveAimLayer(monsterImg) {
+        const closest = monsterImg?.closest?.('.hunt-monster-aim-layer');
+        return closest?.classList?.contains?.('hunt-monster-aim-layer') ? closest : null;
+    }
+
     resolveFacingLayer(monsterImg) {
         const closest = monsterImg?.closest?.('.hunt-monster-facing-layer');
         return closest?.classList?.contains?.('hunt-monster-facing-layer') ? closest : null;
@@ -372,6 +378,8 @@ class HuntMonsterAttackAnimator {
             monsterImg?.style?.removeProperty?.('--monster-facing-flip');
             delete layer.dataset.monsterFacingPlan;
             delete layer.dataset.monsterFacingDirections;
+            // 겨냥도 함께 푼다. 남겨두면 다음 대기 자세가 기울어진 채로 유지된다.
+            this.resolveAimLayer(monsterImg)?.style?.removeProperty?.('--narga-aim-deg');
         };
         if (activeMotion) activeMotion.finishers.push(cleanup);
         return { animation, keyframes, cleanup };
@@ -630,7 +638,9 @@ class HuntMonsterAttackAnimator {
         if (profile.id === 'ground-charge' || profile.id === 'rathian-ground-charge' || profile.id === 'ground-charge-cross'
             || profile.id === 'ground-charge-zigzag' || profile.id === 'ground-charge-double'
             || profile.id === 'ground-charge-triple' || profile.id === 'aerial-charge-cross'
-            || profile.id === 'legiana-drill-cross' || profile.id === 'tigrex-charge-chain') {
+            || profile.id === 'legiana-drill-cross' || profile.id === 'tigrex-charge-chain'
+            || profile.id === 'nargacuga-flank-charge' || profile.id === 'nargacuga-lunge-finish'
+            || profile.id === 'nargacuga-offscreen-charge') {
             const cardRect = this.card.getBoundingClientRect();
             const targetIndex = Number(targetCard.id.replace(/\D+/g, '')) || 0;
             const crossGeometry = ['aerial-charge-cross', 'legiana-drill-cross'].includes(profile.id)

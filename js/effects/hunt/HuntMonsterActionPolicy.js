@@ -120,16 +120,20 @@ class HuntMonsterActionPolicy {
      * (1,2) (2,3) (3,4) 같은 인접 쌍을 뽑아 서로 다른 쌍을 우선 고르고,
      * 쌍이 모자라면 남은 쌍을 재사용한다. 생존자가 한 명뿐이면 단독 패스가 된다.
      */
-    static adjacentPairPivotPasses(targetable, passCount = 2, random = Math.random) {
+    static adjacentPairPivotPasses(targetable, passCount = 2, random = Math.random, anchorIndex = null) {
         const lanes = [...targetable].sort((a, b) => Number(a.index) - Number(b.index));
         const passes = Math.max(1, Number(passCount) || 1);
         if (lanes.length <= 1) {
             return Array.from({ length: passes }, () => lanes.slice(0, 1));
         }
         const pairs = lanes.slice(0, -1).map((lane, i) => [lane, lanes[i + 1]]);
-        const shuffled = [...pairs].sort(() => random() - 0.5);
-        return Array.from({ length: passes }, (_, i) =>
-            shuffled[i % shuffled.length]);
+        // 지정된 표적을 품은 쌍부터 시작한다. 앵커를 무시하면 1번을 노렸는데 3·4번이
+        // 맞는 문제가 생긴다. 이어지는 패스는 한 명을 공유하는 옆 쌍으로 넘어간다.
+        let start = Number.isInteger(anchorIndex)
+            ? pairs.findIndex(pair => pair.some(lane => Number(lane.index) === Number(anchorIndex)))
+            : -1;
+        if (start < 0) start = Math.floor(random() * pairs.length) % pairs.length;
+        return Array.from({ length: passes }, (_, i) => pairs[(start + i) % pairs.length]);
     }
 
     static independentTargetPasses(targetable, passCount = 2, random = Math.random) {
@@ -156,7 +160,10 @@ class HuntMonsterActionPolicy {
         passCount = 2,
         random = Math.random,
         mode = '',
-        defaultTargets = []
+        defaultTargets = [],
+        // 회전 축처럼 "지정한 헌터"가 결과를 좌우하는 모드용. defaultTargets[0]은
+        // 호출부에 따라 중앙 정렬된 레인 창의 시작점일 수 있어 표적과 다르다.
+        primaryIndex = null
     } = {}) {
         if (mode === 'adjacent-lane') {
             return { targets: this.adjacentLaneTargets(targetable, count, random), runtime: {} };
@@ -252,7 +259,9 @@ class HuntMonsterActionPolicy {
         // 그 둘을 함께 훑는다. 타격 범위를 사후 검증하는 대신 축 위치를 미리 정하는
         // 방식이라, 패스마다 "몇 번과 몇 번을 함께 치는지"가 확정된다.
         if (mode === 'adjacent-pair-pivot') {
-            const passes = this.adjacentPairPivotPasses(targetable, passCount, random);
+            const passes = this.adjacentPairPivotPasses(
+                targetable, passCount, random,
+                Number.isInteger(primaryIndex) ? primaryIndex : defaultTargets[0]?.index);
             return {
                 targets: passes.flat(),
                 runtime: {

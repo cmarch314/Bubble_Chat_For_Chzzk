@@ -44,8 +44,8 @@ assert.match(html, /class="hunt-atb-row"/);
 assert.match(html, /class="hunt-item-list"/);
 assert.match(html, /class="game-hunt-weapon-name"/,
     'preview hunter cards must preserve production combat-card information order');
-assert.match(html, /class="hunt-monster-attack-motion">\s*<div class="hunt-monster-facing-layer">\s*<img id="fight-monster-img"/,
-    'the preview must mirror the production travel > facing > image ownership order');
+assert.match(html, /class="hunt-monster-attack-motion">\s*<div class="hunt-monster-aim-layer"><div class="hunt-monster-facing-layer">\s*<img id="fight-monster-img"/,
+    'the preview must mirror the production travel > aim > facing > image ownership order');
 assert.doesNotMatch(html, /class="hunt-monster-facing-layer">\s*<div class="hunt-monster-attack-motion">/,
     'flipping a travel wrapper mirrors its coordinates and teleports the monster across the board');
 assert.match(html, /HUNT_RELEASED_MONSTER_DATA/,

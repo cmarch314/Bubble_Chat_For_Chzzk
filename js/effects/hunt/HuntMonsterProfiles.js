@@ -1174,7 +1174,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         forbiddenStates: ['enraged'],
         tags: ['area', 'tail', 'ground-only', 'target-contact', 'stance-melee'],
         monsterAtbCost: 0.52, movement: { ticks: 24 },
-        targeting: { mode: 'left-right-halves' },
+        // 지정한 대상을 겨눠 찌르는 기술이라 좌/우 절반 고정 분배(left-right-halves)를
+        // 쓰면 안 된다. 그 모드는 표적을 무시하고 늘 1·2 / 3·4로만 나눈다.
         impactTimeline: [{ atTicks: 15, damageScale: 1 }],
         animationProfile: 'nargacuga-tail-whip', animationDurationMs: 2400,
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
@@ -1224,9 +1225,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         forbiddenStates: ['enraged'], cooldown: 46, weight: 1.15,
         tags: ['charge', 'ambush', 'vanish', 'target-contact', 'strong', 'stance-ranged'],
         monsterAtbCost: 0.74,
-        movement: { ticks: 40, untargetable: true },
-        impactTimeline: [{ atTicks: 29, damageScale: 1 }],
-        animationProfile: 'nargacuga-leap-ambush', animationDurationMs: 4000,
+        movement: { ticks: 26, untargetable: true },
+        impactTimeline: [{ atTicks: 18, damageScale: 1 }],
+        animationProfile: 'nargacuga-leap-ambush', animationDurationMs: 2600,
         originPart: 'left-wing',
         brokenPartDamageModifiers: { 'left-wing': 0.76, 'right-wing': 0.76 }
     }],
@@ -1236,9 +1237,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         windup: 6, recovery: 1, forbiddenStates: ['enraged'], cooldown: 40,
         tags: ['charge', 'ground-only', 'target-contact', 'stance-ranged'],
         monsterAtbCost: 0.70,
-        movement: { ticks: 42, untargetable: true },
-        impactTimeline: [{ atTicks: 31, damageScale: 1 }],
-        animationProfile: 'nargacuga-offscreen-charge', animationDurationMs: 4200
+        movement: { ticks: 56, untargetable: true },
+        targeting: { mode: 'independent-passes', passCount: 2 },
+        impactTimeline: [
+            { atTicks: 24, targetMode: 'sequential', damageScale: 1 },
+            { atTicks: 48, targetMode: 'sequential', damageScale: 1 }
+        ],
+        animationProfile: 'nargacuga-offscreen-charge', animationDurationMs: 5600
     }],
     ['nargacuga.quill_shot', '가시깃 사출', 'projectile', 0.33, {
         sourceMoveNameJA: '棘飛ばし', minTargets: 1, maxTargets: 3, windup: 5, recovery: 1,

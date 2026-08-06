@@ -106,6 +106,27 @@ const HuntMonsterGeometryChoreography = {
         HuntMonsterGeometryChoreography['nargacuga-twin-pivot-spin'](context);
     },
 
+    // 대상 헌터를 겨누는 각도. 나르가 스프라이트는 머리가 아래(중앙 하단)를 향하므로
+    // 기준 전방 벡터는 (0,1)이다. 이를 대상 방향 (dx,dy)로 돌리는 각이 atan2(-dx, dy).
+    // 이 값이 없으면 몸이 정면을 본 채 다가가 1번과 2번 사이 허공을 때리는 것처럼 보인다.
+    // 과도한 회전은 어색하므로 ±58도로 제한한다.
+    'nargacuga-aim'({ animator, motionElement, monsterImg, monsterRect, targetRect }) {
+        const dx = (targetRect.left + targetRect.width / 2) - (monsterRect.left + monsterRect.width / 2);
+        const dy = (targetRect.top + targetRect.height / 2) - (monsterRect.top + monsterRect.height / 2);
+        const deg = Math.atan2(-dx, Math.max(1, dy)) * 180 / Math.PI;
+        const clamped = Math.max(-58, Math.min(58, deg));
+        // 겨냥은 전용 레이어에만 건다. 모션 요소에 걸면 공격 회전과 합쳐져,
+        // 회전 기술이 겨냥각만큼 기울어진 채 돌아가 대각선으로 미끄러져 보인다.
+        // 레이어가 없는 구형 fixture에서는 모션 요소로 폴백한다.
+        const aimLayer = animator?.resolveAimLayer?.(monsterImg);
+        (aimLayer || motionElement).style.setProperty('--narga-aim-deg', `${clamped.toFixed(1)}deg`);
+        // 화면 밖 이탈은 좌/우 중 하나를 무작위로 고른다. 대상에서 먼 쪽으로 빠져야
+        // 곧바로 되돌아오는 그림이 되지 않는다.
+        const away = dx >= 0 ? -1 : 1;
+        const side = Math.random() < 0.75 ? away : -away;
+        motionElement.style.setProperty('--narga-exit-x', `${side * 620}px`);
+    },
+
     // 견제 도약은 좌/우를 무작위로 고른다. 방향은 패스마다 반대로 뒤집힌다.
     'nargacuga-stance-hop'({ animator, motionElement, monsterRect }) {
         const cardRect = animator.card.getBoundingClientRect();
@@ -153,6 +174,37 @@ const HuntMonsterGeometryChoreography = {
         motionElement.dataset.tigrexBiteRoute = 'standalone';
     }
 };
+
+// 방향성 있는 나르가 공격은 전부 대상을 겨눈다. 기존 핸들러가 있는 프로파일은
+// 그 핸들러를 먼저 돌린 뒤 겨냥 각을 덧씌운다.
+// 회전·신장이 곧 공격인 기술(꼬리 회전/역회전/후려치기/내려찍기)은 제외한다.
+// 그런 모션은 부모가 비균등 scale(예: scale(1.10,1.52))을 걸기 때문에, 자식인
+// 겨냥 레이어가 회전하면 늘어나는 축이 몸을 따라가지 않아 옆으로 늘어난 것처럼
+// 보인다(전단). 겨냥은 몸 방향이 의미 있는 직선 돌진·급습에만 건다.
+// 내려찍기는 부모가 비균등 scale로 꼬리를 늘리므로 겨냥 레이어(자식)에서 돌리면
+// 전단이 생긴다. 대신 겨냥 각을 모션 요소에 써서 키프레임이 rotate()...scale() 순서로
+// 같은 transform 안에서 합성하게 한다. 그러면 늘어나는 축이 몸을 따라간다.
+for (const id of ['nargacuga-turn-tail-slam', 'nargacuga-turn-tail-slam-double']) {
+    const existing = HuntMonsterGeometryChoreography[id];
+    HuntMonsterGeometryChoreography[id] = context => {
+        if (existing) existing(context);
+        const dx = (context.targetRect.left + context.targetRect.width / 2)
+            - (context.monsterRect.left + context.monsterRect.width / 2);
+        const dy = (context.targetRect.top + context.targetRect.height / 2)
+            - (context.monsterRect.top + context.monsterRect.height / 2);
+        const deg = Math.atan2(-dx, Math.max(1, dy)) * 180 / Math.PI;
+        context.motionElement.style.setProperty(
+            '--narga-aim-deg', `${Math.max(-46, Math.min(46, deg)).toFixed(1)}deg`);
+    };
+}
+
+for (const id of ['nargacuga-dash-bite', 'nargacuga-leap-ambush', 'nargacuga-leap-ambush-triple']) {
+    const existing = HuntMonsterGeometryChoreography[id];
+    HuntMonsterGeometryChoreography[id] = context => {
+        if (existing) existing(context);
+        HuntMonsterGeometryChoreography['nargacuga-aim'](context);
+    };
+}
 
 if (typeof module !== 'undefined' && module.exports) module.exports = HuntMonsterGeometryChoreography;
 if (typeof globalThis !== 'undefined') globalThis.HuntMonsterGeometryChoreography = HuntMonsterGeometryChoreography;
