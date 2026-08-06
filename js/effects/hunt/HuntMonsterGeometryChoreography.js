@@ -254,6 +254,10 @@ for (const id of ['nargacuga-turn-tail-slam', 'nargacuga-turn-tail-slam-double']
     const existing = HuntMonsterGeometryChoreography[id];
     HuntMonsterGeometryChoreography[id] = context => {
         if (existing) existing(context);
+        // 연속 내려찍기의 2타는 표적 측면으로 뛰어 다시 찍는다. 화면 밖으로 나가지
+        // 않도록 안쪽(표적이 중앙에서 치우친 반대 방향)으로 뛴다.
+        const inward = -(Math.sign(Number(context.attackX) || 0) || 1);
+        context.motionElement.style.setProperty('--narga-slam-side', String(inward));
         const dx = (context.targetRect.left + context.targetRect.width / 2)
             - (context.monsterRect.left + context.monsterRect.width / 2);
         const dy = (context.targetRect.top + context.targetRect.height / 2)

@@ -1223,6 +1223,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         tags: ['physical', 'tail', 'target-contact', 'strong', 'stance-melee'],
         monsterAtbCost: 0.72, movement: { ticks: 30 },
         impactTimeline: [{ atTicks: 22, damageScale: 1 }],
+        // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
+        animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-turn-tail-slam', animationDurationMs: 3000,
         originPart: 'tail',
         whiffReaction: { kind: 'stuck', durationTicks: 30 },
@@ -1373,6 +1375,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { atTicks: 26, targetMode: 'sequential', damageScale: 1 },
             { atTicks: 44, targetMode: 'sequential', damageScale: 1 }
         ],
+        // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
+        animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-turn-tail-slam-double', animationDurationMs: 5400,
         originPart: 'tail',
         whiffReaction: { kind: 'stuck', durationTicks: 30 },
