@@ -17,3 +17,9 @@ backup_v1/
 # Python bytecode caches (build artifacts, never commit).
 __pycache__/
 *.pyc
+
+# 일회성 조사 스크립트, 다운로드 캐시, 작업 중 산출물 보관소.
+# 커밋할 물건이 아니고 수가 매우 많아(1만 개 이상) `git add -A` 한 번이면
+# 관계없는 파일이 통째로 스테이징된다.
+/scratch/
+/AI CMC/

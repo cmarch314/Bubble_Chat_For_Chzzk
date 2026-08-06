@@ -1,6 +1,10 @@
 class HuntMonsterRules {
     static BASE_ATTACK_ACCURACY = 1;
 
+    // 분노 사이 진정 구간의 표준 길이. 저작 데이터가 지속만 적고 회복을 빠뜨렸을 때
+    // 쓰인다(HuntMonsterArchetypeCatalog의 모든 몬스터가 실제로 이 값을 쓴다).
+    static DEFAULT_RAGE_RECOVERY_TICKS = 300;
+
     static attackAccuracy(_pattern = {}) {
         // A selected monster attack always reaches its target. Avoidance belongs
         // exclusively to the hunter response layer: evade, guard, counter,
@@ -50,7 +54,12 @@ class HuntMonsterRules {
     static stateForBattleTime(battleTime, behavior = {}) {
         const tick = Math.max(0, Number(battleTime || 0));
         const rageDuration = Number(behavior.rageDurationTicks || 0);
-        const rageRecoveryDuration = Number(behavior.rageRecoveryDurationTicks || 0);
+        // 회복 길이를 빠뜨렸다고 해서 "분노 주기 없음"으로 읽으면 안 된다. 예전에는
+        // 그 조합이 조용히 아래 영구 분노 분기로 떨어져, 지속 900틱이라고 적어둔
+        // 몬스터가 800틱 이후 영원히 분노 상태였다. 지속을 적었다는 것은 주기를
+        // 의도했다는 뜻이므로, 회복은 표준값으로 메운다.
+        const rageRecoveryDuration = Number(behavior.rageRecoveryDurationTicks || 0)
+            || (rageDuration > 0 ? this.DEFAULT_RAGE_RECOVERY_TICKS : 0);
         if (rageDuration > 0 && rageRecoveryDuration > 0) {
             const rageStart = Math.max(0, Number(behavior.rageStartTick || 800));
             if (tick < rageStart) return 'normal';
