@@ -2725,24 +2725,10 @@
    drop-shadow가 눈이 아니라 몸 전체 실루엣을 붉게 복사해, 기본 분노 레이어 위에
    붉은 오라가 한 겹 더 얹히는 것처럼 보였다. 눈만 빛나게 하려면 별도 눈 스프라이트
    레이어가 필요하다. */
-/* 가시깃: 카드 다이아 기호를 남색으로 칠하고 세로로 늘여 쿠나이 날처럼 보이게 한다.
-   FX 요소가 받는 클래스는 monster-local-action-fx + tail-spikes + is-playing 이며,
-   베이스가 opacity:0 이라 전용 is-playing 애니메이션이 없으면 아예 보이지 않는다. */
-.monster-local-action-fx.tail-spikes {
-    font-size:3.1rem; color:#26379e;
-    text-shadow:0 0 8px #0b1440e6, 0 0 2px #4a63d8;
-}
-.monster-local-action-fx.tail-spikes.is-playing {
-    animation:monster-quill-throw var(--monster-local-duration,2.6s) linear both;
-}
-@keyframes monster-quill-throw {
-    0%{opacity:0;transform:translate(-50%,-50%) scale(.35) scaleY(1.5) rotate(-18deg)}
-    8%{opacity:1;transform:translate(-50%,-50%) scale(.95) scaleY(1.5) rotate(6deg)}
-    44%{opacity:1;transform:translate(-38%,120%) scale(1.05) scaleY(1.6) rotate(24deg)}
-    74%{opacity:.9;transform:translate(-22%,300%) scale(1.0) scaleY(1.6) rotate(40deg)}
-    92%{opacity:.35;transform:translate(-14%,430%) scale(.9) scaleY(1.5) rotate(52deg)}
-    100%{opacity:0;transform:translate(-10%,480%) scale(.82) scaleY(1.5) rotate(58deg)}
-}
+/* 가시깃의 꼬리 부착 FX(tail-spikes / monster-quill-throw)는 제거했다.
+   다이아 하나가 2.6초에 걸쳐 화면 아래로 흘러내려, 정작 표적으로 날아가는 날과
+   겹쳐 연출이 산만했다. 이 패턴의 연출은 날아가는 날 하나로 끝난다.
+   패턴의 attachedFx 선언도 함께 지웠으므로 이 클래스를 받는 요소는 생기지 않는다. */
 @keyframes monster-motion-rath-flight-stagger {
     0%,100%{transform:none}
     10%{transform:translateY(-24px) rotate(-6deg)}

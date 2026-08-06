@@ -1286,8 +1286,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         ],
         animationProfile: 'ranged-cast', animationDurationMs: 2600,
         originPart: 'tail',
-        // 가시깃은 던지는 칼날이다. 카드 다이아 기호를 CSS에서 남색으로 칠해 쓴다.
-        attachedFx: { emoji: '♦', className: 'tail-spikes', durationMs: 2600 },
+        // 부착 FX(꼬리에서 떨어지는 다이아)를 두지 않는다. 2.6초에 걸쳐 아래로
+        // 흘러내려, 정작 표적으로 날아가는 날과 겹쳐 연출이 산만해졌다.
+        // 이 패턴의 연출은 날아가는 날 하나로 끝난다.
         forbiddenWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.70 }
     }],
