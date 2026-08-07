@@ -150,6 +150,47 @@ const ratio = frame => {
 assert.ok(Math.abs(ratio(near.pose[near.pose.length - 1]) - ratio(far.pose[far.pose.length - 1])) < 1e-3,
     '원근이 달라도 자세 비율은 같아야 한다');
 
+// ---- align: 몸 중심이 아니라 그 부위를 목적지에 얹는다 ----
+//
+// "너무 헌터 중앙으로 이동해서 몸통 내려찍기나 다름없다"가 이 뺄셈이 없어서 났다.
+// 나르가 꼬리는 이미지 상단 좌측(30%, 17%)이라 중심을 (+76, +125)px 옮겨야
+// 꼬리가 헌터를 덮는다. 그 숫자를 패턴에 적지 않는다.
+const SPRITE = 380;
+const anatomy = require('../js/effects/hunt/HuntMonsterAnatomyCatalog.js');
+const partOffset = (name, facing) => {
+    const point = HuntStageAnchors.resolvePart(anatomy, { id: 'nargacuga' }, name, facing);
+    return { x: (point.xPercent / 100 - .5) * SPRITE, y: (point.yPercent / 100 - .5) * SPRITE };
+};
+
+const plain = HuntMotionCompiler.compile(
+    [{ beat: 'slam', ticks: 4, to: 'hunter:2' }], { anchors, partOffset });
+const aligned = HuntMotionCompiler.compile(
+    [{ beat: 'slam', ticks: 4, to: 'hunter:2', align: 'part:tail' }], { anchors, partOffset });
+
+const xy = frame => frame.transform.match(/translate\((-?\d+)px, (-?\d+)px\)/).slice(1).map(Number);
+const [plainX, plainY] = xy(plain.placement[plain.placement.length - 1]);
+const [alignX, alignY] = xy(aligned.placement[aligned.placement.length - 1]);
+
+// 꼬리 (.30, .17) → 중심에서 (-76, -125.4)px. 그만큼 반대로 밀어야 꼬리가 목적지에 온다.
+assert.strictEqual(alignX - plainX, 76, '꼬리를 얹으려면 몸이 오른쪽으로 76px 가야 한다');
+assert.strictEqual(alignY - plainY, 125, '꼬리를 얹으려면 몸이 아래로 125px 가야 한다');
+
+// 반전하면 가로 보정도 뒤집힌다. 저작자는 좌우 두 벌을 적지 않는다.
+const mirrored = HuntMotionCompiler.compile(
+    [{ beat: 'turn', ticks: 2, to: 'hunter:0' },
+     { beat: 'slam', ticks: 4, to: 'hunter:0', align: 'part:tail' }], { anchors, partOffset });
+const [mirrorX] = xy(mirrored.placement[mirrored.placement.length - 1]);
+const [plainLeftX] = xy(HuntMotionCompiler.compile(
+    [{ beat: 'turn', ticks: 2, to: 'hunter:0' },
+     { beat: 'slam', ticks: 4, to: 'hunter:0' }], { anchors, partOffset })
+    .placement.slice(-1)[0]);
+assert.strictEqual(mirrorX - plainLeftX, -76,
+    '왼쪽을 보면 꼬리가 화면 오른쪽에 오므로 보정도 반대다');
+
+assert.throws(() => HuntMotionCompiler.compile(
+    [{ beat: 'a', ticks: 2, align: 'part:tail' }], { anchors, partOffset }),
+    HuntMotionCompilerError, 'align은 목적지 없이 쓸 수 없다');
+
 // ---- 골격마다 값만 다르다 ----
 
 const wingedCrouch = HuntMotionPoses.resolve('crouch', 'winged').squash;
@@ -177,7 +218,6 @@ assert.throws(() => HuntMotionCompiler.compile([{ beat: 'a', ticks: 2, to: 'hunt
     /9번 헌터가 없다/, '앵커 오류가 그대로 올라온다');
 
 // 회전축이 존재하는 부위를 가리키는지 — 나르가로 전수 확인한다.
-const anatomy = require('../js/effects/hunt/HuntMonsterAnatomyCatalog.js');
 for (const [name, definition] of Object.entries(HuntMotionPoses.ROTATION)) {
     if (!definition.pivot) continue;
     assert.doesNotThrow(

@@ -39,6 +39,9 @@ function huntPattern(id, name, type, damageRatio, options = {}) {
         flightTransition: options.flightTransition || null,
         flight: options.flight || null,
         suppressPrepareAudio: Boolean(options.suppressPrepareAudio),
+        // 비트 목록. 있으면 새 모션 경로를 타고, 없으면 animationProfile의
+        // 키프레임 경로 그대로다(재설계 3단계).
+        motion: options.motion || null,
         animationProfile: options.animationProfile || null,
         animationDurationMs: options.animationDurationMs || null,
         animationGeometry: options.animationGeometry || null,

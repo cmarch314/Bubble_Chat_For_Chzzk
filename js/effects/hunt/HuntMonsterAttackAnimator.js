@@ -166,12 +166,12 @@ class HuntMonsterAttackAnimator {
     // 좌표 어휘 해석기. 매 모션마다 새로 계측한다 — 레이아웃이 바뀌면 앵커도 따라
     // 가야 하고, 캐시하면 예전 사고(430 클램프와 실제 거리 505의 차이를 --narga-drop
     // 으로 메우던 일)가 그대로 재현된다.
-    resolveStageAnchors(monsterImg) {
+    resolveStageAnchors(monsterImg, primaryTarget = null) {
         const Anchors = typeof HuntStageAnchors !== 'undefined'
             ? HuntStageAnchors
             : (typeof require === 'function' ? require('./HuntStageAnchors.js') : null);
         if (!Anchors) throw new Error('HuntStageAnchors가 로드되지 않았다');
-        return Anchors.fromDom(this.card, monsterImg);
+        return Anchors.fromDom(this.card, monsterImg, { primaryTarget });
     }
 
     // 겨냥 레이어는 몸 방향 전용이다. 없으면(구형 fixture) null을 돌려 무시한다.
@@ -655,7 +655,7 @@ class HuntMonsterAttackAnimator {
     // 비트 목록을 가진 패턴은 새 경로를 탄다. 없으면 종전 키프레임 경로 그대로다.
     // 병존이 되므로 몬스터를 하나씩 옮길 수 있고, 어느 시점에 멈춰도 나머지는
     // 그대로 동작한다.
-    playBeatMotion(monsterImg, pattern, profileId) {
+    playBeatMotion(monsterImg, pattern, profileId, targetCard = null) {
         const Compiler = typeof HuntMotionCompiler !== 'undefined'
             ? HuntMotionCompiler
             : (typeof require === 'function' ? require('./HuntMotionCompiler.js') : null);
@@ -664,9 +664,24 @@ class HuntMonsterAttackAnimator {
         if (!Compiler || !motionElement || !poseLayer) return null;
 
         const rig = HuntMonsterAnimationCatalog?.resolveRig?.(this.owner?.selectedMonster)?.id || 'winged';
+        // 비트의 `target`이 가리킬 이번 턴의 주 표적. 비트는 번호를 박지 않는다.
+        const primaryTarget = targetCard?.id
+            ? Number(String(targetCard.id).replace('fight-card-', ''))
+            : null;
+        // align이 쓸 부위 오프셋. 이미지 중심 기준 픽셀이다. 스프라이트 크기를
+        // 실측해서 곱하므로 이미지 크기가 바뀌어도 따라간다.
+        const monsterRect = monsterImg.getBoundingClientRect();
+        const partOffset = (name, facing) => {
+            const point = this.resolvePosePivot(name, facing);
+            return {
+                x: (point.xPercent / 100 - .5) * monsterRect.width,
+                y: (point.yPercent / 100 - .5) * monsterRect.height
+            };
+        };
         const built = Compiler.compile(pattern.motion, {
-            anchors: this.resolveStageAnchors(monsterImg),
-            rig
+            anchors: this.resolveStageAnchors(monsterImg, primaryTarget),
+            rig,
+            partOffset
         });
 
         // 자세 키프레임의 축은 부위 이름이다. 여기서 백분율로 푼다 — 반전은
@@ -729,7 +744,7 @@ class HuntMonsterAttackAnimator {
 
     playPatternMotion(monsterImg, targetCard, pattern, attackName, type) {
         if (Array.isArray(pattern?.motion) && pattern.motion.length) {
-            const beatProfile = this.playBeatMotion(monsterImg, pattern, pattern.id);
+            const beatProfile = this.playBeatMotion(monsterImg, pattern, pattern.id, targetCard);
             if (beatProfile) return beatProfile;
         }
         const Catalog = typeof HuntMonsterAnimationCatalog !== 'undefined' ? HuntMonsterAnimationCatalog : null;

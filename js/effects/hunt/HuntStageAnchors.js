@@ -58,7 +58,10 @@ class HuntStageAnchors {
     });
 
     // rect: {left, top, width, height}
-    constructor({ monsterRect, cardRect = null, stageWidth = null, hunters = null } = {}) {
+    constructor({ monsterRect, cardRect = null, stageWidth = null, hunters = null, primaryTarget = null } = {}) {
+        // 비트는 몇 번 헌터인지 적지 않는다. 표적은 매번 달라지므로 번호를 박으면
+        // 패턴이 늘 같은 사람만 때린다. `target`이 이번 턴의 주 표적을 가리킨다.
+        this.primaryTarget = Number.isInteger(Number(primaryTarget)) ? Number(primaryTarget) : null;
         if (!monsterRect) throw new HuntStageAnchorError('monsterRect가 없다');
         this.monsterRect = monsterRect;
         this.cardRect = cardRect;
@@ -82,7 +85,7 @@ class HuntStageAnchors {
     // 헌터 번호는 세지 않고 DOM에서 발견한다. 이 프로젝트의 fight-card는 0부터
     // 시작하고 인원수도 가변이라, 범위를 가정하면 0번을 놓치고 없는 번호를
     // 지어낸다(실제로 1..4로 훑다가 그렇게 됐다).
-    static fromDom(card, monsterImg) {
+    static fromDom(card, monsterImg, { primaryTarget = null } = {}) {
         const monsterRect = monsterImg?.getBoundingClientRect?.();
         if (!monsterRect) throw new HuntStageAnchorError('몬스터 이미지를 계측할 수 없다');
         const hunters = new Map();
@@ -97,7 +100,8 @@ class HuntStageAnchors {
             monsterRect,
             cardRect: card?.getBoundingClientRect?.() || null,
             stageWidth: monsterImg.closest?.('.hunt-monster-motion-stage')?.clientWidth || null,
-            hunters
+            hunters,
+            primaryTarget
         });
     }
 
@@ -134,7 +138,7 @@ class HuntStageAnchors {
     // 인자를 받는 연산자(toward/polar/above/...)는 중첩할 수 없다. 인자가 어느
     // 연산자의 것인지 문법으로 구분되지 않기 때문이다. 허용하면 안쪽 연산자가
     // 조용히 기본값을 쓰고 잘못된 좌표를 낸다 — 신호 없는 오답은 만들지 않는다.
-    static TERMINAL_KINDS = Object.freeze(['home', 'self', 'hunter', 'between', 'arena', 'offscreen']);
+    static TERMINAL_KINDS = Object.freeze(['home', 'self', 'hunter', 'target', 'between', 'arena', 'offscreen']);
 
     #parse(spec, nested = false) {
         if (spec && typeof spec === 'object' && !Array.isArray(spec)) {
@@ -146,9 +150,11 @@ class HuntStageAnchors {
         const text = String(spec || '').trim();
         if (!text) throw new HuntStageAnchorError('빈 앵커');
         const [head, ...args] = text.split(/\s+/);
-        const colon = head.indexOf(':');
-        const kind = colon < 0 ? head : head.slice(0, colon);
-        const arg = colon < 0 ? '' : head.slice(colon + 1);
+        // 종류와 인자는 ':' 또는 '.'로 갈린다. `hunter:2.bottom`은 콜론이 먼저이므로
+        // 종류가 hunter이고, `target.top`은 점뿐이므로 종류가 target이다.
+        const separator = head.search(/[:.]/);
+        const kind = separator < 0 ? head : head.slice(0, separator);
+        const arg = separator < 0 ? '' : head.slice(separator + 1);
         const handler = this.#handlers()[kind];
         if (!handler) throw new HuntStageAnchorError(`알 수 없는 앵커 종류: ${kind}`, text);
         if (nested && !HuntStageAnchors.TERMINAL_KINDS.includes(kind)) {
@@ -191,6 +197,15 @@ class HuntStageAnchors {
                     x: rect.left + rect.width * ratio.x - this.origin.x,
                     y: rect.top + rect.height * ratio.y - this.origin.y
                 };
+            },
+
+            // `target` / `target.bottom` — 이번 턴의 주 표적. hunter:N으로 넘긴다.
+            target: (arg, args, spec) => {
+                if (this.primaryTarget === null) {
+                    throw new HuntStageAnchorError('주 표적이 지정되지 않았다', spec);
+                }
+                const edge = arg ? `.${arg.replace(/^\./, '')}` : '';
+                return this.#handlers().hunter(`${this.primaryTarget}${edge}`, args, spec);
             },
 
             between: (arg, args, spec) => {

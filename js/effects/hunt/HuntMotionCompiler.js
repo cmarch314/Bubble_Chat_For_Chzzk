@@ -52,7 +52,27 @@ class HuntMotionCompiler {
 
     // beats: 비트 배열
     // options: { anchors, rig, poses, ticksPerSecond }
-    static compile(beats, { anchors, rig = 'winged', poses = null, ticksPerSecond = null } = {}) {
+    // align: 'part:tail' — 몸 중심이 아니라 그 부위가 목적지에 오도록 놓는다.
+    //
+    // 이게 없으면 저작자가 픽셀을 손으로 뺀다. 나르가 꼬리는 이미지 상단 좌측
+    // (30%, 17%)이라, 꼬리를 헌터에 얹으려면 중심을 (+76, +125)px 옮겨야 한다.
+    // 그 뺄셈을 패턴마다 적는 것이 지금 사고의 형태다 — "너무 헌터 중앙으로
+    // 이동해서 몸통 내려찍기나 다름없다"가 정확히 이 뺄셈이 없어서 났다.
+    // 부위 좌표가 이미 데이터에 있으므로 런타임이 계산한다.
+    static #place(spec, beat, anchors, partOffset, facing) {
+        const destination = anchors.resolve(spec, { bounds: beat.bounds || 'contact' });
+        if (!beat.align) return destination;
+        const offset = partOffset(beat.align, facing);
+        return {
+            x: Math.round(destination.x - offset.x),
+            y: Math.round(destination.y - offset.y)
+        };
+    }
+
+    static compile(beats, {
+        anchors, rig = 'winged', poses = null, ticksPerSecond = null, partOffset = null
+    } = {}) {
+        const offsetOf = partOffset || (() => ({ x: 0, y: 0 }));
         const Poses = poses || (typeof HuntMotionPoses !== 'undefined'
             ? HuntMotionPoses
             : (typeof require === 'function' ? require('./HuntMotionPoses.js') : null));
@@ -103,12 +123,15 @@ class HuntMotionCompiler {
             // ---- 위치 ----
             // at은 그 비트 시작에 순간이동한다. to는 비트 내내 이동한다.
             // 둘 다 없으면 이전 위치를 유지한다.
+            if (beat.align && !beat.to && !beat.at) {
+                throw new HuntMotionCompilerError('align은 to나 at과 함께 써야 한다', index);
+            }
             if (beat.at) {
-                state.point = anchors.resolve(beat.at, { bounds: beat.bounds || 'contact' });
+                state.point = this.#place(beat.at, beat, anchors, offsetOf, state.facing);
                 placement.push({ offset: Math.max(0, startAt - this.EPS), ...this.#placementFrame(previous) });
             }
             if (beat.to) {
-                state.point = anchors.resolve(beat.to, { bounds: beat.bounds || 'contact' });
+                state.point = this.#place(beat.to, beat, anchors, offsetOf, state.facing);
             }
 
             // ---- 원근 ----

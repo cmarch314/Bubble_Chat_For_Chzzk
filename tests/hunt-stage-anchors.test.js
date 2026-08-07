@@ -152,6 +152,26 @@ try {
     assert.match(error.message, /hunter:9\.bottom/, '예외 메시지에 앵커 원문이 없다');
 }
 
+// ---- target: 비트는 헌터 번호를 박지 않는다 ----
+//
+// 표적은 매번 다르다. 번호를 박으면 패턴이 늘 같은 사람만 때린다.
+// `target`이 이번 턴의 주 표적을 가리키고, 콜론 없이 `.edge`를 붙일 수 있다.
+const targeted = new HuntStageAnchors({
+    monsterRect: rect(660, 100, 380, 380),
+    cardRect: rect(0, 0, 1700, 900),
+    stageWidth: 1700,
+    hunters: anchors.hunters,
+    primaryTarget: 3
+});
+assert.deepStrictEqual(targeted.resolve('target'), targeted.resolve('hunter:3'),
+    'target은 주 표적으로 풀린다');
+assert.deepStrictEqual(targeted.resolve('target.top'), targeted.resolve('hunter:3.top'),
+    '콜론 없이 붙은 .edge도 인자로 갈려야 한다');
+assert.deepStrictEqual(targeted.resolve('above:target 150'), targeted.resolve('above:hunter:3 150'),
+    'target은 연산자 안에서도 쓸 수 있다');
+assert.throws(() => anchors.resolve('target'), HuntStageAnchorError,
+    '주 표적이 없으면 조용히 원점이 아니라 예외다');
+
 // ---- 방향은 앵커에서 파생된다 (규칙 3) ----
 
 assert.strictEqual(anchors.facingToward('hunter:1'), -1, '왼쪽 헌터를 보면 -1');
