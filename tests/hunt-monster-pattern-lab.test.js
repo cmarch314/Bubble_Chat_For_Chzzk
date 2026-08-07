@@ -52,8 +52,12 @@ assert.match(html, /class="hunt-atb-row"/);
 assert.match(html, /class="hunt-item-list"/);
 assert.match(html, /class="game-hunt-weapon-name"/,
     'preview hunter cards must preserve production combat-card information order');
-assert.match(html, /class="hunt-monster-attack-motion">\s*<div class="hunt-monster-aim-layer"><div class="hunt-monster-facing-layer">\s*<img id="fight-monster-img"/,
-    'the preview must mirror the production travel > aim > facing > image ownership order');
+// 레이어 순서(placement > pose > aim > facing > image)는
+// tests/hunt-monster-layer-contract.test.js가 실수렵 마크업과 직접 대조한다.
+// 여기서 정규식으로 한 번 더 적으면 레이어가 늘 때마다 두 곳을 고쳐야 하고,
+// 한쪽을 잊으면 "검수 화면과 실제 화면이 다르다"가 다시 생긴다.
+assert.match(html, /class="hunt-monster-pose-layer"/,
+    'the preview must carry the production pose layer');
 assert.doesNotMatch(html, /class="hunt-monster-facing-layer">\s*<div class="hunt-monster-attack-motion">/,
     'flipping a travel wrapper mirrors its coordinates and teleports the monster across the board');
 assert.match(html, /HUNT_RELEASED_MONSTER_DATA/,

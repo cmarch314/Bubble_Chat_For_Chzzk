@@ -12,8 +12,10 @@ const html = fs.readFileSync(path.resolve(
 assert.match(html, /width:1920px;height:1080px/);
 assert.match(html, /하단 15%/);
 assert.match(html, /const roster=\[[^\]]+\]/);
-assert.match(html, /class="hunt-monster-attack-motion">\s*<div class="hunt-monster-aim-layer"><div class="hunt-monster-facing-layer">\s*<img id="fight-monster-img"/,
-    'review previews must preserve production travel > aim > facing > image transform ownership');
+// 레이어 순서는 tests/hunt-monster-layer-contract.test.js가 실수렵 마크업과
+// 대조한다. 여기서 정규식으로 겹쳐 적으면 레이어가 늘 때 두 곳을 고쳐야 한다.
+assert.match(html, /class="hunt-monster-pose-layer"/,
+    'review previews must carry the production pose layer');
 for (const id of require('../data/hunt/research/world-iceborne-flying-wyverns.json').roster) {
     assert.match(html, new RegExp(`['"]${id}['"]`), `${id} must be selectable in the visual review fixture`);
 }

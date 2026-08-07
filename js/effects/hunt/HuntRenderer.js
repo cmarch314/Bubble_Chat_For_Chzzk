@@ -862,11 +862,21 @@ class HuntRenderer {
                     <div class="hunt-small-monster-atb" aria-label="${selectedMonster.nameKO} ${index + 1} 행동 게이지"><i></i></div>
                     <b>${index + 1}</b>
                 </div>`).join('')}</div>`
+            // 레이어마다 책임이 하나다(재설계안 원칙 1).
+            //   placement  translate 전용 — 회전하지 않으므로 좌표가 오염되지 않는다
+            //     pose     rotate/scale 전용 — 이동하지 않는다
+            //       aim    대상을 바라보는 몸 방향
+            //         facing  scaleX(±1) — 좌우 반전은 여기 하나뿐이다
+            // 반전이 회전보다 안쪽에 있으므로 저작한 각도가 반전 여부와 무관하게
+            // 늘 같은 방향으로 돈다. 바깥에 두면 안쪽 회전이 전부 거울상이 되어,
+            // 각도를 아무리 고쳐도 안 잡히는 종류의 사고가 난다.
             : `<div class="hunt-monster-attack-motion">
-                    <div class="hunt-monster-aim-layer">
-                        <div class="hunt-monster-facing-layer" data-monster-id="${this.escapeHTML(selectedMonster.id)}">
-                            <img class="game-hunt-monster-img" id="fight-monster-img" src="${this.escapeHTML(this.monsterImagePath(selectedMonster))}" onerror="this.src='img/monsters/rathalos.png';" style="width:380px;height:380px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.85));transition:transform .15s ease;position:relative;z-index:2;" />
-                            <div class="hunt-monster-eye-glow" aria-hidden="true"></div>
+                    <div class="hunt-monster-pose-layer">
+                        <div class="hunt-monster-aim-layer">
+                            <div class="hunt-monster-facing-layer" data-monster-id="${this.escapeHTML(selectedMonster.id)}">
+                                <img class="game-hunt-monster-img" id="fight-monster-img" src="${this.escapeHTML(this.monsterImagePath(selectedMonster))}" onerror="this.src='img/monsters/rathalos.png';" style="width:380px;height:380px;filter:drop-shadow(0 10px 20px rgba(0,0,0,.85));transition:transform .15s ease;position:relative;z-index:2;" />
+                                <div class="hunt-monster-eye-glow" aria-hidden="true"></div>
+                            </div>
                         </div>
                     </div>
                 </div>`;

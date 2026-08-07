@@ -1458,6 +1458,26 @@
     will-change:transform,opacity;
     transform-origin:50% 72%;
 }
+/* 자세 레이어: rotate/scale 전용. 절대 이동하지 않는다.
+   바깥 .hunt-monster-attack-motion이 이동(placement)을 갖고, 이 레이어가 몸 모양을
+   갖는다. 둘을 한 요소에 두면 회전이 위치를 바꾼다 — 축과 몸통 중심이 184px
+   떨어져 있으면 180도 회전에서 몸이 지름 368px 호를 그린다(이미지가 380px이다).
+   자세는 비율(squash)과 원근(depth)의 곱이다. 둘은 성격이 다른 축이라 저작
+   단계에서 분리하고, 여기서만 하나의 scale로 합친다.
+   옛 경로(키프레임을 직접 쓰는 68개 모션)는 여전히 바깥 요소에 붙어 동작이
+   그대로다. 이 레이어는 기본값이 항등이라 아무 영향을 주지 않는다. */
+.hunt-monster-pose-layer {
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    z-index:2;
+    transform:rotate(var(--pose-rotate,0deg)) scale(var(--pose-scale-x,1),var(--pose-scale-y,1));
+    transform-origin:var(--pose-pivot-x,50%) var(--pose-pivot-y,72%);
+    will-change:transform;
+}
 /* 겨냥 레이어: 대상을 바라보는 몸 방향만 담당한다. 공격 동작 회전(회전 기술의 360도,
    내려찍기의 180도)은 바깥 .hunt-monster-attack-motion이 갖는다. 둘을 한 rotate()에
    합치면 회전 기술이 겨냥각만큼 기울어진 채 돌아가 대각선으로 미끄러져 보인다. */

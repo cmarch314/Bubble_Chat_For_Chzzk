@@ -140,11 +140,16 @@
     </header>
     <section id="monster-showcase-panel" class="game-hunt-monster-showcase">
       <div class="hunt-monster-motion-stage">
+        <!-- 레이어 순서는 실수렵(HuntRenderer)과 같아야 한다. 다르면 검수 화면과
+             실제 화면이 갈라지고, 여기서 고친 것이 저기서 안 보인다.
+             tests/hunt-monster-layer-contract.test.js가 둘을 대조한다. -->
         <div class="hunt-monster-attack-motion">
-          <div class="hunt-monster-aim-layer"><div class="hunt-monster-facing-layer">
-            <img id="fight-monster-img" class="game-hunt-monster-img" alt="">
-            <div class="hunt-monster-eye-glow" aria-hidden="true"></div>
-          </div></div>
+          <div class="hunt-monster-pose-layer">
+            <div class="hunt-monster-aim-layer"><div class="hunt-monster-facing-layer">
+              <img id="fight-monster-img" class="game-hunt-monster-img" alt="">
+              <div class="hunt-monster-eye-glow" aria-hidden="true"></div>
+            </div></div>
+          </div>
         </div>
         <div id="state-marker"></div>
       </div>

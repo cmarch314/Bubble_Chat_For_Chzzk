@@ -180,6 +180,66 @@ class HuntMonsterAttackAnimator {
         return closest?.classList?.contains?.('hunt-monster-aim-layer') ? closest : null;
     }
 
+    // 자세 레이어. 구형 fixture에는 없으므로 null을 돌려 무시한다.
+    resolvePoseLayer(monsterImg) {
+        const closest = monsterImg?.closest?.('.hunt-monster-pose-layer');
+        return closest?.classList?.contains?.('hunt-monster-pose-layer') ? closest : null;
+    }
+
+    // 자세(비율)와 원근(크기)을 하나의 scale로 합쳐 자세 레이어에 쓴다.
+    //
+    // 둘을 분리해 저작하는 이유는 실측에서 나왔다. 기존 키프레임 515개 중 320개
+    // (62%)가 비율 1.000 — 자세는 없고 원근만 있다. 그런데 그 원근이 0.52~1.62로
+    // 3.1배 퍼져 있어, 한 필드에 묶으면 "같은 웅크림인데 거리가 달라서" 매번 다른
+    // 숫자를 적게 된다. 실제로 scale 조합이 139가지까지 늘어나 있었고, 분리하면
+    // 13가지다.
+    //
+    //   scaleX = depth * sqrt(squash),  scaleY = depth / sqrt(squash)
+    //   => scaleX/scaleY = squash,  sqrt(scaleX*scaleY) = depth
+    static poseScale(squash = 1, depth = 1) {
+        const ratio = Number.isFinite(Number(squash)) && Number(squash) > 0 ? Number(squash) : 1;
+        const size = Number.isFinite(Number(depth)) && Number(depth) > 0 ? Number(depth) : 1;
+        const root = Math.sqrt(ratio);
+        return { x: size * root, y: size / root };
+    }
+
+    // pose: { squash, depth, rotate, pivot } — pivot은 부위 이름('part:tail')이거나
+    // 백분율 쌍이다. 부위는 반전을 해석 시점에 반영한다(재설계안 규칙 2).
+    applyPose(monsterImg, pose = null, facing = 1) {
+        const layer = this.resolvePoseLayer(monsterImg);
+        if (!layer) return null;
+        if (!pose) {
+            for (const name of ['--pose-rotate', '--pose-scale-x', '--pose-scale-y',
+                '--pose-pivot-x', '--pose-pivot-y']) layer.style.removeProperty(name);
+            return layer;
+        }
+        const scale = this.constructor.poseScale(pose.squash, pose.depth);
+        layer.style.setProperty('--pose-rotate', `${Number(pose.rotate) || 0}deg`);
+        layer.style.setProperty('--pose-scale-x', scale.x.toFixed(4));
+        layer.style.setProperty('--pose-scale-y', scale.y.toFixed(4));
+        const pivot = this.resolvePosePivot(pose.pivot, facing);
+        if (pivot) {
+            layer.style.setProperty('--pose-pivot-x', `${pivot.xPercent.toFixed(2)}%`);
+            layer.style.setProperty('--pose-pivot-y', `${pivot.yPercent.toFixed(2)}%`);
+        }
+        return layer;
+    }
+
+    // 회전축은 CSS transform-origin을 직접 쓰지 않고 부위 데이터에서 나온다.
+    // 그래야 특이도 사고(rig 기본 축이 모션별 축을 이기던 22개 규칙)가 원천적으로
+    // 발생하지 않는다. 축이 데이터면 CSS 우선순위와 무관하다.
+    resolvePosePivot(pivot, facing = 1) {
+        if (!pivot) return null;
+        if (typeof pivot === 'object') {
+            return { xPercent: Number(pivot.xPercent) || 50, yPercent: Number(pivot.yPercent) || 72 };
+        }
+        const Anchors = typeof HuntStageAnchors !== 'undefined'
+            ? HuntStageAnchors
+            : (typeof require === 'function' ? require('./HuntStageAnchors.js') : null);
+        return Anchors.resolvePart(
+            HuntMonsterAnatomyCatalog, this.owner?.selectedMonster, pivot, facing);
+    }
+
     resolveFacingLayer(monsterImg) {
         const closest = monsterImg?.closest?.('.hunt-monster-facing-layer');
         return closest?.classList?.contains?.('hunt-monster-facing-layer') ? closest : null;

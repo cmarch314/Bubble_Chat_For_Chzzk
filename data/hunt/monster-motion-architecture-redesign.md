@@ -175,8 +175,8 @@ geometry 핸들러 + 프로필 데이터 네 곳을 고쳐야 한다. 마리당 
 **1단계 — 앵커 해석기.** ✅ 완료. `HuntStageAnchors`가 좌표 어휘와 경계를 단독으로
 소유한다. 아래 "1단계 결과"에 실제로 무엇이 바뀌고 무엇이 드러났는지 적었다.
 
-**2단계 — 레이어 분리.** `placement` / `pose` / `part`를 렌더러에 넣는다.
-기존 모션은 `placement`에 붙여 동작을 유지한다(현재와 동일).
+**2단계 — 레이어 분리.** ✅ 완료. `pose` 레이어를 넣고 기존 모션은 `placement`에
+그대로 뒀다. 아래 "2단계 결과" 참고.
 
 **3단계 — 비트 컴파일러.** `HuntMotionCompiler`가 비트 목록을 Web Animations
 키프레임으로 만든다. `motion` 필드를 가진 패턴만 새 경로를 탄다.
@@ -838,3 +838,73 @@ HuntMonsterAttackAnimator.js / HuntMonsterGeometryChoreography.js 에
 이게 없으면 "지워서 통과"가 가능해진다.
 
 패턴 랩에서 나르가 15패턴을 전부 재생해 콘솔 오류 0, 좌표 회귀 없음을 확인했다.
+
+---
+
+# 2단계 결과 — 레이어 분리
+
+```
+.hunt-monster-attack-motion   placement  translate 전용 (옛 키프레임 68개가 여기 그대로)
+  .hunt-monster-pose-layer    pose       rotate/scale 전용  ← 새로 넣은 것
+    .hunt-monster-aim-layer   aim        대상을 바라보는 몸 방향
+      .hunt-monster-facing-layer  facing scaleX(±1) — 반전은 여기 하나뿐
+        img
+```
+
+## 옛 경로를 건드리지 않는다
+
+자세 레이어의 기본값이 항등(`rotate(0deg) scale(1,1)`)이라, 지금 동작하는 68개
+키프레임은 아무 영향을 받지 않는다. 실제로 패턴 랩에서 나르가 15패턴을 전수
+재생해 확인했다 — 콘솔 오류 0, 좌표 회귀 없음. `getComputedStyle`로 읽은 자세
+레이어 변환도 `matrix(1,0,0,1,0,0)`이다.
+
+이게 병존 전략의 요점이다. 3단계에서 새 경로를 만들 때 옛 경로를 끄지 않아도 된다.
+
+## 자세는 비율과 원근의 곱이다
+
+`HuntMonsterAttackAnimator.poseScale(squash, depth)`:
+
+```
+scaleX = depth * sqrt(squash)
+scaleY = depth / sqrt(squash)
+  => scaleX / scaleY        = squash   (자세)
+     sqrt(scaleX * scaleY)  = depth    (원근)
+```
+
+왕복이 성립하므로 기존 키프레임에서 뽑은 비율/원근을 그대로 넣을 수 있다.
+잘못된 값(0, 음수, NaN, 문자열)은 1로 떨어진다 — CSS는 오류를 내지 않으므로
+NaN이 흘러들면 `scale()`이 통째로 무효화되고 "아무 일도 안 일어남"으로만 보인다.
+
+## 회전축은 CSS가 아니라 데이터다
+
+`applyPose`는 `pivot: 'part:tail'`을 받아 `HuntStageAnchors.resolvePart`로 풀고,
+결과를 `--pose-pivot-x/y`에 쓴다. **CSS `transform-origin`을 직접 쓰지 않으므로
+특이도 사고가 원천적으로 발생하지 않는다.** rig 기본 축이 모션별 축을 이기던
+22개 규칙 같은 일이 축을 데이터로 옮기면 성립하지 않는다.
+
+반전도 여기서 자동으로 풀린다. 실측(패턴 랩, 이미지 380px):
+
+```
+facing = +1   축 114px
+facing = -1   축 266px      114 + 266 = 380 → 정확한 거울상
+회전 행렬은 두 경우가 완전히 동일   ← 반전이 회전보다 안쪽이라 각도가 안 뒤집힌다
+```
+
+저작자는 좌우 두 벌을 적지 않는다.
+
+## 검증
+
+`tests/hunt-monster-layer-contract.test.js`:
+
+- **마크업 5곳을 대조한다** — 실수렵(HuntRenderer)과 패턴 랩, 프리뷰 3종의
+  레이어 순서가 같은지. 검수 화면과 실제 화면이 갈라지면 "여기서 고친 게 저기서
+  안 보인다"가 되고, 이번 세션에서 그 오해에 검수 두 라운드를 썼다.
+- **반전이 facing 레이어 바깥에 있으면 실패시킨다** — CSS에서 몬스터 레이어에
+  `scaleX`를 거는 규칙을 전수로 훑는다. 바깥에 걸면 안쪽 회전이 전부 거울상이
+  되고, 각도를 아무리 고쳐도 안 잡히는 종류의 사고가 난다.
+- **자세 레이어에 `translate`가 있으면 실패시킨다** — 이동은 placement의 것이다.
+- 자세 분해의 왕복과 잘못된 값의 안전 처리.
+
+레이어 순서를 정규식으로 겹쳐 적던 기존 두 테스트(패턴 랩, 비룡 프리뷰)는 이 대조로
+합쳤다. 두 곳에 적어두면 레이어가 늘 때마다 둘 다 고쳐야 하고, 한쪽을 잊으면 정확히
+막으려던 divergence가 다시 생긴다.
