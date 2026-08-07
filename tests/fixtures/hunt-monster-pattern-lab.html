@@ -204,6 +204,11 @@
   <script src="../../js/effects/hunt/HuntMonsterGeometryChoreography.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterFacingChoreography.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
+  <!-- 부위 파괴 반응은 실수렵과 같은 코드로 재생한다. 랩에서 따로 구현하면
+       검수 화면과 실제 화면이 갈라지고, 그게 이번 세션 사고의 형태였다. -->
+  <script src="../../js/effects/hunt/HuntMonsterPartMaterialCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntWeaponAnimationCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntCombatAnimator.js"></script>
   <script>
     const slotColors=['#ff6b6b','#58c8ff','#ffd65a','#c98cff'];
     const hunters=Array.from({length:4},(_,index)=>({index,status:'alive'}));
@@ -214,7 +219,12 @@
       ['knockdown','대경직','💥'],['stunned','기절','💫'],['paralyzed','마비','⚡'],['sleeping','수면','💤']
     ];
     const owner={card:document.getElementById('lab'),selectedMonster:null,monsterState:'normal',monsterFlightState:'grounded',animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)},clear(id){clearTimeout(id)}}};
-    const animator=new HuntMonsterAttackAnimator(owner,()=>{});
+    // 부위 파괴 반응은 실수렵과 같은 코드(HuntCombatAnimator)로 재생한다.
+    // 랩에서 따로 구현하면 검수 화면과 실제 화면이 갈라진다.
+    // 공격 애니메이터는 새로 만들지 않고 전투 애니메이터가 들고 있는 것을 쓴다 —
+    // 두 개를 두면 서로의 정리(clearMonsterAnimations)를 지워 모션이 끊긴다.
+    const combat=new HuntCombatAnimator(owner);
+    const animator=combat.monsterAttackAnimator;
     const monsterSelect=document.getElementById('monster-select');
     const patternButtons=document.getElementById('pattern-buttons');
     const stateButtons=document.getElementById('state-buttons');
@@ -339,6 +349,20 @@
       part.health=next?0:part.maxHealth;
       renderParts();
       const broken=[...brokenPartKinds()];
+      if(next){
+        // 반응 종류와 길이는 해부 카탈로그가 정한다(꼬리 절단 나뒹굴기 60틱,
+        // 티가렉스 앞발 대경직 80틱, 비행 중 격추 105틱, 기본 넘어짐 40틱).
+        // 랩에서 숫자를 다시 적으면 실수렵과 달라진다.
+        const airborne=currentState==='airborne';
+        const reaction=HuntMonsterAnatomyCatalog.breakReaction(
+          owner.selectedMonster?.id,part.kind,airborne);
+        combat.triggerMonsterPartBreakReaction(
+          reaction.visualType,reaction.durationTicks,part.kind);
+        labAudio?.playState?.('knockdown');
+        document.getElementById('run-readout').textContent=
+          `${partLabel(part.kind)} 파괴 · ${reaction.label} ${reaction.durationTicks}틱`;
+        return;
+      }
       document.getElementById('run-readout').textContent=broken.length
         ?`부위 파괴 · ${broken.map(partLabel).join(', ')}`
         :'부위 파괴 · 없음';

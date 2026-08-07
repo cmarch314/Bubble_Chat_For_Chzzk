@@ -83,6 +83,20 @@ for (const field of ['brokenPartDamageModifiers', 'weightWhenBroken',
 // 막힌 패턴을 목록에서 지우면 왜 없는지 알 수 없다. 남겨두고 이유를 붙인다.
 assert.match(html, /is-blocked/, '막힌 패턴은 지우지 않고 표시한다');
 
+// 파괴 반응 모션은 실수렵과 같은 코드로 재생해야 한다. 랩에서 따로 구현하면
+// 검수 화면과 실제 화면이 갈라지고, 그게 이번 세션 사고의 형태였다.
+assert.match(html, /HuntCombatAnimator\.js/, '파괴 반응은 전투 애니메이터가 재생한다');
+assert.match(html, /combat\.triggerMonsterPartBreakReaction\(/,
+    '부위를 부수면 실제 반응 모션이 나와야 한다');
+assert.match(html, /HuntMonsterAnatomyCatalog\.breakReaction\(/,
+    '반응 종류와 길이는 해부 카탈로그가 정한다 (랩에서 숫자를 다시 적지 않는다)');
+// 공격 애니메이터를 두 개 만들면 서로의 정리(clearMonsterAnimations)를 지워
+// 모션이 끊긴다. 전투 애니메이터가 들고 있는 것을 그대로 쓴다.
+assert.match(html, /const animator=combat\.monsterAttackAnimator/,
+    '공격 애니메이터 인스턴스는 하나여야 한다');
+assert.match(html, /HuntMonsterPartMaterialCatalog\.js/,
+    '파괴 파편 그림은 소재 카탈로그에서 나온다');
+
 // 부위 패널은 renderCombatChrome이 나중에 주입한다. #lab-parts에 직접 리스너를
 // 걸면 그 시점에 없어서 조용히 넘어가고, 눌러도 아무 일이 없다. 실제로 그랬다.
 assert.doesNotMatch(html, /getElementById\('lab-parts'\)\?\.addEventListener/,
