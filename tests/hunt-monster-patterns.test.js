@@ -101,7 +101,13 @@ const postUltimate = pitySelector.select(monster, catalog.test_monster, {
 assert.ok(!postUltimate.tags.includes('ultimate'), 'an ultimate may occur only once in the same rage phase');
 
 const curated = HuntMonsterPatternCatalog.build({ rathalos: ['placeholder'] }).rathalos;
-assert.strictEqual(curated.length, 12);
+assert.strictEqual(curated.length, 13);
+// 공중 삼연 화염구는 비행 중에만 나온다. flight-only 태그가 빠지면 지상에서도
+// 뽑혀 착지한 몬스터가 공중 모션을 재생한다.
+const aerialTriple = curated.find(pattern => pattern.id === 'rathalos.aerial_triple_fireball');
+assert.ok(aerialTriple, '레우스 비행 3연발 브레스가 목록에 있어야 한다');
+assert.ok(aerialTriple.tags.includes('flight-only'), '공중 전용 태그가 필요하다');
+assert.strictEqual(aerialTriple.impactTimeline.length, 3, '세 발이 각각 착탄해야 한다');
 for (const retired of ['triple_fireball', 'step_fireball', 'air_kick_combo', 'flame_sweep']) {
     assert.ok(!curated.some(pattern => pattern.id === `rathalos.${retired}`),
         `${retired} must stay out of the World-style original Rathalos kit`);

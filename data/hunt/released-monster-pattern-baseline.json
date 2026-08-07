@@ -5,7 +5,7 @@
     { "id": "bazelgeuse", "count": 8, "sha256": "a7865851a29dc8cf9e8d8347dd7fe50435857336112188dc97ed5da8ada06a5c" },
     { "id": "chameleos", "count": 7, "sha256": "9f4f25f47b85191543939bf8e9f58393ef2c4ece76993ce9640093345a70f4c9" },
     { "id": "rathian", "count": 13, "sha256": "95f039a24e1ef7cabc5f5b90e75ff24973d4e5fc773149cd79814f979892cca1" },
-    { "id": "rathalos", "count": 12, "sha256": "60f86b8dbf59c39b428b2eee313c70afe6cff7f24950eda8226385a9d35c4f34" },
+    { "id": "rathalos", "count": 13, "sha256": "8cf112472ffa2bb84eddb9a6afc0922f2e131f6f5959e77b3baca941a31e3c5a" },
     { "id": "diablos", "count": 11, "sha256": "47dce19e214ba3799673471c414307d6eba63e3b3b3ea9421433a9b0b5942d91" },
     { "id": "black_diablos", "count": 11, "sha256": "897f73bb4bc9147b36ff892fee803f0507772398ea40f07e26ab1329ac63344b" },
     { "id": "legiana", "count": 10, "sha256": "c31f72f4883a1a8574d6dd25541e21fe1c0776d24fe5d13ade6aec415cc90308" },
@@ -15,12 +15,12 @@
     { "id": "seething_bazelgeuse", "count": 10, "sha256": "6ae6e7f3ff5b446367325161b40526180ecaab658076ec35db846dcd10b936b0" },
     { "id": "tigrex", "count": 10, "sha256": "ba4f74e99883a8616f14454cb5e601f29db14e8fc5bb30c2a83453b8207b842e" },
     { "id": "brute_tigrex", "count": 12, "sha256": "bffad9c7e1f4b3e1e60ab9530041a42f4a89f0084513f65e757dc7c33e1908fa" },
-    { "id": "nargacuga", "count": 15, "sha256": "89bfd6ba9261af9dfc6caa3ae6971d95edc43e1aaad38b363c14eb72deede6da" },
+    { "id": "nargacuga", "count": 15, "sha256": "3baa8fa191b27a3d13f9f77d3652b02c29170837a9e0741ba30895abc7b7a97a" },
     { "id": "barioth", "count": 6, "sha256": "2fe56ea045906548a7506dc88e407dbc26137092fed95291a24675b3981d9726" },
     { "id": "frostfang_barioth", "count": 8, "sha256": "ee399c00b0d443b825de4a05b95c915fad005c0f73e768d46f8a7838a2ea35e9" },
     { "id": "pink_rathian", "count": 14, "sha256": "b2b732e721da248fc2cb2b58356b50626c9a4604713c4d3f131df1e83a7fe318" },
     { "id": "gold_rathian", "count": 15, "sha256": "d4605901a78245024bae5d7f47f5611c38a262cd9e4e7b5de72680cb70c5e632" },
-    { "id": "azure_rathalos", "count": 13, "sha256": "baaea7f732c82780523c75be1553bf19e3eadf88ace552b9862b36b7530aec87" },
-    { "id": "silver_rathalos", "count": 14, "sha256": "b8e3c917f2cf736acd9b4d1ffd0e947fd6f7bf89d68213cbc3ea8bf9b26e0115" }
+    { "id": "azure_rathalos", "count": 14, "sha256": "0a865e5f0035d607c49e041a7003d264b8f78cd929ab949b7fcce8c9f4862bdb" },
+    { "id": "silver_rathalos", "count": 15, "sha256": "79db82e05ba6456ce0b2d1bd2512c0b48932c2a67089fcf8d5a40c8f48b21feb" }
   ]
 }

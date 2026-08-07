@@ -23,9 +23,17 @@ for (const audioScript of [
     'HuntAudioCatalog.js',
     'hunt-monster-pattern-lab-audio.js'
 ]) {
-    assert.match(html, new RegExp(`${audioScript.replace(/\./g, '\\.')}\\?v=20260803a`),
-        `${audioScript} must share the current audio-route cache revision`);
+    assert.match(html, new RegExp(audioScript.replace(/\./g, '\\.')),
+        `${audioScript} must be loaded by the pattern lab`);
 }
+// 손으로 관리하는 ?v= 토큰은 쓰지 않는다. 프리뷰 서버가 Cache-Control: no-store를
+// 보내므로 매번 새로 읽히고, 토큰은 올리는 것을 잊었을 때 "고쳤는데 화면이 그대로"로
+// 나타난다. 실제로 그 오해에 검수 두 라운드를 썼다. 지금 무엇이 로드됐는지는
+// 우측 상단 CSS 빌드 표시로 눈으로 확인한다.
+assert.doesNotMatch(html, /\.js\?v=/,
+    '패턴 랩은 손관리 캐시 토큰을 쓰지 않는다 (프리뷰 서버가 no-store를 보낸다)');
+assert.match(html, /id="css-build"/,
+    '무엇이 로드됐는지 눈으로 확인할 빌드 표시가 필요하다');
 assert.match(html, /labAudio\?\.playPattern\(pattern,pattern\.runtimeResolvedImpactTimeline\|\|\[\]\)/,
     'preview audio must follow the resolved multi-impact timeline');
 assert.match(html, /onMonsterProjectileLaunchAudio=.*playProjectileLaunch/,

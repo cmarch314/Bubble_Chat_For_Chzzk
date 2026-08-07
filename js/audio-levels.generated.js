@@ -435,6 +435,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3659650,
     "mtimeMs": 1784846476367
   },
+  "AI CMC/그될없.mp4": {
+    "category": "visual",
+    "inputLufs": -13.89,
+    "truePeakDb": -1.16,
+    "gainDb": -4.11,
+    "measurement": "loudnorm",
+    "duration": 1.49,
+    "bytes": 3818533,
+    "mtimeMs": 1785885358893
+  },
   "AI CMC/그래픽.mp4": {
     "category": "visual",
     "inputLufs": -19.14,
@@ -474,6 +484,16 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 3558074,
     "mtimeMs": 1785779331656
   },
+  "AI CMC/그럴리가.mp4": {
+    "category": "visual",
+    "inputLufs": -13.65,
+    "truePeakDb": -1.06,
+    "gainDb": -4.35,
+    "measurement": "loudnorm",
+    "duration": 0.92,
+    "bytes": 2435371,
+    "mtimeMs": 1785885371966
+  },
   "AI CMC/그렇구나.mp4": {
     "category": "visual",
     "inputLufs": -20.94,
@@ -503,6 +523,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.9,
     "bytes": 3204406,
     "mtimeMs": 1785168174388
+  },
+  "AI CMC/그수없.mp4": {
+    "category": "visual",
+    "inputLufs": -16.21,
+    "truePeakDb": -2.44,
+    "gainDb": -1.79,
+    "measurement": "loudnorm",
+    "duration": 1.28,
+    "bytes": 3522886,
+    "mtimeMs": 1785885393702
   },
   "AI CMC/기대가되.mp4": {
     "category": "visual",
@@ -1062,6 +1092,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 2.09,
     "bytes": 4895123,
     "mtimeMs": 1781045657267
+  },
+  "AI CMC/될생각.mp4": {
+    "category": "visual",
+    "inputLufs": -15.01,
+    "truePeakDb": -0.85,
+    "gainDb": -2.99,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 3751422,
+    "mtimeMs": 1785885416156
   },
   "AI CMC/드디어고룡.mp4": {
     "category": "visual",
@@ -1759,6 +1799,66 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.7,
     "bytes": 1784436,
     "mtimeMs": 1784873566917
+  },
+  "AI CMC/색1.mp4": {
+    "category": "visual",
+    "inputLufs": -14,
+    "truePeakDb": 0.04,
+    "gainDb": -4,
+    "measurement": "loudnorm",
+    "duration": 1,
+    "bytes": 2724420,
+    "mtimeMs": 1785885442302
+  },
+  "AI CMC/색2.mp4": {
+    "category": "visual",
+    "inputLufs": -15.23,
+    "truePeakDb": -2.22,
+    "gainDb": -2.77,
+    "measurement": "loudnorm",
+    "duration": 0.73,
+    "bytes": 1992664,
+    "mtimeMs": 1785885451404
+  },
+  "AI CMC/색3.mp4": {
+    "category": "visual",
+    "inputLufs": -14.96,
+    "truePeakDb": -0.82,
+    "gainDb": -3.04,
+    "measurement": "loudnorm",
+    "duration": 0.79,
+    "bytes": 1956999,
+    "mtimeMs": 1785885467695
+  },
+  "AI CMC/색4.mp4": {
+    "category": "visual",
+    "inputLufs": -16.32,
+    "truePeakDb": -1.75,
+    "gainDb": -1.68,
+    "measurement": "loudnorm",
+    "duration": 1.51,
+    "bytes": 3876028,
+    "mtimeMs": 1785885479629
+  },
+  "AI CMC/색5.mp4": {
+    "category": "visual",
+    "inputLufs": -17.22,
+    "truePeakDb": -0.74,
+    "gainDb": -0.78,
+    "measurement": "loudnorm",
+    "duration": 1.45,
+    "bytes": 3643411,
+    "mtimeMs": 1785885490414
+  },
+  "AI CMC/색6.mp4": {
+    "category": "visual",
+    "inputLufs": -15.32,
+    "truePeakDb": -1.46,
+    "gainDb": -2.68,
+    "measurement": "loudnorm",
+    "duration": 0.79,
+    "bytes": 2195532,
+    "mtimeMs": 1785885504929
   },
   "AI CMC/서둘.mp4": {
     "category": "visual",

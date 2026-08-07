@@ -23,6 +23,7 @@ assert.deepStrictEqual(rathalos.map(pattern => pattern.id), [
     'rathalos.rush',
     'rathalos.fireball',
     'rathalos.aerial_fireball',
+    'rathalos.aerial_triple_fireball',
     'rathalos.backstep_fireball',
     'rathalos.claw_dive',
     'rathalos.tail_sweep',

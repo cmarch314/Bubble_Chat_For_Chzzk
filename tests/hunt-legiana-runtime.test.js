@@ -41,7 +41,9 @@ assert.ok(
 
 const behavior = global.HuntMonsterArchetypeCatalog.behavior({ id: 'legiana' });
 assert.strictEqual(behavior.roarSize, 'large');
-assert.strictEqual(behavior.rageDurationTicks, 900);
+// 리오레이아급 장기 분노가 아니라 짧은 쪽(1분)이다. 영구 분노는 어느 몬스터에도
+// 없다 — hunt-rage-cadence.test.js가 전수로 지킨다.
+assert.strictEqual(behavior.rageDurationTicks, 600);
 assert.strictEqual(behavior.rageOpenerTakeoff, true);
 assert.strictEqual(behavior.takeoffPreservesReadyAtb, true);
 assert.deepStrictEqual([...behavior.flightGroundActionRange], [1, 2]);

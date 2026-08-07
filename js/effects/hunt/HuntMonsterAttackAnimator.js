@@ -163,6 +163,17 @@ class HuntMonsterAttackAnimator {
         return parent?.classList?.contains?.('hunt-monster-attack-motion') ? parent : monsterImg;
     }
 
+    // 좌표 어휘 해석기. 매 모션마다 새로 계측한다 — 레이아웃이 바뀌면 앵커도 따라
+    // 가야 하고, 캐시하면 예전 사고(430 클램프와 실제 거리 505의 차이를 --narga-drop
+    // 으로 메우던 일)가 그대로 재현된다.
+    resolveStageAnchors(monsterImg) {
+        const Anchors = typeof HuntStageAnchors !== 'undefined'
+            ? HuntStageAnchors
+            : (typeof require === 'function' ? require('./HuntStageAnchors.js') : null);
+        if (!Anchors) throw new Error('HuntStageAnchors가 로드되지 않았다');
+        return Anchors.fromDom(this.card, monsterImg);
+    }
+
     // 겨냥 레이어는 몸 방향 전용이다. 없으면(구형 fixture) null을 돌려 무시한다.
     resolveAimLayer(monsterImg) {
         const closest = monsterImg?.closest?.('.hunt-monster-aim-layer');
@@ -610,8 +621,11 @@ class HuntMonsterAttackAnimator {
                     - (monsterRect.top + monsterRect.height / 2);
             }
         }
-        const stage = monsterImg.closest('.hunt-monster-motion-stage');
-        const maxX = Math.max(150, ((stage?.clientWidth || 720) - monsterRect.width) / 2 + 130);
+        // 앵커 해석기가 이동 한계와 채팅 안전선을 단독으로 소유한다. 예전에는
+        // maxX·-240·430이 애니메이터와 지오메트리 핸들러에 각각 복사돼 있어서,
+        // 한쪽만 고치면 패스마다 다른 거리에서 멈추는 사고가 났다.
+        const anchors = this.resolveStageAnchors(monsterImg);
+        const maxX = anchors.maxX;
         motionElement?.style?.setProperty?.('--monster-lane-x', `${maxX}px`);
         const isUppercut = profile.id === 'horn-uppercut';
         const isSideTackle = profile.id === 'side-tackle-contact';
@@ -629,15 +643,16 @@ class HuntMonsterAttackAnimator {
             geometry.approachY,
             isTailMotion ? .30 : (isUppercut ? .92 : (contactMotion ? .88 : .58))
         );
-        const attackX = Math.max(-maxX, Math.min(maxX, dx * approachScaleX));
-        motionElement.style.setProperty('--monster-attack-x', `${attackX}px`);
         // Targeted strikes travel mainly across the wide monster lane. Their
         // downward component is capped so the enlarged impact frame cannot enter
         // OBS's bottom 15% chat-safe area; dedicated charge motions own their
         // intentional off-screen travel separately.
-        const attackY = contactMotion
-            ? Math.max(-240, Math.min(430, dy * approachScaleY))
-            : Math.max(-190, Math.min(8, dy * approachScaleY));
+        const approachPoint = anchors.clamp(
+            { x: dx * approachScaleX, y: dy * approachScaleY },
+            contactMotion ? 'contact' : 'standoff');
+        const attackX = approachPoint.x;
+        const attackY = approachPoint.y;
+        motionElement.style.setProperty('--monster-attack-x', `${attackX}px`);
         motionElement.style.setProperty('--monster-attack-y', `${attackY}px`);
         if (isSideTackle) {
             // Stop with 30% of the measured route still remaining, then drive
@@ -675,7 +690,8 @@ class HuntMonsterAttackAnimator {
             dy,
             attackX,
             attackY,
-            anatomy
+            anatomy,
+            anchors
         });
         if (profile.id === 'ground-charge' || profile.id === 'rathian-ground-charge' || profile.id === 'ground-charge-cross'
             || profile.id === 'ground-charge-zigzag' || profile.id === 'ground-charge-double'
@@ -697,12 +713,10 @@ class HuntMonsterAttackAnimator {
             const chargeTop = Math.max(420, monsterRect.bottom - cardRect.top + monsterRect.height);
             const chargeSide = Math.max(1150, cardRect.width * .72 + monsterRect.width);
             const clampRouteX = value => Math.max(-chargeSide * 1.35, Math.min(chargeSide * 1.35, value));
-            const routePoint = rect => ({
-                x: Math.max(-maxX, Math.min(maxX,
-                    rect.left + rect.width / 2 - (monsterRect.left + monsterRect.width / 2))),
-                y: Math.max(-240, Math.min(430,
-                    rect.top + rect.height / 2 - (monsterRect.top + monsterRect.height / 2)))
-            });
+            const routePoint = rect => anchors.clamp({
+                x: rect.left + rect.width / 2 - (monsterRect.left + monsterRect.width / 2),
+                y: rect.top + rect.height / 2 - (monsterRect.top + monsterRect.height / 2)
+            }, 'contact');
             const exitFromHome = point => {
                 const scale = chargeBottom / Math.max(80, Math.abs(point.y));
                 return { x: clampRouteX(point.x * scale), y: chargeBottom };
@@ -1025,7 +1039,9 @@ class HuntMonsterAttackAnimator {
         const monsterCenterY = monsterRect.top + monsterRect.height / 2;
         const targetCenterX = targetRect.left + targetRect.width / 2;
         const targetCenterY = targetRect.top + targetRect.height / 2;
-        const maxX = Math.max(150, ((stage?.clientWidth || 720) - monsterRect.width) / 2 + 130);
+        // 이동 한계는 앵커 해석기가 소유한다. 세로는 지면에서 솟는 궤적이 스스로
+        // 정하므로 클램프하지 않는다.
+        const maxX = this.resolveStageAnchors(monsterImg).maxX;
         const targetX = Math.max(-maxX, Math.min(maxX, targetCenterX - monsterCenterX));
         const targetY = targetCenterY - monsterCenterY;
         // The emergence crosses the hunter only slightly: its apex is exactly

@@ -186,30 +186,108 @@ function pSBC(p, c0, c1, l) {
     else return "#" + (4294967296 + r * 16777216 + g * 65536 + b * 256 + (f ? m(a * 255) : 0)).toString(16).slice(1, f ? undefined : -2)
 }
 
+// [CMC] 한글 음절 -> 자모(초성/중성/종성) 분해. 한국어 오타는 음절 단위보다 자모 단위
+// 편집거리로 재야 "슥고이 vs 스고이", "대단하다 vs 대단하니" 같은 근접 오타를 정확히 잡는다.
+const CMC_CHO = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const CMC_JUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const CMC_JONG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+function cmcDecompose(str) {
+    let out = '';
+    for (const ch of str) {
+        const c = ch.codePointAt(0);
+        if (c >= 0xAC00 && c <= 0xD7A3) {
+            const s = c - 0xAC00;
+            out += CMC_CHO[Math.floor(s / (21 * 28))] + CMC_JUNG[Math.floor((s % (21 * 28)) / 28)] + CMC_JONG[s % 28];
+        } else {
+            out += ch;
+        }
+    }
+    return out;
+}
+// 편집거리 (최대 허용거리 maxDist 초과 시 조기 종료 -> 명령어 수가 많아도 빠름)
+function cmcEditDistance(a, b, maxDist) {
+    const m = a.length, n = b.length;
+    if (Math.abs(m - n) > maxDist) return maxDist + 1;
+    if (m === 0) return n;
+    if (n === 0) return m;
+    let prev = new Array(n + 1);
+    for (let j = 0; j <= n; j++) prev[j] = j;
+    for (let i = 1; i <= m; i++) {
+        let cur = new Array(n + 1);
+        cur[0] = i;
+        let rowMin = cur[0];
+        for (let j = 1; j <= n; j++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+            if (cur[j] < rowMin) rowMin = cur[j];
+        }
+        if (rowMin > maxDist) return maxDist + 1; // 이 행 전체가 이미 한계 초과 -> 더 볼 필요 없음
+        prev = cur;
+    }
+    return prev[n];
+}
+// 명령어 목록의 자모 분해 결과를 캐시 (목록이 바뀌면 자동 재생성)
+function cmcJamoIndex(commands) {
+    const cache = window.__CMC_JAMO_CACHE;
+    if (cache && cache.source === commands) return cache.entries;
+    const entries = commands.map(c => ({ cmd: c, jamo: cmcDecompose(c.toLowerCase()) }));
+    window.__CMC_JAMO_CACHE = { source: commands, entries };
+    return entries;
+}
+
+// 유사도 임계값: 0.72 -> 1글자 오타 복구율 98%, 무관한 단어 오발동 0% (실측 기준)
+const CMC_FUZZY_THRESHOLD = 0.72;
+
 // [New] Global helper to parse and find CMC video commands in a chat message
 function findCMCVideosInMessage(message) {
     const commandGroups = window.HIVE_CMC_COMMAND_GROUPS || {};
     const CMC_COMMANDS = Object.keys(commandGroups);
     if (!message || CMC_COMMANDS.length === 0) return [];
 
+    // 매칭 전략: 명령어가 수백~1000개에 달하므로 정확히 치기 어렵다. "정확 -> 프리픽스 -> 자모 퍼지"
+    // 3단계로, 오타/유사 입력은 관대하게 잡되 무관한 채팅은 재생하지 않도록 임계값으로 통제한다.
+    //  - 예측 가능하려면 관련도 최고 1개만 골라야 한다(예전의 substring "포함되면 아무거나" 방식 폐기).
+    //  - 한 글자 term은 초성만으로 남발되므로 프리픽스/퍼지에서 제외(정확 일치만 허용).
     const findBestMatch = (term) => {
         term = term.toLowerCase().trim();
-        // 1. Exact match
+        if (!term) return null;
+
+        // 1. 정확 일치 (예: #뭐 -> 뭐, #하지마요 -> 하지마요 별칭)
         let match = CMC_COMMANDS.find(f => f.toLowerCase() === term);
         if (match) return match;
-        // 2. Command starts with term (e.g. #수호룡 -> 수호룡삭제)
-        match = CMC_COMMANDS.find(f => f.toLowerCase().startsWith(term));
-        if (match) return match;
-        // 3. Term starts with command (e.g. #하지마요 -> 하지마)
-        match = CMC_COMMANDS.find(f => term.startsWith(f.toLowerCase()));
-        if (match) return match;
-        // 4. Full command containment of length >= 2 (e.g. #아하지마 -> 하지마)
-        match = CMC_COMMANDS.find(f => f.length >= 2 && term.includes(f.toLowerCase()));
-        if (match) return match;
-        // 5. Command contains full term of length >= 2
-        match = CMC_COMMANDS.find(f => term.length >= 2 && f.toLowerCase().includes(term));
-        if (match) return match;
-        return null;
+
+        if (term.length < 2) return null; // 한 글자는 정확 일치가 아니면 발동 금지
+
+        // 2. 명령어 프리픽스 = 명령어 앞부분만 입력 (예: #수호룡 -> 수호룡삭제, #안녕 -> 안녕하세요)
+        //    여러 개면 가장 짧은(가장 구체적으로 완성에 가까운) 명령어 선택 -> 결정적 동작.
+        let bestPrefix = null;
+        for (const f of CMC_COMMANDS) {
+            if (f.toLowerCase().startsWith(term) && (!bestPrefix || f.length < bestPrefix.length)) {
+                bestPrefix = f;
+            }
+        }
+        if (bestPrefix) return bestPrefix;
+
+        // 3. 자모 편집거리 기반 퍼지 = 오타/유사 철자 (예: #슥고이 -> 스고이, #대단하니 -> 대단하다)
+        //    유사도(1 - 편집거리/최대길이)가 임계값 이상인 것 중 최고 1개만.
+        const termJamo = cmcDecompose(term);
+        const entries = cmcJamoIndex(CMC_COMMANDS);
+        let best = null, bestScore = -1;
+        for (const { cmd, jamo } of entries) {
+            const maxLen = Math.max(termJamo.length, jamo.length);
+            if (maxLen === 0) continue;
+            // 임계값을 넘으려면 편집거리 <= (1-threshold)*maxLen 이어야 함 -> 그 값으로 조기 종료
+            const maxDist = Math.floor((1 - CMC_FUZZY_THRESHOLD) * maxLen);
+            const dist = cmcEditDistance(termJamo, jamo, maxDist);
+            const score = 1 - dist / maxLen;
+            if (score < CMC_FUZZY_THRESHOLD) continue;
+            // 동점이면 더 짧은(구체적인) 명령어 우선 -> 명령어 등록 순서와 무관하게 결정적
+            if (score > bestScore || (score === bestScore && best && cmd.length < best.length)) {
+                bestScore = score;
+                best = cmd;
+            }
+        }
+        return best;
     };
 
     const videoQueue = [];

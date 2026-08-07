@@ -48,7 +48,7 @@ const HuntMonsterGeometryChoreography = {
         });
     },
 
-    'rathian-somersault-glide'({ animator, motionElement, pattern, targetCard, targetRect, monsterRect, maxX, dx }) {
+    'rathian-somersault-glide'({ animator, motionElement, pattern, targetCard, targetRect, monsterRect, anchors, dx }) {
         const sequence = Array.isArray(pattern?.runtimeImpactTargetSequence)
             ? pattern.runtimeImpactTargetSequence
             : [];
@@ -60,13 +60,13 @@ const HuntMonsterGeometryChoreography = {
             : targetCard;
         const secondAnchor = secondCard?.querySelector?.('.game-hunt-weapon-img-container') || secondCard;
         const secondRect = secondAnchor?.getBoundingClientRect?.() || targetRect;
-        const glideX = Math.max(-maxX, Math.min(maxX,
-            secondRect.left + secondRect.width / 2 - (monsterRect.left + monsterRect.width / 2)));
-        const glideY = Math.max(-240, Math.min(430,
-            secondRect.top + secondRect.height / 2 - (monsterRect.top + monsterRect.height / 2)));
-        motionElement.style.setProperty('--monster-glide-x', `${glideX}px`);
-        motionElement.style.setProperty('--monster-glide-y', `${glideY}px`);
-        pattern.runtimeGlideFacingDirection = Math.sign(glideX) || Math.sign(dx) || -1;
+        const glide = anchors.clamp({
+            x: secondRect.left + secondRect.width / 2 - (monsterRect.left + monsterRect.width / 2),
+            y: secondRect.top + secondRect.height / 2 - (monsterRect.top + monsterRect.height / 2)
+        }, 'contact');
+        motionElement.style.setProperty('--monster-glide-x', `${glide.x}px`);
+        motionElement.style.setProperty('--monster-glide-y', `${glide.y}px`);
+        pattern.runtimeGlideFacingDirection = Math.sign(glide.x) || Math.sign(dx) || -1;
     },
 
     // 3연 급습은 패스마다 다른 헌터를 노린다. 그런데 CSS 애니메이션은 하나뿐이라
@@ -74,7 +74,7 @@ const HuntMonsterGeometryChoreography = {
     // 패스별 좌표를 --narga-pass1..3-x/y로 따로 넘겨, 각 접촉 프레임이 자기
     // 표적을 참조하게 한다. 시퀀스가 없으면(패턴 랩 단독 재생 등) 기본 표적으로
     // 폴백하므로 종전 동작 그대로다.
-    'nargacuga-leap-ambush-triple'({ animator, motionElement, pattern, monsterRect, maxX, attackX, attackY }) {
+    'nargacuga-leap-ambush-triple'({ animator, motionElement, pattern, monsterRect, anchors, attackX, attackY }) {
         const sequence = Array.isArray(pattern?.runtimeImpactTargetSequence)
             ? pattern.runtimeImpactTargetSequence
             : [];
@@ -88,21 +88,22 @@ const HuntMonsterGeometryChoreography = {
                 : null;
             const anchor = liveCard?.querySelector?.('.game-hunt-weapon-img-container') || liveCard;
             const rect = anchor?.getBoundingClientRect?.();
-            // 배율과 클램프는 playPatternMotion과 같아야 한다. 다르게 잡으면
-            // 1타만 다른 거리에서 멈춘다. 패턴이 animationGeometry로 접근 배율을
-            // 덮어썼다면 그 값을 그대로 따라간다.
+            // 배율은 playPatternMotion과 같아야 한다. 다르게 잡으면 1타만 다른
+            // 거리에서 멈춘다. 클램프는 앵커 해석기 하나가 소유하므로 여기서
+            // 다시 적지 않는다. 패턴이 animationGeometry로 접근 배율을 덮어썼다면
+            // 그 값을 그대로 따라간다.
             const approachX = Number.isFinite(Number(pattern?.animationGeometry?.approachX))
                 ? Number(pattern.animationGeometry.approachX) : .92;
             const approachY = Number.isFinite(Number(pattern?.animationGeometry?.approachY))
                 ? Number(pattern.animationGeometry.approachY) : .88;
-            const x = rect
-                ? Math.max(-maxX, Math.min(maxX, (rect.left + rect.width / 2 - monsterCenterX) * approachX))
-                : attackX;
-            const y = rect
-                ? Math.max(-240, Math.min(430, (rect.top + rect.height / 2 - monsterCenterY) * approachY))
-                : attackY;
-            motionElement.style.setProperty(`--narga-pass${pass + 1}-x`, `${Math.round(x)}px`);
-            motionElement.style.setProperty(`--narga-pass${pass + 1}-y`, `${Math.round(y)}px`);
+            const point = rect
+                ? anchors.clamp({
+                    x: (rect.left + rect.width / 2 - monsterCenterX) * approachX,
+                    y: (rect.top + rect.height / 2 - monsterCenterY) * approachY
+                }, 'contact')
+                : { x: attackX, y: attackY };
+            motionElement.style.setProperty(`--narga-pass${pass + 1}-x`, `${Math.round(point.x)}px`);
+            motionElement.style.setProperty(`--narga-pass${pass + 1}-y`, `${Math.round(point.y)}px`);
         }
     },
 
@@ -113,28 +114,27 @@ const HuntMonsterGeometryChoreography = {
     // 축만 바꿔 두 번 돈다(회전 사이에 이동이 없다). 그래서 좌표도 한 벌뿐이다.
     // 예전에는 인접 두 명의 중점으로 두 번 이동했는데, 이동이 사라지면서 그 계산도
     // 필요 없어졌다. 좌우 도달은 회전 축(하단 좌/우)이 만든다.
-    'nargacuga-twin-pivot-spin'({ animator, motionElement, pattern, monsterRect, targetRect }) {
+    'nargacuga-twin-pivot-spin'({ motionElement, pattern, monsterRect, targetRect, anchors }) {
         const sequence = Array.isArray(pattern?.runtimeImpactTargetSequence)
             ? pattern.runtimeImpactTargetSequence
             : [];
-        const monsterCenterX = monsterRect.left + monsterRect.width / 2;
-        const monsterCenterY = monsterRect.top + monsterRect.height / 2;
         // 주 표적은 두 패스에 모두 들어가는 첫 번째 대상이다.
         const primaryIndex = Number(pattern?.runtimeSpinPrimaryIndex
             ?? (Array.isArray(sequence[0]) ? sequence[0][0] : sequence[0]));
-        const card = Number.isInteger(primaryIndex)
-            ? animator.card?.querySelector?.(`#fight-card-${primaryIndex}`)
-            : null;
-        const anchor = card?.querySelector?.('.game-hunt-weapon-img-container') || card;
-        const rect = anchor?.getBoundingClientRect?.() || targetRect;
-        const x = Math.max(-960, Math.min(960,
-            rect.left + rect.width / 2 - monsterCenterX));
         // "바로 위"에 서도록 표적 중심보다 한 몸 정도 올려 잡는다. 표적 위에 겹쳐
         // 서면 꼬리가 도는 반경이 헌터 카드에 파묻혀 보이지 않는다.
-        const y = Math.max(-240, Math.min(430,
-            rect.top + rect.height / 2 - monsterCenterY - 150));
-        motionElement.style.setProperty('--monster-attack-x', `${Math.round(x)}px`);
-        motionElement.style.setProperty('--monster-attack-y', `${Math.round(y)}px`);
+        // 표적이 없는 단독 재생(패턴 랩)에서는 계측한 표적 사각형으로 떨어진다.
+        let point;
+        try {
+            point = anchors.resolve(`above:hunter:${primaryIndex} 150`, { bounds: 'pivot' });
+        } catch {
+            point = anchors.clamp({
+                x: targetRect.left + targetRect.width / 2 - (monsterRect.left + monsterRect.width / 2),
+                y: targetRect.top + targetRect.height / 2 - (monsterRect.top + monsterRect.height / 2) - 150
+            }, 'pivot');
+        }
+        motionElement.style.setProperty('--monster-attack-x', `${point.x}px`);
+        motionElement.style.setProperty('--monster-attack-y', `${point.y}px`);
     },
 
     // 평상시 1회전도 주 표적 바로 위에서 도는 것은 같다. 다만 방향이 하나뿐이라,
@@ -184,7 +184,7 @@ const HuntMonsterGeometryChoreography = {
         motionElement.style.setProperty('--narga-hop-dir', Math.random() < 0.5 ? '-1' : '1');
     },
 
-    'bazel-carpet-bombing'({ animator, motionElement, pattern, monsterRect, targetCard, targetAnchor, maxX, attackX, attackY }) {
+    'bazel-carpet-bombing'({ animator, motionElement, pattern, monsterRect, targetCard, targetAnchor, anchors, attackX, attackY }) {
         const cardRect = animator.card.getBoundingClientRect();
         const direction = pattern?.runtimeSweepDirection === 'right-to-left' ? -1 : 1;
         const sideDistance = Math.max(1150, cardRect.width * .72 + monsterRect.width);
@@ -195,10 +195,12 @@ const HuntMonsterGeometryChoreography = {
             || diveCard
             || targetAnchor;
         const diveRect = diveAnchor.getBoundingClientRect();
-        const diveX = Math.max(-maxX, Math.min(maxX,
-            diveRect.left + diveRect.width / 2 - (monsterRect.left + monsterRect.width / 2)));
-        const diveY = Math.max(-240, Math.min(430,
-            diveRect.top + diveRect.height / 2 - (monsterRect.top + monsterRect.height / 2)));
+        const dive = anchors.clamp({
+            x: diveRect.left + diveRect.width / 2 - (monsterRect.left + monsterRect.width / 2),
+            y: diveRect.top + diveRect.height / 2 - (monsterRect.top + monsterRect.height / 2)
+        }, 'contact');
+        const diveX = dive.x;
+        const diveY = dive.y;
         motionElement.style.setProperty('--monster-charge-bottom',
             `${Math.max(620, cardRect.bottom - monsterRect.top + monsterRect.height)}px`);
         motionElement.style.setProperty('--monster-carpet-opening-x', `${attackX}px`);
