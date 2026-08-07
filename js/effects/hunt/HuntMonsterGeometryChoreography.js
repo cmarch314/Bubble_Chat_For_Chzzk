@@ -137,26 +137,6 @@ const HuntMonsterGeometryChoreography = {
         motionElement.style.setProperty('--monster-attack-y', `${Math.round(y)}px`);
     },
 
-    // 칼날깃 연격은 "레인을 가로지르는 돌진"이다. 예전에는 집에서 표적으로 대각선
-    // 하강한 뒤 아래로 빠져, 돌진이 아니라 내리꽂기로 보였다. 표적 반대편 화면 밖에서
-    // 출발해 표적의 높이를 그대로 유지한 채 수평으로 통과하고 반대쪽으로 빠진다.
-    //
-    // 퇴장 지점은 CSS가 출발점과 접촉점만으로 계산한다(등속 유지). 여기서는 표적
-    // 반대편 화면 밖 출발점과 달릴 높이만 정한다.
-    'nargacuga-flank-charge'({ motionElement, pattern, monsterRect, targetRect }) {
-        const monsterCenterX = monsterRect.left + monsterRect.width / 2;
-        const monsterCenterY = monsterRect.top + monsterRect.height / 2;
-        const hitX = targetRect.left + targetRect.width / 2 - monsterCenterX;
-        const laneY = Math.max(-240, Math.min(430,
-            targetRect.top + targetRect.height / 2 - monsterCenterY));
-        // 표적이 있는 쪽의 반대편에서 출발해야 파티를 가로지른다.
-        const direction = Math.sign(hitX) || -1;
-        motionElement.style.setProperty('--narga-run-start-x', `${Math.round(hitX - direction * 1000)}px`);
-        motionElement.style.setProperty('--narga-run-y', `${Math.round(laneY)}px`);
-        // 진행 방향은 출발점에서 표적을 향한다.
-        pattern.runtimeChargeFacingDirection = direction;
-    },
-
     // 평상시 1회전도 주 표적 바로 위에서 도는 것은 같다. 다만 방향이 하나뿐이라,
     // 어느 쪽 이웃을 고른 패스인지에 따라 회전 방향과 축이 함께 뒤집힌다.
     // +1이면 하단 좌측 축 · 시계 회전(왼쪽까지), -1이면 하단 우측 축 · 반시계(오른쪽까지).
@@ -194,11 +174,14 @@ const HuntMonsterGeometryChoreography = {
     },
 
     // 견제 도약은 좌/우를 무작위로 고른다. 방향은 패스마다 반대로 뒤집힌다.
+    // 견제 도약은 한쪽 방향으로만 돈다. 거리는 양수로 고정하고 방향만 변수로 넘겨,
+    // 키프레임이 두 번 모두 같은 부호를 쓰게 한다. 예전에는 거리 자체에 부호를 실어
+    // 2회차를 반대 부호로 적었고, 그래서 갔다 되돌아오는 왕복이 됐다.
     'nargacuga-stance-hop'({ animator, motionElement, monsterRect }) {
         const cardRect = animator.card.getBoundingClientRect();
         const lane = Math.max(220, cardRect.width * .22 + monsterRect.width * .5);
-        const direction = Math.random() < 0.5 ? -1 : 1;
-        motionElement.style.setProperty('--monster-lane-x', `${Math.round(direction * lane)}px`);
+        motionElement.style.setProperty('--monster-lane-x', `${Math.round(lane)}px`);
+        motionElement.style.setProperty('--narga-hop-dir', Math.random() < 0.5 ? '-1' : '1');
     },
 
     'bazel-carpet-bombing'({ animator, motionElement, pattern, monsterRect, targetCard, targetAnchor, maxX, attackX, attackY }) {

@@ -1192,12 +1192,15 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     // 꼬리는 상단에서 좌상단(←)을 향해 뻗어 있다. 그 꼬리로 찌르듯 135도 반시계로
     // 쫀득하게 돌려 꽂고, 같은 경로를 역회전으로 되짚어 복귀한다.
     ['nargacuga.tail_whip', '꼬리 후려치기', 'area', 0.33, {
-        sourceMoveNameJA: '尻尾薙ぎ払い', minTargets: 2, maxTargets: 3, windup: 5, recovery: 1,
+        sourceMoveNameJA: '尻尾薙ぎ払い', minTargets: 2, maxTargets: 2, windup: 5, recovery: 1,
         forbiddenStates: ['enraged'],
         tags: ['area', 'tail', 'ground-only', 'target-contact', 'stance-melee'],
         monsterAtbCost: 0.52, movement: { ticks: 24 },
         // 지정한 대상을 겨눠 찌르는 기술이라 좌/우 절반 고정 분배(left-right-halves)를
         // 쓰면 안 된다. 그 모드는 표적을 무시하고 늘 1·2 / 3·4로만 나눈다.
+        // 모드를 아예 비워두면 기본 레인 창(defaultTargets)이 그대로 쓰여, 고른 표적과
+        // 상관없는 사람들이 맞는다. 주 표적과 이웃 하나를 훑는 1패스로 고정한다.
+        targeting: { mode: 'primary-flank-passes', passCount: 1 },
         impactTimeline: [{ atTicks: 15, damageScale: 1 }],
         // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
         animationGeometry: { approachX: 1 },
@@ -1223,11 +1226,11 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         sourceMoveNameJA: '棘尻尾叩きつけ', maxTargets: 1, windup: 9, recovery: 30,
         forbiddenStates: ['enraged'],
         tags: ['physical', 'tail', 'target-contact', 'strong', 'stance-melee'],
-        monsterAtbCost: 0.72, movement: { ticks: 30 },
+        monsterAtbCost: 0.72, movement: { ticks: 55 },
         impactTimeline: [{ atTicks: 22, damageScale: 1 }],
         // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
         animationGeometry: { approachX: 1 },
-        animationProfile: 'nargacuga-turn-tail-slam', animationDurationMs: 3000,
+        animationProfile: 'nargacuga-turn-tail-slam', animationDurationMs: 5500,
         originPart: 'tail',
         whiffReaction: { kind: 'stuck', durationTicks: 30 },
         statusBlockedWhenBroken: ['tail'],
@@ -1371,7 +1374,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         sourceMoveNameJA: '激昂尻尾連続叩きつけ', minTargets: 1, maxTargets: 2,
         windup: 11, recovery: 30, state: 'enraged', cooldown: 58, weight: 0.52,
         tags: ['physical', 'tail', 'target-contact', 'multi-hit', 'strong'],
-        monsterAtbCost: 0.88, movement: { ticks: 54 },
+        monsterAtbCost: 0.88, movement: { ticks: 80 },
         targeting: { mode: 'independent-passes', passCount: 2 },
         impactTimeline: [
             { atTicks: 26, targetMode: 'sequential', damageScale: 1 },
@@ -1379,7 +1382,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         ],
         // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
         animationGeometry: { approachX: 1 },
-        animationProfile: 'nargacuga-turn-tail-slam-double', animationDurationMs: 5400,
+        animationProfile: 'nargacuga-turn-tail-slam-double', animationDurationMs: 8000,
         originPart: 'tail',
         whiffReaction: { kind: 'stuck', durationTicks: 30 },
         statusBlockedWhenBroken: ['tail'], brokenPartTargetCaps: { tail: 1 },
