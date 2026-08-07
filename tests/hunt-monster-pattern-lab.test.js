@@ -58,6 +58,35 @@ assert.match(html, /class="game-hunt-weapon-name"/,
 // 한쪽을 잊으면 "검수 화면과 실제 화면이 다르다"가 다시 생긴다.
 assert.match(html, /class="hunt-monster-pose-layer"/,
     'the preview must carry the production pose layer');
+
+// ---- 부위 파괴는 상태와 나란히 실험할 수 있어야 한다 ----
+//
+// 부위 목록을 하드코딩하면(예전에는 머리/좌익/우익/꼬리였다) 어느 몬스터를 골라도
+// 같은 넷이 보이고 파괴 실험 자체가 불가능하다. 티가렉스의 앞발처럼 몬스터마다
+// 다른 부위는 실제 해부 데이터에서만 나온다.
+assert.doesNotMatch(html, /<span class="lab-part"><span>🗿<\/span><b>머리<\/b><\/span>/,
+    '부위 목록을 하드코딩하면 몬스터별 부위를 실험할 수 없다');
+assert.match(html, /HuntMonsterAnatomyCatalog\.createPartState/,
+    '부위는 실제 해부 데이터에서 그려야 한다');
+assert.match(html, /function togglePart\(/, '눌러서 부위를 파괴할 수 있어야 한다');
+
+// 파괴 판정 의미가 HuntMonsterPatternSelector와 같아야 한다. 다르면 랩에서만
+// 되는/안 되는 패턴이 생기고, 그게 이번 세션 사고의 형태였다.
+assert.match(html, /part\.broken\|\|part\.severed/,
+    '파괴 집합은 broken 또는 severed로 잡아야 한다 (선택기와 같은 규칙)');
+assert.match(html, /forbiddenWhenBroken/, '파괴로 막히는 패턴을 표시해야 한다');
+for (const field of ['brokenPartDamageModifiers', 'weightWhenBroken',
+    'brokenPartTargetCaps', 'statusBlockedWhenBroken']) {
+    assert.match(html, new RegExp(field),
+        `${field}의 영향을 검수 화면에서 읽을 수 있어야 한다`);
+}
+// 막힌 패턴을 목록에서 지우면 왜 없는지 알 수 없다. 남겨두고 이유를 붙인다.
+assert.match(html, /is-blocked/, '막힌 패턴은 지우지 않고 표시한다');
+
+// 부위 패널은 renderCombatChrome이 나중에 주입한다. #lab-parts에 직접 리스너를
+// 걸면 그 시점에 없어서 조용히 넘어가고, 눌러도 아무 일이 없다. 실제로 그랬다.
+assert.doesNotMatch(html, /getElementById\('lab-parts'\)\?\.addEventListener/,
+    '나중에 주입되는 노드에 직접 리스너를 걸면 조용히 실패한다');
 assert.doesNotMatch(html, /class="hunt-monster-facing-layer">\s*<div class="hunt-monster-attack-motion">/,
     'flipping a travel wrapper mirrors its coordinates and teleports the monster across the board');
 assert.match(html, /HUNT_RELEASED_MONSTER_DATA/,

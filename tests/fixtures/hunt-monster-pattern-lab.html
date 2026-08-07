@@ -93,9 +93,23 @@
     .lab-vitals .hunt-monster-atb-track>i{width:72%}
     .lab-aux{top:112px!important;left:34px!important;right:34px!important}
     .lab-parts{display:flex;gap:8px;padding:7px 10px;min-height:82px}
-    .lab-part{display:grid;grid-template-rows:48px 20px;place-items:center;width:58px;color:#fff;font-weight:900}
+    .lab-part{display:grid;grid-template-rows:48px 20px;place-items:center;width:58px;color:#fff;font-weight:900;
+      padding:0;border:0;background:none;cursor:pointer;transition:filter .12s,opacity .12s}
     .lab-part>span{font-size:38px;filter:drop-shadow(0 3px 5px #000)}
     .lab-part>b{width:100%;border:1px solid #b79555;border-radius:5px;background:#050504e8;color:#fff4d2;font-size:13px;line-height:19px;text-align:center}
+    .lab-part:hover>b{border-color:#ffe69d;color:#fff}
+    /* 파괴된 부위는 실수렵의 .is-broken과 같은 읽는 법을 쓴다 — 색이 빠지고
+       어두워진다. 라벨에 ✖를 붙여 색만으로 구분하지 않게 한다. */
+    .lab-part.is-broken>span{filter:grayscale(.9) brightness(.55) drop-shadow(0 3px 4px #000)}
+    .lab-part.is-broken>b{border-color:#a44;background:#2a0d0de8;color:#ff9d9d}
+    .lab-part.is-broken>b::after{content:" ✖"}
+    /* 파괴할 수 없는 부위는 누를 수 없다. 눌리는데 아무 일도 안 나면 고장으로 읽힌다. */
+    .lab-part[disabled]{cursor:default;opacity:.42}
+    .lab-part[disabled]>b{border-color:#5a5346;color:#b2ab9b}
+    /* 파괴 때문에 못 나오는 패턴은 목록에서 지우지 않고 남긴다. 사라지면 왜
+       없는지 알 수 없다. 남겨두고 이유를 title에 적는다. */
+    .pattern-btn.is-blocked{opacity:.4;border-color:#7a4444;background:#241414;text-decoration:line-through}
+    .pattern-btn.is-weakened{border-color:#b98a4a}
     #monster-showcase-panel{position:absolute!important;z-index:20!important;top:132px;left:34px;right:34px;width:auto!important;height:430px;min-height:0!important;margin:0!important;padding:0!important;display:grid!important;place-items:center;overflow:visible;background:transparent!important;border:0!important;box-shadow:none!important}
     .hunt-monster-motion-stage{width:min(1320px,82vw)!important;height:410px!important}
     .hunt-monster-attack-motion{width:380px;height:380px}
@@ -249,6 +263,93 @@
       if(!fromPattern)labAudio?.playState(state);
       if(!fromPattern)document.getElementById('run-readout').textContent=`상태 · ${spec[1]}`;
     }
+    // ── 부위 파괴 ────────────────────────────────────────────────────────────
+    // 상태(분노·탈진 등)와 나란히 다루는 또 하나의 전투 상태다. 실수렵에서는
+    // 헌터가 때려서 부수지만, 검수에서는 눌러서 부순다.
+    //
+    // 파괴 판정 의미는 HuntMonsterPatternSelector와 같아야 한다. 다르게 잡으면
+    // 랩에서만 되는/안 되는 패턴이 생기고, 그게 이번 세션 사고의 형태였다.
+    //   - 파괴 집합은 part.kind를 소문자로 (broken 또는 severed)
+    //   - forbiddenWhenBroken 이 걸리면 선택 후보에서 빠진다
+    //   - weightWhenBroken / brokenPartDamageModifiers / brokenPartTargetCaps 는
+    //     빠지지는 않고 값만 바뀐다
+    const PART_LABELS={head:'머리',torso:'몸통',tail:'꼬리','left-wing':'좌익','right-wing':'우익',
+      'left-horn':'좌뿔','right-horn':'우뿔','left-leg':'좌각','right-leg':'우각',
+      'left-front-leg':'좌앞발','right-front-leg':'우앞발','left-foreleg':'좌앞발','right-foreleg':'우앞발',
+      back:'등',chest:'가슴',neck:'목',wing:'날개',leg:'다리'};
+    const PART_ICONS={head:'🗿',torso:'🫀',tail:'➰',back:'🛡️',chest:'🫀',neck:'🦴'};
+    const partIcon=kind=>PART_ICONS[kind]||(/wing/.test(kind)?'🪽':/horn/.test(kind)?'🦌':/leg|foot|claw/.test(kind)?'🦶':'🔩');
+    const partLabel=kind=>PART_LABELS[kind]||kind;
+    let partState=[];
+
+    function brokenPartKinds(){
+      return new Set(partState.filter(part=>part.broken||part.severed)
+        .map(part=>String(part.kind||part.id||'').toLowerCase()));
+    }
+    function renderParts(){
+      const host=document.getElementById('lab-parts');
+      if(!host)return;
+      host.replaceChildren(...partState.map(part=>{
+        const slot=document.createElement('button');
+        slot.type='button';
+        slot.className='lab-part';
+        slot.dataset.partKind=part.kind;
+        const canBreak=part.breakable||part.severable;
+        slot.disabled=!canBreak;
+        slot.classList.toggle('is-broken',Boolean(part.broken||part.severed));
+        slot.title=canBreak
+          ?`${partLabel(part.kind)} · 눌러서 ${part.broken?'복구':(part.severable?'절단':'파괴')}`
+          :`${partLabel(part.kind)} · 파괴 불가`;
+        slot.innerHTML=`<span>${partIcon(part.kind)}</span><b>${partLabel(part.kind)}</b>`;
+        return slot;
+      }));
+      updatePatternAvailability();
+    }
+    // 파괴 때문에 못 나오는 패턴을 목록에서 지우지 않는다. 사라지면 왜 없는지
+    // 알 수 없다. 남겨두고 이유를 붙인다.
+    function updatePatternAvailability(){
+      const broken=brokenPartKinds();
+      const patterns=HUNT_MONSTER_PATTERN_OVERRIDES[owner.selectedMonster?.id]||[];
+      patternButtons.querySelectorAll('.pattern-btn').forEach(button=>{
+        const pattern=patterns.find(entry=>entry.id===button.dataset.pattern);
+        if(!pattern)return;
+        const blockers=(pattern.forbiddenWhenBroken||[]).filter(part=>broken.has(part));
+        const notes=[];
+        for(const [part,modifier] of Object.entries(pattern.brokenPartDamageModifiers||{}))
+          if(broken.has(part))notes.push(`${partLabel(part)} 파괴 → 위력 x${modifier}`);
+        for(const [part,modifier] of Object.entries(pattern.weightWhenBroken||{}))
+          if(broken.has(part))notes.push(`${partLabel(part)} 파괴 → 선택 가중치 x${modifier}`);
+        for(const [part,cap] of Object.entries(pattern.brokenPartTargetCaps||{}))
+          if(broken.has(part))notes.push(`${partLabel(part)} 파괴 → 최대 ${cap}명`);
+        for(const part of (pattern.statusBlockedWhenBroken||[]))
+          if(broken.has(part))notes.push(`${partLabel(part)} 파괴 → 상태이상 없음`);
+        button.classList.toggle('is-blocked',blockers.length>0);
+        button.classList.toggle('is-weakened',blockers.length===0&&notes.length>0);
+        button.title=[`${pattern.id} · ${pattern.type}`,
+          blockers.length?`${blockers.map(partLabel).join('·')} 파괴로 사용 불가`:'',
+          ...notes].filter(Boolean).join('\n');
+      });
+    }
+    function togglePart(kind){
+      const part=partState.find(entry=>String(entry.kind)===kind);
+      if(!part||!(part.breakable||part.severable))return;
+      const next=!(part.broken||part.severed);
+      part.broken=next;
+      if(part.severable)part.severed=next;
+      part.health=next?0:part.maxHealth;
+      renderParts();
+      const broken=[...brokenPartKinds()];
+      document.getElementById('run-readout').textContent=broken.length
+        ?`부위 파괴 · ${broken.map(partLabel).join(', ')}`
+        :'부위 파괴 · 없음';
+    }
+    function resetParts(){
+      const profile=HuntMonsterAnatomyCatalog.find(owner.selectedMonster);
+      partState=HuntMonsterAnatomyCatalog.createPartState(profile);
+      owner.monsterPartState=partState;
+      renderParts();
+    }
+
     function renderStateButtons(){
       stateButtons.replaceChildren(...stateSpecs.map(([state,label,icon])=>{
         const button=document.createElement('button');
@@ -364,6 +465,7 @@
         button.dataset.requiredState=pattern.requiredState||'';button.dataset.flight=String(pattern.tags?.includes('flight-only')||false);
         button.textContent=pattern.name;button.title=`${pattern.id} · ${pattern.type}`;return button;
       }));
+      resetParts();
       activePatternId='';applyState('normal',true);updateTargetSelection([]);
       document.getElementById('run-readout').textContent='패턴을 선택하세요';
     }
@@ -381,12 +483,10 @@
         </div>
         <div class="hunt-monster-aux-rail lab-aux">
           <section class="hunt-monster-aux-panel hunt-monster-parts-panel">
-            <div class="lab-parts">
-              <span class="lab-part"><span>🗿</span><b>머리</b></span>
-              <span class="lab-part"><span>🪽</span><b>좌익</b></span>
-              <span class="lab-part"><span>🪽</span><b>우익</b></span>
-              <span class="lab-part"><span>➰</span><b>꼬리</b></span>
-            </div>
+            <!-- 부위는 몬스터 실제 해부 데이터에서 그린다. 예전에는 머리/좌익/
+                 우익/꼬리를 하드코딩해 둬서, 어느 몬스터를 골라도 같은 넷이
+                 보이고 파괴 실험을 할 수 없었다. 클릭하면 파괴가 토글된다. -->
+            <div class="lab-parts" id="lab-parts"></div>
           </section>
           <section class="hunt-monster-aux-panel hunt-monster-utility-panel">
             <div class="hunt-monster-corner-hud"><span class="hunt-monster-hud-chip">🛒 3</span><span class="hunt-monster-hud-chip">⏱ 07:32</span></div>
@@ -432,6 +532,13 @@
     monsterSelect.addEventListener('change',event=>showMonster(event.target.value));
     patternButtons.addEventListener('click',event=>{const button=event.target.closest('.pattern-btn');if(button)playPattern(button.dataset.pattern)});
     stateButtons.addEventListener('click',event=>{const button=event.target.closest('.state-btn');if(button)applyState(button.dataset.state)});
+    // 부위 패널은 renderCombatChrome이 나중에 주입한다. #lab-parts에 직접 걸면
+    // 이 줄이 도는 시점에는 아직 없어서 ?.가 조용히 넘어가고, 눌러도 아무 일이
+    // 일어나지 않는다. 항상 있는 조상에 위임한다.
+    document.addEventListener('click',event=>{
+      const slot=event.target.closest?.('.lab-part');
+      if(slot&&!slot.disabled)togglePart(slot.dataset.partKind);
+    });
     targetButtons.addEventListener('click',event=>{const button=event.target.closest('.target-btn');if(!button)return;targetMode=button.dataset.target;updateTargetSelection([],null);if(activePatternId)playPattern(activePatternId)});
     addEventListener('load',initialize);
   </script>
