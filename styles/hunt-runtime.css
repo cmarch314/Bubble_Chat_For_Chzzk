@@ -1,7 +1,7 @@
 /* 로드된 CSS를 눈으로 확인하기 위한 표식. 모션을 고칠 때마다 함께 올린다.
    패턴 랩 우측 상단에 이 값이 표시되므로, "고쳤는데 화면이 그대로"일 때
    CSS가 안 온 것인지 모션이 잘못된 것인지 즉시 갈린다. */
-:root { --hunt-css-build: "narga-2026-08-07b"; }
+:root { --hunt-css-build: "narga-2026-08-07c"; }
 /* Loaded on first hunt by HuntRuntimeLoader. */
 /* ==========================================
    Monster Hunter Hunt Mini-game (수렵 미니게임)
@@ -1665,11 +1665,14 @@
    여전히 rig 기본 축(.hunt-monster-attack-motion[data-monster-rig])에 밀린다. */
 .monster-motion-nargacuga-turn-tail-slam.monster-motion-nargacuga-turn-tail-slam,
 .monster-motion-nargacuga-turn-tail-slam-double.monster-motion-nargacuga-turn-tail-slam-double {
-    transform-origin:20% 12%;
+    /* 응급 처치. 컨테이너를 모서리 축으로 돌리면 몸통이 지름 368px 호를 그린다.
+       꼬리를 표적에 맞추는 보정은 근본적으로 컨테이너 회전으로는 불가능하다.
+       재설계 전까지 몸 밑동을 축으로 제자리에서 뒤도는 그림만 유지한다. */
+    transform-origin:50% 82%;
     --narga-standoff:1;
     --narga-drop:75px;
-    --narga-tail-comp-x:114px;
-    --narga-tail-comp-y:144px;
+    --narga-tail-comp-x:0px;
+    --narga-tail-comp-y:0px;
     --narga-slam-side:1;
     --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff));
     --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop));
