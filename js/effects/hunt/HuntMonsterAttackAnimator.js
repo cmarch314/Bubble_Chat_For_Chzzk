@@ -686,13 +686,11 @@ class HuntMonsterAttackAnimator {
 
         // 자세 키프레임의 축은 부위 이름이다. 여기서 백분율로 푼다 — 반전은
         // 해석 시점에 반영된다(규칙 2). 저작자는 좌우 두 벌을 적지 않는다.
-        const facingAt = offset => (built.facing
-            .filter(step => step.offset <= offset).pop()?.direction) ?? 1;
         const poseFrames = built.pose.map(frame => {
             const keyframe = { offset: frame.offset, transform: frame.transform };
             if (frame.filter) keyframe.filter = frame.filter;
             const pivot = frame.pivot
-                ? this.resolvePosePivot(frame.pivot, facingAt(frame.offset))
+                ? this.resolvePosePivot(frame.pivot, frame.facing ?? 1)
                 : null;
             if (pivot) keyframe.transformOrigin = `${pivot.xPercent.toFixed(2)}% ${pivot.yPercent.toFixed(2)}%`;
             return keyframe;

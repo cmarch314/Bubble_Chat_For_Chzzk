@@ -25,7 +25,10 @@ const HuntMotionPoses = {
     BASE: Object.freeze({
         // 기준점. 모든 패턴의 시작과 끝이다. 복귀 비트가 이 자세로 끝나면
         // 이미지가 항상 똑바로 선다.
-        idle: Object.freeze({ squash: 1.000 }),
+        // resetRotation은 "똑바로 선다"를 뜻한다. 회전은 비트를 넘어 유지되므로
+        // (꼬리가 박힌 채 버티는 구간이 회전을 물고 있어야 한다), 이걸 풀어주는
+        // 자세가 없으면 몬스터가 뒤집힌 채로 제자리에 돌아간다.
+        idle: Object.freeze({ squash: 1.000, resetRotation: true }),
 
         // 스프링을 압축하는 순간. 이 자세가 빠지면 도약이 "튀어오르는" 대신
         // "미끄러지는" 것으로 보인다. 3연 급습 2·3타가 어색했던 원인이다.

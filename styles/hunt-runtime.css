@@ -1653,14 +1653,18 @@
        --narga-hit-x/y가 곧 타격 지점이 된다. */
     transform-origin:50% 88%;
 }
-.monster-motion-nargacuga-leap-ambush { animation:monster-motion-nargacuga-leap-ambush var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:100px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+/* 후방 Leap 계열(급습 · 3연 급습 · 연속 런지 1타 · 화면 밖 돌진)은 헌터 중앙을
+   노린다. --narga-drop은 접촉 지점을 헌터 중심보다 아래로 미는 값이라 0이다.
+   꼬리 기술의 75px과 성격이 다르다 — 저쪽은 세로 클램프(430)와 실제 거리(약
+   505)의 차이를 메우는 보정이고, 이쪽은 어디를 노리는지의 선택이다. */
+.monster-motion-nargacuga-leap-ambush { animation:monster-motion-nargacuga-leap-ambush var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 /* 3연 급습만 접촉 좌표를 세 벌 갖는다. --narga-passN-x/y는 geometry choreography가
    패스별 표적에서 계산해 넣고, 없으면 기본 표적(--monster-attack-x/y)으로 폴백한다.
    standoff/drop 보정은 단발 급습과 동일하게 여기서 한 번만 적용한다. */
 .monster-motion-nargacuga-leap-ambush-triple {
     animation:monster-motion-nargacuga-leap-ambush-triple var(--monster-motion-duration) linear both !important;
     z-index:18;
-    --narga-standoff:1; --narga-drop:100px;
+    --narga-standoff:1; --narga-drop:0px;
     --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff));
     --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop));
     --narga-hit1-x:calc(var(--narga-pass1-x,var(--monster-attack-x))*var(--narga-standoff));
@@ -1728,9 +1732,9 @@
 .monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-dash-bite { animation:monster-motion-nargacuga-dash-bite var(--monster-motion-duration) linear both !important; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-flank-charge { animation:monster-motion-nargacuga-flank-charge var(--monster-motion-duration) linear both !important; z-index:18; }
-.monster-motion-nargacuga-offscreen-charge { animation:monster-motion-nargacuga-offscreen-charge var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:100px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+.monster-motion-nargacuga-offscreen-charge { animation:monster-motion-nargacuga-offscreen-charge var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-bite-spin-return { animation:monster-motion-nargacuga-bite-spin-return var(--monster-motion-duration) linear both !important; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
-.monster-motion-nargacuga-lunge-finish { animation:monster-motion-nargacuga-lunge-finish var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:100px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+.monster-motion-nargacuga-lunge-finish { animation:monster-motion-nargacuga-lunge-finish var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-stance-hop { animation:monster-motion-nargacuga-stance-hop var(--monster-motion-duration) linear both !important; z-index:18; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 /* 회전은 한쪽 앞발을 축으로 크게 한 바퀴, 이어지는 회전은 반대쪽 앞발이 축이다.
    축 이동은 transform-origin을 키프레임에서 바꿔 표현한다(앞발 좌표 .29/.71, y .86). */

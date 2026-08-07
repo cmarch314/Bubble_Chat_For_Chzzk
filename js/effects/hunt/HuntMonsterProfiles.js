@@ -1231,6 +1231,28 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         tags: ['physical', 'tail', 'target-contact', 'strong', 'stance-melee'],
         monsterAtbCost: 0.72, movement: { ticks: 55 },
         impactTimeline: [{ atTicks: 22, damageScale: 1 }],
+        // 재설계 4단계 시범 이전. 이 패턴만 비트 경로를 탄다(나머지 14개는 종전
+        // 키프레임 그대로다). 옛 구조로는 표현 자체가 불가능했던 동작이라 골랐다 —
+        // 컨테이너 하나가 이동·회전을 다 가지면 "몸은 두고 꼬리만 휘두르기"가
+        // 안 된다. 축을 꼬리에 두면 몸이 지름 368px 호를 그렸다(이미지가 380px).
+        //
+        // 접근은 헌터 상단으로만 간다. 접합(align)을 접근에 걸면 몸이 헌터보다
+        // 아래로 내려온다 — 꼬리가 이미지 위쪽(17%)이라 꼬리를 얹으려면 몸을
+        // 아래로 밀어야 하기 때문이다. 그래서 접합은 내려찍는 순간에만 건다.
+        // 그 순간 tail-slam이 꼬리를 축으로 180도 돌므로, 꼬리는 헌터 위에 남고
+        // 몸이 위로 넘어간다. 축이 곧 접합점이라 회전이 접합을 흩뜨리지 않는다.
+        //
+        // 틱 합 55 = animationDurationMs 5500, 접촉 22틱 = impactTimeline과 일치.
+        // 타이밍은 그대로 두고 그림만 바꿨다.
+        motion: [
+            { beat: 'windup', ticks: 9, pose: 'crouch' },
+            { beat: 'rise', ticks: 8, to: 'above:target 300', pose: 'stretch' },
+            { beat: 'aim', ticks: 5, to: 'above:target 260', pose: 'stretch-soft' },
+            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', pose: 'tail-slam', hit: true, sfx: 'impact' },
+            // 꼬리가 박힌 채 버틴다. 회전은 유지되고 idle이 풀어준다.
+            { beat: 'brace', ticks: 26, pose: 'brace' },
+            { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
+        ],
         // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
         animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-turn-tail-slam', animationDurationMs: 5500,

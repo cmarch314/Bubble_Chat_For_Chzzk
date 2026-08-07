@@ -15,7 +15,7 @@
     { "id": "seething_bazelgeuse", "count": 10, "sha256": "cb841c285d381e871e1100702eefe85db36ca1edf57ec1918be5eaee205649c0" },
     { "id": "tigrex", "count": 10, "sha256": "e3a1162fb139569fc2ec7208bb8b10ddea93aa7481721e7d48f7c78b94647e20" },
     { "id": "brute_tigrex", "count": 12, "sha256": "c361f2ae599a5c380b6da2d2afb64d0fe990086a7468f6ef97aeb65c6cf25ec4" },
-    { "id": "nargacuga", "count": 15, "sha256": "7c98b98b0d27ba2a6274de097c52034fac9acb2a8963e279f2b5b0248768d163" },
+    { "id": "nargacuga", "count": 15, "sha256": "45f17418fb9b5d75b0eba6f2f2e1544929c90c73d3603b303ac12a060781ee50" },
     { "id": "barioth", "count": 6, "sha256": "05b6342cd1e4b22ba41e9f19afb1f7af03a395201b0f76df4b30e7c4f001e42c" },
     { "id": "frostfang_barioth", "count": 8, "sha256": "a442ea4df2b7fb2f26b15ac6c89bc26c41da0375aeb0fd3d33710fcc53a52155" },
     { "id": "pink_rathian", "count": 14, "sha256": "194330acd576921ba34ee3577ef82682cc8e488a77f2909928808e725617f9bf" },

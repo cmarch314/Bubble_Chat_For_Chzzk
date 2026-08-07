@@ -150,7 +150,11 @@ class HuntMotionCompiler {
             // ---- 자세 ----
             state.squash = Number(definition.squash) || 1;
             state.filter = definition.filter || null;
-            state.origin = definition.pivot || null;
+            // 축은 회전과 함께 유지된다. 회전이 남아 있는데 축만 기본값으로
+            // 돌아가면, 버티는 구간으로 넘어가는 순간 몸이 눈에 띄게 튄다
+            // (꼬리를 축으로 180도 돈 상태에서 축이 몸 중앙으로 옮겨간다).
+            if (definition.pivot) state.origin = definition.pivot;
+            else if (definition.resetRotation) state.origin = null;
             if (beat.fade === 'in') state.opacity = 1;
             else if (beat.fade === 'out') state.opacity = 0;
 
@@ -181,6 +185,10 @@ class HuntMotionCompiler {
                 });
             }
             placement.push({ offset: endAt, ...this.#placementFrame(state) });
+
+            // 회전은 비트를 넘어 유지된다 — 꼬리가 박힌 채 버티는 구간이 회전을
+            // 물고 있어야 하기 때문이다. 그래서 푸는 자세를 명시적으로 둔다.
+            if (definition.resetRotation) state.rotation = 0;
 
             const rotationDelta = Number(definition.rotate) || 0;
             if (rotationDelta) {
@@ -256,7 +264,13 @@ class HuntMotionCompiler {
         const frame = {
             transform: `rotate(${state.rotation.toFixed(2)}deg) scale(${(size * root).toFixed(4)}, ${(size / root).toFixed(4)})`
         };
-        if (state.origin) frame.pivot = state.origin;
+        if (state.origin) {
+            frame.pivot = state.origin;
+            // 축이 부위 이름이면 푸는 쪽이 반전을 알아야 한다. 오프셋으로 되찾게
+            // 두면 비트 경계에서 어느 쪽 방향인지 갈리고, 실제로 버티는 구간
+            // 끝에서 축이 30%↔70%로 튀었다. 낼 때 아는 값을 그대로 싣는다.
+            frame.facing = state.facing;
+        }
         if (state.filter) frame.filter = state.filter;
         return frame;
     }

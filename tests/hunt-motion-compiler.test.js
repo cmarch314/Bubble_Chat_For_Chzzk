@@ -150,6 +150,28 @@ const ratio = frame => {
 assert.ok(Math.abs(ratio(near.pose[near.pose.length - 1]) - ratio(far.pose[far.pose.length - 1])) < 1e-3,
     '원근이 달라도 자세 비율은 같아야 한다');
 
+// ---- 회전은 비트를 넘어 유지되고 idle이 푼다 ----
+//
+// 꼬리가 박힌 채 버티는 구간이 회전을 물고 있어야 한다. 그래서 회전은 자동으로
+// 풀리지 않는다. 대신 idle이 "똑바로 선다"를 뜻하고, 복귀 비트가 그걸로 끝난다.
+// 이게 없으면 몬스터가 뒤집힌 채 제자리에 돌아간다.
+const held = HuntMotionCompiler.compile([
+    { beat: 'slam', ticks: 3, pose: 'tail-slam' },
+    { beat: 'brace', ticks: 20, pose: 'brace' },
+    { beat: 'return', ticks: 4, pose: 'idle' }
+], { anchors });
+const angleAt = offset => Number(held.pose
+    .filter(frame => frame.offset <= offset).pop()
+    .transform.match(/rotate\((-?[\d.]+)deg\)/)[1]);
+assert.strictEqual(angleAt(.5), 180, '버티는 동안 회전이 유지돼야 한다');
+assert.strictEqual(angleAt(1), 0, '복귀는 똑바로 선 채로 끝나야 한다');
+
+// 축도 회전과 함께 유지돼야 한다. 회전이 남았는데 축만 기본값으로 돌아가면
+// 버티는 구간으로 넘어가는 순간 몸이 튄다.
+const pivotAt = offset => held.pose.filter(frame => frame.offset <= offset).pop().pivot || null;
+assert.strictEqual(pivotAt(.5), 'part:tail', '버티는 동안 축이 유지돼야 한다');
+assert.strictEqual(pivotAt(1), null, '똑바로 서면 축도 기본으로 돌아간다');
+
 // ---- align: 몸 중심이 아니라 그 부위를 목적지에 얹는다 ----
 //
 // "너무 헌터 중앙으로 이동해서 몸통 내려찍기나 다름없다"가 이 뺄셈이 없어서 났다.
