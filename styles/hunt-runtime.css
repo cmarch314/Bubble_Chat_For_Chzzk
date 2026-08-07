@@ -1,7 +1,7 @@
 /* 로드된 CSS를 눈으로 확인하기 위한 표식. 모션을 고칠 때마다 함께 올린다.
    패턴 랩 우측 상단에 이 값이 표시되므로, "고쳤는데 화면이 그대로"일 때
    CSS가 안 온 것인지 모션이 잘못된 것인지 즉시 갈린다. */
-:root { --hunt-css-build: "narga-2026-08-07a"; }
+:root { --hunt-css-build: "narga-2026-08-07b"; }
 /* Loaded on first hunt by HuntRuntimeLoader. */
 /* ==========================================
    Monster Hunter Hunt Mini-game (수렵 미니게임)
@@ -1544,8 +1544,8 @@
 .monster-motion-legiana-hop-strike { animation:monster-motion-legiana-hop-strike var(--monster-motion-duration) cubic-bezier(.2,.82,.18,1) both !important; z-index:18; }
 .monster-motion-tail-sweep { animation: monster-motion-tail-sweep var(--monster-motion-duration) cubic-bezier(.2,.75,.2,1) both !important; }
 .monster-motion-tail-sweep-double { animation: monster-motion-tail-sweep-double var(--monster-motion-duration) cubic-bezier(.2,.75,.2,1) both !important; }
-.monster-motion-tail-slam-rock { animation:monster-motion-tail-slam-rock var(--monster-motion-duration) cubic-bezier(.2,.76,.18,1) both !important; transform-origin:52% 78%; }
-.monster-motion-side-tackle-contact { animation:monster-motion-side-tackle-contact var(--monster-motion-duration) cubic-bezier(.18,.76,.16,1) both !important; transform-origin:50% 84%; }
+.monster-motion-tail-slam-rock.monster-motion-tail-slam-rock { animation:monster-motion-tail-slam-rock var(--monster-motion-duration) cubic-bezier(.2,.76,.18,1) both !important; transform-origin:52% 78%; }
+.monster-motion-side-tackle-contact.monster-motion-side-tackle-contact { animation:monster-motion-side-tackle-contact var(--monster-motion-duration) cubic-bezier(.18,.76,.16,1) both !important; transform-origin:50% 84%; }
 .monster-motion-horn-sweep-contact { animation:monster-motion-horn-sweep-contact var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; }
 .monster-motion-lateral-sweep { animation: monster-motion-lateral-sweep var(--monster-motion-duration) cubic-bezier(.2,.72,.18,1) both !important; }
 .monster-motion-pounce-chain { animation: monster-motion-pounce-chain var(--monster-motion-duration) cubic-bezier(.18,.8,.2,1) both !important; }
@@ -1564,16 +1564,16 @@
     0%,49.99%{transform:scaleX(1) translateY(1px)}
     50%,100%{transform:scaleX(-1) translateY(-2px)}
 }
-.monster-motion-diablos-tail-cross { animation:monster-motion-diablos-tail-cross var(--monster-motion-duration) cubic-bezier(.2,.72,.18,1) both !important; transform-origin:72% 48%; }
-.monster-motion-tigrex-exhausted-trip { animation:tigrex-exhausted-trip var(--monster-motion-duration) ease-out both !important; transform-origin:55% 72%; }
+.monster-motion-diablos-tail-cross.monster-motion-diablos-tail-cross { animation:monster-motion-diablos-tail-cross var(--monster-motion-duration) cubic-bezier(.2,.72,.18,1) both !important; transform-origin:72% 48%; }
+.monster-motion-tigrex-exhausted-trip.monster-motion-tigrex-exhausted-trip { animation:tigrex-exhausted-trip var(--monster-motion-duration) ease-out both !important; transform-origin:55% 72%; }
 .monster-motion-tigrex-rock-hop { animation:tigrex-rock-hop var(--monster-motion-duration) cubic-bezier(.2,.72,.16,1) both !important; }
-.monster-motion-tigrex-sliding-spin { animation:tigrex-sliding-spin var(--monster-motion-duration) cubic-bezier(.16,.72,.15,1) both !important; transform-origin:72% 70%; }
-.monster-motion-tigrex-running-double-bite { animation:tigrex-running-double-bite var(--monster-motion-duration) ease-in-out both !important; transform-origin:43% 72%; }
-.monster-motion-tigrex-foreleg-slam { animation:tigrex-foreleg-slam var(--monster-motion-duration) ease-in-out both !important; transform-origin:72% 70%; }
-.monster-motion-tigrex-bite { animation:tigrex-bite var(--monster-motion-duration) ease-in-out both !important; transform-origin:43% 72%; }
-.monster-motion-tigrex-double-bite { animation:tigrex-double-bite var(--monster-motion-duration) ease-in-out both !important; transform-origin:43% 72%; }
-.monster-motion-tigrex-clockwise-spin { animation:tigrex-clockwise-spin var(--monster-motion-duration) cubic-bezier(.18,.72,.14,1) both !important; transform-origin:72% 70%; }
-.monster-motion-tigrex-rock-shot { animation:tigrex-rock-shot var(--monster-motion-duration) ease-in-out both !important; transform-origin:72% 70%; }
+.monster-motion-tigrex-sliding-spin.monster-motion-tigrex-sliding-spin { animation:tigrex-sliding-spin var(--monster-motion-duration) cubic-bezier(.16,.72,.15,1) both !important; transform-origin:72% 70%; }
+.monster-motion-tigrex-running-double-bite.monster-motion-tigrex-running-double-bite { animation:tigrex-running-double-bite var(--monster-motion-duration) ease-in-out both !important; transform-origin:43% 72%; }
+.monster-motion-tigrex-foreleg-slam.monster-motion-tigrex-foreleg-slam { animation:tigrex-foreleg-slam var(--monster-motion-duration) ease-in-out both !important; transform-origin:72% 70%; }
+.monster-motion-tigrex-bite.monster-motion-tigrex-bite { animation:tigrex-bite var(--monster-motion-duration) ease-in-out both !important; transform-origin:43% 72%; }
+.monster-motion-tigrex-double-bite.monster-motion-tigrex-double-bite { animation:tigrex-double-bite var(--monster-motion-duration) ease-in-out both !important; transform-origin:43% 72%; }
+.monster-motion-tigrex-clockwise-spin.monster-motion-tigrex-clockwise-spin { animation:tigrex-clockwise-spin var(--monster-motion-duration) cubic-bezier(.18,.72,.14,1) both !important; transform-origin:72% 70%; }
+.monster-motion-tigrex-rock-shot.monster-motion-tigrex-rock-shot { animation:tigrex-rock-shot var(--monster-motion-duration) ease-in-out both !important; transform-origin:72% 70%; }
 .monster-motion-tigrex-leap { animation:tigrex-leap var(--monster-motion-duration) cubic-bezier(.18,.75,.16,1) both !important; }
 .monster-motion-body-spin { animation: monster-motion-body-spin var(--monster-motion-duration) cubic-bezier(.22,.74,.18,1) both !important; }
 .monster-motion-leap-slam { animation: monster-motion-leap-slam var(--monster-motion-duration) cubic-bezier(.18,.82,.2,1) both !important; }
@@ -1596,15 +1596,15 @@
 .monster-motion-rathalos-flame-sweep { animation:monster-motion-rathalos-flame-sweep var(--monster-motion-duration) ease-in-out both !important; }
 .monster-motion-rathalos-stomp { animation:monster-motion-rathalos-stomp var(--monster-motion-duration) cubic-bezier(.16,.8,.18,1) both !important; }
 .monster-motion-rathalos-glide { animation:monster-motion-rathalos-glide var(--monster-motion-duration) cubic-bezier(.12,.78,.16,1) both !important; }
-.monster-motion-rathian-triple-fireball { animation:monster-motion-rathian-triple-fireball var(--monster-motion-duration) ease-in-out both !important; transform-origin:22% 70%; }
-.monster-motion-rathian-tail-sweep-double { animation:monster-motion-rathian-tail-sweep-double var(--monster-motion-duration) linear both !important; transform-origin:58% 62%; }
-.monster-motion-rathian-somersault { animation:monster-motion-rathian-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
-.monster-motion-rathian-somersault-double { animation:monster-motion-rathian-somersault-double var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
-.monster-motion-rathian-bite-somersault { animation:monster-motion-rathian-bite-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
+.monster-motion-rathian-triple-fireball.monster-motion-rathian-triple-fireball { animation:monster-motion-rathian-triple-fireball var(--monster-motion-duration) ease-in-out both !important; transform-origin:22% 70%; }
+.monster-motion-rathian-tail-sweep-double.monster-motion-rathian-tail-sweep-double { animation:monster-motion-rathian-tail-sweep-double var(--monster-motion-duration) linear both !important; transform-origin:58% 62%; }
+.monster-motion-rathian-somersault.monster-motion-rathian-somersault { animation:monster-motion-rathian-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
+.monster-motion-rathian-somersault-double.monster-motion-rathian-somersault-double { animation:monster-motion-rathian-somersault-double var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
+.monster-motion-rathian-bite-somersault.monster-motion-rathian-bite-somersault { animation:monster-motion-rathian-bite-somersault var(--monster-motion-duration) cubic-bezier(.18,.72,.16,1) both !important; transform-origin:58% 62%; }
 /* 활공은 연속 궤적이므로 반드시 linear. cubic-bezier는 키프레임 "구간마다"
    적용되어 S자 키프레임 하나하나에서 감속→가속이 반복된다(멈칫거리다 튀는 원인).
    곡선감은 이징이 아니라 키프레임 밀도로 표현한다. */
-.monster-motion-rathian-somersault-glide { animation:monster-motion-rathian-somersault-glide var(--monster-motion-duration) linear both !important; transform-origin:58% 62%; }
+.monster-motion-rathian-somersault-glide.monster-motion-rathian-somersault-glide { animation:monster-motion-rathian-somersault-glide var(--monster-motion-duration) linear both !important; transform-origin:58% 62%; }
 .monster-motion-rathian-glide { animation:monster-motion-rathian-glide var(--monster-motion-duration) linear both !important; }
 /* 나르가쿠르가 전용 모션. 연속 궤적이므로 전부 linear(구간마다 걸리는 이징 금지). */
 /* 급습 공통 좌표.
@@ -1618,10 +1618,10 @@
      벗어난 뒤에 Fade Out 하도록 같은 크기를 쓴다.
    진입 방향이 (-side, -1)이므로, 여기에 수직이면서 아래를 향하는 이탈 방향은
    (-side, +1)이다. 그래서 이탈 x에는 side를 그대로 빼고 y에는 더한다. */
-.monster-motion-nargacuga-leap-ambush,
-.monster-motion-nargacuga-leap-ambush-triple,
-.monster-motion-nargacuga-lunge-finish,
-.monster-motion-nargacuga-offscreen-charge {
+.monster-motion-nargacuga-leap-ambush.monster-motion-nargacuga-leap-ambush,
+.monster-motion-nargacuga-leap-ambush-triple.monster-motion-nargacuga-leap-ambush-triple,
+.monster-motion-nargacuga-lunge-finish.monster-motion-nargacuga-lunge-finish,
+.monster-motion-nargacuga-offscreen-charge.monster-motion-nargacuga-offscreen-charge {
     --narga-ambush-side:1;
     --narga-ambush-off:495px;
     --narga-ambush-out:495px;
@@ -1661,8 +1661,10 @@
    --narga-slam-x/y가 그 보정을 적용한 "요소를 놓을 자리"이고,
    --narga-hit-x/y는 "꼬리가 닿을 자리"(= 헌터)다.
    Y 보정 75px은 playPatternMotion의 세로 클램프(430)와 실제 거리(약 505)의 차이다. */
-.monster-motion-nargacuga-turn-tail-slam,
-.monster-motion-nargacuga-turn-tail-slam-double {
+/* 쉼표로 나열한 선택자는 각자 특이도를 갖는다. 하나만 두 번 써두면 나머지는
+   여전히 rig 기본 축(.hunt-monster-attack-motion[data-monster-rig])에 밀린다. */
+.monster-motion-nargacuga-turn-tail-slam.monster-motion-nargacuga-turn-tail-slam,
+.monster-motion-nargacuga-turn-tail-slam-double.monster-motion-nargacuga-turn-tail-slam-double {
     transform-origin:20% 12%;
     --narga-standoff:1;
     --narga-drop:75px;
@@ -1687,7 +1689,7 @@
    표적을 찌른다. 결과적으로 몸통은 헌터보다 한참 위에 뜨고 꼬리만 내려와 닿는다.
    --narga-hit-x/y는 "꼬리가 닿을 자리"(= 헌터), --narga-whip-x/y는 "요소를 놓을 자리"다.
    Y의 75px은 playPatternMotion 세로 클램프(430)와 실제 거리(약 505)의 차이다. */
-.monster-motion-nargacuga-tail-whip {
+.monster-motion-nargacuga-tail-whip.monster-motion-nargacuga-tail-whip {
     animation:monster-motion-nargacuga-tail-whip var(--monster-motion-duration) linear both !important;
     transform-origin:50% 82%;
     --narga-standoff:1;
@@ -1699,7 +1701,7 @@
     --narga-whip-x:calc(var(--narga-hit-x) + var(--narga-whip-comp-x));
     --narga-whip-y:calc(var(--narga-hit-y) + var(--narga-whip-comp-y));
 }
-.monster-motion-nargacuga-pivot-spin { animation:monster-motion-nargacuga-pivot-spin var(--monster-motion-duration) linear both !important; --narga-spin-dir:1; --narga-spin-origin-x:20%; transform-origin:var(--narga-spin-origin-x) 88%; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
+.monster-motion-nargacuga-pivot-spin.monster-motion-nargacuga-pivot-spin { animation:monster-motion-nargacuga-pivot-spin var(--monster-motion-duration) linear both !important; --narga-spin-dir:1; --narga-spin-origin-x:20%; transform-origin:var(--narga-spin-origin-x) 88%; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-twin-pivot-spin { animation:monster-motion-nargacuga-twin-pivot-spin var(--monster-motion-duration) linear both !important; --narga-standoff:1; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:0px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-dash-bite { animation:monster-motion-nargacuga-dash-bite var(--monster-motion-duration) linear both !important; --narga-standoff:.72; --narga-hit-x:calc(var(--monster-attack-x)*var(--narga-standoff)); --narga-drop:62px; --narga-hit-y:calc(var(--monster-attack-y)*var(--narga-standoff) + var(--narga-drop)); }
 .monster-motion-nargacuga-flank-charge { animation:monster-motion-nargacuga-flank-charge var(--monster-motion-duration) linear both !important; z-index:18; }
@@ -2140,7 +2142,7 @@
     68%{transform:translate(var(--monster-burrow-target-x),var(--monster-burrow-target-y)) rotate(-5deg) scale(1.18)}
     100%{transform:none;opacity:1}
 }
-.monster-motion-horn-uppercut { transform-origin:50% 86%; }
+.monster-motion-horn-uppercut.monster-motion-horn-uppercut { transform-origin:50% 86%; }
 @keyframes monster-motion-horn-uppercut { 0%,100%{transform:none} 29%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) scale(.94)} 43%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) + 22px)) scale(.98,.88)} 66%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 58px)) scale(1.02,1.08);filter:brightness(1.35)} 71%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y) - 58px)) scale(1.02,1.08)} }
 
 .monster-local-action-fx { position:absolute; left:50%; top:50%; z-index:58; pointer-events:none; opacity:0; transform:translate(-50%,-50%); filter:drop-shadow(0 4px 8px #000b); }
@@ -2694,12 +2696,14 @@
     100%{transform:none;opacity:1}
 }
 
-/* 연속 물어뜯기(분노). 접촉 16/30 of 36틱 = 44.4% / 83.3%.
-   1타는 도약 착지가 곧 깨물기다. 2타는 꼬리 회전인데, 회전과 복귀를 분리한다.
-   깨문 자리에 그대로 선 채 앞 반회전(0 -> 180도)을 돌고, 나머지 반회전
-   (180 -> 360도)을 도는 동안 제자리로 돌아온다. 한 번에 돌면서 이동하면 회전이
-   이동에 묻혀 "돌았다"가 읽히지 않는다. 2타 접촉은 제자리 반회전이 끝나는
-   지점(83.3%)에 둔다. */
+/* 연속 물어뜯기(분노). 36틱/3600ms. 접촉 16/30틱 = 44.4% / 83.3%.
+   1타는 도약 착지가 곧 깨물기다. 2타는 꼬리 회전인데 회전과 복귀를 분리한다.
+   깨문 자리에 선 채 앞 반회전(0 -> 180도)을 돌고, 나머지 반회전(180 -> 360도)을
+   도는 동안 제자리로 돌아온다. 한 번에 돌면서 이동하면 회전이 이동에 묻힌다.
+
+   회전 속도는 꼬리 회전 계열과 같은 2.35ms/도로 맞춘다(180도 = 422ms = 11.7%).
+   예전에는 제자리 반회전에만 911ms를 써서 눈에 띄게 느렸다. 남는 시간은 깨문 뒤
+   버티는 정지 구간으로 돌린다. 회전이 느린 것과 정지가 긴 것은 다르게 읽힌다. */
 @keyframes monster-motion-nargacuga-bite-spin-return {
     0%,6%{transform:none}
     13%,19%{transform:translate(calc(var(--narga-hit-x)*.06),26px) rotate(0deg) scale(1.12,.84)}
@@ -2707,16 +2711,16 @@
     36%{transform:translate(calc(var(--narga-hit-x)*.82),calc(var(--narga-hit-y)*.72 - 90px)) rotate(0deg) scale(.90,1.18)}
     44.4%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1.28,.80);filter:brightness(1.44) drop-shadow(0 16px 18px #000a)}
     52%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1.06,.98)}
-    58%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
-    /* 앞 반회전 — 깨문 자리에 고정한 채 돈다 */
-    70%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(90deg) scale(1.04)}
+    /* 깨문 자리에서 버티는 정지 구간 */
+    58%,71.6%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(0deg) scale(1)}
+    /* 앞 반회전 — 제자리 고정, 422ms */
     83.3%{transform:translate(var(--narga-hit-x),var(--narga-hit-y)) rotate(180deg) scale(1.12,.92);filter:brightness(1.38)}
-    /* 나머지 반회전 — 도는 동안 제자리로 복귀 */
-    89%{transform:translate(calc(var(--narga-hit-x)*.66),calc(var(--narga-hit-y)*.66)) rotate(240deg) scale(1.04)}
-    94%{transform:translate(calc(var(--narga-hit-x)*.32),calc(var(--narga-hit-y)*.32)) rotate(300deg) scale(1)}
-    97%{transform:translate(0,-18px) rotate(340deg) scale(.92,1.12)}
+    /* 나머지 반회전 — 도는 동안 복귀, 같은 속도 */
+    89%{transform:translate(calc(var(--narga-hit-x)*.52),calc(var(--narga-hit-y)*.52)) rotate(270deg) scale(1.04)}
+    95%{transform:translate(0,-16px) rotate(360deg) scale(.94,1.10)}
     100%{transform:translate(0,0) rotate(360deg) scale(1)}
 }
+
 
 /* 3연 런지 돌진(분노): 이탈·급습 2회 뒤 마지막은 평범한 돌진으로 마무리.
    접촉 22/40/62 of 72틱 = 30.6% / 55.6% / 86.1%. */
