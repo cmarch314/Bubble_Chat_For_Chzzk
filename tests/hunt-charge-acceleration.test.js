@@ -23,14 +23,46 @@ const runtimeStyle = fs.readFileSync(
 // 등가속 위치 곡선. 가속 구간을 여는 프레임은 반드시 이 곡선을 쓴다.
 const ACCEL_CURVE = 'cubic-bezier(.333,0,.667,.333)';
 
-// 돌진 모션 중 이 규칙을 적용한 것들. 한 번에 전부 옮기지 못했으므로,
-// 옮긴 모션만 계약으로 고정하고 나머지는 이 목록에 추가하며 따라온다.
-const RAMPED_CHARGES = [
-    'monster-motion-ground-charge',
-    'monster-motion-rathian-ground-charge',
-    'monster-motion-nargacuga-flank-charge',
-    'monster-motion-ground-charge-zigzag'
-];
+// 돌진 모션을 손으로 나열하지 않는다. 예전에는 여기 적힌 4개만 검사했고,
+// 나머지 돌진은 규칙 밖에 조용히 남았다. 고쳤다고 보고한 뒤에도 사용자가 보는
+// 돌진은 그대로인 일이 반복된 직접적인 원인이다. 목록을 손으로 관리하는 순간
+// 빠뜨린 것은 영원히 안 보인다.
+//
+// 이제 CSS에서 돌진 키프레임을 전부 찾아내고, 아직 못 옮긴 것은 PENDING에 이유와
+// 함께 남긴다. 새 돌진을 추가하면 자동으로 검사 대상이 되고, PENDING에 없으면
+// 테스트가 실패한다. 부채가 코드에 드러나 있고 줄어드는지 눈에 보인다.
+const ALL_CHARGES = [...runtimeStyle.matchAll(
+    /@keyframes (monster-motion-[\w-]*charge[\w-]*|tigrex-charge-chain[\w-]*)\s*\{/g)]
+    .map(match => match[1])
+    // 스텝 반전처럼 이동하지 않는 보조 애니메이션은 제외한다.
+    .filter(name => !/stride-flip|footfall|rumble|slide|dust/.test(name));
+
+// 아직 0.5초 램프로 옮기지 못한 돌진. 옮길 때마다 여기서 지운다.
+// tigrex-charge-chain 계열은 CSS가 아니라 런타임이 경로를 만들므로(WAAPI),
+// 접근 구간 속도와 횡단 구간 속도를 각각 따로 계산한다. CSS만 고쳐서는 안 되고
+// HuntMonsterAttackAnimator.tigrexChargeRouteKeyframes를 함께 손봐야 한다.
+const PENDING = new Set([
+    'monster-motion-ground-charge-cross',
+    'monster-motion-ground-charge-double',
+    'monster-motion-ground-charge-triple',
+    'monster-motion-ground-charge-stomp-burst',
+    'monster-motion-ground-charge-double-stomp-burst',
+    'monster-motion-aerial-charge-cross',
+    'monster-motion-nargacuga-offscreen-charge',
+    'tigrex-charge-chain',
+    'tigrex-charge-chain-three'
+]);
+
+const RAMPED_CHARGES = ALL_CHARGES.filter(name => !PENDING.has(name));
+
+// PENDING에 적힌 이름이 실제로 존재하는지 확인한다. 이름이 바뀌면 부채가 조용히
+// 사라진 것처럼 보이므로, 없는 이름은 즉시 실패시킨다.
+for (const name of PENDING) {
+    assert.ok(ALL_CHARGES.includes(name),
+        `PENDING의 ${name}이 CSS에 없다. 이름이 바뀌었거나 이미 지워졌다면 PENDING에서도 빼라.`);
+}
+assert.ok(RAMPED_CHARGES.length >= 4,
+    `램프를 적용한 돌진이 너무 적다 (${RAMPED_CHARGES.length}). 전부 PENDING으로 빠져나갔을 수 있다.`);
 
 for (const name of RAMPED_CHARGES) {
     const block = runtimeStyle.match(
@@ -89,4 +121,5 @@ assert.match(rules, /0\.5초 동안만 가속/,
 assert.ok(rules.includes(ACCEL_CURVE),
     '공통 규칙 문서에 등가속 곡선 값이 적혀 있어야 한다');
 
-console.log(`[test] Hunt charge acceleration contract passed (${RAMPED_CHARGES.length} charges).`);
+console.log(`[test] Hunt charge acceleration contract passed `
+    + `(적용 ${RAMPED_CHARGES.length}개 / 미적용 ${PENDING.size}개: ${[...PENDING].join(", ")}).`);
