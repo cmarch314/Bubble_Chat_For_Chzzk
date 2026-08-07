@@ -1,3 +1,7 @@
+/* 로드된 CSS를 눈으로 확인하기 위한 표식. 모션을 고칠 때마다 함께 올린다.
+   패턴 랩 우측 상단에 이 값이 표시되므로, "고쳤는데 화면이 그대로"일 때
+   CSS가 안 온 것인지 모션이 잘못된 것인지 즉시 갈린다. */
+:root { --hunt-css-build: "narga-2026-08-07a"; }
 /* Loaded on first hunt by HuntRuntimeLoader. */
 /* ==========================================
    Monster Hunter Hunt Mini-game (수렵 미니게임)
