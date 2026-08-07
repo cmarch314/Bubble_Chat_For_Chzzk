@@ -225,8 +225,16 @@ class HuntMonsterAnatomyCatalog {
         else if (/right.*(?:front.*)?(?:foot|leg|claw)|(?:foot|leg|claw).*right/.test(rawKind)) key = 'right-front-leg';
         else if (/foot|leg|claw/.test(rawKind)) key = 'foot';
         else if (/torso|body|back|chest/.test(rawKind)) key = 'torso';
-        const part = geometry.parts[key];
+        // 같은 부위를 몬스터마다 다르게 적어뒀다. 티가렉스는 left-front-leg,
+        // 나르가쿠르가는 left-foreleg다. 정규화가 앞의 철자로만 떨어지므로
+        // 나르가의 앞발 앵커는 여기로 한 번도 도달한 적이 없었다 — null이 조용히
+        // 돌아가 회전축이 이미지 중앙으로 떨어졌다. 철자를 서로 대체 가능하게 둔다.
+        const alternates = [key,
+            key.replace('front-leg', 'foreleg'),
+            key.replace('foreleg', 'front-leg')];
+        const part = alternates.map(name => geometry.parts[name]).find(Boolean);
         if (!part) return null;
+        key = alternates.find(name => geometry.parts[name]);
         if (Array.isArray(part.path) && part.path.length) {
             const index = Math.abs(Math.trunc(Number(sequence) || 0)) % part.path.length;
             return { ...part.path[index], kind: key, pathIndex: index };

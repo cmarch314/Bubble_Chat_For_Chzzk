@@ -652,7 +652,86 @@ class HuntMonsterAttackAnimator {
         this.onRoar(pattern);
     }
 
+    // 비트 목록을 가진 패턴은 새 경로를 탄다. 없으면 종전 키프레임 경로 그대로다.
+    // 병존이 되므로 몬스터를 하나씩 옮길 수 있고, 어느 시점에 멈춰도 나머지는
+    // 그대로 동작한다.
+    playBeatMotion(monsterImg, pattern, profileId) {
+        const Compiler = typeof HuntMotionCompiler !== 'undefined'
+            ? HuntMotionCompiler
+            : (typeof require === 'function' ? require('./HuntMotionCompiler.js') : null);
+        const motionElement = this.resolveMotionElement(monsterImg);
+        const poseLayer = this.resolvePoseLayer(monsterImg);
+        if (!Compiler || !motionElement || !poseLayer) return null;
+
+        const rig = HuntMonsterAnimationCatalog?.resolveRig?.(this.owner?.selectedMonster)?.id || 'winged';
+        const built = Compiler.compile(pattern.motion, {
+            anchors: this.resolveStageAnchors(monsterImg),
+            rig
+        });
+
+        // 자세 키프레임의 축은 부위 이름이다. 여기서 백분율로 푼다 — 반전은
+        // 해석 시점에 반영된다(규칙 2). 저작자는 좌우 두 벌을 적지 않는다.
+        const facingAt = offset => (built.facing
+            .filter(step => step.offset <= offset).pop()?.direction) ?? 1;
+        const poseFrames = built.pose.map(frame => {
+            const keyframe = { offset: frame.offset, transform: frame.transform };
+            if (frame.filter) keyframe.filter = frame.filter;
+            const pivot = frame.pivot
+                ? this.resolvePosePivot(frame.pivot, facingAt(frame.offset))
+                : null;
+            if (pivot) keyframe.transformOrigin = `${pivot.xPercent.toFixed(2)}% ${pivot.yPercent.toFixed(2)}%`;
+            return keyframe;
+        });
+
+        const timing = { duration: built.durationMs, easing: 'ease-in-out', fill: 'both' };
+        const animations = [
+            motionElement.animate?.(built.placement, timing),
+            poseLayer.animate?.(poseFrames, timing)
+        ].filter(Boolean);
+
+        const facingLayer = this.resolveFacingLayer(monsterImg);
+        if (facingLayer && built.facing.length > 1) {
+            const baseFacing = HuntMonsterAnatomyCatalog.baseFacing(this.owner?.selectedMonster);
+            const flip = direction => (baseFacing === 'left'
+                ? (direction < 0 ? 1 : -1)
+                : (direction > 0 ? 1 : -1));
+            const facingFrames = built.facing.map(step => ({
+                offset: step.offset, transform: `scaleX(${flip(step.direction)})`
+            }));
+            const animation = facingLayer.animate?.(facingFrames,
+                { duration: built.durationMs, easing: 'step-end', fill: 'both' });
+            if (animation) animations.push(animation);
+        }
+
+        // 검수 화면이 비트 구간과 접촉 시점을 그대로 읽을 수 있게 남긴다.
+        motionElement.dataset.monsterBeatTimeline = built.timeline
+            .map(step => `${step.beat}:${step.startTicks}-${step.endTicks}`).join('|');
+        motionElement.dataset.monsterBeatImpacts = built.impacts
+            .map(impact => impact.atTicks).join(',');
+
+        const clear = () => {
+            for (const animation of animations) { try { animation.cancel(); } catch (_) { /* detached */ } }
+            delete motionElement.dataset.monsterBeatTimeline;
+            delete motionElement.dataset.monsterBeatImpacts;
+        };
+        this.animationTimers.timeout(clear, built.durationMs + 60);
+
+        return Object.freeze({
+            id: profileId || pattern.id || 'beat-motion',
+            duration: built.durationMs,
+            ultimate: Boolean(pattern?.tags?.includes('ultimate')),
+            aim: false,
+            rig: { id: rig },
+            delivery: pattern?.delivery || null,
+            beats: built
+        });
+    }
+
     playPatternMotion(monsterImg, targetCard, pattern, attackName, type) {
+        if (Array.isArray(pattern?.motion) && pattern.motion.length) {
+            const beatProfile = this.playBeatMotion(monsterImg, pattern, pattern.id);
+            if (beatProfile) return beatProfile;
+        }
         const Catalog = typeof HuntMonsterAnimationCatalog !== 'undefined' ? HuntMonsterAnimationCatalog : null;
         const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
             ? HuntMonsterAnatomyCatalog
