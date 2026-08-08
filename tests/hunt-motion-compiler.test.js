@@ -233,6 +233,26 @@ const [plainLeftX] = xy(HuntMotionCompiler.compile(
 assert.strictEqual(mirrorX - plainLeftX, -76,
     '왼쪽을 보면 꼬리가 화면 오른쪽에 오므로 보정도 반대다');
 
+const passAnchors = new HuntStageAnchors({
+    monsterRect: rect(660, 100, 380, 380),
+    cardRect: rect(0, 0, 1700, 900),
+    stageWidth: 1700,
+    hunters: anchors.hunters,
+    primaryTarget: 2,
+    targetSequence: [2, 3]
+});
+const doubleBite = HuntMotionCompiler.compile([
+    { beat: 'windup', ticks: 5, pose: 'crouch' },
+    { beat: 'approach-1', ticks: 11, to: 'pass:1', align: 'part:head', pose: 'stretch-soft' },
+    { beat: 'bite-1', ticks: 3, to: 'pass:1', align: 'part:head', pose: 'land', hit: true },
+    { beat: 'approach-2', ticks: 11, to: 'pass:2', align: 'part:head', pose: 'stretch-soft' },
+    { beat: 'bite-2', ticks: 2, to: 'pass:2', align: 'part:head', pose: 'land', hit: true, damageScale: .82 },
+    { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
+], { anchors: passAnchors, partOffset });
+assert.strictEqual(doubleBite.totalTicks, 36);
+assert.deepStrictEqual(doubleBite.impacts.map(hit => [hit.atTicks, hit.damageScale]),
+    [[16, 1], [30, .82]], '연속 물어뜯기의 두 접촉은 실제 순차 표적 타이밍과 같아야 한다');
+
 assert.throws(() => HuntMotionCompiler.compile(
     [{ beat: 'a', ticks: 2, align: 'part:tail' }], { anchors, partOffset }),
     HuntMotionCompilerError, 'align은 목적지 없이 쓸 수 없다');

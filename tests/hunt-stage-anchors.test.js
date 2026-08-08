@@ -55,6 +55,21 @@ assert.ok(top3.y < 430, '상단 기준점은 안전선 위에 있어야 한다')
 assert.ok(anchors.resolve('hunter:3.left').x < anchors.resolve('hunter:3.right').x,
     'left는 right보다 왼쪽이다');
 
+const sequentialAnchors = new HuntStageAnchors({
+    monsterRect: rect(660, 100, 380, 380),
+    cardRect: rect(0, 0, 1700, 900),
+    stageWidth: 1700,
+    hunters: anchors.hunters,
+    primaryTarget: 2,
+    targetSequence: [3, 1, 4]
+});
+assert.deepStrictEqual(sequentialAnchors.resolve('pass:1'), anchors.resolve('hunter:3'),
+    '첫 패스는 impactTimeline의 첫 순차 표적을 가리켜야 한다');
+assert.deepStrictEqual(sequentialAnchors.resolve('pass:2.top'), anchors.resolve('hunter:1.top'),
+    '패스별 기준점도 해당 순차 표적에서 계산해야 한다');
+assert.throws(() => sequentialAnchors.resolve('pass:4'), HuntStageAnchorError,
+    '존재하지 않는 순차 표적은 주 표적으로 조용히 대체하면 안 된다');
+
 // ---- between ----
 
 // 1번(260)과 2번(660)의 중점 460 - 850 = -390

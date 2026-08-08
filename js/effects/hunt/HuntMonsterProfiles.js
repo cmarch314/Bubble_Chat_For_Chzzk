@@ -1356,6 +1356,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { atTicks: 16, targetMode: 'sequential', damageScale: 1 },
             { atTicks: 30, targetMode: 'sequential', damageScale: 0.82 }
         ],
+        motion: [
+            { beat: 'windup', ticks: 5, pose: 'crouch' },
+            { beat: 'approach-1', ticks: 11, to: 'pass:1', align: 'part:head', pose: 'stretch-soft' },
+            { beat: 'bite-1', ticks: 3, to: 'pass:1', align: 'part:head', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'approach-2', ticks: 11, to: 'pass:2', align: 'part:head', pose: 'stretch-soft' },
+            { beat: 'bite-2', ticks: 2, to: 'pass:2', align: 'part:head', pose: 'land', hit: true, damageScale: 0.82, sfx: 'impact' },
+            { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
+        ],
         animationProfile: 'nargacuga-bite-spin-return', animationDurationMs: 3600,
         originPart: 'head',
         brokenPartDamageModifiers: { head: 0.82, tail: 0.74 }

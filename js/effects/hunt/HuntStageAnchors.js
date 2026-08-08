@@ -58,10 +58,16 @@ class HuntStageAnchors {
     });
 
     // rect: {left, top, width, height}
-    constructor({ monsterRect, cardRect = null, stageWidth = null, hunters = null, primaryTarget = null } = {}) {
+    constructor({
+        monsterRect, cardRect = null, stageWidth = null, hunters = null,
+        primaryTarget = null, targetSequence = null
+    } = {}) {
         // 비트는 몇 번 헌터인지 적지 않는다. 표적은 매번 달라지므로 번호를 박으면
         // 패턴이 늘 같은 사람만 때린다. `target`이 이번 턴의 주 표적을 가리킨다.
         this.primaryTarget = Number.isInteger(Number(primaryTarget)) ? Number(primaryTarget) : null;
+        this.targetSequence = Array.isArray(targetSequence)
+            ? targetSequence.map(Number).filter(Number.isInteger)
+            : [];
         if (!monsterRect) throw new HuntStageAnchorError('monsterRect가 없다');
         this.monsterRect = monsterRect;
         this.cardRect = cardRect;
@@ -85,7 +91,7 @@ class HuntStageAnchors {
     // 헌터 번호는 세지 않고 DOM에서 발견한다. 이 프로젝트의 fight-card는 0부터
     // 시작하고 인원수도 가변이라, 범위를 가정하면 0번을 놓치고 없는 번호를
     // 지어낸다(실제로 1..4로 훑다가 그렇게 됐다).
-    static fromDom(card, monsterImg, { primaryTarget = null } = {}) {
+    static fromDom(card, monsterImg, { primaryTarget = null, targetSequence = null } = {}) {
         const monsterRect = monsterImg?.getBoundingClientRect?.();
         if (!monsterRect) throw new HuntStageAnchorError('몬스터 이미지를 계측할 수 없다');
         const hunters = new Map();
@@ -101,7 +107,8 @@ class HuntStageAnchors {
             cardRect: card?.getBoundingClientRect?.() || null,
             stageWidth: monsterImg.closest?.('.hunt-monster-motion-stage')?.clientWidth || null,
             hunters,
-            primaryTarget
+            primaryTarget,
+            targetSequence
         });
     }
 
@@ -138,7 +145,9 @@ class HuntStageAnchors {
     // 인자를 받는 연산자(toward/polar/above/...)는 중첩할 수 없다. 인자가 어느
     // 연산자의 것인지 문법으로 구분되지 않기 때문이다. 허용하면 안쪽 연산자가
     // 조용히 기본값을 쓰고 잘못된 좌표를 낸다 — 신호 없는 오답은 만들지 않는다.
-    static TERMINAL_KINDS = Object.freeze(['home', 'self', 'hunter', 'target', 'between', 'arena', 'offscreen']);
+    static TERMINAL_KINDS = Object.freeze([
+        'home', 'self', 'hunter', 'target', 'pass', 'between', 'arena', 'offscreen'
+    ]);
 
     #parse(spec, nested = false) {
         if (spec && typeof spec === 'object' && !Array.isArray(spec)) {
@@ -206,6 +215,21 @@ class HuntStageAnchors {
                 }
                 const edge = arg ? `.${arg.replace(/^\./, '')}` : '';
                 return this.#handlers().hunter(`${this.primaryTarget}${edge}`, args, spec);
+            },
+
+            // `pass:1` / `pass:2.top` — impactTimeline의 순차 표적. 복수 돌진을
+            // 하나의 주 표적으로 축소하지 않는다. 번호는 저작자가 읽기 쉬운 1부터다.
+            pass: (arg, args, spec) => {
+                const [ordinalText, edge = 'center'] = arg.split('.');
+                const ordinal = Number(ordinalText);
+                if (!Number.isInteger(ordinal) || ordinal < 1) {
+                    throw new HuntStageAnchorError('pass 번호는 1 이상의 정수여야 한다', spec);
+                }
+                const hunterIndex = this.targetSequence[ordinal - 1];
+                if (!Number.isInteger(hunterIndex)) {
+                    throw new HuntStageAnchorError(`${ordinal}번째 순차 표적이 없다`, spec);
+                }
+                return this.#handlers().hunter(`${hunterIndex}.${edge}`, args, spec);
             },
 
             between: (arg, args, spec) => {

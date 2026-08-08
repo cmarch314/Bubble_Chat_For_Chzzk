@@ -166,12 +166,12 @@ class HuntMonsterAttackAnimator {
     // 좌표 어휘 해석기. 매 모션마다 새로 계측한다 — 레이아웃이 바뀌면 앵커도 따라
     // 가야 하고, 캐시하면 예전 사고(430 클램프와 실제 거리 505의 차이를 --narga-drop
     // 으로 메우던 일)가 그대로 재현된다.
-    resolveStageAnchors(monsterImg, primaryTarget = null) {
+    resolveStageAnchors(monsterImg, primaryTarget = null, targetSequence = null) {
         const Anchors = typeof HuntStageAnchors !== 'undefined'
             ? HuntStageAnchors
             : (typeof require === 'function' ? require('./HuntStageAnchors.js') : null);
         if (!Anchors) throw new Error('HuntStageAnchors가 로드되지 않았다');
-        return Anchors.fromDom(this.card, monsterImg, { primaryTarget });
+        return Anchors.fromDom(this.card, monsterImg, { primaryTarget, targetSequence });
     }
 
     // 겨냥 레이어는 몸 방향 전용이다. 없으면(구형 fixture) null을 돌려 무시한다.
@@ -655,7 +655,7 @@ class HuntMonsterAttackAnimator {
     // 비트 목록을 가진 패턴은 새 경로를 탄다. 없으면 종전 키프레임 경로 그대로다.
     // 병존이 되므로 몬스터를 하나씩 옮길 수 있고, 어느 시점에 멈춰도 나머지는
     // 그대로 동작한다.
-    playBeatMotion(monsterImg, pattern, profileId, targetCard = null) {
+    playBeatMotion(monsterImg, pattern, profileId, targetCard = null, targets = []) {
         const Compiler = typeof HuntMotionCompiler !== 'undefined'
             ? HuntMotionCompiler
             : (typeof require === 'function' ? require('./HuntMotionCompiler.js') : null);
@@ -668,6 +668,14 @@ class HuntMonsterAttackAnimator {
         const primaryTarget = targetCard?.id
             ? Number(String(targetCard.id).replace('fight-card-', ''))
             : null;
+        const resolvedPasses = Array.isArray(pattern?.runtimeResolvedImpactTimeline)
+            ? pattern.runtimeResolvedImpactTimeline
+                .map(event => event?.targetIndices?.[0])
+                .filter(Number.isInteger)
+            : [];
+        const targetSequence = resolvedPasses.length
+            ? resolvedPasses
+            : (Array.isArray(targets) ? targets.map(target => target?.index).filter(Number.isInteger) : []);
         // align이 쓸 부위 오프셋. 이미지 중심 기준 픽셀이다. 스프라이트 크기를
         // 실측해서 곱하므로 이미지 크기가 바뀌어도 따라간다.
         const monsterRect = monsterImg.getBoundingClientRect();
@@ -679,7 +687,7 @@ class HuntMonsterAttackAnimator {
             };
         };
         const built = Compiler.compile(pattern.motion, {
-            anchors: this.resolveStageAnchors(monsterImg, primaryTarget),
+            anchors: this.resolveStageAnchors(monsterImg, primaryTarget, targetSequence),
             rig,
             partOffset
         });
@@ -740,9 +748,9 @@ class HuntMonsterAttackAnimator {
         });
     }
 
-    playPatternMotion(monsterImg, targetCard, pattern, attackName, type) {
+    playPatternMotion(monsterImg, targetCard, pattern, attackName, type, targets = []) {
         if (Array.isArray(pattern?.motion) && pattern.motion.length) {
-            const beatProfile = this.playBeatMotion(monsterImg, pattern, pattern.id, targetCard);
+            const beatProfile = this.playBeatMotion(monsterImg, pattern, pattern.id, targetCard, targets);
             if (beatProfile) return beatProfile;
         }
         const Catalog = typeof HuntMonsterAnimationCatalog !== 'undefined' ? HuntMonsterAnimationCatalog : null;
@@ -1884,7 +1892,7 @@ class HuntMonsterAttackAnimator {
         const isUltimate = pattern?.type === 'ultimate' || pattern?.tags?.includes('ultimate');
         const isValstraxAmbush = pattern?.id === 'valstrax.crimson_comet_ambush'
             || /붉은 혜성 강습/.test(attackName);
-        const motionProfile = this.playPatternMotion(monsterImg, targetCard, pattern, attackName, type);
+        const motionProfile = this.playPatternMotion(monsterImg, targetCard, pattern, attackName, type, targets);
         this.scheduleTigrexBranchMotion(monsterImg, pattern);
         const isRoar = type === 'roar'
             || pattern?.type === 'roar'
