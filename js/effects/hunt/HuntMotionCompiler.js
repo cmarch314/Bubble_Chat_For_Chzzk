@@ -154,7 +154,6 @@ class HuntMotionCompiler {
             // 돌아가면, 버티는 구간으로 넘어가는 순간 몸이 눈에 띄게 튄다
             // (꼬리를 축으로 180도 돈 상태에서 축이 몸 중앙으로 옮겨간다).
             if (definition.pivot) state.origin = definition.pivot;
-            else if (definition.resetRotation) state.origin = null;
             if (beat.fade === 'in') state.opacity = 1;
             else if (beat.fade === 'out') state.opacity = 0;
 
@@ -186,9 +185,29 @@ class HuntMotionCompiler {
             }
             placement.push({ offset: endAt, ...this.#placementFrame(state) });
 
-            // 회전은 비트를 넘어 유지된다 — 꼬리가 박힌 채 버티는 구간이 회전을
-            // 물고 있어야 하기 때문이다. 그래서 푸는 자세를 명시적으로 둔다.
-            if (definition.resetRotation) state.rotation = 0;
+            // 복귀 중 rotate(Ndeg) -> rotate(0deg)를 보간하면 완료한 회전을
+            // 거꾸로 되감으며 집으로 간다. 한 바퀴 회전은 누적 각도를 끝까지
+            // 유지하고 모션 owner가 animation.cancel()로만 초기화한다. 반 바퀴
+            // 같은 비정규 자세는 복귀 시작점에서 즉시 세운 뒤 이동한다.
+            if (definition.resetRotation && previous.rotation) {
+                const turns = previous.rotation / 360;
+                const completedFullTurn = Math.abs(turns - Math.round(turns)) < 1e-6;
+                if (completedFullTurn) {
+                    state.rotation = previous.rotation;
+                    state.origin = previous.origin;
+                } else {
+                    pose.push({
+                        offset: Math.max(0, startAt - this.EPS),
+                        ...this.#poseFrame(previous)
+                    });
+                    state.rotation = 0;
+                    state.origin = null;
+                    pose.push({ offset: startAt, ...this.#poseFrame(state) });
+                }
+            } else if (definition.resetRotation) {
+                state.rotation = 0;
+                state.origin = null;
+            }
 
             const rotationDelta = Number(definition.rotate) || 0;
             if (rotationDelta) {

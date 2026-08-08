@@ -166,6 +166,30 @@ const angleAt = offset => Number(held.pose
 assert.strictEqual(angleAt(.5), 180, '버티는 동안 회전이 유지돼야 한다');
 assert.strictEqual(angleAt(1), 0, '복귀는 똑바로 선 채로 끝나야 한다');
 
+// 한 바퀴를 마친 회전은 복귀 중 0도로 보간하면 역회전해 보인다. 누적 각도를
+// 유지한 채 이동하고, 애니메이션 종료 시 owner가 transform을 제거해야 한다.
+const fullTurnReturn = HuntMotionCompiler.compile([
+    { beat: 'spin', ticks: 12, pose: 'spin-right' },
+    { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
+], { anchors });
+const returnStart = 12 / 16;
+const returnAngles = fullTurnReturn.pose
+    .filter(frame => frame.offset >= returnStart)
+    .map(frame => Number(frame.transform.match(/rotate\((-?[\d.]+)deg\)/)[1]));
+assert.ok(returnAngles.every(angle => angle === 360),
+    '한 바퀴 회전은 복귀 중 역회전하지 않고 360도를 유지해야 한다');
+
+// 반 바퀴 자세는 복귀 구간에 걸쳐 되감지 않고 경계에서 즉시 기본 자세가 된다.
+const halfTurnReturn = HuntMotionCompiler.compile([
+    { beat: 'slam', ticks: 3, pose: 'tail-slam' },
+    { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
+], { anchors });
+const halfReturnAngles = halfTurnReturn.pose
+    .filter(frame => frame.offset > 3 / 7)
+    .map(frame => Number(frame.transform.match(/rotate\((-?[\d.]+)deg\)/)[1]));
+assert.ok(halfReturnAngles.every(angle => angle === 0),
+    '반 바퀴 자세도 복귀 중 되감지 말고 복귀 시작점에서 즉시 세워야 한다');
+
 // 축도 회전과 함께 유지돼야 한다. 회전이 남았는데 축만 기본값으로 돌아가면
 // 버티는 구간으로 넘어가는 순간 몸이 튄다.
 const pivotAt = offset => held.pose.filter(frame => frame.offset <= offset).pop().pivot || null;
