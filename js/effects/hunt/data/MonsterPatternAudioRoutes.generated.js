@@ -1041,7 +1041,7 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         "label": null,
         "layers": [
           [
-            "local_assets/monster_hunter/world/monster/em042/em042_vo_nbnk_132_1072090229.mp3",
+            "local_assets/monster_hunter/world/monster/em042/em042_vo_nbnk_045_376349037.mp3",
             0.7,
             0
           ]
