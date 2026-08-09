@@ -221,26 +221,27 @@ const partOffset = (name, facing) => {
 };
 
 const plain = HuntMotionCompiler.compile(
-    [{ beat: 'slam', ticks: 4, to: 'hunter:2' }], { anchors, partOffset });
+    [{ beat: 'slam', ticks: 4, to: 'hunter:2', bounds: 'reach' }], { anchors, partOffset });
 const aligned = HuntMotionCompiler.compile(
-    [{ beat: 'slam', ticks: 4, to: 'hunter:2', align: 'part:tail' }], { anchors, partOffset });
+    [{ beat: 'slam', ticks: 4, to: 'hunter:2', align: 'part:tail', bounds: 'reach' }], { anchors, partOffset });
 
 const xy = frame => frame.transform.match(/translate\((-?\d+)px, (-?\d+)px\)/).slice(1).map(Number);
 const [plainX, plainY] = xy(plain.placement[plain.placement.length - 1]);
 const [alignX, alignY] = xy(aligned.placement[aligned.placement.length - 1]);
 
 // 꼬리 (.30, .17) → 중심에서 (-76, -125.4)px. 그만큼 반대로 밀어야 꼬리가 목적지에 온다.
+// 여기서는 보정 산술만 본다. 경계는 바로 아래 항목에서 따로 확인한다.
 assert.strictEqual(alignX - plainX, 76, '꼬리를 얹으려면 몸이 오른쪽으로 76px 가야 한다');
 assert.strictEqual(alignY - plainY, 125, '꼬리를 얹으려면 몸이 아래로 125px 가야 한다');
 
 // 반전하면 가로 보정도 뒤집힌다. 저작자는 좌우 두 벌을 적지 않는다.
 const mirrored = HuntMotionCompiler.compile(
     [{ beat: 'turn', ticks: 2, to: 'hunter:0' },
-     { beat: 'slam', ticks: 4, to: 'hunter:0', align: 'part:tail' }], { anchors, partOffset });
+     { beat: 'slam', ticks: 4, to: 'hunter:0', align: 'part:tail', bounds: 'reach' }], { anchors, partOffset });
 const [mirrorX] = xy(mirrored.placement[mirrored.placement.length - 1]);
 const [plainLeftX] = xy(HuntMotionCompiler.compile(
     [{ beat: 'turn', ticks: 2, to: 'hunter:0' },
-     { beat: 'slam', ticks: 4, to: 'hunter:0' }], { anchors, partOffset })
+     { beat: 'slam', ticks: 4, to: 'hunter:0', bounds: 'reach' }], { anchors, partOffset })
     .placement.slice(-1)[0]);
 assert.strictEqual(mirrorX - plainLeftX, -76,
     '왼쪽을 보면 꼬리가 화면 오른쪽에 오므로 보정도 반대다');
@@ -268,6 +269,23 @@ assert.deepStrictEqual(doubleBite.impacts.map(hit => [hit.atTicks, hit.damageSca
 assert.throws(() => HuntMotionCompiler.compile(
     [{ beat: 'a', ticks: 2, align: 'part:tail' }], { anchors, partOffset }),
     HuntMotionCompilerError, 'align은 목적지 없이 쓸 수 없다');
+
+// 접합 보정은 경계를 조용히 넘을 수 없다. 앞에서만 클램프하면 부위를 얹느라
+// 몸이 OBS 채팅 영역으로 밀려들어간다 — 벨리오로스 꼬리에서 실제로 그랬다.
+const CONTACT_MAX_Y = HuntStageAnchors.BOUNDS.contact.maxY;
+const pushed = HuntMotionCompiler.compile(
+    [{ beat: 'sweep', ticks: 4, to: 'hunter:2', align: 'part:tail' }], { anchors, partOffset });
+const pushedY = xy(pushed.placement[pushed.placement.length - 1])[1];
+assert.ok(pushedY <= CONTACT_MAX_Y,
+    `접합 뒤에도 클램프가 걸려야 한다 (${pushedY} > ${CONTACT_MAX_Y})`);
+
+// 일부러 넘겨야 하는 기술은 명시한다. 회전축이 곧 접합 부위여서 회전이 몸을
+// 도로 올리는 경우다.
+const reached = HuntMotionCompiler.compile(
+    [{ beat: 'slam', ticks: 4, to: 'hunter:2', align: 'part:tail', bounds: 'reach' }],
+    { anchors, partOffset });
+assert.ok(xy(reached.placement[reached.placement.length - 1])[1] > CONTACT_MAX_Y,
+    "bounds: 'reach'는 접합이 안전선을 넘도록 허용한다");
 
 // ---- 골격마다 값만 다르다 ----
 

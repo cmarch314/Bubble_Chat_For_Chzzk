@@ -1255,7 +1255,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { beat: 'windup', ticks: 9, pose: 'crouch' },
             { beat: 'rise', ticks: 8, to: 'above:target 300', pose: 'stretch' },
             { beat: 'aim', ticks: 5, to: 'above:target 260', pose: 'stretch-soft' },
-            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', pose: 'tail-slam', hit: true, sfx: 'impact' },
+            // bounds 'reach' — 접합 보정이 채팅 안전선을 넘어야 한다. 여기서는 회전축이
+            // 곧 접합 부위(꼬리)라, 180도 회전이 몸을 도로 위로 올린다.
+            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-slam', hit: true, sfx: 'impact' },
             // 꼬리가 박힌 채 버틴다. 회전은 유지되고 idle이 풀어준다.
             { beat: 'brace', ticks: 26, pose: 'brace' },
             { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
@@ -1448,65 +1450,138 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     }]
 ]);
 
+// 벨리오로스 — MHW:Iceborne 원종 기준으로 재조사해 재구축했다.
+//
+// 조사 근거(2026-08-09):
+//   altema.jp/mhw/beriorosu  기술 7종의 일본어 원문 모션 설명
+//     かみつき「前方に飛びかかりかみついて攻撃する」
+//     尻尾攻撃「尻尾振り後方から前面に攻撃」「当たると氷やられ」
+//     ショートタックル「横向きになり、ハンターにタックルする」
+//     滑空攻撃「滑空しハンターに向かって飛びかかる」
+//     回転ひっかき「前方に向かって飛びかかり、前脚で攻撃する」
+//     叩きつけかみつき「ジャンプしハンターを攻撃する。攻撃時に振動が発生」
+//     氷ブレス「氷ブレスを発射し着弾点に竜巻を発生させる」
+//   gamewith.jp/mhw/163255   尻尾「一歩後退した後、尻尾を横振り」
+//                            「通常のモンスターと違い先端が遅れてくる」
+//                            棘破壊「ダウン状態になり、タックルで転倒可能」
+//                            頭破壊「氷ブレス後の竜巻が残らなくなる」
+//   fextralife / game8       앞발 파괴 시 "slips a lot", 탈진 시 브레스 불발
+//                            위력 순서 slam 90 > 회전 70~75 > 활공 60 > 물기·꼬리 50
+//
+// 이전 구현에서 실제로 고친 것:
+//   - 頭破壊 효과가 근거 없는 값(피해 .70 · 명중 .75)이었다. 실제 효과는
+//     "브레스 뒤 竜巻이 남지 않는다"이므로 2타를 잃는 것으로 환산한다.
+//   - 回転ひっかき과 空中ブレス 두 기술이 통째로 빠져 있었다.
+//   - 물어뜯기가 측면으로 돌아 들어갔다. 원문은 前方に飛びかかり다.
+//   - 꼬리 휩쓸기가 표적 쪽으로 다가갔다. 원문은 一歩後退した後다.
+//     선단이 늦게 따라오는 특징도 없었다.
+//   - 벽차기가 늘 화면 왼쪽으로 고정이었다. 표적 반대편에서 파생시킨다.
+//   - 태클·활공·내려찍기가 모션 비트 없이 공용 프로파일로 떨어져 있었다.
 HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
     ['barioth.roar', '포효', 'roar', 0, {
         maxTargets: 4, actionClass: 'Roar', sourceMoveNameJA: '咆哮',
         tags: ['roar', 'transition-roar'], weight: .12, cooldown: 88, monsterAtbCost: .44,
         interference: { kind: 'roar', size: 'small' }
     }],
+
+    // 前方に飛びかかりかみついて攻撃する — 제자리에서 무는 것이 아니라 앞으로
+    // 뛰어들며 문다. 그래서 접근 비트가 가속이고, 무는 순간이 곧 착지다.
     ['barioth.bite', '물어뜯기', 'physical', .22, {
         maxTargets: 1, actionClass: 'BiteSlammedLatter', sourceMoveNameJA: '噛みつき',
         tags: ['physical', 'ground-only', 'target-contact', 'weak'], recovery: 1,
         monsterAtbCost: .30, movement: { ticks: 16 }, maxConsecutiveUses: 2,
+        impactTimeline: [{ atTicks: 7, damageScale: 1 }],
         motion: [
-            { beat: 'head-draw', ticks: 3, pose: 'crouch', face: 'target' },
-            { beat: 'take-flank', ticks: 5, to: 'left:target 155', pose: 'stretch-soft', face: 'target', moveEasing: 'snap' },
-            { beat: 'neck-thrust', ticks: 2, to: 'target', align: 'part:mouth', pose: 'stretch-strong', hit: true, sfx: 'impact', moveEasing: 'snap' },
-            { beat: 'jaw-close', ticks: 2, to: 'target', align: 'part:mouth', pose: 'land' },
-            { beat: 'head-recoil', ticks: 2, to: 'left:target 155', pose: 'settle', moveEasing: 'decelerate' },
-            { beat: 'return', ticks: 2, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+            { beat: 'crouch', ticks: 3, pose: 'crouch', face: 'target' },
+            { beat: 'leap-in', ticks: 4, to: 'toward:target 76%', pose: 'stretch', moveEasing: 'accelerate' },
+            { beat: 'bite', ticks: 2, to: 'target', align: 'part:mouth', pose: 'land', hit: true, sfx: 'impact', moveEasing: 'snap' },
+            { beat: 'jaw-hold', ticks: 3, pose: 'settle' },
+            { beat: 'return', ticks: 4, to: 'home', pose: 'idle', moveEasing: 'smooth' }
         ],
         animationProfile: 'barioth-bite-contact', animationDurationMs: 1600,
         originPart: 'head', brokenPartDamageModifiers: { head: .82 }
     }],
-    ['barioth.shoulder_check', '철산고', 'physical', .32, {
-        minTargets: 1, maxTargets: 2, actionClass: 'BiteSlammedLatterR', sourceMoveNameJA: 'タックル',
+
+    // 横向きになり、ハンターにタックルする — 옆으로 몸을 돌린 뒤 살짝 뛰고 몸통으로
+    // 밀어붙인다. 앞발 스파이크가 부서지면 여기서 제동에 실패해 넘어진다
+    // (棘破壊「タックルで転倒可能」) — slip-eligible이 그 계약이다.
+    ['barioth.short_tackle', '숏 태클', 'physical', .32, {
+        minTargets: 1, maxTargets: 2, actionClass: 'BiteSlammedLatterR', sourceMoveNameJA: 'ショートタックル',
         tags: ['physical', 'ground-only', 'target-contact', 'slip-eligible'], recovery: 1,
         monsterAtbCost: .48, movement: { ticks: 30 }, targeting: { mode: 'adjacent-lane' },
-        impact: { visualRatio: .58 },
+        impactTimeline: [{ atTicks: 8, damageScale: 1 }],
+        motion: [
+            { beat: 'turn-side', ticks: 5, pose: 'brace', face: 'target' },
+            { beat: 'hop', ticks: 3, to: 'above:home 44', pose: 'crouch', moveEasing: 'decelerate' },
+            { beat: 'tackle', ticks: 6, to: 'target', align: 'part:torso', pose: 'stretch-strong', hit: true, sfx: 'impact', moveEasing: 'accelerate' },
+            { beat: 'skid', ticks: 5, to: 'toward:target 128%', pose: 'land', moveEasing: 'decelerate' },
+            { beat: 'plant', ticks: 5, pose: 'brace' },
+            { beat: 'return', ticks: 6, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+        ],
         animationProfile: 'side-tackle-contact', animationDurationMs: 3000,
         originPart: 'torso'
     }],
-    ['barioth.lateral_pounce', '도약 덮치기', 'charge', .36, {
-        minTargets: 1, maxTargets: 2, actionClass: 'JumpAttack', sourceMoveNameJA: '飛びかかり',
-        tags: ['charge', 'ground-only', 'target-contact', 'slip-eligible'], recovery: 1,
-        monsterAtbCost: .56, movement: { ticks: 30 }, targeting: { mode: 'adjacent-lane' },
-        motion: [
-            { beat: 'coil', ticks: 7, pose: 'crouch', face: 'target' },
-            { beat: 'spring-release', ticks: 5, to: 'above:home 70', pose: 'stretch', moveEasing: 'snap' },
-            { beat: 'straight-pounce', ticks: 8, to: 'target', align: 'part:head', pose: 'stretch-strong', moveEasing: 'accelerate' },
-            { beat: 'impact', ticks: 2, to: 'target', align: 'part:head', pose: 'land', hit: true, sfx: 'impact' },
-            { beat: 'plant-claws', ticks: 4, pose: 'brace' },
-            { beat: 'return', ticks: 4, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+
+    // 前方に向かって飛びかかり、前脚で攻撃する — 벨리오로스 대표 기술인데 이전
+    // 구현에 아예 없었다. 위력이 물기·꼬리(50)보다 높고 내려찍기(90)보다 낮은
+    // 70~75대라 그 사이에 놓는다. 앞발 둘로 연속 두 번 긁는다.
+    ['barioth.spin_claw', '회전 할퀴기', 'physical', .40, {
+        minTargets: 1, maxTargets: 2, actionClass: 'JumpAttack', sourceMoveNameJA: '回転ひっかき',
+        tags: ['physical', 'ground-only', 'target-contact', 'multi-hit', 'slip-eligible'], recovery: 1,
+        monsterAtbCost: .54, movement: { ticks: 26 }, targeting: { mode: 'adjacent-lane' },
+        impactTimeline: [
+            { atTicks: 10, damageScale: 1 },
+            { atTicks: 14, targetMode: 'repeat-previous', damageScale: .6 }
         ],
-        animationProfile: 'barioth-lateral-pounce', animationDurationMs: 3000,
-        originPart: 'head', weightWhenBroken: { 'left-front-leg': .72, 'right-front-leg': .72 }
+        motion: [
+            { beat: 'wind-up', ticks: 5, pose: 'crouch', face: 'target' },
+            { beat: 'lunge', ticks: 5, to: 'toward:target 72%', pose: 'stretch', moveEasing: 'accelerate' },
+            { beat: 'first-claw', ticks: 4, to: 'target', align: 'part:left-front-leg', pose: 'spin-right', hit: true, sfx: 'impact', moveEasing: 'snap' },
+            { beat: 'second-claw', ticks: 3, to: 'target', align: 'part:right-front-leg', pose: 'land', hit: true, damageScale: .6 },
+            { beat: 'recover', ticks: 4, pose: 'settle', moveEasing: 'decelerate' },
+            { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+        ],
+        animationProfile: 'barioth-lateral-pounce', animationDurationMs: 2600,
+        originPart: 'left-front-leg',
+        weightWhenBroken: { 'left-front-leg': .72, 'right-front-leg': .72 }
     }],
+
+    // 一歩後退した後、尻尾を横振りして攻撃する
+    // 通常のモンスターと違い先端が遅れてくる
+    // 이 두 가지가 벨리오로스 꼬리의 정체성이다. 이전 구현은 반대로 표적 쪽으로
+    // 64% 다가갔고 선단 지연도 없었다. 물러남은 toward의 음수 비율로, 선단 지연은
+    // 본 타격 뒤에 오는 약한 2타로 쓴다.
     ['barioth.tail_sweep', '꼬리 휩쓸기', 'area', .32, {
         minTargets: 2, maxTargets: 3, actionClass: 'TailAttackClockwise', sourceMoveNameJA: '尻尾なぎ払い',
         tags: ['area', 'tail', 'ice', 'ground-only', 'target-contact'], recovery: 1,
         monsterAtbCost: .52, movement: { ticks: 28 }, targeting: { mode: 'primary-flank-passes', passCount: 1 },
+        impactTimeline: [
+            { atTicks: 9, damageScale: 1 },
+            { atTicks: 15, targetMode: 'repeat-previous', damageScale: .5 }
+        ],
         motion: [
-            { beat: 'close-range', ticks: 6, to: 'toward:target 64%', pose: 'crouch', face: 'target' },
-            { beat: 'tail-draw', ticks: 5, pose: 'brace', rotateBy: 24, origin: 'part:torso' },
-            { beat: 'wide-sweep', ticks: 8, to: 'target', align: 'part:tail', pose: 'tail-whip', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
-            { beat: 'slide-out', ticks: 4, to: 'right:target 80', pose: 'settle', moveEasing: 'decelerate' },
+            { beat: 'step-back', ticks: 5, to: 'toward:target -32%', pose: 'brace', face: 'target', moveEasing: 'decelerate' },
+            { beat: 'coil', ticks: 4, pose: 'crouch' },
+            // 꼬리를 표적 상단에 얹는다. 표적 중심에 얹으면 벨리오로스 꼬리 앵커가
+            // 이미지 위쪽(y .15)이라 몸이 133px 아래로 밀려 채팅 안전선을 넘는다.
+            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
+            // 몸이 멈춘 뒤에도 꼬리 끝이 계속 돌아 나온다. 몸통을 축으로 조금 더
+            // 돌려 그 지연을 만든다.
+            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotateBy: 26, origin: 'part:torso', hit: true, damageScale: .5 },
+            { beat: 'unwind', ticks: 4, pose: 'brace', moveEasing: 'decelerate' },
             { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
         ],
         animationProfile: 'barioth-wide-tail-sweep', animationDurationMs: 2800, originPart: 'tail',
+        // 尻尾切断「判定が大きく縮まる」
         brokenPartDamageModifiers: { tail: .70 }, brokenPartTargetCaps: { tail: 1 },
         statusBlockedWhenBroken: ['tail']
     }],
+
+    // 氷ブレスを発射し着弾点に竜巻を発生させる — 착탄(1타) 뒤 남는 회오리(2타).
+    // 頭破壊「氷ブレス後の竜巻が残らなくなる」이므로 머리를 부수면 2타가 사라진다.
+    // 지금 구조로는 타임라인 항목을 조건부로 뺄 수 없어, .55+.45 중 2타분을 잃는
+    // 것으로 환산해 x.55를 쓴다. 상태이상도 남는 회오리가 거는 것이라 함께 막는다.
+    // (이전 구현의 피해 .70 · 명중 .75는 어느 자료에도 없는 값이었다.)
     ['barioth.ice_tornado', '빙결 회오리 브레스', 'projectile', .30, {
         minTargets: 1, maxTargets: 2, actionClass: 'BreathNormal', sourceMoveNameJA: '氷ブレス',
         tags: ['projectile', 'ice', 'elemental', 'ground-hazard', 'butt-stumble'], recovery: 1,
@@ -1517,27 +1592,57 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
             { atTicks: 28, targetMode: 'repeat-previous', damageScale: .45 }
         ],
         motion: [
+            // 사출은 projectileLaunchDelayTicks 9와 같은 틱에서 시작해야 한다.
+            // 어긋나면 입이 열리기 전에 얼음이 날아가거나 그 반대가 된다.
             { beat: 'anchor-claws', ticks: 6, pose: 'crouch', face: 'target' },
-            { beat: 'draw-breath', ticks: 5, pose: 'brace', scaleX: .94, scaleY: 1.06 },
+            { beat: 'draw-breath', ticks: 3, pose: 'brace', scaleX: .94, scaleY: 1.06 },
             { beat: 'exhale', ticks: 3, pose: 'stretch-soft', sfx: 'projectile' },
             { beat: 'recoil', ticks: 6, pose: 'settle', offsetX: 18, moveEasing: 'decelerate' },
-            { beat: 'watch-tornado', ticks: 5, pose: 'brace' },
+            { beat: 'watch-tornado', ticks: 7, pose: 'brace' },
             { beat: 'reset', ticks: 5, to: 'home', pose: 'idle' }
         ],
         animationProfile: 'barioth-ice-tornado-cast', animationDurationMs: 3000, originPart: 'mouth',
         impactFx: { emoji: '🌪️', className: 'barioth-ice-tornado', durationMs: 3600 },
-        brokenPartDamageModifiers: { head: .70 }, brokenPartAccuracyModifiers: { head: .75 },
+        brokenPartDamageModifiers: { head: .55 },
         statusBlockedWhenBroken: ['head']
     }],
+
+    // 滞空してから空中でブレスを吐く。지상 브레스와 예비 동작이 달라 별개 기술이다
+    // (지상은 앞발을 박고 버티지만 이쪽은 떠오른 채 쏜다). 이전 구현에 없었다.
+    ['barioth.hover_breath', '체공 빙결 브레스', 'projectile', .30, {
+        minTargets: 1, maxTargets: 2, actionClass: 'BreathFly', sourceMoveNameJA: '空中氷ブレス',
+        tags: ['projectile', 'ice', 'elemental', 'air-compatible', 'ground-hazard'], recovery: 1,
+        cooldown: 40, monsterAtbCost: .52, movement: { ticks: 32 }, delivery: 'projectile',
+        projectileLaunchDelayTicks: 13, impact: { delayTicks: 22, survivesInterruption: true },
+        impactTimeline: [{ atTicks: 22, damageScale: 1 }],
+        motion: [
+            // 사출은 projectileLaunchDelayTicks 13과 같은 틱이다(5+6+2).
+            { beat: 'wing-load', ticks: 5, pose: 'crouch', face: 'target' },
+            { beat: 'lift', ticks: 6, to: 'above:home 190', pose: 'stretch', moveEasing: 'decelerate' },
+            { beat: 'hover', ticks: 2, pose: 'stretch-soft' },
+            { beat: 'exhale', ticks: 6, pose: 'stretch-strong', sfx: 'projectile' },
+            { beat: 'hold-aim', ticks: 5, pose: 'settle' },
+            { beat: 'descend', ticks: 8, to: 'home', pose: 'idle', moveEasing: 'decelerate' }
+        ],
+        animationProfile: 'barioth-ice-tornado-cast', animationDurationMs: 3200, originPart: 'mouth',
+        impactFx: { emoji: '🌪️', className: 'barioth-ice-tornado', durationMs: 3600 },
+        brokenPartDamageModifiers: { head: .70 },
+        statusBlockedWhenBroken: ['head']
+    }],
+
+    // 벽에 붙었다가 차고 나오는 급습. 이전 구현은 늘 화면 왼쪽(left:home 420)으로
+    // 고정이라 표적이 왼쪽에 있어도 왼쪽 벽으로 갔다. 표적 반대편에서 파생시킨다 —
+    // toward의 음수 비율이 곧 "표적 반대 방향"이다.
     ['barioth.wall_pounce', '벽차기 급습', 'charge', .42, {
         maxTargets: 1, actionClass: 'JumpAttack', sourceMoveNameJA: '壁蹴り飛びかかり',
         tags: ['charge', 'wall-cling', 'ambush', 'target-contact', 'strong', 'slip-eligible'],
         cooldown: 48, recovery: 1, monsterAtbCost: .68, movement: { ticks: 42, untargetable: true },
+        impactTimeline: [{ atTicks: 30, damageScale: 1 }],
         motion: [
-            { beat: 'spot-wall', ticks: 4, pose: 'crouch', face: 'left:home 420' },
-            { beat: 'wall-bound', ticks: 7, to: 'left:home 440', pose: 'stretch', moveEasing: 'snap' },
+            { beat: 'spot-wall', ticks: 4, pose: 'crouch', face: 'target' },
+            { beat: 'wall-bound', ticks: 7, to: 'toward:target -190%', pose: 'stretch', bounds: 'pivot', moveEasing: 'snap' },
             { beat: 'cling', ticks: 7, pose: 'brace', rotation: -34, origin: 'part:left-front-leg' },
-            { beat: 'kick-off', ticks: 4, to: 'left:home 350', pose: 'stretch-strong', face: 'target', moveEasing: 'snap' },
+            { beat: 'kick-off', ticks: 4, to: 'toward:target -150%', pose: 'stretch-strong', bounds: 'pivot', face: 'target', moveEasing: 'snap' },
             { beat: 'diagonal-pounce', ticks: 8, to: 'target', align: 'part:head', pose: 'stretch-strong', rotateBy: 360, origin: 'part:left-front-leg', moveEasing: 'accelerate' },
             { beat: 'impact', ticks: 3, to: 'target', align: 'part:head', pose: 'land', hit: true, sfx: 'impact' },
             { beat: 'skid', ticks: 4, to: 'below:target 65', pose: 'settle', moveEasing: 'decelerate' },
@@ -1546,28 +1651,52 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
         animationProfile: 'barioth-wall-pounce', animationDurationMs: 4200, originPart: 'head',
         weightWhenBroken: { 'left-front-leg': .55, 'right-front-leg': .55 }
     }],
+
+    // 滑空しハンターに向かって飛びかかる — 낮게 활공해 지나간다. 이전 구현은
+    // 노트에 "한쪽 앞발이 닿는 순간부터 관성으로 180도 회전하며 미끄러져 착지"라고
+    // 적어두고 정작 모션 비트가 없어 공용 프로파일로 떨어졌다. 적어둔 대로 만든다.
     ['barioth.glide_pounce', '저공 활공 덮치기', 'charge', .39, {
-        minTargets: 2, maxTargets: 3, actionClass: 'BreathFly', sourceMoveNameJA: '滑空飛びかかり',
+        minTargets: 2, maxTargets: 3, actionClass: 'BreathFly', sourceMoveNameJA: '滑空攻撃',
         tags: ['charge', 'air-compatible', 'target-contact', 'slip-eligible'], recovery: 1,
         monsterAtbCost: .62, movement: { ticks: 36, untargetable: true }, targeting: { mode: 'adjacent-lane' },
         chargeMode: 'single',
-        // 전용 활강: 낮은 직선 비행 뒤 한쪽 앞발이 닿는 순간부터 관성으로
-        // 180도 회전하며 미끄러져 착지한다. 접근 자체는 타격이 아니다.
-        impact: { visualRatio: .74 },
+        impactTimeline: [{ atTicks: 20, damageScale: 1 }],
+        motion: [
+            { beat: 'wing-load', ticks: 5, pose: 'crouch', face: 'target' },
+            { beat: 'take-off', ticks: 5, to: 'above:home 150', pose: 'stretch', moveEasing: 'decelerate' },
+            { beat: 'glide-in', ticks: 10, to: 'above:target 90', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'claw-touch', ticks: 3, to: 'target', align: 'part:left-front-leg', pose: 'land', hit: true, sfx: 'impact' },
+            // 앞발이 닿은 지점을 축으로 관성이 몸을 반 바퀴 돌린다.
+            { beat: 'inertia-slide', ticks: 6, to: 'toward:target 132%', pose: 'settle', rotateBy: 180, origin: 'part:left-front-leg', moveEasing: 'decelerate' },
+            { beat: 'return', ticks: 7, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+        ],
         animationProfile: 'barioth-glide-circle-land', animationDurationMs: 3600,
         originPart: 'left-front-leg',
         weightWhenBroken: { 'left-front-leg': .65, 'right-front-leg': .65 }
     }],
+
+    // ジャンプしハンターを攻撃する。攻撃時に振動が発生する — 위력 90으로 최대.
+    // 수직으로 크게 뛰어 표적 상공에서 떨어진다. 착지 진동은 직격자에게 중복되지 않는다.
     ['barioth.landing_slam', '도약 내려찍기', 'physical', .45, {
-        maxTargets: 1, actionClass: 'JumpAttack', sourceMoveNameJA: 'ジャンプ攻撃',
+        maxTargets: 1, actionClass: 'JumpAttack', sourceMoveNameJA: '叩きつけかみつき',
         tags: ['physical', 'jump', 'slam', 'strong', 'target-contact', 'slip-eligible'],
         cooldown: 52, recovery: 1, monsterAtbCost: .72, movement: { ticks: 44 },
         interference: { kind: 'tremor', size: 'small', directHitSupersedes: true },
-        // 티가렉스의 도약 덮치기와 같은 수직 도약 → 표적 낙하 모션을 그대로 쓴다.
-        // 정상 착지는 미끄러지지 않으며, 앞발 파괴 뒤에만 shared broken-limb-slip이 붙는다.
-        impact: { visualRatio: .68 }, animationProfile: 'barioth-spring-leap',
+        impactTimeline: [{ atTicks: 26, damageScale: 1 }],
+        motion: [
+            { beat: 'coil', ticks: 7, pose: 'crouch', face: 'target' },
+            { beat: 'vertical-leap', ticks: 7, to: 'above:home 330', pose: 'stretch', moveEasing: 'decelerate' },
+            { beat: 'apex', ticks: 4, to: 'above:target 300', pose: 'stretch-soft' },
+            { beat: 'fall', ticks: 8, to: 'above:target 60', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'slam', ticks: 3, to: 'target', align: 'part:torso', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'tremor-hold', ticks: 8, pose: 'brace' },
+            { beat: 'return', ticks: 7, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+        ],
+        animationProfile: 'barioth-spring-leap',
         animationDurationMs: 4400, originPart: 'torso'
     }],
+
+    // 탈진 중에는 브레스가 나오지 않는다(not even his ice breath will work).
     ['barioth.ice_breath_fizzle', '탈진 빙결 브레스 불발', 'physical', 0, {
         maxTargets: 1, actionClass: 'BreathNormal', sourceMoveNameJA: '疲労ブレス不発',
         state: 'exhausted', tags: ['ground-only', 'ice', 'no-impact', 'exhausted-fizzle'], recovery: 1,

@@ -1046,7 +1046,7 @@
           ]
         }
       },
-      "barioth.shoulder_check": {
+      "barioth.short_tackle": {
         "telegraph": {
           "label": null,
           "layers": [
@@ -1058,7 +1058,7 @@
           ]
         }
       },
-      "barioth.glide_dive": {
+      "barioth.glide_pounce": {
         "telegraph": {
           "label": null,
           "layers": [

@@ -139,3 +139,36 @@ assert.ok(live.patterns.some(p => p.id === 'diablos.tail_slam_rock'));
 try { fs.unlinkSync(tmp); } catch { /* best effort */ }
 try { fs.unlinkSync(motionTmp); } catch { /* best effort */ }
 console.log('[test] hunt audio pattern-map derivation, overrides, and live catalog passed.');
+
+// ── 라우트가 존재하는 패턴을 가리키는가 ──────────────────────────────────────
+//
+// 벨리오로스에 `barioth.glide_dive` 라우트가 있었는데, 그 이름의 패턴은 어느
+// 버전에도 존재한 적이 없다. 텔레그래프 음성이 한 번도 재생되지 않았고 아무
+// 신호도 없었다. 같은 부류로 `barioth.shoulder_check`는 패턴이 이름을 바꾸면서
+// 남겨진 죽은 키였다.
+//
+// 라우트는 조용히 죽는다. 재생되지 않는 것과 그 패턴에 음성이 없는 것이
+// 화면에서 구분되지 않기 때문이다. 전수로 대조한다.
+{
+    const routes = require('../data/hunt/monster-pattern-audio-routes.json').routes || {};
+    global.window = global;
+    const overrides = require('../js/effects/hunt/HuntMonsterProfiles.js');
+    const known = new Set();
+    for (const [monsterId, list] of Object.entries(overrides)) {
+        for (const pattern of list || []) {
+            known.add(pattern.id);
+            // 후속기(지중 급습 등)는 카탈로그가 followUp에서 만들어 낸다.
+            // 원본 목록에만 없을 뿐 실재하는 패턴이므로 함께 센다.
+            const suffix = pattern.followUp?.idSuffix;
+            if (suffix) known.add(`${monsterId}.${suffix}`);
+        }
+    }
+    const orphans = [];
+    for (const [monsterId, patternRoutes] of Object.entries(routes)) {
+        for (const patternId of Object.keys(patternRoutes || {})) {
+            if (!known.has(patternId)) orphans.push(`${monsterId} → ${patternId}`);
+        }
+    }
+    assert.deepStrictEqual(orphans, [],
+        `없는 패턴을 가리키는 오디오 라우트가 있다. 조용히 재생되지 않는다:\n  ${orphans.join('\n  ')}`);
+}

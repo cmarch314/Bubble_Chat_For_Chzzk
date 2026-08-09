@@ -44,7 +44,12 @@ class HuntStageAnchors {
         standoff: Object.freeze({ minY: -190, maxY: 8 }),
         // 회전 기술은 표적 바로 위에 자리를 잡는 것이 곧 공격이다. 이동 한계로
         // 끌어당기면 축이 헌터에서 벗어나 꼬리가 닿지 않는다. 가로만 넓게 연다.
-        pivot: Object.freeze({ minY: -240, maxY: 430, minX: -960, maxX: 960 })
+        pivot: Object.freeze({ minY: -240, maxY: 430, minX: -960, maxX: 960 }),
+        // align이 몸을 채팅 영역까지 밀어야 하는 경우에만 쓴다. 회전축이 곧
+        // 접합 부위여서 회전이 몸을 도로 끌어올리는 기술(꼬리 내려찍기)이
+        // 여기 해당한다. 축과 접합 부위가 다르면 몸이 그대로 잘리므로,
+        // 이 프리셋을 쓰기 전에 회전이 실제로 복원하는지 확인해야 한다.
+        reach: Object.freeze({ minY: -240, maxY: 620, minX: -960, maxX: 960 })
     });
 
     // 헌터 카드 기준점의 세로 비율. bottom을 카드 밑변이 아니라 조금 위로 잡는

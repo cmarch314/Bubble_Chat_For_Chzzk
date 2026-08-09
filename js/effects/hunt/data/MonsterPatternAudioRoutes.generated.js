@@ -1048,7 +1048,7 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         ]
       }
     },
-    "barioth.shoulder_check": {
+    "barioth.short_tackle": {
       "telegraph": {
         "label": null,
         "layers": [
@@ -1060,7 +1060,7 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         ]
       }
     },
-    "barioth.glide_dive": {
+    "barioth.glide_pounce": {
       "telegraph": {
         "label": null,
         "layers": [

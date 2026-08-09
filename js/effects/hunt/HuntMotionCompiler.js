@@ -73,13 +73,18 @@ class HuntMotionCompiler {
     // 이동해서 몸통 내려찍기나 다름없다"가 정확히 이 뺄셈이 없어서 났다.
     // 부위 좌표가 이미 데이터에 있으므로 런타임이 계산한다.
     static #place(spec, beat, anchors, partOffset, facing) {
-        const destination = anchors.resolve(spec, { bounds: beat.bounds || 'contact' });
+        const bounds = beat.bounds || 'contact';
+        const destination = anchors.resolve(spec, { bounds });
         if (!beat.align) return destination;
         const offset = partOffset(beat.align, facing);
-        return {
-            x: Math.round(destination.x - offset.x),
-            y: Math.round(destination.y - offset.y)
-        };
+        // 접합 뒤에 다시 클램프한다. 앞에서만 걸면 접합 보정이 경계를 조용히
+        // 넘는다 — 벨리오로스 꼬리 앵커가 이미지 위쪽이라 꼬리를 표적에 얹으면
+        // 몸이 133px 아래로 밀려 OBS 채팅 영역으로 들어갔다.
+        // 일부러 넘겨야 하는 기술은 bounds: 'reach'로 명시한다.
+        return anchors.clamp({
+            x: destination.x - offset.x,
+            y: destination.y - offset.y
+        }, bounds);
     }
 
     static compile(beats, {
