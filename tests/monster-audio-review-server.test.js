@@ -188,6 +188,10 @@ if (fs.existsSync(htmlPath)) {
     assert.ok(html.includes('/api/hunt-patterns'));
     assert.ok(html.includes('/api/hunt-pattern-route'));
     assert.ok(html.includes('/api/hunt-pattern-motion'));
+    assert.ok(html.includes('state.apiVersion<2'),
+        'the editor must block object motion saves against a stale numeric-only server');
+    assert.ok(html.includes('구버전 저장 차단됨'),
+        'a stale server must report a restart instruction instead of corrupting every beat to one tick');
     assert.ok(html.includes('motion-editor'));
     assert.ok(html.includes('beat-handle'));
     assert.ok(html.includes('타이밍 편집'));

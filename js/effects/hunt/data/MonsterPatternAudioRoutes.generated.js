@@ -1047,6 +1047,42 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
           ]
         ]
       }
+    },
+    "barioth.shoulder_check": {
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em042/em042_vo_nbnk_001_7029202.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "barioth.glide_dive": {
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em042/em042_vo_nbnk_049_398818738.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    },
+    "barioth.ice_tornado": {
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em042/em042_vo_nbnk_056_447282015.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
     }
   }
 };

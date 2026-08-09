@@ -15,6 +15,7 @@ const UI_PATH = path.join(__dirname, 'monster-audio-review.html');
 const HOST = '127.0.0.1';
 const DEFAULT_PORT = 17930;
 const BODY_LIMIT = 64 * 1024;
+const REVIEW_API_VERSION = 2;
 
 const PRESETS = Object.freeze({
     roar: { label: '포효', tags: ['monster_roar'] },
@@ -467,7 +468,7 @@ function createServer(options = {}) {
                 return;
             }
             if (request.method === 'GET' && url.pathname === '/api/monsters') {
-                sendJson(response, 200, { monsters: listMonsters(labelsPath), presets: PRESETS });
+                sendJson(response, 200, { apiVersion: REVIEW_API_VERSION, monsters: listMonsters(labelsPath), presets: PRESETS });
                 return;
             }
             if (request.method === 'GET' && url.pathname === '/api/groups') {
