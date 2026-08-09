@@ -1505,7 +1505,11 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
     // 横向きになり、ハンターにタックルする — 옆으로 몸을 돌린 뒤 살짝 뛰고 몸통으로
     // 밀어붙인다. 앞발 스파이크가 부서지면 여기서 제동에 실패해 넘어진다
     // (棘破壊「タックルで転倒可能」) — slip-eligible이 그 계약이다.
-    ['barioth.short_tackle', '숏 태클', 'physical', .32, {
+    //
+    // 이름은 철산고다. 국내 몬헌 커뮤니티가 빙아룡의 이 기술을 부르는 이름이고,
+    // 원문 ショートタックル의 직역보다 이쪽이 통한다. 재구축 때 "숏 태클"로
+    // 바꿨다가 되돌렸다 — 알아보는 이름을 번역 정확도로 갈아치우면 안 된다.
+    ['barioth.shoulder_check', '철산고', 'physical', .32, {
         minTargets: 1, maxTargets: 2, actionClass: 'BiteSlammedLatterR', sourceMoveNameJA: 'ショートタックル',
         tags: ['physical', 'ground-only', 'target-contact', 'slip-eligible'], recovery: 1,
         monsterAtbCost: .48, movement: { ticks: 30 }, targeting: { mode: 'adjacent-lane' },

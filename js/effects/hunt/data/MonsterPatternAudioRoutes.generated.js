@@ -1048,7 +1048,7 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         ]
       }
     },
-    "barioth.short_tackle": {
+    "barioth.shoulder_check": {
       "telegraph": {
         "label": null,
         "layers": [

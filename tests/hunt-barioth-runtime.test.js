@@ -28,7 +28,7 @@ const byId = id => patterns.find(pattern => pattern.id === id);
 
 const REQUIRED = {
     'barioth.bite': '噛みつき',
-    'barioth.short_tackle': 'ショートタックル',
+    'barioth.shoulder_check': 'ショートタックル',
     'barioth.spin_claw': '回転ひっかき',
     'barioth.tail_sweep': '尻尾なぎ払い',
     'barioth.ice_tornado': '氷ブレス',
@@ -123,7 +123,7 @@ assert.strictEqual(tail.brokenPartTargetCaps.tail, 1, '꼬리를 자르면 범�
 
 // 棘破壊「ダウン状態になり、タックルで転倒可能」
 // 앞발로 제동하는 기술에만 slip-eligible이 붙는다. 브레스에 붙으면 안 된다.
-const SLIP = ['barioth.short_tackle', 'barioth.spin_claw', 'barioth.wall_pounce',
+const SLIP = ['barioth.shoulder_check', 'barioth.spin_claw', 'barioth.wall_pounce',
     'barioth.glide_pounce', 'barioth.landing_slam'];
 for (const id of SLIP) {
     assert.ok(byId(id).tags.includes('slip-eligible'),
