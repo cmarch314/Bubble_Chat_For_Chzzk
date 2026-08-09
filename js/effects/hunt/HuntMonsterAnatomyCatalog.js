@@ -141,14 +141,19 @@ class HuntMonsterAnatomyCatalog {
             })
         }),
         barioth: Object.freeze({
+            // 원본 스프라이트는 머리가 중앙 상단에서 왼쪽을 본다. 꼬리는
+            // 우상단으로 솟고, 날개 바깥판과 그 아래로 뻗은 앞발은 별개다.
             sourceSize: Object.freeze({ width: 512, height: 512 }),
-            baseFacing: 'front',
+            baseFacing: 'left',
             parts: Object.freeze({
-                head: Object.freeze({ x: .47, y: .25 }),
-                torso: Object.freeze({ x: .49, y: .56 }),
-                'left-wing': Object.freeze({ x: .20, y: .65 }),
-                'right-wing': Object.freeze({ x: .79, y: .65 }),
-                tail: Object.freeze({ x: .65, y: .20 })
+                head: Object.freeze({ x: .49, y: .24 }),
+                mouth: Object.freeze({ x: .41, y: .23 }),
+                torso: Object.freeze({ x: .50, y: .53 }),
+                'left-wing': Object.freeze({ x: .18, y: .48 }),
+                'right-wing': Object.freeze({ x: .82, y: .48 }),
+                'left-front-leg': Object.freeze({ x: .31, y: .81 }),
+                'right-front-leg': Object.freeze({ x: .72, y: .81 }),
+                tail: Object.freeze({ x: .70, y: .15 })
             })
         })
     });

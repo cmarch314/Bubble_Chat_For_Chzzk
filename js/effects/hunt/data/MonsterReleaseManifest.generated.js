@@ -1,7 +1,7 @@
 'use strict';
 const HUNT_MONSTER_RELEASE_MANIFEST = Object.freeze({
     schemaVersion: 1,
-    sourceDigest: 'd50d25eea542f3ad0b556f04c236e97d9eeee465709156203382bc9d296f5812',
+    sourceDigest: 'bff4c3f6807766d4658f5d8f408bb7f03d3b3805b817dfd5f296f275cd9b63f6',
     records: Object.freeze([
     {
         "id": "bazelgeuse",
@@ -168,8 +168,8 @@ const HUNT_MONSTER_RELEASE_MANIFEST = Object.freeze({
     },
     {
         "id": "barioth",
-        "review": "world-flying-batch-2026-07-28",
-        "reviewedAt": "2026-07-28",
+        "review": "barioth-rebuild-2026-08-09",
+        "reviewedAt": "2026-08-09",
         "canonicalEdition": "world-iceborne",
         "variantOf": null,
         "mechanicModules": [

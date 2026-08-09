@@ -4,6 +4,7 @@ class HuntMonsterAttackAnimator {
         this.onRoar = onRoar;
         this.motionGeneration = 0;
         this.activeMonsterMotion = null;
+        this.activeBeatMotionPreview = null;
         this.motionTrace = [];
         this.motionTraceLimit = 48;
     }
@@ -628,6 +629,7 @@ class HuntMonsterAttackAnimator {
 
     clearMonsterMotion(reason = 'dispose') {
         const cleared = this.clearActiveMonsterMotion(null, reason);
+        this.activeBeatMotionPreview = null;
         this.card?.classList?.remove?.('hunt-monster-underground', 'monster-charge-rumble');
         this.card?.querySelectorAll?.('.hunt-monster-attack-motion')?.forEach(motionElement => {
             const motionClasses = Array.from(motionElement.classList || [])
@@ -656,6 +658,12 @@ class HuntMonsterAttackAnimator {
     // 병존이 되므로 몬스터를 하나씩 옮길 수 있고, 어느 시점에 멈춰도 나머지는
     // 그대로 동작한다.
     playBeatMotion(monsterImg, pattern, profileId, targetCard = null, targets = []) {
+        if (pattern?.runtimePreviewScrub && this.activeBeatMotionPreview?.animations) {
+            this.activeBeatMotionPreview.animations.forEach(animation => {
+                try { animation.cancel(); } catch (_) { /* detached preview layer */ }
+            });
+            this.activeBeatMotionPreview = null;
+        }
         const Compiler = typeof HuntMotionCompiler !== 'undefined'
             ? HuntMotionCompiler
             : (typeof require === 'function' ? require('./HuntMotionCompiler.js') : null);
@@ -696,7 +704,9 @@ class HuntMonsterAttackAnimator {
         // 해석 시점에 반영된다(규칙 2). 저작자는 좌우 두 벌을 적지 않는다.
         const poseFrames = built.pose.map(frame => {
             const keyframe = { offset: frame.offset, transform: frame.transform };
+            if (frame.easing) keyframe.easing = frame.easing;
             if (frame.filter) keyframe.filter = frame.filter;
+            if (frame.origin) keyframe.transformOrigin = frame.origin;
             const pivot = frame.pivot
                 ? this.resolvePosePivot(frame.pivot, frame.facing ?? 1)
                 : null;
@@ -704,7 +714,7 @@ class HuntMonsterAttackAnimator {
             return keyframe;
         });
 
-        const timing = { duration: built.durationMs, easing: 'ease-in-out', fill: 'both' };
+        const timing = { duration: built.durationMs, easing: 'linear', fill: 'both' };
         const animations = [
             motionElement.animate?.(built.placement, timing),
             poseLayer.animate?.(poseFrames, timing)
@@ -730,12 +740,15 @@ class HuntMonsterAttackAnimator {
         motionElement.dataset.monsterBeatImpacts = built.impacts
             .map(impact => impact.atTicks).join(',');
 
+        const previewController = { animations, durationMs: built.durationMs };
+        this.activeBeatMotionPreview = previewController;
         const clear = () => {
             for (const animation of animations) { try { animation.cancel(); } catch (_) { /* detached */ } }
+            if (this.activeBeatMotionPreview === previewController) this.activeBeatMotionPreview = null;
             delete motionElement.dataset.monsterBeatTimeline;
             delete motionElement.dataset.monsterBeatImpacts;
         };
-        this.animationTimers.timeout(clear, built.durationMs + 60);
+        if (!pattern?.runtimePreviewScrub) this.animationTimers.timeout(clear, built.durationMs + 60);
 
         return Object.freeze({
             id: profileId || pattern.id || 'beat-motion',
@@ -746,6 +759,19 @@ class HuntMonsterAttackAnimator {
             delivery: pattern?.delivery || null,
             beats: built
         });
+    }
+
+    seekBeatMotion(progress = 0) {
+        const controller = this.activeBeatMotionPreview;
+        if (!controller?.animations?.length) return false;
+        const ratio = Math.max(0, Math.min(1, Number(progress) || 0));
+        controller.animations.forEach(animation => {
+            try {
+                animation.pause();
+                animation.currentTime = controller.durationMs * ratio;
+            } catch (_) { /* detached preview layer */ }
+        });
+        return true;
     }
 
     playPatternMotion(monsterImg, targetCard, pattern, attackName, type, targets = []) {
@@ -1913,7 +1939,33 @@ class HuntMonsterAttackAnimator {
                 Number(pattern.attachedFx.durationMs || motionProfile?.duration || 900),
                 pattern.originPart || null
             );
-        } else if (motionProfile?.id === 'tail-slam-rock') {
+        }
+        if (pattern?.impactFx && stage) {
+            const impactTicks = Number(pattern.impact?.delayTicks
+                ?? pattern.impactTimeline?.[0]?.atTicks
+                ?? pattern.windupTicks
+                ?? 0);
+            const tickMs = 1000 / Math.max(1, Number(
+                (typeof HuntAtbConfig !== 'undefined' && HuntAtbConfig?.TICKS_PER_SECOND) || 10
+            ));
+            this.animationTimers.timeout(() => {
+                const liveTarget = this.card.querySelector(`#fight-card-${targets[0]?.index}`) || targetCard;
+                const anchor = liveTarget?.querySelector?.('.game-hunt-weapon-img-container') || liveTarget;
+                const targetRect = anchor?.getBoundingClientRect?.();
+                const stageRect = stage.getBoundingClientRect?.();
+                this.createLocalEmojiFx(
+                    stage,
+                    pattern.impactFx.emoji || '💥',
+                    pattern.impactFx.className || 'impact-action',
+                    Number(pattern.impactFx.durationMs || 900),
+                    targetRect && stageRect ? {
+                        left: `${targetRect.left + targetRect.width / 2 - stageRect.left}px`,
+                        top: `${targetRect.top + targetRect.height * .42 - stageRect.top}px`
+                    } : {}
+                );
+            }, Math.max(0, Math.round(impactTicks * tickMs)));
+        }
+        if (motionProfile?.id === 'tail-slam-rock') {
             const duration = Number(motionProfile?.duration || 3400);
             this.createLocalEmojiFx(stage, '☁️', 'tail-slam-dust', duration);
             this.animationTimers.timeout(() => {

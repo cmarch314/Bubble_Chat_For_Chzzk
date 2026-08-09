@@ -243,7 +243,9 @@ class HuntMonsterArchetypeCatalog {
                 Object.freeze({
                     kind: 'broken-limb-slip',
                     parts: Object.freeze(['left-front-leg', 'right-front-leg']),
-                    patternTags: Object.freeze(['charge']),
+                    // 이동 기술 전체가 아니라, 실제로 앞발 가시로 제동하는
+                    // 도약·돌진·착지에만 미끄러짐을 적용한다.
+                    patternTags: Object.freeze(['slip-eligible']),
                     baseTicks: 16,
                     perBrokenPartTicks: 8
                 })
@@ -257,7 +259,7 @@ class HuntMonsterArchetypeCatalog {
                 Object.freeze({
                     kind: 'broken-limb-slip',
                     parts: Object.freeze(['left-front-leg', 'right-front-leg']),
-                    patternTags: Object.freeze(['charge']),
+                    patternTags: Object.freeze(['slip-eligible']),
                     baseTicks: 14,
                     perBrokenPartTicks: 7
                 }),

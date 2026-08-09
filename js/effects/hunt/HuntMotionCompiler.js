@@ -49,6 +49,19 @@ class HuntMotionCompiler {
     // 4.1배 차이 나는 사고가 났다.
     static WINDUP_AT = .22;
     static SWING_AT = .88;
+    static EASING_PRESETS = Object.freeze({
+        linear: 'linear',
+        accelerate: 'cubic-bezier(.42,0,1,1)',
+        decelerate: 'cubic-bezier(0,0,.58,1)',
+        smooth: 'cubic-bezier(.42,0,.58,1)',
+        'slow-fast-slow': 'cubic-bezier(.65,0,.35,1)',
+        snap: 'cubic-bezier(.2,.85,.25,1)',
+        heavy: 'cubic-bezier(.55,.05,.25,1)'
+    });
+
+    static easing(name) {
+        return this.EASING_PRESETS[name] || this.EASING_PRESETS.smooth;
+    }
 
     // beats: 비트 배열
     // options: { anchors, rig, poses, ticksPerSecond }
@@ -99,7 +112,11 @@ class HuntMotionCompiler {
             origin: null,
             opacity: 1,
             filter: null,
-            facing: 1
+            facing: 1,
+            scaleX: 1,
+            scaleY: 1,
+            skewX: 0,
+            skewY: 0
         };
 
         const placement = [{ offset: 0, ...this.#placementFrame(state) }];
@@ -133,6 +150,10 @@ class HuntMotionCompiler {
             if (beat.to) {
                 state.point = this.#place(beat.to, beat, anchors, offsetOf, state.facing);
             }
+            state.point = {
+                x: state.point.x + (Number(beat.offsetX) || 0),
+                y: state.point.y + (Number(beat.offsetY) || 0)
+            };
 
             // ---- 원근 ----
             // 명시하지 않으면 이전 값을 잇는다. 앵커에서 자동 파생하는 것은 아직
@@ -156,6 +177,12 @@ class HuntMotionCompiler {
             if (definition.pivot) state.origin = definition.pivot;
             if (beat.fade === 'in') state.opacity = 1;
             else if (beat.fade === 'out') state.opacity = 0;
+            if (beat.opacity !== undefined) state.opacity = Math.max(0, Math.min(1, Number(beat.opacity)));
+            if (beat.scaleX !== undefined) state.scaleX = Math.max(.05, Number(beat.scaleX) || 1);
+            if (beat.scaleY !== undefined) state.scaleY = Math.max(.05, Number(beat.scaleY) || 1);
+            if (beat.skewX !== undefined) state.skewX = Number(beat.skewX) || 0;
+            if (beat.skewY !== undefined) state.skewY = Number(beat.skewY) || 0;
+            if (beat.origin) state.origin = beat.origin;
 
             // ---- 방향 (규칙 3) ----
             // facing을 저작 데이터에서 받지 않는다. 목적지에서 파생시킨다.
@@ -183,6 +210,7 @@ class HuntMotionCompiler {
                     ...this.#placementFrame({ ...state, opacity: previous.opacity })
                 });
             }
+            placement.push({ offset: startAt, ...this.#placementFrame(previous), easing: this.easing(beat.moveEasing) });
             placement.push({ offset: endAt, ...this.#placementFrame(state) });
 
             // 복귀 중 rotate(Ndeg) -> rotate(0deg)를 보간하면 완료한 회전을
@@ -209,7 +237,10 @@ class HuntMotionCompiler {
                 state.origin = null;
             }
 
-            const rotationDelta = Number(definition.rotate) || 0;
+            // 명시적 편집값은 포즈의 기본 리셋보다 우선한다.
+            if (beat.origin) state.origin = beat.origin;
+            if (beat.rotation !== undefined) state.rotation = Number(beat.rotation) || 0;
+            const rotationDelta = beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0 : Number(definition.rotate) || 0;
             if (rotationDelta) {
                 const sign = Math.sign(rotationDelta);
                 const windup = Number(definition.windup) || 0;
@@ -221,7 +252,7 @@ class HuntMotionCompiler {
                         ...this.#poseFrame({ ...state, rotation: previous.rotation - sign * windup })
                     });
                 }
-                const swung = previous.rotation + rotationDelta;
+                const swung = state.rotation + rotationDelta;
                 pose.push({
                     offset: startAt + span * this.SWING_AT,
                     ...this.#poseFrame({ ...state, rotation: swung })
@@ -232,6 +263,7 @@ class HuntMotionCompiler {
                 // 이게 "휙! 착지!"의 멈춤을 만든다.
                 pose.push({ offset: startAt + this.EPS, ...this.#poseFrame(state) });
             }
+            pose.push({ offset: startAt, ...this.#poseFrame(previous), easing: this.easing(beat.rotationEasing) });
             pose.push({ offset: endAt, ...this.#poseFrame(state) });
 
             // ---- 판정과 음향 ----
@@ -254,6 +286,11 @@ class HuntMotionCompiler {
                 endTicks,
                 pose: beat.pose || 'idle',
                 to: beat.to || beat.at || null,
+                offsetX: Number(beat.offsetX) || 0,
+                offsetY: Number(beat.offsetY) || 0,
+                rotation: state.rotation,
+                moveEasing: beat.moveEasing || 'smooth',
+                rotationEasing: beat.rotationEasing || 'smooth',
                 hit: Boolean(beat.hit)
             });
         });
@@ -281,10 +318,11 @@ class HuntMotionCompiler {
         const root = Math.sqrt(state.squash > 0 ? state.squash : 1);
         const size = state.depth > 0 ? state.depth : 1;
         const frame = {
-            transform: `rotate(${state.rotation.toFixed(2)}deg) scale(${(size * root).toFixed(4)}, ${(size / root).toFixed(4)})`
+            transform: `rotate(${state.rotation.toFixed(2)}deg) skew(${state.skewX.toFixed(2)}deg, ${state.skewY.toFixed(2)}deg) scale(${(size * root * state.scaleX).toFixed(4)}, ${(size / root * state.scaleY).toFixed(4)})`
         };
         if (state.origin) {
-            frame.pivot = state.origin;
+            if (/%/.test(String(state.origin))) frame.origin = state.origin;
+            else frame.pivot = state.origin;
             // 축이 부위 이름이면 푸는 쪽이 반전을 알아야 한다. 오프셋으로 되찾게
             // 두면 비트 경계에서 어느 쪽 방향인지 갈리고, 실제로 버티는 구간
             // 끝에서 축이 30%↔70%로 튀었다. 낼 때 아는 값을 그대로 싣는다.

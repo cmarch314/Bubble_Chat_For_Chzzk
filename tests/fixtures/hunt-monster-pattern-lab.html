@@ -2,6 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
+  <script>
+    // Internal renderer for the unified monster audio review UI only.
+    if (new URLSearchParams(location.search).get('embed') !== '1') {
+      location.replace('http://127.0.0.1:17930/');
+    }
+  </script>
   <meta name="viewport" content="width=1920,initial-scale=1">
   <title>몬스터 패턴 유닛 테스트</title>
   <link rel="stylesheet" href="../../style.css">
@@ -67,6 +73,7 @@
     #lab{position:relative;width:1760px!important;height:918px;margin:0 auto;padding:18px 34px 14px!important;overflow:hidden}
     .lab-controls{position:fixed;z-index:2147483647;top:12px;left:50%;right:auto;width:min(1540px,calc(100vw - 48px));min-height:124px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:12px;padding:10px 12px;border:2px solid #a68a55;border-radius:13px;background:linear-gradient(145deg,rgba(16,22,15,.72),rgba(5,8,6,.62));box-shadow:0 12px 28px #0008;backdrop-filter:blur(6px);transform:translateX(-50%);opacity:.76;transition:opacity .15s ease,background .15s ease}
     .lab-controls:hover,.lab-controls:focus-within{opacity:.98;background:linear-gradient(145deg,rgba(16,22,15,.94),rgba(5,8,6,.9))}
+    html.embedded-preview .lab-controls{display:none}
     .monster-picker{display:grid;grid-template-columns:1fr;align-content:start;gap:6px;padding-right:11px;border-right:1px solid #756440}
     .monster-picker label{font-size:16px}
     #monster-select{height:36px;padding:0 9px}
@@ -444,9 +451,12 @@
       const tags=new Set(pattern.tags||[]);
       return tags.has('fire')?'🔥':tags.has('ice')?'❄️':tags.has('water')?'💧':tags.has('thunder')?'⚡':tags.has('dragon')?'🐉':tags.has('poison')?'☠️':'💥';
     }
-    function playPattern(patternId){
+    function playPattern(patternId, previewPattern=null){
       clearPendingFlightTransition();
-      const source=(HUNT_MONSTER_PATTERN_OVERRIDES[owner.selectedMonster.id]||[]).find(pattern=>pattern.id===patternId);
+      const authored=(HUNT_MONSTER_PATTERN_OVERRIDES[owner.selectedMonster.id]||[]).find(pattern=>pattern.id===patternId);
+      const source=previewPattern?{...(authored||{}),...previewPattern,
+        motion:previewPattern.motion||authored?.motion,
+        targeting:previewPattern.targeting||authored?.targeting}:authored;
       if(!source)return;
       const pattern={...source,tags:[...(source.tags||[])],targeting:source.targeting?{...source.targeting}:null};
       const required=pattern.requiredState||(pattern.tags.includes('flight-only')?'airborne':null);
@@ -474,9 +484,9 @@
         },Math.max(1,Number(pattern.animationDurationMs||1800)));
       }
     }
-    function showMonster(id){
+    function showMonster(id, previewMonster=null){
       labAudio?.cancelPatternAudio();
-      const monster=released.find(entry=>entry.id===id)||released[0];
+      const monster=released.find(entry=>entry.id===id)||previewMonster||released[0];
       owner.selectedMonster={...monster};
       const image=document.getElementById('fight-monster-img');
       image.src=`../../img/monsters/${monster.filename||`${monster.id}.png`}`;image.alt=monster.nameKO;
@@ -541,6 +551,7 @@
       });
     }
     function initialize(){
+      document.documentElement.classList.toggle('embedded-preview',new URLSearchParams(location.search).get('embed')==='1');
       renderCombatChrome();
       labAudio=new HuntMonsterPatternLabAudio({monsterProvider:()=>owner.selectedMonster});
       owner.onMonsterProjectileLaunchAudio=(monster,pattern)=>labAudio?.playProjectileLaunch(monster,pattern);
@@ -564,6 +575,21 @@
       if(slot&&!slot.disabled)togglePart(slot.dataset.partKind);
     });
     targetButtons.addEventListener('click',event=>{const button=event.target.closest('.target-btn');if(!button)return;targetMode=button.dataset.target;updateTargetSelection([],null);if(activePatternId)playPattern(activePatternId)});
+    addEventListener('message',event=>{
+      if(event.source!==parent||!/^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(event.origin))return;
+      const message=event.data||{};
+      if(message.type!=='bubblechat:pattern-preview'||!message.monsterId||!message.pattern?.id)return;
+      if(owner.selectedMonster?.id!==message.monsterId){monsterSelect.value=message.monsterId;showMonster(message.monsterId,message.monster)}
+      if(message.target!=null){targetMode=String(message.target);updateTargetSelection([],null)}
+      if(message.state)applyState(message.state,true);
+      playPattern(message.pattern.id,message.pattern);
+    });
+    addEventListener('message',event=>{
+      if(event.source!==parent||!/^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(event.origin))return;
+      const message=event.data||{};
+      if(message.type==='bubblechat:pattern-preview-seek')animator.seekBeatMotion(message.progress);
+    });
+    if(parent!==window)parent.postMessage({type:'bubblechat:pattern-preview-ready'},'http://127.0.0.1:17930');
     addEventListener('load',initialize);
   </script>
 </body>

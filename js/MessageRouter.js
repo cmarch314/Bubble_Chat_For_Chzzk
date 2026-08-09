@@ -27,7 +27,13 @@ class MessageRouter {
         if (this.visualDirector.activeGame) {
             try {
                 if (this.visualDirector.activeGame.handleChat(msgData)) {
-                    return; // 게임 참여 채팅은 일반 말풍선이나 사운드로 중복 처리하지 않고 스킵
+                    const game = this.visualDirector.activeGame;
+                    const hasVideo = typeof findCMCVideosInMessage === 'function'
+                        && findCMCVideosInMessage(updatedTrimmedMsg).length > 0;
+                    if (!hasVideo && game.shouldPlayBaseChatAudio?.(msgData)) {
+                        this.audioManager.checkAndPlay(msgData.message, msgData.isStreamer, false);
+                    }
+                    return; // 게임 UI가 말풍선을 소유하며, 참가자의 일반 채팅 음성만 위에서 선별 재생
                 }
             } catch (e) {
                 console.error("❌ activeGame.handleChat error:", e);

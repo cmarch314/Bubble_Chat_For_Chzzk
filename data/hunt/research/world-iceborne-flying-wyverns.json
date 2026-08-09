@@ -65,8 +65,13 @@
     {
       "base": "barioth",
       "members": ["barioth", "frostfang_barioth"],
-      "evidence": "https://gamewith.jp/mhw/219962",
-      "notes": "Leaps, tackles, tail sweeps and tornado projectiles; foreleg breaks cause landing slips. Frostfang adds freezing ground that roots hunters."
+      "evidence": "https://gamewith.jp/mhw/163255",
+      "supportingEvidence": [
+        "https://game8.jp/mhw/276430",
+        "https://mhworld.gameconductor.com/m/d/73",
+        "https://monsterhunter.tools/mhw/monsters/barioth/"
+      ],
+      "notes": "World/Iceborne Barioth is a grounded, highly mobile Flying Wyvern: lateral leaps, short tackles, delayed tail sweeps, wall-cling pounces, gliding pounces, ice-tornado projectiles and a high landing slam. Breaking either foreleg spike causes braking slips after eligible mobility actions; breaking the head weakens accuracy/damage and suppresses iceblight from the tornado; severing the tail shortens the sweep. Exhaustion can make the ice breath fizzle. Frostfang remains a separate variant that adds freezing ground and roots."
     }
   ],
   "roster": [

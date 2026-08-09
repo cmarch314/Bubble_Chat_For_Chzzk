@@ -16,6 +16,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const BANK_MAP_PATH = path.join(ROOT, 'data', 'hunt', 'world-monster-audio-banks.json');
 const OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-pattern-audio-routes.json');
+const MOTION_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-pattern-motion-overrides.json');
 
 function readJson(file, fallback) {
     try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; }
@@ -123,6 +124,70 @@ function patternAudioSlots(pattern = {}) {
     return slots;
 }
 
+// Review UI projection of the authored motion. Beat motion is authoritative
+// when present; legacy patterns still expose a compact phase timeline so the
+// reviewer uses the same left-to-right workflow during gradual migration.
+function patternReviewTimeline(pattern = {}, slots = patternAudioSlots(pattern)) {
+    const motion = Array.isArray(pattern.motion) ? pattern.motion : [];
+    if (motion.length) {
+        let elapsed = 0;
+        const beats = motion.map((beat, index) => {
+            const ticks = Math.max(1, Number(beat.ticks) || 1);
+            const item = {
+                id: beat.beat || `beat-${index + 1}`,
+                label: beat.beat || `beat ${index + 1}`,
+                startTicks: elapsed,
+                endTicks: elapsed + ticks,
+                ticks,
+                pose: beat.pose || null,
+                destination: beat.to || beat.at || null,
+                at: beat.at || null,
+                to: beat.to || null,
+                offsetX: Number(beat.offsetX) || 0,
+                offsetY: Number(beat.offsetY) || 0,
+                rotation: Number.isFinite(Number(beat.rotation)) ? Number(beat.rotation) : null,
+                rotateBy: Number.isFinite(Number(beat.rotateBy)) ? Number(beat.rotateBy) : null,
+                scaleX: Number.isFinite(Number(beat.scaleX)) ? Number(beat.scaleX) : 1,
+                scaleY: Number.isFinite(Number(beat.scaleY)) ? Number(beat.scaleY) : 1,
+                skewX: Number(beat.skewX) || 0,
+                skewY: Number(beat.skewY) || 0,
+                opacity: Number.isFinite(Number(beat.opacity)) ? Number(beat.opacity) : null,
+                origin: beat.origin || null,
+                moveEasing: beat.moveEasing || 'smooth',
+                rotationEasing: beat.rotationEasing || 'smooth',
+                hit: Boolean(beat.hit),
+                sfx: beat.sfx || null
+            };
+            elapsed += ticks;
+            return item;
+        });
+        return { source: 'beat-motion', durationTicks: elapsed, beats };
+    }
+
+    const movementTicks = Math.max(1, Number(pattern.movement?.ticks || 1));
+    const animationTicks = Math.max(1, Math.round(Number(pattern.animationDurationMs || 0) / 100));
+    const phaseTicks = slot => Math.max(1, Number(
+        slot.phase === 'telegraph' ? pattern.windupTicks
+            : slot.phase === 'travel' ? movementTicks
+                : slot.phase === 'recovery' ? pattern.recoveryTicks
+                    : pattern.activeTicks
+    ) || Math.round(animationTicks / Math.max(1, slots.length)) || 1);
+    const durationTicks = slots.reduce((total, slot) => total + phaseTicks(slot), 0);
+    let elapsed = 0;
+    return {
+        source: 'legacy-phases',
+        durationTicks,
+        beats: slots.map(slot => {
+            const ticks = phaseTicks(slot);
+            const beat = { id: slot.slot, label: slot.label, startTicks: elapsed,
+                endTicks: elapsed + ticks, ticks, phase: slot.phase,
+                hit: slot.phase === 'impact', sfx: null };
+            elapsed += ticks;
+            return beat;
+        })
+    };
+}
+
 // Map a canonical slot to the HuntAudioCatalog action key it corresponds to.
 const SLOT_TO_ACTION = { telegraph: 'telegraph', start: 'attack', launch: 'projectile_launch', travel: 'charge_stride_step', recovery: 'recovery', roar: 'roar', burrow: 'burrow' };
 function slotToAction(slot) {
@@ -161,17 +226,32 @@ function buildMonsterPatternAudioMap({
         huntId,
         graphId,
         patterns: patterns.map(pattern => {
-            const slots = patternAudioSlots(pattern).map(slot => ({
-                ...slot,
-                current: currentCatalogRoute(catalog, huntId, slot.slot, pattern),
-                assigned: (monsterOverrides[pattern.id] || {})[slot.slot] || null
-            }));
+            const slots = patternAudioSlots(pattern).map(slot => {
+                const catalogRoute = currentCatalogRoute(catalog, huntId, slot.slot, pattern);
+                const override = (monsterOverrides[pattern.id] || {})[slot.slot] || null;
+                const muted = override?.disabled === true;
+                const effective = muted ? null : (override || (catalogRoute && {
+                    label: catalogRoute.label,
+                    layers: (catalogRoute.files || []).map(file => [file, 0.7, 0]),
+                    evidence: catalogRoute.evidence || null
+                }));
+                return {
+                    ...slot,
+                    current: catalogRoute,
+                    assigned: effective,
+                    override,
+                    effective,
+                    muted
+                };
+            });
             return {
                 id: pattern.id,
                 name: pattern.name || pattern.id,
                 type: pattern.type || null,
                 delivery: pattern.delivery || null,
                 tags: pattern.tags || [],
+                motion: Array.isArray(pattern.motion) ? pattern.motion.map(beat => ({ ...beat })) : null,
+                timeline: patternReviewTimeline(pattern, slots),
                 slots
             };
         })
@@ -190,6 +270,7 @@ function loadHuntCatalogs() {
         require(`../js/effects/hunt/data/${file}.generated.js`);
     }
     require('../js/effects/hunt/data/PublishedMonsterBehavior.js');
+    global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = require('../js/effects/hunt/data/MonsterPatternMotionOverrides.generated.js');
     require('../js/effects/MonsterData.js');
     const PatternCatalog = require('../js/effects/hunt/HuntMonsterPatternCatalog.js');
     const AudioCatalog = require('../js/effects/hunt/HuntAudioCatalog.js');
@@ -244,10 +325,9 @@ function loadHuntPatternAudioMap(idOrGraphId, { overridesPath = OVERRIDES_PATH, 
     });
 }
 
-// Persist (or clear) a single pattern-slot assignment. `files` is an ordered
-// list of repo-relative mp3 paths; empty clears the override so the slot falls
-// back to the hand-authored catalog again.
-function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, delay = 0, label = null }, overridesPath = OVERRIDES_PATH) {
+// Persist, suppress, or clear a single pattern-slot assignment. `disabled`
+// explicitly silences the slot, including its hand-authored catalog fallback.
+function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, delay = 0, label = null, mode = null, disabled = false }, overridesPath = OVERRIDES_PATH) {
     if (!huntId || !patternId || !slot) throw new Error('huntId, patternId, slot는 필수입니다.');
     const cleanFiles = (Array.isArray(files) ? files : [files])
         .map(file => String(file || '').replace(/\\/g, '/'))
@@ -260,8 +340,11 @@ function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, del
     if (cleanFiles.length) {
         overrides.routes[huntId][patternId][slot] = {
             label,
+            ...(mode === 'random' ? { mode: 'random' } : {}),
             layers: cleanFiles.map(file => [file, Number(gain) || 0.7, Number(delay) || 0])
         };
+    } else if (disabled === true) {
+        overrides.routes[huntId][patternId][slot] = { disabled: true };
     } else {
         delete overrides.routes[huntId][patternId][slot];
         if (!Object.keys(overrides.routes[huntId][patternId]).length) delete overrides.routes[huntId][patternId];
@@ -279,18 +362,58 @@ function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, del
         try { generated = require('../scripts/generate-monster-pattern-audio-routes.js').generate(); }
         catch { generated = null; }
     }
-    return { huntId, patternId, slot, files: cleanFiles, generated };
+    return { huntId, patternId, slot, files: cleanFiles, mode: mode === 'random' ? 'random' : null, disabled: disabled === true, generated };
+}
+
+function savePatternMotion({ huntId, patternId, beats = null, reset = false }, overridesPath = MOTION_OVERRIDES_PATH) {
+    if (!huntId || !patternId) throw new Error('huntId와 patternId는 필수입니다.');
+    const document = readJson(overridesPath, { version: 1, overrides: {} });
+    document.version = Math.max(1, Number(document.version) || 1);
+    document.overrides = document.overrides || {};
+    if (reset) {
+        delete document.overrides[huntId]?.[patternId];
+        if (document.overrides[huntId] && !Object.keys(document.overrides[huntId]).length) delete document.overrides[huntId];
+    } else {
+        const allowedText = ['at', 'to', 'origin', 'moveEasing', 'rotationEasing'];
+        const allowedNumber = ['offsetX', 'offsetY', 'rotation', 'rotateBy', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity'];
+        const cleanBeats = Object.fromEntries(Object.entries(beats || {}).map(([id, value]) => {
+            if (!value || typeof value !== 'object') {
+                return [String(id), Math.max(1, Math.min(600, Math.round(Number(value) || 1)))];
+            }
+            const clean = { ticks: Math.max(1, Math.min(600, Math.round(Number(value.ticks) || 1))) };
+            for (const key of allowedText) if (value[key] != null && String(value[key]).trim()) clean[key] = String(value[key]).trim().slice(0, 120);
+            for (const key of allowedNumber) if (value[key] != null && Number.isFinite(Number(value[key]))) clean[key] = Number(value[key]);
+            return [String(id), clean];
+        }));
+        if (!Object.keys(cleanBeats).length) throw new Error('저장할 모션 비트가 없습니다.');
+        document.overrides[huntId] = document.overrides[huntId] || {};
+        document.overrides[huntId][patternId] = { beats: cleanBeats };
+    }
+    document.updatedAt = new Date().toISOString();
+    fs.mkdirSync(path.dirname(overridesPath), { recursive: true });
+    const temporary = `${overridesPath}.tmp`;
+    fs.writeFileSync(temporary, `${JSON.stringify(document, null, 2)}\n`, 'utf8');
+    fs.renameSync(temporary, overridesPath);
+    global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = document.overrides;
+    let generated = null;
+    if (overridesPath === MOTION_OVERRIDES_PATH) {
+        generated = require('../scripts/generate-monster-pattern-motion-overrides.js').generate();
+    }
+    return { huntId, patternId, reset: Boolean(reset), beats: document.overrides[huntId]?.[patternId]?.beats || null, generated };
 }
 
 module.exports = {
     OVERRIDES_PATH,
+    MOTION_OVERRIDES_PATH,
     BANK_MAP_PATH,
     huntToGraphId,
     resolveHuntId,
     patternAudioSlots,
+    patternReviewTimeline,
     currentCatalogRoute,
     buildMonsterPatternAudioMap,
     loadHuntCatalogs,
     loadHuntPatternAudioMap,
-    savePatternRoute
+    savePatternRoute,
+    savePatternMotion
 };

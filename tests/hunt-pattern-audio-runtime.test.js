@@ -41,7 +41,8 @@ global.HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
     diablos: {
         'diablos.tail_slam_rock': {
             'impact:rock': { label: 'rock hit', layers: [['local_assets/x/rock_hit.mp3', 0.8, 0]] },
-            launch: { label: 'rock throw', layers: [['local_assets/x/rock_throw.mp3', 0.7, 0]] }
+            launch: { label: 'rock throw', layers: [['local_assets/x/rock_throw.mp3', 0.7, 0]] },
+            recovery: { disabled: true }
         }
     }
 };
@@ -69,6 +70,15 @@ assert.ok(played && played.layers[0][0].endsWith('rock_throw.mp3'), 'launch over
 played = null; fellBack = false;
 result = manager.playMonsterAction('diablos', 'recovery', { patternId: 'diablos.tail_slam_rock', patternSlot: 'recovery', overrideOnly: true });
 assert.strictEqual(result, false, 'unmapped overrideOnly phase must be silent');
+assert.strictEqual(played, null);
+assert.strictEqual(fellBack, false);
+
+// An explicit removal is authoritative and must not fall through to catalogs.
+played = null; fellBack = false;
+result = manager.playMonsterAction('diablos', 'recovery', {
+    patternId: 'diablos.tail_slam_rock', patternSlot: 'recovery'
+});
+assert.strictEqual(result, false);
 assert.strictEqual(played, null);
 assert.strictEqual(fellBack, false);
 

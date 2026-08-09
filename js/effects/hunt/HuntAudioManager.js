@@ -777,6 +777,7 @@ class HuntAudioManager {
         const candidates = [monsterId, String(monsterId).toLowerCase(), this.monsterGroup?.(monsterId)];
         for (const id of candidates) {
             const route = id && map[id]?.[patternId]?.[slot];
+            if (route?.disabled === true) return route;
             if (route && Array.isArray(route.layers) && route.layers.length) return route;
         }
         return null;
@@ -809,6 +810,7 @@ class HuntAudioManager {
         const overrideSlot = HuntAudioManager.resolveOverrideSlot(kind, options);
         if (options.patternId && overrideSlot) {
             const route = this.patternAudioRoute(monsterId, options.patternId, overrideSlot);
+            if (route?.disabled === true) return false;
             if (route) return this.playPatternAudioRoute(route);
             if (options.overrideOnly) return false;
         }

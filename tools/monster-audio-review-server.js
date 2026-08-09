@@ -5,7 +5,7 @@ const http = require('http');
 const path = require('path');
 const { URL } = require('url');
 const { generate: generateReviewRoutes } = require('../scripts/generate-world-monster-audio-review-routes');
-const { loadHuntPatternAudioMap, savePatternRoute } = require('./hunt-audio-pattern-map');
+const { loadHuntPatternAudioMap, savePatternRoute, savePatternMotion } = require('./hunt-audio-pattern-map');
 
 const ROOT = path.resolve(__dirname, '..');
 const GRAPH_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'audio_graph');
@@ -254,7 +254,8 @@ function saveReviewCompletion(
     labelsPath = LABELS_PATH,
     bankMap = readJson(path.join(ROOT, 'data', 'hunt', 'world-monster-audio-banks.json'), {})
 ) {
-    const graphId = String(monster || '').toLowerCase();
+    const requestedId = String(monster || '').toLowerCase();
+    const graphId = resolveGraphId(requestedId);
     if (!/^[a-z0-9_-]+$/i.test(graphId)) throw new Error('잘못된 몬스터 ID입니다.');
     const monsterIds = [...new Set(bankMap[`${graphId}_vo`] || [])];
     if (!monsterIds.length) throw new Error('몬스터 음성 은행 연결 정보를 찾을 수 없습니다.');
@@ -278,7 +279,8 @@ function saveReviewCompletion(
     fs.writeFileSync(temporary, `${JSON.stringify(labels, null, 2)}\n`, 'utf8');
     fs.renameSync(temporary, labelsPath);
     return {
-        monster: graphId,
+        monster: requestedId,
+        graphId,
         monsterIds,
         reviewStatus: completed ? 'completed' : 'pending'
     };
@@ -494,6 +496,11 @@ function createServer(options = {}) {
             }
             if (request.method === 'POST' && url.pathname === '/api/hunt-pattern-route') {
                 const result = savePatternRoute(await readBody(request));
+                sendJson(response, 200, { ok: true, ...result });
+                return;
+            }
+            if (request.method === 'POST' && url.pathname === '/api/hunt-pattern-motion') {
+                const result = savePatternMotion(await readBody(request));
                 sendJson(response, 200, { ok: true, ...result });
                 return;
             }

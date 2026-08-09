@@ -71,6 +71,7 @@ function huntPattern(id, name, type, damageRatio, options = {}) {
         ...(options.ignitesAllScales ? { ignitesAllScales: true } : {}),
         ...(options.defenseMode ? { defenseMode: options.defenseMode } : {}),
         ...(options.telegraphFx ? { telegraphFx: options.telegraphFx } : {}),
+        ...(options.impactFx ? { impactFx: options.impactFx } : {}),
         ...(options.fixedWindup ? { fixedWindup: true } : {}),
         evidence: options.evidence || (options.actionClass ? 'installed-game-action-class' : 'web-reference'),
         confidence: options.confidence || (options.actionClass ? 'extracted-action' : 'curated-behavior') };
@@ -1448,28 +1449,137 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
 ]);
 
 HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
-    ['barioth.roar', '포효', 'roar', 0, { maxTargets: 4, actionClass: 'Roar', tags: ['roar'], weight: .14 }],
-    ['barioth.shoulder_check', '빙아 몸통박치기', 'physical', .31, {
-        maxTargets: 2, actionClass: 'BiteSlammedLatter', tags: ['physical', 'target-contact'],
-        movement: { ticks: 22, returnsToOrigin: true, returnTicks: 16 }, impact: { delayRatio: .62 }
+    ['barioth.roar', '포효', 'roar', 0, {
+        maxTargets: 4, actionClass: 'Roar', sourceMoveNameJA: '咆哮',
+        tags: ['roar', 'transition-roar'], weight: .12, cooldown: 88, monsterAtbCost: .44,
+        interference: { kind: 'roar', size: 'small' }
     }],
-    ['barioth.leap', '측면 도약 덮치기', 'charge', .34, {
-        maxTargets: 2, actionClass: 'JumpAttack', tags: ['charge', 'target-contact'], chargeMode: 'single',
-        movement: { ticks: 25, returnsToOrigin: true, returnTicks: 18 }, impact: { delayRatio: .66 },
-        whiffReaction: { kind: 'slip', durationTicks: 24 },
-        weightWhenBroken: { 'left-front-leg': .62, 'right-front-leg': .62 }
+    ['barioth.bite', '물어뜯기', 'physical', .22, {
+        maxTargets: 1, actionClass: 'BiteSlammedLatter', sourceMoveNameJA: '噛みつき',
+        tags: ['physical', 'ground-only', 'target-contact', 'weak'], recovery: 1,
+        monsterAtbCost: .30, movement: { ticks: 16 }, maxConsecutiveUses: 2,
+        motion: [
+            { beat: 'head-draw', ticks: 3, pose: 'crouch', face: 'target' },
+            { beat: 'take-flank', ticks: 5, to: 'left:target 155', pose: 'stretch-soft', face: 'target', moveEasing: 'snap' },
+            { beat: 'neck-thrust', ticks: 2, to: 'target', align: 'part:mouth', pose: 'stretch-strong', hit: true, sfx: 'impact', moveEasing: 'snap' },
+            { beat: 'jaw-close', ticks: 2, to: 'target', align: 'part:mouth', pose: 'land' },
+            { beat: 'head-recoil', ticks: 2, to: 'left:target 155', pose: 'settle', moveEasing: 'decelerate' },
+            { beat: 'return', ticks: 2, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+        ],
+        animationProfile: 'barioth-bite-contact', animationDurationMs: 1600,
+        originPart: 'head', brokenPartDamageModifiers: { head: .82 }
     }],
-    ['barioth.tail_sweep', '빙결 꼬리 휩쓸기', 'area', .32, {
-        minTargets: 2, maxTargets: 3, actionClass: 'TailAttackClockwise', tags: ['area', 'tail', 'ice'],
-        brokenPartDamageModifiers: { tail: .7 }, brokenPartTargetCaps: { tail: 1 }
+    ['barioth.shoulder_check', '철산고', 'physical', .32, {
+        minTargets: 1, maxTargets: 2, actionClass: 'BiteSlammedLatterR', sourceMoveNameJA: 'タックル',
+        tags: ['physical', 'ground-only', 'target-contact', 'slip-eligible'], recovery: 1,
+        monsterAtbCost: .48, movement: { ticks: 30 }, targeting: { mode: 'adjacent-lane' },
+        impact: { visualRatio: .58 },
+        animationProfile: 'side-tackle-contact', animationDurationMs: 3000,
+        originPart: 'torso'
     }],
-    ['barioth.ice_tornado', '빙결 회오리탄', 'projectile', .30, {
-        maxTargets: 3, actionClass: 'BreathNormal', tags: ['projectile', 'ice', 'elemental', 'ground-hazard'],
-        delivery: 'projectile', brokenPartDamageModifiers: { head: .72 }, statusBlockedWhenBroken: ['head']
+    ['barioth.lateral_pounce', '도약 덮치기', 'charge', .36, {
+        minTargets: 1, maxTargets: 2, actionClass: 'JumpAttack', sourceMoveNameJA: '飛びかかり',
+        tags: ['charge', 'ground-only', 'target-contact', 'slip-eligible'], recovery: 1,
+        monsterAtbCost: .56, movement: { ticks: 30 }, targeting: { mode: 'adjacent-lane' },
+        motion: [
+            { beat: 'coil', ticks: 7, pose: 'crouch', face: 'target' },
+            { beat: 'spring-release', ticks: 5, to: 'above:home 70', pose: 'stretch', moveEasing: 'snap' },
+            { beat: 'straight-pounce', ticks: 8, to: 'target', align: 'part:head', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact', ticks: 2, to: 'target', align: 'part:head', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'plant-claws', ticks: 4, pose: 'brace' },
+            { beat: 'return', ticks: 4, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+        ],
+        animationProfile: 'barioth-lateral-pounce', animationDurationMs: 3000,
+        originPart: 'head', weightWhenBroken: { 'left-front-leg': .72, 'right-front-leg': .72 }
     }],
-    ['barioth.glide_dive', '저공 활강 덮치기', 'charge', .39, {
-        maxTargets: 3, actionClass: 'BreathFly', tags: ['charge', 'air-compatible', 'target-contact'],
-        chargeMode: 'wide', animationProfile: 'low-glide-sweep'
+    ['barioth.tail_sweep', '꼬리 휩쓸기', 'area', .32, {
+        minTargets: 2, maxTargets: 3, actionClass: 'TailAttackClockwise', sourceMoveNameJA: '尻尾なぎ払い',
+        tags: ['area', 'tail', 'ice', 'ground-only', 'target-contact'], recovery: 1,
+        monsterAtbCost: .52, movement: { ticks: 28 }, targeting: { mode: 'primary-flank-passes', passCount: 1 },
+        motion: [
+            { beat: 'close-range', ticks: 6, to: 'toward:target 64%', pose: 'crouch', face: 'target' },
+            { beat: 'tail-draw', ticks: 5, pose: 'brace', rotateBy: 24, origin: 'part:torso' },
+            { beat: 'wide-sweep', ticks: 8, to: 'target', align: 'part:tail', pose: 'tail-whip', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
+            { beat: 'slide-out', ticks: 4, to: 'right:target 80', pose: 'settle', moveEasing: 'decelerate' },
+            { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+        ],
+        animationProfile: 'barioth-wide-tail-sweep', animationDurationMs: 2800, originPart: 'tail',
+        brokenPartDamageModifiers: { tail: .70 }, brokenPartTargetCaps: { tail: 1 },
+        statusBlockedWhenBroken: ['tail']
+    }],
+    ['barioth.ice_tornado', '빙결 회오리 브레스', 'projectile', .30, {
+        minTargets: 1, maxTargets: 2, actionClass: 'BreathNormal', sourceMoveNameJA: '氷ブレス',
+        tags: ['projectile', 'ice', 'elemental', 'ground-hazard', 'butt-stumble'], recovery: 1,
+        monsterAtbCost: .48, movement: { ticks: 30 }, delivery: 'projectile',
+        projectileLaunchDelayTicks: 9, impact: { delayTicks: 18, survivesInterruption: true },
+        impactTimeline: [
+            { atTicks: 18, damageScale: .55 },
+            { atTicks: 28, targetMode: 'repeat-previous', damageScale: .45 }
+        ],
+        motion: [
+            { beat: 'anchor-claws', ticks: 6, pose: 'crouch', face: 'target' },
+            { beat: 'draw-breath', ticks: 5, pose: 'brace', scaleX: .94, scaleY: 1.06 },
+            { beat: 'exhale', ticks: 3, pose: 'stretch-soft', sfx: 'projectile' },
+            { beat: 'recoil', ticks: 6, pose: 'settle', offsetX: 18, moveEasing: 'decelerate' },
+            { beat: 'watch-tornado', ticks: 5, pose: 'brace' },
+            { beat: 'reset', ticks: 5, to: 'home', pose: 'idle' }
+        ],
+        animationProfile: 'barioth-ice-tornado-cast', animationDurationMs: 3000, originPart: 'mouth',
+        impactFx: { emoji: '🌪️', className: 'barioth-ice-tornado', durationMs: 3600 },
+        brokenPartDamageModifiers: { head: .70 }, brokenPartAccuracyModifiers: { head: .75 },
+        statusBlockedWhenBroken: ['head']
+    }],
+    ['barioth.wall_pounce', '벽차기 급습', 'charge', .42, {
+        maxTargets: 1, actionClass: 'JumpAttack', sourceMoveNameJA: '壁蹴り飛びかかり',
+        tags: ['charge', 'wall-cling', 'ambush', 'target-contact', 'strong', 'slip-eligible'],
+        cooldown: 48, recovery: 1, monsterAtbCost: .68, movement: { ticks: 42, untargetable: true },
+        motion: [
+            { beat: 'spot-wall', ticks: 4, pose: 'crouch', face: 'left:home 420' },
+            { beat: 'wall-bound', ticks: 7, to: 'left:home 440', pose: 'stretch', moveEasing: 'snap' },
+            { beat: 'cling', ticks: 7, pose: 'brace', rotation: -34, origin: 'part:left-front-leg' },
+            { beat: 'kick-off', ticks: 4, to: 'left:home 350', pose: 'stretch-strong', face: 'target', moveEasing: 'snap' },
+            { beat: 'diagonal-pounce', ticks: 8, to: 'target', align: 'part:head', pose: 'stretch-strong', rotateBy: 360, origin: 'part:left-front-leg', moveEasing: 'accelerate' },
+            { beat: 'impact', ticks: 3, to: 'target', align: 'part:head', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'skid', ticks: 4, to: 'below:target 65', pose: 'settle', moveEasing: 'decelerate' },
+            { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+        ],
+        animationProfile: 'barioth-wall-pounce', animationDurationMs: 4200, originPart: 'head',
+        weightWhenBroken: { 'left-front-leg': .55, 'right-front-leg': .55 }
+    }],
+    ['barioth.glide_pounce', '저공 활공 덮치기', 'charge', .39, {
+        minTargets: 2, maxTargets: 3, actionClass: 'BreathFly', sourceMoveNameJA: '滑空飛びかかり',
+        tags: ['charge', 'air-compatible', 'target-contact', 'slip-eligible'], recovery: 1,
+        monsterAtbCost: .62, movement: { ticks: 36, untargetable: true }, targeting: { mode: 'adjacent-lane' },
+        chargeMode: 'single',
+        // 전용 활강: 낮은 직선 비행 뒤 한쪽 앞발이 닿는 순간부터 관성으로
+        // 180도 회전하며 미끄러져 착지한다. 접근 자체는 타격이 아니다.
+        impact: { visualRatio: .74 },
+        animationProfile: 'barioth-glide-circle-land', animationDurationMs: 3600,
+        originPart: 'left-front-leg',
+        weightWhenBroken: { 'left-front-leg': .65, 'right-front-leg': .65 }
+    }],
+    ['barioth.landing_slam', '도약 내려찍기', 'physical', .45, {
+        maxTargets: 1, actionClass: 'JumpAttack', sourceMoveNameJA: 'ジャンプ攻撃',
+        tags: ['physical', 'jump', 'slam', 'strong', 'target-contact', 'slip-eligible'],
+        cooldown: 52, recovery: 1, monsterAtbCost: .72, movement: { ticks: 44 },
+        interference: { kind: 'tremor', size: 'small', directHitSupersedes: true },
+        // 티가렉스의 도약 덮치기와 같은 수직 도약 → 표적 낙하 모션을 그대로 쓴다.
+        // 정상 착지는 미끄러지지 않으며, 앞발 파괴 뒤에만 shared broken-limb-slip이 붙는다.
+        impact: { visualRatio: .68 }, animationProfile: 'barioth-spring-leap',
+        animationDurationMs: 4400, originPart: 'torso'
+    }],
+    ['barioth.ice_breath_fizzle', '탈진 빙결 브레스 불발', 'physical', 0, {
+        maxTargets: 1, actionClass: 'BreathNormal', sourceMoveNameJA: '疲労ブレス不発',
+        state: 'exhausted', tags: ['ground-only', 'ice', 'no-impact', 'exhausted-fizzle'], recovery: 1,
+        monsterAtbCost: .36, movement: { ticks: 20 }, suppressPrepareAudio: true,
+        motion: [
+            { beat: 'try-breath', ticks: 5, pose: 'crouch', face: 'target' },
+            { beat: 'dry-exhale', ticks: 4, pose: 'stretch-soft' },
+            { beat: 'cough', ticks: 4, pose: 'land', offsetX: 14 },
+            { beat: 'pant', ticks: 7, to: 'home', pose: 'brace' }
+        ],
+        animationProfile: 'barioth-exhausted-breath-fizzle', animationDurationMs: 2000, originPart: 'mouth',
+        attachedFx: { emoji: '☁️', className: 'breath-fizzle', durationMs: 2000 }
     }]
 ]);
 

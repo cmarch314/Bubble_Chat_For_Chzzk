@@ -124,6 +124,33 @@ function fixture(overrides = {}) {
 }
 
 {
+    const { calls, router } = fixture({
+        visualDirector: {
+            activeGame: {
+                handleChat: () => true,
+                shouldPlayBaseChatAudio: data => data.nickname === 'tester' && !data.message.startsWith('!')
+            }
+        }
+    });
+    router.route(message({ message: 'ㅋㅋㅋ' }));
+    assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'audio']);
+    assert.deepStrictEqual(calls[1].slice(1), ['ㅋㅋㅋ', false, false]);
+}
+
+{
+    const { calls, router } = fixture({
+        visualDirector: {
+            activeGame: {
+                handleChat: () => true,
+                shouldPlayBaseChatAudio: () => false
+            }
+        }
+    });
+    router.route(message({ message: '!준비' }));
+    assert.deepStrictEqual(calls.map(call => call[0]), ['system']);
+}
+
+{
     const { calls, router } = fixture();
     router.route(message({ isDonation: true, message: 'donation text' }));
     assert.deepStrictEqual(calls.map(call => call[0]), ['system', 'audio']);

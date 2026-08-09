@@ -1575,7 +1575,7 @@
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 13,
+        "count": 14,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -1590,6 +1590,7 @@
           "rathalos-bite-contact",
           "rathalos-rush-bite",
           "rathalos-fireball",
+          "rathalos-triple-fireball",
           "rathalos-backstep-fireball",
           "rathalos-claw-dive",
           "rathalos-tail-sweep-double",
@@ -1760,7 +1761,7 @@
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 6,
+        "count": 10,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -1771,14 +1772,18 @@
       "animation": {
         "semanticProfiles": [
           "roar",
-          "leap-slam",
+          "barioth-bite-contact",
+          "barioth-side-tackle",
+          "barioth-lateral-pounce",
           "tail-sweep",
           "ranged-cast",
-          "rathalos-glide"
+          "barioth-wall-pounce",
+          "rathalos-glide",
+          "barioth-landing-slam"
         ],
         "deliveryProfiles": [
-          "projectile",
-          "gas"
+          "gas",
+          "projectile"
         ],
         "rig": "winged"
       }
@@ -4034,7 +4039,7 @@
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 8,
+        "count": 12,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -4046,15 +4051,19 @@
       "animation": {
         "semanticProfiles": [
           "roar",
-          "leap-slam",
+          "barioth-bite-contact",
+          "barioth-side-tackle",
+          "barioth-lateral-pounce",
           "tail-sweep",
           "ranged-cast",
+          "barioth-wall-pounce",
           "rathalos-glide",
+          "barioth-landing-slam",
           "aerial-charge-cross"
         ],
         "deliveryProfiles": [
-          "projectile",
           "gas",
+          "projectile",
           "ground-wave"
         ],
         "rig": "winged"
@@ -7595,7 +7604,7 @@
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 14,
+        "count": 15,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -7606,17 +7615,20 @@
       "animation": {
         "semanticProfiles": [
           "roar",
-          "close-strike",
-          "pounce-chain",
-          "ground-charge",
+          "nargacuga-dash-bite",
+          "nargacuga-tail-whip",
+          "nargacuga-pivot-spin",
+          "nargacuga-turn-tail-slam",
+          "nargacuga-flank-charge",
           "nargacuga-leap-ambush",
+          "nargacuga-offscreen-charge",
+          "ranged-cast",
+          "nargacuga-stance-hop",
+          "nargacuga-bite-spin-return",
           "nargacuga-leap-ambush-triple",
-          "aerial-dive",
-          "tail-sweep",
-          "body-spin",
-          "tail-sweep-double",
-          "leap-slam",
-          "ranged-cast"
+          "nargacuga-twin-pivot-spin",
+          "nargacuga-turn-tail-slam-double",
+          "nargacuga-lunge-finish"
         ],
         "deliveryProfiles": [
           "gas",
@@ -8810,7 +8822,7 @@
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 12,
+        "count": 13,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -8824,6 +8836,7 @@
           "rathalos-bite-contact",
           "rathalos-rush-bite",
           "rathalos-fireball",
+          "rathalos-triple-fireball",
           "rathalos-backstep-fireball",
           "rathalos-claw-dive",
           "rathalos-tail-sweep-double",
@@ -10111,7 +10124,7 @@
       },
       "patterns": {
         "status": "reviewed-release",
-        "count": 14,
+        "count": 15,
         "fallbackCount": 0,
         "inferredCount": 0,
         "reviewed": true,
@@ -10126,6 +10139,7 @@
           "rathalos-bite-contact",
           "rathalos-rush-bite",
           "rathalos-fireball",
+          "rathalos-triple-fireball",
           "rathalos-backstep-fireball",
           "rathalos-claw-dive",
           "rathalos-tail-sweep-double",

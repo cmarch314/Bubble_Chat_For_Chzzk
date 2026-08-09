@@ -1007,6 +1007,46 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
           ]
         ]
       }
+    },
+    "tigrex.rock_shot": {
+      "impact": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em032/em032_se_nbnk_231_609233192.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    }
+  },
+  "legiana": {
+    "legiana.cold_tail_slam": {
+      "telegraph": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em111/em111_vo_nbnk_002_10596222.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
+    }
+  },
+  "barioth": {
+    "barioth.roar": {
+      "roar": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em042/em042_vo_nbnk_132_1072090229.mp3",
+            0.7,
+            0
+          ]
+        ]
+      }
     }
   }
 };

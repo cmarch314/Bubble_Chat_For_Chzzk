@@ -61,11 +61,19 @@ function engineFor(id, overrides = {}) {
         monsterPartState: [{ kind: 'left-front-leg', broken: true }],
         callbacks: { onTriggerMonsterTraitReaction: kind => { reaction = kind; } }
     });
-    engine.monsterTraitRuntime.afterAction(engine, { tags: ['charge'] });
+    engine.monsterTraitRuntime.afterAction(engine, { tags: ['charge', 'slip-eligible'] });
     assert.strictEqual(engine.monsterAtb, 50,
         'a broken-limb stumble must settle at half ATB instead of subtracting from action debt');
     assert.ok(engine.monsterActionLockTicks >= 24);
     assert.strictEqual(reaction, 'limb-slip');
+
+    engine.monsterAtb = 100;
+    engine.monsterActionLockTicks = 0;
+    reaction = null;
+    engine.monsterTraitRuntime.afterAction(engine, { tags: ['charge'] });
+    assert.strictEqual(engine.monsterAtb, 100,
+        'a generic charge must not slip unless its authored motion uses the broken foreleg spike');
+    assert.strictEqual(reaction, null);
 }
 
 {

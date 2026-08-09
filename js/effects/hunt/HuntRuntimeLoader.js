@@ -50,6 +50,7 @@ const HUNT_RUNTIME_SCRIPT_PATHS = Object.freeze([
     'js/effects/hunt/HuntMonsterTraitRuntime.js',
     'js/effects/hunt/HuntMonsterProfiles.js?v=20260803h',
     'js/effects/hunt/HuntMonsterEditionResolver.js',
+    'js/effects/hunt/data/MonsterPatternMotionOverrides.generated.js',
     'js/effects/hunt/HuntMonsterPatternCatalog.js',
     'js/effects/hunt/HuntMonsterPatternSelector.js',
     'js/effects/hunt/HuntLifecycle.js',

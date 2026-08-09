@@ -241,6 +241,39 @@ class HuntMonsterPatternCatalog {
                 result[monsterId] = patterns.map(pattern => HuntMonsterFlightRuntime.decoratePattern(monsterId, pattern));
             });
         }
+        const timingOverrides = scope.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES || {};
+        Object.entries(result).forEach(([monsterId, patterns]) => {
+            result[monsterId] = patterns.map(pattern => {
+                const override = timingOverrides[monsterId]?.[pattern.id];
+                if (!override?.beats) return pattern;
+                const beats = override.beats;
+                if (Array.isArray(pattern.motion) && pattern.motion.length) {
+                    return {
+                        ...pattern,
+                        motion: pattern.motion.map((beat, index) => ({
+                            ...beat,
+                            ...(typeof beats[beat.beat || `beat-${index + 1}`] === 'object'
+                                ? beats[beat.beat || `beat-${index + 1}`] : {}),
+                            ticks: Math.max(1, Number(
+                                typeof beats[beat.beat || `beat-${index + 1}`] === 'object'
+                                    ? beats[beat.beat || `beat-${index + 1}`].ticks
+                                    : beats[beat.beat || `beat-${index + 1}`]
+                            ) || Number(beat.ticks) || 1)
+                        }))
+                    };
+                }
+                const tickValue = value => typeof value === 'object' ? value?.ticks : value;
+                const active = tickValue(beats.start) ?? tickValue(beats.launch) ?? tickValue(beats.impact)
+                    ?? Object.entries(beats).find(([key]) => key.startsWith('impact'))?.[1];
+                return {
+                    ...pattern,
+                    ...(beats.telegraph != null ? { windupTicks: Math.max(1, Number(tickValue(beats.telegraph)) || 1) } : {}),
+                    ...(active != null ? { activeTicks: Math.max(1, Number(tickValue(active)) || 1) } : {}),
+                    ...(beats.recovery != null ? { recoveryTicks: Math.max(1, Number(tickValue(beats.recovery)) || 1) } : {}),
+                    ...(beats.travel != null ? { movement: { ...(pattern.movement || {}), ticks: Math.max(1, Number(tickValue(beats.travel)) || 1) } } : {})
+                };
+            });
+        });
         return result;
     }
 

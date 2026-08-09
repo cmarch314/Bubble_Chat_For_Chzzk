@@ -943,7 +943,7 @@ const HUNT_RELEASED_MONSTER_DATA = Object.freeze([
             "audioStatus": "unresolved"
         },
         "canonicalEdition": "world-iceborne",
-        "releaseReview": "world-flying-batch-2026-07-28",
+        "releaseReview": "barioth-rebuild-2026-08-09",
         "mechanicModules": [
             "common"
         ]

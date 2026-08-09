@@ -86,6 +86,18 @@ class HuntEffect extends BaseEffect {
         this.lifecycle.transition(nextState);
     }
 
+    shouldPlayBaseChatAudio(msgData = {}) {
+        if (!this.isActive || !['loadout', 'fighting', 'results'].includes(this.phase)) return false;
+        const message = String(msgData.message || '').trim();
+        if (!message || /^[!！]/.test(message)) return false;
+        const uid = msgData.uid || msgData.userIdHash || null;
+        const nickname = String(msgData.nickname || '').normalize('NFKC').trim().toLowerCase();
+        return this.selectedWeapons.some(hunter => !hunter.isNpc && (
+            (uid && hunter.participantUid === uid)
+            || String(hunter.hunterName || '').normalize('NFKC').trim().toLowerCase() === nickname
+        ));
+    }
+
     async execute(context) {
         if (this.isActive) {
             console.warn("Monster hunt game is already active. Ignoring double trigger.");

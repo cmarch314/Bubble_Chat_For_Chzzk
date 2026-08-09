@@ -1595,6 +1595,11 @@
 .monster-motion-tigrex-clockwise-spin.monster-motion-tigrex-clockwise-spin { animation:tigrex-clockwise-spin var(--monster-motion-duration) cubic-bezier(.18,.72,.14,1) both !important; transform-origin:72% 70%; }
 .monster-motion-tigrex-rock-shot.monster-motion-tigrex-rock-shot { animation:tigrex-rock-shot var(--monster-motion-duration) ease-in-out both !important; transform-origin:72% 70%; }
 .monster-motion-tigrex-leap { animation:tigrex-leap var(--monster-motion-duration) cubic-bezier(.18,.75,.16,1) both !important; }
+.monster-motion-barioth-spring-leap { animation:barioth-spring-leap var(--monster-motion-duration) linear both !important; }
+.monster-motion-barioth-glide-circle-land.monster-motion-barioth-glide-circle-land {
+    animation:barioth-glide-circle-land var(--monster-motion-duration) linear both !important;
+    transform-origin:31% 81%;
+}
 .monster-motion-body-spin { animation: monster-motion-body-spin var(--monster-motion-duration) cubic-bezier(.22,.74,.18,1) both !important; }
 .monster-motion-leap-slam { animation: monster-motion-leap-slam var(--monster-motion-duration) cubic-bezier(.18,.82,.2,1) both !important; }
 .monster-motion-aerial-dive { animation: monster-motion-aerial-dive var(--monster-motion-duration) cubic-bezier(.12,.8,.18,1) both !important; }
@@ -2200,6 +2205,32 @@
 }
 .monster-local-action-fx.breath-fizzle.is-playing {
     animation:monster-breath-fizzle var(--monster-local-duration,1.8s) ease-out both;
+}
+.monster-local-action-fx.barioth-ice-tornado {
+    width:420px;
+    height:420px;
+    display:grid;
+    place-items:center;
+    font-size:18rem;
+    color:#d9f7ff;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(224,252,255,.34) 0 18%,rgba(108,215,255,.18) 42%,transparent 70%);
+    filter:drop-shadow(0 0 12px #8eeeff) drop-shadow(0 0 28px #4abfffaa);
+}
+.monster-local-action-fx.barioth-ice-tornado::before,
+.monster-local-action-fx.barioth-ice-tornado::after {
+    content:'❄';
+    position:absolute;
+    color:#e9fdff;
+    font-size:2.4rem;
+    text-shadow:55px -25px 0 #bdefff,-46px 32px 0 #86dfff,24px 58px 0 #dffcff;
+}
+.monster-local-action-fx.barioth-ice-tornado::after {
+    transform:scale(.72);
+    opacity:.75;
+}
+.monster-local-action-fx.barioth-ice-tornado.is-playing {
+    animation:barioth-ice-tornado var(--monster-local-duration,3.6s) cubic-bezier(.18,.72,.24,1) both;
 }
 .monster-local-action-fx.flight-stagger {
     top:39%; font-size:6.4rem; filter:drop-shadow(0 6px 11px #000d);
@@ -2855,6 +2886,40 @@
     20%{opacity:.85;transform:translate(-50%,-50%) scale(.85)}
     55%{opacity:.72;transform:translate(-62%,-82%) scale(1.25) rotate(-8deg)}
     100%{opacity:0;transform:translate(-78%,-135%) scale(1.75) rotate(9deg);filter:blur(4px)}
+}
+@keyframes barioth-ice-tornado {
+    0% { opacity:0; transform:translate(-50%,-42%) scale(.22,.45); }
+    12% { opacity:1; transform:translate(-50%,-52%) scale(.82,1.08); }
+    38% { opacity:.96; transform:translate(-50%,-58%) scale(1.05,1.20); }
+    76% { opacity:.72; transform:translate(-50%,-64%) scale(.92,1.32); }
+    100% { opacity:0; transform:translate(-50%,-88%) scale(.45,1.55); }
+}
+
+@keyframes barioth-spring-leap {
+    0%,100%{transform:none}
+    9%{transform:translateY(8px) scale(1.03,.94)}
+    17%,22%{transform:translateY(32px) scale(1.18,.72)}
+    31%{transform:translate(0,-285px) rotate(-7deg) scale(.84,1.22)}
+    50%{transform:translate(calc(var(--monster-attack-x)*.62),calc(var(--monster-attack-y)*.24 - 310px)) rotate(5deg) scale(.94,1.10)}
+    68%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(8deg) scale(1.28,.74);filter:brightness(1.35) drop-shadow(0 24px 12px #0009)}
+    79%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(3deg) scale(1.08,.92)}
+    89%{transform:translate(calc(var(--monster-attack-x)*.5),calc(var(--monster-attack-y)*.45))}
+}
+
+/* 벨리오로스 전용 저공 활강.
+   0~58%는 앞발을 내민 낮은 직선 활강, 58~82%는 왼앞발을 축으로 한
+   180도 착지 회전이다. 회전 중에도 X 이동을 계속해 제자리 펀치가 되지 않는다. */
+@keyframes barioth-glide-circle-land {
+    0%,100%{transform:none}
+    8%{transform:translateY(24px) scale(1.10,.82)}
+    16%{transform:translate(0,-92px) rotate(-78deg) scale(.78,1.16)}
+    31%{transform:translate(calc(var(--monster-attack-x)*.30),calc(var(--monster-attack-y)*.12 - 170px)) rotate(-84deg) scale(.72,1.22)}
+    48%{transform:translate(calc(var(--monster-attack-x)*.62),calc(var(--monster-attack-y)*.34 - 150px)) rotate(-82deg) scale(.78,1.18)}
+    58%{transform:translate(calc(var(--monster-attack-x)*.82),calc(var(--monster-attack-y)*.60 - 130px)) rotate(-78deg) scale(.90,1.08)}
+    66%{transform:translate(calc(var(--monster-attack-x)*.94 + 55px),calc(var(--monster-attack-y)*.72 - 170px)) rotate(-18deg) scale(1.03,.96)}
+    74%{transform:translate(calc(var(--monster-attack-x) + 125px),calc(var(--monster-attack-y)*.78 - 210px)) rotate(46deg) scale(1.12,.88);filter:brightness(1.35) drop-shadow(0 18px 15px #000a)}
+    82%{transform:translate(calc(var(--monster-attack-x) + 215px),calc(var(--monster-attack-y)*.80 - 240px)) rotate(102deg) scale(1.16,.84)}
+    91%,99.8%{transform:translate(calc(var(--monster-attack-x) + 245px),calc(var(--monster-attack-y)*.80 - 240px)) rotate(102deg) scale(1.02,.98)}
 }
 @keyframes monster-flight-stagger-fx {
     0%,100%{opacity:0;transform:translate(-50%,-50%) scale(.6)}

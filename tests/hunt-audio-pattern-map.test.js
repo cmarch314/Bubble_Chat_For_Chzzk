@@ -7,9 +7,11 @@ const path = require('path');
 const {
     huntToGraphId,
     patternAudioSlots,
+    patternReviewTimeline,
     buildMonsterPatternAudioMap,
     loadHuntPatternAudioMap,
-    savePatternRoute
+    savePatternRoute,
+    savePatternMotion
 } = require('../tools/hunt-audio-pattern-map');
 
 // hunt monster id resolves to its World audio-graph bank id.
@@ -45,6 +47,29 @@ const emergeSlots = patternAudioSlots({ id: 'diablos.burrow_emerge', type: 'char
 assert.deepStrictEqual(emergeSlots, ['telegraph', 'impact'],
     'burrow emerge must expose a telegraph and a physical impact slot');
 
+const beatTimeline = patternReviewTimeline({
+    motion: [
+        { beat: 'windup', ticks: 5, pose: 'crouch' },
+        { beat: 'bite', ticks: 2, to: 'target', hit: true, sfx: 'impact' },
+        { beat: 'return', ticks: 3, to: 'home', pose: 'idle' }
+    ]
+});
+assert.strictEqual(beatTimeline.source, 'beat-motion');
+assert.strictEqual(beatTimeline.durationTicks, 10);
+assert.deepStrictEqual(beatTimeline.beats.map(beat => [beat.id, beat.startTicks, beat.endTicks, beat.hit]), [
+    ['windup', 0, 5, false],
+    ['bite', 5, 7, true],
+    ['return', 7, 10, false]
+]);
+
+const legacyTimeline = patternReviewTimeline({
+    animationDurationMs: 2600,
+    movement: { ticks: 20 },
+    impactTimeline: [{ atTicks: 15 }]
+});
+assert.strictEqual(legacyTimeline.source, 'legacy-phases');
+assert.strictEqual(legacyTimeline.durationTicks, 27);
+
 // build map reflects the hand-authored catalog: diablos roar/burrow are curated.
 const catalog = {
     'diablos:roar': [{ label: 'Diablos roar', layers: [['a/em007_vo_roar.mp3', 0.7, 0]] }],
@@ -56,13 +81,17 @@ const patterns = [
     { id: 'diablos.tail_slam_rock', name: '꼬리 바위', type: 'projectile', delivery: 'projectile', tags: ['tail', 'projectile'], impactTimeline: [{ audioCue: 'rock' }] }
 ];
 const tmp = path.join(os.tmpdir(), `hunt-audio-overrides-${process.pid}.json`);
+const motionTmp = path.join(os.tmpdir(), `hunt-motion-overrides-${process.pid}.json`);
 try { fs.unlinkSync(tmp); } catch { /* fresh */ }
+try { fs.unlinkSync(motionTmp); } catch { /* fresh */ }
 
 let map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
 assert.strictEqual(map.graphId, 'em007');
 const roarPattern = map.patterns.find(p => p.id === 'diablos.roar');
 assert.ok(roarPattern.slots[0].current, 'roar slot must report its curated route');
 const rockPattern = map.patterns.find(p => p.id === 'diablos.tail_slam_rock');
+assert.ok(rockPattern.timeline && rockPattern.timeline.beats.length,
+    'review projection must expose a left-to-right motion timeline');
 const launch = rockPattern.slots.find(s => s.slot === 'launch');
 assert.strictEqual(launch.current, null, 'uncurated launch slot must read as fallback');
 assert.strictEqual(launch.assigned, null);
@@ -74,10 +103,33 @@ const assigned = map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots
 assert.ok(assigned.assigned && assigned.assigned.layers[0][0].endsWith('em007_se_launch.mp3'),
     'saved override must appear on the slot');
 
-// clearing removes it.
+savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: 'launch',
+    files: ['local_assets/x/a.mp3', 'local_assets/x/b.mp3'], mode: 'random' }, tmp);
+map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
+const randomAssigned = map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === 'launch');
+assert.strictEqual(randomAssigned.effective.mode, 'random');
+assert.strictEqual(randomAssigned.effective.layers.length, 2);
+
+// Explicit removal suppresses both an override and any catalog fallback.
+savePatternRoute({ huntId: 'diablos', patternId: 'diablos.roar', slot: 'roar', files: [], disabled: true }, tmp);
+map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
+const mutedRoar = map.patterns.find(p => p.id === 'diablos.roar').slots[0];
+assert.strictEqual(mutedRoar.effective, null);
+assert.strictEqual(mutedRoar.muted, true);
+assert.deepStrictEqual(mutedRoar.override, { disabled: true });
+
+// Empty files without disabled still clears a custom override and restores fallback.
 savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: 'launch', files: [] }, tmp);
 map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
 assert.strictEqual(map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === 'launch').assigned, null);
+
+const motionSave = savePatternMotion({
+    huntId: 'diablos', patternId: 'diablos.tail_slam_rock',
+    beats: { telegraph: 12, launch: 3, 'impact:rock': 2, recovery: 18 }
+}, motionTmp);
+assert.deepStrictEqual(motionSave.beats, { telegraph: 12, launch: 3, 'impact:rock': 2, recovery: 18 });
+savePatternMotion({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', reset: true }, motionTmp);
+assert.strictEqual(JSON.parse(fs.readFileSync(motionTmp, 'utf8')).overrides.diablos, undefined);
 
 // the real reviewed catalog resolves diablos without throwing.
 const live = loadHuntPatternAudioMap('diablos', { overridesPath: tmp });
@@ -85,4 +137,5 @@ assert.ok(live.patterns.length >= 8, 'diablos must expose its reviewed pattern s
 assert.ok(live.patterns.some(p => p.id === 'diablos.tail_slam_rock'));
 
 try { fs.unlinkSync(tmp); } catch { /* best effort */ }
+try { fs.unlinkSync(motionTmp); } catch { /* best effort */ }
 console.log('[test] hunt audio pattern-map derivation, overrides, and live catalog passed.');

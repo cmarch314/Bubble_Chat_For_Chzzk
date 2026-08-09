@@ -142,6 +142,7 @@ const completion = saveReviewCompletion(
 );
 assert.deepStrictEqual(completion, {
     monster: 'em001',
+    graphId: 'em001',
     monsterIds: ['rathian', 'rathalos'],
     reviewStatus: 'completed'
 });
@@ -154,6 +155,15 @@ saveReviewCompletion(
 );
 labels = JSON.parse(fs.readFileSync(labelsPath, 'utf8'));
 assert.deepStrictEqual(labels.runtimePolicy.completedMonsterIds, []);
+
+const huntIdCompletion = saveReviewCompletion(
+    { monster: 'legiana', completed: true },
+    labelsPath,
+    { em111_vo: ['legiana'] }
+);
+assert.deepStrictEqual(huntIdCompletion, {
+    monster: 'legiana', graphId: 'em111', monsterIds: ['legiana'], reviewStatus: 'completed'
+});
 
 fs.writeFileSync(labelsPath, JSON.stringify({
     version: 1,
@@ -177,7 +187,35 @@ if (fs.existsSync(htmlPath)) {
     assert.ok(html.includes('/api/review-completion'));
     assert.ok(html.includes('/api/hunt-patterns'));
     assert.ok(html.includes('/api/hunt-pattern-route'));
+    assert.ok(html.includes('/api/hunt-pattern-motion'));
+    assert.ok(html.includes('motion-editor'));
+    assert.ok(html.includes('beat-handle'));
+    assert.ok(html.includes('타이밍 편집'));
+    assert.ok(html.includes('선택 랜덤 배정'));
+    assert.ok(html.includes('source-include'));
+    assert.ok(html.includes('previewPatternTimeline'));
+    assert.ok(html.includes('실수렵 모션 미리보기'));
+    assert.ok(html.includes('bubblechat:pattern-preview'));
+    assert.ok(html.includes('slow-fast-slow'));
+    assert.ok(html.includes('rotationEasing'));
+    assert.ok(html.includes('installTimelineScrubber'));
+    assert.ok(html.includes('bubblechat:pattern-preview-seek'));
+    assert.ok(html.includes('bubblechat.monsterAudioReview.lastMonster'));
+    assert.ok(html.includes('route.mode===\'random\''));
     assert.ok(html.includes('class="slot-pick"'));
+    assert.ok(html.includes('class="workspace"'));
+    assert.ok(html.includes('class="beat-track"'));
+    assert.ok(html.includes('tickMap=()=>Object.fromEntries'),
+        'timing editor must save and preview from one object-backed tick draft');
+    assert.ok(html.includes('draft[leftId].ticks=leftStart+delta'),
+        'timeline handle dragging must update the same draft sent to the save API');
+    assert.ok(html.includes('function selectEditorPart('),
+        'sound slots, timeline beats, timing fields and transforms must share one selected part');
+    assert.ok(html.includes('saveBeats=Object.fromEntries'),
+        'timing save must serialize the visible editor values instead of a stale closure');
+    assert.ok(html.includes('저장 검증 실패'),
+        'timing save must verify the server persisted every submitted beat');
+    assert.ok(html.includes('selectedSlot'));
 }
 
 console.log('monster audio event-group review server tests passed');

@@ -6,6 +6,10 @@ const path = require('path');
 
 const html = fs.readFileSync(path.resolve(__dirname, 'fixtures/hunt-monster-pattern-lab.html'), 'utf8');
 
+assert.match(html, /get\('embed'\) !== '1'/,
+    'the retired standalone pattern lab must only run as the unified audio review iframe');
+assert.match(html, /location\.replace\('http:\/\/127\.0\.0\.1:17930\/'\)/,
+    'direct pattern-lab visits must return to the unified monster audio review UI');
 assert.match(html, /width:1920px;height:1080px/);
 assert.match(html, /id="monster-select"/);
 assert.match(html, /id="pattern-buttons"/);
@@ -121,5 +125,11 @@ assert.match(html, /classList\.toggle\('is-targeted'/,
 assert.match(html, /자동→\$\{linked\+1\}/,
     'the automatic target button must reveal the selected slot');
 assert.match(html, /하단 15%/);
+assert.match(html, /bubblechat:pattern-preview/,
+    'sound review must be able to preview an unsaved motion draft in the real animator');
+assert.match(html, /embedded-preview/,
+    'embedded production preview must hide its own control overlay');
+assert.match(html, /seekBeatMotion\(message\.progress\)/,
+    'the embedded lab must seek the real compiled animation without applying combat damage');
 
 console.log('[test] Interactive monster pattern lab contract passed.');

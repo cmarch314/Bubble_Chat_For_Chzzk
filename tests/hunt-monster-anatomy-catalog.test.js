@@ -165,6 +165,24 @@ assert.deepStrictEqual(
     { x: .50, y: .58, kind: 'mouth' },
     'Seething Bazelgeuse must inherit the same species mouth anchor'
 );
+assert.strictEqual(Catalog.baseFacing({ id: 'barioth' }), 'left');
+assert.deepStrictEqual(
+    Catalog.visualPoint({ id: 'barioth' }, 'mouth'),
+    { x: .41, y: .23, kind: 'mouth' },
+    'Barioth breath must leave the left-facing mouth at the upper center of the sprite'
+);
+assert.deepStrictEqual(
+    Catalog.visualPoint({ id: 'barioth' }, 'left-front-leg'),
+    { x: .31, y: .81, kind: 'left-front-leg' }
+);
+assert.deepStrictEqual(
+    Catalog.visualPoint({ id: 'barioth' }, 'right-front-leg'),
+    { x: .72, y: .81, kind: 'right-front-leg' }
+);
+assert.deepStrictEqual(
+    Catalog.visualPoint({ id: 'barioth' }, 'tail'),
+    { x: .70, y: .15, kind: 'tail' }
+);
 
 let endgameBreakCoverage = 0;
 for (let seed = 1; seed <= 50; seed++) {

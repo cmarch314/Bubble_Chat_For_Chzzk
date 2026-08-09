@@ -40,6 +40,18 @@ const AMBUSH = [
 
 const built = HuntMotionCompiler.compile(AMBUSH, { anchors });
 
+const transformed = HuntMotionCompiler.compile([{
+    beat: 'edited', ticks: 10, to: 'hunter:1', offsetX: 12, offsetY: -8,
+    rotation: 30, rotateBy: 180, scaleX: 1.2, scaleY: .8,
+    skewX: 5, skewY: -3, opacity: .7, origin: '25% 75%',
+    moveEasing: 'accelerate', rotationEasing: 'slow-fast-slow'
+}], { anchors });
+assert.ok(transformed.placement.some(frame => frame.easing === HuntMotionCompiler.EASING_PRESETS.accelerate));
+assert.ok(transformed.pose.some(frame => frame.easing === HuntMotionCompiler.EASING_PRESETS['slow-fast-slow']));
+assert.ok(transformed.pose.some(frame => frame.transform.includes('skew(5.00deg, -3.00deg)')));
+assert.ok(transformed.pose.some(frame => frame.transform.includes('scale(1.2000, 0.8000)')));
+assert.ok(transformed.pose.some(frame => frame.origin === '25% 75%'));
+
 // ---- 길이는 틱에서만 나온다 ----
 
 assert.strictEqual(built.totalTicks, 20, '틱 합이 총 길이다');
@@ -81,14 +93,14 @@ for (const frame of built.placement) {
     assert.ok(!/rotate|scale/.test(frame.transform), 'placement는 회전·신축하지 않는다');
 }
 for (const frame of built.pose) {
-    assert.match(frame.transform, /^rotate\([^)]*\) scale\(/, 'pose는 회전과 신축만 한다');
+    assert.match(frame.transform, /^rotate\([^)]*\) skew\([^)]*\) scale\(/, 'pose는 회전·기울기·신축만 한다');
     assert.ok(!/translate/.test(frame.transform), 'pose는 이동하지 않는다');
 }
 
 // ---- 복귀는 항상 똑바로 선 자세로 끝난다 ----
 
 const last = built.pose[built.pose.length - 1];
-assert.strictEqual(last.transform, 'rotate(0.00deg) scale(1.0000, 1.0000)',
+assert.strictEqual(last.transform, 'rotate(0.00deg) skew(0.00deg, 0.00deg) scale(1.0000, 1.0000)',
     '마지막 자세가 idle이면 이미지가 늘 원래 방향으로 선다');
 
 // ---- 화면 밖은 실제로 밖으로 나간다 ----
