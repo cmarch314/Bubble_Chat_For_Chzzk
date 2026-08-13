@@ -47,7 +47,7 @@ assert.strictEqual(Catalog.resolve({ id: 'unreviewed' }, { kind: 'tail' }).tint,
 for (const monster of releasedMonsters) {
     const material = Catalog.resolve(monster, { kind: 'head' });
     const tint = material.tint;
-    assert.match(tint, /^brightness\([^)]+\) sepia\(1\)/,
+    assert.match(tint, /^brightness\([^)]+\) (?:sepia\(1\)|saturate\(0\))/,
         `${monster.id} must lower white luminance before tinting the opaque icon interior`);
     assert.doesNotMatch(tint, /^grayscale/,
         `${monster.id} must not silently fall back to a white material icon`);

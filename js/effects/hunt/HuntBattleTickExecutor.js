@@ -37,7 +37,7 @@ class HuntBattleTickExecutor {
 
     static startTransitionRoarAction(engine, kind) {
         const pattern = HuntBattleTickExecutor.transitionRoarPattern(engine);
-        if (!pattern?.beatV2Approved || !pattern?.beatV2) return false;
+        if (!(pattern?.beatV2Enabled || pattern?.beatV2Approved) || !pattern?.beatV2) return false;
         const previousForcedPatternId = engine.forcedMonsterPatternId || null;
         engine.pendingMonsterTransitionRoarKind = kind;
         engine.forcedMonsterPatternId = pattern.id;

@@ -59,7 +59,7 @@ class HuntBeatV2Adapter {
         return BEAT_V2_CONTRACT.compile({
             schemaVersion: 2,
             backend: 'beat-v2',
-            reviewStatus: String(options.reviewStatus || 'migration'),
+            reviewStatus: String(options.reviewStatus || 'migrated'),
             id: String(pattern.id || ''),
             actor: 'monster',
             source: Object.freeze({ kind: 'monster-pattern', monsterId: options.monsterId || null }),

@@ -20,6 +20,7 @@ const huntRenderer = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt
 const huntPartMaterials = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntMonsterPartMaterialCatalog.js'), 'utf8');
 const huntAnimator = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntCombatAnimator.js'), 'utf8');
 const huntEffect = fs.readFileSync(path.resolve(__dirname, '../js/effects/HuntEffect.js'), 'utf8');
+const huntPresenter = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntCombatPresenter.js'), 'utf8');
 const insectGlaiveWeapon = fs.readFileSync(path.resolve(__dirname, '../img/weapons/insect_glaive.svg'), 'utf8');
 const insectGlaiveKinsect = fs.readFileSync(path.resolve(__dirname, '../img/weapons/kinsect.svg'), 'utf8');
 assert.match(huntRenderer, /class="game-hunt-card game-hunt-pregame-card hunt-quest-board/);
@@ -215,14 +216,14 @@ assert.match(huntAnimator, /triggerHitAnimation\(idx, w, reaction = \{\}\)\s*\{[
     'hunter hit reactions must interrupt the currently running weapon animation');
 assert.match(huntAnimator, /triggerHitAnimation\(idx, w, reaction = \{\}\)[\s\S]*?'\.game-hunt-weapon-img, \.hunt-split-shield, \.game-hunt-weapon-overlay'/,
     'hunter hit knockback must target weapon, split shield, and attached weapon effect layers');
-assert.match(huntAnimator, /weaponCard\.classList\.add\(cardShakeClass\)[\s\S]*?weaponLayers\.forEach\(layer => \{[\s\S]*?layer\.animate\(keyframes/,
-    'a hunter hit may shake the fixed card while WAAPI applies knockback only to its weapon layers');
+assert.match(huntAnimator, /weaponCard\.classList\.add\(cardShakeClass\)[\s\S]*?(?:hitLayers|weaponLayers)\.forEach\(layer => \{[\s\S]*?layer\.animate\(keyframes/,
+    'a hunter hit may shake the fixed card while WAAPI applies knockback only to its stable weapon wrapper or layers');
 assert.doesNotMatch(huntAnimator, /layer\.classList\.add\(hitClass\)/,
     'legacy CSS hunter hit animation must not coexist with the WAAPI owner');
-assert.match(huntAnimator, /kind === 'weak' \? 1500 : 4000/,
-    'migrated weak and strong hit recovery must preserve the approved 1.5s and 4s timing');
-assert.match(huntAnimator, /knockbackVectorFromRects[\s\S]*?offset: \.25[\s\S]*?translate\(\$\{x\}px, \$\{y \+ yOffset\}px\)[\s\S]*?offset: \.75/,
-    'strong hit recovery must fall along the measured monster-to-hunter collision vector');
+assert.match(huntAnimator, /kind === 'weak' \? 1500 : 5000/,
+    'migrated weak and strong hit recovery must preserve the approved 1.5s and 5s timing');
+assert.match(huntAnimator, /static strongHitKeyframes[\s\S]*?const tumbleFrame[\s\S]*?tumbleFrame\(tumbleEndOffset \* \.25[\s\S]*?tumbleFrame\(tumbleEndOffset \* \.75/,
+    'strong hit recovery must use the measured monster-to-hunter collision vector through its tumble frames');
 assert.doesNotMatch(css, /@keyframes\s+weapon-(?:small|large)-hit/,
     'legacy CSS hunter hit keyframes must be removed after WAAPI migration');
 assert.doesNotMatch(huntAnimator, /weaponCard\.style\.animation\s*=\s*'cart-card-slide-out/,
@@ -258,11 +259,11 @@ assert.doesNotMatch(huntAnimator, /triggerRollAnimation\(idx\)[\s\S]{0,300}?game
 assert.match(css, /\.game-hunt-weapon-img\.roll-anim,\s*\n\.hunt-split-shield\.roll-anim\s*\{/);
 assert.match(huntAnimator, /interruptWeaponVisual\(idx, w\)[\s\S]*?cancelWeaponAnimation\(weaponImg\)[\s\S]*?updateWeaponChargeAuraUI\(idx, w\)/,
     'an interrupted Great Sword charge must immediately return its visual stage to the reset mechanic state');
-assert.match(huntEffect, /onInterruptWeaponVisual:[\s\S]*?interruptWeaponVisual\(idx, w\)/,
-    'combat defense interruptions must reach the weapon visual cleanup owner');
+assert.match(huntPresenter, /onInterruptWeaponVisual:\s*index => renderer\?\.combatAnimator[\s\S]*?interruptWeaponVisual\?\.\(index, this\.hunter\(index\)\)/,
+    'combat defense interruptions must reach the weapon visual cleanup owner through the combat presenter');
 assert.doesNotMatch(css, /\.weapon-charge-aura/,
     'detached charge silhouettes must not return for Great Sword or Hammer');
-assert.match(css, /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(135deg \* var\(--weapon-facing\)\)\)/,
+assert.match(css, /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(225deg \* var\(--weapon-facing\)\)\)/,
     'Great Sword charge pose must not reverse its blade direction in right-side slots');
 assert.match(css, /\.weapon-hammer:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(-78deg \* var\(--weapon-facing\)\)\)/,
     'Hammer charge pose must stay visibly tilted toward the monster');

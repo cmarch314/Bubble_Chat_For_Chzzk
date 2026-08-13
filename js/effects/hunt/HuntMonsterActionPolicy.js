@@ -578,7 +578,7 @@ class HuntMonsterActionPolicy {
         if (authored?.length) {
             const compiledTicks = pattern.beatV2
                 && pattern.runtimeJudgmentGroups === true
-                && pattern.beatV2Approved === true
+                && (pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
                 ? this.#beatV2GameplayTicks(pattern.beatV2)
                 : [];
             return authored.map((entry, index) => {

@@ -12,6 +12,7 @@ class HuntBeatV2Contract {
     static VERSION = 2;
     static BACKEND = 'beat-v2';
     static ACTORS = new Set(['monster', 'hunter', 'reaction', 'environment']);
+    static REVIEW_STATUSES = new Set(['draft', 'migrated', 'approved']);
     static FORBIDDEN_APPROVED_FIELDS = Object.freeze([
         'impactTimeline', 'profileMotion', 'runtimeTimingBeats', 'runtimeSourceTimingBeats',
         'animationClass', 'cssAnimation', 'hitOffsetTicks'
@@ -30,7 +31,11 @@ class HuntBeatV2Contract {
         if (source.schemaVersion !== this.VERSION) {
             throw new HuntBeatV2ContractError(`schemaVersion must be ${this.VERSION}`, 'schemaVersion');
         }
-        if (source.reviewStatus === 'approved') {
+        const reviewStatus = String(source.reviewStatus || 'migrated').trim().toLowerCase();
+        if (!this.REVIEW_STATUSES.has(reviewStatus)) {
+            throw new HuntBeatV2ContractError(`unsupported reviewStatus: ${reviewStatus || '-'}`, 'reviewStatus');
+        }
+        if (reviewStatus === 'approved') {
             const forbidden = this.FORBIDDEN_APPROVED_FIELDS.filter(field => source[field] != null);
             if (forbidden.length) {
                 throw new HuntBeatV2ContractError(
@@ -113,6 +118,7 @@ class HuntBeatV2Contract {
             backend: this.BACKEND,
             id,
             actor,
+            reviewStatus,
             totalTicks: elapsed,
             atb,
             beats: timeline,

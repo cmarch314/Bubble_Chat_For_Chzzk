@@ -955,7 +955,7 @@ class HuntMonsterTurnExecutor {
         // Approved graphs already contain their telegraph BEAT. A separate
         // pending windup makes live combat slower than preview and creates a
         // second interruption owner for the same action.
-        const windupTicks = pattern.beatV2Approved === true ? 0 : legacyWindupTicks;
+        const windupTicks = (pattern.beatV2Enabled === true || pattern.beatV2Approved === true) ? 0 : legacyWindupTicks;
         const animationProfile = HuntMonsterTurnExecutor.animationCatalog()?.resolve?.(
             pattern,
             HuntMonsterTurnExecutor.displayPatternName(pattern, engine.selectedMonster),
@@ -990,7 +990,7 @@ class HuntMonsterTurnExecutor {
             : Number(engine.monsterAtb || 0) - actionCost;
         if (!engine.smallMonsterSwarm) engine.updateMonsterAtbUI(engine.monsterAtb);
         let targetIndex = null;
-        if (isBurrowEmerge && pattern.beatV2Approved !== true) {
+        if (isBurrowEmerge && !(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)) {
             const targetable = HuntMonsterTurnExecutor.targetableHunters(engine);
             if (!targetable.length) {
                 return HuntMonsterTurnExecutor.cancelPreparedTargetAction(engine);
@@ -1018,7 +1018,7 @@ class HuntMonsterTurnExecutor {
         // 울려야 한다. 꼬리를 휘두르는 순간이 아니라 몸을 세우는 순간이 울음의 자리다.
         const hasSomersaultCue = (pattern.impactTimeline || [])
             .some(event => event?.audioCue === 'somersault');
-        if (pattern.beatV2Approved !== true && (!pattern.suppressPrepareAudio || hasSomersaultCue)) {
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && (!pattern.suppressPrepareAudio || hasSomersaultCue)) {
             engine.playSFX?.('monster_telegraph', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
@@ -1088,7 +1088,7 @@ class HuntMonsterTurnExecutor {
         }
         const attackName = HuntMonsterTurnExecutor.displayPatternName(pattern, engine.selectedMonster);
 
-        if (pattern.beatV2Approved !== true
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
             && pattern.tags?.includes('burrow-enter') && pattern.followUp) {
             if (pattern.secondaryInterference) {
                 HuntMonsterTurnExecutor.targetableHunters(engine).forEach(target => {
@@ -1122,7 +1122,7 @@ class HuntMonsterTurnExecutor {
             if (engine.telemetry) engine.telemetry.recordMonsterPattern(engine.selectedMonster.id, pattern, 'roar', 0);
             engine.triggerMonsterRoarFlinch(
                 pattern.runtimeTransitionRoarKind === 'encounter',
-                { actionOwned: pattern.beatV2Approved === true }
+                { actionOwned: pattern.beatV2Enabled === true || pattern.beatV2Approved === true }
             );
             if (Number(pattern.damageRatio || 0) <= 0) {
                 engine.monsterTraitRuntime?.afterAction?.(engine, pattern, []);
@@ -1131,7 +1131,7 @@ class HuntMonsterTurnExecutor {
             }
         }
 
-        if (pattern.beatV2Approved !== true
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
             && !isImpactCommit && pattern.type !== 'roar' && !pattern.suppressPrepareAudio) {
             engine.playSFX('monster_attack', null, {
                 monsterId: engine.selectedMonster.id,
@@ -1142,7 +1142,7 @@ class HuntMonsterTurnExecutor {
                 patternDelivery: pattern.delivery,
                 audioPhase: 'action-start'
             });
-        } else if (pattern.beatV2Approved !== true
+        } else if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
             && isImpactCommit && HuntMonsterTurnExecutor.judgmentField(
                 pattern, 'audioCue', 'runtimeImpactAudioCue') === 'tigrex-final-vocal') {
             engine.playSFX?.('monster_attack', null, {
@@ -1158,7 +1158,7 @@ class HuntMonsterTurnExecutor {
         // Phase-slot triggers (타격/후딜): fire the user-mapped pattern override at
         // the exact impact frame and again for recovery on the final hit. These are
         // overrideOnly, so they stay silent until a sound is assigned in the tool.
-        if (pattern.beatV2Approved !== true && isImpactCommit && pattern.type !== 'roar') {
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && isImpactCommit && pattern.type !== 'roar') {
             engine.playSFX?.('monster_impact', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
@@ -1275,7 +1275,7 @@ class HuntMonsterTurnExecutor {
             );
         }
 
-        const beatDriven = pattern.beatV2Approved === true && Boolean(pattern.beatV2);
+        const beatDriven = (pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && Boolean(pattern.beatV2);
         const traversal = HuntMonsterTurnExecutor.movementForPattern(pattern, engine.monsterState);
         if (!beatDriven && !isImpactCommit && traversal) {
             engine.beginMonsterTraversal?.(
@@ -1300,7 +1300,7 @@ class HuntMonsterTurnExecutor {
                 return;
             }
             const policy = HuntMonsterTurnExecutor.actionPolicy();
-            const measuredImpact = pattern.beatV2Approved === true ? null
+            const measuredImpact = (pattern.beatV2Enabled === true || pattern.beatV2Approved === true) ? null
                 : engine.callbacks.onResolveMonsterImpactTimeline?.(
                     pattern,
                     uniqueTargets.map(target => target.index)
@@ -1397,7 +1397,7 @@ class HuntMonsterTurnExecutor {
             return;
         }
 
-        if (!isImpactCommit && pattern.beatV2Approved === true && pattern.beatV2) {
+        if (!isImpactCommit && (pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && pattern.beatV2) {
             engine.beginMonsterBeatAction?.(pattern.beatV2, {
                 patternId: pattern.id,
                 pattern,
@@ -1409,7 +1409,7 @@ class HuntMonsterTurnExecutor {
         // Creature vocals may accompany the action start, but authored and
         // fallback SE belongs to the actual contact/projectile/explosion event.
         // Delayed and multi-hit timelines re-enter here once per committed event.
-        if (pattern.beatV2Approved !== true
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
             && pattern.type !== 'roar' && HuntMonsterTurnExecutor.judgmentField(
                 pattern, 'audioCue', 'runtimeImpactAudioCue') !== 'somersault') {
             engine.playSFX('monster_attack', null, {
@@ -1429,7 +1429,7 @@ class HuntMonsterTurnExecutor {
 
         // Charge trigger
         const isChargeAttack = attackName.includes('돌진') || attackName.includes('급습') || attackName.includes('휩쓸기') || attackName.includes('강습') || attackName.includes('활공') || attackName.includes('진격') || attackName.includes('습격') || attackName.includes('들이받기');
-        if (pattern.beatV2Approved !== true
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
             && !isImpactCommit && isChargeAttack && !isChargePattern) {
             if (engine.callbacks.onTriggerMonsterCharge) engine.callbacks.onTriggerMonsterCharge();
         }
@@ -1985,7 +1985,7 @@ class HuntMonsterTurnExecutor {
                 }
             });
         });
-        if (pattern.beatV2Approved !== true && pattern.tags?.includes('burrow-emerge')) {
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && pattern.tags?.includes('burrow-emerge')) {
             engine.monsterBurrowState = null;
             engine.callbacks?.onTriggerMonsterBurrowPhase?.(
                 'emerge',

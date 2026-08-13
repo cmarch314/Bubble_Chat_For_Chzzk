@@ -985,7 +985,7 @@ class HuntMonsterAttackAnimator {
             // Live approved audio is emitted by HuntBeatActionRuntime. Keeping
             // this renderer timer would play the same assigned slot twice and
             // would survive on a clock unrelated to gameplay interruption.
-            if (pattern?.beatV2Approved !== true && !pattern?.runtimePreviewMuteAudio) for (const cue of built.cues || []) {
+            if (!(pattern?.beatV2Enabled === true || pattern?.beatV2Approved === true) && !pattern?.runtimePreviewMuteAudio) for (const cue of built.cues || []) {
                 this.animationTimers.timeout(() => {
                     if (this.motionGeneration !== audioGeneration) return;
                     this.owner.onMonsterPatternAudio?.('monster_attack', null, {
@@ -1547,7 +1547,7 @@ class HuntMonsterAttackAnimator {
                     String(pattern.runtimeTigrexBranchApproachDurationMs);
                 tigrexStrideDelayMs = Math.round(profile.duration * (passCount === 3 ? .09 : .10));
                 motionElement.style.setProperty('--tigrex-stride-delay', `${tigrexStrideDelayMs}ms`);
-                const timeline = pattern?.beatV2Approved === true
+                const timeline = (pattern?.beatV2Enabled === true || pattern?.beatV2Approved === true)
                     ? []
                     : Array.isArray(pattern.runtimeResolvedImpactTimeline)
                     ? pattern.runtimeResolvedImpactTimeline

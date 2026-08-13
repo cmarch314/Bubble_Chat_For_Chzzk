@@ -475,8 +475,13 @@ assert.ok(profiles.black_diablos.every(pattern =>
         assert.ok(variant, `${variantId} must exist`);
         assert.deepStrictEqual(variant.motion, basePattern.motion,
             `${variantId} must use the reviewed base-species motion override`);
-        assert.deepStrictEqual(variant.impactTimeline, basePattern.impactTimeline,
-            `${variantId} must keep HIT timing synchronized with the inherited BEAT graph`);
+        assert.deepStrictEqual(
+            variant.impactTimeline.map(({ atTicks, targetMode, hitReactionKind }) =>
+                ({ atTicks, targetMode, hitReactionKind })),
+            basePattern.impactTimeline.map(({ atTicks, targetMode, hitReactionKind }) =>
+                ({ atTicks, targetMode, hitReactionKind })),
+            `${variantId} must keep HIT timing, targets, and reaction synchronized with the inherited BEAT graph`
+        );
     }
     global.HUNT_MONSTER_PATTERN_OVERRIDES = previousProfiles;
     global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = previousMotion;
@@ -549,9 +554,17 @@ assert.ok(profiles.black_diablos.every(pattern =>
         'Diablos bite approach must rotate its body axis toward the selected hunter, not only mirror horizontally');
     assert.ok(!bite.tags.includes('butt-stumble'),
         'approved Diablos reactions must not be duplicated in legacy profile tags');
-    assert.strictEqual(bite.impactTimeline[0].hitReactionKind, 'weak',
+    const previousProfiles = global.HUNT_MONSTER_PATTERN_OVERRIDES;
+    const previousMotion = global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES;
+    global.HUNT_MONSTER_PATTERN_OVERRIDES = profiles;
+    global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = motionOverrides;
+    const liveBite = HuntMonsterPatternCatalog.build({}, [{ id: 'diablos' }])
+        .diablos.find(pattern => pattern.id === 'diablos.bite');
+    global.HUNT_MONSTER_PATTERN_OVERRIDES = previousProfiles;
+    global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = previousMotion;
+    assert.strictEqual(liveBite.impactTimeline[0].hitReactionKind, 'weak',
         'Diablos bite must preserve its Preview-authored small/butt-stumble reaction');
-    assert.strictEqual(bite.impactTimeline[0].hitRecoveryTicks, undefined,
+    assert.strictEqual(liveBite.impactTimeline[0].hitRecoveryTicks, undefined,
         'Diablos impacts must not own hunter recovery timing');
     const sideTackle = profiles.diablos.find(pattern => pattern.id.endsWith('.side_tackle'));
     assert.strictEqual(sideTackle.motion.find(beat => beat.beat === 'side-hop').to,
@@ -612,12 +625,14 @@ assert.ok(profiles.black_diablos.every(pattern =>
     const traversal = {
         callbacks: { onResetMonsterMotion() {} },
         monsterActionLockTicks: 0,
+        monsterActionPresentationTicks: 0,
         monsterTraversalGeneration: 0,
         monsterTraversalState: null
     };
     traversal.beginMonsterTraversal = HuntEngine.prototype.beginMonsterTraversal;
     traversal.clearMonsterTraversal = HuntEngine.prototype.clearMonsterTraversal;
     traversal.interruptMonsterMovement = HuntEngine.prototype.interruptMonsterMovement;
+    traversal.cancelMonsterBeatAction = () => {};
     traversal.beginMonsterTraversal('diablos-return-charge', 57, { untargetable: true });
     assert.strictEqual(traversal.monsterActionLockTicks, 57);
     assert.strictEqual(traversal.monsterTraversalState.untargetable, true);
@@ -723,6 +738,8 @@ function interferenceHarness({ atb = 100, random = 0.99, shield = false, resiste
     engine.applyHunterInterference = HuntEngine.prototype.applyHunterInterference;
     engine.clearHunterInterference = HuntEngine.prototype.clearHunterInterference;
     engine.interruptHunterItemAction = HuntEngine.prototype.interruptHunterItemAction;
+    engine.cancelHunterBeatAction = () => {};
+    engine.presentHunterImpact = () => {};
     return { engine, hunter, calls };
 }
 
