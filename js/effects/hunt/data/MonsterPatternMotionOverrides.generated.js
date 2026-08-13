@@ -1011,7 +1011,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "to": "between:pass:1,pass:2",
           "moveEasing": "linear",
           "pose": "brace",
-          "face": "pass:1",
+          "face": "target-group",
           "label": "두 헌터 사이 접근"
         },
         "lower-1": {
@@ -1019,7 +1019,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "origin": "50% 52%",
           "pose": "crouch",
           "face": "pass:1",
-          "label": "첫 뿔 낮추기",
+          "label": "왼쪽 뿔 낮추기",
           "rotationToward": 10
         },
         "impact-1": {
@@ -1027,15 +1027,18 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "origin": "50% 52%",
           "moveEasing": "snap",
           "pose": "idle",
+          "face": "pass:1",
           "sfx": "impact",
-          "label": "첫 쳐올리기",
+          "label": "왼쪽 뿔 쳐올리기",
           "fx": "part-dust",
           "fxAnchor": "head",
           "fxSecondary": "target-impact-dust",
           "fxSecondaryAnchor": "target",
           "fxSecondaryAngleMode": "upward-diagonal",
-          "offsetY": -18,
+          "offsetY": -24,
           "rotationToward": -34,
+          "scaleX": 1,
+          "scaleY": 1.03,
           "fxDurationTicks": 6,
           "fxSecondaryDurationTicks": 6,
           "hit": false,
@@ -1044,7 +1047,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "id": "impact-1-damage",
               "group": "impact-1-impact",
               "kind": "damage",
-              "target": "primary",
+              "target": "pair-left",
               "offsetTicks": 0,
               "damagePercent": 45,
               "hitReactionKind": "strong"
@@ -1065,6 +1068,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "pose": "settle",
           "label": "중앙 자세 전환",
           "offsetY": 0,
+          "origin": "50% 52%",
           "rotation": 0
         },
         "lower-2": {
@@ -1072,7 +1076,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "origin": "50% 52%",
           "pose": "crouch",
           "face": "pass:2",
-          "label": "둘째 뿔 낮추기",
+          "label": "오른쪽 뿔 낮추기",
           "rotationToward": 10
         },
         "impact-2": {
@@ -1080,15 +1084,18 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "origin": "50% 52%",
           "moveEasing": "snap",
           "pose": "idle",
+          "face": "pass:2",
           "sfx": "impact",
-          "label": "둘째 쳐올리기",
+          "label": "오른쪽 뿔 쳐올리기",
           "fx": "part-dust",
           "fxAnchor": "head",
           "fxSecondary": "target-impact-dust",
           "fxSecondaryAnchor": "target",
           "fxSecondaryAngleMode": "upward-diagonal",
-          "offsetY": -18,
+          "offsetY": -24,
           "rotationToward": -34,
+          "scaleX": 1,
+          "scaleY": 1.03,
           "fxDurationTicks": 6,
           "fxSecondaryDurationTicks": 6,
           "hit": false,
@@ -1097,7 +1104,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "id": "impact-2-damage",
               "group": "impact-2-impact",
               "kind": "damage",
-              "target": "primary",
+              "target": "pair-right",
               "offsetTicks": 0,
               "damagePercent": 45,
               "hitReactionKind": "strong"
@@ -1118,7 +1125,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "moveEasing": "decelerate",
           "pose": "settle",
           "label": "상체 복구",
-          "offsetY": -8,
+          "offsetY": -10,
           "rotationToward": -8
         },
         "return": {

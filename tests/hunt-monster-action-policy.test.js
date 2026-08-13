@@ -161,6 +161,8 @@ const HuntMonsterAnimationCatalog = require('../js/effects/hunt/HuntMonsterAnima
         'an adjacent pair must be struck one hunter at a time from left to right');
     assert.deepStrictEqual(plan.runtime.runtimePivotPairs, [[1, 2]],
         'the selected 1-2, 2-3 or 3-4 boundary must remain one stable pivot pair');
+    assert.deepStrictEqual(plan.runtime.runtimePairTargets, [1, 2],
+        'pair-left and pair-right judgments must resolve from the same stable adjacent pair');
 }
 
 {

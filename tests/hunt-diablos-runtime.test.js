@@ -410,6 +410,20 @@ assert.ok(profiles.black_diablos.every(pattern =>
         ['target-impact-dust', 'upward-diagonal', 'part-swing-arc', 'upward-diagonal'],
         ['target-impact-dust', 'upward-diagonal', 'part-swing-arc', 'upward-diagonal']
     ], 'both live horn-sweep HIT beats must retain their target-specific upward FX');
+    assert.deepStrictEqual(liveSweep.motion
+        .flatMap(beat => beat.judgments || [])
+        .filter(judgment => judgment.kind === 'damage')
+        .map(judgment => judgment.target),
+    ['pair-left', 'pair-right'],
+    'the two horn sweeps must bind their judgments to opposite hunters in the selected pair');
+    assert.deepStrictEqual(liveSweep.impactTimeline.map(event => event.targetMode),
+        ['runtime-pair-left', 'runtime-pair-right'],
+        'live combat must not collapse both horn-sweep impacts back onto the primary hunter');
+    assert.deepStrictEqual(liveSweep.motion
+        .filter(beat => beat.beat === 'impact-1' || beat.beat === 'impact-2')
+        .map(beat => [beat.face, beat.rotationToward]),
+    [['pass:1', -34], ['pass:2', -34]],
+    'the pair midpoint choreography must mirror the approved uppercut toward each hunter');
     assert.ok(runtime.diablos.every(pattern => !pattern.runtimePreviewScrub
         && !pattern.runtimePreviewCardReactions && !pattern.runtimePreviewMuteAudio),
     'live hunt patterns must not inherit preview-only gates');

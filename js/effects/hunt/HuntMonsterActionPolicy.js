@@ -436,6 +436,8 @@ class HuntMonsterActionPolicy {
                 runtime: {
                     runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index)),
                     runtimePivotPairs: [pair.map(target => target.index)],
+                    runtimePairTargets: pair.map(target => target.index)
+                        .filter(Number.isInteger).sort((left, right) => left - right),
                     runtimeImpactAllowEmptySequence: true
                 }
             };
