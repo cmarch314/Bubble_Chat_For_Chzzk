@@ -22,9 +22,14 @@ class HuntHunterDecisionPolicy {
             || Number(engine?.monsterStunDuration || 0) > 0
             || engine?.activeTrapControl
             || ['knocked_down', 'stunned', 'paralyzed', 'sleeping'].includes(engine?.monsterState));
+        const rawEnteredAt = engine?.monsterControlEnteredAtTick;
+        const enteredAt = Number(rawEnteredAt);
+        const controlAgeTicks = rawEnteredAt !== null && rawEnteredAt !== undefined && Number.isFinite(enteredAt)
+            ? Math.max(0, Number(engine?.battleTime || 0) - enteredAt)
+            : Number.POSITIVE_INFINITY;
         const progress = Math.max(0, Math.min(1, Number(engine?.battleTime || 0)
             / Math.max(1, Number(engine?.timeLimit || 480) * 10)));
-        return { living, injured, critical, pattern, dangerous, controlled, progress,
+        return { living, injured, critical, pattern, dangerous, controlled, controlAgeTicks, progress,
             sleeping: engine?.monsterState === 'sleeping',
             airborne: engine?.monsterFlightState === 'airborne' };
     }
@@ -82,7 +87,14 @@ class HuntHunterDecisionPolicy {
 
         const hasBombardier = (hunter.perks || []).some(perk =>
             String(typeof perk === 'string' ? perk : perk?.name || '') === '폭파광');
-        if (Number(hunter.bombs || 0) > 0 && ctx.controlled && (ctx.sleeping || hasBombardier)) {
+        // Bombs never create control. Give a newly entered knockdown/KO/trap a
+        // readable lead before Bombardier follows up, otherwise the same-tick
+        // explosion falsely appears to have caused the large stagger. Sleep
+        // bombing remains immediate because the sleeping pose is already an
+        // established, explicit setup state.
+        const readableBombWindow = ctx.sleeping || ctx.controlAgeTicks >= 6;
+        if (Number(hunter.bombs || 0) > 0 && ctx.controlled && readableBombWindow
+            && (ctx.sleeping || hasBombardier)) {
             add('bomb', Number(ai.bomb || 0) + perkBias('bomb') + .18 + lateSpend + jitter(), 5);
         }
 

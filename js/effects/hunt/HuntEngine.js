@@ -125,6 +125,8 @@ class HuntEngine {
         this.monsterStunDuration = config.monsterStunDuration || 0;
         this.monsterStunCount = Math.max(0, Number(config.monsterStunCount || 0));
         this.monsterKnockdownDuration = config.monsterKnockdownDuration || 0;
+        this.monsterControlEnteredAtTick = Number.isFinite(Number(config.monsterControlEnteredAtTick))
+            ? Number(config.monsterControlEnteredAtTick) : null;
         this.monsterSleepGeneration = 0;
         this.monsterSleepWakeBatch = null;
         this.monsterDeathCuePlayed = Boolean(config.monsterDeathCuePlayed);
@@ -1007,6 +1009,7 @@ class HuntEngine {
                     Number(reaction.durationTicks || 0)
                 );
                 this.monsterState = 'knocked_down';
+                this.monsterControlEnteredAtTick = Number(this.battleTime || 0);
             }
             this.monsterAtb = isFlinch
                 ? (bodyReactionBlocked ? this.monsterAtb : atbConfig.monsterAtbAfterControl('flinch'))
@@ -1090,6 +1093,7 @@ class HuntEngine {
             : require('./HuntAtbConfig.js');
         this.monsterState = 'knocked_down';
         this.monsterKnockdownDuration = trapEffect.durationTicks;
+        this.monsterControlEnteredAtTick = Number(this.battleTime || 0);
         atbConfig.applyMonsterTrapAtb(this, trapEffect.multiplier);
         const trapReaction = typeof HuntMonsterReactionCatalog !== 'undefined'
             ? HuntMonsterReactionCatalog.resolvePitfall?.(
@@ -1228,6 +1232,7 @@ class HuntEngine {
             this.monsterKnockdownDuration = Math.max(Number(this.monsterKnockdownDuration || 0), duration);
         }
         this.monsterState = config.state;
+        this.monsterControlEnteredAtTick = Number(this.battleTime || 0);
         if (kind === 'sleep') {
             this.monsterSleepRestoreState = ['enraged', 'exhausted'].includes(stateBeforeControl)
                 ? stateBeforeControl : 'normal';
