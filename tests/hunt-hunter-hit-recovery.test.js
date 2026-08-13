@@ -101,12 +101,14 @@ assert.ok(leftDownKnockback.x < 0 && leftDownKnockback.y > 0,
 
 {
     const frames = HuntCombatAnimator.strongHitKeyframes({ x: 240, y: 170, direction: -1 });
-    assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .11, .22, .33, .44, .96, .97, .98, .99, .995, 1],
-        'a strong hit must use 2.2s to tumble and only the final 0.2s to return');
+    assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .11, .22, .33, .44, .88, .90, .93, .96, .98, 1],
+        'a strong hit must use 2.2s to tumble and the final 0.6s to walk home');
     assert.match(frames[4].transform, /translate\(240px, 170px\) rotate\(-540deg\) skewX\(-12deg\)/,
         'the knockback must finish one and a half turns in a visibly prone pose');
     assert.strictEqual(frames[5].transform, frames[4].transform,
         'the fallen pose and position must remain unchanged until the shortened return');
+    assert.strictEqual((1 - frames[5].offset) * 5000, 600,
+        'the authored walk-home segment must last exactly 0.6 seconds');
     assert.match(frames[10].transform, /translate\(0, 0\) rotate\(-720deg\)/,
         'recovery must preserve the equivalent final rotation instead of rewinding to zero');
 }

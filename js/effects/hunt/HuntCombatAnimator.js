@@ -442,14 +442,14 @@ class HuntCombatAnimator {
             tumbleFrame(.33, .75, 405, 16),
             { offset: .44, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
             // Stay visibly prone instead of ending on an upright full turn.
-            { offset: .96, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            { offset: .88, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
             // Stand without rewinding, then return with alternating planted
-            // steps. The return now owns only the final 0.2s, one second less
-            // than its previous 1.2s budget.
-            { offset: .97, transform: `translate(${Math.round(x * .78)}px, ${Math.round(y * .78)}px) rotate(${standingSpin}deg) scale(.94, 1.02)`, filter: 'brightness(.78)', opacity: .76 },
-            { offset: .98, transform: `translate(${Math.round(x * .60)}px, ${Math.round(y * .60 - 5)}px) rotate(${standingSpin - spinDirection * 7}deg) skewX(${spinDirection * 4}deg) scale(.96)`, filter: 'brightness(.84)', opacity: .82 },
-            { offset: .99, transform: `translate(${Math.round(x * .40)}px, ${Math.round(y * .40)}px) rotate(${standingSpin + spinDirection * 7}deg) skewX(${-spinDirection * 4}deg) scale(.97)`, filter: 'brightness(.9)', opacity: .88 },
-            { offset: .995, transform: `translate(${Math.round(x * .18)}px, ${Math.round(y * .18 - 4)}px) rotate(${standingSpin - spinDirection * 5}deg) skewX(${spinDirection * 3}deg) scale(.99)`, filter: 'brightness(.96)', opacity: .95 },
+            // steps. The final 12% of the five-second reaction is an exact
+            // 0.6-second walk home: readable without restoring the old 1.2s drag.
+            { offset: .90, transform: `translate(${Math.round(x * .78)}px, ${Math.round(y * .78)}px) rotate(${standingSpin}deg) scale(.94, 1.02)`, filter: 'brightness(.78)', opacity: .76 },
+            { offset: .93, transform: `translate(${Math.round(x * .60)}px, ${Math.round(y * .60 - 5)}px) rotate(${standingSpin - spinDirection * 7}deg) skewX(${spinDirection * 4}deg) scale(.96)`, filter: 'brightness(.84)', opacity: .82 },
+            { offset: .96, transform: `translate(${Math.round(x * .40)}px, ${Math.round(y * .40)}px) rotate(${standingSpin + spinDirection * 7}deg) skewX(${-spinDirection * 4}deg) scale(.97)`, filter: 'brightness(.9)', opacity: .88 },
+            { offset: .98, transform: `translate(${Math.round(x * .18)}px, ${Math.round(y * .18 - 4)}px) rotate(${standingSpin - spinDirection * 5}deg) skewX(${spinDirection * 3}deg) scale(.99)`, filter: 'brightness(.96)', opacity: .95 },
             { offset: 1, transform: `translate(0, 0) rotate(${standingSpin}deg) scale(1)`, filter: 'brightness(1)', opacity: 1 }
         ];
     }
