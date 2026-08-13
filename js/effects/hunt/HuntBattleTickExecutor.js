@@ -23,6 +23,31 @@ class HuntBattleTickExecutor {
         else if (kind === 'encounter') engine.pendingMonsterEncounterRoar = true;
     }
 
+    static transitionRoarPattern(engine) {
+        const monsterKey = String(engine.selectedMonster?.id || '')
+            .replace(/-/g, '_').replace(/'/g, '');
+        const patterns = engine.MONSTER_PATTERNS?.[monsterKey]
+            || engine.MONSTER_PATTERNS?.[engine.selectedMonster?.id]
+            || [];
+        return patterns.find(pattern => pattern.tags?.includes('transition-roar'))
+            || patterns.find(pattern => pattern.type === 'roar'
+                && !pattern.tags?.includes('combat-roar'))
+            || null;
+    }
+
+    static startTransitionRoarAction(engine, kind) {
+        const pattern = HuntBattleTickExecutor.transitionRoarPattern(engine);
+        if (!pattern?.beatV2Approved || !pattern?.beatV2) return false;
+        const previousForcedPatternId = engine.forcedMonsterPatternId || null;
+        engine.pendingMonsterTransitionRoarKind = kind;
+        engine.forcedMonsterPatternId = pattern.id;
+        const prepared = engine.prepareMonsterTurn?.() === true;
+        if (prepared) return true;
+        engine.pendingMonsterTransitionRoarKind = null;
+        engine.forcedMonsterPatternId = previousForcedPatternId;
+        return false;
+    }
+
     static actionStateTransitionLocked(engine) {
         return Boolean(
             engine.isMonsterActionSessionActive?.()
@@ -96,16 +121,18 @@ class HuntBattleTickExecutor {
         );
         if (busy) return false;
 
-        if (kind === 'encounter') {
-            engine.pendingMonsterEncounterRoar = false;
-            engine.triggerEncounterRoar();
-        } else {
-            engine.pendingMonsterRageRoar = false;
-            if (rageConsumesFullAtb) {
-                engine.monsterAtb = 0;
-                engine.updateMonsterAtbUI?.(0);
-            }
-            engine.triggerMonsterRoarFlinch(false);
+        engine.pendingMonsterEncounterRoar = false;
+        engine.pendingMonsterRageRoar = false;
+        const authoredRoarStarted = HuntBattleTickExecutor.startTransitionRoarAction(engine, kind);
+        if (rageConsumesFullAtb) {
+            engine.monsterAtb = 0;
+            engine.updateMonsterAtbUI?.(0);
+        }
+        if (!authoredRoarStarted) {
+            if (kind === 'encounter') engine.triggerEncounterRoar();
+            else engine.triggerMonsterRoarFlinch(false);
+        }
+        if (kind === 'rage') {
             const monsterKey = engine.selectedMonster.id.replace(/-/g, '_').replace(/'/g, '');
             const patterns = engine.MONSTER_PATTERNS?.[monsterKey]
                 || engine.MONSTER_PATTERNS?.[engine.selectedMonster.id]

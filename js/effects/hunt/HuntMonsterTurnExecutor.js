@@ -796,8 +796,16 @@ class HuntMonsterTurnExecutor {
             : stancePool[Math.floor(engine.random() * stancePool.length)];
     }
 
+    static applyPendingTransitionRoarContext(engine, pattern) {
+        const kind = String(engine.pendingMonsterTransitionRoarKind || '');
+        if (!['encounter', 'rage'].includes(kind)
+            || !pattern?.tags?.includes('transition-roar')) return pattern;
+        engine.pendingMonsterTransitionRoarKind = null;
+        return { ...pattern, runtimeTransitionRoarKind: kind };
+    }
+
     static prepare(engine) {
-        if (engine.pendingMonsterAction) return false;
+        if (engine.pendingMonsterAction || engine.isMonsterActionSessionActive?.()) return false;
         if (typeof engine.random !== 'function') engine.random = Math.random;
         // Do not begin (or pay for) an action while every hunter is temporarily
         // unavailable. This commonly happens while the party is carting, at
@@ -832,6 +840,7 @@ class HuntMonsterTurnExecutor {
             pattern = HuntMonsterTurnExecutor.selectPattern(engine);
         }
         if (!pattern) return false;
+        pattern = HuntMonsterTurnExecutor.applyPendingTransitionRoarContext(engine, pattern);
         pattern = HuntMonsterTurnExecutor.decorateHabitatVariant(engine,
             engine.monsterTraitRuntime?.decorateAction?.(engine, pattern) || pattern);
         if (pattern.partUse?.mode === 'random-front-leg') {
@@ -963,6 +972,8 @@ class HuntMonsterTurnExecutor {
     }
 
     static execute(engine, preparedPattern = null, preparedAttackerIndex = null, preparedTargetIndex = null) {
+        if (engine.monsterBeatRuntime?.has?.('monster')
+            && preparedPattern?.runtimeImpactCommit !== true) return false;
         if (engine.smallMonsterSwarm) {
             const attacker = Number.isInteger(preparedAttackerIndex)
                 ? engine.smallMonsterSwarm.units[preparedAttackerIndex]
@@ -1028,7 +1039,10 @@ class HuntMonsterTurnExecutor {
 
         if (pattern.type === 'roar' && isImpactCommit) {
             if (engine.telemetry) engine.telemetry.recordMonsterPattern(engine.selectedMonster.id, pattern, 'roar', 0);
-            engine.triggerMonsterRoarFlinch(false);
+            engine.triggerMonsterRoarFlinch(
+                pattern.runtimeTransitionRoarKind === 'encounter',
+                { actionOwned: pattern.beatV2Approved === true }
+            );
             if (Number(pattern.damageRatio || 0) <= 0) {
                 engine.monsterTraitRuntime?.afterAction?.(engine, pattern, []);
                 engine.monsterRecoveryDuration = 0;

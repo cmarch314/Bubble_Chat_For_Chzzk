@@ -90,6 +90,9 @@ assert.strictEqual(engine.schedule, schedule);
         'encounter and rage roars must each emit exactly one monster-roar event');
     assert.deepStrictEqual(extraAudio, [],
         'roars must not layer the legacy Encounter music cue beneath the monster voice');
+    assert.strictEqual(roarEngine.triggerMonsterRoarFlinch(false, { actionOwned: true }), true);
+    assert.strictEqual(roarEngine.monsterRoarDuration, 0,
+        'an approved BEAT roar must not create a second fixed-duration monster lock');
 }
 
 assert.match(fs.readFileSync(sourcePath, 'utf8'), /return HuntBattleTickExecutor\.execute\(this\)/);

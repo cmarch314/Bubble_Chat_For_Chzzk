@@ -119,6 +119,7 @@ class HuntEngine {
             ? config.pendingMonsterPartReactions.slice() : [];
         this.pendingMonsterEncounterRoar = Boolean(config.pendingMonsterEncounterRoar);
         this.pendingMonsterRageRoar = Boolean(config.pendingMonsterRageRoar);
+        this.pendingMonsterTransitionRoarKind = config.pendingMonsterTransitionRoarKind || null;
         this.monsterBurrowState = config.monsterBurrowState || null;
         this.monsterActionLockTicks = Math.max(0, Number(config.monsterActionLockTicks || 0));
         this.monsterActionGateDiagnostics = Array.isArray(config.monsterActionGateDiagnostics)
@@ -302,6 +303,7 @@ class HuntEngine {
         };
         this.pendingMonsterAction = null;
         this.pendingMonsterImpact = null;
+        this.pendingMonsterTransitionRoarKind = null;
         this.cancelMonsterBeatAction(reason);
         // Presentation belongs to the interrupted action. Leaving this debt
         // alive lets a trap/control pose and the cancelled BEAT graph coexist.
@@ -1253,7 +1255,7 @@ class HuntEngine {
         this.triggerMonsterRoarFlinch(true);
     }
 
-    triggerMonsterRoarFlinch(isEncounter = false) {
+    triggerMonsterRoarFlinch(isEncounter = false, options = {}) {
         if (this.monsterTier === 'small' || this.selectedMonster?.roar?.status !== 'verified-present') {
             this.monsterRoarDuration = 0;
             this.selectedWeapons.forEach(hunter => {
@@ -1266,8 +1268,9 @@ class HuntEngine {
         // 몬스터 포효 트리거
         this.triggerMonsterRoar(this.selectedMonster);
         
-        // 포효 시전 중 몬스터도 멈춤 (느림 약 4.5초)
-        this.monsterRoarDuration = 12;
+        // Approved transition-roar graphs own the complete brace/roar/settle
+        // session. The fixed timer remains only for legacy/fallback callers.
+        this.monsterRoarDuration = options.actionOwned ? 0 : 12;
         this.updateMonsterAtbUI(this.monsterAtb);
 
         if (isEncounter) {

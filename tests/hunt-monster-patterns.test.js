@@ -232,6 +232,14 @@ for (const [monsterId, patterns] of Object.entries(pilotCatalog)) {
         }
     }
 }
+{
+    const activeEngine = {
+        pendingMonsterAction: null,
+        isMonsterActionSessionActive: () => true
+    };
+    assert.strictEqual(HuntMonsterTurnExecutor.prepare(activeEngine), false,
+        'monster turn preparation must reject every caller while an approved BEAT session is active');
+}
 const savedTailWhip = pilotCatalog.nargacuga.find(pattern =>
     pattern.id === 'nargacuga.tail_whip');
 assert.deepStrictEqual(savedTailWhip.motion.map(beat => beat.beat),

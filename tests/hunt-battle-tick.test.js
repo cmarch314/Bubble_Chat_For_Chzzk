@@ -101,6 +101,35 @@ function createEngine(overrides = {}) {
 }
 
 {
+    const roarPattern = {
+        id: 'diablos.roar', type: 'roar', tags: ['roar', 'transition-roar'],
+        beatV2Approved: true, beatV2: { backend: 'beat-v2', totalTicks: 45 }
+    };
+    let directRoars = 0;
+    let prepared = 0;
+    const { engine } = createEngine({
+        monsterTier: 'large',
+        monsterAtb: 100,
+        pendingMonsterEncounterRoar: true,
+        selectedMonster: { id: 'diablos', nameKO: 'Diablos' },
+        MONSTER_PATTERNS: { diablos: [roarPattern] },
+        triggerEncounterRoar() { directRoars++; },
+        prepareMonsterTurn() {
+            prepared++;
+            assert.strictEqual(this.forcedMonsterPatternId, 'diablos.roar');
+            this.pendingMonsterAction = { pattern: roarPattern, remainingTicks: 0 };
+            return true;
+        }
+    });
+    assert.strictEqual(context.HuntBattleTickExecutor.flushTransitionRoar(engine), true);
+    assert.strictEqual(prepared, 1,
+        'an approved encounter roar must enter the ordinary monster action pipeline');
+    assert.strictEqual(directRoars, 0,
+        'an approved transition roar must not use the fixed-duration direct callback path');
+    assert.strictEqual(engine.pendingMonsterTransitionRoarKind, 'encounter');
+}
+
+{
     let resolved = null;
     const pattern = { id: 'test.telegraph', name: '예고 공격', windupTicks: 3 };
     const { engine } = createEngine({
