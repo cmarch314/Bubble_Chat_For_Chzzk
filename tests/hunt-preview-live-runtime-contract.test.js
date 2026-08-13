@@ -11,6 +11,12 @@ const reviewApp = fs.readFileSync(path.join(root,
     'tools/monster-audio-review-app.js'), 'utf8');
 const executor = fs.readFileSync(path.join(root,
     'js/effects/hunt/HuntMonsterTurnExecutor.js'), 'utf8');
+const sourceMotion = JSON.parse(fs.readFileSync(path.join(root,
+    'data/hunt/monster-pattern-motion-overrides.json'), 'utf8')).overrides || {};
+const generatedMotion = require('../js/effects/hunt/data/MonsterPatternMotionOverrides.generated.js');
+
+assert.deepStrictEqual(generatedMotion, sourceMotion,
+    'the OBS runtime artifact must be an exact serialization of the editor source of truth');
 
 assert.match(fixture, /pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern\(pattern\)/,
     'Preview must compile its current draft through the same catalog normalizer as live hunts');
