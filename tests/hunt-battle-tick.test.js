@@ -713,7 +713,7 @@ function createEngine(overrides = {}) {
     assert.strictEqual(engine.activeTrapControl.releasing, true,
         'escape must begin at the start of its reserved eight-tick timeline segment');
     assert.strictEqual(JSON.stringify(effects),
-        JSON.stringify([['trap-release', null, { kind: 'shocktrap', useCount: 3 }]]),
+        JSON.stringify([['trap-release', null, { kind: 'shocktrap', useCount: 3, releaseTicks: 8 }]]),
         'the trap visual must release exactly once at the authored escape beat');
     assert.strictEqual(monsterTurns, 0,
         'trap release and the next monster pattern must never share a frame');

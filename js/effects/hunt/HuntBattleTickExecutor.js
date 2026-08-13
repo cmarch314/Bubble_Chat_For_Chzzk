@@ -738,7 +738,8 @@ class HuntBattleTickExecutor {
                     });
                     engine.triggerEnvironmentEffect?.('trap-release', null, {
                         kind: engine.activeTrapControl.kind,
-                        useCount: engine.activeTrapControl.useCount
+                        useCount: engine.activeTrapControl.useCount,
+                        releaseTicks: escapeTicks
                     });
                 }
             }
@@ -752,7 +753,9 @@ class HuntBattleTickExecutor {
                 });
                 engine.triggerEnvironmentEffect?.('trap-release', null, {
                     kind: engine.activeTrapControl.kind,
-                    useCount: engine.activeTrapControl.useCount
+                    useCount: engine.activeTrapControl.useCount,
+                    releaseTicks: Number((typeof HuntTrapConfig !== 'undefined'
+                        ? HuntTrapConfig.ESCAPE_TICKS : 8) || 8)
                 });
                 }
                 if (engine.activeTrapControl) {

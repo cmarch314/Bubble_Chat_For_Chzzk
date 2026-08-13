@@ -1,5 +1,6 @@
 class HuntCombatAnimator {
-    static PITFALL_RELEASE_FADE_MS = 1400;
+    static PITFALL_RELEASE_TICK_MS = 100;
+    static PITFALL_RELEASE_TICKS = 8;
 
     constructor(owner) {
         this.owner = owner;
@@ -1344,11 +1345,21 @@ class HuntCombatAnimator {
             if (!hasActivePitfall) return;
             const lifecycle = Number(monsterImg?.dataset?.pitfallLifecycle || 0) + 1;
             if (monsterImg?.dataset) monsterImg.dataset.pitfallLifecycle = String(lifecycle);
-            effects.forEach(effect => effect.classList.add('is-releasing'));
-            effects.forEach(effect => effect.style.setProperty(
-                '--pitfall-release-fade-ms',
-                `${HuntCombatAnimator.PITFALL_RELEASE_FADE_MS}ms`
-            ));
+            const releaseTicks = Math.max(1, Number(details?.releaseTicks)
+                || HuntCombatAnimator.PITFALL_RELEASE_TICKS);
+            const releaseFadeMs = releaseTicks * HuntCombatAnimator.PITFALL_RELEASE_TICK_MS;
+            effects.forEach(effect => {
+                effect.classList.add('is-releasing');
+                effect.style.setProperty('--pitfall-release-fade-ms', `${releaseFadeMs}ms`);
+                // OBS must show the fade even if a stale stylesheet or another
+                // CSS animation wins the cascade. WAAPI owns the actual opacity
+                // from the first escape tick; CSS remains the fallback.
+                effect._pitfallReleaseAnimation?.cancel?.();
+                effect._pitfallReleaseAnimation = effect.animate?.(
+                    [{ opacity: 1 }, { opacity: 0 }],
+                    { duration: releaseFadeMs, easing: 'ease-in', fill: 'forwards' }
+                ) || null;
+            });
             monsterImg?.classList?.remove('monster-pitfall-struggle-pulse');
             // Renderer uses this lifecycle guard to keep the trap mounted until
             // its release fade finishes. BEAT owns motion, not DOM persistence.
@@ -1366,7 +1377,7 @@ class HuntCombatAnimator {
                 );
                 if (monsterImg?.dataset) delete monsterImg.dataset.pitfallLifecycle;
                 if (monsterImg?.dataset) delete monsterImg.dataset.pitfallBeatOwned;
-            }, HuntCombatAnimator.PITFALL_RELEASE_FADE_MS);
+            }, releaseFadeMs);
             return;
         }
         if (!showcase || !monsterImg || !['pitfall', 'pitfall-pending', 'rockfall', 'flash', 'bomb'].includes(kind)) return;
