@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "monsterId": "diablos",
+  "actions": {
+    "diablos.roar": { "totalTicks": 45, "events": [["audio","brace",0],["audio","roar",10],["roar","roar",11],["audio","settle",12]] },
+    "diablos.horn_charge": { "totalTicks": 41, "events": [["audio","stomp",0],["audio","charge",12],["damage","charge",17],["audio","impact",20],["audio","return",27]] },
+    "diablos.burrow_enter": { "totalTicks": 68, "events": [["audio","dig",0],["audio","sink",3],["audio","still",18],["audio","track",28],["audio","eruption",38],["damage","eruption",40],["tremor","eruption",40],["audio","land",43],["audio","return",48]] },
+    "diablos.horn_uppercut": { "totalTicks": 32, "events": [["audio","telegraph",0],["audio","start",6],["audio","impact",13],["damage","impact",13],["audio","recover",17],["audio","return",24]] },
+    "diablos.horn_sweep": { "totalTicks": 42, "events": [["audio","telegraph",0],["audio","lower-1",7],["audio","impact-1",11],["damage","impact-1",11],["audio","recenter",15],["audio","lower-2",20],["audio","impact-2",24],["damage","impact-2",24],["audio","recover",28],["audio","return",34]] },
+    "diablos.tail_slam_rock": { "totalTicks": 46, "events": [["audio","brace",0],["audio","turn-back",5],["audio","tail-compress",10],["audio","tail-slam-volley",16],["audio","volley-flight",20],["damage","volley-flight",26],["audio","recoil",27],["audio","recover",33],["audio","return",38]] },
+    "diablos.bite": { "totalTicks": 16, "events": [["audio","approach",0],["damage","bite",5],["audio","bite",5],["audio","recoil",8],["audio","return",11]] },
+    "diablos.side_tackle": { "totalTicks": 30, "events": [["audio","side-hop",0],["audio","shoulder-set",7],["audio","tackle",12],["damage","tackle",12],["audio","step-back",16],["audio","return",24]] },
+    "diablos.rage_charge": { "totalTicks": 105, "events": [["audio","stomp",0],["audio","charge-out",7],["damage","charge-out",14],["audio","exit-bottom",17],["audio","hold-outside",27],["audio","return-charge",42],["damage","return-charge",49],["audio","return-impact",54],["audio","tail-wind-left",58],["audio","tail-cross-one",73],["damage","tail-cross-one",73],["audio","tail-rebound",78],["audio","tail-wind-right",82],["audio","tail-cross-two",87],["damage","tail-cross-two",87],["audio","tail-settle",92],["audio","return",97]] }
+  }
+}
