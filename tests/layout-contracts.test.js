@@ -256,7 +256,7 @@ assert.match(huntEffect, /onInterruptWeaponVisual:[\s\S]*?interruptWeaponVisual\
     'combat defense interruptions must reach the weapon visual cleanup owner');
 assert.doesNotMatch(css, /\.weapon-charge-aura/,
     'detached charge silhouettes must not return for Great Sword or Hammer');
-assert.match(css, /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(-104deg\)/,
+assert.match(css, /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(135deg \* var\(--weapon-facing\)\)\)/,
     'Great Sword charge pose must not reverse its blade direction in right-side slots');
 assert.match(css, /\.weapon-hammer:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(-78deg \* var\(--weapon-facing\)\)\)/,
     'Hammer charge pose must stay visibly tilted toward the monster');

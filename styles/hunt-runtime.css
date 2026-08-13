@@ -7342,7 +7342,7 @@ body.in-hunt #chat {
    drift during charge, attack, hit, and recovery animations. */
 
 .weapon-great_sword:not(.weapon-charge-stage-0) .game-hunt-weapon-img {
-    transform: translate(calc(-27px * var(--weapon-facing)), -12px) rotate(-104deg) scale(1.06) scaleX(var(--great-sword-mirror, 1));
+    transform: translate(calc(-27px * var(--weapon-facing)), -12px) rotate(calc(135deg * var(--weapon-facing))) scale(1.06) scaleX(var(--great-sword-mirror, 1));
     transform-origin: 50% 70%;
 }
 

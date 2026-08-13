@@ -254,16 +254,17 @@ class HuntWeaponAnimationCatalog {
         const end = [1, 0, 0, 0, 1, 0, 0];
         const motions = {
             charge: [idle, [.3, 0, 0, -12, .92, -10, 10], [.7, 0, 0, -7, 1.12, -5, 5], end],
-            great_sword_charge_raise: [idle, [.42, 0, 0, 24, .98, -28, -22], [.76, 0, 0, 42, 1.04, -45, -48], [1, 0, 0, 45, 1.06, -50, -55]],
-            great_sword_charge_hold: [[0, 0, 0, 45, 1.06, -50, -55], [.42, 0, 0, 49, 1.1, -54, -59], [.72, 0, 0, 42, 1.04, -46, -51], [1, 0, 0, 45, 1.07, -50, -55]],
+            great_sword_charge_raise: [idle, [.42, 0, 0, 74, .98, -28, -22], [.76, 0, 0, 120, 1.04, -45, -48], [1, 0, 0, 135, 1.06, -50, -55]],
+            great_sword_charge_hold: [[0, 0, 0, 135, 1.06, -50, -55], [.42, 0, 0, 139, 1.1, -54, -59], [.72, 0, 0, 132, 1.04, -46, -51], [1, 0, 0, 135, 1.07, -50, -55]],
             // The source stands vertically: blade edge left, grip at the bottom.
-            // Grip-bottom source: +45deg points the blade toward the upper-left
-            // for slots 1/2. Positive rotation then chops downward through the
-            // target; slots 3/4 receive the exact mirrored path.
-            great_sword_charged_release: [[0, 0, 0, 45, 1.07, -50, -55], [.2, 0, 0, 30, 1.1, -60, -68], [.46, .72, .75, 95, 1.13, -12, -88], [.72, 1, 1, 180, 1.2, 0, 0], [.86, .9, .9, 195, 1.12, 0, 7], [1, 0, 0, 180, 1, 0, 0]],
+            // Slots 1/2 first flip the asymmetric edge, then +135deg places
+            // the grip upper-right, tip lower-left, and cutting edge upward.
+            // Positive rotation carries that edge down through the target;
+            // slots 3/4 receive the exact mirrored path.
+            great_sword_charged_release: [[0, 0, 0, 135, 1.07, -50, -55], [.2, 0, 0, 120, 1.1, -60, -68], [.46, .72, .75, 185, 1.13, -12, -88], [.72, 1, 1, 270, 1.2, 0, 0], [.86, .9, .9, 285, 1.12, 0, 7], [1, 0, 0, 270, 1, 0, 0]],
             // First downward swing plants the blade, then the rebound continues
             // in the same direction for the heavy second contact.
-            great_sword_true_release: [[0, 0, 0, 45, 1.1, -54, -60], [.1, 0, 0, 28, 1.14, -65, -74], [.24, .52, .56, 92, 1.16, -12, -102], [.38, 1, 1, 180, 1.24, 0, 0], [.5, 1, 1, 180, 1.12, 0, 18], [.58, .48, .5, 265, 1.2, -8, -26], [.72, .78, .82, 420, 1.24, 0, -108], [.86, 1, 1, 540, 1.34, 0, 0], [.93, .9, .9, 555, 1.18, 0, 8], [1, 0, 0, 540, 1, 0, 0]],
+            great_sword_true_release: [[0, 0, 0, 135, 1.1, -54, -60], [.1, 0, 0, 118, 1.14, -65, -74], [.24, .52, .56, 182, 1.16, -12, -102], [.38, 1, 1, 270, 1.24, 0, 0], [.5, 1, 1, 270, 1.12, 0, 18], [.58, .48, .5, 355, 1.2, -8, -26], [.72, .78, .82, 510, 1.24, 0, -108], [.86, 1, 1, 630, 1.34, 0, 0], [.93, .9, .9, 645, 1.18, 0, 8], [1, 0, 0, 630, 1, 0, 0]],
             heavy_overhead: [idle, [.3, 0, 0, -92, 1.04, -26, 18], [.52, .18, .18, -42, 1.08, 0, 0], [.76, 1, 1, 38, 1.15, 0, 0], end],
             true_charged_slash: [idle, [.24, 0, 0, -115, 1.08, -34, 22], [.48, .14, .12, -78, 1.14, 0, 0], [.68, 1, 1, 48, 1.28, 0, 0], [.82, .88, .84, 56, 1.18, 0, 0], end],
             shoulder_tackle: [idle, [.25, 0, 0, -8, .96, -18, 5], [.62, .65, .58, 9, 1.13, 0, 0], end],
@@ -440,7 +441,13 @@ class HuntWeaponAnimationCatalog {
         // Slots 1/2 share one stance; slots 3/4 are its true visual mirror.
         // Mirroring the whole weapon is intentional here: the cutting edge must
         // face inward after the hunter crosses to the other side of the monster.
-        const bladeMirror = directionalBlade ? v.side : 1;
+        // Great Sword's bitmap has its cutting edge on the opposite local side
+        // from the other directional weapon assets. Flip its source first so
+        // the charged stance presents the edge toward the swing, then mirror
+        // the complete stance between the left and right hunter pairs.
+        const bladeMirror = profile?.weaponId === 'great_sword'
+            ? -v.side
+            : (directionalBlade ? v.side : 1);
         return spec.map(([offset, xRatio, yRatio, rotation, scale, xNudge, yNudge]) => ({
             offset,
             transformOrigin: profile?.transformOrigin || '50% 50%',

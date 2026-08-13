@@ -1,10 +1,13 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 global.HuntBeatV2Contract = require('../js/effects/hunt/HuntBeatV2Contract.js').HuntBeatV2Contract;
 const HuntHunterBeatCatalog = require('../js/effects/hunt/HuntHunterBeatCatalog.js');
 const HuntBeatActionRuntime = require('../js/effects/hunt/HuntBeatActionRuntime.js');
 const HuntWeaponMechanics = require('../js/effects/hunt/HuntWeaponMechanics.js');
+const runtimeCss = fs.readFileSync(path.resolve(__dirname, '../styles/hunt-runtime.css'), 'utf8');
 
 const actions = HuntWeaponMechanics.actionsFor('great_sword');
 assert.strictEqual(actions.length, 16, 'the complete Great Sword action kit must be BEAT-compilable');
@@ -49,14 +52,19 @@ assert.strictEqual(runtime.has('hunter:0'), false, 'cart/hit interruption must r
 
 const WeaponAnimationCatalog = require('../js/effects/hunt/HuntWeaponAnimationCatalog.js');
 const chargedFrames = WeaponAnimationCatalog.MOTIONS.great_sword_charged_release;
-assert.ok(chargedFrames[0][3] > 0 && chargedFrames[3][3] >= 180,
-    'charged slashes must raise toward the upper-left and rotate downward onto contact');
+assert.strictEqual(chargedFrames[0][3], 135,
+    'slot 1 charge must begin grip upper-right and blade tip lower-left');
+assert.ok(chargedFrames[3][3] >= 270,
+    'charged slashes must carry the upward-facing edge downward onto contact');
 const trueFrames = WeaponAnimationCatalog.MOTIONS.great_sword_true_release;
-assert.strictEqual(trueFrames[3][3], 180,
+assert.strictEqual(trueFrames[3][3], 270,
     'the first True Charged Slash swing must plant downward rather than uppercut');
-assert.strictEqual(trueFrames[7][3], 540,
+assert.strictEqual(trueFrames[7][3], 630,
     'the rebound must continue the same rotation for the second downward hit');
 assert.ok(trueFrames[2][6] < -90 && trueFrames[6][6] < -90,
     'both True Charged Slash hits must approach from above their contact point');
+assert.match(runtimeCss,
+    /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(135deg \* var\(--weapon-facing\)\)\)[\s\S]*?scaleX\(var\(--great-sword-mirror, 1\)\)/,
+    'the persistent charge pose and BEAT release must share the same mirrored 135-degree blade stance');
 
 console.log('[test] Great Sword BEAT V2 compilation and runtime passed');
