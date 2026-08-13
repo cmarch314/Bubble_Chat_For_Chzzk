@@ -256,6 +256,63 @@ class HuntMonsterAttackAnimator {
         return closest?.classList?.contains?.('hunt-monster-facing-layer') ? closest : null;
     }
 
+    // The clipped copy lives inside the same facing layer as its source sprite.
+    // Placement, pose rotation and image mirroring are inherited first; only
+    // the requested anatomy region is then deformed, so it cannot drift away.
+    createBeatPartFxLayers(monsterImg, motion, built, addCssTrack) {
+        const facingLayer = this.resolveFacingLayer(monsterImg);
+        if (!facingLayer || !monsterImg?.src || !Array.isArray(motion)) return { layers: [], animations: [] };
+        const totalTicks = Math.max(1, Number(built?.durationMs || 0) / 100);
+        const groups = new Map(); let elapsed = 0;
+        for (const beat of motion) {
+            const ticks = Math.max(1, Number(beat?.ticks) || 1);
+            const start = elapsed / totalTicks, end = (elapsed + ticks) / totalTicks;
+            elapsed += ticks;
+            for (const value of Array.isArray(beat?.partFx) ? beat.partFx : []) {
+                const part = String(value?.part || '').replace(/^part:/, '').trim();
+                if (!part) continue;
+                const entries = groups.get(part) || [];
+                entries.push({ start, end, value }); groups.set(part, entries);
+            }
+        }
+        const layers = [], animations = [];
+        const transformFor = (value, phase = 0) => {
+            const cycles = Math.max(1, Math.min(5, Math.round(Number(value?.cycles) || 1)));
+            const wave = Math.sin(phase * Math.PI * 2 * cycles);
+            const rotate = wave * Math.max(0, Number(value?.degrees ?? value?.rotate ?? 0));
+            const skew = wave * (Number(value?.skewX) || 0);
+            return `rotate(${rotate.toFixed(2)}deg) skewX(${skew.toFixed(2)}deg) scale(${Number(value?.scaleX ?? 1) || 1},${Number(value?.scaleY ?? 1) || 1})`;
+        };
+        for (const [part, entries] of groups) {
+            const first = entries[0].value;
+            const pivot = this.resolvePosePivot(`part:${part}`, 1) || { xPercent: 50, yPercent: 50 };
+            const layer = document.createElement('div');
+            layer.className = 'hunt-monster-part-fx-layer';
+            layer.dataset.partFx = part; layer.setAttribute('aria-hidden', 'true');
+            layer.style.clipPath = String(first.clip || `ellipse(24% 18% at ${pivot.xPercent}% ${pivot.yPercent}%)`);
+            layer.style.webkitClipPath = layer.style.clipPath;
+            layer.style.transformOrigin = `${pivot.xPercent.toFixed(2)}% ${pivot.yPercent.toFixed(2)}%`;
+            const copy = document.createElement('img');
+            copy.src = monsterImg.currentSrc || monsterImg.src; copy.alt = ''; copy.draggable = false;
+            layer.appendChild(copy); facingLayer.appendChild(layer); layers.push(layer);
+            const frames = [{ offset: 0, opacity: 0, transform: 'none' }];
+            for (const entry of entries) {
+                const opacity = Math.max(0, Math.min(.9, Number(entry.value.opacity ?? .42)));
+                const filter = String(entry.value.filter || 'brightness(1.08) saturate(1.08)');
+                frames.push({ offset: entry.start, opacity: 0, transform: transformFor(entry.value, 0), filter });
+                for (const phase of [.25, .5, .75, 1]) frames.push({
+                    offset: entry.start + (entry.end - entry.start) * phase,
+                    opacity, transform: transformFor(entry.value, phase), filter
+                });
+            }
+            frames.push({ offset: 1, opacity: 0, transform: 'none', filter: 'none' });
+            const animation = layer.animate?.(frames, { duration: built.durationMs, easing: 'linear', fill: 'both' });
+            if (animation) animations.push(animation);
+            else addCssTrack(layer, `part-fx-${part.replace(/[^a-z0-9_-]/gi, '-')}`, frames);
+        }
+        return { layers, animations };
+    }
+
     screenCrossGeometry(monsterImg, pattern = {}) {
         if (!this.card || !monsterImg) return null;
         const cardRect = this.card.getBoundingClientRect?.();
@@ -704,6 +761,7 @@ class HuntMonsterAttackAnimator {
             track.element?.style?.removeProperty?.('animation-play-state');
         });
         controller.cssStyle?.remove?.();
+        controller.partFxLayers?.forEach(layer => layer.remove());
         if (controller.motionElement?.dataset) delete controller.motionElement.dataset.monsterBeatBackend;
         return true;
     }
@@ -946,6 +1004,9 @@ class HuntMonsterAttackAnimator {
             addCssTrack(facingLayer, 'facing', facingFrames, 'steps(1,end)');
         }
 
+        const partFx = this.createBeatPartFxLayers(monsterImg, pattern.motion, built, addCssTrack);
+        animations.push(...partFx.animations);
+
         // OBS/WebView builds can expose neither Element.animate nor Animation.
         // Silently optional-chaining animate() used to leave a valid BEAT graph
         // with zero moving tracks. Compile the same frames into scoped CSS so
@@ -964,7 +1025,7 @@ class HuntMonsterAttackAnimator {
         motionElement.dataset.monsterBeatImpacts = built.impacts
             .map(impact => impact.atTicks).join(',');
 
-        const previewController = { animations, cssTracks, cssStyle,
+        const previewController = { animations, cssTracks, cssStyle, partFxLayers: partFx.layers,
             durationMs: built.durationMs, motionElement, monsterImg };
         this.activeBeatMotionPreview = previewController;
         // Timeline scrubbing is a still-frame editor, not playback. WAAPI

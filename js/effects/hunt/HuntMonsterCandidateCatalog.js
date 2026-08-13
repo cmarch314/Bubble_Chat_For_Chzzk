@@ -83,8 +83,11 @@ class HuntMonsterCandidateCatalog {
     static #projectVisualMotion(graph) {
         return graph.beats.map(beat => {
             const frames = beat.tracks?.visual || [];
+            const partFxFrames = beat.tracks?.partFx || [];
             const visual = frames.length ? frames[frames.length - 1].value || {} : {};
-            return Object.freeze({ beat: beat.id, ticks: beat.ticks, ...visual });
+            const partFx = partFxFrames.length ? partFxFrames.at(-1).value : null;
+            return Object.freeze({ beat: beat.id, ticks: beat.ticks, ...visual,
+                ...(Array.isArray(partFx) && partFx.length ? { partFx } : {}) });
         });
     }
 }

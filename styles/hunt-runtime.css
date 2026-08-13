@@ -1486,6 +1486,10 @@
     transform-origin:50% 50%;
     will-change:transform;
 }
+/* Local BEAT deformation: a clipped copy inherits every parent transform
+   before its wing/tail-only flutter is applied. */
+.hunt-monster-part-fx-layer { position:absolute; inset:0; z-index:3; pointer-events:none; opacity:0; will-change:transform,opacity,filter; }
+.hunt-monster-part-fx-layer img { display:block; width:100%; height:100%; object-fit:contain; user-select:none; pointer-events:none; }
 .hunt-monster-motion-stage .game-hunt-monster-img {
     will-change: transform, filter, opacity;
     transform-origin: 50% 72%;

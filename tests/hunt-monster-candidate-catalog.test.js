@@ -45,6 +45,9 @@ assert.deepStrictEqual(somersault.motion.map(beat => beat.beat),
     ['approach', 'tail-load', 'tail-scoop', 'air-rise', 'airborne-settle']);
 assert.deepStrictEqual(somersault.motion.slice(1, 4).map(beat => beat.rotation), [-45, 315, 360],
     'Rathian must load its curled J tail counterclockwise then scoop clockwise into flight');
+assert.deepStrictEqual(somersault.motion.slice(3).map(beat => beat.partFx?.[0]?.part),
+    ['left-wing', 'left-wing'],
+    'the flight-only wing flutter must remain in the native BEAT projection, never in a detached CSS timeline');
 
 const source = fs.readFileSync(path.join(root, 'js', 'effects', 'hunt', 'HuntMonsterCandidateCatalog.js'), 'utf8');
 assert.ok(!source.includes('HuntBeatV2Adapter'), 'native candidates must not import the legacy adapter');
