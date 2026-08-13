@@ -9,8 +9,8 @@ const frames = HuntCombatAnimator.strongHitKeyframes({
     direction: -1
 });
 
-assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .11, .22, .33, .44, .96, .97, .98, .99, .995, 1],
-    'strong hit must spend 2.2s tumbling and reserve only 0.2s for the stepped return');
+assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .11, .22, .33, .44, .88, .90, .93, .96, .98, 1],
+    'strong hit must spend 2.2s tumbling, remain prone, and reserve the final 0.5s for the stepped return');
 assert.deepStrictEqual(
     frames.slice(1, 5).map(frame => Number(frame.transform.match(/rotate\((-?\d+(?:\.\d+)?)deg\)/)?.[1])),
     [-135, -270, -405, -540],
@@ -24,5 +24,18 @@ assert.match(frames[10].transform, /translate\(0, 0\) rotate\(-720deg\)/,
     'recovery must return naturally without rewinding the tumble');
 assert.notStrictEqual(frames[7].transform, frames[8].transform,
     'return frames must alternate planted steps instead of parallel-sliding home');
+
+const fs = require('fs');
+const path = require('path');
+const animatorSource = fs.readFileSync(
+    path.resolve(__dirname, '../js/effects/hunt/HuntCombatAnimator.js'),
+    'utf8'
+);
+assert.match(animatorSource,
+    /easing:\s*kind === 'weak' \? 'ease-in-out' : 'linear'/,
+    'strong-hit offsets must stay on a linear real-time clock so the final 0.5s remains 0.5s');
+assert.doesNotMatch(animatorSource,
+    /easing:\s*kind === 'weak' \? 'ease-in-out' : 'cubic-bezier/,
+    'an effect-wide easing curve must not stretch the authored walk-home segment');
 
 console.log('[test] Hunter visible tumble keyframes passed.');

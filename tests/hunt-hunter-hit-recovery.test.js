@@ -486,12 +486,12 @@ assert.match(combatAnimatorSource,
 assert.match(combatAnimatorSource,
     /beatVisualTickMs = profile\.durationMs \/ Math\.max\(1, Number\(actionOrName\.durationTicks\)\)/,
     'compressed weapon motion must keep authored hit moments synchronized to its visible timeline');
-const huntEffectSource = fs.readFileSync(
-    path.resolve(__dirname, '../js/effects/HuntEffect.js'),
+const combatPresenterSource = fs.readFileSync(
+    path.resolve(__dirname, '../js/effects/hunt/HuntCombatPresenter.js'),
     'utf8'
 );
-assert.match(huntEffectSource,
-    /selectedWeapons\.find\(candidate => candidate\?\.index === idx\)/,
+assert.match(combatPresenterSource,
+    /hunters\.find\(candidate => Number\(candidate\?\.index\) === Number\(index\)\)/,
     'live callbacks must resolve stable hunter indexes instead of assuming array order');
 
 console.log('[test] Hunter weak/strong hit recovery and state priority passed.');

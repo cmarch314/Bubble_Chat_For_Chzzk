@@ -549,7 +549,14 @@ class HuntCombatAnimator {
                 });
             const animation = layer.animate(keyframes, {
                 duration: durationMs,
-                easing: kind === 'weak' ? 'ease-in-out' : 'cubic-bezier(.18,.72,.2,1)',
+                // Strong-hit frame offsets are authored as real clock
+                // fractions (the final 10% is the 0.5s walk home). Applying
+                // an effect-wide acceleration curve remaps that clock and
+                // makes the short return take several seconds. Keep the
+                // strong reaction linear; its weight/easing is expressed by
+                // the deliberately spaced tumble, prone, stand, and step
+                // keyframes instead.
+                easing: kind === 'weak' ? 'ease-in-out' : 'linear',
                 iterations: 1,
                 fill: 'both'
             });
