@@ -176,108 +176,66 @@
     let pendingFlightTransitionTimer=null;
     let pendingReactionTimer=null;
     let pendingReactionBeatTimers=[];
-    let previewRuntime=null;
-    let previewRuntimeTimer=null;
     let previewRuntimePattern=null;
     let previewRuntimeSelection=null;
 
     function stopPreviewRuntime(reason='preview-reset'){
-      if(previewRuntimeTimer!==null){clearInterval(previewRuntimeTimer);previewRuntimeTimer=null}
-      previewRuntime?.cancelMonsterAction?.(reason);
-      previewRuntime?.stop?.();
-      previewRuntime=null;
+      // Preview is an editor surface: only the shared monster BEAT animator
+      // owns the visible motion. Never leave a combat-runtime session alive
+      // to process hunter damage/reactions behind the editor preview.
+      animator.cancelBeatMotionPreview?.();
       previewRuntimePattern=null;
       previewRuntimeSelection=null;
     }
 
-    function createPreviewRuntime(pattern,selection){
-      stopPreviewRuntime('preview-replaced');
-      document.documentElement.dataset.previewDependencies=[
-        typeof HuntEngine,typeof HuntCombatRuntime,typeof HuntBeatActionRuntime
-      ].join(',');
-      document.documentElement.dataset.previewBeatApproved=String(pattern.beatV2Approved===true);
-      document.documentElement.dataset.previewBeatBackend=String(pattern.beatV2?.backend||'');
-      const engineHunters=hunters.map(hunter=>({
-        ...hunter,id:'great_sword',name:`Hunter ${hunter.index+1}`,
-        hunterName:`Hunter ${hunter.index+1}`,type:'melee',personality:'balanced',
-        hp:1000,maxHp:1000,atb:0,potions:10,sharpness:100,perks:[]
-      }));
-      const presenter=new HuntCombatPresenter({
-        renderer:previewRenderer,
-        audio:{playMHAsset:(fileName,fallbackKey,context)=>labAudio?.playEngineAsset(fileName,fallbackKey,context)},
-        getHunters:()=>engineHunters,
-        getEngine:()=>previewRuntime?.engine
-      });
-      previewRuntime=new HuntCombatRuntime({
-        mode:'preview',clockMode:'manual',
-        onTrace:entry=>{
-          document.documentElement.dataset.previewClock='hunt-combat-runtime';
-          document.documentElement.dataset.previewTick=String(entry.tick||0);
-          document.documentElement.dataset.previewTraceType=entry.type;
-        },
-        engineConfig:{
-          selectedWeapons:engineHunters,selectedMonster:owner.selectedMonster,
-          monsterTier:'large',monsterHp:100000,monsterMaxHp:100000,
-          monsterAtb:0,monsterSpeed:.0001,hunterSpeedMultiplier:0,
-          MONSTER_ATTACKS:{},MONSTER_PATTERNS:{[owner.selectedMonster.id]:[pattern]},COMBO_LIST:{},
-          callbacks:{...presenter.callbacks(),
-            onMonsterBeatActionComplete:()=>{
-              if(previewRuntimeTimer!==null){clearInterval(previewRuntimeTimer);previewRuntimeTimer=null}
-              previewRenderer.combatAnimator.monsterAttackAnimator?.clearMonsterMotion?.('beat-complete');
-            }
-          }
-        }
-      });
-      previewRuntimePattern=pattern;
-      previewRuntimeSelection={
-        primary:selection.primary,
-        indices:[...selection.indices]
+    function playPreviewMotionOnly(pattern, selection){
+      stopPreviewRuntime('preview-motion-replaced');
+      const monsterImg=document.getElementById('fight-monster-img');
+      if(!monsterImg)return false;
+      const cards=[...document.querySelectorAll('.game-hunt-weapon-card')];
+      const targetCard=cards[selection.primary]||null;
+      // Keep target geometry for the authored route, but remove all target
+      // resolution/impact presentation. The editor must show the monster
+      // moving; hunter cards, damage, reactions and target dust belong only to
+      // the live hunt session.
+      const targets=[];
+      const motionPattern={
+        ...pattern,
+        runtimePreviewMotionOnly:true,
+        runtimeResolvedImpactTimeline:[],
+        impactFx:null,
+        motion:Array.isArray(pattern.motion)
+          ? pattern.motion.map(beat=>({
+            ...beat,
+            cues:Array.isArray(beat?.cues)
+              ? beat.cues.filter(cue=>!['target-impact-dust','part-swing-arc'].includes(cue?.fx))
+              : beat?.cues
+          }))
+          : pattern.motion
       };
-      previewRuntime.start();
-      const accepted=previewRuntime.executeMonsterPattern(pattern,{
-        primaryTargetIndex:selection.primary,
-        targetIndices:selection.indices,
-        impactTargets:(pattern.runtimeResolvedImpactTimeline||[]).map(event=>event.targetIndices||[])
-      });
+      document.documentElement.dataset.previewExecution='monster-beat-only';
+      document.documentElement.dataset.previewHunterResolution='disabled';
+      previewRuntimePattern=motionPattern;
+      previewRuntimeSelection={primary:selection.primary,indices:[...selection.indices]};
+      const accepted=animator.playBeatMotion(
+        monsterImg,motionPattern,motionPattern.id,targetCard,targets);
       document.documentElement.dataset.previewActionAccepted=String(accepted!==false);
-      document.documentElement.dataset.previewBeatActive=String(
-        Boolean(previewRuntime.engine.monsterBeatRuntime?.has?.('monster')));
-      return previewRuntime;
-    }
-
-    function playPreviewRuntime(){
-      if(!previewRuntime)return;
-      previewRuntimeTimer=setInterval(()=>{
-        previewRuntime.step(1);
-        const active=previewRuntime.engine.monsterBeatRuntime?.get?.('monster');
-        const total=Math.max(1,Number(active?.compiled?.totalTicks||previewRuntimePattern?.animationDurationMs/100||1));
-        const elapsed=Math.max(0,Number(active?.elapsedTicks||previewRuntime.clock.elapsedTicks));
-        animator.seekBeatMotion(Math.min(1,elapsed/total));
-        if(!active&&previewRuntimeTimer!==null){clearInterval(previewRuntimeTimer);previewRuntimeTimer=null}
-      },100);
+      document.documentElement.dataset.previewBeatActive=String(Boolean(accepted));
+      return accepted!==false;
     }
 
     function pausePreviewRuntime(){
-      if(previewRuntimeTimer!==null){clearInterval(previewRuntimeTimer);previewRuntimeTimer=null}
-      previewRuntime?.pause?.();
       const controller=animator.activeBeatMotionPreview;
       controller?.animations?.forEach(animation=>animation.pause());
     }
 
     function resumePreviewRuntime(){
-      if(!previewRuntime||previewRuntimeTimer!==null)return;
-      previewRuntime.resume?.();
-      playPreviewRuntime();
+      const controller=animator.activeBeatMotionPreview;
+      controller?.animations?.forEach(animation=>animation.play());
     }
 
     function seekPreviewRuntime(progress){
       if(!previewRuntimePattern||!previewRuntimeSelection)return;
-      const pattern=previewRuntimePattern;
-      const selection={...previewRuntimeSelection,targets:previewRuntimeSelection.indices.map(index=>({index,result:'pending'}))};
-      const total=Math.max(1,(pattern.motion||[]).reduce((sum,beat)=>sum+Math.max(1,Number(beat.ticks)||1),0));
-      createPreviewRuntime(pattern,selection);
-      pausePreviewRuntime();
-      previewRuntime.step(Math.max(0,Math.min(total,Math.round(Number(progress||0)*total))));
       animator.seekBeatMotion(Math.max(0,Math.min(1,Number(progress||0))));
     }
 
@@ -650,15 +608,13 @@
       });
       document.documentElement.style.setProperty('--target',slotColors[selection.primary]);
       document.getElementById('run-readout').textContent=`${pattern.name} · ${targetMode==='auto'?'자동 ':''}${selection.indices.map(index=>index+1).join('·')}번`;
-      // Preview does not call the animator directly. It submits the authored
-      // pattern to the same HuntEngine/BEAT runtime used by a live hunt; the
-      // renderer callbacks above merely observe that runtime session.
-      createPreviewRuntime(pattern,selection);
-      if(pattern.runtimePreviewScrub){
-        previewRuntime.step(Math.max(0,Number(previewScenario?.scrubTick||0)));
-      }else{
-        playPreviewRuntime();
-      }
+      // Preview is an editor, not a second combat simulation. The same
+      // authored BEAT graph used by live hunts is played directly by the
+      // shared monster animator. Hunter damage/reaction resolution stays in
+      // the real hunt only; the editor shows its judgments on the timeline.
+      playPreviewMotionOnly(pattern,selection);
+      if(pattern.runtimePreviewScrub)
+        animator.seekBeatMotion(Math.max(0,Math.min(1,Number(previewScenario?.scrubTick||0))));
       if(pattern.flightTransition==='takeoff'){
         pendingFlightTransitionTimer=setTimeout(()=>{
           pendingFlightTransitionTimer=null;

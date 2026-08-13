@@ -44,10 +44,20 @@ assert.doesNotMatch(html, /\.js\?v=/,
     '패턴 랩은 손관리 캐시 토큰을 쓰지 않는다 (프리뷰 서버가 no-store를 보낸다)');
 assert.match(html, /id="css-build"/,
     '무엇이 로드됐는지 눈으로 확인할 빌드 표시가 필요하다');
-assert.match(html, /createPreviewRuntime\(pattern,selection\)/,
-    'Preview must submit the pattern to the shared HuntCombatRuntime');
-assert.match(html, /previewRuntime\.executeMonsterPattern\(pattern/,
-    'Preview judgments and audio must be emitted by the real HuntEngine BEAT session');
+assert.match(html, /function playPreviewMotionOnly\(pattern,\s*selection\)/,
+    'Preview must expose a dedicated monster-motion-only editor path');
+assert.match(html, /animator\.playBeatMotion\(\s*monsterImg,motionPattern,motionPattern\.id,targetCard,targets\)/,
+    'Preview must render the same authored monster BEAT graph without starting a hunter combat simulation');
+assert.match(html, /const targets=\[\];/,
+    'Preview must preserve target geometry without creating hunter impact recipients');
+assert.match(html, /runtimePreviewMotionOnly:true/,
+    'Preview motion must be explicitly marked as editor-only');
+assert.match(html, /dataset\.previewHunterResolution='disabled'/,
+    'Preview must not resolve hunter damage/reactions while editing monster motion');
+assert.doesNotMatch(html, /playPreviewMotionOnly\(pattern,selection\)[\s\S]{0,500}previewRuntime\.executeMonsterPattern/,
+    'the editor motion path must not re-enter the combat runtime');
+assert.doesNotMatch(html, /new HuntCombatRuntime\(/,
+    'the embedded editor must not construct a second combat runtime at all');
 assert.doesNotMatch(html,
     /labAudio\?\.playPattern\(pattern,pattern\.runtimeResolvedImpactTimeline\|\|\[\]\)/,
     'Preview must not schedule a second audio/impact timeline beside the BEAT engine');
@@ -146,8 +156,8 @@ assert.match(html, /new URL\(document\.referrer\)\.origin/,
     'preview readiness must return to the active loopback review-server origin, including agent-specific ports');
 assert.match(html, /embedded-preview/,
     'embedded production preview must hide its own control overlay');
-assert.match(html, /seekPreviewRuntime\(message\.progress\)/,
-    'the embedded lab must rebuild and seek the real engine/BEAT session');
+assert.match(html, /animator\.seekBeatMotion\(Math\.max\(0,Math\.min\(1,Number\(progress\|\|0\)\)\)\)/,
+    'the embedded editor must scrub the shared BEAT animation directly');
 assert.match(html, /bubblechat:pattern-preview-playback/,
     'the embedded runtime must acknowledge playback so the editor timeline follows real playback');
 assert.match(html, /!pattern\.runtimePreviewMuteAudio/,
