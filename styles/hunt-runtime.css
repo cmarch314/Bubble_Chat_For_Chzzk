@@ -3327,8 +3327,16 @@
 .monster-pitfall-caught.monster-pitfall-struggle-pulse { animation:monster-pitfall-struggle 1.2s cubic-bezier(.18,.76,.22,1) both !important; }
 .monster-pitfall-caught.monster-pitfall-releasing { animation:monster-pitfall-release .8s cubic-bezier(.2,.72,.2,1) both !important; }
 .environment-pitfall.is-releasing { animation:pitfall-release-fade var(--pitfall-release-fade-ms,.8s) ease-in both; }
-.environment-pitfall.is-releasing .pitfall-hole,
-.environment-pitfall.is-releasing .pitfall-net { animation:pitfall-close var(--pitfall-release-fade-ms,.8s) ease-in both !important; }
+.environment-pitfall.is-releasing .pitfall-hole {
+    animation:none !important;
+    opacity:1;
+    transform:translateX(-50%) scale(1);
+}
+.environment-pitfall.is-releasing .pitfall-net {
+    animation:none !important;
+    opacity:.9;
+    transform:translateX(-50%) scale(1) rotate(0);
+}
 .environment-pitfall.is-atb-bound .pitfall-hole { animation:pitfall-open-held .46s ease-out both; }
 .environment-pitfall.is-atb-bound .pitfall-net { animation:pitfall-net-held .52s ease-out both; }
 .environment-pitfall.is-atb-bound::after {
@@ -3447,10 +3455,6 @@
     78%{transform:translateY(13px) rotate(-2deg) scale(1.01,.95);clip-path:inset(0 0 7% 0)}
     90%{transform:translateY(-8px) rotate(1deg) scale(1,1.04);clip-path:inset(0)}
     100%{transform:none;clip-path:inset(0)}
-}
-@keyframes pitfall-close {
-    0%{opacity:1}
-    100%{opacity:0;transform:translateX(-50%) scale(.18)}
 }
 @keyframes pitfall-release-fade {
     0%{opacity:1}

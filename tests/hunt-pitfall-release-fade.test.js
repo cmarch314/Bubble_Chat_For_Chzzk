@@ -17,6 +17,14 @@ assert.match(css,
 assert.doesNotMatch(css,
     /@keyframes pitfall-release-fade\s*\{[\s\S]*?0%,58%\{opacity:1\}/,
     'the retired opaque hold must not make the trap pop out at the end of escape');
+assert.match(css,
+    /\.environment-pitfall\.is-releasing \.pitfall-hole\s*\{[^}]*animation:none !important;[^}]*opacity:1;[^}]*transform:translateX\(-50%\) scale\(1\);/,
+    'the open hole must remain at full size while the parent layer fades');
+assert.match(css,
+    /\.environment-pitfall\.is-releasing \.pitfall-net\s*\{[^}]*animation:none !important;[^}]*opacity:\.9;[^}]*transform:translateX\(-50%\) scale\(1\) rotate\(0\);/,
+    'the net must remain fully spread while the parent layer fades');
+assert.doesNotMatch(css, /pitfall-close/,
+    'pitfall release must never shrink the hole or net toward its center');
 assert.match(animator,
     /PITFALL_RELEASE_TICK_MS = 100[\s\S]*?releaseFadeMs = releaseTicks \* HuntCombatAnimator\.PITFALL_RELEASE_TICK_MS[\s\S]*?effect\.animate\?\.[\s\S]*?effects\.forEach\(effect => effect\.remove\(\)\)[\s\S]*?releaseFadeMs\);/,
     'live and preview trap release must animate opacity for the authored escape ticks before DOM cleanup');
