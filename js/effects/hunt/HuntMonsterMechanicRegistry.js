@@ -30,6 +30,7 @@ class HuntMonsterMechanicRegistry {
             owner: 'HuntMonsterTurnExecutor/HuntMonsterAttackAnimator',
             matches: pattern => pattern.tags?.includes('burrow-enter')
                 || pattern.tags?.includes('burrow-emerge')
+                || pattern.tags?.includes('burrow')
         }),
         'charge-chain': Object.freeze({
             owner: 'HuntMonsterActionPolicy',

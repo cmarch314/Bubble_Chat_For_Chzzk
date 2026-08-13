@@ -11,7 +11,11 @@
     "reviewedAt": "2026-07-25",
     "gates": { "evidence": true, "patterns": true, "anatomy": true, "animation": true, "audio": true, "preview": true, "simulation": true }
   },
-  "runtime": { "profileId": "diablos", "mechanicModules": ["common", "burrow", "charge-chain", "tremor"] },
+  "runtime": {
+    "profileId": "diablos",
+    "mechanicModules": ["common", "burrow", "charge-chain", "tremor"],
+    "actionManifest": "data/hunt/monster-kits/actions/diablos.json"
+  },
   "evidenceRefs": [
     { "kind": "review-standard", "path": "data/hunt/monster-implementation-standard.md" },
     { "kind": "pattern-audit", "path": "data/hunt/monster-pattern-pilot-report.md" },

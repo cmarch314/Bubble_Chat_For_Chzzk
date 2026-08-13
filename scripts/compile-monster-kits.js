@@ -26,6 +26,44 @@ function readKits(sourceDir = SOURCE_DIR) {
         });
 }
 
+function readActionManifest(kit) {
+    const ref = String(kit?.runtime?.actionManifest || '').trim();
+    if (!ref) return null;
+    const sourcePath = path.join(ROOT, ref);
+    if (!fs.existsSync(sourcePath)) throw new Error(`${kit.id} missing action manifest: ${ref}`);
+    const manifest = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+    if (manifest.schemaVersion !== 1 || manifest.id !== kit.id || !Array.isArray(manifest.actions)) {
+        throw new Error(`${kit.id} has an invalid action manifest: ${ref}`);
+    }
+    const ids = manifest.actions.map(action => String(action?.id || ''));
+    if (!ids.length || ids.some(id => !id.startsWith(`${kit.id}.`)) || new Set(ids).size !== ids.length) {
+        throw new Error(`${kit.id} action manifest must contain unique local action IDs`);
+    }
+    if (manifest.actions.some(action => !['draft', 'migrated', 'approved'].includes(action?.reviewStatus))) {
+        throw new Error(`${kit.id} action manifest has an invalid review status`);
+    }
+    return { ref, manifest };
+}
+
+function assertActionManifestMatchesProfile(kit, patterns = []) {
+    const source = readActionManifest(kit);
+    if (!source) return null;
+    const byId = new Map((patterns || []).map(pattern => [pattern.id, pattern]));
+    const manifestIds = new Set(source.manifest.actions.map(action => action.id));
+    const profileIds = new Set((patterns || []).map(pattern => pattern.id));
+    if (manifestIds.size !== profileIds.size || [...manifestIds].some(id => !profileIds.has(id))) {
+        throw new Error(`${kit.id} action manifest does not match the authored profile IDs`);
+    }
+    source.manifest.actions.forEach(action => {
+        const profile = byId.get(action.id);
+        const profileStatus = profile?.beatV2Approved === true ? 'approved' : 'migrated';
+        if (profileStatus !== action.reviewStatus) {
+            throw new Error(`${kit.id}.${action.id} action review status disagrees with the authored profile`);
+        }
+    });
+    return source;
+}
+
 function compile(kits) {
     const ids = new Set();
     const orders = new Set();
@@ -114,7 +152,19 @@ function runtimeIndexText(index) {
 function main(args = process.argv.slice(2)) {
     const kits = readKits();
     const profiles = require(path.join(ROOT, 'js', 'effects', 'hunt', 'HuntMonsterProfiles.js'));
-    kits.forEach(kit => HuntMonsterMechanicRegistry.assertKit(kit, profiles[kit.id] || []));
+    kits.forEach(kit => {
+        const patterns = profiles[kit.id] || [];
+        // Variants may deliberately inherit body-plan mechanics from the base
+        // kit while retaining only their tuning/profile override locally.
+        // Validate against both sources so a shared burrow or flight module is
+        // not falsely rejected merely because the variant does not duplicate
+        // every semantic tag in its local profile object.
+        const mechanicPatterns = kit.variantOf
+            ? [...patterns, ...(profiles[kit.variantOf] || [])]
+            : patterns;
+        HuntMonsterMechanicRegistry.assertKit(kit, mechanicPatterns);
+        assertActionManifestMatchesProfile(kit, patterns);
+    });
     const manifest = compile(kits);
     const runtimeIndex = compileRuntimeIndex(manifest);
     const outputs = [
@@ -155,6 +205,8 @@ module.exports = {
     JS_OUTPUT,
     RUNTIME_INDEX_OUTPUT,
     readKits,
+    readActionManifest,
+    assertActionManifestMatchesProfile,
     compile,
     compileRuntimeIndex,
     jsonText,
