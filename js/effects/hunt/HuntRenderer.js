@@ -1441,6 +1441,11 @@ class HuntRenderer {
             if (part.broken) slot.classList.add('is-broken');
             if (part.severed) slot.classList.add('is-severed');
             slot.dataset.partId = String(part.id || '');
+            // Keep the authored anatomy key on the rendered slot.  The live
+            // hunt and the embedded Preview both use this same renderer, so
+            // editors can identify a side-specific part without rebuilding a
+            // second emoji/icon list of their own.
+            slot.dataset.partKind = String(part.sourceKind || part.kind || '');
             const material = typeof HuntMonsterPartMaterialCatalog !== 'undefined'
                 ? HuntMonsterPartMaterialCatalog.resolve(this.selectedMonster, part)
                 : null;

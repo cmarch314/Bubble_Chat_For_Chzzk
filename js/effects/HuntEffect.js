@@ -1057,6 +1057,11 @@ class HuntEffect extends BaseEffect {
             }
         });
         this.engine = this.combatRuntime.engine;
+        // `renderFight()` replaces the card DOM.  Re-emit the current anatomy
+        // after the engine is attached so the live hunt always shows the same
+        // material-backed part icons as Preview, even when a renderer or
+        // callback was initialized one frame later.
+        this.engine.updateMonsterPartsUI?.();
         if (this.engine.sharedSupply) this.selectedWeapons.forEach(hunter =>
             this.renderer.updateHunterItemUI(hunter, this.engine.sharedSupply));
         this.selectedWeapons.forEach(hunter => {
@@ -1293,6 +1298,11 @@ class HuntEffect extends BaseEffect {
             timeLimit: resumeLimitVal,
             smallMonsterCount: this.smallMonsterCount
         });
+
+        // Consecutive hunts re-render the card while retaining the same
+        // engine. Restore the part icon panel from the engine-owned state
+        // instead of leaving the freshly-created panel empty/hidden.
+        this.engine.updateMonsterPartsUI?.();
 
         // Restore actual UI states for monster HP, timer, and hunter HP
         this.renderer.updateMonsterHpUI(this.engine.monsterHp, this.engine.monsterMaxHp);

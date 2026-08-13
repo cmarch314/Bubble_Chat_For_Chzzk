@@ -171,8 +171,10 @@ assert.match(html, /bubblechat:pattern-anatomy/,
 assert.match(html, /monster-anatomy-guide/);
 assert.match(html, /let anatomyGuideEnabled=true/,
     'the embedded editor must show anatomy guides by default');
-assert.match(html, /host\.hidden=false[\s\S]*hunt-monster-parts-panel.*removeAttribute\('hidden'\)/,
-    'the Preview part list must be visible instead of remaining hidden behind the production HUD');
+assert.match(html, /previewRenderer\.updateMonsterPartsUI\(\s*HuntMonsterAnatomyCatalog\.partDisplaySlots\(partState\)/,
+    'Preview must render the production material-backed part list instead of a second emoji-only HUD');
+assert.doesNotMatch(html, /const PART_ICONS=|function partIcon\(/,
+    'Preview must not maintain a second hand-authored part icon map');
 assert.match(html, /part-handle/,
     'each anatomy part must expose an interactive drag handle');
 assert.match(html, /syncAnatomyTransform/,

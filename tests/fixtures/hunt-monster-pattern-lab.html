@@ -306,13 +306,11 @@
     //   - forbiddenWhenBroken 이 걸리면 선택 후보에서 빠진다
     //   - weightWhenBroken / brokenPartDamageModifiers / brokenPartTargetCaps 는
     //     빠지지는 않고 값만 바뀐다
-    const PART_LABELS={head:'머리',torso:'몸통',tail:'꼬리','left-wing':'좌익','right-wing':'우익',
-      'left-horn':'좌뿔','right-horn':'우뿔','left-leg':'좌각','right-leg':'우각',
-      'left-front-leg':'좌앞발','right-front-leg':'우앞발','left-foreleg':'좌앞발','right-foreleg':'우앞발',
-      back:'등',chest:'가슴',neck:'목',wing:'날개',leg:'다리'};
-    const PART_ICONS={head:'🗿',torso:'🫀',tail:'➰',back:'🛡️',chest:'🫀',neck:'🦴'};
-    const partIcon=kind=>PART_ICONS[kind]||(/wing/.test(kind)?'🪽':/horn/.test(kind)?'🦌':/leg|foot|claw/.test(kind)?'🦶':'🔩');
-    const partLabel=kind=>PART_LABELS[kind]||kind;
+    // Part labels/materials are owned by the production renderer/catalog.
+    // Keeping a second Preview-only emoji map was the reason the live hunt
+    // and editor showed different parts.  The lab now asks HuntRenderer to
+    // render the exact same extracted icon and tint pipeline.
+    const partLabel=kind=>HuntMonsterPartMaterialCatalog.shortPartLabel({kind});
     let partState=[];
 
     function brokenPartKinds(){
@@ -322,23 +320,20 @@
     function renderParts(){
       const host=document.getElementById('hunt-monster-parts');
       if(!host)return;
-      host.classList.add('lab-parts');
-      host.hidden=false;
-      document.getElementById('hunt-monster-parts-panel')?.removeAttribute('hidden');
-      host.replaceChildren(...partState.map(part=>{
-        const slot=document.createElement('button');
-        slot.type='button';
-        slot.className='lab-part';
-        slot.dataset.partKind=part.kind;
-        const canBreak=part.breakable||part.severable;
-        slot.disabled=!canBreak;
-        slot.classList.toggle('is-broken',Boolean(part.broken||part.severed));
-        slot.title=canBreak
+      // `partDisplaySlots` is the same source consumed by HuntEngine in live
+      // combat.  Do not add a Preview-only icon/label representation here.
+      previewRenderer.updateMonsterPartsUI(
+        HuntMonsterAnatomyCatalog.partDisplaySlots(partState)
+      );
+      host.querySelectorAll('.hunt-monster-part').forEach(slot=>{
+        const sourceKind=slot.dataset.partKind;
+        const part=partState.find(entry=>String(entry.kind)===sourceKind);
+        if(!part)return;
+        slot.title=(part.severable||part.breakable)
           ?`${partLabel(part.kind)} · 눌러서 ${part.broken?'복구':(part.severable?'절단':'파괴')}`
           :`${partLabel(part.kind)} · 파괴 불가`;
-        slot.innerHTML=`<span>${partIcon(part.kind)}</span><b>${partLabel(part.kind)}</b>`;
-        return slot;
-      }));
+        slot.classList.add('lab-part');
+      });
       updatePatternAvailability();
     }
     // 파괴 때문에 못 나오는 패턴을 목록에서 지우지 않는다. 사라지면 왜 없는지
@@ -705,8 +700,8 @@
     // 이 줄이 도는 시점에는 아직 없어서 ?.가 조용히 넘어가고, 눌러도 아무 일이
     // 일어나지 않는다. 항상 있는 조상에 위임한다.
     document.addEventListener('click',event=>{
-      const slot=event.target.closest?.('.lab-part');
-      if(slot&&!slot.disabled)togglePart(slot.dataset.partKind);
+      const slot=event.target.closest?.('.hunt-monster-part');
+      if(slot)togglePart(slot.dataset.partKind);
     });
     targetButtons.addEventListener('click',event=>{const button=event.target.closest('.target-btn');if(!button)return;targetMode=button.dataset.target;updateTargetSelection([],null);if(activePatternId)playPattern(activePatternId)});
     const ANATOMY_LABELS={head:'머리',mouth:'입',torso:'몸통',tail:'꼬리','left-wing':'좌익','right-wing':'우익',
