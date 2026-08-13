@@ -2889,28 +2889,6 @@ const HUNT_MONSTER_PROFILE_KEYFRAMES={
         "transform": "rotate(1deg) scale(1.03)"
       }
     ],
-    "monster-uppercut-launched": [
-      {
-        "offset": 0,
-        "transform": "none"
-      },
-      {
-        "offset": 0.57,
-        "transform": "translateY(-105px) scale(1.05)"
-      },
-      {
-        "offset": 0.7,
-        "transform": "translateY(-86px)"
-      },
-      {
-        "offset": 0.88,
-        "transform": "translateY(12px)"
-      },
-      {
-        "offset": 1,
-        "transform": "none"
-      }
-    ],
     "hunter-interference-wobble": [
       {
         "offset": 0,
@@ -5551,13 +5529,27 @@ const HUNT_MONSTER_PROFILE_KEYFRAMES={
         "opacity": 1
       },
       {
-        "offset": 0.72,
+        "offset": 0.58,
         "opacity": 1
       },
       {
         "offset": 1,
         "opacity": 0,
         "transform": "translateX(-50%) scale(.18)"
+      }
+    ],
+    "pitfall-release-fade": [
+      {
+        "offset": 0,
+        "opacity": 1
+      },
+      {
+        "offset": 0.58,
+        "opacity": 1
+      },
+      {
+        "offset": 1,
+        "opacity": 0
       }
     ],
     "monster-rockfall-hit": [
@@ -5997,35 +5989,6 @@ const HUNT_MONSTER_PROFILE_KEYFRAMES={
         "offset": 1,
         "transform": "translate(calc(var(--p-x) - 50%), calc(var(--p-dy) + var(--p-y) - 50%)) rotate(260deg) scale(.2)",
         "opacity": 0
-      }
-    ],
-    "element-impact-card-shake": [
-      {
-        "offset": 0,
-        "transform": "translate(0)",
-        "filter": "brightness(1)"
-      },
-      {
-        "offset": 0.2,
-        "transform": "translate(-8px, 4px) rotate(-.6deg)",
-        "filter": "brightness(1.8)"
-      },
-      {
-        "offset": 0.42,
-        "transform": "translate(7px, -5px) rotate(.5deg)"
-      },
-      {
-        "offset": 0.64,
-        "transform": "translate(-4px, 2px)"
-      },
-      {
-        "offset": 0.82,
-        "transform": "translate(3px, -1px)"
-      },
-      {
-        "offset": 1,
-        "transform": "translate(0)",
-        "filter": "brightness(1)"
       }
     ],
     "victory-jump": [

@@ -422,7 +422,7 @@ class HuntMonsterTurnExecutor {
             if (actionMachine) actionMachine.cancel(target, 'guard');
             engine.addLog(`🛡️⚡ [가드 포인트] ${target.name}이(가) 정확히 막아 병 폭발을 일으키고 고출력 반격 자세로 전환했습니다!`, '#ff79c6');
             engine.showSkillBubble(target.index, '가드 포인트!');
-            engine.callbacks?.onTriggerGuardShake?.(target.index);
+            engine.presentHunterImpact?.(target.index, 'counter');
             engine.shakeWeapon(target.index, '#ff79c6', true, { id: 'charge_blade.guard_point' });
         } else if (!isStunned && (canLanceCounter || canPowerGuard)) {
             handled = true;
@@ -445,7 +445,7 @@ class HuntMonsterTurnExecutor {
             if (actionMachine) actionMachine.cancel(target, 'guard');
             engine.addLog(`🛡️ [${canPowerGuard ? '파워 가드' : '카운터 가드'}] ${target.name}이(가) 정면에서 버티며 반격권을 확보했습니다!`, '#87ceeb');
             engine.showSkillBubble(target.index, canPowerGuard ? `파워 가드 ${target.powerGuardCharge}단계!` : '카운터 가드!');
-            engine.callbacks?.onTriggerGuardShake?.(target.index);
+            engine.presentHunterImpact?.(target.index, 'counter');
             engine.shakeWeapon(target.index, '#87ceeb', true, { id: canPowerGuard ? 'lance.power_guard' : 'lance.counter_stance' });
         } else if (!isStunned && canHammerOffset && defendRoll < specialChance(.70)) {
             handled = true;
@@ -473,7 +473,7 @@ class HuntMonsterTurnExecutor {
             if (actionMachine) actionMachine.cancel(target, 'guard');
             engine.addLog(`🛡️ [퍼펙트 가드] ${target.name}이(가) 공격을 정확히 막아내고 카운터베기 연계권을 얻었습니다!`, '#f5f8ff');
             engine.showSkillBubble(target.index, '퍼펙트 가드!');
-            engine.callbacks?.onTriggerGuardShake?.(target.index);
+            engine.presentHunterImpact?.(target.index, 'perfect-guard');
             engine.shakeWeapon(target.index, '#f5f8ff', true, { id: 'sword_shield.perfect_guard' });
         } else if (!isStunned && target.id === 'long_sword' && hasIaiAttempt) {
             handled = true;
@@ -1377,7 +1377,7 @@ class HuntMonsterTurnExecutor {
                 engine.addLog(`🛡️ [태클 카운터] ${target.name}이(가) 태클로 공격을 맞받아쳐 피해를 50% 경감하고 다음 모으기 연계로 진입합니다! (-${damage} HP, 반사 피해: -${counterDmg} HP, 기절치 +${counterStun})`, '#ff9500');
                 engine.updateHpUI(target);
                 engine.shakeWeapon(target.index, '#ff9500');
-                if (engine.callbacks.onTriggerGuardShake) engine.callbacks.onTriggerGuardShake(target.index);
+                engine.presentHunterImpact?.(target.index, 'tackle');
                 attackResults.push({ index: target.index, result: 'tackle' });
                 if (engine.telemetry) engine.telemetry.recordMonsterPattern(engine.selectedMonster.id, pattern, 'guard', damage);
                 if (target.hp <= 0) {
@@ -1533,7 +1533,7 @@ class HuntMonsterTurnExecutor {
                         engine.addLog(`🛡️ [방패 가드] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 방어해냈습니다! (-${damage} HP)`, '#00ffff');
                         engine.playSFX('hunter_guard', null, { hunterIndex: target.index, action: 'guard' });
                         engine.shakeWeapon(target.index, '#00ffff');
-                        if (engine.callbacks.onTriggerGuardShake) engine.callbacks.onTriggerGuardShake(target.index);
+                        engine.presentHunterImpact?.(target.index, 'guard');
                         target.guardDuration = 6;
                         attackResults.push({ index: target.index, result: 'guard' });
                     } else if (hazardHpOnly) {
@@ -1561,7 +1561,7 @@ class HuntMonsterTurnExecutor {
                         engine.addLog(`💥 [피격] ${engine.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 큰 타격! (-${damage} HP, 행동 게이지 초기화)`, '#ff5555');
                         // Hunter-hit voice is deferred until the stun result is known.
                         engine.shakeMonster();
-                        engine.triggerHitAnimation(target.index, hitReaction);
+                        engine.presentHunterImpact?.(target.index, 'hit', { reaction: hitReaction });
                         if (engine.expressHunterEmotion) engine.expressHunterEmotion(target, 'hurt');
                         attackResults.push({ index: target.index, result: 'hit' });
                     }
@@ -1617,7 +1617,7 @@ class HuntMonsterTurnExecutor {
                     // A perfect guard holds the shield line; it must not borrow the evade-roll pose.
                     target.guardDuration = 6;
                 } else {
-                    if (engine.callbacks.onTriggerRollAnimation) engine.callbacks.onTriggerRollAnimation(target.index);
+                    engine.presentHunterImpact?.(target.index, 'dodge');
                     target.rollDuration = 6;
                 }
                 attackResults.push({ index: target.index, result: (isHammerOffset || isLanceCounter || isChargeBladeGuardPoint) ? 'counter' : 'dodge' });

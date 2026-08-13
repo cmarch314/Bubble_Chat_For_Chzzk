@@ -9,13 +9,31 @@ const HuntCombatAnimator = require('../js/effects/hunt/HuntCombatAnimator.js');
 const HuntMonsterAttackAnimator = require('../js/effects/hunt/HuntMonsterAttackAnimator.js');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
 
-assert.strictEqual(HuntMonsterAttackAnimator.hunterReactionForAttackResult('hit'), 'hit');
+assert.strictEqual(HuntMonsterAttackAnimator.previewReactionForAttackResult('hit'), 'hit');
 for (const result of ['guard', 'perfect-guard', 'counter']) {
-    assert.strictEqual(HuntMonsterAttackAnimator.hunterReactionForAttackResult(result), 'guard');
+    assert.strictEqual(HuntMonsterAttackAnimator.previewReactionForAttackResult(result), 'guard');
 }
 for (const result of ['invulnerable', 'pending', 'dodge', 'miss', 'resist', 'effect', undefined]) {
-    assert.strictEqual(HuntMonsterAttackAnimator.hunterReactionForAttackResult(result), null,
+    assert.strictEqual(HuntMonsterAttackAnimator.previewReactionForAttackResult(result), null,
         `${String(result)} must never be presented as a hunter hit`);
+}
+{
+    const presented = [];
+    const engine = {
+        callbacks: {
+            onTriggerHitAnimation: (...args) => presented.push(['hit', ...args]),
+            onTriggerGuardShake: (...args) => presented.push(['guard', ...args]),
+            onTriggerRollAnimation: (...args) => presented.push(['dodge', ...args])
+        },
+        presentHunterImpact: HuntEngine.prototype.presentHunterImpact
+    };
+    assert.strictEqual(engine.presentHunterImpact(1, 'invulnerable'), false);
+    assert.strictEqual(engine.presentHunterImpact(1, 'pending'), false);
+    assert.deepStrictEqual(presented, [], 'uncommitted/non-hit outcomes must not reach presentation');
+    assert.strictEqual(engine.presentHunterImpact(1, 'hit', { reaction: { kind: 'strong' } }), true);
+    assert.strictEqual(engine.presentHunterImpact(2, 'guard'), true);
+    assert.strictEqual(engine.presentHunterImpact(3, 'dodge'), true);
+    assert.deepStrictEqual(presented.map(entry => entry[0]), ['hit', 'guard', 'dodge']);
 }
 {
     const weaponCard = { dataset: { hunterHitReactionActive: 'true' } };
@@ -317,6 +335,12 @@ assert.doesNotMatch(turnSource,
 assert.match(turnSource,
     /clearHunterInterference\?\.\(target, 'hit'\)[\s\S]*?actionMachine\.cancel\(target, 'hitstun'\)[\s\S]*?target\.hitDuration = hitReaction\.durationTicks[\s\S]*?target\.hitStartedThisTick = true/,
     'ordinary damaging hits must replace roar, tremor, and wind reactions before knockback');
+assert.doesNotMatch(turnSource,
+    /callbacks(?:\?\.)?\.onTrigger(?:HitAnimation|GuardShake|RollAnimation)/,
+    'monster turn resolution must publish hunter reactions only through HuntEngine.presentHunterImpact');
+assert.match(turnSource,
+    /presentHunterImpact\?\.\(target\.index, 'hit', \{ reaction: hitReaction \}\)/,
+    'committed ordinary hits must cross the single engine presentation boundary');
 const valstraxSource = fs.readFileSync(
     path.resolve(__dirname, '../js/effects/hunt/HuntValstraxExecutor.js'),
     'utf8'
@@ -324,10 +348,22 @@ const valstraxSource = fs.readFileSync(
 assert.match(valstraxSource,
     /clearHunterInterference\?\.\(target, 'hit'\)[\s\S]*?target\.hitDuration = hitReaction\.durationTicks[\s\S]*?target\.hitStartedThisTick = true/,
     'Valstrax direct impacts must obey the same interference-to-hit priority');
+assert.doesNotMatch(valstraxSource,
+    /callbacks(?:\?\.)?\.onTrigger(?:HitAnimation|GuardShake|RollAnimation)|engine\.triggerHitAnimation/,
+    'special monster executors must not bypass the engine impact presenter');
 const combatAnimatorSource = fs.readFileSync(
     path.resolve(__dirname, '../js/effects/hunt/HuntCombatAnimator.js'),
     'utf8'
 );
+const monsterAttackAnimatorSource = fs.readFileSync(
+    path.resolve(__dirname, '../js/effects/hunt/HuntMonsterAttackAnimator.js'),
+    'utf8'
+);
+assert.doesNotMatch(monsterAttackAnimatorSource, /element-impact-shake|monster-uppercut-launched/,
+    'monster motion rendering must not own hunter hit reaction classes');
+assert.match(monsterAttackAnimatorSource,
+    /runtimePreviewCardReactions[\s\S]*?schedulePreviewImpactCardReactions/,
+    'simulated hunter reactions must remain explicitly preview-only');
 assert.match(combatAnimatorSource,
     /restoreBorder\(wIndex, w\)[\s\S]*?Number\(w\.hitDuration \|\| 0\) > 0\) return/,
     'resource and buff cleanup must not erase a live hunter hit reaction');

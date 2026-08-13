@@ -53,12 +53,10 @@ class HuntMonsterAttackAnimator {
         return Math.max(0, Math.round(Number(impactTicks || 0) * tickMs - visualTravelMs));
     }
 
-    static hunterReactionForAttackResult(result) {
-        // Monster motion is started before delayed judgments resolve, so live
-        // attacks arrive here with `pending`.  Never turn an unknown/non-hit
-        // result into a hunter reaction: the turn executor is the sole owner of
-        // committed hit/guard animations.  This also keeps invulnerable combo
-        // follow-ups from visually hitting an already tumbling hunter.
+    static previewReactionForAttackResult(result) {
+        // Preview results are simulated and must stay inside the explicitly
+        // preview-only timeline path. Live hunter reactions are owned by
+        // HuntEngine.presentHunterImpact() after judgment commit.
         if (result === 'hit') return 'hit';
         if (['guard', 'perfect-guard', 'counter'].includes(result)) return 'guard';
         return null;
@@ -1922,7 +1920,7 @@ class HuntMonsterAttackAnimator {
                 indices.forEach(index => {
                     const card = this.card?.querySelector(`#fight-card-${index}`);
                     const result = resultByIndex.get(Number(index));
-                    const reaction = HuntMonsterAttackAnimator.hunterReactionForAttackResult(result);
+                    const reaction = HuntMonsterAttackAnimator.previewReactionForAttackResult(result);
                     if (!card || !reaction) return;
                     if (!hasDirectDamage && pattern?.interference?.kind) return;
                     const guarded = reaction === 'guard';
@@ -2017,22 +2015,6 @@ class HuntMonsterAttackAnimator {
         this.card.classList.remove('monster-charge-rumble');
         void this.card.offsetWidth;
         this.card.classList.add('monster-charge-rumble');
-        const strikeTargets = pass => {
-            const configured = Array.isArray(this._activeChargePassSizes) ? this._activeChargePassSizes : null;
-            if (!configured) return pass === 0 ? targets : [];
-            const offset = pass === 0 ? 0 : configured[0];
-            return targets.slice(offset, offset + configured[pass]);
-        };
-        const shakeTargets = pass => {
-            strikeTargets(pass).forEach(target => {
-                if (HuntMonsterAttackAnimator.hunterReactionForAttackResult(target.result) !== 'hit') return;
-                const hitCard = this.card?.querySelector(`#fight-card-${target.index}`);
-                if (!hitCard) return;
-                hitCard.classList.remove('element-impact-shake');
-                void hitCard.offsetWidth;
-                hitCard.classList.add('element-impact-shake');
-            });
-        };
         if (isStompBurst) {
             const stompRatios = authoredLaunchTicks
                 ? [launchRatio * .22, launchRatio * .58, launchRatio * .92]
@@ -2057,23 +2039,6 @@ class HuntMonsterAttackAnimator {
                     this.card.classList.add('monster-charge-rumble');
                 }, Math.round(motionDuration * ratio));
             });
-        }
-        const impactRatios = Array.isArray(pattern?.impact?.passRatios)
-            ? pattern.impact.passRatios
-            : null;
-        const firstImpactProgress = Array.isArray(this._activeChargePassSizes)
-            ? Number(impactRatios?.[0] ?? .22)
-            : .36;
-        const secondImpactProgress = Number(impactRatios?.[1] ?? .68);
-        if (!pattern?.runtimeImpactPending) {
-            this.animationTimers.timeout(() => {
-                if (isCurrent()) shakeTargets(0);
-            }, Math.round(motionDuration * firstImpactProgress));
-            if (Array.isArray(this._activeChargePassSizes)) {
-                this.animationTimers.timeout(() => {
-                    if (isCurrent()) shakeTargets(1);
-                }, Math.round(motionDuration * secondImpactProgress));
-            }
         }
         if (pattern?.runtimeWhiffStuck) {
             this.animationTimers.timeout(() => {
@@ -2122,7 +2087,6 @@ class HuntMonsterAttackAnimator {
         this.animationTimers.timeout(() => {
             track.remove();
             this.card?.classList.remove('monster-charge-rumble');
-            this.card?.querySelectorAll('.element-impact-shake').forEach(card => card.classList.remove('element-impact-shake'));
         }, motionDuration + 120);
     }
 
@@ -2409,8 +2373,8 @@ class HuntMonsterAttackAnimator {
         const angle = Math.atan2(dy, dx) * 180 / Math.PI;
         const theme = this.getElementalTheme(attackName, pattern);
         const delivery = this.getBreathDelivery(attackName, pattern);
-        const isDodge = target.result === 'dodge';
-        const isConfirmedHit = HuntMonsterAttackAnimator.hunterReactionForAttackResult(target.result) === 'hit';
+        const isDodge = pattern?.runtimePreviewCardReactions === true
+            && target.result === 'dodge';
         const isBreath = /브레스|레이저|수류|분사|방출|화염구/.test(attackName);
         const isUltimate = /겁염|절대영도|대재앙|혜성|초폭|대폭발|에스카톤|황도|슈퍼노바|헬 플레어/.test(attackName);
         const travelScale = isDodge ? 1.32 : 1;
@@ -2508,15 +2472,6 @@ class HuntMonsterAttackAnimator {
         fx.classList.add('is-playing');
         this.animationTimers.timeout(() => fx.remove(), isUltimate ? 1800 : 1400);
 
-        if (isConfirmedHit) {
-            this.animationTimers.timeout(() => {
-                if (!this.card) return;
-                targetCard.classList.remove('element-impact-shake');
-                void targetCard.offsetWidth;
-                targetCard.classList.add('element-impact-shake');
-                this.animationTimers.timeout(() => targetCard.classList.remove('element-impact-shake'), 440);
-            }, 420 + order * 35);
-        }
     }
 
     resolveLiveElementalOrigin(monsterImg, targetCard, pattern, fallback) {
@@ -2770,21 +2725,6 @@ class HuntMonsterAttackAnimator {
                 } : {});
             }, Math.round(Number(motionProfile?.duration || 2800) * .57));
         }
-        if (motionProfile?.id === 'horn-uppercut' && firstTarget.result === 'hit') {
-            const weapon = targetCard.querySelector('.game-hunt-weapon-img-container');
-            if (weapon) {
-                const launchDuration = Math.max(1050, Number(motionProfile?.duration || 1050));
-                weapon.style.setProperty('--monster-uppercut-launch-duration', `${launchDuration}ms`);
-                weapon.classList.remove('monster-uppercut-launched');
-                void weapon.offsetWidth;
-                weapon.classList.add('monster-uppercut-launched');
-                this.animationTimers.timeout(() => {
-                    if (!isPlaybackCurrent()) return;
-                    weapon.classList.remove('monster-uppercut-launched');
-                    weapon.style.removeProperty('--monster-uppercut-launch-duration');
-                }, launchDuration + 80);
-            }
-        }
         // A delayed hit starts the monster motion now, but detached projectiles
         // must still be created before the impact commit. Launch late enough for
         // the 720 ms projectile animation to arrive at the authored impact tick.
@@ -2949,18 +2889,9 @@ class HuntMonsterAttackAnimator {
                 this.card.classList.remove('hunt-valstrax-impact');
                 void this.card.offsetWidth;
                 this.card.classList.add('hunt-valstrax-impact');
-                targets.forEach(target => {
-                    const hitCard = this.card.querySelector(`#fight-card-${target.index}`);
-                    if (!hitCard
-                        || HuntMonsterAttackAnimator.hunterReactionForAttackResult(target.result) !== 'hit') return;
-                    hitCard.classList.remove('element-impact-shake');
-                    void hitCard.offsetWidth;
-                    hitCard.classList.add('element-impact-shake');
-                });
                 this.animationTimers.timeout(() => {
                     if (!isPlaybackCurrent()) return;
                     this.card?.classList.remove('hunt-valstrax-impact');
-                    this.card?.querySelectorAll('.element-impact-shake').forEach(card => card.classList.remove('element-impact-shake'));
                 }, 1800);
                 return;
             }

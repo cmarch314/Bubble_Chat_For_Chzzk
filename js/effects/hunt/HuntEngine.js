@@ -675,7 +675,7 @@ class HuntEngine {
             if (hasShield && (guaranteedLanceGuard || this.random() < guardChance)) {
                 this.actionStateMachine?.cancel(hunter, 'guard');
                 hunter.guardDuration = 6;
-                this.callbacks?.onTriggerGuardShake?.(hunter.index);
+                this.presentHunterImpact(hunter.index, 'guard');
                 this.showSkillBubble(hunter.index, '🛡️ 가드');
                 this.playSFX('hunter_guard', null, { hunterIndex: hunter.index, action: 'guard' });
                 return false;
@@ -1012,8 +1012,27 @@ class HuntEngine {
         return HuntMonsterRules.isTrapImmune(this.selectedMonster, this.monsterTier);
     }
 
+    presentHunterImpact(idx, outcome, details = {}) {
+        // This is the single live presentation boundary for committed monster
+        // judgments. Monster motion starts with pending targets and must never
+        // call hunter reaction callbacks on its own.
+        if (outcome === 'hit') {
+            this.callbacks.onTriggerHitAnimation?.(idx, details.reaction || details);
+            return true;
+        }
+        if (['guard', 'perfect-guard', 'counter', 'tackle'].includes(outcome)) {
+            this.callbacks.onTriggerGuardShake?.(idx);
+            return true;
+        }
+        if (outcome === 'dodge') {
+            this.callbacks.onTriggerRollAnimation?.(idx);
+            return true;
+        }
+        return false;
+    }
+
     triggerHitAnimation(idx, reaction) {
-        if (this.callbacks.onTriggerHitAnimation) this.callbacks.onTriggerHitAnimation(idx, reaction);
+        return this.presentHunterImpact(idx, 'hit', { reaction });
     }
 
     cancelHunterHitRecovery(target, reason = 'cancelled') {
@@ -1323,7 +1342,7 @@ class HuntEngine {
                 this.playSFX('hunter_guard', null, { hunterIndex: w.index, action: 'guard' });
                 this.showSkillBubble(w.index, "간파베기!");
                 this.shakeWeapon(w.index, '#c98534');
-                if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(w.index);
+                this.presentHunterImpact(w.index, 'dodge');
                 w.rollDuration = 6;
             } else if (isGuard) {
                 this.actionStateMachine.cancel(w, 'guard');
@@ -1332,7 +1351,7 @@ class HuntEngine {
                 this.playSFX('hunter_guard', null, { hunterIndex: w.index, action: 'guard' });
                 this.showSkillBubble(w.index, "가드!");
                 this.shakeWeapon(w.index, '#00ffff');
-                if (this.callbacks.onTriggerGuardShake) this.callbacks.onTriggerGuardShake(w.index);
+                this.presentHunterImpact(w.index, 'guard');
                 w.guardDuration = 6;
             } else if (isDodge) {
                 this.actionStateMachine.cancel(w, 'evade');
@@ -1341,7 +1360,7 @@ class HuntEngine {
                 this.playSFX('hunter_evade', null, { hunterIndex: w.index, action: 'evade' });
                 this.showSkillBubble(w.index, "회피!");
                 this.shakeWeapon(w.index, '#2eff7b', false, null, true);
-                if (this.callbacks.onTriggerRollAnimation) this.callbacks.onTriggerRollAnimation(w.index);
+                this.presentHunterImpact(w.index, 'dodge');
                 w.rollDuration = 6;
             } else {
                 this.applyHunterInterference(

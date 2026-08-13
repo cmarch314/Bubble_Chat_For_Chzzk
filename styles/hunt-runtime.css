@@ -2236,8 +2236,6 @@
 @keyframes hunter-target-dust-wave{0%{opacity:0;transform:translateX(-8px) scale(.45)}20%{opacity:.95}100%{opacity:0;transform:translateX(46px) scale(1.18)}}
 @keyframes monster-part-swing-sketch{0%{opacity:0;clip-path:inset(48% 0 48% 94%);transform:rotate(-5deg) scale(.94)}24%{opacity:.92;clip-path:inset(4% 0 4% 12%);transform:rotate(1deg) scale(1)}58%{opacity:.78;clip-path:inset(0);transform:rotate(0) scale(1.025)}100%{opacity:0;clip-path:inset(0);transform:rotate(1deg) scale(1.03)}}
 
-.monster-uppercut-launched { animation:monster-uppercut-launched var(--monster-uppercut-launch-duration,2.8s) cubic-bezier(.18,.8,.2,1) both !important; }
-@keyframes monster-uppercut-launched { 0%,100%{transform:none} 57%{transform:translateY(-105px) scale(1.05)} 70%{transform:translateY(-86px)} 88%{transform:translateY(12px)} }
 .hunter-interference-active .game-hunt-weapon-img {
     animation:hunter-interference-wobble .42s ease-in-out infinite alternate !important;
 }
@@ -3530,8 +3528,6 @@
 @keyframes monster-signature-ultimate { 0%{transform:scale(1)} 22%{transform:scale(.72) translateY(-35px);filter:brightness(.35)} 46%{transform:scale(1.35) translateY(50px);filter:brightness(2.2) drop-shadow(0 0 30px var(--fx-color,#ffb020))} 100%{transform:scale(1);filter:none} }
 @keyframes monster-ultimate-board-shake { 0%,100%{transform:translate(0)} 25%{transform:translate(-8px,5px)} 50%{transform:translate(7px,-5px)} 75%{transform:translate(-5px,-3px)} }
 
-.element-impact-shake { animation: element-impact-card-shake .44s cubic-bezier(.2,.8,.25,1) both !important; }
-
 @keyframes monster-element-wash {
     0% { opacity: 0; }
     18% { opacity: 1; }
@@ -3601,14 +3597,6 @@
     20% { opacity: 1; }
     100% { transform: translate(calc(var(--p-x) - 50%), calc(var(--p-dy) + var(--p-y) - 50%)) rotate(260deg) scale(.2); opacity: 0; }
 }
-@keyframes element-impact-card-shake {
-    0%, 100% { transform: translate(0); filter: brightness(1); }
-    20% { transform: translate(-8px, 4px) rotate(-.6deg); filter: brightness(1.8); }
-    42% { transform: translate(7px, -5px) rotate(.5deg); }
-    64% { transform: translate(-4px, 2px); }
-    82% { transform: translate(3px, -1px); }
-}
-
 @media (prefers-reduced-motion: reduce) {
     .monster-element-fx.delivery-projectile.is-playing .monster-element-projectile {
         animation: monster-element-projectile-reduced .48s ease-out calc(var(--fx-delay) + 60ms) both !important;
