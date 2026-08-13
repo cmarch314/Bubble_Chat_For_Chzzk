@@ -1181,6 +1181,21 @@ class HuntEffect extends BaseEffect {
             }
         });
         this.engine = this.combatRuntime.engine;
+        this.combatPresenter = new HuntCombatPresenter({
+            renderer: this.renderer,
+            audio: this.audioManager,
+            getHunters: () => this.selectedWeapons,
+            getEngine: () => this.engine,
+            hooks: {
+                onLog: (text, color) => this.addCombatLog(text, color),
+                onCart: carts => { this.cartCount = carts; },
+                onGameEnd: (victory, winner) => this.endGame(container, victory, winner),
+                onNextConsecutive: () => this.spawnNextConsecutiveMonster(container)
+            }
+        });
+        // Replace the constructor-time compatibility object immediately. From
+        // this point OBS and Preview receive the same presentation callbacks.
+        this.engine.callbacks = this.combatPresenter.callbacks();
         if (this.engine.sharedSupply) this.selectedWeapons.forEach(hunter =>
             this.renderer.updateHunterItemUI(hunter, this.engine.sharedSupply));
         this.selectedWeapons.forEach(hunter => {

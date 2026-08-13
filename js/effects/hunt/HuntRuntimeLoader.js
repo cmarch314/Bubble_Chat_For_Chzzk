@@ -91,6 +91,7 @@ const HUNT_RUNTIME_SCRIPT_PATHS = Object.freeze([
     'js/effects/hunt/HuntEngine.js',
     'js/effects/hunt/HuntCombatClock.js',
     'js/effects/hunt/HuntCombatRuntime.js',
+    'js/effects/hunt/HuntCombatPresenter.js',
     'js/effects/hunt/HuntMonsterAnimationCatalog.js',
     'js/effects/hunt/HuntMonsterFacingChoreography.js',
     'js/effects/hunt/HuntStageAnchors.js',
