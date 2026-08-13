@@ -22,6 +22,7 @@ const commands = [
     ['node', ['tests/hunt-diablos-golden-beat-trace.test.js']],
     ['node', ['tests/hunt-monster-kit-contract.test.js']],
     ['node', ['tests/create-monster-kit.test.js']],
+    ['node', ['tests/hunt-rath-family-rebuild-plan.test.js']],
     ['node', ['tests/hunt-profile-motion-migration.test.js']]
 ];
 
