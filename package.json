@@ -33,6 +33,7 @@
     "gate:hunt-expansion": "node scripts/gate-hunt-expansion.js",
     "gate:hunt-expansion:full": "node scripts/gate-hunt-expansion.js --full",
     "build:hunt-audio": "node scripts/build-local-mh-audio.js",
+    "create:monster-kit": "node scripts/create-monster-kit.js",
     "build:world-dedicated-bgm": "node scripts/extract-world-dedicated-bgm.js",
     "inspect:world-monster-audio": "node scripts/extract-world-monster-audio-graph.js",
     "review:monster-audio": "node tools/monster-audio-review-server.js",
