@@ -656,15 +656,18 @@ class HuntEngine {
     }
 
     applyHunterInterference(hunter, kind, size = 'small') {
-        if (!hunter || hunter.status !== 'alive') return false;
+        if (!hunter || !['alive', 'stunned'].includes(hunter.status)) return false;
+        const alreadyStunned = hunter.status === 'stunned';
         // A hunter already tumbling is invulnerable to follow-up judgments and
         // keeps that presentation until returning. Do not cover the tumble with
         // an earplug/tremor/wind badge while leaving its hidden immunity alive.
-        if (Number(hunter.hitDuration || 0) > 0) return false;
+        // Stun is deliberately vulnerable, however; a stale overlapping tumble
+        // timer must not turn KO into immunity against roar/tremor/wind.
+        if (!alreadyStunned && Number(hunter.hitDuration || 0) > 0) return false;
         // Damage and control judgments share the same post-counter immunity.
         // A delayed tremor must not bypass the counter that answered the
         // preceding direct impact.
-        if (Number(hunter.counterInvulnerabilityTicks || 0) > 0
+        if (!alreadyStunned && Number(hunter.counterInvulnerabilityTicks || 0) > 0
             && !(typeof HuntMonsterTurnExecutor !== 'undefined'
                 && HuntMonsterTurnExecutor.hasFreshCounterAttempt?.(hunter))) return false;
         const pattern = { name: kind === 'tremor' ? '지진' : kind === 'wind' ? '풍압' : '포효', type: kind };
@@ -675,7 +678,7 @@ class HuntEngine {
             return false;
         }
         let foresightFailed = false;
-        if (!hunter.pendingSharpnessRestore
+        if (!alreadyStunned && !hunter.pendingSharpnessRestore
             && hunter.id === 'long_sword'
             && typeof HuntMonsterTurnExecutor !== 'undefined') {
             const foresight = HuntMonsterTurnExecutor.resolveLongSwordForesight(this, hunter, 0, {
@@ -697,7 +700,7 @@ class HuntEngine {
                 HuntMonsterTurnExecutor.clearCounterInvulnerability?.(hunter);
             }
         }
-        if (!foresightFailed) {
+        if (!alreadyStunned && !foresightFailed) {
             const actionAllowsGuard = !this.actionStateMachine || this.actionStateMachine.canGuard(hunter);
             const isGreatSwordCharging = typeof HuntMonsterTurnExecutor !== 'undefined'
                 ? HuntMonsterTurnExecutor.isGreatSwordCharging(hunter)
