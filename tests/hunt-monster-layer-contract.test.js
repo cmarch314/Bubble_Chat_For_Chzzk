@@ -46,11 +46,16 @@ function layerOrder(source) {
 
 const sources = {
     'HuntRenderer.js': read('js', 'effects', 'hunt', 'HuntRenderer.js'),
-    'hunt-monster-pattern-lab.html': read('tests', 'fixtures', 'hunt-monster-pattern-lab.html'),
     'hunt-rathalos-preview.html': read('tests', 'fixtures', 'hunt-rathalos-preview.html'),
     'hunt-rathian-preview.html': read('tests', 'fixtures', 'hunt-rathian-preview.html'),
     'hunt-world-flying-wyverns-preview.html': read('tests', 'fixtures', 'hunt-world-flying-wyverns-preview.html')
 };
+
+const patternLab = read('tests', 'fixtures', 'hunt-monster-pattern-lab.html');
+assert.match(patternLab, /new HuntRenderer\(/,
+    'the pattern lab must inherit the production layer order from HuntRenderer');
+assert.doesNotMatch(patternLab, /class="[^\"]*hunt-monster-(?:attack-motion|pose-layer|aim-layer|facing-layer)/,
+    'the pattern lab must not duplicate the production monster layer markup');
 
 for (const [name, source] of Object.entries(sources)) {
     const order = layerOrder(source);

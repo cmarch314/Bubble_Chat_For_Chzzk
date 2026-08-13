@@ -53,26 +53,28 @@ assert.doesNotMatch(html,
     'Preview must not schedule a second audio/impact timeline beside the BEAT engine');
 assert.match(html, /onMonsterProjectileLaunchAudio=.*playProjectileLaunch/,
     'the pattern lab must reproduce projectile launch audio callbacks');
-assert.match(html, /\.lab-controls\{position:fixed;z-index:2147483647;/,
-    'the inspection console must float in its own top layer without changing combat geometry');
-assert.match(html, /backdrop-filter:blur\(6px\);[^}]*opacity:\.76/,
-    'the floating inspection console must remain translucent over the production scene');
-assert.match(html, /function renderCombatChrome\(\)/);
-assert.match(html, /class="hunt-monster-vitals lab-vitals"/,
-    'the preview must include the production monster HP and ATB structure');
-assert.match(html, /class="hunt-monster-aux-rail lab-aux"/,
-    'the preview must include the production parts, cart, and timer rails');
-assert.match(html, /class="hunt-hunter-heading"/);
-assert.match(html, /class="hunt-atb-row"/);
-assert.match(html, /class="hunt-item-list"/);
-assert.match(html, /class="game-hunt-weapon-name"/,
-    'preview hunter cards must preserve production combat-card information order');
+assert.match(html, /id="preview-editor-tools"/,
+    'design gizmos may add an overlay but must not restyle the production combat board');
+assert.doesNotMatch(html, /id="lab-preview-overrides"/,
+    'the retired Preview-only combat layout stylesheet must not survive');
+assert.match(html, /new HuntRenderer\(/,
+    'Preview must mount the production combat renderer itself');
+assert.match(html, /previewRenderer\.renderFight\(\{/,
+    'Preview combat markup must come from HuntRenderer.renderFight');
+assert.doesNotMatch(html, /function renderCombatChrome\(\)/,
+    'the retired hand-written combat-board clone must not survive');
+assert.doesNotMatch(html, /const previewRenderer=\{/,
+    'Preview must not maintain a hand-written renderer facade');
+for (const productionScript of ['HuntNotificationRenderer.js', 'HuntRenderer.js']) {
+    assert.match(html, new RegExp(productionScript.replace(/\./g, '\\.')),
+        `${productionScript} must be loaded by the embedded real-hunt Preview`);
+}
 // 레이어 순서(placement > pose > aim > facing > image)는
 // tests/hunt-monster-layer-contract.test.js가 실수렵 마크업과 직접 대조한다.
 // 여기서 정규식으로 한 번 더 적으면 레이어가 늘 때마다 두 곳을 고쳐야 하고,
 // 한쪽을 잊으면 "검수 화면과 실제 화면이 다르다"가 다시 생긴다.
-assert.match(html, /class="hunt-monster-pose-layer"/,
-    'the preview must carry the production pose layer');
+assert.match(html, /id="preview-overlay" class="game-overlay-container"/,
+    'the production renderer must receive the same overlay/card ownership shape as live combat');
 
 // ---- 부위 파괴는 상태와 나란히 실험할 수 있어야 한다 ----
 //
