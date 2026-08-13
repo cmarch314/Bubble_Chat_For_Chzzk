@@ -6,7 +6,29 @@ const path = require('path');
 const vm = require('vm');
 const HuntMonsterTurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
 const HuntCombatAnimator = require('../js/effects/hunt/HuntCombatAnimator.js');
+const HuntMonsterAttackAnimator = require('../js/effects/hunt/HuntMonsterAttackAnimator.js');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
+
+assert.strictEqual(HuntMonsterAttackAnimator.hunterReactionForAttackResult('hit'), 'hit');
+for (const result of ['guard', 'perfect-guard', 'counter']) {
+    assert.strictEqual(HuntMonsterAttackAnimator.hunterReactionForAttackResult(result), 'guard');
+}
+for (const result of ['invulnerable', 'pending', 'dodge', 'miss', 'resist', 'effect', undefined]) {
+    assert.strictEqual(HuntMonsterAttackAnimator.hunterReactionForAttackResult(result), null,
+        `${String(result)} must never be presented as a hunter hit`);
+}
+{
+    const weaponCard = { dataset: { hunterHitReactionActive: 'true' } };
+    const animator = Object.create(HuntCombatAnimator.prototype);
+    animator.owner = { card: { querySelector: () => weaponCard } };
+    animator.triggerHunterInterference = () => {
+        throw new Error('an active tumble must return before restarting presentation');
+    };
+    assert.doesNotThrow(() => animator.triggerHitAnimation(0, {
+        hp: 50,
+        hitDuration: 12
+    }, { kind: 'strong' }));
+}
 
 const rightDownKnockback = HuntCombatAnimator.knockbackVectorFromRects(
     { left: 100, top: 100, width: 100, height: 100 },
@@ -318,6 +340,9 @@ assert.match(combatAnimatorSource,
 assert.match(combatAnimatorSource,
     /triggerHitAnimation\(idx, w, reaction = \{\}\)[\s\S]*?classList\.remove\('hunter-interference-active', 'roar-stunned'\)[\s\S]*?hunter-interference-overlay/,
     'a damaging hit must synchronously remove tremor, wind, and roar CSS before starting knockback');
+assert.match(combatAnimatorSource,
+    /hunterHitReactionActive === 'true'[\s\S]*?Number\(w\.hitDuration \|\| 0\) > 0\) return/,
+    'duplicate visual callbacks must not restart an active hunter tumble');
 assert.match(combatAnimatorSource,
     /cancelHitAnimation\(idx\)[\s\S]*?this\.cancelWeaponAnimation\(layer\)/,
     'hit recovery cleanup must cancel the owned WAAPI reaction before restoring the home pose');

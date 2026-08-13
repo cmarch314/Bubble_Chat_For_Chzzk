@@ -44,6 +44,9 @@ class HuntCombatAnimator {
             container.style.removeProperty('filter');
             container.style.removeProperty('opacity');
         });
+        this.card.querySelectorAll('[id^="fight-card-"]').forEach(weaponCard => {
+            delete weaponCard.dataset.hunterHitReactionActive;
+        });
         this.card.querySelectorAll('.hunt-split-shield').forEach(shieldImg => {
             this.cancelWeaponAnimation(shieldImg);
             shieldImg.style.removeProperty('transform');
@@ -426,16 +429,22 @@ class HuntCombatAnimator {
 
     triggerHitAnimation(idx, w, reaction = {}) {
         if (!this.card || !w || w.hp <= 0) return;
+        const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
+        if (!weaponCard) return;
+        // Runtime impact commits are authoritative, but keep the renderer
+        // idempotent too. A stale/speculative callback must never restart the
+        // tumble while the same hunter is still inside hit recovery.
+        if (weaponCard.dataset.hunterHitReactionActive === 'true'
+            && Number(w.hitDuration || 0) > 0) return;
         // A damaging hit replaces roar, tremor, and wind-pressure presentation.
         // Keep this defensive cleanup even when the runtime callback arrives late.
         this.triggerHunterInterference(idx, '', '', false);
         this.interruptWeaponVisual(idx, w);
         this.cancelHitAnimation(idx);
-        const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         const weaponLayers = weaponCard?.querySelectorAll(
             '.game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
         ) || [];
-        if (!weaponCard) return;
+        weaponCard.dataset.hunterHitReactionActive = 'true';
 
         // Interference used a CSS animation with !important. Remove its DOM
         // ownership synchronously as well as clearing the runtime state above,
@@ -535,6 +544,7 @@ class HuntCombatAnimator {
     cancelHitAnimation(idx) {
         const weaponCard = this.card?.querySelector?.(`#fight-card-${idx}`);
         if (!weaponCard) return;
+        delete weaponCard.dataset.hunterHitReactionActive;
         weaponCard.classList.remove('hunter-card-large-shake', 'hunter-card-small-shake',
             'hunter-card-hit-shake', 'hunter-card-guard-shake');
         weaponCard.querySelectorAll(

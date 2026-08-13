@@ -53,6 +53,17 @@ class HuntMonsterAttackAnimator {
         return Math.max(0, Math.round(Number(impactTicks || 0) * tickMs - visualTravelMs));
     }
 
+    static hunterReactionForAttackResult(result) {
+        // Monster motion is started before delayed judgments resolve, so live
+        // attacks arrive here with `pending`.  Never turn an unknown/non-hit
+        // result into a hunter reaction: the turn executor is the sole owner of
+        // committed hit/guard animations.  This also keeps invulnerable combo
+        // follow-ups from visually hitting an already tumbling hunter.
+        if (result === 'hit') return 'hit';
+        if (['guard', 'perfect-guard', 'counter'].includes(result)) return 'guard';
+        return null;
+    }
+
     static tigrexRouteDirections(points = [], exits = []) {
         let previousDirection = -1;
         return points.map((point, index) => {
@@ -1911,9 +1922,10 @@ class HuntMonsterAttackAnimator {
                 indices.forEach(index => {
                     const card = this.card?.querySelector(`#fight-card-${index}`);
                     const result = resultByIndex.get(Number(index));
-                    if (!card || result === 'dodge') return;
+                    const reaction = HuntMonsterAttackAnimator.hunterReactionForAttackResult(result);
+                    if (!card || !reaction) return;
                     if (!hasDirectDamage && pattern?.interference?.kind) return;
-                    const guarded = ['guard', 'perfect-guard', 'counter'].includes(result);
+                    const guarded = reaction === 'guard';
                     const className = guarded
                         ? 'hunter-card-guard-shake' : 'hunter-card-hit-shake';
                     card.classList.remove('hunter-card-hit-shake', 'hunter-card-guard-shake');
@@ -2013,7 +2025,7 @@ class HuntMonsterAttackAnimator {
         };
         const shakeTargets = pass => {
             strikeTargets(pass).forEach(target => {
-                if (target.result === 'dodge') return;
+                if (HuntMonsterAttackAnimator.hunterReactionForAttackResult(target.result) !== 'hit') return;
                 const hitCard = this.card?.querySelector(`#fight-card-${target.index}`);
                 if (!hitCard) return;
                 hitCard.classList.remove('element-impact-shake');
@@ -2398,6 +2410,7 @@ class HuntMonsterAttackAnimator {
         const theme = this.getElementalTheme(attackName, pattern);
         const delivery = this.getBreathDelivery(attackName, pattern);
         const isDodge = target.result === 'dodge';
+        const isConfirmedHit = HuntMonsterAttackAnimator.hunterReactionForAttackResult(target.result) === 'hit';
         const isBreath = /브레스|레이저|수류|분사|방출|화염구/.test(attackName);
         const isUltimate = /겁염|절대영도|대재앙|혜성|초폭|대폭발|에스카톤|황도|슈퍼노바|헬 플레어/.test(attackName);
         const travelScale = isDodge ? 1.32 : 1;
@@ -2495,7 +2508,7 @@ class HuntMonsterAttackAnimator {
         fx.classList.add('is-playing');
         this.animationTimers.timeout(() => fx.remove(), isUltimate ? 1800 : 1400);
 
-        if (!isDodge) {
+        if (isConfirmedHit) {
             this.animationTimers.timeout(() => {
                 if (!this.card) return;
                 targetCard.classList.remove('element-impact-shake');
@@ -2938,7 +2951,8 @@ class HuntMonsterAttackAnimator {
                 this.card.classList.add('hunt-valstrax-impact');
                 targets.forEach(target => {
                     const hitCard = this.card.querySelector(`#fight-card-${target.index}`);
-                    if (!hitCard || target.result === 'dodge') return;
+                    if (!hitCard
+                        || HuntMonsterAttackAnimator.hunterReactionForAttackResult(target.result) !== 'hit') return;
                     hitCard.classList.remove('element-impact-shake');
                     void hitCard.offsetWidth;
                     hitCard.classList.add('element-impact-shake');
