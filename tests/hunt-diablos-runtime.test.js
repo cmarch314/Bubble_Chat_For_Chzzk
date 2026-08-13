@@ -21,6 +21,9 @@ assert.match(animatorSource,
     /createTargetImpactDustEffect\(targetCard,[\s\S]*?fxStage[\s\S]*?weaponRect[\s\S]*?fxStage\.appendChild\(dust\)/,
     'target impact dust must use the live weapon centre while living in the combat-board top FX layer');
 assert.match(animatorSource,
+    /addCssTrack\(facingLayer, 'facing', facingFrames, 'steps\(1,end\)'\)/,
+    'BEAT facing must use the dependable scoped CSS track in Preview and embedded Chromium');
+assert.match(animatorSource,
     /resolvedImpactTargets\.length \? resolvedImpactTargets : fallbackTargetIndices/,
     'target impact dust must cover every hunter struck by a shared impact tick');
 assert.doesNotMatch(animatorSource, /owner\.playSFX\?\.\('monster_attack'/,
@@ -384,6 +387,11 @@ assert.deepStrictEqual(
         ['tail-cross-one', 0, 0, -6, 202],
         ['tail-cross-two', 0, 0, 6, 158]
     ], 'the two tail contacts must cross around the flipped torso without translating the monster');
+    assert.deepStrictEqual(
+        rageCharge.motion.filter(beat => beat.flipFacing).map(beat => beat.beat),
+        ['tail-wind-right', 'return'],
+        'the second X swing must mirror from its windup through recovery, then restore while returning home'
+    );
     assert.ok(rageCharge.motion.filter(beat => beat.beat.startsWith('tail-'))
         .every(beat => beat.origin === 'part:torso'),
     'the flipped follow-up must pivot around the torso instead of reusing the unflipped tail coordinates');

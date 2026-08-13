@@ -885,6 +885,40 @@ class HuntMonsterAttackAnimator {
             poseLayer.animate?.(poseFrames, timing)
         ].filter(Boolean);
 
+        // Facing is deliberately CSS-backed even when placement/pose use WAAPI.
+        // Some OBS/embedded Chromium builds expose Element.animate() and return
+        // Animation objects, but silently fail to composite a transform on the
+        // nested facing layer. That left authored flipFacing beats visible in
+        // data while both X-tail contacts rendered with the same orientation.
+        // A scoped CSS track also gives playback and scrubbing one dependable
+        // direction source across Preview and live hunts.
+        let cssStyle = null;
+        const cssTracks = [];
+        const generation = this.motionGeneration + 1;
+        const declarations = frame => [
+            frame.transform != null ? `transform:${frame.transform}` : '',
+            frame.opacity != null ? `opacity:${frame.opacity}` : '',
+            frame.filter != null ? `filter:${frame.filter}` : '',
+            frame.transformOrigin != null ? `transform-origin:${frame.transformOrigin}` : '',
+            frame.easing ? `animation-timing-function:${frame.easing}` : ''
+        ].filter(Boolean).join(';');
+        const addCssTrack = (element, suffix, frames, easing = 'linear') => {
+            if (!element || !frames.length) return;
+            if (!cssStyle) {
+                cssStyle = document.createElement('style');
+                cssStyle.dataset.monsterBeatFallback = String(generation);
+                (document.head || document.documentElement).appendChild(cssStyle);
+            }
+            const name = `monster-beat-${generation}-${suffix}`;
+            const keyframes = frames.map(frame =>
+                `${(Math.max(0, Math.min(1, Number(frame.offset) || 0)) * 100).toFixed(4)}%{${declarations(frame)}}`
+            ).join('');
+            cssStyle.textContent += `@keyframes ${name}{${keyframes}}`;
+            element.style.setProperty('animation',
+                `${name} ${built.durationMs}ms ${easing} both`, 'important');
+            cssTracks.push({ element, name });
+        };
+
         const facingLayer = this.resolveFacingLayer(monsterImg);
         let facingFrames = [];
         if (facingLayer && built.facingActive) {
@@ -892,49 +926,31 @@ class HuntMonsterAttackAnimator {
             const flip = direction => (baseFacing === 'left'
                 ? (direction < 0 ? 1 : -1)
                 : (direction > 0 ? 1 : -1));
-            const facingSteps = built.facing.length === 1
-                ? [{ ...built.facing[0], offset: 0 }, { ...built.facing[0], offset: 1 }]
-                : built.facing;
+            const authoredSteps = built.facing;
+            const facingSteps = authoredSteps.length
+                ? [
+                    ...(authoredSteps[0].offset > 0 ? [{ ...authoredSteps[0], offset: 0 }] : []),
+                    ...authoredSteps,
+                    ...(authoredSteps.at(-1).offset < 1
+                        ? [{ ...authoredSteps.at(-1), offset: 1 }] : [])
+                ]
+                : [];
             facingFrames = facingSteps.map(step => ({
                 offset: step.offset, transform: `scaleX(${flip(step.direction)})`
             }));
-            const animation = facingLayer.animate?.(facingFrames,
-                { duration: built.durationMs, easing: 'step-end', fill: 'both' });
-            if (animation) animations.push(animation);
+            addCssTrack(facingLayer, 'facing', facingFrames, 'steps(1,end)');
         }
 
         // OBS/WebView builds can expose neither Element.animate nor Animation.
         // Silently optional-chaining animate() used to leave a valid BEAT graph
         // with zero moving tracks. Compile the same frames into scoped CSS so
         // playback, pause and timeline seeking retain one authoritative graph.
-        let cssStyle = null;
-        const cssTracks = [];
         if (!animations.length) {
-            const generation = this.motionGeneration + 1;
-            const declarations = frame => [
-                frame.transform != null ? `transform:${frame.transform}` : '',
-                frame.opacity != null ? `opacity:${frame.opacity}` : '',
-                frame.filter != null ? `filter:${frame.filter}` : '',
-                frame.transformOrigin != null ? `transform-origin:${frame.transformOrigin}` : '',
-                frame.easing ? `animation-timing-function:${frame.easing}` : ''
-            ].filter(Boolean).join(';');
-            const addTrack = (element, suffix, frames) => {
-                if (!element || !frames.length) return;
-                const name = `monster-beat-${generation}-${suffix}`;
-                const keyframes = frames.map(frame =>
-                    `${(Math.max(0, Math.min(1, Number(frame.offset) || 0)) * 100).toFixed(4)}%{${declarations(frame)}}`
-                ).join('');
-                cssStyle.textContent += `@keyframes ${name}{${keyframes}}`;
-                element.style.setProperty('animation', `${name} ${built.durationMs}ms linear both`, 'important');
-                cssTracks.push({ element, name });
-            };
-            cssStyle = document.createElement('style');
-            cssStyle.dataset.monsterBeatFallback = String(generation);
-            (document.head || document.documentElement).appendChild(cssStyle);
             motionElement.dataset.monsterBeatBackend = 'css-fallback';
-            addTrack(motionElement, 'placement', built.placement);
-            addTrack(poseLayer, 'pose', poseFrames);
-            addTrack(facingLayer, 'facing', facingFrames);
+            addCssTrack(motionElement, 'placement', built.placement);
+            addCssTrack(poseLayer, 'pose', poseFrames);
+        } else if (facingFrames.length) {
+            motionElement.dataset.monsterBeatBackend = 'waapi+css-facing';
         }
 
         // 검수 화면이 비트 구간과 접촉 시점을 그대로 읽을 수 있게 남긴다.
