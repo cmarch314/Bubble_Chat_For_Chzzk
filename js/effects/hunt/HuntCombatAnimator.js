@@ -624,9 +624,9 @@ class HuntCombatAnimator {
         }
         if (weaponContainer) {
             this.cancelWeaponAnimation(weaponContainer);
-            weaponContainer.style.removeProperty('transform');
-            weaponContainer.style.removeProperty('filter');
-            weaponContainer.style.removeProperty('opacity');
+            weaponContainer.style?.removeProperty?.('transform');
+            weaponContainer.style?.removeProperty?.('filter');
+            weaponContainer.style?.removeProperty?.('opacity');
         }
         if (['great_sword', 'hammer'].includes(w?.id)) {
             if (weaponContainer?.dataset) delete weaponContainer.dataset.weaponChargeReleaseStage;

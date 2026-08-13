@@ -11,6 +11,7 @@ const monsterGeometryChoreography = read('js/effects/hunt/HuntMonsterGeometryCho
 const renderer = read('js/effects/hunt/HuntRenderer.js');
 const engine = read('js/effects/hunt/HuntEngine.js');
 const effect = read('js/effects/HuntEffect.js');
+const presenter = read('js/effects/hunt/HuntCombatPresenter.js');
 const hunterTurns = read('js/effects/hunt/HuntHunterTurnExecutor.js');
 const tactics = read('js/effects/hunt/HuntChatTactics.js');
 const perks = read('js/effects/hunt/HuntPerkRuntime.js');
@@ -122,8 +123,9 @@ assert.doesNotMatch(animator,
 assert.match(renderer,
     /triggerEnvironmentEffect\(kind,\s*hunterIndex\s*=\s*null,\s*details\s*=\s*null\).*combatAnimator\.triggerEnvironmentEffect\(kind,\s*hunterIndex,\s*details\)/s);
 assert.match(engine, /onTriggerEnvironmentEffect/);
-assert.match(effect,
-    /onTriggerEnvironmentEffect:\s*\(kind,\s*hunterIndex,\s*details\).*renderer\.triggerEnvironmentEffect\(kind,\s*hunterIndex,\s*details\)/s);
+assert.match(presenter,
+    /onTriggerEnvironmentEffect:\s*\(\.\.\.args\)\s*=>\s*renderer\?\.triggerEnvironmentEffect\?\.\(\.\.\.args\)/s,
+    'environment presentation must remain owned by the combat presenter renderer bridge');
 assert.match(hunterTurns, /triggerEnvironmentEffect\('pitfall'/);
 assert.match(hunterTurns, /triggerEnvironmentEffect\('flash'/);
 assert.match(animator, /'pitfall', 'pitfall-pending', 'rockfall', 'flash', 'bomb'/,

@@ -120,18 +120,16 @@ Report any required check that fails or is skipped.
 
 ## 11. Self-Maintaining Rules
 
-Update this file when an owner/lifecycle/command/directory boundary changes, a failure class repeats, or an expensive discovery would be lost.
-
-Each rule names trigger, owner/action, and verification. Merge near related rules, revise stale text, keep under 16 KiB UTF-8 without BOM with unique headings, and prefer tests over prose.
+Update this file when ownership changes, a failure repeats, or costly discovery would be lost. Name trigger, owner/action, verification; merge stale rules; keep under 16 KiB UTF-8 without BOM; prefer tests.
 
 ## 12. Concurrent Agent Coordination
 
-Codex, Claude, and Antigravity share this working directory. Assume another agent may edit files, commit, push, or run servers at any moment.
+Codex, Claude, and Antigravity share this directory; assume concurrent edits, commits, pushes, and servers.
 
-- Isolation first: one agent works on one branch, ideally its own `git worktree`. Never share a live working branch, and never commit onto a branch another agent is actively editing.
-- Never absorb foreign work: before committing, read `git status` and stage only the files you changed for this task, by explicit path. Never `git add -A`, `git add -u`, or `git commit -a`. Never commit another agent's uncommitted changes, generated churn (`js/audio-levels.generated.js`, `js/audio-gains.runtime.js`), build artifacts (`__pycache__/`, `*.pyc`), or `scratch/`.
+- Isolation first: one agent per branch/worktree; never share a live branch or commit onto one another agent edits.
+- Never absorb foreign work: check `git status`; stage explicit owned paths only. Never `git add -A/-u`, `commit -a`, foreign changes, generated churn, build artifacts, or `scratch/`.
 - Honest scoped commits: one logical change per commit; the message states only what actually changed and was verified. Never claim work that is empty, unverified, or another agent's.
-- Commit every completed task: after verification, stage only the files owned by that task and create one scoped commit whose message summarizes the completed work. Report that summary and commit hash in the handoff. If the user explicitly forbids committing, leave the changes uncommitted and say so.
+- Commit each verified task with owned files only; report summary/hash. If forbidden, leave changes uncommitted and say so.
 - Integrate, don't clobber: pull/rebase onto the shared branch before pushing; if a file changed under you, re-read and merge rather than overwrite. Resolve conflicts; never force-push a shared branch.
 - Regenerate, don't hand-merge: `*.generated.js` and route/label JSON come from their scripts (`generate:*`, `apply:*`). Regenerate deterministically after data changes; never hand-edit or manually merge generated output.
 - Runtime resources: dev and review servers must pass an agent-specific `--port`; never assume the default port is free, and never kill a process you did not start.

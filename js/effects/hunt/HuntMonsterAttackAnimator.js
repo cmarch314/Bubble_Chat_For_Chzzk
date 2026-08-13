@@ -927,11 +927,16 @@ class HuntMonsterAttackAnimator {
                 ? (direction < 0 ? 1 : -1)
                 : (direction > 0 ? 1 : -1));
             const authoredSteps = built.facing;
+            // A single authored facing step is still a full-duration pose.
+            // Keep an explicit terminal frame so the CSS fallback cannot
+            // restore the base sprite direction before the BEAT completes.
+            const singleFacingHold = built.facing.length === 1
+                && authoredSteps[0]?.offset < 1;
             const facingSteps = authoredSteps.length
                 ? [
                     ...(authoredSteps[0].offset > 0 ? [{ ...authoredSteps[0], offset: 0 }] : []),
                     ...authoredSteps,
-                    ...(authoredSteps.at(-1).offset < 1
+                    ...(singleFacingHold || authoredSteps.at(-1).offset < 1
                         ? [{ ...authoredSteps.at(-1), offset: 1 }] : [])
                 ]
                 : [];

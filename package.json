@@ -30,6 +30,8 @@
     "audit:hunt-monster-inventory": "node scripts/audit-monster-pattern-semantics.js --all",
     "audit:hunt-sfx": "node scripts/build-hunt-sfx-migration.js",
     "audit:hunt-weapon-audio": "node scripts/audit-hunt-weapon-audio-precision.js",
+    "gate:hunt-expansion": "node scripts/gate-hunt-expansion.js",
+    "gate:hunt-expansion:full": "node scripts/gate-hunt-expansion.js --full",
     "build:hunt-audio": "node scripts/build-local-mh-audio.js",
     "build:world-dedicated-bgm": "node scripts/extract-world-dedicated-bgm.js",
     "inspect:world-monster-audio": "node scripts/extract-world-monster-audio-graph.js",
