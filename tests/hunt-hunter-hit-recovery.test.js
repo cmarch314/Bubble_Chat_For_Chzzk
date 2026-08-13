@@ -151,6 +151,13 @@ assert.strictEqual(
     1,
     'an authored incoming direction must throw the weapon in the opposite direction'
 );
+assert.strictEqual(
+    HuntMonsterTurnExecutor.hitReactionForPattern({
+        runtimeImpactHitReactionKind: 'strong', runtimeImpactHitRecoveryTicks: 1
+    }, { index: 3 }).durationTicks,
+    50,
+    'monster-authored timing must not override hunter-owned recovery duration'
+);
 assert.strictEqual(HuntMonsterTurnExecutor.isHunterHitRecovering({ hitDuration: 1 }), true);
 assert.strictEqual(
     HuntMonsterTurnExecutor.hunterImpactImmunityReason({ rollDuration: 3 }),

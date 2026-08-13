@@ -1926,8 +1926,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         // 화면 밖으로 빠졌다 되돌아오는 연출의 의미가 없어진다.
         targeting: { mode: 'independent-passes', passCount: 3, distinctPasses: true },
         impactTimeline: [
-            { atTicks: 22, targetMode: 'sequential', damageScale: 1, hitRecoveryTicks: 15, hitReactionKind: 'weak' },
-            { atTicks: 38, targetMode: 'sequential', damageScale: 0.92, hitRecoveryTicks: 15, hitReactionKind: 'weak' },
+            { atTicks: 22, targetMode: 'sequential', damageScale: 1, hitReactionKind: 'weak' },
+            { atTicks: 38, targetMode: 'sequential', damageScale: 0.92, hitReactionKind: 'weak' },
             { atTicks: 54, targetMode: 'sequential', damageScale: 0.92 }
         ],
         motion: [

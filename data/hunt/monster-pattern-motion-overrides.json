@@ -804,8 +804,7 @@
                 "target": "primary",
                 "offsetTicks": 5,
                 "damagePercent": 50,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ]
           },
@@ -892,8 +891,7 @@
                 "target": "primary",
                 "offsetTicks": 2,
                 "damagePercent": 60,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               },
               {
                 "id": "burrow-tremor",
@@ -973,8 +971,7 @@
                 "target": "primary",
                 "offsetTicks": 0,
                 "damagePercent": 45,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ],
             "fxAdditional": [
@@ -1049,8 +1046,7 @@
                 "target": "primary",
                 "offsetTicks": 0,
                 "damagePercent": 45,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ],
             "fxAdditional": [
@@ -1103,8 +1099,7 @@
                 "target": "primary",
                 "offsetTicks": 0,
                 "damagePercent": 45,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ],
             "fxAdditional": [
@@ -1163,8 +1158,7 @@
                 "target": "primary",
                 "offsetTicks": 0,
                 "damagePercent": 30,
-                "hitReactionKind": "butt-stumble",
-                "hitRecoveryTicks": 15
+                "hitReactionKind": "butt-stumble"
               }
             ]
           },
@@ -1219,8 +1213,7 @@
                 "target": "primary",
                 "offsetTicks": 0,
                 "damagePercent": 65,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ]
           },
@@ -1266,8 +1259,7 @@
                 "target": "pair",
                 "offsetTicks": 7,
                 "damagePercent": 60,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ],
             "hit": false
@@ -1314,8 +1306,7 @@
                 "target": "pair",
                 "offsetTicks": 7,
                 "damagePercent": 60,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ]
           },
@@ -1370,8 +1361,7 @@
                 "target": "pair-left",
                 "offsetTicks": 0,
                 "damagePercent": 30,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ]
           },
@@ -1429,8 +1419,7 @@
                 "target": "pair-right",
                 "offsetTicks": 0,
                 "damagePercent": 30,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ]
           },
@@ -1525,8 +1514,7 @@
                 "target": "primary-adjacent",
                 "offsetTicks": 6,
                 "damagePercent": 40,
-                "hitReactionKind": "strong",
-                "hitRecoveryTicks": 50
+                "hitReactionKind": "strong"
               }
             ]
           },

@@ -1051,10 +1051,6 @@ function savePatternMotion({ huntId, patternId, beats = null, reset = false }, o
                         if (['strong', 'butt-stumble', 'weak'].includes(item?.hitReactionKind)) {
                             result.hitReactionKind = item.hitReactionKind;
                         }
-                        if (Number.isFinite(Number(item?.hitRecoveryTicks))) {
-                            result.hitRecoveryTicks = Math.max(1, Math.min(600,
-                                Math.round(Number(item.hitRecoveryTicks))));
-                        }
                     }
                     else result.size = item?.size === 'small' ? 'small' : 'large';
                     if (item?.directHitSupersedes === true) result.directHitSupersedes = true;

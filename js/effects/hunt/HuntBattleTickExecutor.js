@@ -298,9 +298,6 @@ class HuntBattleTickExecutor {
                             runtimeImpactTargetIndices: resolvedEvent.targetIndices,
                             runtimeImpactEmpty: resolvedEvent.allowEmpty === true,
                             runtimeImpactDamageScale: Number(resolvedEvent.damageScale ?? 1),
-                            runtimeImpactHitRecoveryTicks: Number.isFinite(Number(resolvedEvent.hitRecoveryTicks))
-                                ? Math.max(1, Number(resolvedEvent.hitRecoveryTicks))
-                                : null,
                             runtimeImpactHitReactionKind: resolvedEvent.hitReactionKind || null,
                             runtimeImpactSecondaryInterference: resolvedEvent.secondaryInterference || null,
                             runtimeImpactAudioCue: resolvedEvent.audioCue || null,

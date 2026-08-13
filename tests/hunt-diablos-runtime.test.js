@@ -495,8 +495,8 @@ assert.ok(profiles.black_diablos.every(pattern =>
         'approved Diablos reactions must not be duplicated in legacy profile tags');
     assert.strictEqual(bite.impactTimeline[0].hitReactionKind, 'butt-stumble',
         'Diablos bite must preserve its Preview-authored reaction through the runtime catalog');
-    assert.strictEqual(bite.impactTimeline[0].hitRecoveryTicks, 15,
-        'Diablos bite must preserve its Preview-authored recovery through the runtime catalog');
+    assert.strictEqual(bite.impactTimeline[0].hitRecoveryTicks, undefined,
+        'Diablos impacts must not own hunter recovery timing');
     const sideTackle = profiles.diablos.find(pattern => pattern.id.endsWith('.side_tackle'));
     assert.strictEqual(sideTackle.motion.find(beat => beat.beat === 'side-hop').to,
         'pair-flank:targets 150',

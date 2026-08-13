@@ -1,5 +1,9 @@
 class HuntHunterTurnExecutor {
     static BASE_HIT_CHANCE = 0.90;
+
+    static hitReactionDurationTicks(kind = 'strong') {
+        return ['weak', 'butt-stumble'].includes(String(kind)) ? 15 : 50;
+    }
     static WHETSTONE_ITEM_VISUAL = Object.freeze({
         type: 'item',
         label: '숫돌',

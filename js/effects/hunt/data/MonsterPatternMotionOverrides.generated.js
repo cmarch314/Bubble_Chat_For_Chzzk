@@ -805,8 +805,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary",
               "offsetTicks": 5,
               "damagePercent": 50,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ]
         },
@@ -893,8 +892,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary",
               "offsetTicks": 2,
               "damagePercent": 60,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             },
             {
               "id": "burrow-tremor",
@@ -974,8 +972,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary",
               "offsetTicks": 0,
               "damagePercent": 45,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ],
           "fxAdditional": [
@@ -1050,8 +1047,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary",
               "offsetTicks": 0,
               "damagePercent": 45,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ],
           "fxAdditional": [
@@ -1104,8 +1100,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary",
               "offsetTicks": 0,
               "damagePercent": 45,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ],
           "fxAdditional": [
@@ -1164,8 +1159,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary",
               "offsetTicks": 0,
               "damagePercent": 30,
-              "hitReactionKind": "butt-stumble",
-              "hitRecoveryTicks": 15
+              "hitReactionKind": "butt-stumble"
             }
           ]
         },
@@ -1220,8 +1214,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary",
               "offsetTicks": 0,
               "damagePercent": 65,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ]
         },
@@ -1267,8 +1260,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "pair",
               "offsetTicks": 7,
               "damagePercent": 60,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ],
           "hit": false
@@ -1315,8 +1307,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "pair",
               "offsetTicks": 7,
               "damagePercent": 60,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ]
         },
@@ -1371,8 +1362,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "pair-left",
               "offsetTicks": 0,
               "damagePercent": 30,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ]
         },
@@ -1430,8 +1420,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "pair-right",
               "offsetTicks": 0,
               "damagePercent": 30,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ]
         },
@@ -1526,8 +1515,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary-adjacent",
               "offsetTicks": 6,
               "damagePercent": 40,
-              "hitReactionKind": "strong",
-              "hitRecoveryTicks": 50
+              "hitReactionKind": "strong"
             }
           ]
         },

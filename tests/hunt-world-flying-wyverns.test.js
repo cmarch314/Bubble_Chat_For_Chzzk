@@ -54,9 +54,9 @@ assert(profiles.nargacuga.some(pattern =>
     pattern.tags.includes('bleed') && pattern.tags.includes('ground-hazard')));
 const nargacugaTriple = profiles.nargacuga.find(pattern =>
     pattern.id === 'nargacuga.leaping_cutwing_triple');
-assert.deepStrictEqual(nargacugaTriple.impactTimeline.map(event => event.hitRecoveryTicks ?? 40),
-    [15, 15, 40],
-    'Nargacuga triple rush must let a hunter recover before a returning third pass');
+assert.deepStrictEqual(nargacugaTriple.impactTimeline.map(event => event.hitReactionKind ?? 'strong'),
+    ['weak', 'weak', 'strong'],
+    'Nargacuga triple rush must author reaction classes without owning hunter recovery ticks');
 const nargacugaAmbush = profiles.nargacuga.find(pattern =>
     pattern.id === 'nargacuga.leaping_cutwing');
 const ambushReappear = nargacugaAmbush.motion.find(beat => beat.beat === 'reappear');
@@ -97,13 +97,13 @@ assert.strictEqual(tailImpactBeat.scaleX, tailAimBeat.scaleX,
     'Nargacuga spiked tail must not contract sideways at impact');
 const MonsterTurns = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
 assert.strictEqual(MonsterTurns.hitReactionForPattern({
-    tags: ['strong'], runtimeImpactHitRecoveryTicks: 15, runtimeImpactHitReactionKind: 'weak'
+    tags: ['strong'], runtimeImpactHitRecoveryTicks: 99, runtimeImpactHitReactionKind: 'weak'
 }).durationTicks, 15,
-    'per-impact recovery metadata must override the parent strong pattern');
+    'hunter-owned recovery must follow reaction class and ignore monster recovery metadata');
 const battleTickSource = fs.readFileSync(
     path.resolve(__dirname, '../js/effects/hunt/HuntBattleTickExecutor.js'), 'utf8');
-assert.match(battleTickSource, /runtimeImpactHitRecoveryTicks:[\s\S]*?resolvedEvent\.hitRecoveryTicks/,
-    'the pending multi-hit timeline must forward per-impact recovery metadata');
+assert.doesNotMatch(battleTickSource, /runtimeImpactHitRecoveryTicks/,
+    'the monster timeline must not forward hunter-owned recovery metadata');
 assert(profiles.frostfang_barioth.some(pattern =>
     pattern.tags.includes('frost-ground') && pattern.delivery === 'ground-wave'));
 assert(profiles.gold_rathian.some(pattern => pattern.tags.includes('blue-flame')));

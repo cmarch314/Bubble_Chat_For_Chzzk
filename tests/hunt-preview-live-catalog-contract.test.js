@@ -49,8 +49,8 @@ for (const pattern of catalog.diablos || []) {
         if (!(Number(impact.damageScale) > 0)) continue;
         assert.ok(['strong', 'butt-stumble', 'weak'].includes(impact.hitReactionKind),
             `diablos/${pattern.id}: approved damage judgment lost its Preview-authored reaction`);
-        assert.ok(Number(impact.hitRecoveryTicks) >= 1,
-            `diablos/${pattern.id}: approved damage judgment lost its Preview-authored recovery`);
+        assert.strictEqual(impact.hitRecoveryTicks, undefined,
+            `diablos/${pattern.id}: monster graph must not own hunter recovery timing`);
     }
 }
 

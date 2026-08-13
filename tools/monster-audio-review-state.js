@@ -357,9 +357,7 @@
                 ...(kind === 'damage' ? { damagePercent: Math.max(0, Math.min(1000,
                     Number(input.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100))),
                     hitReactionKind: ['strong', 'butt-stumble', 'weak'].includes(input.hitReactionKind)
-                        ? input.hitReactionKind : 'strong',
-                    hitRecoveryTicks: Math.max(1, Math.min(600,
-                        Math.round(Number(input.hitRecoveryTicks) || 50))) }
+                        ? input.hitReactionKind : 'strong' }
                     : { size: input.size || 'large' }) });
             this.draft[beatId] = { ...this.draft[beatId], judgments: list };
             return this.emit('add-judgment', { beatId, id });
@@ -380,13 +378,10 @@
                             Number(next.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100)));
                         next.hitReactionKind = ['strong', 'butt-stumble', 'weak'].includes(next.hitReactionKind)
                             ? next.hitReactionKind : 'strong';
-                        next.hitRecoveryTicks = Math.max(1, Math.min(600,
-                            Math.round(Number(next.hitRecoveryTicks) || 50)));
                     } else {
                         delete next.damageScale;
                         delete next.damagePercent;
                         delete next.hitReactionKind;
-                        delete next.hitRecoveryTicks;
                         next.size = next.size === 'small' ? 'small' : 'large';
                     }
                     next.target = ['primary', 'left', 'right', 'pair', 'pair-left', 'pair-right',

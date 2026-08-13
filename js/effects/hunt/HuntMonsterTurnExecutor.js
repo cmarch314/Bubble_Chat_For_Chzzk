@@ -122,11 +122,15 @@ class HuntMonsterTurnExecutor {
         }
         if (direction && !hasExplicitKnockback) direction *= -1;
         if (!direction) direction = Number(target.index || 0) < 2 ? -1 : 1;
+        const HunterTurns = typeof HuntHunterTurnExecutor !== 'undefined'
+            ? HuntHunterTurnExecutor
+            : (typeof require === 'function' ? require('./HuntHunterTurnExecutor.js') : null);
+        if (!HunterTurns?.hitReactionDurationTicks) {
+            throw new Error('HuntHunterTurnExecutor must own hunter hit recovery duration');
+        }
         return {
             kind,
-            durationTicks: Number.isFinite(Number(pattern.runtimeImpactHitRecoveryTicks))
-                ? Math.max(1, Number(pattern.runtimeImpactHitRecoveryTicks))
-                : ['weak', 'butt-stumble'].includes(kind) ? 15 : 50,
+            durationTicks: HunterTurns.hitReactionDurationTicks(kind),
             knockbackDirection: direction < 0 ? -1 : 1
         };
     }
