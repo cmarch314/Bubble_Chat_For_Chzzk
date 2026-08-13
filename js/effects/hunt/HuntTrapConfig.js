@@ -7,6 +7,10 @@ class HuntTrapConfig {
     static INVENTORY_KEY = 'shockTraps';
     static ENTRY_TICKS = 6;
     static ESCAPE_TICKS = 8;
+    // The DOM fade and the simulation clock finish on different task queues.
+    // Hold one complete battle tick after escape so a new attack cannot reuse
+    // the monster layer before the trap renderer has removed its lifecycle.
+    static RELEASE_HANDOFF_TICKS = 2;
     static STRUGGLE_TICKS = 12;
     static STRUGGLE_COUNTS = Object.freeze([6, 3, 1, 0]);
 
@@ -42,8 +46,8 @@ class HuntTrapConfig {
         const entry = beats.find(beat => beat?.beat === 'reaction');
         const held = beats.filter(beat => /^held-\d+$/.test(String(beat?.beat || '')));
         const release = beats.find(beat => beat?.beat === 'release');
-        const entryTicks = entry ? ticksOf(entry) : this.ENTRY_TICKS;
-        const releaseTicks = release ? ticksOf(release) : this.ESCAPE_TICKS;
+        const entryTicks = Math.max(this.ENTRY_TICKS, entry ? ticksOf(entry) : this.ENTRY_TICKS);
+        const releaseTicks = Math.max(this.ESCAPE_TICKS, release ? ticksOf(release) : this.ESCAPE_TICKS);
         const struggleTicks = held.map(ticksOf);
         const expectedCount = this.struggleCount(useCount);
         while (struggleTicks.length < expectedCount) struggleTicks.push(this.STRUGGLE_TICKS);

@@ -768,9 +768,14 @@ class HuntBattleTickExecutor {
                 }
                 if (engine.activeTrapControl) {
                     engine.activeTrapControl = null;
+                    const handoffTicks = Math.max(2, Number(
+                        typeof HuntTrapConfig !== 'undefined'
+                            ? HuntTrapConfig.RELEASE_HANDOFF_TICKS
+                            : 2
+                    ) || 2);
                     engine.monsterActionLockTicks = Math.max(
                         Number(engine.monsterActionLockTicks || 0),
-                        1);
+                        handoffTicks);
                 }
                 // Recovery from knockdown
                 const restoreState = engine.monsterStaminaRuntime?.isExhausted?.(engine)

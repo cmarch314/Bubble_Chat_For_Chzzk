@@ -1389,8 +1389,10 @@ class HuntCombatAnimator {
             if (!hasActivePitfall) return;
             const lifecycle = Number(monsterImg?.dataset?.pitfallLifecycle || 0) + 1;
             if (monsterImg?.dataset) monsterImg.dataset.pitfallLifecycle = String(lifecycle);
-            const releaseTicks = Math.max(1, Number(details?.releaseTicks)
-                || HuntCombatAnimator.PITFALL_RELEASE_TICKS);
+            const releaseTicks = Math.max(
+                HuntCombatAnimator.PITFALL_RELEASE_TICKS,
+                Number(details?.releaseTicks) || HuntCombatAnimator.PITFALL_RELEASE_TICKS
+            );
             const releaseFadeMs = releaseTicks * HuntCombatAnimator.PITFALL_RELEASE_TICK_MS;
             effects.forEach(effect => {
                 effect.classList.add('is-releasing');

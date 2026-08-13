@@ -1094,6 +1094,16 @@ class HuntEffect extends BaseEffect {
                 onResetMonsterMotion: reason => {
                     this.renderer.combatAnimator.monsterAttackAnimator?.clearMonsterMotion?.(reason);
                 },
+                // The engine BEAT session, not a browser timeout or traversal
+                // helper, owns the visible monster action lifetime.
+                onMonsterBeatActionComplete: () => {
+                    this.renderer.combatAnimator.monsterAttackAnimator?.clearMonsterMotion?.('beat-complete');
+                },
+                onMonsterBeatActionCancel: (_action, reason) => {
+                    this.renderer.combatAnimator.monsterAttackAnimator?.clearMonsterMotion?.(
+                        `beat-cancel:${reason || 'interrupted'}`
+                    );
+                },
                 onTriggerHunterInterference: (idx, kind, size, active) => {
                     this.renderer.combatAnimator.triggerHunterInterference(idx, kind, size, active);
                 },

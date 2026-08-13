@@ -149,31 +149,21 @@ assert.deepStrictEqual(headBreak.reactions[0], ['part_flinch', 30, 'head']);
 assert.strictEqual(headBreak.soundContexts[0].partBreakSize, 'small',
     'an ordinary break must route through the shared small-break group');
 
-const deferredHeadBreak = breakPart(
+const activePatternHeadBreak = breakPart(
     { id: 'test:deferred-head', kind: 'head', health: 10, breakable: true, severable: false },
     { id: 'hammer' },
     'test',
     10000,
     { presentationTicks: 12 }
 );
-assert.strictEqual(deferredHeadBreak.result.newlyBroken, true,
+assert.strictEqual(activePatternHeadBreak.result.newlyBroken, true,
     'part durability must still accumulate during a monster attack');
-assert.strictEqual(deferredHeadBreak.result.reactionDeferred, true);
-assert.strictEqual(deferredHeadBreak.result.part.broken, false,
-    'the broken flag and changed hitzones must remain pending during the authored attack');
-assert.strictEqual(deferredHeadBreak.result.part.breakPending, true);
-assert.strictEqual(deferredHeadBreak.reactions.length, 0,
-    'a part-break pose must not interrupt an active monster pattern');
-assert.strictEqual(deferredHeadBreak.engine.monsterState, 'normal');
-deferredHeadBreak.engine.monsterActionPresentationTicks = 0;
-assert.strictEqual(
-    HuntEngine.prototype.flushPendingMonsterPartReaction.call(deferredHeadBreak.engine),
-    true
-);
-assert.deepStrictEqual(deferredHeadBreak.reactions[0], ['part_flinch', 30, 'head'],
-    'the queued break must resolve immediately after the authored pattern finishes');
-assert.strictEqual(deferredHeadBreak.result.part.broken, true);
-assert.strictEqual(deferredHeadBreak.result.part.breakPending, false);
+assert.strictEqual(activePatternHeadBreak.result.reactionDeferred, undefined,
+    'an already-confirmed hit must not wait for the monster pattern to finish');
+assert.deepStrictEqual(activePatternHeadBreak.reactions[0], ['part_flinch', 30, 'head'],
+    'a confirmed part break must interrupt the active monster pattern immediately');
+assert.strictEqual(activePatternHeadBreak.result.part.broken, true);
+assert.strictEqual(activePatternHeadBreak.result.part.breakPending, false);
 
 const diablosHeadFlinch = breakPart(
     {

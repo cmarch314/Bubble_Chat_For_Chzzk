@@ -124,6 +124,33 @@ const action = Object.freeze({
 }
 
 {
+    const engine = makeEngine([]);
+    engine.activeTrapControl = { kind: 'pitfall', releasing: true };
+    assert.strictEqual(engine.isMonsterActionSessionActive(), true,
+        'trap escape and renderer handoff must remain part of the authoritative monster session');
+    engine.activeTrapControl = null;
+    assert.strictEqual(engine.isMonsterActionSessionActive(), false);
+}
+
+{
+    const events = [];
+    const engine = makeEngine(events);
+    engine.beginMonsterBeatAction(action, { patternId: action.id });
+    engine.monsterTraversalState = { kind: 'charge', remainingTicks: 0 };
+    engine.monsterActionLockTicks = 5;
+    engine.clearMonsterTraversal('complete');
+    assert.deepStrictEqual(events, [],
+        'a completed movement sub-track must not erase the parent BEAT recovery motion');
+    assert.strictEqual(engine.monsterActionLockTicks, 5,
+        'a movement helper must not release the parent action lock');
+    engine.interruptMonsterMovement('part-break:head');
+    assert.deepStrictEqual(events, [
+        'cancel:diablos.horn-charge:part-break:head',
+        'reset:part-break:head'
+    ], 'an explicit control interruption must cancel and reset the whole action atomically');
+}
+
+{
     const events = [];
     const engine = makeEngine(events);
     engine.pendingMonsterImpact = { pattern: { id: 'horn-charge', tags: [] } };

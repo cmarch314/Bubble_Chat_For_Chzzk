@@ -62,6 +62,7 @@ assert.deepStrictEqual(cancelled.part, {
 });
 
 const active = provisionalResult(3);
+let committedReaction = null;
 const activeEngine = {
     ...cancelledEngine,
     pendingMonsterPartReactions: [active],
@@ -69,7 +70,8 @@ const activeEngine = {
         get: key => key === 'hunter:3'
             ? { context: { action: { id: 'hammer.overhead_smash' } } }
             : null
-    }
+    },
+    resolveMonsterPartReaction: result => { committedReaction = result; }
 };
 assert.strictEqual(HuntEngine.prototype.flushPendingMonsterPartReaction.call(activeEngine), false,
     'a provisional reaction must wait while its authored swing approaches HIT');
@@ -84,5 +86,9 @@ assert.strictEqual(HuntEngine.prototype.confirmPendingHunterPartImpact.call(
 ), true);
 assert.strictEqual(active.impactConfirmed, true,
     'the authored BEAT damage event must commit the pending reaction');
+assert.strictEqual(activeEngine.pendingMonsterPartReactions.length, 0,
+    'a confirmed part reaction must leave the deferred queue immediately');
+assert.strictEqual(committedReaction, active,
+    'the confirmed HIT must interrupt the active monster action through its body reaction');
 
 console.log('[test] Deferred part reactions require their hunter BEAT impact.');

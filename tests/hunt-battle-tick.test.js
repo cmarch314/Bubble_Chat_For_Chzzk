@@ -755,6 +755,9 @@ function createEngine(overrides = {}) {
     assert.strictEqual(engine.activeTrapControl, null);
     assert.strictEqual(effects.length, 1, 'escape must not be emitted again when its final tick completes');
     context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(monsterTurns, 0,
+        'the renderer handoff tick must finish before another BEAT can claim the monster layer');
+    context.HuntBattleTickExecutor.execute(engine);
     assert.strictEqual(monsterTurns, 1,
         'the full ATB action may start only after the complete escape handoff');
 }

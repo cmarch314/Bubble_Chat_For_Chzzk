@@ -250,6 +250,7 @@ class HuntEngine {
             || this.pendingMonsterImpact
             || this.monsterTraversalState
             || this.monsterBurrowState
+            || this.activeTrapControl
             || Number(this.monsterActionLockTicks || 0) > 0
         );
     }
@@ -314,9 +315,19 @@ class HuntEngine {
     clearMonsterTraversal(reason = 'complete') {
         const previous = this.monsterTraversalState;
         this.monsterTraversalState = null;
-        this.monsterActionLockTicks = 0;
         this.monsterTraversalGeneration++;
-        this.callbacks?.onResetMonsterMotion?.(reason);
+        const parentBeatActive = Boolean(this.monsterBeatRuntime?.has?.('monster'));
+        // Traversal is only one track inside an approved BEAT action. Its
+        // natural end must not erase recovery/return tracks that are still
+        // owned by the parent action session. Explicit cancellation clears the
+        // whole session and may reset the renderer immediately.
+        if (reason !== 'complete') {
+            this.monsterActionLockTicks = 0;
+            this.callbacks?.onResetMonsterMotion?.(reason);
+        } else if (!parentBeatActive) {
+            this.monsterActionLockTicks = 0;
+            this.callbacks?.onResetMonsterMotion?.(reason);
+        }
         return previous;
     }
 
@@ -844,7 +855,7 @@ class HuntEngine {
             result.impactConfirmed = !result.sourceActionId || !this.monsterBeatRuntime;
         }
         if (result?.newlyBroken || result?.newlyFlinched || result?.repeatedTopple) {
-            if (HuntEngine.prototype.isMonsterActionPresenting.call(this)) {
+            if (HuntEngine.prototype.isMonsterActionPresenting.call(this) && !result.impactConfirmed) {
                 if (result.newlyBroken) {
                     result.part.broken = false;
                     result.part.severed = false;
@@ -872,6 +883,14 @@ class HuntEngine {
         if (!result) return false;
         result.impactConfirmed = true;
         result.confirmedImpactEventId = String(event.id || '');
+        // The authored damage event is the commit point. A confirmed break or
+        // flinch interrupts the currently running monster action atomically;
+        // cancelMonsterBeatAction then invalidates every future judgment from
+        // that action before the body reaction begins. Existing control states
+        // still receive only material split/audio, as resolve... already owns.
+        const resultIndex = this.pendingMonsterPartReactions.indexOf(result);
+        if (resultIndex >= 0) this.pendingMonsterPartReactions.splice(resultIndex, 1);
+        this.resolveMonsterPartReaction(result);
         return true;
     }
 

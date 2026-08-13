@@ -73,7 +73,15 @@ assert.doesNotMatch(animator,
         'the real DOM opacity animation must span all eight escape ticks');
     assert.strictEqual(removed, false, 'the trap DOM must survive while fading');
     assert.strictEqual(timers[0].delay, 800);
+    instance.triggerEnvironmentEffect('trap-release', null, { kind: 'pitfall', releaseTicks: 1 });
+    assert.strictEqual(animationArgs.options.duration, 800,
+        'stale or malformed authored data must not collapse trap escape to a 0.1 second pop');
+    assert.strictEqual(removed, false);
+    assert.strictEqual(timers[1].delay, 800);
     timers[0].callback();
+    assert.strictEqual(removed, false,
+        'an older release cleanup must not remove a newer trap lifecycle');
+    timers[1].callback();
     assert.strictEqual(removed, true, 'the trap DOM may be removed only after opacity reaches zero');
 }
 
