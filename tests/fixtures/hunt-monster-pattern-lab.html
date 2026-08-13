@@ -449,13 +449,16 @@
       return hunters.slice(start,start+take);
     }
     function resolvePreviewTargets(pattern){
+      const seeded=HuntMonsterActionPolicy.seededRandom(previewScenario?.seed||1);
       const selectedPair=targetMode.startsWith('pair:')
         ?targetMode.slice(5).split(',').map(Number).filter(Number.isInteger):null;
       const primary=selectedPair?.length===2?selectedPair[0]
-        :targetMode==='auto'?Math.floor(Math.random()*hunters.length):Number(targetMode);
-      const random=()=>selectedPair?.length===2&&primary>0&&selectedPair[1]>primary
+        :targetMode==='auto'?Math.floor(seeded()*hunters.length):Number(targetMode);
+      const directedRandom=()=>selectedPair?.length===2&&primary>0&&selectedPair[1]>primary
         ?.999:Math.min(.999,(primary+.25)/hunters.length);
-      const count=Math.max(1,Math.min(4,Number(pattern.maxTargets||pattern.minTargets||1)));
+      const random=targetMode==='auto'?seeded:directedRandom;
+      const count=HuntMonsterActionPolicy.rollTargetCount(
+        pattern,hunters.length,random,hunters.length);
       // 프로덕션(HuntMonsterTurnExecutor)과 같은 순서로 패스 수를 정한다.
       // 예전에는 passCountByState만 보고 나머지는 2로 떨어뜨려, targeting.passCount가
       // 1인 패턴(평상시 꼬리 회전)이 랩에서만 2패스로 돌았다. 축·표적이 실제 전투와
@@ -534,12 +537,14 @@
               &&!entry.severable&&!/(^|[-_])tail($|[-_])/.test(String(entry.kind||'')))?.kind
             ||partState.find(entry=>entry.breakable||entry.severable)?.kind
             ||'head');
-        combat.triggerMonsterPartBreakReaction(visualType,durationTicks,representativePart);
+        combat.triggerMonsterPartBreakReaction(
+          visualType,durationTicks,representativePart,pattern.motion);
       }else if(kind==='part-break'){
         const reaction=HuntMonsterAnatomyCatalog.breakReaction(owner.selectedMonster?.id,part,currentState==='airborne');
-        combat.triggerMonsterPartBreakReaction(reaction.visualType,reaction.durationTicks,part);
+        combat.triggerMonsterPartBreakReaction(
+          reaction.visualType,reaction.durationTicks,part,pattern.motion);
       }else if(kind==='flinch'){
-        combat.triggerMonsterPartBreakReaction('part_flinch',durationTicks);
+        combat.triggerMonsterPartBreakReaction('part_flinch',durationTicks,null,pattern.motion);
       }else if(kind==='tail-sever'){
         // Tail sever is an authored reaction row, not a fresh part-break event.
         // Play its current BEAT graph directly so editor timing/transform edits
@@ -571,10 +576,13 @@
       }else if(kind==='sleeping'){
         applyState(kind,true);
         combat.triggerMonsterSleepAnim({motion:pattern.motion});
-      }else if(['stunned','paralyzed'].includes(kind)){
+      }else if(kind==='stunned'){
+        combat.triggerMonsterKnockdownAnim({kind:'stun',motion:pattern.motion});
+      }else if(kind==='paralyzed'){
         applyState(kind,true);
       }else if(kind==='death'){
-        combat.triggerMonsterPartBreakReaction('part_break_topple',durationTicks);
+        combat.triggerMonsterPartBreakReaction(
+          'part_break_topple',durationTicks,null,pattern.motion);
       }
       if(!pattern.runtimePreviewMuteAudio)labAudio?.playPattern(pattern,[]);
       pendingReactionTimer=setTimeout(()=>{
@@ -592,7 +600,8 @@
         motion:previewPattern.motion||authored?.motion,
         targeting:previewPattern.targeting||authored?.targeting}:authored;
       if(!source)return {ok:false,reason:'pattern-not-found',durationMs:0};
-      const pattern={...source,tags:[...(source.tags||[])],targeting:source.targeting?{...source.targeting}:null};
+      let pattern={...source,tags:[...(source.tags||[])],targeting:source.targeting?{...source.targeting}:null};
+      pattern=HuntMonsterPatternCatalog.synchronizeEditedPattern(pattern);
       const reactionPlayback=playRuntimeReaction(pattern);
       if(reactionPlayback)return reactionPlayback;
       const required=pattern.requiredState||(pattern.tags.includes('flight-only')?'airborne':null);
@@ -600,7 +609,10 @@
       const selection=resolvePreviewTargets(pattern);
       if(!selection.targets.length){
         const fallback=Number.isInteger(selection.primary)?selection.primary:0;
-        selection.primary=fallback;selection.indices=[fallback];selection.targets=[{index:fallback,result:'pending'}];
+        // Movement still needs an anchor when an authored judgment deliberately
+        // has no recipients.  Keep that anchor presentation-only: never turn an
+        // empty judgment set into a fake Preview hit.
+        selection.primary=fallback;selection.indices=[];selection.targets=[{index:fallback,result:'effect'}];
       }
       updateTargetSelection(selection.indices,selection.primary);
       activePatternId=pattern.id;

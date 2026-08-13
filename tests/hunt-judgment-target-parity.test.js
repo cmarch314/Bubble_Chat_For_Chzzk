@@ -23,6 +23,21 @@ assert.strictEqual(HuntMonsterActionPolicy.minimumImpactTargetCount({
     motion: [{ judgments: [{ kind: 'damage', target: 'primary' }] }]
 }), 1, 'ordinary primary judgments must remain single-target');
 
+assert.strictEqual(HuntMonsterActionPolicy.rollTargetCount({
+    minTargets: 1, maxTargets: 2,
+    impactTimeline: [{ targetMode: 'runtime-pair' }]
+}, 4, () => 0), 2, 'pair judgments must select two hunters in Preview and live hunts');
+assert.strictEqual(HuntMonsterActionPolicy.rollTargetCount({
+    minTargets: 1, maxTargets: 2
+}, 4, () => 0), 1, 'ordinary target count must preserve the authored minimum');
+assert.strictEqual(HuntMonsterActionPolicy.rollTargetCount({
+    minTargets: 1, maxTargets: 2
+}, 4, () => .999), 2, 'ordinary target count must preserve the authored random range');
+const seededA = HuntMonsterActionPolicy.seededRandom(73);
+const seededB = HuntMonsterActionPolicy.seededRandom(73);
+assert.deepStrictEqual([seededA(), seededA(), seededA()], [seededB(), seededB(), seededB()],
+    'Preview scenario seeds must reproduce the same target selection');
+
 const synchronizedTackle = HuntMonsterPatternCatalog.synchronizeMotionTiming({
     id: 'test.side_tackle',
     minTargets: 2,
@@ -38,6 +53,29 @@ assert.strictEqual(synchronizedTackle.impactTimeline[0].targetMode, 'runtime-pai
     'a two-person lane attack must not collapse to one hunter when editor judgment data says primary');
 assert.strictEqual(HuntMonsterActionPolicy.minimumImpactTargetCount(synchronizedTackle), 2,
     'the live executor must reserve both hunters required by the synchronized judgment');
+
+const synchronizedDraft = HuntMonsterPatternCatalog.synchronizeEditedPattern({
+    id: 'test.edited_draft', damageRatio: .4,
+    movement: { ticks: 99 }, animationDurationMs: 9900,
+    impactTimeline: [{ atTicks: 88, targetMode: 'primary' }],
+    beatV2: { timeline: [{ atTicks: 88 }] },
+    motion: [
+        { beat: 'approach', ticks: 5 },
+        { beat: 'impact', ticks: 3, judgments: [{
+            kind: 'damage', group: 'impact', target: 'pair', offsetTicks: 1, damagePercent: 40
+        }] }
+    ]
+});
+assert.strictEqual(synchronizedDraft.movement.ticks, 8,
+    'an edited Preview draft must replace stale saved movement timing');
+assert.strictEqual(synchronizedDraft.animationDurationMs, 800,
+    'an edited Preview draft must replace stale saved animation timing');
+assert.strictEqual(synchronizedDraft.impactTimeline[0].atTicks, 6,
+    'an edited Preview draft must regenerate the live impact tick');
+assert.strictEqual(synchronizedDraft.impactTimeline[0].targetMode, 'runtime-pair',
+    'an edited Preview draft must regenerate the live target mode');
+assert.strictEqual(synchronizedDraft.beatV2.totalTicks, 8,
+    'an edited Preview draft must regenerate stale BEAT V2 data');
 
 const anchors = new HuntStageAnchors({
     monsterRect: { left: 600, top: 100, width: 400, height: 400 },

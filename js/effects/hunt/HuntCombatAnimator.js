@@ -864,7 +864,7 @@ class HuntCombatAnimator {
         }
     }
 
-    triggerMonsterPartBreakReaction(kind, durationTicks, partKind = null) {
+    triggerMonsterPartBreakReaction(kind, durationTicks, partKind = null, authoredMotion = null) {
         if (!this.card) return;
         this.clearMonsterAnimations(`part-break:${partKind || 'unknown'}`);
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted')
@@ -877,7 +877,10 @@ class HuntCombatAnimator {
         const profileId = kind === 'part_flinch' ? 'flinch'
             : kind === 'tail_sever_roll' ? 'tail'
                 : 'knockdown';
-        const profile = catalog?.applyAuthoredMotion?.(monsterId, catalog.profile(profileId));
+        const catalogProfile = catalog?.applyAuthoredMotion?.(monsterId, catalog.profile(profileId));
+        const profile = Array.isArray(authoredMotion) && authoredMotion.length
+            ? { ...catalogProfile, motion: authoredMotion }
+            : catalogProfile;
         const motion = profile?.motion;
         if (profileId === 'knockdown' && Array.isArray(motion) && motion.length) {
             // Part-break knockdowns previously bypassed the shared knockdown

@@ -32,7 +32,7 @@
         monster: '', huntId: '', monsters: [], categories: [], groups: [], commonGroups: [], presets: {}, patterns: [],
         partReactions: [], systemAudioPattern: null,
         selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', anatomy: false, sourceQueue: [], previewTimers: [],
-        previewAudios: [], capabilities: [], buildId: '', session: MonsterAudioReviewState.createEditorSession(),
+        previewAudios: [], previewAudioSchedule: [], capabilities: [], buildId: '', session: MonsterAudioReviewState.createEditorSession(),
         pickerCategory: '', pickerStatus: 'all', previewReady: false, previewSequence: 0,
         sourceRowsByPath: new Map(), sourceGroupViews: [], sourceRenderLimit: 80,
         hiddenSourcePaths: new Set(), temporarilyRevealedSources: new Set(),
@@ -187,6 +187,7 @@
         for (const clip of app.previewAudios) { clip.pause(); clip.removeAttribute('src'); }
         app.previewTimers = [];
         app.previewAudios = [];
+        app.previewAudioSchedule = [];
     }
 
     function resetAudioClock(button = app.playingButton) {
@@ -311,6 +312,7 @@
         stopPreviewAudio();
         const pattern = selectedPattern(), snapshot = app.session.snapshot();
         if (!pattern) return;
+        const schedule = [];
         for (const beat of snapshot.timeline.beats) {
             for (const slot of previewSlotsForBeat(pattern, beat)) {
                 if (!slot.effective?.layers?.length) continue;
@@ -318,10 +320,22 @@
                     ? Array.from({ length: Math.max(1, Math.ceil(beat.ticks / 30)) }, (_, index) => index * 30)
                         .filter(offset => offset < beat.ticks)
                     : [0];
-                for (const offset of offsets) app.previewTimers.push(setTimeout(
-                    () => playRoute(slot.effective, `${pattern.name} · ${slot.label}`),
-                    (beat.startTicks + offset) * 100));
+                for (const offset of offsets) schedule.push({
+                    atMs: (beat.startTicks + offset) * 100,
+                    route: slot.effective,
+                    label: `${pattern.name} · ${slot.label}`,
+                    played: false
+                });
             }
+        }
+        app.previewAudioSchedule = schedule.sort((left, right) => left.atMs - right.atMs);
+    }
+
+    function emitPreviewAudioThrough(elapsedMs) {
+        for (const cue of app.previewAudioSchedule) {
+            if (cue.played || cue.atMs > elapsedMs) continue;
+            cue.played = true;
+            playRoute(cue.route, cue.label);
         }
     }
 
@@ -329,6 +343,7 @@
         if (app.playbackState === 'paused') {
             app.playbackState = 'playing';
             app.playbackStartedAt = performance.now() - app.playbackElapsedMs;
+            app.previewAudios.forEach(clip => clip.play().catch(() => {}));
             bridge.send('bubblechat:pattern-preview-transport', { action: 'resume' });
             runPlaybackProgress(); updateTransportControls();
             return;
@@ -351,6 +366,7 @@
         const frame = () => {
             if (app.playbackState !== 'playing') return;
             app.playbackElapsedMs = performance.now() - app.playbackStartedAt;
+            emitPreviewAudioThrough(app.playbackElapsedMs);
             const ratio = Math.max(0, Math.min(1, app.playbackElapsedMs / app.playbackDurationMs));
             const before = app.session.snapshot().selection.beatId;
             app.session.seek(app.playbackDurationTicks * ratio); updateTimelineCursor();

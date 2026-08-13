@@ -174,8 +174,8 @@ assert.match(html, /ANATOMY_LABELS=\{head:'머리'/,
 
 assert.match(html, /const representativePart=pattern\.reactionSize==='large'/,
     'grouped small/large break previews must resolve a concrete anatomy part');
-assert.match(html, /triggerMonsterPartBreakReaction\(visualType,durationTicks,representativePart\)/,
-    'grouped break previews must pass that part into the material split visual');
+assert.match(html, /triggerMonsterPartBreakReaction\(\s*visualType,durationTicks,representativePart,pattern\.motion\s*\)/,
+    'grouped break previews must pass the part and current draft motion into the material split visual');
 assert.doesNotMatch(html, /triggerMonsterPartBreakReaction\(visualType,durationTicks,null\)/,
     'grouped break previews must never silently suppress the part-material split visual');
 assert.match(html, /kind==='tail-sever'[\s\S]*?playBeatMotion\(/,

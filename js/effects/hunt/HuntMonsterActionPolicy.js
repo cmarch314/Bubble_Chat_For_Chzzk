@@ -58,6 +58,33 @@ class HuntMonsterActionPolicy {
             ['runtime-pair', 'runtime-pair-left', 'runtime-pair-right'].includes(mode)) ? 2 : 1;
     }
 
+    static rollTargetCount(pattern = {}, availableCount = 0, random = Math.random, targetCap = null) {
+        const available = Math.max(0, Math.floor(Number(availableCount) || 0));
+        if (!available) return 0;
+        const hasTargetCap = targetCap !== null && targetCap !== undefined && targetCap !== ''
+            && Number.isFinite(Number(targetCap));
+        const cap = Math.max(1, Math.min(available,
+            hasTargetCap ? Math.floor(Number(targetCap)) : available));
+        const required = Math.min(cap, this.minimumImpactTargetCount(pattern));
+        const maximum = Math.min(cap, Math.max(required,
+            Math.floor(Number(pattern.maxTargets || pattern.minTargets || 1))));
+        const minimum = Math.min(maximum, Math.max(required,
+            Math.floor(Number(pattern.minTargets || 1))));
+        return minimum + Math.floor(Math.max(0, Math.min(.999999, Number(random()) || 0))
+            * (maximum - minimum + 1));
+    }
+
+    static seededRandom(seed = 1) {
+        let state = Math.max(1, Math.floor(Number(seed) || 1)) >>> 0;
+        return () => {
+            state += 0x6D2B79F5;
+            let value = state;
+            value = Math.imul(value ^ value >>> 15, value | 1);
+            value ^= value + Math.imul(value ^ value >>> 7, value | 61);
+            return ((value ^ value >>> 14) >>> 0) / 4294967296;
+        };
+    }
+
     static chargeMode(pattern = {}) {
         if (pattern.chargeMode === 'wide' || pattern.tags?.includes('wide-charge')) return 'wide';
         return 'single';

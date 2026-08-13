@@ -224,6 +224,16 @@ class HuntMonsterPatternCatalog {
         return synchronized;
     }
 
+    static synchronizeEditedPattern(pattern = {}) {
+        if (Array.isArray(pattern.motion) && pattern.motion.length) {
+            return this.synchronizeMotionTiming(pattern);
+        }
+        if (Array.isArray(pattern.runtimeTimingBeats) && pattern.runtimeTimingBeats.length) {
+            return this.synchronizeGeneratedKeyframeMotion(pattern, pattern.runtimeTimingBeats);
+        }
+        return this.synchronizeGeneratedKeyframeMotion(pattern);
+    }
+
     static displayName(patternOrName, monster = {}) {
         let value = String(patternOrName?.name || patternOrName || '').trim();
         const aliases = [monster.nameKO, monster.nameEN, monster.name, monster.id]
