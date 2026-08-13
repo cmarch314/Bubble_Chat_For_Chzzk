@@ -495,7 +495,7 @@ class HuntEngine {
         const pools = {
             success: ['😆', '😁', '🤩', '😎', '🥳', '🔥', '💪', '✨'],
             failure: ['😡', '🤬', '😤', '😫', '😱', '💢', '😭'],
-            hurt: ['😵', '😭', '😨', '😖', '🥲', '💀', '💢']
+            hurt: ['😵', '😭', '😨', '😖', '🥲', '😵‍💫', '💢']
         };
         const pool = pools[kind];
         const emoji = pool[Math.floor(this.random() * pool.length)];
