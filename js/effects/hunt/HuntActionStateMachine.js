@@ -63,6 +63,9 @@ class HuntActionStateMachine {
 
     canEvade(hunter) {
         if (!hunter || hunter.status !== 'alive' || hunter.roarStunned || hunter.interference) return false;
+        // An already visible roll owns its full invulnerability window. It is
+        // not a fresh probability roll for every hit in a combo.
+        if (Number(hunter.rollDuration || 0) > 0) return false;
         // Sharpening is an interruptible item action. An evade cancels the
         // pending restore instead of forcing the hunter to finish sharpening.
         if (hunter.pendingSharpnessRestore) return true;

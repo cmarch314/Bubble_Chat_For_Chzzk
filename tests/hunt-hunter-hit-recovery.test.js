@@ -149,6 +149,11 @@ assert.strictEqual(
     'an authored incoming direction must throw the weapon in the opposite direction'
 );
 assert.strictEqual(HuntMonsterTurnExecutor.isHunterHitRecovering({ hitDuration: 1 }), true);
+assert.strictEqual(
+    HuntMonsterTurnExecutor.hunterImpactImmunityReason({ rollDuration: 3 }),
+    'evade',
+    'an already visible roll must own the remaining multi-hit immunity window'
+);
 {
     const hunter = {};
     assert.strictEqual(HuntMonsterTurnExecutor.grantCounterInvulnerability(hunter), 10);
@@ -321,11 +326,12 @@ const turnSource = fs.readFileSync(
     path.resolve(__dirname, '../js/effects/hunt/HuntMonsterTurnExecutor.js'),
     'utf8'
 );
-assert.match(turnSource, /isHunterHitRecovering\(target\)[\s\S]*?result: 'invulnerable'[\s\S]*?return;/,
-    'repeat hits must silently pass through a recovering hunter before damage/status resolution');
 assert.match(turnSource,
-    /isHunterImpactImmune\(target\)[\s\S]*?result: 'invulnerable'[\s\S]*?return;/,
-    'the shared impact gate must reject follow-up judgments during counter protection');
+    /hunterImpactImmunityReason\(target[\s\S]*?isHunterHitRecovering\(target\)[\s\S]*?return 'hit-recovery'/,
+    'repeat hits must retain one typed recovery-immunity owner');
+assert.match(turnSource,
+    /const immunityReason = HuntMonsterTurnExecutor\.hunterImpactImmunityReason\(target\)[\s\S]*?immunityReason === 'counter'[\s\S]*?presentHunterImpact\?\.\(target\.index, 'counter'\)[\s\S]*?result: immunityReason === 'evade'/,
+    'the shared impact gate must classify recovery, roll, and visibly explained counter protection');
 assert.match(turnSource,
     /if \(isGreatSwordTackling\)[\s\S]*?grantCounterInvulnerability\(target\)/,
     'a successful Great Sword tackle must open the shared one-second counter protection window');

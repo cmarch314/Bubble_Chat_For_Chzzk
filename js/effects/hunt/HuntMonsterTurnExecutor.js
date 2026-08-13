@@ -153,11 +153,17 @@ class HuntMonsterTurnExecutor {
     }
 
     static isHunterImpactImmune(target = {}) {
-        if (Number(target.counterInvulnerabilityTicks || 0) > 0) return true;
+        return HuntMonsterTurnExecutor.hunterImpactImmunityReason(target) !== null;
+    }
+
+    static hunterImpactImmunityReason(target = {}) {
+        if (Number(target.counterInvulnerabilityTicks || 0) > 0) return 'counter';
+        if (Number(target.rollDuration || 0) > 0) return 'evade';
         // Once a damaging reaction owns the hunter, its recovery window wins
         // over any stale interference flag. This prevents later hits in the
         // same combo from reopening an already translucent/tumbling hunter.
-        return HuntMonsterTurnExecutor.isHunterHitRecovering(target);
+        if (HuntMonsterTurnExecutor.isHunterHitRecovering(target)) return 'hit-recovery';
+        return null;
     }
 
     static grantCounterInvulnerability(target, ticks = 10) {
@@ -609,6 +615,7 @@ class HuntMonsterTurnExecutor {
             && (!actionMachine || actionMachine.canGuard(target));
         const canEvade = !actionMachine || actionMachine.canEvade(target);
         const isCharging = HuntMonsterTurnExecutor.isGreatSwordCharging(target);
+        const canTackle = isCharging && HuntMonsterTurnExecutor.isPatternGuardable(pattern);
         const hasShield = canGuard && !isCharging
             && (target.type === 'shield' || target.id === 'heavy_bowgun');
         const guaranteedLanceGuard = target.id === 'lance' && hasShield;
@@ -618,11 +625,59 @@ class HuntMonsterTurnExecutor {
                 && Number(target.spiritGauge || 0) > 0);
         const attemptChance = target.personality === 'newbie' ? .90
             : target.personality === 'offensive' ? .96 : .99;
+        const tackleChance = HuntMonsterTurnExecutor.personalityProfiles()
+            ?.specialActionChance?.(target, .90) ?? .90;
         return {
             attempted: guaranteedLanceGuard
-                || ((canGuard || canEvade) && engine.random() < attemptChance),
+                || ((canTackle || canGuard || canEvade)
+                    && engine.random() < (canTackle ? tackleChance : attemptChance)),
+            preferred: canTackle ? 'tackle'
+                : counterReady ? 'counter' : hasShield ? 'guard' : canEvade ? 'evade' : 'none'
+        };
+    }
+
+    static resolveHunterResponseIntent(engine, target, pattern = {}, plannedIntent = null) {
+        const planned = plannedIntent
+            || HuntMonsterTurnExecutor.planHunterResponseIntent(engine, target, pattern);
+        if (!planned?.attempted || HuntMonsterTurnExecutor.isHunterDefenseLocked(target)) {
+            return { attempted: false, preferred: 'none' };
+        }
+        const actionMachine = engine.actionStateMachine;
+        if (HuntMonsterTurnExecutor.isGreatSwordCharging(target)
+            && HuntMonsterTurnExecutor.isPatternGuardable(pattern)) {
+            return { attempted: true, preferred: 'tackle' };
+        }
+        const canGuard = HuntMonsterTurnExecutor.isPatternGuardable(pattern)
+            && (!actionMachine || actionMachine.canGuard(target));
+        const canEvade = !actionMachine || actionMachine.canEvade(target);
+        const hasShield = canGuard
+            && (target.type === 'shield' || target.id === 'heavy_bowgun');
+        const counterReady = Boolean(target.currentAction?.tags?.includes('counter'))
+            || (target.id === 'long_sword'
+                && target.longSwordForesightEligible
+                && Number(target.spiritGauge || 0) > 0);
+        return {
+            attempted: canGuard || canEvade || counterReady,
             preferred: counterReady ? 'counter' : hasShield ? 'guard' : canEvade ? 'evade' : 'none'
         };
+    }
+
+    static activateReactiveGreatSwordTackle(engine, target) {
+        if (!HuntMonsterTurnExecutor.isGreatSwordCharging(target)) return false;
+        const Mechanics = engine.weaponMechanics?.constructor?.actionsFor
+            ? engine.weaponMechanics.constructor
+            : (typeof require === 'function' ? require('./HuntWeaponMechanics.js') : null);
+        const tackle = Mechanics?.actionsFor?.('great_sword')
+            ?.find(action => action.id === 'great_sword.tackle');
+        if (!tackle) return false;
+        engine.cancelHunterBeatAction?.(target, 'reactive-tackle');
+        engine.callbacks?.onInterruptWeaponVisual?.(target.index);
+        engine.weaponMechanics?.applyAction?.(engine, target, tackle);
+        engine.beginHunterBeatAction?.(target, tackle);
+        engine.actionStateMachine?.begin?.(target, tackle);
+        target.greatSwordChargeLocked = false;
+        engine.showSkillBubble?.(target.index, '차지 태클!');
+        return true;
     }
 
     static repeatTargetsForState(targets, pattern, monsterState = 'normal') {
@@ -1297,8 +1352,20 @@ class HuntMonsterTurnExecutor {
             }
             // The monster may keep its chosen target, but a hunter already tumbling
             // through hit recovery silently ignores every follow-up hit.
-            if (HuntMonsterTurnExecutor.isHunterImpactImmune(target)) {
-                attackResults.push({ index: target.index, result: 'invulnerable' });
+            const immunityReason = HuntMonsterTurnExecutor.hunterImpactImmunityReason(target);
+            if (immunityReason) {
+                if (immunityReason === 'counter') {
+                    // Counter protection used to discard the impact silently,
+                    // making a sharpening/charging hunter look inexplicably
+                    // immune. Keep the authored one-second protection, but show
+                    // the guard recoil that explains why no damage landed.
+                    engine.presentHunterImpact?.(target.index, 'counter');
+                }
+                attackResults.push({
+                    index: target.index,
+                    result: immunityReason === 'evade' ? 'dodge'
+                        : immunityReason === 'counter' ? 'counter' : 'invulnerable'
+                });
                 return;
             }
             const resistedBy = engine.perkRuntime && engine.perkRuntime.ignoresPattern(target, pattern);
@@ -1332,11 +1399,23 @@ class HuntMonsterTurnExecutor {
             if (Number(target.hornDefenseBuffTicks || 0) > 0) damage = Math.max(1, Math.floor(damage * 0.88));
 
             const actionMachine = engine.actionStateMachine;
+            const plannedResponseIntent = pattern.runtimeDefenseIntents?.[target.index] || null;
+            const responseIntent = HuntMonsterTurnExecutor.resolveHunterResponseIntent(
+                engine,
+                target,
+                pattern,
+                plannedResponseIntent
+            );
 
-            // Great Sword tackle is now a real counter window, never an implicit combo-index bonus.
-            const isGreatSwordTackling = target.id === 'great_sword'
+            // Great Sword tackle is a real impact-time response. A charge that
+            // was active when the telegraph began, or began during a long
+            // approach, may convert to the authored tackle BEAT at contact.
+            const alreadyGreatSwordTackling = target.id === 'great_sword'
                 && actionMachine
                 && actionMachine.canCounter(target, 'tackle');
+            const reactiveGreatSwordTackle = responseIntent.preferred === 'tackle'
+                && HuntMonsterTurnExecutor.activateReactiveGreatSwordTackle(engine, target);
+            const isGreatSwordTackling = alreadyGreatSwordTackling || reactiveGreatSwordTackle;
             if (isGreatSwordTackling) {
                 HuntMonsterTurnExecutor.grantCounterInvulnerability(target);
                 damage = Math.floor(damage * 0.5);
@@ -1404,8 +1483,7 @@ class HuntMonsterTurnExecutor {
             );
             const isStunned = guaranteedByInterference
                 || HuntMonsterTurnExecutor.isHunterDefenseLocked(target);
-            const responseIntent = pattern.runtimeDefenseIntents?.[target.index] || null;
-            const intendsDefense = !responseIntent || responseIntent.attempted;
+            const intendsDefense = responseIntent.attempted;
             const actionAllowsGuard = intendsDefense
                 && responseIntent?.preferred !== 'evade'
                 && HuntMonsterTurnExecutor.isPatternGuardable(pattern)
