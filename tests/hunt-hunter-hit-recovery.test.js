@@ -25,6 +25,18 @@ const leftDownKnockback = HuntCombatAnimator.knockbackVectorFromRects(
 assert.ok(leftDownKnockback.x < 0 && leftDownKnockback.y > 0,
     'a hunter below-left of the monster must tumble down and left');
 
+{
+    const frames = HuntCombatAnimator.strongHitKeyframes({ x: 240, y: 170, direction: -1 });
+    assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .15, .90, 1],
+        'a strong hit must tumble for 0.6 seconds, stay down for 3 seconds, then return for 0.4 seconds');
+    assert.match(frames[1].transform, /translate\(240px, 170px\) rotate\(-720deg\)/,
+        'the knockback must complete exactly two turns in the collision direction');
+    assert.strictEqual(frames[2].transform, frames[1].transform,
+        'the fallen pose and position must remain unchanged for the complete three-second hold');
+    assert.match(frames[3].transform, /translate\(0, 0\) rotate\(-720deg\)/,
+        'recovery must preserve the equivalent final rotation instead of rewinding to zero');
+}
+
 for (const kind of ['roar', 'tremor', 'wind']) {
     const hunter = {
         index: 0, status: 'alive', atb: 75,

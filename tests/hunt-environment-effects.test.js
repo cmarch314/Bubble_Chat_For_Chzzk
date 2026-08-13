@@ -170,6 +170,9 @@ for (const keyframe of ['pitfall-open', 'monster-pitfall-caught', 'rockfall-drop
 }
 assert.match(animator, /monster-pitfall-struggling/,
     'pitfall entry must transition into a persistent struggle pose');
+assert.doesNotMatch(animator,
+    /kind === 'trap-struggle'[\s\S]{0,220}?pitfallBeatOwned[\s\S]{0,80}?return/,
+    'BEAT ownership must not suppress resistance-aware live struggle pulses');
 assert.match(css, /monster-pitfall-caught\.monster-pitfall-struggle-pulse[\s\S]*?monster-pitfall-struggle/,
     'pitfall struggle must be an explicitly triggered pulse rather than an uncounted infinite loop');
 assert.match(css, /monster-pitfall-struggle-pulse\s*\{[^}]*animation:monster-pitfall-struggle 1\.2s/,

@@ -381,6 +381,21 @@ class HuntCombatAnimator {
         return { x: Number(fallbackDirection) < 0 ? -1 : 1, y: .28 };
     }
 
+    static strongHitKeyframes({ x = 0, y = 0, direction = 1, angleOffset = 0 } = {}) {
+        const spin = (Number(direction) < 0 ? -1 : 1) * 720;
+        const fallen = `translate(${Math.round(x)}px, ${Math.round(y)}px) rotate(${spin + Number(angleOffset || 0)}deg) scale(.82)`;
+        return [
+            { offset: 0, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)', opacity: 1 },
+            // 0.6 s: two complete turns in the collision direction.
+            { offset: .15, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            // 3.0 s: remain down at the exact final rotation and position.
+            { offset: .90, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            // Return only the position/pose. Keeping the equivalent 720-degree
+            // orientation prevents WAAPI from rewinding both spins on recovery.
+            { offset: 1, transform: `translate(0, 0) rotate(${spin}deg) scale(1)`, filter: 'brightness(1)', opacity: 1 }
+        ];
+    }
+
     triggerHitAnimation(idx, w, reaction = {}) {
         if (!this.card || !w || w.hp <= 0) return;
         // A damaging hit replaces roar, tremor, and wind-pressure presentation.
@@ -451,12 +466,12 @@ class HuntCombatAnimator {
                     { offset: .68, transform: `translate(${shortX}px, ${shortY + yOffset}px) rotate(${direction * 88 + angleOffset}deg) scale(.9)`, filter: 'brightness(.72)' },
                     { offset: 1, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)' }
                 ]
-                : [
-                    { offset: 0, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)', opacity: 1 },
-                    { offset: .25, transform: `translate(${x}px, ${y + yOffset}px) rotate(${direction * 1080 + angleOffset}deg) scale(.82)`, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
-                    { offset: .75, transform: `translate(${x}px, ${y + yOffset}px) rotate(${direction * 1080 + angleOffset}deg) scale(.82)`, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
-                    { offset: 1, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)', opacity: 1 }
-                ];
+                : HuntCombatAnimator.strongHitKeyframes({
+                    x,
+                    y: y + yOffset,
+                    direction,
+                    angleOffset
+                });
             const animation = layer.animate(keyframes, {
                 duration: durationMs,
                 easing: kind === 'weak' ? 'ease-in-out' : 'cubic-bezier(.18,.72,.2,1)',
@@ -1241,7 +1256,10 @@ class HuntCombatAnimator {
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-targeted') || this.card.querySelector('#fight-monster-img');
         if (kind === 'trap-struggle') {
             if (!monsterImg?.dataset?.pitfallLifecycle) return;
-            if (monsterImg.dataset.pitfallBeatOwned === 'true') return;
+            // The BEAT graph owns the persistent sunk pose while the live trap
+            // clock owns resistance-aware struggle occurrences. Compose the
+            // short pulse on the outer monster container instead of suppressing
+            // it; inner BEAT placement/pose tracks remain intact.
             monsterImg.classList.remove('monster-pitfall-struggle-pulse');
             void monsterImg.offsetWidth;
             monsterImg.classList.add('monster-pitfall-struggle-pulse');

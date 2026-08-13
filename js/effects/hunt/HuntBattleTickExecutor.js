@@ -675,7 +675,10 @@ class HuntBattleTickExecutor {
             // still resolve, but its control duration cannot replace KO.
             engine.monsterKnockdownDuration = 0;
         }
-        if (engine.pendingMonsterAction || engine.pendingMonsterImpact) {
+        // A trap is an authoritative control state. The interrupted action can
+        // remain pending until its cancelled promise settles, but it must never
+        // freeze trap ATB recovery or suppress authored struggle beats.
+        if (!engine.activeTrapControl && (engine.pendingMonsterAction || engine.pendingMonsterImpact)) {
             engine.monsterAtb = engine.smallMonsterSwarm
                 ? engine.smallMonsterSwarm.advanceAtb(engine.monsterSpeed)
                 : Math.min(HuntBattleTickExecutor.atbConfig().GAUGE_MAX, engine.monsterAtb + engine.monsterSpeed);

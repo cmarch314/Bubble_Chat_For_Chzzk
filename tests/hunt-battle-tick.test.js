@@ -697,6 +697,30 @@ function createEngine(overrides = {}) {
 }
 
 {
+    const effects = [];
+    const { engine } = createEngine({
+        monsterAtb: 50,
+        monsterState: 'knocked_down',
+        monsterKnockdownDuration: 20,
+        // Cancellation completion is asynchronous in the live hunt. A stale
+        // pending action must not stall the authoritative trap clock.
+        pendingMonsterAction: Promise.resolve(),
+        activeTrapControl: {
+            kind: 'pitfall', durationTicks: 20, recoveryPerTick: 2.5,
+            retainedAtb: 50, useCount: 1, elapsedTicks: 5,
+            struggleSchedule: [6], nextStruggleIndex: 0, releasing: false
+        },
+        triggerEnvironmentEffect: (...args) => effects.push(args)
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(engine.activeTrapControl.elapsedTicks, 6,
+        'a cancelled pending action must not freeze the live pitfall clock');
+    assert.strictEqual(JSON.stringify(effects), JSON.stringify([['trap-struggle', null,
+        { kind: 'pitfall', useCount: 1, struggleIndex: 1 }]]),
+    'the authored struggle pulse must still fire while action cancellation settles');
+}
+
+{
     let monsterTurns = 0;
     const { engine } = createEngine({
         monsterAtb: 100,
