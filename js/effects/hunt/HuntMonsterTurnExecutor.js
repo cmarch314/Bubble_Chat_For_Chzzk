@@ -1242,6 +1242,7 @@ class HuntMonsterTurnExecutor {
                 random: engine.random.bind(engine),
                 mode: targetingMode,
                 defaultTargets: targetsToHit,
+                primaryIndex: resolvedPreparedTargetIndex,
                 distinctPasses: Boolean(pattern.targeting?.distinctPasses)
             });
         targetsToHit = targetPlan.targets;

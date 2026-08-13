@@ -100,10 +100,14 @@ class HuntMonsterActionPolicy {
         return reverseChance && random() >= .5 ? lane.reverse() : lane;
     }
 
-    static adjacentLaneTargets(targetable, count, random = Math.random) {
+    static adjacentLaneTargets(targetable, count, random = Math.random, primaryIndex = null) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
-        const anchor = ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
+        const prepared = Number.isInteger(Number(primaryIndex))
+            ? ordered.find(target => Number(target.index) === Number(primaryIndex))
+            : null;
+        const anchor = prepared
+            || ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
         if (Number(count || 1) < 2) return [anchor];
         const adjacent = ordered.filter(target =>
             target.index !== anchor.index && Math.abs(Number(target.index) - Number(anchor.index)) === 1);
@@ -112,10 +116,14 @@ class HuntMonsterActionPolicy {
         return [anchor, neighbour];
     }
 
-    static primaryAdjacentBothTargets(targetable, count, random = Math.random) {
+    static primaryAdjacentBothTargets(targetable, count, random = Math.random, primaryIndex = null) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
-        const anchor = ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
+        const prepared = Number.isInteger(Number(primaryIndex))
+            ? ordered.find(target => Number(target.index) === Number(primaryIndex))
+            : null;
+        const anchor = prepared
+            || ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
         const neighbours = ordered.filter(target =>
             target.index !== anchor.index && Math.abs(Number(target.index) - Number(anchor.index)) === 1);
         return [anchor, ...neighbours].slice(0, Math.max(1, Number(count || 1)));
@@ -293,10 +301,16 @@ class HuntMonsterActionPolicy {
         distinctPasses = false
     } = {}) {
         if (mode === 'adjacent-lane') {
-            return { targets: this.adjacentLaneTargets(targetable, count, random), runtime: {} };
+            return {
+                targets: this.adjacentLaneTargets(targetable, count, random, primaryIndex),
+                runtime: {}
+            };
         }
         if (mode === 'primary-adjacent-both') {
-            return { targets: this.primaryAdjacentBothTargets(targetable, count, random), runtime: {} };
+            return {
+                targets: this.primaryAdjacentBothTargets(targetable, count, random, primaryIndex),
+                runtime: {}
+            };
         }
         if (mode === 'lane') {
             return { targets: this.laneTargets(targetable, count, random, false), runtime: {} };

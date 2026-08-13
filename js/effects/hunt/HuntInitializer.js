@@ -133,6 +133,7 @@ class HuntInitializer {
             selectedMonster = consecutiveQueue[0];
         } else if (targetMonsterName) {
             const nicknameMap = {
+                '디아브로스': '디아블로스',
                 '네기': '네르기간테',
                 '발파': '발파루크',
                 '이베르': '벨카나',

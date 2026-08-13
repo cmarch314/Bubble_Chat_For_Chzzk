@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BubbleChat 실수렵 스모크 테스트</title>
+  <style>
+    html,body{margin:0;background:#090b10;color:#fff;font:16px system-ui,sans-serif}
+    #controls{position:fixed;z-index:10;top:12px;left:12px;display:flex;gap:10px;align-items:center;padding:10px 14px;border:1px solid #536079;border-radius:12px;background:rgba(15,19,29,.92)}
+    button{padding:10px 16px;border:0;border-radius:8px;background:#c98534;color:#111;font-weight:800;cursor:pointer}
+    #status[data-state="ready"]{color:#6fffa3}#status[data-state="error"]{color:#ff7272}
+    iframe{display:block;width:1920px;height:1080px;border:0;transform-origin:top left;transform:scale(.65)}
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <button id="start" type="button">디아브로스 실수렵 시작</button>
+    <span id="status" role="status">대기 중</span>
+  </div>
+  <iframe id="overlay" src="/index.html" title="BubbleChat 실제 OBS 오버레이"></iframe>
+  <script>
+    const frame = document.getElementById('overlay');
+    const status = document.getElementById('status');
+    const hunters = [0, 1, 2, 3].map(index => ({
+      message: '!참가', nickname: `Smoke${index + 1}`, uid: `smoke-${index + 1}`,
+      isStreamer: index === 0, isSubscriber: true, type: 'chat'
+    }));
+    const send = payload => frame.contentWindow.processMessage?.(payload);
+    const waitFor = (test, timeoutMs) => new Promise((resolve, reject) => {
+      const started = performance.now();
+      const timer = setInterval(() => {
+        if (test()) { clearInterval(timer); resolve(); }
+        else if (performance.now() - started > timeoutMs) {
+          clearInterval(timer); reject(new Error('실수렵 화면 전환 시간 초과'));
+        }
+      }, 100);
+    });
+    document.getElementById('start').addEventListener('click', async () => {
+      try {
+        status.dataset.state = '';
+        status.textContent = '런타임 로드 중';
+        await waitFor(() => typeof frame.contentWindow.processMessage === 'function', 10000);
+        send({ message: '!수렵 디아블로스', nickname: 'Smoke1', uid: 'smoke-1', isStreamer: true, type: 'chat' });
+        await waitFor(() => frame.contentDocument.querySelector('.hunt-quest-board'), 15000);
+        hunters.forEach(send);
+        await waitFor(() => frame.contentDocument.querySelector('.hunt-loadout-board'), 15000);
+        hunters.forEach(hunter => send({ ...hunter, message: '!준비' }));
+        await waitFor(() => frame.contentDocument.querySelector('#fight-monster-img'), 20000);
+        status.dataset.state = 'ready';
+        status.textContent = '실수렵 진행 중';
+      } catch (error) {
+        status.dataset.state = 'error';
+        status.textContent = error.message;
+        console.error('[hunt-live-smoke]', error);
+      }
+    });
+  </script>
+</body>
+</html>

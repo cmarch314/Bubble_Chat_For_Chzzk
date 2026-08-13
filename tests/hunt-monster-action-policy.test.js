@@ -79,6 +79,23 @@ const HuntMonsterAnimationCatalog = require('../js/effects/hunt/HuntMonsterAnima
 }
 
 {
+    const hunters = [0, 1, 2, 3].map(index => ({ index }));
+    const anchored = HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern: { impactTimeline: [{ atTicks: 8, targetMode: 'judgment-primary' }] },
+        targetable: hunters,
+        count: 2,
+        random: () => .999,
+        mode: 'adjacent-lane',
+        defaultTargets: [hunters[1]],
+        primaryIndex: 1
+    });
+    assert.deepStrictEqual(anchored.targets.map(target => target.index), [1],
+        'a primary-only judgment must preserve the prepared live target');
+    assert.deepStrictEqual(anchored.impactTimeline[0].targetIndices, [1],
+        'the authored primary judgment must hit the same hunter used by the visible route');
+}
+
+{
     const sourcePattern = {
         id: 'future_monster.submerge',
         phase: { kind: 'burrow', enterVisualMs: 900, emergeVisualMs: 1200 },
