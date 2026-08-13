@@ -28,6 +28,26 @@ class HuntCombatAnimator {
             : Number(durationMs || 0);
     }
 
+    cartExitDistance(anchor, direction) {
+        const mapRect = this.card?.getBoundingClientRect?.();
+        const anchorRect = anchor?.getBoundingClientRect?.();
+        const fallbackWidth = Number(globalThis?.innerWidth || 1920);
+        const mapLeft = Number.isFinite(mapRect?.left) ? mapRect.left : 0;
+        const mapRight = Number.isFinite(mapRect?.right) && mapRect.right > mapLeft
+            ? mapRect.right
+            : fallbackWidth;
+        const anchorCenter = Number.isFinite(anchorRect?.left) && Number.isFinite(anchorRect?.width)
+            ? anchorRect.left + (anchorRect.width / 2)
+            : fallbackWidth / 2;
+        // Move the 84px cart completely beyond the combat map, not merely away
+        // from its hunter card. The same distance drives the carried weapon.
+        const exitPadding = Math.max(72, Number(anchorRect?.width || 0) * .75);
+        const distance = direction > 0
+            ? mapRight - anchorCenter + exitPadding
+            : anchorCenter - mapLeft + exitPadding;
+        return Math.max(520, Math.ceil(distance));
+    }
+
     clearWeaponAnimations() {
         this.activeWeaponAnimations.forEach(animation => {
             try { animation.cancel(); } catch (_) { /* detached OBS node */ }
@@ -682,6 +702,7 @@ class HuntCombatAnimator {
         const travelDirection = idx < 2 ? 1 : -1;
         const fallDistance = 220;
         const cartLiftDistance = 62;
+        const exitDistance = this.cartExitDistance(imgContainer || weaponCard, travelDirection);
         layers.forEach(layer => {
             this.cancelWeaponAnimation(layer);
             if (typeof layer.animate !== 'function') return;
@@ -690,7 +711,8 @@ class HuntCombatAnimator {
                 { offset: .4, transform: `translate(0,${fallDistance}px) rotate(720deg) scale(.86)`, opacity: 1, filter: 'grayscale(.55) brightness(.68)' },
                 { offset: .62, transform: `translate(0,${fallDistance}px) rotate(720deg) scale(.86)`, opacity: 1, filter: 'grayscale(.55) brightness(.68)' },
                 { offset: .7, transform: `translate(0,${fallDistance - cartLiftDistance}px) rotate(720deg) scale(.72)`, opacity: 1, filter: 'brightness(2.8)' },
-                { offset: 1, transform: `translate(${travelDirection * 520}px,${fallDistance - cartLiftDistance}px) rotate(720deg) scale(.72)`, opacity: 0, filter: 'brightness(1.2)' }
+                { offset: .96, transform: `translate(${travelDirection * exitDistance}px,${fallDistance - cartLiftDistance}px) rotate(720deg) scale(.72)`, opacity: 1, filter: 'brightness(1.2)' },
+                { offset: 1, transform: `translate(${travelDirection * exitDistance}px,${fallDistance - cartLiftDistance}px) rotate(720deg) scale(.72)`, opacity: 0, filter: 'brightness(1.2)' }
             ], { duration: 3000, easing: 'linear', fill: 'forwards' });
             this.activeWeaponAnimations.set(layer, animation);
         });
@@ -705,7 +727,8 @@ class HuntCombatAnimator {
             { offset: .4, transform: `translate(${travelDirection * -360}px,${fallDistance}px)`, opacity: 0 },
             { offset: .62, transform: `translate(0,${fallDistance}px)`, opacity: 1 },
             { offset: .7, transform: `translate(0,${fallDistance - cartLiftDistance}px) scale(1.12)`, opacity: 1, filter: 'brightness(2.8)' },
-            { offset: 1, transform: `translate(${travelDirection * 520}px,${fallDistance - cartLiftDistance}px) scale(1.12)`, opacity: 0, filter: 'brightness(1)' }
+            { offset: .96, transform: `translate(${travelDirection * exitDistance}px,${fallDistance - cartLiftDistance}px) scale(1.12)`, opacity: 1, filter: 'brightness(1)' },
+            { offset: 1, transform: `translate(${travelDirection * exitDistance}px,${fallDistance - cartLiftDistance}px) scale(1.12)`, opacity: 0, filter: 'brightness(1)' }
         ], { duration: 3000, easing: 'linear', fill: 'forwards' });
         const flash = document.createElement('span');
         flash.className = 'hunter-cart-sequence-flash';

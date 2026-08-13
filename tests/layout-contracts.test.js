@@ -231,6 +231,12 @@ assert.match(huntAnimator, /triggerDeathTag\(idx, w, timerVal = 5\)[\s\S]*?fallD
     'carting must use the authored two-turn fall and converging cart sequence');
 assert.match(huntAnimator, /\(imgContainer \|\| weaponCard\)\.appendChild\(cart\)[\s\S]*?translate\(0,\$\{fallDistance\}px\)/,
     'the cart must share the weapon image coordinate space and converge on its exact fallen position');
+assert.match(huntAnimator, /cartExitDistance\(anchor, direction\)[\s\S]*?mapRight - anchorCenter[\s\S]*?anchorCenter - mapLeft/,
+    'cart exit distance must be measured from the hunter anchor to the corresponding combat-map edge');
+assert.match(huntAnimator, /exitDistance = this\.cartExitDistance\(imgContainer \|\| weaponCard, travelDirection\)[\s\S]*?travelDirection \* exitDistance/,
+    'the cart and carried weapon must travel fully beyond the combat map instead of using a fixed short offset');
+assert.doesNotMatch(huntAnimator, /travelDirection \* 520/,
+    'the obsolete fixed cart exit distance must not strand carts inside the combat map');
 assert.match(css, /\.hunter-cart-sequence-cart,[\s\S]*?top:50%/,
     'cart and weapon coordinates must share the image-container center origin');
 assert.match(huntAnimator, /triggerHunterReturn\(idx, w\)[\s\S]*?translateY\(230px\)[\s\S]*?translateY\(0\)/,
