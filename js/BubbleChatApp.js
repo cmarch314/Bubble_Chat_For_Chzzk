@@ -50,6 +50,14 @@ class BubbleChatApp {
             if (window.processMessage === processMessage) delete window.processMessage;
         });
 
+        const simulationMode = /(?:^|[?&])huntSimulation=1(?:&|$)/
+            .test(String(window.location?.search || ''));
+        if (simulationMode) {
+            document.body.dataset.huntSimulation = 'true';
+            document.getElementById('loading-screen')?.remove();
+            return this;
+        }
+
         const connectedHandler = () => this._handleConnected();
         window.addEventListener('chzzk_connected', connectedHandler, { once: true });
         this.scope.add(() => window.removeEventListener?.('chzzk_connected', connectedHandler));

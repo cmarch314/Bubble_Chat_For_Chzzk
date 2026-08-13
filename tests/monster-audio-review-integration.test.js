@@ -24,9 +24,24 @@ const { createServer } = require('../tools/monster-audio-review-server');
             'the source rail must expose the shared common sound folder explicitly');
         assert.ok(!shell.includes('const state='), 'legacy monkey-patch application must not be served');
         assert.ok(shell.includes('src="/preview/?embed=1"'), 'preview must use the versioned same-origin server');
+        assert.ok(shell.includes('id="simulationStart"')
+            && shell.includes('id="simulationPause"')
+            && shell.includes('id="simulationSpeed"'),
+        'the review preview must expose live-combat start, pause and speed controls');
+
+        const liveShell = await fetch(`${origin}/index.html?huntSimulation=1`).then(response => response.text());
+        assert.ok(liveShell.includes('js/BubbleChatApp.js') && liveShell.includes('js/main.js'),
+            'simulation mode must mount the production BubbleChat application, not a duplicate fixture');
 
         const app = await fetch(`${origin}/review-app.js`).then(response => response.text());
         assert.ok(app.includes('MonsterAudioReviewState.createEditorSession()'));
+        assert.ok(app.includes("previewFrame().src = `/index.html?huntSimulation=1")
+            && app.includes('simulationWindow()?.processMessage')
+            && app.includes("sendSimulationChat('!참가'")
+            && app.includes("sendSimulationChat('!준비'"),
+        'live simulation must drive the real chat router through the production index');
+        assert.ok(app.includes('simulationRuntime().clock?.setRate?.'),
+            'simulation speed must control the shared combat clock');
         const commonGroups = await fetch(`${origin}/api/common-groups`).then(response => response.json());
         assert.ok(Array.isArray(commonGroups.groups), 'the common source endpoint must return a stable group list');
         assert.ok(commonGroups.groups.every(group => group.common === true

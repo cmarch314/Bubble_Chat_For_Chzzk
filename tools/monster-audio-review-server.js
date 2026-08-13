@@ -605,7 +605,11 @@ function assertExpectedRevision(input, file, label) {
 
 function safeEditorAssetPath(pathname) {
     const decoded = decodeURIComponent(String(pathname || ''));
-    const allowed = ['/js/', '/styles/', '/tests/fixtures/', '/img/', '/local_assets/', '/style.css'];
+    const allowed = [
+        '/js/', '/styles/', '/tests/fixtures/', '/img/', '/local_assets/', '/fonts/',
+        '/config/', '/BGM/', '/SFX/', '/Unified_SFX/', '/AI CMC/',
+        '/style.css', '/config.js'
+    ];
     if (!allowed.some(prefix => decoded === prefix || decoded.startsWith(prefix))) return null;
     const absolute = path.resolve(ROOT, `.${decoded}`);
     const relative = path.relative(ROOT, absolute);
@@ -642,6 +646,15 @@ function createServer(options = {}) {
                     '<script src="/review-app.js"></script>\n</body>'
                 );
                 response.end(shell);
+                return;
+            }
+            if (request.method === 'GET' && url.pathname === '/index.html') {
+                response.writeHead(200, {
+                    'Content-Type': 'text/html; charset=utf-8',
+                    'Cache-Control': 'no-store',
+                    'X-Content-Type-Options': 'nosniff'
+                });
+                response.end(fs.readFileSync(path.join(ROOT, 'index.html')));
                 return;
             }
             if (request.method === 'GET' && url.pathname === '/review-app.js') {

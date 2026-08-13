@@ -40,7 +40,8 @@
         showHiddenSources: false, linkedSourcesFirst: false, sourceFocusPath: '', routeClipboard: null,
         routeLastRandomLayer: new Map(),
         revisions: { audio: '', motion: '', anatomy: '' }, playbackState: 'stopped',
-        playbackStartedAt: 0, playbackElapsedMs: 0, playbackDurationMs: 0, playbackDurationTicks: 0
+        playbackStartedAt: 0, playbackElapsedMs: 0, playbackDurationMs: 0, playbackDurationTicks: 0,
+        simulationMode: false, simulationState: 'pattern', simulationPollTimer: null
     };
     const audio = $('#audio');
     const selectedPattern = () => app.patterns.find(pattern => pattern.id === app.selectedPatternId) || null;
@@ -179,6 +180,10 @@
             this.ready = true;
             if (this.pending) { const pending = this.pending; this.pending = null; this.send(pending.type, pending); }
         }
+        reset() {
+            this.ready = false;
+            this.pending = null;
+        }
     }
     const bridge = new PreviewBridge(previewFrame());
 
@@ -257,6 +262,7 @@
     }
 
     function sendPreview({ scrub = false, play = false, reset = false, resetOnly = false } = {}) {
+        if (app.simulationMode) return;
         const pattern = selectedPattern(), monster = app.monsters.find(item => item.id === app.monster);
         if (!pattern) return;
         const snapshot = app.session.snapshot();
@@ -278,6 +284,7 @@
     }
 
     function syncPreviewSettings() {
+        if (app.simulationMode) return;
         const snapshot = app.session.snapshot();
         bridge.send('bubblechat:pattern-preview-settings', {
             target: $('#previewTarget').value,
@@ -285,6 +292,160 @@
             scenario: { ...snapshot.scenario, selectedBeatId: snapshot.selection.beatId,
                 editBeat: { ...(snapshot.draft[snapshot.selection.beatId] || {}) } }
         });
+    }
+
+    function simulationWindow() {
+        return previewFrame()?.contentWindow || null;
+    }
+
+    function simulationApp() {
+        return simulationWindow()?.__bubbleChatSimulationApp || null;
+    }
+
+    function simulationGame() {
+        return simulationApp()?.visuals?.activeGame || null;
+    }
+
+    function simulationRuntime() {
+        const game = simulationGame();
+        return game?.combatRuntime || game?.instance?.combatRuntime || null;
+    }
+
+    function setSimulationUi(state, message = '') {
+        app.simulationState = state;
+        const active = app.simulationMode;
+        $('.combat-preview')?.classList.toggle('simulation-active', active);
+        const start = $('#simulationStart'), pause = $('#simulationPause');
+        const speed = $('#simulationSpeed'), reset = $('#simulationReset'), status = $('#simulationStatus');
+        if (start) {
+            start.classList.toggle('active', active);
+            start.textContent = active ? '패턴 편집으로' : '⚔ 실전 시작';
+            start.disabled = state === 'loading';
+        }
+        if (pause) {
+            pause.disabled = state !== 'running' && state !== 'paused';
+            pause.textContent = state === 'paused' ? '▶' : 'Ⅱ';
+            pause.title = state === 'paused' ? '계속' : '일시정지';
+        }
+        if (speed) speed.disabled = state !== 'running' && state !== 'paused';
+        if (reset) reset.disabled = !active || state === 'loading';
+        if (status) {
+            status.className = `simulation-status ${state}`;
+            status.textContent = message || ({ pattern: '패턴 모드', loading: '전투 준비…', running: '실전 진행', paused: '일시정지', ended: '전투 종료' }[state] || state);
+        }
+    }
+
+    function stopSimulationMonitor() {
+        if (app.simulationPollTimer) clearInterval(app.simulationPollTimer);
+        app.simulationPollTimer = null;
+    }
+
+    function startSimulationMonitor() {
+        stopSimulationMonitor();
+        app.simulationPollTimer = setInterval(() => {
+            if (!app.simulationMode || app.simulationState === 'paused') return;
+            const game = simulationGame(), engine = simulationRuntime()?.engine;
+            if (!game) {
+                if (app.simulationState === 'running') setSimulationUi('ended', '전투 종료');
+                return;
+            }
+            if (!engine) return;
+            const hp = Math.max(0, Math.round(Number(engine.monsterHp || 0)));
+            const maxHp = Math.max(hp, Math.round(Number(engine.monsterMaxHp || engine.maxMonsterHp || 0)));
+            const time = Math.max(0, Math.round(Number(engine.battleTime || 0) / 10));
+            setSimulationUi('running', maxHp ? `HP ${hp}/${maxHp} · ${time}초` : `전투 ${time}초`);
+        }, 500);
+    }
+
+    function waitForSimulation(predicate, description, timeoutMs = 25000) {
+        const startedAt = performance.now();
+        return new Promise((resolve, reject) => {
+            const poll = () => {
+                let value = null;
+                try { value = predicate(); } catch { value = null; }
+                if (value) return resolve(value);
+                if (performance.now() - startedAt >= timeoutMs) return reject(new Error(`실전 시뮬레이션 준비 실패: ${description}`));
+                setTimeout(poll, 100);
+            };
+            poll();
+        });
+    }
+
+    function sendSimulationChat(message, index = 0, isStreamer = false) {
+        const receiver = simulationWindow()?.processMessage;
+        if (typeof receiver !== 'function') throw new Error('실제 채팅 라우터를 찾을 수 없습니다.');
+        receiver({
+            message,
+            nickname: isStreamer ? 'Simulation Host' : `Preview Hunter ${index + 1}`,
+            uid: isStreamer ? 'preview-simulation-host' : `preview-simulation-hunter-${index + 1}`,
+            userIdHash: isStreamer ? 'preview-simulation-host' : `preview-simulation-hunter-${index + 1}`,
+            color: ['#64d8ff', '#ff8ca8', '#9be56b', '#ffd166'][index % 4],
+            isStreamer,
+            isSubscriber: true,
+            emojis: []
+        });
+    }
+
+    async function stopCombatSimulation({ restorePatternPreview = true } = {}) {
+        stopSimulationMonitor();
+        const game = simulationGame();
+        try { game?.forceStopGame?.(); } catch (error) { console.warn('Simulation cleanup failed', error); }
+        app.simulationMode = false;
+        bridge.reset();
+        if (restorePatternPreview) {
+            previewFrame().src = '/preview/?embed=1';
+            setSimulationUi('pattern');
+        }
+    }
+
+    async function startCombatSimulation() {
+        if (app.simulationMode) {
+            await stopCombatSimulation();
+            return;
+        }
+        const monster = app.monsters.find(item => item.id === app.monster);
+        if (!monster) throw new Error('선택한 몬스터를 찾을 수 없습니다.');
+        stopPreviewAudio();
+        stopPlaybackProgress();
+        bridge.reset();
+        app.simulationMode = true;
+        setSimulationUi('loading', '실제 수렵 로딩…');
+        previewFrame().src = `/index.html?huntSimulation=1&monster=${encodeURIComponent(app.huntId || app.monster)}`;
+
+        await waitForSimulation(() => simulationApp() && typeof simulationWindow()?.processMessage === 'function', '실제 수렵 앱');
+        sendSimulationChat(`!수렵 ${monster.name || app.huntId || app.monster}`, 0, true);
+        await waitForSimulation(() => simulationWindow()?.document?.querySelector('.hunt-quest-board'), '퀘스트 보드');
+        for (let index = 0; index < 4; index++) sendSimulationChat('!참가', index);
+        await waitForSimulation(() => simulationWindow()?.document?.querySelector('.hunt-loadout-board'), '장비 선택');
+        for (let index = 0; index < 4; index++) sendSimulationChat('!준비', index);
+        await waitForSimulation(() => simulationWindow()?.document?.querySelector('#fight-monster-img') && simulationRuntime(), '전투 시작');
+        simulationRuntime().clock?.setRate?.(Number($('#simulationSpeed').value || 1));
+        setSimulationUi('running', `${monster.name || app.huntId} 실전`);
+        startSimulationMonitor();
+    }
+
+    function installCombatSimulationControls() {
+        setSimulationUi('pattern');
+        $('#simulationStart').onclick = () => startCombatSimulation().catch(error => {
+            console.error(error);
+            setSimulationUi('ended', error.message);
+        });
+        $('#simulationPause').onclick = () => {
+            const runtime = simulationRuntime();
+            if (!runtime) return;
+            if (app.simulationState === 'paused') {
+                runtime.resume();
+                setSimulationUi('running');
+            } else {
+                runtime.pause();
+                setSimulationUi('paused');
+            }
+        };
+        $('#simulationSpeed').onchange = () => simulationRuntime()?.clock?.setRate?.(Number($('#simulationSpeed').value || 1));
+        $('#simulationReset').onclick = async () => {
+            await stopCombatSimulation({ restorePatternPreview: false });
+            await startCombatSimulation();
+        };
     }
 
     function installPairPreviewTargets() {
@@ -1522,7 +1683,9 @@
         previewFrame().src = metadata.previewPath || '/preview/?embed=1';
         const resizePreview = () => { const stage = $('#previewStage'); previewFrame().style.transform = `scale(${stage.clientWidth / 1920})`; };
         new ResizeObserver(resizePreview).observe($('#previewStage')); resizePreview();
-        installScenarioControls(); $('#monsterPickerToggle').onclick = () => $('#monsterPickerPanel').hidden ? openPicker() : closePicker();
+        installScenarioControls();
+        installCombatSimulationControls();
+        $('#monsterPickerToggle').onclick = () => $('#monsterPickerPanel').hidden ? openPicker() : closePicker();
         $('.undo-motion').onclick = () => { app.session.undo(); renderPatternDesk(); sendPreview({ scrub: true }); };
         $('.redo-motion').onclick = () => { app.session.redo(); renderPatternDesk(); sendPreview({ scrub: true }); };
         $('.reset-motion').onclick = resetMotion;

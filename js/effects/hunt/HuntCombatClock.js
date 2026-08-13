@@ -11,6 +11,7 @@ class HuntCombatClock {
     constructor(options = {}) {
         this.mode = options.mode === 'manual' ? 'manual' : 'auto';
         this.tickMs = Math.max(1, Number(options.tickMs || 100));
+        this.rate = this.#normalizeRate(options.rate || 1);
         this.timers = options.timers || null;
         this.onTick = typeof options.onTick === 'function' ? options.onTick : () => {};
         this.onError = typeof options.onError === 'function' ? options.onError : null;
@@ -34,6 +35,17 @@ class HuntCombatClock {
     }
 
     resume() { return this.start(); }
+
+    setRate(rate = 1) {
+        const next = this.#normalizeRate(rate);
+        if (next === this.rate) return this.rate;
+        this.rate = next;
+        if (this.running && this.mode === 'auto') {
+            this.#clearInterval();
+            this.#startInterval();
+        }
+        return this.rate;
+    }
 
     stop() {
         const changed = this.running || this.intervalId != null;
@@ -66,9 +78,15 @@ class HuntCombatClock {
         const callback = () => {
             if (this.running) this.step(1);
         };
+        const intervalMs = Math.max(1, this.tickMs / this.rate);
         this.intervalId = this.timers?.interval
-            ? this.timers.interval(callback, this.tickMs)
-            : setInterval(callback, this.tickMs);
+            ? this.timers.interval(callback, intervalMs)
+            : setInterval(callback, intervalMs);
+    }
+
+    #normalizeRate(rate) {
+        const numeric = Number(rate);
+        return [1, 2, 4].includes(numeric) ? numeric : 1;
     }
 
     #clearInterval() {

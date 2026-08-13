@@ -21,6 +21,33 @@ const HuntCombatRuntime = require('../js/effects/hunt/HuntCombatRuntime.js');
 }
 
 {
+    const scheduled = [];
+    const cleared = [];
+    const clock = new HuntCombatClock({
+        mode: 'auto',
+        tickMs: 100,
+        timers: {
+            interval(callback, milliseconds) {
+                const token = { callback, milliseconds };
+                scheduled.push(token);
+                return token;
+            },
+            clear(token) { cleared.push(token); }
+        }
+    });
+    clock.start();
+    assert.strictEqual(scheduled[0].milliseconds, 100);
+    assert.strictEqual(clock.setRate(2), 2);
+    assert.strictEqual(scheduled[1].milliseconds, 50);
+    assert.strictEqual(cleared[0], scheduled[0]);
+    assert.strictEqual(clock.setRate(4), 4);
+    assert.strictEqual(scheduled[2].milliseconds, 25);
+    assert.strictEqual(clock.setRate(3), 1, 'unsupported preview rates normalize to real time');
+    assert.strictEqual(scheduled[3].milliseconds, 100);
+    clock.stop();
+}
+
+{
     class FakeEngine {
         constructor(config) {
             this.config = config;
