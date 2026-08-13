@@ -82,6 +82,11 @@ assert.strictEqual(trueFrames[8][3], 855,
 assert.deepStrictEqual([trueFrames[6][0], trueFrames[8][0]],
     trueChargeHits.map(event => event.atTicks / trueCharge.totalTicks),
     'both visible blade contacts must share the exact BEAT damage timestamps');
+assert.ok([trueFrames[6], trueFrames[8]].every(frame => frame[1] < .9 && frame[2] < .9),
+    'True Charged Slash contacts must stop the grip short so the blade, not the handle, reaches the monster');
+assert.ok(trueFrames[9][3] - trueFrames[8][3] >= 60
+    && trueFrames[10][3] > trueFrames[9][3],
+    'the heavy cut must continue through a readable same-direction follow-through instead of stopping or rewinding');
 assert.ok(trueFrames[2][6] < -90 && trueFrames[7][6] < -90,
     'the planted turn and heavy rebound must retain a readable vertical arc');
 assert.ok(trueFrames.slice(0, 4).every(frame => frame[1] === 0 && frame[2] === 0),
