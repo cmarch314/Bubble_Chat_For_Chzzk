@@ -1554,7 +1554,10 @@ class HuntCombatAnimator {
     }
 
     playWeaponAnimation(weaponImg, weaponId, idx, profile, target = null) {
-        this.cancelWeaponAnimation(weaponImg);
+        // Action motion owns only its WAAPI transform. Persistent weapon-state
+        // CSS (notably Long Sword spirit-color pulse) must remain visible while
+        // Special Sheathe and other authored motions run on the same image.
+        this.cancelWeaponAnimation(weaponImg, { preserveResourceAnimations: true });
         if (typeof weaponImg.animate === 'function') {
             const targetVector = profile.trackTarget
                 ? this.resolveWeaponTargetVector(weaponImg, target)
@@ -1591,13 +1594,16 @@ class HuntCombatAnimator {
         this.animationTimers.timeout(() => weaponImg.classList.remove(fallbackClass), profile.durationMs);
     }
 
-    cancelWeaponAnimation(weaponImg) {
+    cancelWeaponAnimation(weaponImg, { preserveResourceAnimations = false } = {}) {
         if (!weaponImg) return;
         const animation = this.activeWeaponAnimations.get(weaponImg);
         const animations = typeof weaponImg.getAnimations === 'function'
             ? weaponImg.getAnimations()
             : [];
         new Set([animation, ...animations].filter(Boolean)).forEach(activeAnimation => {
+            const isPersistentResourceAnimation = activeAnimation !== animation
+                && activeAnimation?.animationName === 'ls-spirit-img-pulse-3';
+            if (preserveResourceAnimations && isPersistentResourceAnimation) return;
             try { activeAnimation.cancel(); } catch (_) { /* detached OBS node */ }
         });
         this.activeWeaponAnimations.delete(weaponImg);

@@ -885,6 +885,7 @@
     filter: sepia(1) saturate(20) hue-rotate(15deg) brightness(1.35) drop-shadow(0 0 10px rgba(241, 196, 15, 0.95)) !important;
 }
 .game-hunt-weapon-img.ls-spirit-img-3 {
+    filter: sepia(1) saturate(30) hue-rotate(300deg) brightness(1.35) drop-shadow(0 0 8px rgba(231, 76, 60, 0.85)) !important;
     animation: ls-spirit-img-pulse-3 0.8s infinite alternate !important;
 }
 @keyframes ls-spirit-img-pulse-3 {
