@@ -1255,11 +1255,11 @@
 }
 .hunt-monster-aux-panel[hidden] { display:none; }
 .hunt-monster-parts-panel {
-    justify-self:start; padding:5px 12px;
+    position:absolute; left:0; top:0; justify-self:start; padding:5px 12px;
     border-color:rgba(211,167,87,.92);
 }
 .hunt-monster-utility-panel {
-    justify-self:end; padding:5px 14px;
+    position:absolute; right:0; top:0; justify-self:end; padding:5px 14px;
     border-color:rgba(126,174,183,.86);
     background:linear-gradient(145deg,rgba(18,29,31,.94),rgba(8,12,13,.86));
 }

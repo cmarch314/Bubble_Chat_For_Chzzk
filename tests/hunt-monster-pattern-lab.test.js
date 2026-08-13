@@ -169,6 +169,10 @@ assert.match(html, /if\(!selection\.targets\.length\)/,
 assert.match(html, /bubblechat:pattern-anatomy/,
     'the editor must be able to toggle the monster anatomy position/direction guide');
 assert.match(html, /monster-anatomy-guide/);
+assert.match(html, /let anatomyGuideEnabled=true/,
+    'the embedded editor must show anatomy guides by default');
+assert.match(html, /host\.hidden=false[\s\S]*hunt-monster-parts-panel.*removeAttribute\('hidden'\)/,
+    'the Preview part list must be visible instead of remaining hidden behind the production HUD');
 assert.match(html, /part-handle/,
     'each anatomy part must expose an interactive drag handle');
 assert.match(html, /syncAnatomyTransform/,

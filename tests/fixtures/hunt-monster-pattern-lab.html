@@ -323,6 +323,8 @@
       const host=document.getElementById('hunt-monster-parts');
       if(!host)return;
       host.classList.add('lab-parts');
+      host.hidden=false;
+      document.getElementById('hunt-monster-parts-panel')?.removeAttribute('hidden');
       host.replaceChildren(...partState.map(part=>{
         const slot=document.createElement('button');
         slot.type='button';
@@ -709,7 +711,7 @@
     targetButtons.addEventListener('click',event=>{const button=event.target.closest('.target-btn');if(!button)return;targetMode=button.dataset.target;updateTargetSelection([],null);if(activePatternId)playPattern(activePatternId)});
     const ANATOMY_LABELS={head:'머리',mouth:'입',torso:'몸통',tail:'꼬리','left-wing':'좌익','right-wing':'우익',
       'left-front-leg':'좌앞발','right-front-leg':'우앞발','left-foreleg':'좌앞발','right-foreleg':'우앞발',foot:'앞발'};
-    let anatomyGuideEnabled=false,anatomyGuideFrame=0,anatomyDraft=null;
+    let anatomyGuideEnabled=true,anatomyGuideFrame=0,anatomyDraft=null;
     const cloneGeometry=value=>value?JSON.parse(JSON.stringify(value)):null;
     function syncAnatomyTransform(){
       cancelAnimationFrame(anatomyGuideFrame);

@@ -31,7 +31,7 @@
     const app = {
         monster: '', huntId: '', monsters: [], categories: [], groups: [], commonGroups: [], presets: {}, patterns: [],
         partReactions: [], systemAudioPattern: null,
-        selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', anatomy: false, sourceQueue: [], previewTimers: [],
+        selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', anatomy: true, sourceQueue: [], previewTimers: [],
         previewAudios: [], previewAudioSchedule: [], capabilities: [], buildId: '', session: MonsterAudioReviewState.createEditorSession(),
         pickerCategory: '', pickerStatus: 'all', previewReady: false, previewSequence: 0,
         sourceRowsByPath: new Map(), sourceGroupViews: [], sourceRenderLimit: 80,
@@ -1663,6 +1663,7 @@
         panel.querySelector('.impact-options').onclick = event => { const button = event.target.closest('button'), row = event.target.closest('.impact-option'); if (!button || !row) return; const impactIndex = Number(row.dataset.impact), target = Number(button.dataset.index), entries = app.session.scenario.forcedImpactTargets.map(entry => ({ ...entry, targetIndices: [...entry.targetIndices] })), entry = entries.find(item => item.impactIndex === impactIndex) || { impactIndex, targetIndices: [] }, values = new Set(entry.targetIndices); values.has(target) ? values.delete(target) : values.add(target); entry.targetIndices = [...values]; app.session.setScenario({ forcedImpactTargets: [...entries.filter(item => item.impactIndex !== impactIndex), entry] }); render(); syncPreviewSettings(); };
         $('#previewTarget').onchange = syncPreviewSettings;
         $('#previewState').onchange = () => { app.session.setScenario({ monsterState: $('#previewState').value }); syncPreviewSettings(); };
+        $('#anatomyToggle').classList.toggle('active', app.anatomy);
         $('#anatomyToggle').onclick = () => { app.anatomy = !app.anatomy; $('#anatomyToggle').classList.toggle('active', app.anatomy); bridge.send('bubblechat:pattern-anatomy', { enabled: app.anatomy }); };
         app.renderScenario = render; render();
     }
