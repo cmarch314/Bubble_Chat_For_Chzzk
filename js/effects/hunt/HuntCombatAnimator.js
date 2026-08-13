@@ -382,12 +382,28 @@ class HuntCombatAnimator {
     }
 
     static strongHitKeyframes({ x = 0, y = 0, direction = 1, angleOffset = 0 } = {}) {
-        const spin = (Number(direction) < 0 ? -1 : 1) * 720;
+        const spinDirection = Number(direction) < 0 ? -1 : 1;
+        const spin = spinDirection * 720;
         const fallen = `translate(${Math.round(x)}px, ${Math.round(y)}px) rotate(${spin + Number(angleOffset || 0)}deg) scale(.82)`;
+        const tumbleFrame = (offset, progress, degrees, lift = 0) => {
+            const scale = progress === 1 ? '.82' : String(Number((1 - .18 * progress).toFixed(3)));
+            return {
+                offset,
+                transform: `translate(${Math.round(x * progress)}px, ${Math.round(y * progress - lift)}px) rotate(${spinDirection * degrees + Number(angleOffset || 0) * progress}deg) scale(${scale})`,
+                filter: `brightness(${1 - .38 * progress}) sepia(${.5 * progress}) hue-rotate(${-50 * progress}deg)`,
+                opacity: 1 - .32 * progress
+            };
+        };
         return [
             { offset: 0, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)', opacity: 1 },
-            // 0.6 s: two complete turns in the collision direction.
-            { offset: .15, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            // Explicit quarter-turn waypoints prevent transform matrix
+            // normalization from treating rotate(720deg) as rotate(0deg).
+            // The hunter now visibly tumbles twice while travelling along the
+            // measured collision vector instead of merely sliding in parallel.
+            tumbleFrame(.0375, .25, 180, 18),
+            tumbleFrame(.075, .50, 360, 26),
+            tumbleFrame(.1125, .75, 540, 14),
+            tumbleFrame(.15, 1, 720),
             // 3.0 s: remain down at the exact final rotation and position.
             { offset: .90, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
             // Return only the position/pose. Keeping the equivalent 720-degree
