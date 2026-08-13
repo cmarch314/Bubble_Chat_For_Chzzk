@@ -101,8 +101,11 @@ assert.ok(leftDownKnockback.x < 0 && leftDownKnockback.y > 0,
 
 {
     const frames = HuntCombatAnimator.strongHitKeyframes({ x: 240, y: 170, direction: -1 });
-    assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .11, .22, .33, .44, .88, .90, .93, .96, .98, 1],
-        'a strong hit must use 2.2s to tumble and the final 0.6s to walk home');
+    const tumbleEndOffset = .44 / 1.3;
+    assert.deepStrictEqual(frames.map(frame => frame.offset), [
+        0, tumbleEndOffset * .25, tumbleEndOffset * .5, tumbleEndOffset * .75,
+        tumbleEndOffset, .88, .90, .93, .96, .98, 1
+    ], 'a strong hit must tumble 30% faster and keep the final 0.6s walk home');
     assert.match(frames[4].transform, /translate\(240px, 170px\) rotate\(-540deg\) skewX\(-12deg\)/,
         'the knockback must finish one and a half turns in a visibly prone pose');
     assert.strictEqual(frames[5].transform, frames[4].transform,

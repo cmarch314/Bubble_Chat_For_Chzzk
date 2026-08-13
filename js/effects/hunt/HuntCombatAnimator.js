@@ -420,6 +420,9 @@ class HuntCombatAnimator {
         const fallSpin = spinDirection * 540;
         const standingSpin = spinDirection * 720;
         const proneSkew = spinDirection * 12;
+        // Keep the five-second recovery/invulnerability contract unchanged,
+        // but make the visible launch and tumble 30% faster for a sharper hit.
+        const tumbleEndOffset = .44 / 1.3;
         const fallen = `translate(${Math.round(x)}px, ${Math.round(y)}px) rotate(${fallSpin + Number(angleOffset || 0)}deg) skewX(${proneSkew}deg) scale(.82, .76)`;
         const tumbleFrame = (offset, progress, degrees, lift = 0) => {
             const scale = progress === 1 ? '.82' : String(Number((1 - .18 * progress).toFixed(3)));
@@ -434,13 +437,11 @@ class HuntCombatAnimator {
             { offset: 0, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)', opacity: 1 },
             // Explicit waypoints prevent transform matrix normalization from
             // collapsing the 1.5-turn fall into parallel translation.
-            // Five-second strong recovery budget: spend 2.2s on the actual
-            // tumble (one second longer than before) so the rotations read as
-            // weight rather than a fast spin.
-            tumbleFrame(.11, .25, 135, 18),
-            tumbleFrame(.22, .50, 270, 28),
-            tumbleFrame(.33, .75, 405, 16),
-            { offset: .44, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            // The same 1.5-turn path now lands in about 1.69s instead of 2.2s.
+            tumbleFrame(tumbleEndOffset * .25, .25, 135, 18),
+            tumbleFrame(tumbleEndOffset * .50, .50, 270, 28),
+            tumbleFrame(tumbleEndOffset * .75, .75, 405, 16),
+            { offset: tumbleEndOffset, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
             // Stay visibly prone instead of ending on an upright full turn.
             { offset: .88, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
             // Stand without rewinding, then return with alternating planted

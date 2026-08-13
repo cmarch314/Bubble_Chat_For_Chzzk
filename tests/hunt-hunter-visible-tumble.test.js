@@ -9,8 +9,13 @@ const frames = HuntCombatAnimator.strongHitKeyframes({
     direction: -1
 });
 
-assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .11, .22, .33, .44, .88, .90, .93, .96, .98, 1],
-    'strong hit must spend 2.2s tumbling, remain prone, and reserve the final 0.5s for the stepped return');
+const tumbleEndOffset = .44 / 1.3;
+assert.deepStrictEqual(frames.map(frame => frame.offset), [
+    0, tumbleEndOffset * .25, tumbleEndOffset * .5, tumbleEndOffset * .75,
+    tumbleEndOffset, .88, .90, .93, .96, .98, 1
+], 'strong hit must tumble 30% faster, remain prone, and preserve the stepped return');
+assert.ok(Math.abs(frames[4].offset * 5000 - (2200 / 1.3)) < .001,
+    'the 2.2-second tumble must be shortened by exactly a 1.3x speed multiplier');
 assert.deepStrictEqual(
     frames.slice(1, 5).map(frame => Number(frame.transform.match(/rotate\((-?\d+(?:\.\d+)?)deg\)/)?.[1])),
     [-135, -270, -405, -540],
