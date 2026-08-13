@@ -67,7 +67,11 @@ assert.deepStrictEqual(
     ['머리', '등', '좌익', '우익', '꼬리']
 );
 assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'head'), { x: .18, y: .72, kind: 'head' });
-assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'left-wing'), { x: .53, y: .20, kind: 'left-wing' });
+assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'left-wing'), { x: .40, y: .19, kind: 'left-wing' });
+assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'right-wing'), { x: .68, y: .23, kind: 'right-wing' });
+assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'torso'), { x: .50, y: .56, kind: 'torso' });
+assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'tail', 0), { x: .78, y: .56, kind: 'tail', pathIndex: 0 });
+assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'tail', 5), { x: .20, y: .80, kind: 'tail', pathIndex: 5 });
 assert.deepStrictEqual(Catalog.visualPoint({ id: 'diablos' }, 'torso'), { x: .50, y: .50, kind: 'torso' },
     'Diablos BEAT rotations require an authored torso pivot');
 assert.deepStrictEqual(Catalog.visualPoint({ id: 'black_diablos' }, 'torso'), { x: .50, y: .50, kind: 'torso' },

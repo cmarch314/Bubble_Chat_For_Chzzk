@@ -40,19 +40,22 @@ class HuntMonsterAnatomyCatalog {
             baseFacing: 'left',
             parts: Object.freeze({
                 head: Object.freeze({ x: .18, y: .72 }),
-                torso: Object.freeze({ x: .58, y: .61 }),
-                'left-wing': Object.freeze({ x: .53, y: .20 }),
-                'right-wing': Object.freeze({ x: .73, y: .38 }),
-                foot: Object.freeze({ x: .55, y: .82 }),
+                // Side-view Rathian: the visible left wing occupies the
+                // upper third. Its leading edge points left; the trailing
+                // edge points right, so the two break slots follow the same
+                // physical wing instead of implying a symmetric front view.
+                torso: Object.freeze({ x: .50, y: .56 }),
+                'left-wing': Object.freeze({ x: .40, y: .19 }),
+                'right-wing': Object.freeze({ x: .68, y: .23 }),
+                foot: Object.freeze({ x: .52, y: .80 }),
                 tail: Object.freeze({
                     path: Object.freeze([
-                        Object.freeze({ x: .75, y: .65 }),
-                        Object.freeze({ x: .58, y: .79 }),
-                        Object.freeze({ x: .39, y: .84 }),
-                        Object.freeze({ x: .22, y: .78 }),
-                        Object.freeze({ x: .14, y: .56 }),
-                        Object.freeze({ x: .18, y: .30 }),
-                        Object.freeze({ x: .31, y: .17 })
+                        Object.freeze({ x: .78, y: .56 }),
+                        Object.freeze({ x: .84, y: .69 }),
+                        Object.freeze({ x: .75, y: .82 }),
+                        Object.freeze({ x: .56, y: .88 }),
+                        Object.freeze({ x: .36, y: .87 }),
+                        Object.freeze({ x: .20, y: .80 })
                     ])
                 })
             })
