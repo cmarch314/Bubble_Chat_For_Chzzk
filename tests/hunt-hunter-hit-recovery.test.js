@@ -27,13 +27,13 @@ assert.ok(leftDownKnockback.x < 0 && leftDownKnockback.y > 0,
 
 {
     const frames = HuntCombatAnimator.strongHitKeyframes({ x: 240, y: 170, direction: -1 });
-    assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .15, .90, 1],
+    assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .0375, .075, .1125, .15, .90, 1],
         'a strong hit must tumble for 0.6 seconds, stay down for 3 seconds, then return for 0.4 seconds');
-    assert.match(frames[1].transform, /translate\(240px, 170px\) rotate\(-720deg\)/,
+    assert.match(frames[4].transform, /translate\(240px, 170px\) rotate\(-720deg\)/,
         'the knockback must complete exactly two turns in the collision direction');
-    assert.strictEqual(frames[2].transform, frames[1].transform,
+    assert.strictEqual(frames[5].transform, frames[4].transform,
         'the fallen pose and position must remain unchanged for the complete three-second hold');
-    assert.match(frames[3].transform, /translate\(0, 0\) rotate\(-720deg\)/,
+    assert.match(frames[6].transform, /translate\(0, 0\) rotate\(-720deg\)/,
         'recovery must preserve the equivalent final rotation instead of rewinding to zero');
 }
 
@@ -289,6 +289,9 @@ assert.match(combatAnimatorSource,
 assert.match(combatAnimatorSource,
     /triggerHitAnimation\(idx, w, reaction = \{\}\)[\s\S]*?layer\.animate\(keyframes,[\s\S]*?this\.activeWeaponAnimations\.set\(layer, animation\)/,
     'live hunter hit reactions must own the weapon transform through WAAPI instead of competing CSS');
+assert.match(combatAnimatorSource,
+    /const hitLayers = hunterAnchor && typeof hunterAnchor\.animate === 'function'[\s\S]*?\[hunterAnchor\] : \[\.\.\.weaponLayers\]/,
+    'live hit tumble must animate the stable wrapper so HUD child updates cannot erase rotation');
 assert.match(combatAnimatorSource,
     /triggerHitAnimation\(idx, w, reaction = \{\}\)[\s\S]*?classList\.remove\('hunter-interference-active', 'roar-stunned'\)[\s\S]*?hunter-interference-overlay/,
     'a damaging hit must synchronously remove tremor, wind, and roar CSS before starting knockback');

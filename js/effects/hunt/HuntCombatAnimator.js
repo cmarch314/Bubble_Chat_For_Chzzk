@@ -38,6 +38,12 @@ class HuntCombatAnimator {
             this.cancelWeaponAnimation(weaponImg);
             weaponImg.style.removeProperty('transform');
         });
+        this.card.querySelectorAll('.game-hunt-weapon-img-container').forEach(container => {
+            this.cancelWeaponAnimation(container);
+            container.style.removeProperty('transform');
+            container.style.removeProperty('filter');
+            container.style.removeProperty('opacity');
+        });
         this.card.querySelectorAll('.hunt-split-shield').forEach(shieldImg => {
             this.cancelWeaponAnimation(shieldImg);
             shieldImg.style.removeProperty('transform');
@@ -469,7 +475,14 @@ class HuntCombatAnimator {
         });
         void weaponCard.offsetWidth;
         weaponCard.classList.add(cardShakeClass);
-        weaponLayers.forEach(layer => {
+        // Own knockback on the stable wrapper. Live HUD refreshes legitimately
+        // update child weapon/shield transforms; animating those children made
+        // their rotation disappear while translation appeared to survive.
+        // One wrapper track keeps every visual layer together and guarantees
+        // the authored two-turn tumble remains visible in production.
+        const hitLayers = hunterAnchor && typeof hunterAnchor.animate === 'function'
+            ? [hunterAnchor] : [...weaponLayers];
+        hitLayers.forEach(layer => {
             if (typeof layer.animate !== 'function') return;
             const x = Math.round(strongX * (layer.classList.contains('hunt-split-shield') ? .88 : 1));
             const y = Math.round(strongY * (layer.classList.contains('hunt-split-shield') ? .92 : 1));
@@ -521,7 +534,7 @@ class HuntCombatAnimator {
         weaponCard.classList.remove('hunter-card-large-shake', 'hunter-card-small-shake',
             'hunter-card-hit-shake', 'hunter-card-guard-shake');
         weaponCard.querySelectorAll(
-            '.game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
+            '.game-hunt-weapon-img-container, .game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
         ).forEach(layer => {
             this.cancelWeaponAnimation(layer);
             layer.style.removeProperty('transform');
@@ -553,6 +566,12 @@ class HuntCombatAnimator {
         if (shieldImg) {
             this.cancelWeaponAnimation(shieldImg);
             shieldImg.style.removeProperty('transform');
+        }
+        if (weaponContainer) {
+            this.cancelWeaponAnimation(weaponContainer);
+            weaponContainer.style.removeProperty('transform');
+            weaponContainer.style.removeProperty('filter');
+            weaponContainer.style.removeProperty('opacity');
         }
         if (['great_sword', 'hammer'].includes(w?.id)) {
             if (weaponContainer?.dataset) delete weaponContainer.dataset.weaponChargeReleaseStage;
