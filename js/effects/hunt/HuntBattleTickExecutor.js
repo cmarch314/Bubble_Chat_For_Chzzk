@@ -203,10 +203,18 @@ class HuntBattleTickExecutor {
                     const eventIndex = Number(engine.pendingMonsterImpact.nextEventIndex || 0);
                     const dueEvent = engine.pendingMonsterImpact.events?.[eventIndex];
                     const dueTick = Number(dueEvent?.atTicks || 0);
+                    const elapsedTicks = Number(beatState.elapsedTicks || 0);
+                    // The authored timeline remains the gameplay authority even
+                    // when an event notification was dropped by a renderer/load
+                    // race. Clamping an already-passed event to one tick made the
+                    // countdown stay at 1 forever, so the visible eruption could
+                    // finish without ever committing its damage.
                     engine.pendingMonsterImpact.remainingTicks =
                         Number(engine.monsterBeatJudgmentTicks?.get?.(dueTick) || 0) > 0
                             ? 0
-                            : Math.max(1, dueTick - Number(beatState.elapsedTicks || 0));
+                            : elapsedTicks >= dueTick
+                                ? 0
+                                : Math.max(1, dueTick - elapsedTicks);
                 } else {
                     engine.pendingMonsterImpact.remainingTicks--;
                 }

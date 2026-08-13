@@ -136,6 +136,39 @@ function createEngine(overrides = {}) {
 }
 
 {
+    const beatV2 = { id: 'diablos.burrow_enter', backend: 'beat-v2' };
+    const impactPattern = {
+        id: 'diablos.burrow_enter', beatV2Approved: true, beatV2,
+        runtimeImpactCommit: true, runtimeImpactTimelineEvent: true
+    };
+    const resolutions = [];
+    const { engine } = createEngine({
+        tickMonsterBeatAction() {},
+        monsterBeatRuntime: {
+            get: () => ({ action: beatV2, elapsedTicks: 41 })
+        },
+        monsterBeatJudgmentTicks: new Map(),
+        pendingMonsterImpact: {
+            pattern: impactPattern,
+            remainingTicks: 1,
+            totalTicks: 40,
+            attackerIndex: null,
+            targetIndex: 0,
+            nextEventIndex: 0,
+            events: [{ atTicks: 40, targetIndices: [0], damageScale: 1 }]
+        },
+        executeMonsterTurn: (...args) => resolutions.push(args)
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(resolutions.length, 1,
+        'an authored eruption whose due tick has passed must commit even if its notification was missed');
+    assert.strictEqual(resolutions[0][0].runtimeImpactTargetIndices[0], 0,
+        'the recovered eruption commit must retain the locked hunter');
+    assert.strictEqual(engine.pendingMonsterImpact, null,
+        'a recovered overdue judgment must not remain stuck at one tick forever');
+}
+
+{
     const volleys = [];
     const resolutions = [];
     const { engine } = createEngine({
