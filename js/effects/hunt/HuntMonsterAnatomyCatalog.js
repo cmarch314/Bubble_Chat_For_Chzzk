@@ -55,7 +55,9 @@ class HuntMonsterAnatomyCatalog {
                         Object.freeze({ x: .75, y: .82 }),
                         Object.freeze({ x: .56, y: .88 }),
                         Object.freeze({ x: .36, y: .87 }),
-                        Object.freeze({ x: .20, y: .80 })
+                        // Tail tip points dead-left (`<<`), not diagonally
+                        // downward: keep its final vector horizontally level.
+                        Object.freeze({ x: .20, y: .87 })
                     ])
                 })
             })
