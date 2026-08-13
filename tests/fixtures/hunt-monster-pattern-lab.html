@@ -92,6 +92,8 @@
   <script src="../../js/effects/hunt/HuntWeaponMechanics.js"></script>
   <script src="../../js/effects/hunt/HuntWeaponActionSelector.js"></script>
   <script src="../../js/effects/hunt/HuntBeatV2Contract.js"></script>
+  <script src="/candidate-kits.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterCandidateCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntBeatV2Adapter.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterPatternCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntBeatActionRuntime.js"></script>
@@ -178,6 +180,13 @@
     let pendingReactionBeatTimers=[];
     let previewRuntimePattern=null;
     let previewRuntimeSelection=null;
+    const candidateMonsterId=String(new URLSearchParams(location.search).get('candidate')||'').trim();
+    const candidateActions=monsterId=>candidateMonsterId===monsterId
+      ?HuntMonsterCandidateCatalog.forMonster(monsterId):[];
+    const patternsForMonster=monsterId=>{
+      const candidates=candidateActions(monsterId);
+      return candidates.length?candidates:(HUNT_MONSTER_PATTERN_OVERRIDES[monsterId]||[]);
+    };
 
     function stopPreviewRuntime(reason='preview-reset'){
       // Preview is an editor surface: only the shared monster BEAT animator
@@ -340,7 +349,7 @@
     // 알 수 없다. 남겨두고 이유를 붙인다.
     function updatePatternAvailability(){
       const broken=brokenPartKinds();
-      const patterns=HUNT_MONSTER_PATTERN_OVERRIDES[owner.selectedMonster?.id]||[];
+      const patterns=patternsForMonster(owner.selectedMonster?.id);
       patternButtons.querySelectorAll('.pattern-btn').forEach(button=>{
         const pattern=patterns.find(entry=>entry.id===button.dataset.pattern);
         if(!pattern)return;
@@ -486,7 +495,7 @@
       combat.triggerEnvironmentEffect?.('trap-release');
     }
     function authoredPattern(patternId){
-      const installed=HUNT_MONSTER_PATTERN_OVERRIDES[owner.selectedMonster.id]||[];
+      const installed=patternsForMonster(owner.selectedMonster.id);
       const direct=installed.find(pattern=>pattern.id===patternId);
       if(direct)return direct;
       for(const parentPattern of installed){
@@ -585,12 +594,17 @@
     function playPattern(patternId, previewPattern=null){
       clearPendingFlightTransition();
       const authored=authoredPattern(patternId);
-      const source=previewPattern?{...(authored||{}),...previewPattern,
+      // The review shell can send a saved compatibility pattern for the same
+      // id.  A candidate URL must keep its native graph authoritative instead
+      // of silently replacing it with that legacy payload.
+      const source=authored?.nativeBeatCandidate?authored:previewPattern?{...(authored||{}),...previewPattern,
         motion:previewPattern.motion||authored?.motion,
         targeting:previewPattern.targeting||authored?.targeting}:authored;
       if(!source)return {ok:false,reason:'pattern-not-found',durationMs:0};
       let pattern={...source,tags:[...(source.tags||[])],targeting:source.targeting?{...source.targeting}:null};
-      pattern=HuntMonsterPatternCatalog.synchronizeEditedPattern(pattern);
+      // Candidate graphs are authored directly against the Contract.  Their
+      // renderer projection must never be routed through the legacy adapter.
+      if(!pattern.nativeBeatCandidate)pattern=HuntMonsterPatternCatalog.synchronizeEditedPattern(pattern);
       const reactionPlayback=playRuntimeReaction(pattern);
       if(reactionPlayback)return reactionPlayback;
       const required=pattern.requiredState||(pattern.tags.includes('flight-only')?'airborne':null);
@@ -668,7 +682,7 @@
       const image=document.getElementById('fight-monster-img');
       const combatName=document.getElementById('monster-name-text');
       if(combatName)combatName.textContent=monster.nameKO;
-      const patterns=HUNT_MONSTER_PATTERN_OVERRIDES[monster.id]||[];
+      const patterns=patternsForMonster(monster.id);
       document.getElementById('monster-summary').innerHTML=`<strong>${monster.nameKO}</strong>${monster.species||'분류 미상'} · 패턴 ${patterns.length}개`;
       patternButtons.replaceChildren(...patterns.map(pattern=>{
         const button=document.createElement('button');button.className='pattern-btn';button.dataset.pattern=pattern.id;

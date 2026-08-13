@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "monsterId": "rathalos",
+  "status": "candidate",
+  "actions": [
+    {
+      "id": "rathalos.roar",
+      "name": "포효 · clean BEAT 후보",
+      "type": "roar",
+      "tags": ["roar"],
+      "damageRatio": 0,
+      "minTargets": 4,
+      "maxTargets": 4,
+      "atbCost": 18,
+      "graph": {
+        "schemaVersion": 2,
+        "backend": "beat-v2",
+        "reviewStatus": "draft",
+        "atb": { "cost": 18, "recovery": "during-action", "gateUntil": "complete" },
+        "beats": [
+          { "id": "brace", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "brace", "scaleY": 0.94 } }] }, "events": [{ "kind": "audio", "slot": "brace", "offsetTicks": 1 }] },
+          { "id": "roar", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "scaleY": 1.08 } }, { "offsetTicks": 8, "value": { "pose": "stretch-strong", "scaleY": 1.02 } }] }, "events": [{ "kind": "roar", "target": "all", "size": "large", "offsetTicks": 3 }, { "kind": "audio", "slot": "roar", "offsetTicks": 3 }] },
+          { "id": "settle", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "scaleY": 1 } }] }, "events": [{ "kind": "audio", "slot": "settle", "offsetTicks": 1 }] }
+        ]
+      }
+    }
+  ]
+}

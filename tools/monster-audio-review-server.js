@@ -20,6 +20,7 @@ const ANATOMY_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-visual-g
 const ANATOMY_RUNTIME_PATH = path.join(ROOT, 'js', 'effects', 'hunt', 'data', 'MonsterVisualGeometryOverrides.generated.js');
 const PATTERN_AUDIO_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-pattern-audio-routes.json');
 const PATTERN_MOTION_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-pattern-motion-overrides.json');
+const CANDIDATE_KITS_DIR = path.join(ROOT, 'data', 'hunt', 'monster-kits', 'candidates');
 const UI_PATH = path.join(__dirname, 'monster-audio-review.html');
 const APP_PATH = path.join(__dirname, 'monster-audio-review-app.js');
 const PREVIEW_PATH = path.join(ROOT, 'tests', 'fixtures', 'hunt-monster-pattern-lab.html');
@@ -139,6 +140,17 @@ function readJson(file, fallback) {
     } catch {
         return fallback;
     }
+}
+
+function readCandidateKits() {
+    if (!fs.existsSync(CANDIDATE_KITS_DIR)) return {};
+    const kits = {};
+    for (const entry of fs.readdirSync(CANDIDATE_KITS_DIR, { withFileTypes: true })) {
+        if (!entry.isFile() || !entry.name.endsWith('.json')) continue;
+        const kit = readJson(path.join(CANDIDATE_KITS_DIR, entry.name), null);
+        if (kit?.monsterId) kits[String(kit.monsterId)] = kit;
+    }
+    return kits;
 }
 
 function evidenceScope(bank) {
@@ -722,6 +734,12 @@ function createServer(options = {}) {
                 response.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8',
                     'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
                 response.end(fs.readFileSync(APP_PATH));
+                return;
+            }
+            if (request.method === 'GET' && url.pathname === '/candidate-kits.js') {
+                response.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8',
+                    'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+                response.end(`window.HUNT_MONSTER_CANDIDATE_KITS=${JSON.stringify(readCandidateKits())};`);
                 return;
             }
             if (request.method === 'GET' && (url.pathname === '/preview' || url.pathname === '/preview/')) {

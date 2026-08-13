@@ -1712,7 +1712,11 @@
         if (metadata.apiVersion !== 3 || metadata.buildId !== 'unified-editor-v3') throw new Error('편집기 서버 버전 불일치 · 서버를 재시작하세요.');
         app.capabilities = metadata.capabilities || []; app.buildId = metadata.buildId; app.presets = metadata.presets || {}; app.monsters = metadata.monsters || []; app.categories = metadata.categories || [];
         installPairPreviewTargets();
-        previewFrame().src = metadata.previewPath || '/preview/?embed=1';
+        const candidate = String(new URLSearchParams(location.search).get('candidate') || '').trim();
+        const previewPath = metadata.previewPath || '/preview/?embed=1';
+        previewFrame().src = candidate
+            ? `${previewPath}${previewPath.includes('?') ? '&' : '?'}candidate=${encodeURIComponent(candidate)}`
+            : previewPath;
         const resizePreview = () => { const stage = $('#previewStage'); previewFrame().style.transform = `scale(${stage.clientWidth / 1920})`; };
         new ResizeObserver(resizePreview).observe($('#previewStage')); resizePreview();
         installScenarioControls();
