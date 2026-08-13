@@ -1085,11 +1085,6 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.d
                 rotation: 180, skewX: 0, scaleX: 1, scaleY: 1, opacity: 1,
                 pose: 'idle', origin: '74% 30%', moveEasing: 'decelerate', flipFacing: true }
         ],
-        whiffReaction: {
-            pass: 'last', result: 'dodge',
-            disabledWhenAllBroken: ['left-horn', 'right-horn'],
-            kind: 'knockdown'
-        },
         brokenPartDamageModifiers: { 'left-horn': 0.906, 'right-horn': 0.906 }
     }]
 ]);

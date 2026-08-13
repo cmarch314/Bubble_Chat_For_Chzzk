@@ -589,36 +589,14 @@ assert.ok(profiles.black_diablos.every(pattern =>
         'a one-hunter return charge must not expand onto another card');
 }
 {
-    const pattern = {
-        ...profiles.diablos.find(candidate => candidate.id.endsWith('.rage_charge')),
-        runtimeChargePassSizes: [1, 1]
-    };
-    const partState = [];
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, pattern, [
-        { result: 'hit' }, { result: 'dodge' }
-    ]), true, 'only the return pass must miss for Diablos to become stuck');
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, {
+    const pattern = profiles.diablos.find(candidate => candidate.id.endsWith('.rage_charge'));
+    assert.strictEqual(pattern.whiffReaction, null,
+        'the approved return-charge and tail-cross action must finish at recovery without appending knockdown');
+    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction([], {
         ...pattern,
-        runtimeImpactTimelineEvent: true,
-        runtimeImpactTimelineFinal: false
+        runtimeJudgment: { id: 'tail-cross-two-damage', timelineFinal: true }
     }, [{ result: 'dodge' }]), false,
-    'a missed outbound pass must not trigger the return-pass terrain collision early');
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, {
-        ...pattern,
-        runtimeImpactTimelineEvent: true,
-        runtimeImpactTimelineFinal: true
-    }, [{ result: 'dodge' }]), true,
-    'the final off-screen return pass owns the terrain-stuck reaction');
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, pattern, [
-        { result: 'dodge' }, { result: 'hit' }
-    ]), false);
-    partState.push(
-        { kind: 'left-horn', broken: true },
-        { kind: 'right-horn', broken: true }
-    );
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, pattern, [
-        { result: 'hit' }, { result: 'dodge' }
-    ]), false, 'two broken horns must disable the terrain-stuck opening');
+    'dodging the final tail-cross judgment must not be mistaken for a charge collision');
 }
 {
     const traversal = {
