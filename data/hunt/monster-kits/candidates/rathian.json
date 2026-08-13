@@ -67,6 +67,30 @@
           { "id": "return", "ticks": 14, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "at": "offscreen:top", "to": "home", "pose": "idle", "fade": "in", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "return", "offsetTicks": 1 }] }
         ]
       }
+    },
+    {
+      "id": "rathian.somersault",
+      "name": "독가시 서머솔트 · clean BEAT 후보",
+      "type": "physical",
+      "tags": ["physical", "tail", "poison", "aerial"],
+      "damageRatio": 0.48,
+      "minTargets": 1,
+      "maxTargets": 1,
+      "atbCost": 48,
+      "flightTransition": "takeoff",
+      "graph": {
+        "schemaVersion": 2,
+        "backend": "beat-v2",
+        "reviewStatus": "draft",
+        "atb": { "cost": 48, "recovery": "during-action", "gateUntil": "complete" },
+        "beats": [
+          { "id": "approach", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 82%", "face": "target", "pose": "stretch-soft", "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "approach", "offsetTicks": 2 }] },
+          { "id": "tail-load", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "origin": "part:torso", "rotation": -45, "scaleY": 0.92, "rotationEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "tail-load", "offsetTicks": 2 }] },
+          { "id": "tail-scoop", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 105%", "pose": "stretch-strong", "origin": "part:torso", "rotation": 315, "scaleY": 1.10, "moveEasing": "snap", "rotationEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 48, "hitReactionKind": "strong", "offsetTicks": 3 }, { "kind": "audio", "slot": "tail-scoop-impact", "offsetTicks": 3 }] },
+          { "id": "air-rise", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 170", "pose": "stretch", "origin": "part:torso", "rotation": 360, "scaleY": 1, "moveEasing": "decelerate", "rotationEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "takeoff", "offsetTicks": 1 }] },
+          { "id": "airborne-settle", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "rotation": 360, "origin": "part:torso" } }] }, "events": [{ "kind": "audio", "slot": "airborne-settle", "offsetTicks": 1 }] }
+        ]
+      }
     }
   ]
 }

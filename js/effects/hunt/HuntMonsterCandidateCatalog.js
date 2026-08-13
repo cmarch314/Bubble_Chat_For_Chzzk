@@ -47,6 +47,8 @@ class HuntMonsterCandidateCatalog {
                 maxTargets: Math.max(0, Number(rawAction.maxTargets ?? rawAction.minTargets ?? 1)),
                 targeting: rawAction.targeting ? Object.freeze({ ...rawAction.targeting }) : null,
                 atbCost: Math.max(0, Number(rawAction.atbCost ?? graph.atb.cost ?? 0)),
+                flightTransition: rawAction.flightTransition === 'takeoff' || rawAction.flightTransition === 'land'
+                    ? rawAction.flightTransition : null,
                 reviewStatus: graph.reviewStatus,
                 beatV2Enabled: true,
                 beatV2Approved: false,

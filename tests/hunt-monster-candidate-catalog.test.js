@@ -38,6 +38,13 @@ assert.deepStrictEqual(bite.beatV2.events.filter(event => event.kind === 'damage
     .map(event => [event.beatId, event.atTicks, event.hitReactionKind]), [['bite', 5, 'weak']]);
 assert.deepStrictEqual(rathian.actions.find(action => action.id === 'rathian.roar').motion.map(beat => beat.ticks),
     [10, 2, 33]);
+const somersault = rathian.actions.find(action => action.id === 'rathian.somersault');
+assert.ok(somersault, 'Rathian candidate includes the tail-scoop somersault');
+assert.strictEqual(somersault.flightTransition, 'takeoff');
+assert.deepStrictEqual(somersault.motion.map(beat => beat.beat),
+    ['approach', 'tail-load', 'tail-scoop', 'air-rise', 'airborne-settle']);
+assert.deepStrictEqual(somersault.motion.slice(1, 4).map(beat => beat.rotation), [-45, 315, 360],
+    'Rathian must load its curled J tail counterclockwise then scoop clockwise into flight');
 
 const source = fs.readFileSync(path.join(root, 'js', 'effects', 'hunt', 'HuntMonsterCandidateCatalog.js'), 'utf8');
 assert.ok(!source.includes('HuntBeatV2Adapter'), 'native candidates must not import the legacy adapter');
