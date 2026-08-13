@@ -42,21 +42,21 @@ assert.strictEqual(kick.events.find(event => event.kind === 'damage').atTicks, 2
 const trueCharge = HuntHunterBeatCatalog.compile('great_sword',
     actions.find(action => action.id === 'great_sword.true_charged_slash'));
 const trueChargeHits = trueCharge.events.filter(event => event.kind === 'damage');
-assert.ok(trueChargeHits[0].atTicks / trueCharge.totalTicks < .5,
-    'the first True Charged Slash hit must land when the blade plants in the ground');
+assert.ok(trueChargeHits[0].atTicks / trueCharge.totalTicks >= .65,
+    'True Charged Slash damage must wait until the in-place turn and ground plant finish');
 assert.ok(trueChargeHits[1].atTicks / trueCharge.totalTicks >= .75,
     'the heavy hit must land only after the planted-blade rebound completes');
 assert.deepStrictEqual(trueCharge.beats.map(beat => beat.id),
-    ['first-swing', 'blade-plant', 'rebound-swing', 'recovery']);
+    ['spin-in-place', 'blade-plant', 'rebound-slash', 'recovery']);
 const emitted = [];
 const runtime = new HuntBeatActionRuntime({ onEvent: (_state, event) => emitted.push(event.id) });
 runtime.begin('hunter:0', trueCharge);
 for (let tick = 0; tick < trueCharge.totalTicks; tick++) runtime.tick('hunter:0');
 assert.deepStrictEqual(emitted, [
-    'great_sword.true_charged_slash:hit:1',
     'great_sword.true_charged_slash:plant-audio',
+    'great_sword.true_charged_slash:hit:1',
     'great_sword.true_charged_slash:hit:2'
-], 'the true charged slash must emit its first hit, planted-blade cue, and rebound hit in order');
+], 'the true charged slash must plant first, then emit both rebound-path hits in order');
 
 const charge = HuntHunterBeatCatalog.compile('great_sword',
     actions.find(action => action.id === 'great_sword.charge_1'));
@@ -75,17 +75,17 @@ assert.strictEqual(chargedFrames[0][3], 135,
 assert.ok(chargedFrames[3][3] >= 270,
     'charged slashes must carry the upward-facing edge downward onto contact');
 const trueFrames = WeaponAnimationCatalog.MOTIONS.great_sword_true_release;
-assert.strictEqual(trueFrames[4][3], 495,
-    'the first True Charged Slash contact must follow one complete forward turn');
+assert.strictEqual(trueFrames[3][3], 495,
+    'the in-place True Charged Slash windup must complete one full forward turn');
 assert.strictEqual(trueFrames[8][3], 855,
     'the rebound must complete the next full turn into the heavy hit');
-assert.deepStrictEqual([trueFrames[4][0], trueFrames[8][0]],
+assert.deepStrictEqual([trueFrames[6][0], trueFrames[8][0]],
     trueChargeHits.map(event => event.atTicks / trueCharge.totalTicks),
     'both visible blade contacts must share the exact BEAT damage timestamps');
 assert.ok(trueFrames[2][6] < -90 && trueFrames[7][6] < -90,
-    'both True Charged Slash hits must approach from above their contact point');
-assert.ok(trueFrames.slice(0, 4).every(frame => frame[1] < 1 && frame[2] < 1),
-    'the first turn must stay in front of the monster until its actual contact frame');
+    'the planted turn and heavy rebound must retain a readable vertical arc');
+assert.ok(trueFrames.slice(0, 4).every(frame => frame[1] === 0 && frame[2] === 0),
+    'the entire first turn must remain at the hunter origin instead of arriving at the monster');
 assert.match(runtimeCss,
     /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(225deg \* var\(--weapon-facing\)\)\)[\s\S]*?scaleX\(var\(--great-sword-mirror, 1\)\)/,
     'the persistent charge pose and BEAT release must share the corrected 12 o’clock blade stance');

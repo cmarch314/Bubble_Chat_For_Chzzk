@@ -268,10 +268,10 @@ class HuntWeaponAnimationCatalog {
             // Positive rotation carries the edge down through the target;
             // slots 3/4 receive the exact mirrored path.
             great_sword_charged_release: [[0, 0, 0, 135, 1.07, -50, -55], [.2, 0, 0, 120, 1.1, -60, -68], [.46, .72, .75, 185, 1.13, -12, -88], [.72, 1, 1, 270, 1.2, 0, 0], [.86, .9, .9, 285, 1.12, 0, 7], [1, 0, 0, 270, 1, 0, 0]],
-            // Complete the first forward roll before the planted-blade contact.
-            // The rebound then continues through a second full turn into the
-            // heavy hit; neither turn may begin after its damage event.
-            great_sword_true_release: [[0, 0, 0, 135, 1.1, -54, -60], [.08, 0, 0, 118, 1.14, -65, -74], [.17, .34, .38, 245, 1.16, -18, -94], [.25, .72, .76, 405, 1.2, -8, -74], [6 / 21, 1, 1, 495, 1.24, 0, 0], [.43, 1, 1, 495, 1.12, 0, 18], [.55, .42, .46, 585, 1.2, -8, -30], [.7, .78, .82, 735, 1.24, 0, -108], [18 / 21, 1, 1, 855, 1.34, 0, 0], [.93, .9, .9, 870, 1.18, 0, 8], [1, 0, 0, 855, 1, 0, 0]],
+            // The first complete turn is planted at the hunter's origin. Only
+            // after the blade braces against the ground may the rebound carry
+            // the hunter toward the monster for the two cutting contacts.
+            great_sword_true_release: [[0, 0, 0, 135, 1.1, -54, -60], [.1, 0, 0, 210, 1.14, -65, -76], [.22, 0, 0, 330, 1.17, -42, -94], [8 / 21, 0, 0, 495, 1.22, -12, -78], [.48, 0, 0, 510, 1.12, -8, 24], [.57, .2, .22, 585, 1.19, -10, -42], [14 / 21, 1, 1, 675, 1.24, 0, 0], [.75, .82, .84, 735, 1.24, 0, -104], [18 / 21, 1, 1, 855, 1.34, 0, 0], [.93, .9, .9, 870, 1.18, 0, 8], [1, 0, 0, 855, 1, 0, 0]],
             // Draw the blade out beside the hunter, carry its edge laterally
             // through the live target, then settle after the follow-through.
             // This is a compact horizontal cut, not a shortened charged slash.

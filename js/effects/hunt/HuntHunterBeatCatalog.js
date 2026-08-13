@@ -111,22 +111,25 @@ class HuntHunterBeatCatalog {
                 ] }
             ];
         } else if (trueChargedSlash) {
-            const firstSwing = Math.max(1, Math.floor(totalTicks * .38));
-            const plant = Math.max(1, Math.floor(totalTicks * .14));
-            const recovery = Math.max(1, Math.floor(totalTicks * .12));
-            const rebound = Math.max(1, totalTicks - firstSwing - plant - recovery);
+            const spin = Math.max(1, Math.round(totalTicks * .38));
+            const plant = Math.max(1, Math.round(totalTicks * .14));
+            const recovery = Math.max(1, Math.floor(totalTicks * .10));
+            const slash = Math.max(2, totalTicks - spin - plant - recovery);
             beats = [
-                { id: 'first-swing', ticks: firstSwing, events: [{
-                    id: `${id}:hit:1`, kind: 'damage', target: 'primary',
-                    hitIndex: 0, hitCount: 2, offsetTicks: firstSwing - 1
-                }] },
+                { id: 'spin-in-place', ticks: spin, events: [] },
                 { id: 'blade-plant', ticks: plant, events: [{
                     id: `${id}:plant-audio`, kind: 'audio', slot: 'impact', offsetTicks: 0
                 }] },
-                { id: 'rebound-swing', ticks: rebound, events: [{
-                    id: `${id}:hit:2`, kind: 'damage', target: 'primary',
-                    hitIndex: 1, hitCount: 2, offsetTicks: rebound - 1
-                }] },
+                { id: 'rebound-slash', ticks: slash, events: [
+                    {
+                        id: `${id}:hit:1`, kind: 'damage', target: 'primary',
+                        hitIndex: 0, hitCount: 2, offsetTicks: Math.max(0, slash - 5)
+                    },
+                    {
+                        id: `${id}:hit:2`, kind: 'damage', target: 'primary',
+                        hitIndex: 1, hitCount: 2, offsetTicks: slash - 1
+                    }
+                ] },
                 { id: 'recovery', ticks: recovery, events: [] }
             ];
         } else if (wideSlash) {
