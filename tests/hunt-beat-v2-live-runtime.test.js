@@ -3,6 +3,7 @@
 const assert = require('assert');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
 const HuntBeatActionRuntime = require('../js/effects/hunt/HuntBeatActionRuntime.js');
+const HuntCombatJudgmentRuntime = require('../js/effects/hunt/HuntCombatJudgmentRuntime.js');
 const Catalog = require('../js/effects/hunt/HuntMonsterPatternCatalog.js');
 global.HUNT_MONSTER_PATTERN_OVERRIDES = require('../js/effects/hunt/HuntMonsterProfiles.js');
 global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = require(
@@ -16,13 +17,20 @@ function makeEngine(events) {
         onResetMonsterMotion: reason => events.push(`reset:${reason}`)
     };
     engine.monsterBeatRuntimeEvents = [];
+    engine.combatJudgmentRuntime = new HuntCombatJudgmentRuntime();
     engine.monsterBeatRuntime = new HuntBeatActionRuntime({
         onEvent: (state, event) => {
             engine.monsterBeatRuntimeEvents.push(event);
             engine.dispatchMonsterBeatEvent(state, event);
         },
-        onComplete: state => engine.callbacks.onMonsterBeatActionComplete(state.action, state.context),
-        onCancel: (state, reason) => engine.callbacks.onMonsterBeatActionCancel(state.action, reason, state.context)
+        onComplete: state => {
+            engine.combatJudgmentRuntime.complete(state.actorKey);
+            engine.callbacks.onMonsterBeatActionComplete(state.action, state.context);
+        },
+        onCancel: (state, reason) => {
+            engine.combatJudgmentRuntime.cancel(state.actorKey, reason);
+            engine.callbacks.onMonsterBeatActionCancel(state.action, reason, state.context);
+        }
     });
     engine.pendingMonsterAction = null;
     engine.pendingMonsterImpact = null;
@@ -55,12 +63,19 @@ const action = Object.freeze({
 {
     const events = [];
     const engine = makeEngine(events);
-    engine.beginMonsterBeatAction(action, { targetIndex: 1 });
-    for (let tick = 0; tick < action.totalTicks; tick++) engine.tickMonsterBeatAction();
+    const resolved = [];
+    engine.beginMonsterBeatAction(action, {
+        targetIndex: 1,
+        judgmentEvents: [{ atTicks: 4, targetIndices: [1], damageScale: 1 }]
+    });
+    for (let tick = 0; tick < action.totalTicks; tick++) {
+        engine.tickMonsterBeatAction();
+        engine.combatJudgmentRuntime.drain(command => resolved.push(command));
+    }
     assert.deepStrictEqual(engine.monsterBeatRuntimeEvents.map(event => event.id), ['audio:charge', 'hit:primary'],
         'live runtime must emit the authored gameplay judgment exactly once');
-    assert.strictEqual(engine.monsterBeatJudgmentTicks.has(4), true,
-        'the emitted BEAT judgment, not a renderer timer, must authorize the live impact tick');
+    assert.deepStrictEqual(resolved.map(command => [command.atTicks, command.targetIndices]), [[4, [1]]],
+        'the emitted BEAT judgment must resolve exactly once without a renderer countdown');
     assert.deepStrictEqual(events, ['audio:monster_attack:beat:charge', 'complete:diablos.horn-charge'],
         'the live action must dispatch authored audio and complete exactly once');
 }

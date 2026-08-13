@@ -48,6 +48,8 @@ const HUNT_RUNTIME_SCRIPT_PATHS = Object.freeze([
     'js/effects/hunt/HuntBeatV2Contract.js',
     'js/effects/hunt/HuntBeatV2Adapter.js',
     'js/effects/hunt/HuntBeatActionRuntime.js',
+    'js/effects/hunt/HuntCombatJudgmentRuntime.js',
+    'js/effects/hunt/HuntCombatJudgmentResolver.js',
     'js/effects/hunt/HuntHunterBeatCatalog.js',
     'js/effects/hunt/HuntActionStateMachine.js',
     'js/effects/hunt/HuntSeededRandom.js',

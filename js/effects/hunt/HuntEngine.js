@@ -25,8 +25,17 @@ class HuntEngine {
         const BeatActionRuntime = typeof HuntBeatActionRuntime !== 'undefined'
             ? HuntBeatActionRuntime
             : (typeof require === 'function' ? require('./HuntBeatActionRuntime.js') : null);
+        const CombatJudgmentRuntime = typeof HuntCombatJudgmentRuntime !== 'undefined'
+            ? HuntCombatJudgmentRuntime
+            : (typeof require === 'function' ? require('./HuntCombatJudgmentRuntime.js') : null);
+        const CombatJudgmentResolver = typeof HuntCombatJudgmentResolver !== 'undefined'
+            ? HuntCombatJudgmentResolver
+            : (typeof require === 'function' ? require('./HuntCombatJudgmentResolver.js') : null);
         this.monsterBeatRuntimeEvents = [];
-        this.monsterBeatJudgmentTicks = new Map();
+        this.combatJudgmentRuntime = config.combatJudgmentRuntime
+            || (CombatJudgmentRuntime ? new CombatJudgmentRuntime() : null);
+        this.combatJudgmentResolver = config.combatJudgmentResolver
+            || (CombatJudgmentResolver ? new CombatJudgmentResolver() : null);
         this.hunterBeatRuntimeEvents = new Map();
         this.monsterBeatRuntime = config.monsterBeatRuntime || (BeatActionRuntime
             ? new BeatActionRuntime({
@@ -46,12 +55,18 @@ class HuntEngine {
                 onComplete: state => {
                     if (String(state.actorKey).startsWith('hunter:')) {
                         this.callbacks?.onHunterBeatActionComplete?.(state.action, state.context);
-                    } else this.callbacks?.onMonsterBeatActionComplete?.(state.action, state.context);
+                    } else {
+                        this.combatJudgmentRuntime?.complete?.(state.actorKey);
+                        this.callbacks?.onMonsterBeatActionComplete?.(state.action, state.context);
+                    }
                 },
                 onCancel: (state, reason) => {
                     if (String(state.actorKey).startsWith('hunter:')) {
                         this.callbacks?.onHunterBeatActionCancel?.(state.action, reason, state.context);
-                    } else this.callbacks?.onMonsterBeatActionCancel?.(state.action, reason, state.context);
+                    } else {
+                        this.combatJudgmentRuntime?.cancel?.(state.actorKey, reason);
+                        this.callbacks?.onMonsterBeatActionCancel?.(state.action, reason, state.context);
+                    }
                 }
             })
             : null);
@@ -210,9 +225,14 @@ class HuntEngine {
     beginMonsterBeatAction(compiledAction, context = {}) {
         if (!compiledAction || compiledAction.backend !== 'beat-v2' || !this.monsterBeatRuntime) return null;
         this.monsterBeatRuntimeEvents.length = 0;
-        if (!(this.monsterBeatJudgmentTicks instanceof Map)) this.monsterBeatJudgmentTicks = new Map();
-        this.monsterBeatJudgmentTicks.clear();
-        return this.monsterBeatRuntime.begin('monster', compiledAction, context);
+        this.monsterBeatRuntime.cancel?.('monster', 'replaced');
+        const judgmentSession = Array.isArray(context.judgmentEvents)
+            ? this.combatJudgmentRuntime?.begin?.('monster', compiledAction, context)
+            : null;
+        return this.monsterBeatRuntime.begin('monster', compiledAction, {
+            ...context,
+            actionSessionId: judgmentSession?.sessionId || null
+        });
     }
 
     isMonsterActionSessionActive() {
@@ -229,14 +249,7 @@ class HuntEngine {
 
     dispatchMonsterBeatEvent(state, event) {
         if (['damage', 'judgment', 'roar', 'tremor', 'wind'].includes(event?.kind)) {
-            if (!(this.monsterBeatJudgmentTicks instanceof Map)) {
-                this.monsterBeatJudgmentTicks = new Map();
-            }
-            const judgmentTick = Number(event.atTicks || 0);
-            this.monsterBeatJudgmentTicks.set(
-                judgmentTick,
-                Number(this.monsterBeatJudgmentTicks.get(judgmentTick) || 0) + 1
-            );
+            this.combatJudgmentRuntime?.observeBeatEvent?.(state.actorKey, event);
             return true;
         }
         if (event?.kind !== 'audio') return false;
@@ -260,9 +273,15 @@ class HuntEngine {
         return this.monsterBeatRuntime?.tick?.('monster') || null;
     }
 
+    drainCombatJudgments() {
+        return this.combatJudgmentRuntime?.drain?.(command =>
+            this.combatJudgmentResolver?.resolve?.(this, command)
+        ) || [];
+    }
+
     cancelMonsterBeatAction(reason = 'interrupted') {
         this.monsterBeatRuntimeEvents.length = 0;
-        this.monsterBeatJudgmentTicks?.clear?.();
+        this.combatJudgmentRuntime?.cancel?.('monster', reason);
         return this.monsterBeatRuntime?.cancel?.('monster', reason) || false;
     }
 

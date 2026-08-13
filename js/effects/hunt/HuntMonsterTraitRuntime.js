@@ -315,7 +315,9 @@ class HuntMonsterTraitRuntime {
     }
 
     afterAction(engine, pattern, attackResults = []) {
-        if (pattern?.runtimeImpactTimelineEvent && pattern.runtimeImpactTimelineFinal !== true) {
+        const judgment = pattern?.runtimeJudgment || null;
+        if ((pattern?.runtimeImpactTimelineEvent || judgment)
+            && (judgment?.timelineFinal ?? pattern.runtimeImpactTimelineFinal) !== true) {
             return attackResults;
         }
 
@@ -326,8 +328,8 @@ class HuntMonsterTraitRuntime {
             } else if (pattern?.ignitesScaleTarget || pattern?.tags?.includes('ignites-scale-target')) {
                 this.heatTargetScale(engine, attackResults);
             }
-            if (pattern?.runtimeImpactEventKind === 'carpet-dive') {
-                const anchor = pattern.runtimeImpactTargetIndices?.[0]
+            if ((judgment?.eventKind ?? pattern?.runtimeImpactEventKind) === 'carpet-dive') {
+                const anchor = (judgment?.targetIndices ?? pattern.runtimeImpactTargetIndices)?.[0]
                     ?? attackResults[0]?.index
                     ?? 0;
                 this.scheduleGlobalDetonation(engine, anchor);

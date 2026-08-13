@@ -205,6 +205,10 @@ class HuntBattleTickExecutor {
         engine.monsterTraitRuntime?.tick?.(engine);
         engine.updateTimerUI(engine.battleTime);
 
+        // Control interruption above gets the first right to cancel the action
+        // and purge its queued judgments. Only surviving sessions may mutate combat.
+        engine.drainCombatJudgments?.();
+
         if (engine.pendingMonsterImpact) {
             const interrupted = engine.monsterKnockdownDuration > 0 || engine.monsterStunDuration > 0
                 || engine.monsterState === 'knocked_down' || engine.monsterState === 'stunned';
@@ -221,30 +225,7 @@ class HuntBattleTickExecutor {
                     engine.clearMonsterTraversal?.('impact-interrupted');
                 }
             } else {
-                const beatState = engine.monsterBeatRuntime?.get?.('monster');
-                const beatDriven = Boolean(
-                    engine.pendingMonsterImpact.pattern?.beatV2Approved === true
-                    && beatState?.action === engine.pendingMonsterImpact.pattern?.beatV2
-                );
-                if (beatDriven) {
-                    const eventIndex = Number(engine.pendingMonsterImpact.nextEventIndex || 0);
-                    const dueEvent = engine.pendingMonsterImpact.events?.[eventIndex];
-                    const dueTick = Number(dueEvent?.atTicks || 0);
-                    const elapsedTicks = Number(beatState.elapsedTicks || 0);
-                    // The authored timeline remains the gameplay authority even
-                    // when an event notification was dropped by a renderer/load
-                    // race. Clamping an already-passed event to one tick made the
-                    // countdown stay at 1 forever, so the visible eruption could
-                    // finish without ever committing its damage.
-                    engine.pendingMonsterImpact.remainingTicks =
-                        Number(engine.monsterBeatJudgmentTicks?.get?.(dueTick) || 0) > 0
-                            ? 0
-                            : elapsedTicks >= dueTick
-                                ? 0
-                                : Math.max(1, dueTick - elapsedTicks);
-                } else {
-                    engine.pendingMonsterImpact.remainingTicks--;
-                }
+                engine.pendingMonsterImpact.remainingTicks--;
                 if (engine.pendingMonsterImpact.remainingTicks <= 0) {
                     const pendingImpact = engine.pendingMonsterImpact;
                     const hasTimeline = Array.isArray(pendingImpact.events);
@@ -256,15 +237,6 @@ class HuntBattleTickExecutor {
                         }];
                     const eventIndex = Number(pendingImpact.nextEventIndex || 0);
                     const event = events[eventIndex] || events[0];
-                    if (beatDriven) {
-                        const judgmentTick = Number(event?.atTicks || 0);
-                        const remainingJudgments = Number(engine.monsterBeatJudgmentTicks?.get?.(judgmentTick) || 0) - 1;
-                        if (remainingJudgments > 0) {
-                            engine.monsterBeatJudgmentTicks.set(judgmentTick, remainingJudgments);
-                        } else {
-                            engine.monsterBeatJudgmentTicks?.delete?.(judgmentTick);
-                        }
-                    }
                     const nextEvent = events[eventIndex + 1];
                     if (nextEvent) {
                         pendingImpact.nextEventIndex = eventIndex + 1;

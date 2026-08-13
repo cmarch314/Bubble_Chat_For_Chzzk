@@ -498,7 +498,7 @@ class HuntMonsterActionPolicy {
     }
 
     static requiresDelayedImpact(pattern = {}) {
-        if (pattern.runtimeImpactCommit) return false;
+        if (pattern.runtimeImpactCommit || pattern.runtimeJudgment) return false;
         if (pattern.impact?.disabled || pattern.tags?.includes('no-impact')) return false;
         if (pattern.tags?.includes('burrow-enter')) return false;
         const type = String(pattern.type || '').toLowerCase();
@@ -737,8 +737,8 @@ class HuntMonsterActionPolicy {
         const policy = pattern.whiffReaction;
         if (!policy) return false;
         if (policy.pass === 'last'
-            && pattern.runtimeImpactTimelineEvent
-            && pattern.runtimeImpactTimelineFinal !== true) return false;
+            && (pattern.runtimeImpactTimelineEvent || pattern.runtimeJudgment)
+            && (pattern.runtimeJudgment?.timelineFinal ?? pattern.runtimeImpactTimelineFinal) !== true) return false;
         if (this.allPartsBroken(partState, policy.disabledWhenAllBroken || [])) return false;
         const passSizes = pattern.runtimeChargePassSizes || [];
         let inspected = attackResults;

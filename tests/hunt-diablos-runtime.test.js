@@ -65,6 +65,13 @@ assert.strictEqual(
 const enter = profiles.diablos.find(pattern => pattern.id === 'diablos.burrow_enter');
 const roar = profiles.diablos.find(pattern => pattern.id === 'diablos.roar');
 {
+    const runtimeEnter = HuntMonsterPatternCatalog.synchronizeMotionTiming({
+        ...enter,
+        motion: enter.motion.map(beat => ({
+            ...beat,
+            ...(motionOverrides.diablos?.[enter.id]?.beats?.[beat.beat] || {})
+        }))
+    });
     const hunters = [0, 1, 2, 3].map(index => ({
         index, name: `Hunter ${index + 1}`, hunterName: `Hunter ${index + 1}`,
         status: 'alive', hp: 100, maxHp: 100, cartRecoveryTicks: 0,
@@ -82,12 +89,18 @@ const roar = profiles.diablos.find(pattern => pattern.id === 'diablos.roar');
             beginMonsterTraversal(kind, ticks) {
                 this.monsterTraversalState = { kind, remainingTicks: ticks };
             },
+            beginMonsterBeatAction(action, context) {
+                this.startedBeatAction = action;
+                this.startedBeatContext = context;
+            },
             getMonsterAttackType: () => ({ type: 'physical', emoji: 'impact' })
         };
-        HuntMonsterTurnExecutor.execute(engine, enter, null, intendedTarget.index);
-        assert.strictEqual(engine.pendingMonsterImpact.targetIndex, intendedTarget.index,
-            'burrow damage reservation must keep the selected hunter');
-        assert.deepStrictEqual(engine.pendingMonsterImpact.events[0].targetIndices, [intendedTarget.index],
+        HuntMonsterTurnExecutor.execute(engine, runtimeEnter, null, intendedTarget.index);
+        assert.strictEqual(engine.pendingMonsterImpact, null,
+            'approved BEAT actions must not create the legacy delayed-impact countdown');
+        assert.strictEqual(engine.startedBeatContext.targetIndex, intendedTarget.index,
+            'burrow judgment session must keep the selected hunter');
+        assert.deepStrictEqual(engine.startedBeatContext.judgmentEvents[0].targetIndices, [intendedTarget.index],
             'burrow eruption damage must not migrate to a different hunter');
         assert.strictEqual(animationCalls[0][4].runtimePrimaryTargetIndex, intendedTarget.index,
             'burrow tracking dust and eruption animation must follow the same hunter as damage');
@@ -187,8 +200,8 @@ assert.match(animatorSource, /pattern\?\.chargeLaunchStyle === 'stomp-burst'/,
     'BEAT-authored Diablos charges must not lose their stomp dust when the resolved profile id is the pattern id');
 assert.match(animatorSource, /schedulePreviewImpactCardReactions[\s\S]*event\.atTicks/,
     'preview hunter-card reactions must be scheduled from resolved HIT ticks');
-assert.match(animatorSource, /if \(!pattern\?\.runtimeImpactPending\) \{[\s\S]*shakeTargets\(0\)/,
-    'delayed BEAT impacts must not retain the legacy percentage-based charge shake timer');
+assert.doesNotMatch(animatorSource, /shakeTargets\(/,
+    'delayed BEAT impacts must not retain a renderer-owned percentage hit timer');
 assert.strictEqual(hornCharge.motion[1].moveEasing, 'linear',
     'the charge must launch at full route speed instead of inheriting the old CSS acceleration');
 assert.deepStrictEqual(
