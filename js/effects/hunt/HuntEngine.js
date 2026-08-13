@@ -1,5 +1,6 @@
 class HuntEngine {
     static CART_CAMP_TICKS = 300;
+    static STANDARD_GUARD_LABEL = '가드!';
 
     static personalityProfiles() {
         if (typeof HuntPersonalityProfiles !== 'undefined') return HuntPersonalityProfiles;
@@ -676,7 +677,7 @@ class HuntEngine {
                 this.actionStateMachine?.cancel(hunter, 'guard');
                 hunter.guardDuration = 6;
                 this.presentHunterImpact(hunter.index, 'guard');
-                this.showSkillBubble(hunter.index, '🛡️ 가드');
+                this.showSkillBubble(hunter.index, HuntEngine.STANDARD_GUARD_LABEL);
                 this.playSFX('hunter_guard', null, { hunterIndex: hunter.index, action: 'guard' });
                 return false;
             }
@@ -1349,7 +1350,7 @@ class HuntEngine {
                 this.cancelHunterBeatAction(w, 'guard');
                 this.addLog(`🛡️ [방패 가드] ${w.name}이(가) 포효를 방패로 막아내며 흔들림 없이 버팁니다!`, '#00ffff');
                 this.playSFX('hunter_guard', null, { hunterIndex: w.index, action: 'guard' });
-                this.showSkillBubble(w.index, "가드!");
+                this.showSkillBubble(w.index, HuntEngine.STANDARD_GUARD_LABEL);
                 this.shakeWeapon(w.index, '#00ffff');
                 this.presentHunterImpact(w.index, 'guard');
                 w.guardDuration = 6;
