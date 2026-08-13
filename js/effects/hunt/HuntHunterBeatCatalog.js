@@ -100,6 +100,8 @@ class HuntHunterBeatCatalog {
         const release = action.tags?.includes('charge-release');
         const tackle = action.tags?.includes('tackle');
         const trueChargedSlash = id === 'great_sword.true_charged_slash';
+        const wideSlash = id === 'great_sword.wide_slash';
+        const kick = id === 'great_sword.kick';
         let beats;
         if (preparation) {
             beats = [
@@ -124,6 +126,30 @@ class HuntHunterBeatCatalog {
                 { id: 'rebound-swing', ticks: rebound, events: [{
                     id: `${id}:hit:2`, kind: 'damage', target: 'primary',
                     hitIndex: 1, hitCount: 2, offsetTicks: rebound - 1
+                }] },
+                { id: 'recovery', ticks: recovery, events: [] }
+            ];
+        } else if (wideSlash) {
+            const draw = Math.max(1, Math.min(2, totalTicks - 2));
+            const sweep = Math.max(1, Math.floor(totalTicks * .45));
+            const recovery = Math.max(1, totalTicks - draw - sweep);
+            beats = [
+                { id: 'draw-side', ticks: draw, events: [] },
+                { id: 'horizontal-sweep', ticks: sweep, events: [{
+                    id: `${id}:hit:1`, kind: 'damage', target: 'primary',
+                    hitIndex: 0, hitCount: 1, offsetTicks: sweep - 1
+                }] },
+                { id: 'recovery', ticks: recovery, events: [] }
+            ];
+        } else if (kick) {
+            const brace = 1;
+            const strike = Math.max(1, Math.min(2, totalTicks - 2));
+            const recovery = Math.max(1, totalTicks - brace - strike);
+            beats = [
+                { id: 'brace', ticks: brace, events: [] },
+                { id: 'kick', ticks: strike, events: [{
+                    id: `${id}:hit:1`, kind: 'damage', target: 'primary',
+                    hitIndex: 0, hitCount: 1, offsetTicks: strike - 1
                 }] },
                 { id: 'recovery', ticks: recovery, events: [] }
             ];

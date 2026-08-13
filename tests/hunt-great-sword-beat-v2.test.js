@@ -10,7 +10,7 @@ const HuntWeaponMechanics = require('../js/effects/hunt/HuntWeaponMechanics.js')
 const runtimeCss = fs.readFileSync(path.resolve(__dirname, '../styles/hunt-runtime.css'), 'utf8');
 
 const actions = HuntWeaponMechanics.actionsFor('great_sword');
-assert.strictEqual(actions.length, 16, 'the complete Great Sword action kit must be BEAT-compilable');
+assert.strictEqual(actions.length, 15, 'the Side Blow-free Great Sword action kit must be BEAT-compilable');
 for (const action of actions) {
     const compiled = HuntHunterBeatCatalog.compile('great_sword', action);
     assert.strictEqual(compiled.actor, 'hunter');
@@ -24,6 +24,20 @@ for (const action of actions) {
     assert.strictEqual(damageEvents.length, expectedHits,
         `${action.id} must author each impact unless it is preparation`);
 }
+
+const wideSlash = HuntHunterBeatCatalog.compile('great_sword',
+    actions.find(action => action.id === 'great_sword.wide_slash'));
+assert.deepStrictEqual(wideSlash.beats.map(beat => beat.id),
+    ['draw-side', 'horizontal-sweep', 'recovery'],
+    'Wide Slash must own a dedicated lateral-cut timeline');
+assert.strictEqual(wideSlash.events.find(event => event.kind === 'damage').atTicks, 5,
+    'Wide Slash contact must land during the lateral sweep, not during its preparation');
+
+const kick = HuntHunterBeatCatalog.compile('great_sword',
+    actions.find(action => action.id === 'great_sword.kick'));
+assert.deepStrictEqual(kick.beats.map(beat => beat.id), ['brace', 'kick', 'recovery']);
+assert.strictEqual(kick.events.find(event => event.kind === 'damage').atTicks, 2,
+    'the foot emoji and Kick damage must share one authored impact tick');
 
 const trueCharge = HuntHunterBeatCatalog.compile('great_sword',
     actions.find(action => action.id === 'great_sword.true_charged_slash'));

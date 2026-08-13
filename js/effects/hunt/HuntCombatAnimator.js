@@ -1171,6 +1171,16 @@ class HuntCombatAnimator {
                         });
 
                         if (monsterImg && profile.impact) {
+                            const impactAccent = this.createWeaponImpactAccent(
+                                profile,
+                                impactStage,
+                                monsterImg,
+                                idx
+                            );
+                            if (impactAccent) {
+                                (impactStage || weaponCard).appendChild(impactAccent);
+                                this.animationTimers.timeout(() => impactAccent.remove(), 760);
+                            }
                             this.showDamageAtImpact(
                                 monsterImg,
                                 visualDamage,
@@ -1584,6 +1594,28 @@ class HuntCombatAnimator {
         }
         effect.setAttribute('aria-hidden', 'true');
         return effect;
+    }
+
+    createWeaponImpactAccent(profile, stage = null, target = null, hunterIndex = 0) {
+        if (typeof document === 'undefined' || !profile?.impactAccent) return null;
+        const stageRect = stage?.getBoundingClientRect?.();
+        const targetRect = target?.getBoundingClientRect?.();
+        if (!(stageRect?.width > 0) || !(targetRect?.width > 0)) return null;
+
+        const accent = document.createElement('span');
+        accent.className = `hunt-action-effect hunt-weapon-impact-accent hunt-weapon-impact-${profile.impactAccent}`;
+        if (Number(hunterIndex) >= 2) accent.classList.add('is-from-right');
+        accent.dataset.actionId = String(profile.actionId || '');
+        accent.style.left = `${targetRect.left - stageRect.left + targetRect.width / 2}px`;
+        accent.style.top = `${targetRect.top - stageRect.top + targetRect.height / 2}px`;
+        accent.style.setProperty('--hunt-impact-width', `${Math.round(Math.max(170, Math.min(360, targetRect.width * .95)))}px`);
+        accent.style.setProperty('--hunt-impact-height', `${Math.round(Math.max(100, Math.min(220, targetRect.height * .62)))}px`);
+        if (profile.impactAccent === 'wide-slash') accent.innerHTML = '<i></i><b></b>';
+        else if (profile.impactAccent === 'kick') {
+            accent.textContent = '🦶';
+        }
+        accent.setAttribute('aria-hidden', 'true');
+        return accent;
     }
 
     shakeMonster() {

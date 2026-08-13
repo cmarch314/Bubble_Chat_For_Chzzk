@@ -27,6 +27,7 @@ class HuntWeaponAnimationCatalog {
                     transformOrigin: options.transformOrigin || (weaponId === 'long_sword'
                         ? '82% 18%'
                         : (weaponId === 'great_sword' ? '50% 88%' : '50% 50%')),
+                    impactAccent: options.impactAccent || null,
                     kinsect: options.kinsect || 'none',
                     source: 'capcom-controls+wilds-action-class'
                 });
@@ -51,9 +52,12 @@ class HuntWeaponAnimationCatalog {
             releaseChargePose: true, trackTarget: true
         });
         add('great_sword', ['tackle'], 'shoulder_tackle', 480, 'counter');
-        add('great_sword', ['wide_slash'], 'horizontal_slash', 620, 'sever');
-        add('great_sword', ['side_blow'], 'quick_chop', 430, 'blunt');
-        add('great_sword', ['kick'], 'shoulder_tackle', 390, 'blunt');
+        add('great_sword', ['wide_slash'], 'great_sword_wide_slash', 900, 'sever', {
+            trackTarget: true, impactAccent: 'wide-slash'
+        });
+        add('great_sword', ['kick'], 'great_sword_kick', 500, 'blunt', {
+            animateWeapon: false, impactAccent: 'kick'
+        });
 
         add('long_sword', ['overhead_slash'], 'ls_overhead_slash', 560);
         add('long_sword', ['thrust'], 'ls_thrust', 430);
@@ -268,6 +272,13 @@ class HuntWeaponAnimationCatalog {
             // The rebound then continues through a second full turn into the
             // heavy hit; neither turn may begin after its damage event.
             great_sword_true_release: [[0, 0, 0, 135, 1.1, -54, -60], [.08, 0, 0, 118, 1.14, -65, -74], [.17, .34, .38, 245, 1.16, -18, -94], [.25, .72, .76, 405, 1.2, -8, -74], [6 / 21, 1, 1, 495, 1.24, 0, 0], [.43, 1, 1, 495, 1.12, 0, 18], [.55, .42, .46, 585, 1.2, -8, -30], [.7, .78, .82, 735, 1.24, 0, -108], [18 / 21, 1, 1, 855, 1.34, 0, 0], [.93, .9, .9, 870, 1.18, 0, 8], [1, 0, 0, 855, 1, 0, 0]],
+            // Draw the blade out beside the hunter, carry its edge laterally
+            // through the live target, then settle after the follow-through.
+            // This is a compact horizontal cut, not a shortened charged slash.
+            great_sword_wide_slash: [[0, 0, 0, -18, 1.02, -12, 5], [.22, 0, 0, -52, 1.08, -46, 2], [.4, .25, .2, -22, 1.12, -18, -4], [.56, 1, 1, 58, 1.18, 0, 0], [.76, .9, .9, 88, 1.1, 8, 5], [1, 0, 0, 90, 1, 0, 0]],
+            // The weapon stays planted for a kick; the foot emoji owns the
+            // visible strike at the authored impact tick.
+            great_sword_kick: [idle, end],
             heavy_overhead: [idle, [.3, 0, 0, -92, 1.04, -26, 18], [.52, .18, .18, -42, 1.08, 0, 0], [.76, 1, 1, 38, 1.15, 0, 0], end],
             true_charged_slash: [idle, [.24, 0, 0, -115, 1.08, -34, 22], [.48, .14, .12, -78, 1.14, 0, 0], [.68, 1, 1, 48, 1.28, 0, 0], [.82, .88, .84, 56, 1.18, 0, 0], end],
             // A compact shoulder check: brace, bump a short distance toward the

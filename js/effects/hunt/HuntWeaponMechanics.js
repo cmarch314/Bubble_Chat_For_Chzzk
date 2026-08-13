@@ -239,8 +239,7 @@ class HuntWeaponMechanics {
                 prep('great_sword.true_charge_3', '참 모아베기 · 3차지', { greatSwordChain: 2, greatSwordCharge: 2 }, { greatSwordCharge: 3, atbAfterAction: 92 }, 'wilds-motion-reference:true-charged-slash-hold-loop', greatSwordChargeTicks),
                 { id: 'great_sword.true_charged_slash', name: '참 모아베기', dmg: 760, motionValue: 190, hits: [15, 175], requirements: { greatSwordChain: 2, minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, greatSwordChain: 0 }, tags: ['sever', 'charge-release', 'heavy', 'finisher'], audioCue: 'true_charged_slash', durationTicks: 21, mechanicEvidence: 'wilds-action-class:cSpiritVerticalSlash' },
                 { id: 'great_sword.tackle', name: '태클', dmg: 95, motionValue: 26, stun: 55, requirements: { minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, advanceGreatSwordChain: true, atbAfterAction: 86 }, tags: ['blunt', 'counter', 'tackle'], audioCue: 'blunt_light', durationTicks: 7, mechanicEvidence: 'wilds-action-class:cTackle' },
-                { id: 'great_sword.wide_slash', name: '횡베기', dmg: 168, motionValue: 42, effects: {}, next: ['great_sword.side_blow'], tags: ['sever'], audioCue: 'slash_heavy', durationTicks: 9, mechanicEvidence: 'wilds-motion-values:wide-slash-42' },
-                { id: 'great_sword.side_blow', name: '옆면치기', dmg: 64, motionValue: 16, stun: 20, effects: {}, next: ['great_sword.kick'], tags: ['blunt'], audioCue: 'blunt_light', durationTicks: 6, mechanicEvidence: 'wilds-motion-values:side-blow-16-stun-20' },
+                { id: 'great_sword.wide_slash', name: '횡베기', dmg: 168, motionValue: 42, effects: {}, next: ['great_sword.kick'], tags: ['sever'], audioCue: 'slash_heavy', durationTicks: 9, mechanicEvidence: 'wilds-motion-values:wide-slash-42' },
                 { id: 'great_sword.kick', name: '발차기', dmg: 20, motionValue: 5, stun: 10, effects: {}, tags: ['blunt'], audioCue: 'blunt_light', durationTicks: 5, mechanicEvidence: 'wilds-motion-values:kick-5-stun-10' }
             ],
             long_sword: [
@@ -677,13 +676,12 @@ class HuntWeaponMechanics {
             const prefixes = ['great_sword.charge', 'great_sword.strong_charge', 'great_sword.true_charge'];
             const releases = ['great_sword.charged_slash', 'great_sword.strong_charged_slash', 'great_sword.true_charged_slash'];
             if (charge === 0 && chain === 0 && !context.monsterDowned) {
-                const normalMoves = new Set(['great_sword.wide_slash', 'great_sword.side_blow']);
+                const normalMoves = new Set(['great_sword.wide_slash']);
                 const linked = normalMoves.has(hunter.lastActionId) ? linkedFromLast() : -1;
                 if (linked >= 0 && this.random() < 0.62) return linked;
                 const route = this.random();
-                if (route < 0.24) return byId('great_sword.wide_slash');
-                if (route < 0.36) return byId('great_sword.side_blow');
-                if (route < 0.44) return byId('great_sword.kick');
+                if (route < 0.30) return byId('great_sword.wide_slash');
+                if (route < 0.42) return byId('great_sword.kick');
             }
             if (charge === 0) return byId(`${prefixes[chain]}_1`);
             if (charge >= 3) return byId(releases[chain]);

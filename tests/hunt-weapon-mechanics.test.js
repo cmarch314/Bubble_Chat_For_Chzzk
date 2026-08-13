@@ -18,7 +18,7 @@ const selector = new HuntWeaponActionSelector(() => 0, mechanics);
 
 const greatSwordActions = HuntWeaponMechanics.actionsFor('great_sword');
 assert.ok(greatSwordActions.some(action => action.id === 'great_sword.wide_slash'), 'Great Sword must retain a non-charge severing route');
-assert.ok(greatSwordActions.some(action => action.id === 'great_sword.side_blow'), 'Great Sword must retain a quick blunt route');
+assert.ok(!greatSwordActions.some(action => action.id === 'great_sword.side_blow'), 'removed Side Blow must not remain selectable');
 const greatSword = { id: 'great_sword', hunterName: 'GS', hp: 100, maxHp: 100 };
 mechanics.initialize(greatSword);
 const normalGreatSword = { id: 'great_sword', hunterName: 'GS NORMAL', hp: 100, maxHp: 100 };
@@ -27,7 +27,7 @@ const firstNormal = selector.select(normalGreatSword, greatSwordActions, { monst
 assert.strictEqual(firstNormal.id, 'great_sword.wide_slash', 'an ordinary opening must allow a non-charge Great Sword attack');
 mechanics.applyAction(engine, normalGreatSword, firstNormal);
 normalGreatSword.lastActionId = firstNormal.id;
-assert.strictEqual(selector.select(normalGreatSword, greatSwordActions, { monsterDowned: false, monsterAtb: 20 }).action.id, 'great_sword.side_blow', 'normal Great Sword attacks must form a readable short combo');
+assert.strictEqual(selector.select(normalGreatSword, greatSwordActions, { monsterDowned: false, monsterAtb: 20 }).action.id, 'great_sword.kick', 'Wide Slash must link directly into the retained emoji Kick');
 const orthodoxGreatSwordTrace = [
     'great_sword.charge_1', 'great_sword.charge_2', 'great_sword.charge_3', 'great_sword.charged_slash',
     'great_sword.strong_charge_1', 'great_sword.strong_charge_2', 'great_sword.strong_charge_3', 'great_sword.strong_charged_slash',

@@ -96,6 +96,13 @@ for (const motion of ['split_shield_brace', 'split_shield_guard', 'split_shield_
 const greatSwordRaise = HuntWeaponAnimationCatalog.PROFILES['great_sword.charge_1'];
 const greatSwordHold = HuntWeaponAnimationCatalog.PROFILES['great_sword.charge_2'];
 const greatSwordRelease = HuntWeaponAnimationCatalog.PROFILES['great_sword.charged_slash'];
+const greatSwordWideSlash = HuntWeaponAnimationCatalog.PROFILES['great_sword.wide_slash'];
+const greatSwordKick = HuntWeaponAnimationCatalog.PROFILES['great_sword.kick'];
+assert.strictEqual(greatSwordWideSlash.motion, 'great_sword_wide_slash',
+    'Wide Slash needs a dedicated lateral blade path instead of the generic slash');
+assert.strictEqual(greatSwordWideSlash.impactAccent, 'wide-slash');
+assert.strictEqual(greatSwordKick.animateWeapon, false, 'Kick must leave the planted Great Sword still');
+assert.strictEqual(greatSwordKick.impactAccent, 'kick', 'Kick must render its foot emoji on the impact tick');
 assert.strictEqual(greatSwordRaise.durationMs, 800, 'global 1.25x visual cadence turns the authored charge motion into 1000ms');
 assert.strictEqual(greatSwordHold.durationMs, 800, 'every Great Sword charge level must use the same one-second runtime duration');
 assert.strictEqual(
@@ -175,8 +182,10 @@ assert.match(slotTwoGreatSwordReleaseFrames.at(-1).transform, /rotate\(360deg\)/
 const trueGreatSwordFrames = HuntWeaponAnimationCatalog.keyframes(
     HuntWeaponAnimationCatalog.PROFILES['great_sword.true_charged_slash'], 0
 );
-assert.ok(trueGreatSwordFrames.some(frame => frame.transform.includes('rotate(720deg)')),
-    'true charged slash must plant downward, then continue into its rebound rotation');
+assert.ok(trueGreatSwordFrames.some(frame => {
+    const rotation = Number(frame.transform.match(/rotate\((-?\d+)deg\)/)?.[1] || 0);
+    return rotation >= 900;
+}), 'true charged slash must plant downward, then continue forward through its rebound rotation');
 assert.ok(
     HuntWeaponAnimationCatalog.keyframes(greatSwordRelease, 0, { x: 420, y: -310 })
         .some(frame => frame.transform.includes('translate(420px, -310px)')),
@@ -271,5 +280,11 @@ assert.match(animatorSource, /resolveWeaponTargetVector\(weaponImg, target\)/,
     'target-tracked weapon attacks must measure the live monster position');
 assert.match(animatorSource, /keyframes\(profile, idx, targetVector\)/,
     'the measured monster vector must drive generated weapon keyframes');
+assert.match(animatorSource, /createWeaponImpactAccent\([\s\S]*?profile,[\s\S]*?impactStage,[\s\S]*?monsterImg,[\s\S]*?idx/,
+    'Great Sword accents must be created inside the resolved BEAT impact callback');
+assert.match(animatorSource, /accent\.textContent = '🦶'/,
+    'Great Sword Kick must use a foot emoji instead of borrowing a weapon swing');
+assert.match(animatorSource, /profile\.impactAccent === 'wide-slash'[\s\S]*?<i><\/i><b><\/b>/,
+    'Wide Slash must render a layered horizontal cutting trail at contact');
 
 console.log('[test] All canonical weapon actions have semantic OBS animation profiles.');
