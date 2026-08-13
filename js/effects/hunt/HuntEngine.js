@@ -46,6 +46,11 @@ class HuntEngine {
                         queue.push(event);
                         if (queue.length > 32) queue.shift();
                         this.hunterBeatRuntimeEvents.set(hunterIndex, queue);
+                        this.confirmPendingHunterPartImpact?.(
+                            hunterIndex,
+                            state.context?.action?.id,
+                            event
+                        );
                     } else {
                         this.monsterBeatRuntimeEvents.push(event);
                         if (this.monsterBeatRuntimeEvents.length > 64) this.monsterBeatRuntimeEvents.shift();
@@ -799,6 +804,16 @@ class HuntEngine {
 
     recordMonsterPartDamage(weapon, rawDamage, action = null) {
         if (!this.monsterAnatomy || !this.monsterPartState.length || typeof HuntMonsterAnatomyCatalog === 'undefined') return null;
+        const previousPartState = new Map(this.monsterPartState.map(part => [part, {
+            health: Number(part.health || 0),
+            damageAccumulated: Number(part.damageAccumulated || 0),
+            flinchAccumulated: Number(part.flinchAccumulated || 0),
+            postBreakDamageAccumulated: Number(part.postBreakDamageAccumulated || 0),
+            broken: Boolean(part.broken),
+            severed: Boolean(part.severed),
+            breakPending: Boolean(part.breakPending),
+            hitzones: { ...(part.hitzones || {}) }
+        }]));
         const scale = HuntMonsterAnatomyCatalog.partDamageScale(
             this.monsterPartState,
             this.monsterMaxHp
@@ -813,7 +828,16 @@ class HuntEngine {
             this.random,
             part => this.perkRuntime?.partTargetWeight?.(weapon, part) || 1
         );
-        if (result) result.sourceHunterIndex = Number(weapon?.index);
+        if (result) {
+            result.sourceHunterIndex = Number(weapon?.index);
+            result.sourceActionId = String(action?.id || '');
+            result.partStateBeforeImpact = previousPartState.get(result.part) || null;
+            // Normal hunter turns author the real contact on their BEAT damage
+            // event. Until that event is emitted, a break detected by the old
+            // synchronous damage path is provisional and must be reversible if
+            // roar, hitstun, or another control judgment cancels the swing.
+            result.impactConfirmed = !result.sourceActionId || !this.monsterBeatRuntime;
+        }
         if (result?.newlyBroken || result?.newlyFlinched || result?.repeatedTopple) {
             if (HuntEngine.prototype.isMonsterActionPresenting.call(this)) {
                 if (result.newlyBroken) {
@@ -829,6 +853,43 @@ class HuntEngine {
             HuntEngine.prototype.resolveMonsterPartReaction.call(this, result);
         }
         return result;
+    }
+
+    confirmPendingHunterPartImpact(hunterIndex, actionId, event) {
+        if (event?.kind !== 'damage') return false;
+        const sourceIndex = Number(hunterIndex);
+        const sourceActionId = String(actionId || '');
+        const result = this.pendingMonsterPartReactions?.find(candidate =>
+            !candidate.impactConfirmed
+            && Number(candidate.sourceHunterIndex) === sourceIndex
+            && String(candidate.sourceActionId || '') === sourceActionId
+        );
+        if (!result) return false;
+        result.impactConfirmed = true;
+        result.confirmedImpactEventId = String(event.id || '');
+        return true;
+    }
+
+    rollbackPendingMonsterPartReaction(result) {
+        const part = result?.part;
+        const snapshot = result?.partStateBeforeImpact;
+        if (!part || !snapshot) return false;
+        part.health = snapshot.health;
+        part.damageAccumulated = snapshot.damageAccumulated;
+        part.flinchAccumulated = snapshot.flinchAccumulated;
+        part.postBreakDamageAccumulated = snapshot.postBreakDamageAccumulated;
+        part.broken = snapshot.broken;
+        part.severed = snapshot.severed;
+        part.breakPending = snapshot.breakPending;
+        part.hitzones = { ...snapshot.hitzones };
+        return true;
+    }
+
+    isPendingHunterPartImpactActive(result) {
+        if (!result?.sourceActionId || !this.monsterBeatRuntime?.get) return false;
+        const state = this.monsterBeatRuntime.get(`hunter:${result.sourceHunterIndex}`);
+        return Boolean(state
+            && String(state.context?.action?.id || '') === String(result.sourceActionId));
     }
 
     isMonsterActionPresenting() {
@@ -848,6 +909,21 @@ class HuntEngine {
             || Number(this.monsterStunDuration || 0) > 0
             || Number(this.monsterActionLockTicks || 0) > 0
             || ['knocked_down', 'stunned', 'paralyzed', 'sleeping'].includes(this.monsterState)) return false;
+        // A provisional break may outlive the attack that appeared to cause it.
+        // Wait while that action is still approaching its authored HIT; if the
+        // action vanished without emitting the HIT, restore part durability and
+        // discard the impossible delayed reaction.
+        while (this.pendingMonsterPartReactions.length) {
+            const pending = this.pendingMonsterPartReactions[0];
+            if (pending.sourceActionId && !pending.impactConfirmed) {
+                if (HuntEngine.prototype.isPendingHunterPartImpactActive.call(this, pending)) return false;
+                this.pendingMonsterPartReactions.shift();
+                HuntEngine.prototype.rollbackPendingMonsterPartReaction.call(this, pending);
+                continue;
+            }
+            break;
+        }
+        if (!this.pendingMonsterPartReactions.length) return false;
         const result = this.pendingMonsterPartReactions.shift();
         HuntEngine.prototype.resolveMonsterPartReaction.call(this, result);
         return true;
