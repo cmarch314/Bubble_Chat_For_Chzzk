@@ -730,7 +730,7 @@ class HuntMonsterTurnExecutor {
         // like an unexplained immunity/HP reduction in live hunts.
         engine.shakeWeapon?.(target.index, '#ff9500', true, tackle);
         target.greatSwordChargeLocked = false;
-        engine.showSkillBubble?.(target.index, '차지 태클!');
+        engine.showSkillBubble?.(target.index, '태클!');
         return true;
     }
 

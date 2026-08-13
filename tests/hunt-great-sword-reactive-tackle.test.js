@@ -103,7 +103,7 @@ assert.ok(reactive.impacts.includes('tackle'),
 assert.ok(reactive.animations.some(animation =>
     animation.isAttack === true && animation.id === 'great_sword.tackle'),
     'reactive tackle must start the authored weapon animation, not only its hidden BEAT state');
-assert.ok(reactive.bubbles.includes('차지 태클!'));
+assert.ok(reactive.bubbles.includes('태클!'));
 
 const failedHunter = createHunter();
 failedHunter.personality = 'newbie';
