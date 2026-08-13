@@ -129,6 +129,10 @@ assert.strictEqual(motionValuesEqual(
     { hop: { to: 'target', ticks: 6 }, impact: { rotation: 45, ticks: 4 } },
     { impact: { ticks: 4, rotation: 45 }, hop: { ticks: 6, to: 'target' } }
 ), true, 'save verification must ignore JSON object key insertion order');
+assert.strictEqual(motionValuesEqual(
+    { impact: { ticks: 4, judgments: [{ id: 'quake', directHitSupersedes: false }] } },
+    { impact: { ticks: 4, judgments: [{ id: 'quake' }] } }
+), true, 'an omitted opt-in judgment flag must be semantically equal to its explicit false default');
 const reorderedSaved = Object.fromEntries(Object.entries(session.serialize()).reverse().map(([id, beat]) =>
     [id, Object.fromEntries(Object.entries(beat).reverse())]));
 assert.doesNotThrow(() => session.markSaved(reorderedSaved),

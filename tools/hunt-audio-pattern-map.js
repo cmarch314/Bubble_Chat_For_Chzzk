@@ -1054,7 +1054,14 @@ function savePatternMotion({ huntId, patternId, beats = null, reset = false }, o
                         }
                     }
                     else result.size = item?.size === 'small' ? 'small' : 'large';
-                    if (item?.directHitSupersedes === true) result.directHitSupersedes = true;
+                    // Preserve both explicit values. `false` is normally the
+                    // default, but the editor may load it from an authored
+                    // judgment. Dropping it here made a successful write look
+                    // different after reload and incorrectly reported a
+                    // validation failure.
+                    if (typeof item?.directHitSupersedes === 'boolean') {
+                        result.directHitSupersedes = item.directHitSupersedes;
+                    }
                     return result;
                 }).filter(item => {
                     const key = String(item.id || item.group || '');

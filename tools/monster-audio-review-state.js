@@ -177,7 +177,13 @@
         const normalize = item => {
             if (Array.isArray(item)) return item.map(normalize);
             if (!item || typeof item !== 'object') return item;
-            return Object.fromEntries(Object.keys(item).sort().map(key => [key, normalize(item[key])]));
+            return Object.fromEntries(Object.keys(item).sort()
+                // `false` is the runtime default for this opt-in flag. Older
+                // authored patterns may spell it out while the save boundary
+                // deliberately omits it, so it must not cause a false
+                // save/reload mismatch.
+                .filter(key => !(key === 'directHitSupersedes' && item[key] === false))
+                .map(key => [key, normalize(item[key])]));
         };
         return JSON.stringify(normalize(value));
     }

@@ -217,6 +217,14 @@ assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].hitReactionKind, 
     'the editor save boundary must normalize legacy butt-stumble into small-hit identity');
 assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].hitRecoveryTicks, undefined,
     'the editor save boundary must reject monster-authored hunter recovery timing');
+const explicitFalseJudgmentSave = savePatternMotion({
+    huntId: 'diablos', patternId: 'diablos.burrow_enter', beats: {
+        eruption: { ticks: 5, judgments: [{ id: 'tremor', group: 'eruption', kind: 'tremor',
+            target: 'primary-adjacent', offsetTicks: 2, size: 'large', directHitSupersedes: false }] }
+    }
+}, motionTmp);
+assert.strictEqual(explicitFalseJudgmentSave.beats.eruption.judgments[0].directHitSupersedes, false,
+    'save/reload must retain an explicitly authored false judgment flag instead of producing a false mismatch');
 const duplicateJudgmentSave = savePatternMotion({
     huntId: 'diablos', patternId: 'diablos.rage_charge', beats: {
         first: { ticks: 5, judgments: [{ id: 'same-hit', group: 'same-group', kind: 'damage',
@@ -231,6 +239,7 @@ assert.deepStrictEqual(duplicateJudgmentSave.beats.old.judgments, [],
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', reset: true }, motionTmp);
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.rage_double_charge', reset: true }, motionTmp);
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.rage_charge', reset: true }, motionTmp);
+savePatternMotion({ huntId: 'diablos', patternId: 'diablos.burrow_enter', reset: true }, motionTmp);
 assert.strictEqual(JSON.parse(fs.readFileSync(motionTmp, 'utf8')).overrides.diablos, undefined);
 
 // the real reviewed catalog resolves diablos without throwing.
