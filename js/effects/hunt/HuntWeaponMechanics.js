@@ -691,14 +691,11 @@ class HuntWeaponMechanics {
             const riskBias = hunter.personality === 'offensive' ? 7
                 : (hunter.personality === 'defensive' || hunter.personality === 'support' ? -6 : 0);
             const continueLimit = (charge === 1 ? 76 : 84) + riskBias + ((this.random() - 0.5) * 12);
-            // Check the charge-cancel reaction before extending the charge.
-            // Previously the early continue return made tackle unreachable through
-            // most of its useful window. An imminent attack is deterministic;
-            // earlier pressure still respects the personality special-action rate.
-            const tackleBase = monsterAtb >= 90 ? .9 : (monsterAtb >= 78 ? .68 : .42);
-            const tackleChance = HuntWeaponMechanics.specialActionChance(hunter, tackleBase);
-            if (hunter._mechanicMonsterPressure
-                && (monsterAtb >= 94 || this.random() < tackleChance)) return byId('great_sword.tackle');
+            // Tackle is an impact-time response owned by
+            // HuntMonsterTurnExecutor.activateReactiveGreatSwordTackle(). Merely
+            // seeing high monster ATB must not manufacture a tackle here: doing
+            // so resets charge to zero, advances the chain, and can trap the final
+            // tier in an endless charge -> tackle loop without an incoming hit.
             if (monsterAtb < continueLimit) return byId(`${prefixes[chain]}_${charge + 1}`);
             return byId(releases[chain]);
         }
