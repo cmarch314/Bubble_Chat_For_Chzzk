@@ -1712,11 +1712,18 @@
         if (metadata.apiVersion !== 3 || metadata.buildId !== 'unified-editor-v3') throw new Error('편집기 서버 버전 불일치 · 서버를 재시작하세요.');
         app.capabilities = metadata.capabilities || []; app.buildId = metadata.buildId; app.presets = metadata.presets || {}; app.monsters = metadata.monsters || []; app.categories = metadata.categories || [];
         installPairPreviewTargets();
-        const candidate = String(new URLSearchParams(location.search).get('candidate') || '').trim();
+        const reviewQuery = new URLSearchParams(location.search);
+        const candidate = String(reviewQuery.get('candidate') || '').trim();
+        const requestedPreviewMonster = String(reviewQuery.get('monster') || '').trim();
         const previewPath = metadata.previewPath || '/preview/?embed=1';
-        previewFrame().src = candidate
-            ? `${previewPath}${previewPath.includes('?') ? '&' : '?'}candidate=${encodeURIComponent(candidate)}`
-            : previewPath;
+        const previewQuery = new URLSearchParams(previewPath.includes('?')
+            ? previewPath.slice(previewPath.indexOf('?') + 1) : '');
+        if (candidate) previewQuery.set('candidate', candidate);
+        // The iframe must receive the selected monster before its first paint.
+        // Otherwise the lab's Tigerx default flashes briefly before the editor
+        // posts the actual selection.
+        if (requestedPreviewMonster) previewQuery.set('monster', requestedPreviewMonster);
+        previewFrame().src = `${previewPath.split('?')[0]}?${previewQuery.toString()}`;
         const resizePreview = () => { const stage = $('#previewStage'); previewFrame().style.transform = `scale(${stage.clientWidth / 1920})`; };
         new ResizeObserver(resizePreview).observe($('#previewStage')); resizePreview();
         installScenarioControls();
