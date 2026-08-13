@@ -1,6 +1,19 @@
 'use strict';
 
 class HuntHunterBeatCatalog {
+    // Approval is intentionally action-scoped, never weapon-scoped. New Great
+    // Sword actions may use the BEAT runtime immediately, but must remain
+    // migrated until their authored graph has passed visual/audio review.
+    static APPROVED_ACTION_IDS = new Set([
+        'great_sword.charge_1', 'great_sword.charge_2', 'great_sword.charge_3',
+        'great_sword.charged_slash',
+        'great_sword.strong_charge_1', 'great_sword.strong_charge_2', 'great_sword.strong_charge_3',
+        'great_sword.strong_charged_slash',
+        'great_sword.true_charge_1', 'great_sword.true_charge_2', 'great_sword.true_charge_3',
+        'great_sword.true_charged_slash',
+        'great_sword.tackle', 'great_sword.wide_slash', 'great_sword.kick'
+    ]);
+
     static get WEAPON_IDS() {
         return Object.freeze([
             'great_sword', 'long_sword', 'sword_shield', 'dual_blades', 'hammer', 'hunting_horn',
@@ -179,7 +192,7 @@ class HuntHunterBeatCatalog {
         return HuntBeatV2Contract.compile({
             schemaVersion: 2,
             backend: 'beat-v2',
-            reviewStatus: 'approved',
+            reviewStatus: this.APPROVED_ACTION_IDS.has(id) ? 'approved' : 'migrated',
             id,
             actor: 'hunter',
             source: Object.freeze({ kind: 'weapon-action', weaponId: 'great_sword' }),

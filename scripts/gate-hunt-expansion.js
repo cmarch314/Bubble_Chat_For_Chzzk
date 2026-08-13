@@ -12,6 +12,7 @@ const full = process.argv.includes('--full');
 const commands = [
     ['node', ['scripts/compile-monster-kits.js', '--check']],
     ['node', ['tests/hunt-beat-review-status.test.js']],
+    ['node', ['tests/hunt-hunter-beat-review-status.test.js']],
     ['node', ['tests/hunt-beat-v2-contract.test.js']],
     ['node', ['tests/hunt-reaction-beat-runtime.test.js']],
     ['node', ['tests/hunt-monster-sleep-runtime.test.js']],
