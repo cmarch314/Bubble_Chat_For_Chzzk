@@ -1510,7 +1510,8 @@
         root.textContent = '';
         const banner = document.createElement('div'); banner.className = 'selection-banner'; banner.innerHTML = slot ? `배정 대상 · <b>${esc(pattern.name)} / ${esc(slot.label)}</b>` : '타임라인에서 사운드 순간을 선택하세요.'; root.appendChild(banner);
         let matchedGroups = 0, renderedGroups = 0;
-        const sourcePool = filter === 'common' ? app.commonGroups : app.groups;
+        const commonFilter = filter === 'common' || filter === 'common-part-break' || filter === 'common-items';
+        const sourcePool = commonFilter ? app.commonGroups : app.groups;
         const orderedGroups = sourcePool.map((group, order) => ({ group, order })).sort((left, right) => {
             const favoriteDelta = Number(app.favoriteSourceGroups.has(sourceGroupKey(right.group)))
                 - Number(app.favoriteSourceGroups.has(sourceGroupKey(left.group)));
@@ -1527,7 +1528,12 @@
             const groupHidden = app.hiddenSourceGroups.has(groupKey);
             if (groupHidden && !app.showHiddenSources && !containsFocus) continue;
             if (!containsFocus && query && !haystack.includes(query)) continue;
-            if (!containsFocus && (filter === 'voice' && group.sourceLayer !== 'voice' || filter === 'sound-effect' && group.sourceLayer !== 'sound-effect' || filter === 'reviewed' && !reviewed || filter === 'unreviewed' && reviewed)) continue;
+            if (!containsFocus && (filter === 'common-part-break' && group.commonCategory !== 'part-break'
+                || filter === 'common-items' && !String(group.commonCategory || '').startsWith('items-')
+                || filter === 'voice' && group.sourceLayer !== 'voice'
+                || filter === 'sound-effect' && group.sourceLayer !== 'sound-effect'
+                || filter === 'reviewed' && !reviewed
+                || filter === 'unreviewed' && reviewed)) continue;
             matchedGroups += 1;
             const containsCurrent = group.sources.some(source => current.has(source.path));
             if (renderedGroups >= app.sourceRenderLimit && !containsCurrent && !containsFocus) continue;
@@ -1537,7 +1543,7 @@
             details.classList.toggle('hidden-source-group', groupHidden);
             details.classList.toggle('favorite-source-group', app.favoriteSourceGroups.has(groupKey));
             details.open = containsFocus || openGroups.has(details.dataset.groupKey);
-            details.innerHTML = `<summary><span class="group-audio-actions"><button class="play-group" title="그룹 재생">▶</button><button class="hide-group" title="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}" aria-label="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}">${groupHidden ? '🙈' : '👁'}</button><button class="favorite-group${app.favoriteSourceGroups.has(groupKey) ? ' active' : ''}" title="즐겨찾기" aria-label="즐겨찾기" aria-pressed="${app.favoriteSourceGroups.has(groupKey)}">★</button></span><span class="event-title"><strong>${esc(group.bank)} · EVENT ${esc(group.eventId)}</strong><small>${group.sources.length} SOURCES${group.groupTags.length ? ` · ${esc(group.groupTags.join(', '))}` : ''}</small></span><span class="event-badges"><span class="badge">${esc(group.sourceLayer || '')}</span></span></summary><div class="event-classify"><button data-preset="smallFlinch">소경직</button><button data-preset="knockdown">대경직</button><button data-preset="death">죽음</button><input placeholder="직접 태그"><button data-preset="custom">저장</button><button data-preset="clear">지우기</button><span class="save-state"></span></div><div class="sources"></div>`;
+            details.innerHTML = `<summary><span class="group-audio-actions"><button class="play-group" title="그룹 재생">▶</button><button class="hide-group" title="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}" aria-label="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}">${groupHidden ? '🙈' : '👁'}</button><button class="favorite-group${app.favoriteSourceGroups.has(groupKey) ? ' active' : ''}" title="즐겨찾기" aria-label="즐겨찾기" aria-pressed="${app.favoriteSourceGroups.has(groupKey)}">★</button></span><span class="event-title"><strong>${esc(group.bank)} · EVENT ${esc(group.eventId)}</strong><small>${group.sources.length} SOURCES${group.groupTags.length ? ` · ${esc(group.groupTags.join(', '))}` : ''}</small></span><span class="event-badges"><span class="badge">${esc(group.categoryLabel || group.sourceLayer || '')}</span></span></summary><div class="event-classify"><button data-preset="smallFlinch">소경직</button><button data-preset="knockdown">대경직</button><button data-preset="death">죽음</button><input placeholder="직접 태그"><button data-preset="custom">저장</button><button data-preset="clear">지우기</button><span class="save-state"></span></div><div class="sources"></div>`;
             details.querySelector('.play-group').onclick = event => { event.preventDefault(); const available = group.sources.filter(source => source.path); if (available.length) playSource(available[0], event.currentTarget); };
             details.querySelector('.hide-group').onclick = event => { event.preventDefault(); event.stopPropagation(); toggleSourceGroupHidden(groupKey); };
             details.querySelector('.favorite-group').onclick = event => { event.preventDefault(); event.stopPropagation(); toggleSourceGroupFavorite(groupKey); };
@@ -1721,7 +1727,7 @@
         $('#sourceSearch').oninput = () => { cancelAnimationFrame(sourceFilterFrame); sourceFilterFrame = requestAnimationFrame(() => { app.sourceRenderLimit = 80; renderSources(); }); };
         $('#scopeFilter').onchange = async () => {
             app.sourceRenderLimit = 80;
-            if ($('#scopeFilter').value === 'common' && !app.commonGroups.length) {
+            if ($('#scopeFilter').value.startsWith('common') && !app.commonGroups.length) {
                 const result = await api('/api/common-groups');
                 app.commonGroups = result.groups || [];
             }

@@ -20,6 +20,8 @@ const { createServer } = require('../tools/monster-audio-review-server');
 
         const shell = await fetch(`${origin}/`).then(response => response.text());
         assert.ok(shell.includes('<script src="/review-app.js"></script>'));
+        assert.ok(shell.includes('value="common-part-break"') && shell.includes('value="common-items"'),
+            'the source rail must split shared part-break and item/bomb Common groups');
         assert.ok(shell.includes('value="common">COMMON 범용 음향'),
             'the source rail must expose the shared common sound folder explicitly');
         assert.ok(!shell.includes('const state='), 'legacy monkey-patch application must not be served');
@@ -44,9 +46,24 @@ const { createServer } = require('../tools/monster-audio-review-server');
             'simulation speed must control the shared combat clock');
         const commonGroups = await fetch(`${origin}/api/common-groups`).then(response => response.json());
         assert.ok(Array.isArray(commonGroups.groups), 'the common source endpoint must return a stable group list');
-        assert.ok(commonGroups.groups.every(group => group.common === true
+        assert.ok(commonGroups.groups.every(group => group.common === true),
+            'COMMON mode must contain only explicitly shared groups');
+        assert.ok(commonGroups.groups.some(group => group.commonCategory === 'part-break'
             && group.sources.every(source => source.path.includes('/monster/common/'))),
-        'COMMON mode must be restricted to the shared monster/common audio folder');
+            'COMMON mode must retain the shared monster/common part-break bank');
+        const commonItems = commonGroups.groups.filter(group => String(group.commonCategory || '').startsWith('items-'));
+        assert.ok(commonItems.length >= 6, 'COMMON mode must expose the verified item and bomb cue groups');
+        assert.ok(commonItems.some(group => group.cue === 'flash_pod')
+            && commonItems.some(group => group.cue === 'whetstone_stroke')
+            && commonItems.some(group => group.cue === 'barrel_bomb'),
+            'item Common groups must include flash, whetstone and clearly-labelled bomb cues');
+        assert.ok(commonItems.every(group => group.sources.every(source => !source.path.includes('/monster/common/'))),
+            'item Common groups must not be mistaken for monster part-break audio');
+        const flashPath = commonItems.find(group => group.cue === 'flash_pod').sources[0].path;
+        assert.strictEqual((await fetch(`${origin}/audio?path=${encodeURIComponent(flashPath)}`)).status, 200,
+            'verified non-monster Common assets must remain playable through the review server');
+        assert.strictEqual((await fetch(`${origin}/audio?path=${encodeURIComponent('local_assets/monster_hunter/world/bgm_build/forbidden.mp3')}`)).status, 404,
+            'audio serving must not expand beyond approved world audio roots');
         assert.ok(app.includes('function refreshTimingEditVisuals()'),
             'tick editing must use a lightweight DOM refresh path');
         assert.ok(app.includes('refreshTimingEditVisuals();') && app.includes('syncTimingPreviewAfterPaint();'),

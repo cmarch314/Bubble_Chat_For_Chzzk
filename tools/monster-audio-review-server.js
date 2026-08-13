@@ -8,10 +8,12 @@ const { generate: generateReviewRoutes } = require('../scripts/generate-world-mo
 const { loadHuntPatternAudioMap, savePatternRoute, movePatternRouteFile, savePatternMotion,
     savePartReactionMappings } = require('./hunt-audio-pattern-map');
 const { CATEGORY_CATALOG, categoryForMonster } = require('./hunt-monster-review-categories');
+const { HUNT_VERIFIED_LOCAL_ITEM_CUES, HUNT_LOCAL_ITEM_SURROGATE_CUES } = require('../js/effects/hunt/HuntAudioCatalog');
 
 const ROOT = path.resolve(__dirname, '..');
 const GRAPH_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'audio_graph');
 const AUDIO_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'monster');
+const WORLD_AUDIO_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world');
 const COMMON_AUDIO_ROOT = path.join(AUDIO_ROOT, 'common');
 const LABELS_PATH = path.join(ROOT, 'data', 'hunt', 'world-monster-audio-review-labels.json');
 const ANATOMY_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-visual-geometry-overrides.json');
@@ -234,10 +236,58 @@ function groupEvents(graph, labels) {
         .sort((a, b) => a.bank.localeCompare(b.bank) || a.eventId - b.eventId);
 }
 
+function commonSourceId(key, offset = 0) {
+    let hash = 2166136261;
+    for (const char of String(key)) {
+        hash ^= char.charCodeAt(0);
+        hash = Math.imul(hash, 16777619);
+    }
+    return offset + (hash >>> 0) % 900000;
+}
+
+function commonCatalogGroups(catalog, category, categoryLabel, bank, records) {
+    return Object.entries(catalog || {}).flatMap(([cue, variants]) => (variants || []).map((variant, variantIndex) => {
+        const paths = [...new Set((variant.layers || []).map(layer => layer?.[0]).filter(Boolean))]
+            .filter(file => fs.existsSync(path.resolve(ROOT, file)));
+        if (!paths.length) return null;
+        const isSurrogate = /surrogate/i.test(String(variant.evidence || ''));
+        const effectiveCategory = isSurrogate ? 'items-surrogate' : category;
+        const effectiveLabel = isSurrogate ? '아이템 대체음 (검수 필요)' : categoryLabel;
+        const effectiveBank = isSurrogate ? 'item_surrogate_se' : bank;
+        const eventId = commonSourceId(`${effectiveBank}:${cue}:${variantIndex}`, effectiveBank.includes('surrogate') ? 500000 : 100000);
+        const sourceId = commonSourceId(`${effectiveBank}:${cue}:${variantIndex}:source`);
+        const reviews = records.filter(record => record.bank === effectiveBank && Number(record.eventId) === eventId && Number(record.sourceId) === sourceId);
+        return {
+            key: `${effectiveBank}:${eventId}`,
+            bank: effectiveBank,
+            eventId,
+            sourceLayer: 'sound-effect',
+            reuseScope: 'cross-title-semantic',
+            common: true,
+            commonCategory: effectiveCategory,
+            categoryLabel: effectiveLabel,
+            evidence: variant.evidence || null,
+            structures: ['single'],
+            sources: paths.map((file, sourceIndex) => ({
+                sourceId: sourceIndex ? sourceId + sourceIndex : sourceId,
+                stream: null,
+                duration: null,
+                path: file,
+                variant: effectiveCategory,
+                structure: ['single'],
+                evidence: variant.evidence || null
+            })),
+            groupTags: [...new Set(reviews.flatMap(record => record.tags || []))],
+            reviewedSources: reviews.length,
+            cue
+        };
+    }).filter(Boolean));
+}
+
 function listCommonAudioGroups(labels = { records: [] }) {
-    if (!fs.existsSync(COMMON_AUDIO_ROOT)) return [];
     const records = labels.records || [];
-    return fs.readdirSync(COMMON_AUDIO_ROOT, { withFileTypes: true })
+    const groups = fs.existsSync(COMMON_AUDIO_ROOT)
+        ? fs.readdirSync(COMMON_AUDIO_ROOT, { withFileTypes: true })
         .filter(entry => entry.isFile() && /\.(mp3|wav|ogg)$/i.test(entry.name))
         .sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }))
         .map((entry, index) => {
@@ -251,6 +301,8 @@ function listCommonAudioGroups(labels = { records: [] }) {
                 eventId: sourceId,
                 sourceLayer: 'sound-effect',
                 reuseScope: 'cross-title-semantic',
+                commonCategory: 'part-break',
+                categoryLabel: '공통 부위파괴',
                 structures: ['single'],
                 sources: [{
                     sourceId,
@@ -264,7 +316,13 @@ function listCommonAudioGroups(labels = { records: [] }) {
                 reviewedSources: reviews.length,
                 common: true
             };
-        });
+        })
+        : [];
+    return [
+        ...groups,
+        ...commonCatalogGroups(HUNT_VERIFIED_LOCAL_ITEM_CUES, 'items-verified', '검증된 아이템·숫돌·섬광', 'item_common_se', records),
+        ...commonCatalogGroups(HUNT_LOCAL_ITEM_SURROGATE_CUES, 'items-surrogate', '폭탄·아이템 대체음 (검수 필요)', 'item_surrogate_se', records)
+    ];
 }
 
 function normalizeTags(category, customLabel) {
@@ -586,8 +644,11 @@ function safeAudioPath(relativePath) {
     const normalized = String(relativePath || '').replace(/\\/g, '/');
     if (!normalized.toLowerCase().endsWith('.mp3')) return null;
     const absolute = path.resolve(ROOT, normalized);
-    const relative = path.relative(AUDIO_ROOT, absolute);
-    if (relative.startsWith('..') || path.isAbsolute(relative)) return null;
+    const allowedRoots = [AUDIO_ROOT, path.join(WORLD_AUDIO_ROOT, 'unknown'), path.join(WORLD_AUDIO_ROOT, 'weapon')];
+    if (!allowedRoots.some(root => {
+        const relative = path.relative(root, absolute);
+        return !relative.startsWith('..') && !path.isAbsolute(relative);
+    })) return null;
     return absolute;
 }
 
