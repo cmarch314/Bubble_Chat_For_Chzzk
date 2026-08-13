@@ -1,4 +1,6 @@
 class HuntCombatAnimator {
+    static PITFALL_RELEASE_FADE_MS = 1400;
+
     constructor(owner) {
         this.owner = owner;
         this.activeWeaponAnimations = new Map();
@@ -1310,6 +1312,10 @@ class HuntCombatAnimator {
             const lifecycle = Number(monsterImg?.dataset?.pitfallLifecycle || 0) + 1;
             if (monsterImg?.dataset) monsterImg.dataset.pitfallLifecycle = String(lifecycle);
             effects.forEach(effect => effect.classList.add('is-releasing'));
+            effects.forEach(effect => effect.style.setProperty(
+                '--pitfall-release-fade-ms',
+                `${HuntCombatAnimator.PITFALL_RELEASE_FADE_MS}ms`
+            ));
             monsterImg?.classList?.remove('monster-pitfall-struggle-pulse');
             if (monsterImg?.dataset?.pitfallBeatOwned !== 'true') {
                 monsterImg?.classList?.add('monster-pitfall-releasing');
@@ -1327,7 +1333,7 @@ class HuntCombatAnimator {
                 );
                 if (monsterImg?.dataset) delete monsterImg.dataset.pitfallLifecycle;
                 if (monsterImg?.dataset) delete monsterImg.dataset.pitfallBeatOwned;
-            }, 800);
+            }, HuntCombatAnimator.PITFALL_RELEASE_FADE_MS);
             return;
         }
         if (!showcase || !monsterImg || !['pitfall', 'pitfall-pending', 'rockfall', 'flash', 'bomb'].includes(kind)) return;

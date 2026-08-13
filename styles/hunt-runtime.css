@@ -3328,9 +3328,9 @@
 .monster-pitfall-caught.monster-pitfall-struggling { transform:translateY(50px) scaleY(.72);clip-path:inset(0 0 27% 0); }
 .monster-pitfall-caught.monster-pitfall-struggle-pulse { animation:monster-pitfall-struggle 1.2s cubic-bezier(.18,.76,.22,1) both !important; }
 .monster-pitfall-caught.monster-pitfall-releasing { animation:monster-pitfall-release .8s cubic-bezier(.2,.72,.2,1) both !important; }
-.environment-pitfall.is-releasing { animation:pitfall-release-fade .8s ease-in both; }
+.environment-pitfall.is-releasing { animation:pitfall-release-fade var(--pitfall-release-fade-ms,1.4s) ease-in both; }
 .environment-pitfall.is-releasing .pitfall-hole,
-.environment-pitfall.is-releasing .pitfall-net { animation:pitfall-close .8s ease-in both !important; }
+.environment-pitfall.is-releasing .pitfall-net { animation:pitfall-close var(--pitfall-release-fade-ms,1.4s) ease-in both !important; }
 .environment-pitfall.is-atb-bound .pitfall-hole { animation:pitfall-open-held .46s ease-out both; }
 .environment-pitfall.is-atb-bound .pitfall-net { animation:pitfall-net-held .52s ease-out both; }
 .environment-pitfall.is-atb-bound::after {
@@ -3451,11 +3451,11 @@
     100%{transform:none;clip-path:inset(0)}
 }
 @keyframes pitfall-close {
-    0%,72%{opacity:1}
+    0%,58%{opacity:1}
     100%{opacity:0;transform:translateX(-50%) scale(.18)}
 }
 @keyframes pitfall-release-fade {
-    0%,35%{opacity:1}
+    0%,58%{opacity:1}
     100%{opacity:0}
 }
 @keyframes monster-rockfall-hit { 0%,38%{transform:translateY(0) rotate(0)} 44%{transform:translateY(28px) rotate(-9deg) scale(.93)} 51%{transform:translateY(10px) rotate(7deg)} 60%,100%{transform:translateY(58px) rotate(90deg) scale(.9)} }

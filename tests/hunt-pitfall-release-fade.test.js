@@ -8,13 +8,13 @@ const css = fs.readFileSync(path.resolve(__dirname, '../styles/hunt-runtime.css'
 const animator = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntCombatAnimator.js'), 'utf8');
 
 assert.match(css,
-    /\.environment-pitfall\.is-releasing\s*\{\s*animation:pitfall-release-fade \.8s ease-in both;/,
+    /\.environment-pitfall\.is-releasing\s*\{\s*animation:pitfall-release-fade var\(--pitfall-release-fade-ms,1\.4s\) ease-in both;/,
     'the complete pitfall layer must fade during the authored escape window');
 assert.match(css,
-    /@keyframes pitfall-release-fade\s*\{[\s\S]*?0%,35%\{opacity:1\}[\s\S]*?100%\{opacity:0\}/,
-    'the trap must remain readable as escape begins and reach zero opacity before cleanup');
+    /@keyframes pitfall-release-fade\s*\{[\s\S]*?0%,58%\{opacity:1\}[\s\S]*?100%\{opacity:0\}/,
+    'the trap must outlive the 800ms monster escape, then reach zero opacity before cleanup');
 assert.match(animator,
-    /effects\.forEach\(effect => effect\.classList\.add\('is-releasing'\)\)[\s\S]*?effects\.forEach\(effect => effect\.remove\(\)\)[\s\S]*?}, 800\);/,
-    'live and preview trap release must share the fade class and remove only after its 800ms animation');
+    /PITFALL_RELEASE_FADE_MS = 1400[\s\S]*?effects\.forEach\(effect => effect\.classList\.add\('is-releasing'\)\)[\s\S]*?effects\.forEach\(effect => effect\.remove\(\)\)[\s\S]*?HuntCombatAnimator\.PITFALL_RELEASE_FADE_MS\);/,
+    'live and preview trap release must share a visible post-escape fade before DOM cleanup');
 
 console.log('[test] Pitfall release fade lifecycle passed.');

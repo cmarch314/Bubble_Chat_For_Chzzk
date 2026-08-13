@@ -183,7 +183,7 @@ assert.doesNotMatch(css, /monster-pitfall-struggle[\s\S]{0,900}?clip-path:inset\
     'a pitfall struggle must never reveal nearly the whole monster and make it appear airborne');
 assert.match(css, /@keyframes monster-pitfall-release[\s\S]*?55%[\s\S]*?translate\(7px,31px\)[\s\S]*?90%[\s\S]*?translateY\(-8px\)/,
     'the monster must climb out throughout the escape beat instead of teleporting home at its start');
-assert.match(css, /@keyframes pitfall-close\s*\{[\s\S]*?0%,72%\{opacity:1\}/,
+assert.match(css, /@keyframes pitfall-close\s*\{[\s\S]*?0%,58%\{opacity:1\}/,
     'the hole and net must stay visible until the monster has mostly climbed out');
 assert.match(css, /\.pitfall-rear\s*\{[^}]*z-index:5[\s\S]*?\.pitfall-front\s*\{[^}]*z-index:15/,
     'the rear rim must sit behind the monster while the foreground net and mask sit in front');
