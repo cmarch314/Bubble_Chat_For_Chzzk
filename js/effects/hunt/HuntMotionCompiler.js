@@ -407,11 +407,16 @@ class HuntMotionCompiler {
                     Math.round(Number(damageJudgment?.offsetTicks ?? beat.hitOffsetTicks) || 0)))
                 : 0;
             if (hasImpact) {
+                const policy = typeof HuntMonsterActionPolicy !== 'undefined'
+                    ? HuntMonsterActionPolicy
+                    : (typeof require === 'function' ? require('./HuntMonsterActionPolicy.js') : null);
                 impacts.push({
                     atTicks: startTicks + hitOffsetTicks,
                     beat: beat.beat || `beat-${index}`,
                     damageScale: Number(damageJudgment?.damageScale ?? beat.damageScale) || 1,
-                    targetMode: beat.targetMode || 'sequential',
+                    targetMode: damageJudgment
+                        ? (policy?.judgmentTargetMode?.(damageJudgment.target) || 'judgment-primary')
+                        : beat.targetMode || 'sequential',
                     ...(beat.eventKind ? { eventKind: String(beat.eventKind) } : {})
                 });
             }

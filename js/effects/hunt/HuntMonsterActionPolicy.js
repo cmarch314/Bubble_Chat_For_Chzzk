@@ -34,6 +34,30 @@ class HuntMonsterActionPolicy {
         return [...targetable].sort((a, b) => Number(a.index) - Number(b.index));
     }
 
+    static judgmentTargetMode(target = '') {
+        return ({
+            primary: 'judgment-primary',
+            left: 'judgment-left',
+            right: 'judgment-right',
+            pair: 'runtime-pair',
+            'pair-left': 'runtime-pair-left',
+            'pair-right': 'runtime-pair-right',
+            'primary-adjacent': 'judgment-primary-adjacent',
+            all: 'judgment-all'
+        })[String(target)] || 'judgment-primary';
+    }
+
+    static minimumImpactTargetCount(pattern = {}) {
+        const modes = (Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : [])
+            .map(event => String(event?.targetMode || event?.targetShape || ''));
+        const motionTargets = (Array.isArray(pattern.motion) ? pattern.motion : [])
+            .flatMap(beat => Array.isArray(beat?.judgments) ? beat.judgments : [])
+            .filter(judgment => judgment?.kind === 'damage')
+            .map(judgment => this.judgmentTargetMode(judgment.target));
+        return [...modes, ...motionTargets].some(mode =>
+            ['runtime-pair', 'runtime-pair-left', 'runtime-pair-right'].includes(mode)) ? 2 : 1;
+    }
+
     static chargeMode(pattern = {}) {
         if (pattern.chargeMode === 'wide' || pattern.tags?.includes('wide-charge')) return 'wide';
         return 'single';

@@ -81,10 +81,12 @@ class HuntMonsterPatternCatalog {
             }
             judgmentElapsed += beat.ticks;
         }
-        const targetMode = target => ({ primary: 'judgment-primary', left: 'judgment-left',
-            right: 'judgment-right', pair: 'runtime-pair', 'pair-left': 'runtime-pair-left',
-            'pair-right': 'runtime-pair-right', 'primary-adjacent': 'judgment-primary-adjacent',
-            all: 'judgment-all' }[target] || 'judgment-primary');
+        const targetMode = target => {
+            const policy = typeof HuntMonsterActionPolicy !== 'undefined'
+                ? HuntMonsterActionPolicy
+                : (typeof require === 'function' ? require('./HuntMonsterActionPolicy.js') : null);
+            return policy?.judgmentTargetMode?.(target) || 'judgment-primary';
+        };
         const damagePercents = [...judgmentGroups.values()].flatMap(group => group.judgments)
             .filter(item => item.kind === 'damage')
             .map(item => Number(item.damagePercent)).filter(Number.isFinite);
@@ -100,7 +102,13 @@ class HuntMonsterPatternCatalog {
                 // impact or a reviewed rock volley silently stops spawning.
                 ...(typeof authoredImpacts[index] === 'object' ? authoredImpacts[index] : {}),
                 atTicks: Math.max(1, Math.round(group.atTicks)),
-                targetMode: targetMode(authority?.target),
+                targetMode: targetMode(
+                    authority?.target === 'primary'
+                        && Number(pattern.minTargets || 1) >= 2
+                        && ['lane', 'adjacent-lane'].includes(String(pattern.targeting?.mode || ''))
+                        ? 'pair'
+                        : authority?.target
+                ),
                 damageScale: damage ? (Number.isFinite(Number(damage.damagePercent))
                     ? (Number(damage.damagePercent) / 100) / Math.max(.0001, runtimeDamageRatio)
                     : Number(damage.damageScale ?? 1)) : 0,

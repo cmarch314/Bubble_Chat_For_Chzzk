@@ -1022,9 +1022,12 @@ class HuntMonsterTurnExecutor {
         const isUltimate = pattern.type === 'ultimate' || pattern.tags?.includes('ultimate');
         const hazardHpOnly = pattern.tags?.includes('hazard-hp-only');
         if (isUltimate) engine.monsterUltimateUsedInRage = true;
+        const requiredImpactTargets = HuntMonsterTurnExecutor.actionPolicy()
+            .minimumImpactTargetCount?.(pattern) || 1;
         const maxTargets = Math.min(isUltimate ? targetable.length
-            : HuntMonsterTurnExecutor.effectiveTargetCap(engine, pattern), targetable.length);
-        const minTargets = Math.min(pattern.minTargets || 1, maxTargets);
+            : Math.max(requiredImpactTargets,
+                HuntMonsterTurnExecutor.effectiveTargetCap(engine, pattern)), targetable.length);
+        const minTargets = Math.min(Math.max(pattern.minTargets || 1, requiredImpactTargets), maxTargets);
         const numTargets = minTargets + Math.floor(engine.random() * (maxTargets - minTargets + 1));
         const weightedTargets = targetable.flatMap(target => {
             const weight = engine.perkRuntime ? engine.perkRuntime.targetWeight(target) : 1;
