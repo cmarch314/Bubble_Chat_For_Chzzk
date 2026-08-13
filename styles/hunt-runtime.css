@@ -6970,7 +6970,8 @@ body.in-hunt #chat {
     clip-path: inset(0 0 0 44%);
 }
 
-.hunt-guard-impact {
+.hunt-guard-impact,
+.hunt-tackle-impact {
     position:absolute;
     left:50%;
     top:52%;
@@ -6989,7 +6990,13 @@ body.in-hunt #chat {
     animation:hunt-guard-impact-shake .58s ease-out both;
 }
 
-.hunt-guard-impact.is-split-shield {
+.hunt-tackle-impact {
+    filter:drop-shadow(0 0 5px #fff) drop-shadow(0 0 14px rgba(255,149,0,.95));
+    animation:hunt-guard-impact-shake .62s cubic-bezier(.16,.8,.22,1) both;
+}
+
+.hunt-guard-impact.is-split-shield,
+.hunt-tackle-impact.is-split-shield {
     /* Split shields occupy the visible right half of the shared weapon art. */
     left:73%;
     top:54%;

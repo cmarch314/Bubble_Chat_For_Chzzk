@@ -1149,7 +1149,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos.splice(-1, 0,
         sourceUrl: PILOT_SOURCES.diablos,
         recovery: 1,
         cooldown: 22,
-        tags: ['physical', 'bite', 'weak'],
+        tags: ['physical', 'bite', 'weak', 'butt-stumble'],
         monsterAtbCost: 0.32,
         motion: [
             { beat: 'approach', label: '접근', ticks: 5, to: 'toward:target 82%', face: 'target', aimBodyAt: 'target', pose: 'stretch-soft', moveEasing: 'accelerate' },

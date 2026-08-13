@@ -1097,8 +1097,8 @@ class HuntEffect extends BaseEffect {
                 onTriggerHunterInterference: (idx, kind, size, active) => {
                     this.renderer.combatAnimator.triggerHunterInterference(idx, kind, size, active);
                 },
-                onTriggerGuardShake: (idx) => {
-                    this.renderer.combatAnimator.triggerGuardImpact(idx);
+                onTriggerGuardShake: (idx, outcome = 'guard') => {
+                    this.renderer.combatAnimator.triggerGuardImpact(idx, outcome);
                 },
                 onInterruptWeaponVisual: (idx) => {
                     const w = this.selectedWeapons.find(candidate => candidate?.index === idx)

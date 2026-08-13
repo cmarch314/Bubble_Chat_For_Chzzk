@@ -32,8 +32,11 @@ for (const result of ['invulnerable', 'pending', 'dodge', 'miss', 'resist', 'eff
     assert.deepStrictEqual(presented, [], 'uncommitted/non-hit outcomes must not reach presentation');
     assert.strictEqual(engine.presentHunterImpact(1, 'hit', { reaction: { kind: 'strong' } }), true);
     assert.strictEqual(engine.presentHunterImpact(2, 'guard'), true);
+    assert.strictEqual(engine.presentHunterImpact(2, 'tackle'), true);
     assert.strictEqual(engine.presentHunterImpact(3, 'dodge'), true);
-    assert.deepStrictEqual(presented.map(entry => entry[0]), ['hit', 'guard', 'dodge']);
+    assert.deepStrictEqual(presented.map(entry => entry[0]), ['hit', 'guard', 'guard', 'dodge']);
+    assert.strictEqual(presented[2][2], 'tackle',
+        'damage-reducing tackle contact must be visibly distinct from a shield guard');
 }
 {
     const weaponCard = { dataset: { hunterHitReactionActive: 'true' } };
@@ -135,8 +138,8 @@ assert.deepStrictEqual(
 );
 assert.deepStrictEqual(
     HuntMonsterTurnExecutor.hitReactionForPattern({ tags: ['butt-stumble'] }, { index: 3 }),
-    { kind: 'weak', durationTicks: 15, knockbackDirection: 1 },
-    'blast-scale explosions must use the short butt-stumble reaction'
+    { kind: 'butt-stumble', durationTicks: 15, knockbackDirection: 1 },
+    'butt-stumble impacts must retain their authored reaction identity through presentation'
 );
 assert.deepStrictEqual(
     HuntMonsterTurnExecutor.hitReactionForPattern({}, { index: 3 }),

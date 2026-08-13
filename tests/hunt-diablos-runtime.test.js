@@ -491,6 +491,8 @@ assert.ok(profiles.black_diablos.every(pattern =>
     const bite = profiles.diablos.find(pattern => pattern.id.endsWith('.bite'));
     assert.strictEqual(bite.motion.find(beat => beat.beat === 'approach').aimBodyAt, 'target',
         'Diablos bite approach must rotate its body axis toward the selected hunter, not only mirror horizontally');
+    assert.ok(bite.tags.includes('butt-stumble'),
+        'Diablos bite must preserve its authored butt-stumble reaction through the common impact runtime');
     const sideTackle = profiles.diablos.find(pattern => pattern.id.endsWith('.side_tackle'));
     assert.strictEqual(sideTackle.motion.find(beat => beat.beat === 'side-hop').to,
         'pair-flank:targets 150',

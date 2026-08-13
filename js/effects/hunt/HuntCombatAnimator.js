@@ -56,7 +56,7 @@ class HuntCombatAnimator {
         this.card.querySelectorAll('.hunt-environment-effect').forEach(effect => effect.remove());
         this.card.querySelectorAll('.hunt-hit-impact').forEach(effect => effect.remove());
         this.card.querySelectorAll('.hunt-damage-number').forEach(number => number.remove());
-        this.card.querySelectorAll('.hunt-guard-impact').forEach(effect => effect.remove());
+        this.card.querySelectorAll('.hunt-guard-impact, .hunt-tackle-impact').forEach(effect => effect.remove());
         this.card.querySelectorAll('.monster-part-break-visual').forEach(effect => effect.remove());
         this.card.querySelectorAll('.monster-stun-head-marker').forEach(effect => effect.remove());
         this.monsterStunMarkerGeneration += 1;
@@ -264,22 +264,24 @@ class HuntCombatAnimator {
         }, visibleDuration);
     }
 
-    triggerGuardImpact(idx) {
+    triggerGuardImpact(idx, outcome = 'guard') {
         if (!this.card || typeof document === 'undefined') return;
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         const container = weaponCard?.querySelector('.game-hunt-weapon-img-container');
         if (!container) return;
 
-        weaponCard.classList.remove('hunter-card-guard-shake');
+        const isTackle = outcome === 'tackle';
+        const shakeClass = isTackle ? 'hunter-card-hit-shake' : 'hunter-card-guard-shake';
+        weaponCard.classList.remove('hunter-card-hit-shake', 'hunter-card-guard-shake');
         void weaponCard.offsetWidth;
-        weaponCard.classList.add('hunter-card-guard-shake');
-        this.animationTimers.timeout(() => weaponCard?.classList.remove('hunter-card-guard-shake'), 300);
+        weaponCard.classList.add(shakeClass);
+        this.animationTimers.timeout(() => weaponCard?.classList.remove(shakeClass), isTackle ? 360 : 300);
 
-        container.querySelectorAll('.hunt-guard-impact').forEach(effect => effect.remove());
+        container.querySelectorAll('.hunt-guard-impact, .hunt-tackle-impact').forEach(effect => effect.remove());
         const hasSplitShield = Boolean(container.querySelector('.hunt-split-shield'));
         const impact = document.createElement('span');
-        impact.className = `hunt-guard-impact${hasSplitShield ? ' is-split-shield' : ' is-weapon-fallback'}`;
-        impact.textContent = '🛡️';
+        impact.className = `${isTackle ? 'hunt-tackle-impact' : 'hunt-guard-impact'}${hasSplitShield ? ' is-split-shield' : ' is-weapon-fallback'}`;
+        impact.textContent = isTackle ? '💥' : '🛡️';
         impact.setAttribute('aria-hidden', 'true');
         container.appendChild(impact);
         this.animationTimers.timeout(() => impact.remove(), 620);
@@ -456,7 +458,7 @@ class HuntCombatAnimator {
         delete weaponCard.dataset.interferenceSize;
         weaponCard.querySelector('.hunter-interference-overlay')?.remove();
 
-        const kind = reaction.kind === 'weak' ? 'weak' : 'strong';
+        const kind = ['weak', 'butt-stumble'].includes(reaction.kind) ? 'weak' : 'strong';
         const cardShakeClass = 'hunter-card-hit-shake';
         const durationMs = kind === 'weak' ? 1500 : 5000;
         const authoredDirection = Number(

@@ -106,9 +106,10 @@ class HuntMonsterTurnExecutor {
     static hitReactionForPattern(pattern = {}, target = {}) {
         const tags = Array.isArray(pattern.tags) ? pattern.tags.map(tag => String(tag).toLowerCase()) : [];
         const authoredKind = String(pattern.runtimeImpactHitReactionKind || '').toLowerCase();
-        const kind = ['weak', 'strong'].includes(authoredKind)
+        const kind = ['weak', 'butt-stumble', 'strong'].includes(authoredKind)
             ? authoredKind
-            : tags.includes('weak') || tags.includes('butt-stumble') ? 'weak' : 'strong';
+            : tags.includes('butt-stumble') ? 'butt-stumble'
+                : tags.includes('weak') ? 'weak' : 'strong';
         const hasExplicitKnockback = pattern.knockbackDirection !== undefined
             && pattern.knockbackDirection !== null;
         const authoredDirection = hasExplicitKnockback
@@ -125,7 +126,7 @@ class HuntMonsterTurnExecutor {
             kind,
             durationTicks: Number.isFinite(Number(pattern.runtimeImpactHitRecoveryTicks))
                 ? Math.max(1, Number(pattern.runtimeImpactHitRecoveryTicks))
-                : kind === 'weak' ? 15 : 50,
+                : ['weak', 'butt-stumble'].includes(kind) ? 15 : 50,
             knockbackDirection: direction < 0 ? -1 : 1
         };
     }

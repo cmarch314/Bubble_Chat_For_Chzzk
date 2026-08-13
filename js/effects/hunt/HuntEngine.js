@@ -1022,7 +1022,7 @@ class HuntEngine {
             return true;
         }
         if (['guard', 'perfect-guard', 'counter', 'tackle'].includes(outcome)) {
-            this.callbacks.onTriggerGuardShake?.(idx);
+            this.callbacks.onTriggerGuardShake?.(idx, outcome);
             return true;
         }
         if (outcome === 'dodge') {
