@@ -45,7 +45,9 @@ class HuntWeaponAnimationCatalog {
         add('great_sword', ['strong_charged_slash'], 'great_sword_charged_release', 1020, 'sever', {
             releaseChargePose: true, trackTarget: true
         });
-        add('great_sword', ['true_charged_slash'], 'great_sword_true_release', 1220, 'sever', {
+        // 참모아는 21틱 BEAT 전체를 사용한다. 시각 모션을 더 짧게 끝내면
+        // 첫 HIT가 이미 다음 회전에 들어간 뒤 발생해 "때리고 허공에서 돈다".
+        add('great_sword', ['true_charged_slash'], 'great_sword_true_release', 2100, 'sever', {
             releaseChargePose: true, trackTarget: true
         });
         add('great_sword', ['tackle'], 'shoulder_tackle', 480, 'counter');
@@ -262,9 +264,10 @@ class HuntWeaponAnimationCatalog {
             // Positive rotation carries the edge down through the target;
             // slots 3/4 receive the exact mirrored path.
             great_sword_charged_release: [[0, 0, 0, 135, 1.07, -50, -55], [.2, 0, 0, 120, 1.1, -60, -68], [.46, .72, .75, 185, 1.13, -12, -88], [.72, 1, 1, 270, 1.2, 0, 0], [.86, .9, .9, 285, 1.12, 0, 7], [1, 0, 0, 270, 1, 0, 0]],
-            // First downward swing plants the blade, then the rebound continues
-            // in the same direction for the heavy second contact.
-            great_sword_true_release: [[0, 0, 0, 135, 1.1, -54, -60], [.1, 0, 0, 118, 1.14, -65, -74], [.24, .52, .56, 182, 1.16, -12, -102], [.38, 1, 1, 270, 1.24, 0, 0], [.5, 1, 1, 270, 1.12, 0, 18], [.58, .48, .5, 355, 1.2, -8, -26], [.72, .78, .82, 510, 1.24, 0, -108], [.86, 1, 1, 630, 1.34, 0, 0], [.93, .9, .9, 645, 1.18, 0, 8], [1, 0, 0, 630, 1, 0, 0]],
+            // Complete the first forward roll before the planted-blade contact.
+            // The rebound then continues through a second full turn into the
+            // heavy hit; neither turn may begin after its damage event.
+            great_sword_true_release: [[0, 0, 0, 135, 1.1, -54, -60], [.08, 0, 0, 118, 1.14, -65, -74], [.17, .34, .38, 245, 1.16, -18, -94], [.25, .72, .76, 405, 1.2, -8, -74], [6 / 21, 1, 1, 495, 1.24, 0, 0], [.43, 1, 1, 495, 1.12, 0, 18], [.55, .42, .46, 585, 1.2, -8, -30], [.7, .78, .82, 735, 1.24, 0, -108], [18 / 21, 1, 1, 855, 1.34, 0, 0], [.93, .9, .9, 870, 1.18, 0, 8], [1, 0, 0, 855, 1, 0, 0]],
             heavy_overhead: [idle, [.3, 0, 0, -92, 1.04, -26, 18], [.52, .18, .18, -42, 1.08, 0, 0], [.76, 1, 1, 38, 1.15, 0, 0], end],
             true_charged_slash: [idle, [.24, 0, 0, -115, 1.08, -34, 22], [.48, .14, .12, -78, 1.14, 0, 0], [.68, 1, 1, 48, 1.28, 0, 0], [.82, .88, .84, 56, 1.18, 0, 0], end],
             shoulder_tackle: [idle, [.25, 0, 0, -8, .96, -18, 5], [.62, .65, .58, 9, 1.13, 0, 0], end],

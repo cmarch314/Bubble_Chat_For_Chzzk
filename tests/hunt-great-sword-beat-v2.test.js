@@ -51,18 +51,27 @@ assert.strictEqual(runtime.cancel('hunter:0', 'cart'), true);
 assert.strictEqual(runtime.has('hunter:0'), false, 'cart/hit interruption must remove the active Great Sword graph');
 
 const WeaponAnimationCatalog = require('../js/effects/hunt/HuntWeaponAnimationCatalog.js');
+const trueChargeProfile = WeaponAnimationCatalog.resolve('great_sword',
+    actions.find(action => action.id === 'great_sword.true_charged_slash'));
+assert.strictEqual(trueChargeProfile.durationMs, trueCharge.totalTicks * 100,
+    'the True Charged Slash visual clock must cover the same 21 ticks as its BEAT graph');
 const chargedFrames = WeaponAnimationCatalog.MOTIONS.great_sword_charged_release;
 assert.strictEqual(chargedFrames[0][3], 135,
     'slot 1 charge must begin grip upper-right and blade tip lower-left');
 assert.ok(chargedFrames[3][3] >= 270,
     'charged slashes must carry the upward-facing edge downward onto contact');
 const trueFrames = WeaponAnimationCatalog.MOTIONS.great_sword_true_release;
-assert.strictEqual(trueFrames[3][3], 270,
-    'the first True Charged Slash swing must plant downward rather than uppercut');
-assert.strictEqual(trueFrames[7][3], 630,
-    'the rebound must continue the same rotation for the second downward hit');
-assert.ok(trueFrames[2][6] < -90 && trueFrames[6][6] < -90,
+assert.strictEqual(trueFrames[4][3], 495,
+    'the first True Charged Slash contact must follow one complete forward turn');
+assert.strictEqual(trueFrames[8][3], 855,
+    'the rebound must complete the next full turn into the heavy hit');
+assert.deepStrictEqual([trueFrames[4][0], trueFrames[8][0]],
+    trueChargeHits.map(event => event.atTicks / trueCharge.totalTicks),
+    'both visible blade contacts must share the exact BEAT damage timestamps');
+assert.ok(trueFrames[2][6] < -90 && trueFrames[7][6] < -90,
     'both True Charged Slash hits must approach from above their contact point');
+assert.ok(trueFrames.slice(0, 4).every(frame => frame[1] < 1 && frame[2] < 1),
+    'the first turn must stay in front of the monster until its actual contact frame');
 assert.match(runtimeCss,
     /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(225deg \* var\(--weapon-facing\)\)\)[\s\S]*?scaleX\(var\(--great-sword-mirror, 1\)\)/,
     'the persistent charge pose and BEAT release must share the corrected 12 o’clock blade stance');
