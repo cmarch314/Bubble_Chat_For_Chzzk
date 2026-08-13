@@ -555,6 +555,11 @@ class HuntBattleTickExecutor {
                         w.hitRecoveryTotalTicks = 0;
                         w.hitReactionKind = null;
                         w.hitKnockbackDirection = 0;
+                        // Runtime recovery is authoritative. Clear the matching
+                        // visual here instead of relying on a same-duration DOM
+                        // timer which may run late under OBS/browser load and
+                        // suppress the next independent combo impact.
+                        engine.callbacks?.onCancelHitAnimation?.(w.index, 'recovered');
                         if (Number(w.pendingStunDuration || 0) > 0
                             && (!engine.blightRuntime?.canAct || engine.blightRuntime.canAct(w))) {
                             w.status = 'stunned';

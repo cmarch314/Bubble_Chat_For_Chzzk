@@ -724,6 +724,11 @@ class HuntMonsterTurnExecutor {
         engine.weaponMechanics?.applyAction?.(engine, target, tackle);
         engine.beginHunterBeatAction?.(target, tackle);
         engine.actionStateMachine?.begin?.(target, tackle);
+        // Hunter BEAT owns action timing, but the combat renderer still needs
+        // the authored weapon profile to make the shoulder check visible.
+        // Starting only the runtime state made a successful auto-tackle look
+        // like an unexplained immunity/HP reduction in live hunts.
+        engine.shakeWeapon?.(target.index, '#ff9500', true, tackle);
         target.greatSwordChargeLocked = false;
         engine.showSkillBubble?.(target.index, '차지 태클!');
         return true;
@@ -1705,6 +1710,8 @@ class HuntMonsterTurnExecutor {
                         target.hitStartedThisTick = true;
                         target.hitReactionKind = hitReaction.kind;
                         target.hitKnockbackDirection = hitReaction.knockbackDirection;
+                        target.hitReactionGeneration = Number(target.hitReactionGeneration || 0) + 1;
+                        hitReaction.generation = target.hitReactionGeneration;
                         engine.addLog(`💥 [피격] ${engine.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 큰 타격! (-${damage} HP, 행동 게이지 초기화)`, '#ff5555');
                         // Hunter-hit voice is deferred until the stun result is known.
                         engine.shakeMonster();
@@ -1760,6 +1767,10 @@ class HuntMonsterTurnExecutor {
                     );
                     engine.callbacks?.onTriggerInvincibleJump?.(target.index, true);
                     engine.showSkillBubble?.(target.index, '긴급회피!');
+                } else if (isForesightSlash || isIaiCounter) {
+                    // Their dedicated weapon motion was already started above.
+                    // A generic dodge here used to cancel it immediately and
+                    // replace it with the roll CSS, making the counter invisible.
                 } else if (isPerfectGuard || isHammerOffset || isLanceCounter || isChargeBladeGuardPoint) {
                     // A perfect guard holds the shield line; it must not borrow the evade-roll pose.
                     target.guardDuration = 6;

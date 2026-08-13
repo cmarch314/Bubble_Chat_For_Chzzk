@@ -161,6 +161,8 @@ class HuntValstraxExecutor {
                         target.hitStartedThisTick = true;
                         target.hitReactionKind = hitReaction.kind;
                         target.hitKnockbackDirection = hitReaction.knockbackDirection;
+                        target.hitReactionGeneration = Number(target.hitReactionGeneration || 0) + 1;
+                        hitReaction.generation = target.hitReactionGeneration;
                         engine.addLog(`💥 [피격] ${target.name}이(가) 혜성 습격 직격! 치명적인 데미지를 입었습니다. (-${damage} HP)`, '#ff5555');
                         engine.presentHunterImpact?.(target.index, 'hit', { reaction: hitReaction });
                         attackResults.push({ index: target.index, result: 'hit' });

@@ -48,6 +48,7 @@ function createEngine(hunter, random) {
     const beats = [];
     const impacts = [];
     const bubbles = [];
+    const animations = [];
     const engine = {
         selectedWeapons: [hunter],
         selectedMonster: { id: 'test_monster', nameKO: '훈련 몬스터' },
@@ -78,11 +79,11 @@ function createEngine(hunter, random) {
         updateWeaponAtbUI: noop,
         triggerHunterCart: noop,
         shakeMonster: noop,
-        shakeWeapon: noop,
+        shakeWeapon: (_index, _color, isAttack, action) => animations.push({ isAttack, id: action?.id }),
         restoreBorder: noop,
         getMonsterAttackType: () => ({ type: 'melee', emoji: '💥' })
     };
-    return { engine, beats, impacts, bubbles };
+    return { engine, beats, impacts, bubbles, animations };
 }
 
 const reactiveHunter = createHunter();
@@ -99,6 +100,9 @@ assert.ok(reactive.beats.includes('great_sword.tackle'),
     'reactive tackle must mount the authored hunter BEAT animation');
 assert.ok(reactive.impacts.includes('tackle'),
     'reactive tackle must present a visible contact reaction');
+assert.ok(reactive.animations.some(animation =>
+    animation.isAttack === true && animation.id === 'great_sword.tackle'),
+    'reactive tackle must start the authored weapon animation, not only its hidden BEAT state');
 assert.ok(reactive.bubbles.includes('차지 태클!'));
 
 const failedHunter = createHunter();

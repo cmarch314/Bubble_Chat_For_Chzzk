@@ -437,8 +437,11 @@ class HuntCombatAnimator {
         // Runtime impact commits are authoritative, but keep the renderer
         // idempotent too. A stale/speculative callback must never restart the
         // tumble while the same hunter is still inside hit recovery.
+        const reactionGeneration = Math.max(0, Number(reaction.generation || 0));
+        const activeGeneration = Math.max(0, Number(weaponCard.dataset.hunterHitReactionGeneration || 0));
         if (weaponCard.dataset.hunterHitReactionActive === 'true'
-            && Number(w.hitDuration || 0) > 0) return;
+            && Number(w.hitDuration || 0) > 0
+            && (reactionGeneration === 0 || reactionGeneration === activeGeneration)) return;
         // A damaging hit replaces roar, tremor, and wind-pressure presentation.
         // Keep this defensive cleanup even when the runtime callback arrives late.
         this.triggerHunterInterference(idx, '', '', false);
@@ -448,6 +451,7 @@ class HuntCombatAnimator {
             '.game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
         ) || [];
         weaponCard.dataset.hunterHitReactionActive = 'true';
+        weaponCard.dataset.hunterHitReactionGeneration = String(reactionGeneration);
 
         // Interference used a CSS animation with !important. Remove its DOM
         // ownership synchronously as well as clearing the runtime state above,
@@ -548,6 +552,7 @@ class HuntCombatAnimator {
         const weaponCard = this.card?.querySelector?.(`#fight-card-${idx}`);
         if (!weaponCard) return;
         delete weaponCard.dataset.hunterHitReactionActive;
+        delete weaponCard.dataset.hunterHitReactionGeneration;
         weaponCard.classList.remove('hunter-card-large-shake', 'hunter-card-small-shake',
             'hunter-card-hit-shake', 'hunter-card-guard-shake');
         weaponCard.querySelectorAll(

@@ -41,7 +41,10 @@ for (const result of ['invulnerable', 'pending', 'dodge', 'miss', 'resist', 'eff
 {
     const weaponCard = { dataset: { hunterHitReactionActive: 'true' } };
     const animator = Object.create(HuntCombatAnimator.prototype);
-    animator.owner = { card: { querySelector: () => weaponCard } };
+    animator.owner = {
+        card: { querySelector: () => weaponCard },
+        animationTimers: { timeout() {} }
+    };
     animator.triggerHunterInterference = () => {
         throw new Error('an active tumble must return before restarting presentation');
     };
@@ -49,6 +52,34 @@ for (const result of ['invulnerable', 'pending', 'dodge', 'miss', 'resist', 'eff
         hp: 50,
         hitDuration: 12
     }, { kind: 'strong' }));
+}
+{
+    const weaponCard = {
+        dataset: {
+            hunterHitReactionActive: 'true',
+            hunterHitReactionGeneration: '4'
+        },
+        classList: { remove() {}, add() {} },
+        querySelector: () => null,
+        querySelectorAll: () => [],
+        offsetWidth: 0
+    };
+    const animator = Object.create(HuntCombatAnimator.prototype);
+    animator.owner = {
+        card: { querySelector: () => weaponCard },
+        animationTimers: { timeout() {} }
+    };
+    animator.weaponAnimationGenerations = new Map();
+    animator.activeWeaponAnimations = new Map();
+    animator.triggerHunterInterference = () => {};
+    animator.interruptWeaponVisual = () => {};
+    animator.cancelHitAnimation = () => {};
+    assert.doesNotThrow(() => animator.triggerHitAnimation(0, {
+        hp: 50,
+        hitDuration: 50
+    }, { kind: 'strong', generation: 5 }));
+    assert.strictEqual(weaponCard.dataset.hunterHitReactionGeneration, '5',
+        'a new combo judgment must replace a stale visual lock even when its old timer is late');
 }
 
 const rightDownKnockback = HuntCombatAnimator.knockbackVectorFromRects(
@@ -289,6 +320,7 @@ function recoveryEngine(durationTicks, pendingStunDuration = 0) {
     };
     let actions = 0;
     const noop = () => {};
+    let cancelledHitAnimations = 0;
     const engine = {
         battleTime: 0,
         selectedWeapons: [hunter],
@@ -304,7 +336,7 @@ function recoveryEngine(durationTicks, pendingStunDuration = 0) {
         currentConsecutiveIndex: 0,
         consecutiveTotal: 1,
         hunterSpeedMultiplier: 1,
-        callbacks: {},
+        callbacks: { onCancelHitAnimation: () => { cancelledHitAnimations++; } },
         getRemainingSeconds: () => 999,
         updateTimerUI: noop,
         addLog: noop,
@@ -325,11 +357,11 @@ function recoveryEngine(durationTicks, pendingStunDuration = 0) {
         prepareMonsterTurn: noop,
         executeHunterTurn: () => { actions++; }
     };
-    return { engine, hunter, actions: () => actions };
+    return { engine, hunter, actions: () => actions, cancelledHitAnimations: () => cancelledHitAnimations };
 }
 
 {
-    const { engine, hunter, actions } = recoveryEngine(15);
+    const { engine, hunter, actions, cancelledHitAnimations } = recoveryEngine(15);
     for (let tick = 0; tick < 14; tick++) context.HuntBattleTickExecutor.execute(engine);
     assert.strictEqual(hunter.hitDuration, 1);
     assert.ok(hunter.atb > 90 && hunter.atb < 100, 'ATB must fill linearly during the fall');
@@ -338,6 +370,8 @@ function recoveryEngine(durationTicks, pendingStunDuration = 0) {
     assert.strictEqual(hunter.hitDuration, 0);
     assert.strictEqual(hunter.atb, 100);
     assert.strictEqual(actions(), 1, 'an action may begin on the exact full-recovery tick');
+    assert.strictEqual(cancelledHitAnimations(), 1,
+        'runtime recovery completion must clear its visual lock without waiting for a DOM timer');
 }
 
 {

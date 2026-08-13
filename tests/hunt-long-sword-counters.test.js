@@ -23,7 +23,7 @@ vm.runInContext(
 );
 
 function createScenario(randomValue, action) {
-    const calls = { bubbles: [], animations: [], logs: [], cancels: [] };
+    const calls = { bubbles: [], animations: [], impacts: [], logs: [], cancels: [] };
     const hunter = {
         index: 0,
         id: 'long_sword',
@@ -65,6 +65,7 @@ function createScenario(randomValue, action) {
         addLog: text => calls.logs.push(text),
         showSkillBubble: (target, text) => calls.bubbles.push(text),
         shakeWeapon: (target, color, strong, profile) => calls.animations.push(profile?.id || null),
+        presentHunterImpact: (_target, outcome) => calls.impacts.push(outcome),
         playSFX: noop,
         updateMonsterHpUI: noop,
         checkMonsterKnockdown: noop,
@@ -134,6 +135,8 @@ const iaiAction = {
     assert.strictEqual(hunter.hp, 100, 'post-attack recovery may react even after the action object has cleared');
     assert.strictEqual(hunter.spiritLevel, 0, 'reactive Foresight must wait for Roundslash to build the first level');
     assert.ok(calls.animations.includes('long_sword.foresight'), 'reactive Foresight Slash must use its counter animation');
+    assert.ok(!calls.impacts.includes('dodge'),
+        'Foresight Slash must not be overwritten by the generic evade-roll presentation');
 }
 
 {

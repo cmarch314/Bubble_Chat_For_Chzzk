@@ -427,6 +427,17 @@ assert.ok(profiles.black_diablos.every(pattern =>
     assert.ok(runtime.diablos.every(pattern => !pattern.runtimePreviewScrub
         && !pattern.runtimePreviewCardReactions && !pattern.runtimePreviewMuteAudio),
     'live hunt patterns must not inherit preview-only gates');
+    const damagingJudgments = runtime.diablos.flatMap(pattern =>
+        (pattern.impactTimeline || [])
+            .filter(impact => Number(impact.damageScale ?? 1) > 0)
+            .map(impact => ({ patternId: pattern.id, reaction: impact.hitReactionKind }))
+    );
+    assert.ok(damagingJudgments.length > 0, 'Diablos must expose reviewed damaging judgments');
+    damagingJudgments.forEach(judgment => {
+        assert.strictEqual(judgment.reaction,
+            judgment.patternId === 'diablos.bite' ? 'weak' : 'strong',
+            `${judgment.patternId} must use the approved hunter reaction class`);
+    });
     for (const basePattern of runtime.diablos) {
         const variantId = basePattern.id.replace(/^diablos\./, 'black_diablos.');
         const variant = runtime.black_diablos.find(pattern => pattern.id === variantId);
