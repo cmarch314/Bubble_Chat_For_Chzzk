@@ -421,8 +421,9 @@ class HuntCombatAnimator {
         const standingSpin = spinDirection * 720;
         const proneSkew = spinDirection * 12;
         // Keep the five-second recovery/invulnerability contract unchanged,
-        // but make the visible launch and tumble 30% faster for a sharper hit.
-        const tumbleEndOffset = .44 / 1.3;
+        // but finish the visible launch and tumble in 1.1s. The remaining
+        // lock is a prone hold plus the existing 0.6s walk home, not a slow fall.
+        const tumbleEndOffset = 1100 / 5000;
         const fallen = `translate(${Math.round(x)}px, ${Math.round(y)}px) rotate(${fallSpin + Number(angleOffset || 0)}deg) skewX(${proneSkew}deg) scale(.82, .76)`;
         const tumbleFrame = (offset, progress, degrees, lift = 0) => {
             const scale = progress === 1 ? '.82' : String(Number((1 - .18 * progress).toFixed(3)));
@@ -437,7 +438,7 @@ class HuntCombatAnimator {
             { offset: 0, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)', opacity: 1 },
             // Explicit waypoints prevent transform matrix normalization from
             // collapsing the 1.5-turn fall into parallel translation.
-            // The same 1.5-turn path now lands in about 1.69s instead of 2.2s.
+            // The same 1.5-turn path lands in 1.1s instead of reading as slow motion.
             tumbleFrame(tumbleEndOffset * .25, .25, 135, 18),
             tumbleFrame(tumbleEndOffset * .50, .50, 270, 28),
             tumbleFrame(tumbleEndOffset * .75, .75, 405, 16),
