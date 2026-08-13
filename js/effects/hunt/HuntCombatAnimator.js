@@ -414,18 +414,22 @@ class HuntCombatAnimator {
             { offset: 0, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)', opacity: 1 },
             // Explicit waypoints prevent transform matrix normalization from
             // collapsing the 1.5-turn fall into parallel translation.
-            tumbleFrame(.06, .25, 135, 18),
-            tumbleFrame(.12, .50, 270, 28),
-            tumbleFrame(.18, .75, 405, 16),
-            { offset: .24, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            // Five-second strong recovery budget: spend 2.2s on the actual
+            // tumble (one second longer than before) so the rotations read as
+            // weight rather than a fast spin.
+            tumbleFrame(.11, .25, 135, 18),
+            tumbleFrame(.22, .50, 270, 28),
+            tumbleFrame(.33, .75, 405, 16),
+            { offset: .44, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
             // Stay visibly prone instead of ending on an upright full turn.
-            { offset: .76, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            { offset: .96, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
             // Stand without rewinding, then return with alternating planted
-            // steps so the recovery reads as walking rather than translation.
-            { offset: .82, transform: `translate(${Math.round(x * .78)}px, ${Math.round(y * .78)}px) rotate(${standingSpin}deg) scale(.94, 1.02)`, filter: 'brightness(.78)', opacity: .76 },
-            { offset: .87, transform: `translate(${Math.round(x * .60)}px, ${Math.round(y * .60 - 5)}px) rotate(${standingSpin - spinDirection * 7}deg) skewX(${spinDirection * 4}deg) scale(.96)`, filter: 'brightness(.84)', opacity: .82 },
-            { offset: .92, transform: `translate(${Math.round(x * .40)}px, ${Math.round(y * .40)}px) rotate(${standingSpin + spinDirection * 7}deg) skewX(${-spinDirection * 4}deg) scale(.97)`, filter: 'brightness(.9)', opacity: .88 },
-            { offset: .97, transform: `translate(${Math.round(x * .18)}px, ${Math.round(y * .18 - 4)}px) rotate(${standingSpin - spinDirection * 5}deg) skewX(${spinDirection * 3}deg) scale(.99)`, filter: 'brightness(.96)', opacity: .95 },
+            // steps. The return now owns only the final 0.2s, one second less
+            // than its previous 1.2s budget.
+            { offset: .97, transform: `translate(${Math.round(x * .78)}px, ${Math.round(y * .78)}px) rotate(${standingSpin}deg) scale(.94, 1.02)`, filter: 'brightness(.78)', opacity: .76 },
+            { offset: .98, transform: `translate(${Math.round(x * .60)}px, ${Math.round(y * .60 - 5)}px) rotate(${standingSpin - spinDirection * 7}deg) skewX(${spinDirection * 4}deg) scale(.96)`, filter: 'brightness(.84)', opacity: .82 },
+            { offset: .99, transform: `translate(${Math.round(x * .40)}px, ${Math.round(y * .40)}px) rotate(${standingSpin + spinDirection * 7}deg) skewX(${-spinDirection * 4}deg) scale(.97)`, filter: 'brightness(.9)', opacity: .88 },
+            { offset: .995, transform: `translate(${Math.round(x * .18)}px, ${Math.round(y * .18 - 4)}px) rotate(${standingSpin - spinDirection * 5}deg) skewX(${spinDirection * 3}deg) scale(.99)`, filter: 'brightness(.96)', opacity: .95 },
             { offset: 1, transform: `translate(0, 0) rotate(${standingSpin}deg) scale(1)`, filter: 'brightness(1)', opacity: 1 }
         ];
     }
