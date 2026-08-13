@@ -64,7 +64,7 @@ assert.strictEqual(trueFrames[7][3], 630,
 assert.ok(trueFrames[2][6] < -90 && trueFrames[6][6] < -90,
     'both True Charged Slash hits must approach from above their contact point');
 assert.match(runtimeCss,
-    /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(135deg \* var\(--weapon-facing\)\)\)[\s\S]*?scaleX\(var\(--great-sword-mirror, 1\)\)/,
-    'the persistent charge pose and BEAT release must share the same mirrored 135-degree blade stance');
+    /\.weapon-great_sword:not\(\.weapon-charge-stage-0\)[\s\S]*?rotate\(calc\(225deg \* var\(--weapon-facing\)\)\)[\s\S]*?scaleX\(var\(--great-sword-mirror, 1\)\)/,
+    'the persistent charge pose and BEAT release must share the corrected 12 o’clock blade stance');
 
 console.log('[test] Great Sword BEAT V2 compilation and runtime passed');

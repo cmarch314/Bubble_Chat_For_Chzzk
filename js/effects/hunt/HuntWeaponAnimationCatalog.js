@@ -257,9 +257,9 @@ class HuntWeaponAnimationCatalog {
             great_sword_charge_raise: [idle, [.42, 0, 0, 74, .98, -28, -22], [.76, 0, 0, 120, 1.04, -45, -48], [1, 0, 0, 135, 1.06, -50, -55]],
             great_sword_charge_hold: [[0, 0, 0, 135, 1.06, -50, -55], [.42, 0, 0, 139, 1.1, -54, -59], [.72, 0, 0, 132, 1.04, -46, -51], [1, 0, 0, 135, 1.07, -50, -55]],
             // The source stands vertically: blade edge left, grip at the bottom.
-            // Slots 1/2 first flip the asymmetric edge, then +135deg places
-            // the grip upper-right, tip lower-left, and cutting edge upward.
-            // Positive rotation carries that edge down through the target;
+            // Great Sword receives its bitmap-axis correction in keyframes();
+            // these authored rotations describe the swing relative to that base.
+            // Positive rotation carries the edge down through the target;
             // slots 3/4 receive the exact mirrored path.
             great_sword_charged_release: [[0, 0, 0, 135, 1.07, -50, -55], [.2, 0, 0, 120, 1.1, -60, -68], [.46, .72, .75, 185, 1.13, -12, -88], [.72, 1, 1, 270, 1.2, 0, 0], [.86, .9, .9, 285, 1.12, 0, 7], [1, 0, 0, 270, 1, 0, 0]],
             // First downward swing plants the blade, then the rebound continues
@@ -437,7 +437,13 @@ class HuntWeaponAnimationCatalog {
                     : (Number(targetVector.x) < 0 ? -1 : 1) }
             : fallbackVector;
         const spec = this.MOTIONS[profile?.motion] || this.MOTIONS.horizontal_slash;
-        const rotationFor = rotation => rotation * v.side;
+        // The Great Sword bitmap's visible clock axis is +90deg from the
+        // catalog's generic vertical-weapon axis. Mirroring its cutting edge
+        // without correcting this axis produced a 9→6 o'clock slash in slots
+        // 1/2. Apply the asset correction once, centrally: 12→9 for slots 1/2
+        // and the exact mirror for slots 3/4.
+        const assetRotationOffset = profile?.weaponId === 'great_sword' ? 90 : 0;
+        const rotationFor = rotation => (rotation + assetRotationOffset) * v.side;
         // Slots 1/2 share one stance; slots 3/4 are its true visual mirror.
         // Mirroring the whole weapon is intentional here: the cutting edge must
         // face inward after the hunter crosses to the other side of the monster.
