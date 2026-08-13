@@ -709,7 +709,7 @@ class HuntBattleTickExecutor {
                     && engine.activeTrapControl.elapsedTicks >= Number(schedule[nextIndex])) {
                     nextIndex++;
                     engine.activeTrapControl.nextStruggleIndex = nextIndex;
-                    engine.playSFX?.('monster_trap', null, {
+                    if (!engine.activeTrapControl.reactionBeatOwned) engine.playSFX?.('monster_trap', null, {
                         monsterId: engine.selectedMonster.id,
                         trapKind: engine.activeTrapControl.kind,
                         trapPhase: `held-${nextIndex}`,
@@ -735,7 +735,7 @@ class HuntBattleTickExecutor {
                 ));
                 if (engine.monsterKnockdownDuration <= escapeTicks) {
                     engine.activeTrapControl.releasing = true;
-                    engine.playSFX?.('monster_trap', null, {
+                    if (!engine.activeTrapControl.reactionBeatOwned) engine.playSFX?.('monster_trap', null, {
                         monsterId: engine.selectedMonster.id,
                         trapKind: engine.activeTrapControl.kind,
                         trapPhase: 'escape',
@@ -750,7 +750,7 @@ class HuntBattleTickExecutor {
             }
             if (engine.monsterKnockdownDuration <= 0) {
                 if (engine.activeTrapControl && !engine.activeTrapControl.releasing) {
-                engine.playSFX?.('monster_trap', null, {
+                if (!engine.activeTrapControl.reactionBeatOwned) engine.playSFX?.('monster_trap', null, {
                     monsterId: engine.selectedMonster.id,
                     trapKind: engine.activeTrapControl.kind,
                     trapPhase: 'escape',

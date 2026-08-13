@@ -909,29 +909,9 @@ class HuntCombatAnimator {
             } else monsterImg.classList.add('monster-knockdown-sequence');
             this.setMonsterStunHeadMarker(details?.kind === 'stun');
 
-            // The initial fall keeps the existing authoritative knockdown cue.
-            // Every struggle/rise beat is independently addressable in the
-            // review tool and is emitted at the same authored runtime tick.
-            let elapsedTicks = knockdownBeatTicks.reaction;
-            const audioMoments = Object.keys(knockdownBeatTicks).slice(1).map(beatId => {
-                const moment = [beatId, elapsedTicks * 100];
-                elapsedTicks += knockdownBeatTicks[beatId];
-                return moment;
-            });
-            // Stun differs only by its head marker; it inherits the reviewed
-            // large-knockdown sound mapping beat-for-beat.
-            const audioPatternId = '__reaction.knockdown';
-            audioMoments.forEach(([beatId, delayMs]) => {
-                this.animationTimers.timeout(() => {
-                    if (monsterImg.dataset.monsterKnockdownSequence !== 'active') return;
-                    this.owner?.playSFX?.('monster_attack', null, {
-                        monsterId,
-                        patternId: audioPatternId,
-                        patternSlot: `beat:${beatId}`,
-                        overrideOnly: true
-                    });
-                }, delayMs);
-            });
+            // Audio belongs to the shared reaction BEAT session in HuntEngine.
+            // This renderer only projects the already-compiled motion and must
+            // not recreate an independent timeout schedule for each struggle.
             this.animationTimers.timeout(() => {
                 if (monsterImg.dataset.monsterKnockdownSequence !== 'active') return;
                 this.monsterKnockdownAnimation?.cancel?.();

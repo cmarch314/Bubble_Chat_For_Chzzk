@@ -32,6 +32,7 @@ class HuntEngine {
             ? HuntCombatJudgmentResolver
             : (typeof require === 'function' ? require('./HuntCombatJudgmentResolver.js') : null);
         this.monsterBeatRuntimeEvents = [];
+        this.reactionBeatRuntimeEvents = [];
         this.combatJudgmentRuntime = config.combatJudgmentRuntime
             || (CombatJudgmentRuntime ? new CombatJudgmentRuntime() : null);
         this.combatJudgmentResolver = config.combatJudgmentResolver
@@ -51,6 +52,10 @@ class HuntEngine {
                             state.context?.action?.id,
                             event
                         );
+                    } else if (String(state.actorKey).startsWith('reaction:')) {
+                        this.reactionBeatRuntimeEvents.push(event);
+                        if (this.reactionBeatRuntimeEvents.length > 64) this.reactionBeatRuntimeEvents.shift();
+                        this.dispatchMonsterReactionBeatEvent?.(state, event);
                     } else {
                         this.monsterBeatRuntimeEvents.push(event);
                         if (this.monsterBeatRuntimeEvents.length > 64) this.monsterBeatRuntimeEvents.shift();
@@ -60,6 +65,8 @@ class HuntEngine {
                 onComplete: state => {
                     if (String(state.actorKey).startsWith('hunter:')) {
                         this.callbacks?.onHunterBeatActionComplete?.(state.action, state.context);
+                    } else if (String(state.actorKey).startsWith('reaction:')) {
+                        this.callbacks?.onMonsterReactionBeatComplete?.(state.action, state.context);
                     } else {
                         this.combatJudgmentRuntime?.complete?.(state.actorKey);
                         this.callbacks?.onMonsterBeatActionComplete?.(state.action, state.context);
@@ -68,6 +75,8 @@ class HuntEngine {
                 onCancel: (state, reason) => {
                     if (String(state.actorKey).startsWith('hunter:')) {
                         this.callbacks?.onHunterBeatActionCancel?.(state.action, reason, state.context);
+                    } else if (String(state.actorKey).startsWith('reaction:')) {
+                        this.callbacks?.onMonsterReactionBeatCancel?.(state.action, reason, state.context);
                     } else {
                         this.combatJudgmentRuntime?.cancel?.(state.actorKey, reason);
                         this.callbacks?.onMonsterBeatActionCancel?.(state.action, reason, state.context);
@@ -278,7 +287,51 @@ class HuntEngine {
     }
 
     tickMonsterBeatAction() {
-        return this.monsterBeatRuntime?.tick?.('monster') || null;
+        const monster = this.monsterBeatRuntime?.tick?.('monster') || null;
+        const reaction = this.monsterBeatRuntime?.tick?.('reaction:monster') || null;
+        return monster || reaction;
+    }
+
+    beginMonsterReactionBeat(profile, context = {}) {
+        const compiled = typeof HuntMonsterReactionCatalog !== 'undefined'
+            ? HuntMonsterReactionCatalog.compile?.(profile)
+            : null;
+        if (!compiled || !this.monsterBeatRuntime) return null;
+        this.reactionBeatRuntimeEvents.length = 0;
+        return this.monsterBeatRuntime.begin('reaction:monster', compiled, {
+            ...context,
+            reactionProfile: profile,
+            patternId: profile.patternId
+        });
+    }
+
+    cancelMonsterReactionBeat(reason = 'interrupted') {
+        if (Array.isArray(this.reactionBeatRuntimeEvents)) this.reactionBeatRuntimeEvents.length = 0;
+        return this.monsterBeatRuntime?.cancel?.('reaction:monster', reason) || false;
+    }
+
+    dispatchMonsterReactionBeatEvent(state, event) {
+        if (event?.kind !== 'audio') return false;
+        const profile = state?.context?.reactionProfile || null;
+        const patternId = String(profile?.patternId || state?.context?.patternId || state?.action?.id || '');
+        if (!patternId) return false;
+        const trapKind = state?.context?.trapKind;
+        const audioContext = {
+            monsterId: this.selectedMonster?.id,
+            patternId,
+            patternName: profile?.id || patternId,
+            patternType: 'reaction',
+            patternSlot: `beat:${event.beatId}`,
+            beatEventId: event.id,
+            audioPhase: 'beat-event',
+            overrideOnly: true
+        };
+        if (trapKind) {
+            audioContext.trapKind = trapKind;
+            audioContext.trapPhase = String(event.beatId);
+            return this.playSFX?.('monster_trap', null, audioContext) || false;
+        }
+        return this.playSFX?.('monster_attack', null, audioContext) || false;
     }
 
     drainCombatJudgments() {
@@ -1037,7 +1090,16 @@ class HuntEngine {
                 ? (bodyReactionBlocked ? this.monsterAtb : atbConfig.monsterAtbAfterControl('flinch'))
                 : (bodyReactionBlocked ? this.monsterAtb : partBreakAtb);
             this.monsterPartReactionKind = reaction.visualType || reaction.type;
-            if (!bodyReactionBlocked) this.playSFX?.(
+            const reactionProfileData = typeof HuntMonsterReactionCatalog !== 'undefined'
+                ? HuntMonsterReactionCatalog.applyAuthoredMotion?.(
+                    this.selectedMonster?.id,
+                    HuntMonsterReactionCatalog.profile?.(reactionProfile)
+                ) : null;
+            const reactionBeatStarted = !bodyReactionBlocked
+                && this.beginMonsterReactionBeat?.(reactionProfileData, {
+                    cause: 'part-break', partKind: result.part.kind
+                });
+            if (!bodyReactionBlocked && !reactionBeatStarted) this.playSFX?.(
                 isFlinch ? 'monster_flinch' : 'monster_knockdown', null,
                 { monsterId: this.selectedMonster.id, reactionProfile }
             );
@@ -1145,7 +1207,11 @@ class HuntEngine {
             nextStruggleIndex: 0,
             releasing: false
         };
-        this.playSFX?.('monster_trap', null, {
+        const trapBeatStarted = this.beginMonsterReactionBeat?.(trapReaction, {
+            cause: 'trap', trapKind: runtimeKind, useCount: trapEffect.useCount
+        });
+        this.activeTrapControl.reactionBeatOwned = Boolean(trapBeatStarted);
+        if (!trapBeatStarted) this.playSFX?.('monster_trap', null, {
             monsterId: this.selectedMonster.id,
             trapKind: runtimeKind,
             trapPhase: 'fall',
@@ -1275,9 +1341,14 @@ class HuntEngine {
             const sleepMotion = typeof HuntMonsterReactionCatalog !== 'undefined'
                 ? HuntMonsterReactionCatalog.resolveSleep?.(this.selectedMonster?.id)?.motion || []
                 : [];
+            const sleepProfile = typeof HuntMonsterReactionCatalog !== 'undefined'
+                ? HuntMonsterReactionCatalog.resolveSleep?.(this.selectedMonster?.id) : null;
+            const sleepBeatStarted = this.beginMonsterReactionBeat?.(sleepProfile, {
+                cause: 'status', statusKind: 'sleep'
+            });
             this.callbacks?.onTriggerMonsterSleepAnim?.({ durationTicks: duration, motion: sleepMotion });
             let elapsedTicks = 0;
-            sleepMotion.forEach(beat => {
+            if (!sleepBeatStarted) sleepMotion.forEach(beat => {
                 const playBeat = () => {
                     if (this.monsterState !== 'sleeping'
                         || this.monsterSleepGeneration !== sleepGeneration) return;
@@ -1311,6 +1382,11 @@ class HuntEngine {
                 kind: 'stun', durationTicks: duration,
                 struggleCount: Math.max(3, 6 - this.monsterStunCount)
             });
+            const reaction = typeof HuntMonsterReactionCatalog !== 'undefined'
+                ? HuntMonsterReactionCatalog.resolveKnockdown?.(
+                    this.selectedMonster?.id, Math.max(3, 6 - this.monsterStunCount)
+                ) : null;
+            this.beginMonsterReactionBeat?.(reaction, { cause: 'status', statusKind: 'stun' });
         }
         if (wasAirborne) {
             this.addLog(`🪽 [강제 착지] ${this.selectedMonster.nameKO}(이)가 공중에서 ${config.stateName.replace(' 상태', '')}에 걸려 즉시 추락했습니다.`, config.color);
@@ -1347,6 +1423,10 @@ class HuntEngine {
         const profile = typeof HuntMonsterReactionCatalog !== 'undefined'
             ? HuntMonsterReactionCatalog.resolveSleep?.(this.selectedMonster?.id) : null;
         const wakeMotion = (profile?.motion || []).filter(beat => beat.beat === 'wake');
+        this.cancelMonsterReactionBeat?.('sleep-wake');
+        const wakeBeatStarted = this.beginMonsterReactionBeat?.({
+            ...(profile || {}), motion: wakeMotion
+        }, { cause: 'status', statusKind: 'sleep-wake' });
         this.monsterKnockdownDuration = 0;
         this.monsterStunDuration = 0;
         this.monsterAtb = HuntAtbConfig.GAUGE_MAX;
@@ -1355,7 +1435,7 @@ class HuntEngine {
         this.monsterSleepRestoreState = null;
         this.monsterSpeed = this.getMonsterSpeedForState(this.monsterState);
         this.callbacks?.onTriggerMonsterSleepAnim?.({ motion: wakeMotion, wakeOnly: true });
-        this.playSFX?.('monster_attack', null, {
+        if (!wakeBeatStarted) this.playSFX?.('monster_attack', null, {
             monsterId: this.selectedMonster.id,
             patternId: '__reaction.sleep', patternSlot: 'beat:wake', overrideOnly: true
         });

@@ -21,8 +21,8 @@ assert.doesNotMatch(css, /@keyframes monster-part-flinch/,
     'live part reactions must use the shared BEAT profile rather than a second CSS timeline');
 const largeBreak = reactions.get('__reaction.tail-sever');
 assert.deepStrictEqual(largeBreak.motion.map(beat => [beat.beat, beat.ticks]), [
-    ['reaction', 4], ['roll-1', 11], ['roll-2', 12], ['down', 20], ['recover', 13]
-], 'large part break must preserve the former two-roll tail-sever reaction');
+    ['reaction', 2], ['roll-1', 3], ['roll-2', 22], ['down', 20], ['recover', 13]
+], 'large part break must reflect the saved reviewed tail-sever timing');
 assert.deepStrictEqual(largeBreak.motion.map(beat => beat.rotation), [-14, 170, 700, 720, 720],
     'large part break recovery must stand up without visibly reverse-spinning the two rolls');
 

@@ -24,6 +24,7 @@ class HuntCombatRuntime {
             ? options.tick
             : () => this.engine.processTick();
         this.monsterEventCursor = 0;
+        this.reactionEventCursor = 0;
         this.clock = options.clock || new Clock({
             mode: options.clockMode || (this.mode === 'preview' ? 'manual' : 'auto'),
             tickMs: options.tickMs || 100,
@@ -55,6 +56,7 @@ class HuntCombatRuntime {
             targetIndices: runtimePattern.runtimeImpactTargetIndices || null
         });
         this.monsterEventCursor = 0;
+        this.reactionEventCursor = 0;
         return this.engine.executeMonsterTurn(runtimePattern, null, primaryTargetIndex);
     }
 
@@ -84,6 +86,18 @@ class HuntCombatRuntime {
             });
         }
         this.monsterEventCursor = events.length;
+        const reactionEvents = Array.isArray(this.engine.reactionBeatRuntimeEvents)
+            ? this.engine.reactionBeatRuntimeEvents : [];
+        for (const event of reactionEvents.slice(this.reactionEventCursor)) {
+            this.#record('reaction-beat-event', {
+                actionId: String(event?.actionId || event?.patternId || ''),
+                beatId: String(event?.beatId || ''),
+                eventId: String(event?.id || ''),
+                kind: String(event?.kind || ''),
+                atTicks: Number(event?.atTicks || 0)
+            });
+        }
+        this.reactionEventCursor = reactionEvents.length;
         const active = this.engine.monsterBeatRuntime?.get?.('monster') || null;
         this.#record('tick', {
             battleTimeBefore: before,
