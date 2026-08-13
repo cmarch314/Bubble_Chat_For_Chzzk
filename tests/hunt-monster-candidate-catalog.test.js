@@ -17,7 +17,7 @@ for (const monsterId of ['rathian', 'rathalos']) {
     assert.strictEqual(action.nativeBeatCandidate, true);
     assert.strictEqual(action.reviewStatus, 'draft');
     assert.strictEqual(action.beatV2.source.kind, 'monster-candidate');
-    assert.strictEqual(action.beatV2.totalTicks, 19);
+    assert.strictEqual(action.beatV2.totalTicks, monsterId === 'rathian' ? 45 : 19);
     assert.strictEqual(action.motion.reduce((sum, beat) => sum + beat.ticks, 0), action.beatV2.totalTicks);
     assert.ok(action.beatV2.events.some(event => event.kind === 'roar'));
 }
@@ -27,11 +27,17 @@ const rathian = CandidateCatalog.compileKit(JSON.parse(fs.readFileSync(
 )));
 const charge = rathian.actions.find(action => action.id === 'rathian.charge');
 assert.ok(charge, 'Rathian clean rebuild starts with an explicit charge candidate');
-assert.strictEqual(charge.beatV2.totalTicks, 22);
+assert.strictEqual(charge.beatV2.totalTicks, 41);
 assert.deepStrictEqual(charge.beatV2.events.filter(event => event.kind === 'damage')
-    .map(event => [event.beatId, event.offsetTicks, event.atTicks]), [['charge-through', 5, 11]]);
-assert.strictEqual(charge.motion.find(beat => beat.beat === 'charge-through').to,
-    'through-current:target 165%');
+    .map(event => [event.beatId, event.offsetTicks, event.atTicks]), [['charge', 5, 17]]);
+assert.deepStrictEqual(charge.motion.map(beat => beat.ticks), [12, 8, 7, 14]);
+const bite = rathian.actions.find(action => action.id === 'rathian.bite');
+assert.ok(bite, 'Rathian candidate includes the shared-timing bite');
+assert.deepStrictEqual(bite.motion.map(beat => beat.ticks), [5, 3, 3, 5]);
+assert.deepStrictEqual(bite.beatV2.events.filter(event => event.kind === 'damage')
+    .map(event => [event.beatId, event.atTicks, event.hitReactionKind]), [['bite', 5, 'weak']]);
+assert.deepStrictEqual(rathian.actions.find(action => action.id === 'rathian.roar').motion.map(beat => beat.ticks),
+    [10, 2, 33]);
 
 const source = fs.readFileSync(path.join(root, 'js', 'effects', 'hunt', 'HuntMonsterCandidateCatalog.js'), 'utf8');
 assert.ok(!source.includes('HuntBeatV2Adapter'), 'native candidates must not import the legacy adapter');

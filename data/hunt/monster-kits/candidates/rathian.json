@@ -18,9 +18,31 @@
         "reviewStatus": "draft",
         "atb": { "cost": 18, "recovery": "during-action", "gateUntil": "complete" },
         "beats": [
-          { "id": "brace", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "brace", "scaleY": 0.94 } }] }, "events": [{ "kind": "audio", "slot": "brace", "offsetTicks": 1 }] },
-          { "id": "roar", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "scaleY": 1.08 } }, { "offsetTicks": 8, "value": { "pose": "stretch-strong", "scaleY": 1.02 } }] }, "events": [{ "kind": "roar", "target": "all", "size": "large", "offsetTicks": 3 }, { "kind": "audio", "slot": "roar", "offsetTicks": 3 }] },
-          { "id": "settle", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "scaleY": 1 } }] }, "events": [{ "kind": "audio", "slot": "settle", "offsetTicks": 1 }] }
+          { "id": "brace", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch" } }] }, "events": [{ "kind": "audio", "slot": "brace", "offsetTicks": 1 }] },
+          { "id": "roar", "ticks": 2, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong" } }] }, "events": [{ "kind": "roar", "target": "all", "size": "large", "offsetTicks": 1 }, { "kind": "audio", "slot": "roar", "offsetTicks": 1 }] },
+          { "id": "settle", "ticks": 33, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle" } }] }, "events": [{ "kind": "audio", "slot": "settle", "offsetTicks": 1 }] }
+        ]
+      }
+    },
+    {
+      "id": "rathian.bite",
+      "name": "물어뜯기 · clean BEAT 후보",
+      "type": "physical",
+      "tags": ["physical", "bite", "weak"],
+      "damageRatio": 0.18,
+      "minTargets": 1,
+      "maxTargets": 1,
+      "atbCost": 32,
+      "graph": {
+        "schemaVersion": 2,
+        "backend": "beat-v2",
+        "reviewStatus": "draft",
+        "atb": { "cost": 32, "recovery": "during-action", "gateUntil": "complete" },
+        "beats": [
+          { "id": "approach", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "target", "face": "toward-target", "aimBodyAt": "target", "pose": "stretch-soft", "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "approach", "offsetTicks": 1 }] },
+          { "id": "bite", "ticks": 3, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 106%", "pose": "stretch-strong", "moveEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 18, "hitReactionKind": "weak", "offsetTicks": 0 }, { "kind": "audio", "slot": "impact", "offsetTicks": 0 }] },
+          { "id": "recoil", "ticks": 3, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 90%", "pose": "land" } }] }, "events": [{ "kind": "audio", "slot": "recoil", "offsetTicks": 1 }] },
+          { "id": "return", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "pose": "idle" } }] }, "events": [{ "kind": "audio", "slot": "return", "offsetTicks": 1 }] }
         ]
       }
     },
@@ -39,10 +61,10 @@
         "reviewStatus": "draft",
         "atb": { "cost": 31, "recovery": "during-action", "gateUntil": "complete" },
         "beats": [
-          { "id": "brace", "ticks": 4, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "face": "target", "scaleY": 0.94 } }] }, "events": [{ "kind": "audio", "slot": "brace", "offsetTicks": 2 }] },
-          { "id": "launch", "ticks": 2, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 15%", "face": "target", "pose": "stretch-strong", "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "charge-launch", "offsetTicks": 0 }] },
-          { "id": "charge-through", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "through-current:target 165%", "face": "target", "pose": "stretch-strong", "moveEasing": "linear", "strideFlipTicks": 3 } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 5 }, { "kind": "audio", "slot": "charge-impact", "offsetTicks": 5 }] },
-          { "id": "recover", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "pose": "idle", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "recover", "offsetTicks": 1 }] }
+          { "id": "stomp", "ticks": 12, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "stompSteps": 3 } }] }, "events": [{ "kind": "audio", "slot": "stomp", "offsetTicks": 2 }] },
+          { "id": "charge", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "target", "face": "target", "bounds": "reach", "pose": "idle", "instantPose": true, "moveEasing": "linear", "strideFlipTicks": 3 } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 5 }, { "kind": "audio", "slot": "charge-impact", "offsetTicks": 5 }] },
+          { "id": "impact", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "offscreen:bottom", "continueTravel": true, "pose": "land", "fade": "out", "moveEasing": "linear", "strideFlipTicks": 3 } }] }, "events": [{ "kind": "audio", "slot": "impact", "offsetTicks": 0 }] },
+          { "id": "return", "ticks": 14, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "at": "offscreen:top", "to": "home", "pose": "idle", "fade": "in", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "return", "offsetTicks": 1 }] }
         ]
       }
     }
