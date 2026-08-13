@@ -90,4 +90,15 @@ for (const pattern of approved) {
     assert.deepStrictEqual(liveTrace, expected.events, `${pattern.id} live trace diverged from its graph`);
 }
 
+const rageCharge = patterns.find(pattern => pattern.id === 'diablos.rage_charge');
+const visual = beatId => rageCharge.beatV2.beats.find(beat => beat.id === beatId)?.tracks?.visual?.[0]?.value || {};
+for (const beatId of ['tail-wind-left', 'tail-wind-right']) {
+    assert.strictEqual(visual(beatId).flipFacing, true,
+        `${beatId} must establish its X-tail image direction during the windup`);
+}
+for (const beatId of ['tail-cross-one', 'tail-cross-two']) {
+    assert.notStrictEqual(visual(beatId).flipFacing, true,
+        `${beatId} must preserve its windup direction through the actual swing`);
+}
+
 console.log('[test] Diablos approved BEAT golden traces passed.');

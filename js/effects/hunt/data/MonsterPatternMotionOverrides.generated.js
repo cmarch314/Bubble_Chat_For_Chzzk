@@ -1340,7 +1340,8 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "rotation": 165,
           "scaleX": 1.01,
           "scaleY": 0.99,
-          "skewX": 4
+          "skewX": 4,
+          "flipFacing": true
         },
         "tail-cross-one": {
           "ticks": 5,
@@ -1360,7 +1361,6 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "skewX": -6,
           "damageScale": 0.45,
           "fxDurationTicks": 5,
-          "flipFacing": true,
           "hit": false,
           "judgments": [
             {
@@ -1419,7 +1419,6 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "skewX": 6,
           "damageScale": 0.45,
           "fxDurationTicks": 5,
-          "flipFacing": true,
           "hit": false,
           "judgments": [
             {
