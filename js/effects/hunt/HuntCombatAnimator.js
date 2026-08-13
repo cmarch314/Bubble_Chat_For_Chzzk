@@ -863,6 +863,19 @@ class HuntCombatAnimator {
                 : 'knockdown';
         const profile = catalog?.applyAuthoredMotion?.(monsterId, catalog.profile(profileId));
         const motion = profile?.motion;
+        if (profileId === 'knockdown' && Array.isArray(motion) && motion.length) {
+            // Part-break knockdowns previously bypassed the shared knockdown
+            // player and sent mostly pose-only struggle beats to playBeatMotion.
+            // That kept the monster lying perfectly still. Route every large
+            // knockdown through the same fall/struggle/rise owner used by KO
+            // and forced landings, while retaining the editor-authored ticks.
+            this.triggerMonsterKnockdownAnim({
+                kind: 'knockdown',
+                motion,
+                struggleCount: motion.filter(beat => /^struggle-\d+$/.test(String(beat?.beat || ''))).length
+            });
+            return;
+        }
         const actualTicks = Array.isArray(motion)
             ? motion.reduce((sum, beat) => sum + Math.max(1, Number(beat.ticks) || 1), 0)
             : Number(durationTicks || 1);
