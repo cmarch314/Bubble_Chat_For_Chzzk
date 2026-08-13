@@ -12,9 +12,11 @@
   },
   "runtimePolicy": {
     "completedMonsterIds": [
+      "barioth",
       "bazelgeuse",
       "deviljho",
       "diablos",
+      "frostfang_barioth",
       "jyuratodus",
       "kirin",
       "kushala_daora",
@@ -7252,6 +7254,76 @@
       "reviewMethod": "event-group-audition",
       "sourceLayer": "voice",
       "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 1757505335,
+      "sourceId": 204946478,
+      "reference": true,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 1757505335,
+      "sourceId": 36455104,
+      "reference": false,
+      "tags": [
+        "small_flinch_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 2058782943,
+      "sourceId": 967940364,
+      "reference": true,
+      "tags": [
+        "knockdown_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 2058782943,
+      "sourceId": 35060887,
+      "reference": false,
+      "tags": [
+        "knockdown_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
+    },
+    {
+      "monster": "diablos",
+      "bank": "em007_vo",
+      "eventId": 2058782943,
+      "sourceId": 33504928,
+      "reference": false,
+      "tags": [
+        "knockdown_vocal"
+      ],
+      "verdict": "확정",
+      "reviewMethod": "event-group-audition",
+      "sourceLayer": "voice",
+      "reuseScope": "monster-identity"
     }
   ],
   "tagAliases": {
@@ -7272,7 +7344,7 @@
     "돌진 스탭": "charge_stride_step",
     "바위 발사": "projectile_launch"
   },
-  "updatedAt": "2026-08-04T17:39:52.745Z",
+  "updatedAt": "2026-08-11T21:55:21.052Z",
   "normalizedAt": "2026-08-03T19:00:19.388Z",
   "reusePolicy": {
     "voice": "monster-identity-only",

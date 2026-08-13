@@ -69,7 +69,7 @@ class HuntJourneyEventCatalog {
                 narrative: '안전한 길과 빛이 닿지 않는 깊은 군락이 갈라진다.',
                 actions: [
                     { id: 'safe', icon: '🌿', label: '안전 채집', description: '코인 +1 · 물약 +1', apply(result, indexes) { Economy.gather(result, indexes, false); } },
-                    { id: 'mushroom', icon: '🍄', label: '버섯 군락', description: '체력 15% · 공용 물약 +1', apply(result, indexes) { heal(result, indexes, .15); const stock = Economy.stock(result); stock.potions = Math.min(10, stock.potions + 1); } },
+                    { id: 'mushroom', icon: '🍄', label: '버섯 군락', description: '체력 15% · 공용 물약 +1', apply(result, indexes) { heal(result, indexes, .15); Economy.addSupply(result, 'potions', 1); } },
                     { id: 'deep', icon: '⛏️', label: '깊은 채집', description: '코인 +2 · 난입 가능', apply(result, indexes) { Economy.gather(result, indexes, true); } }
                 ] })
             .register({ id: 'trader', icon: '🛒', label: '행상인', scope: 'individual', defaultActionId: 'leave',
@@ -83,7 +83,7 @@ class HuntJourneyEventCatalog {
                 narrative: '불씨는 살아 있지만 식량 자루에는 정체 모를 발자국이 남아 있다.',
                 actions: [
                     { id: 'rest', icon: '💤', label: '휴식', description: '체력 30% 회복', apply(result, indexes) { heal(result, indexes, .3); } },
-                    { id: 'search', icon: '🔎', label: '보급품 수색', description: '공용 물약 +2', apply(result) { const stock = Economy.stock(result); stock.potions = Math.min(10, stock.potions + 2); } }
+                    { id: 'search', icon: '🔎', label: '보급품 수색', description: '공용 물약 +2', apply(result) { Economy.addSupply(result, 'potions', 2); } }
                 ] })
             .register({ id: 'felyne', icon: '🐱', label: '아이루 상점', scope: 'individual', defaultActionId: null,
                 narrative: '아이루 상인이 계산판을 두드리며 꼬리로 상품을 가리킨다.',
@@ -122,9 +122,8 @@ class HuntJourneyEventCatalog {
                     { id: 'trade', icon: '🎒', label: '비밀 거래', description: '💰1 · 물약 +1 · 폭탄 +1', price: 1,
                         apply(result, indexes) {
                             if (!Economy.spend(result, 1)) return;
-                            const stock = Economy.stock(result);
-                            stock.potions = Math.min(10, stock.potions + 1);
-                            stock.bombs += 1;
+                            Economy.addSupply(result, 'potions', 1);
+                            Economy.addSupply(result, 'bombs', 1);
                         } },
                     { id: 'chase', icon: '💨', label: '도둑을 쫓는다', description: '코인 +1 · 체력 5% 손실',
                         apply(result, indexes) {

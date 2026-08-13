@@ -8,9 +8,15 @@ class HuntHunterTurnExecutor {
         sourceNameJa: '砥石'
     });
 
-    static supportItemPolicy() {
-        if (typeof HuntSupportItemPolicy !== 'undefined') return HuntSupportItemPolicy;
-        if (typeof require === 'function') return require('./HuntSupportItemPolicy.js');
+    static personalityProfiles() {
+        if (typeof HuntPersonalityProfiles !== 'undefined') return HuntPersonalityProfiles;
+        if (typeof require === 'function') return require('./HuntPersonalityProfiles.js');
+        return null;
+    }
+
+    static decisionPolicy() {
+        if (typeof HuntHunterDecisionPolicy !== 'undefined') return HuntHunterDecisionPolicy;
+        if (typeof require === 'function') return require('./HuntHunterDecisionPolicy.js');
         return null;
     }
 
@@ -34,6 +40,7 @@ class HuntHunterTurnExecutor {
         if (engine.perkRuntime) {
             resolvedAction.durationTicks = engine.perkRuntime.actionDuration(hunter, resolvedAction, resolvedAction.durationTicks);
         }
+        engine.beginHunterBeatAction?.(hunter, resolvedAction);
         if (engine.actionStateMachine) engine.actionStateMachine.begin(hunter, resolvedAction);
         else hunter.attackDuration = attackTicks;
         if (hunter.id === 'great_sword') {
@@ -165,40 +172,42 @@ class HuntHunterTurnExecutor {
         if (engine.perkRuntime && engine.perkRuntime.trySpecialAction(w)) return;
 
         const trapImmuneMonster = engine.isMonsterTrapImmune();
-        const supportItemPolicy = HuntHunterTurnExecutor.supportItemPolicy();
-        const shouldFlash = supportItemPolicy?.canUseFlash(engine, w, engine.random.bind(engine));
-        if (Number(w.shockTraps || 0) > 0
+        const supportDecision = HuntHunterTurnExecutor.decisionPolicy()?.chooseSupportAction(engine, w) || null;
+        const wantsTrap = supportDecision?.kind === 'trap';
+        const shouldFlash = supportDecision?.kind === 'flash';
+        if (supportDecision?.kind === 'bomb' && engine.perkRuntime?.useBomb(w, '전술 폭탄')) return;
+        if (wantsTrap && Number(w.shockTraps || 0) > 0
             && !trapImmuneMonster
             && engine.monsterFlightState === 'airborne'
             && !shouldFlash
             && !engine.pendingLandingTrap) {
-            w.shockTraps--;
+            if (!engine.perkRuntime || engine.perkRuntime.shouldConsumeItem(w, 'shockTraps')) w.shockTraps--;
             w.itemDuration = 12;
             engine.pendingLandingTrap = {
                 hunterIndex: w.index,
                 hunterName: w.hunterName
             };
             engine.updateHunterItemUI?.(w);
-            engine.triggerEnvironmentEffect('shocktrap-pending', w.index);
+            engine.triggerEnvironmentEffect('pitfall-pending', w.index);
             engine.addLog(`🪤 [함정 설치] ${w.hunterName}이(가) 착지 지점에 함정을 설치했습니다.`, '#ffe66d');
             return;
         }
-        if (Number(w.shockTraps || 0) > 0 && !trapImmuneMonster && engine.monsterFlightState !== 'airborne'
-            && engine.monsterState === 'normal' && engine.monsterAtb >= 60) {
-            w.shockTraps--;
+        if (wantsTrap && Number(w.shockTraps || 0) > 0 && !trapImmuneMonster
+            && engine.monsterFlightState !== 'airborne' && engine.monsterState === 'normal') {
+            if (!engine.perkRuntime || engine.perkRuntime.shouldConsumeItem(w, 'shockTraps')) w.shockTraps--;
             engine.updateHunterItemUI?.(w);
             w.itemDuration = 12;
-            const trapEffect = engine.beginMonsterTrapControl('shocktrap', 40);
+            const trapEffect = engine.beginMonsterTrapControl('pitfall', 40);
             const trapTicks = trapEffect.durationTicks;
-            engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
-            engine.updateMonsterStateUI('마비함정', `⚡ 마비함정에 걸린 ${engine.selectedMonster.nameKO} ⚡`, { color: '#ffe66d', bg: 'rgba(255,230,80,.14)' });
-            engine.triggerEnvironmentEffect('shocktrap', w.index, trapEffect);
-            engine.addLog(`⚡ [마비함정] ${w.hunterName}이(가) 뇌광충으로 만든 덫을 설치했습니다! (${(trapTicks / 10).toFixed(1)}초 · 누적 내성 ${engine.monsterTrapUseCount}단계)`, '#ffe66d');
+            engine.updateMonsterStateUI('구멍함정', `🕸️ 구멍함정에 빠진 ${engine.selectedMonster.nameKO}`, { color: '#c69a58', bg: 'rgba(93,55,28,.22)' });
+            engine.triggerEnvironmentEffect('pitfall', w.index, trapEffect);
+            engine.addLog(`🕸️ [구멍함정] ${w.hunterName}이(가) 몬스터를 구멍함정에 빠뜨렸습니다! (${(trapTicks / 10).toFixed(1)}초 · 누적 내성 ${engine.monsterTrapUseCount}단계)`, '#d6ad72');
             return;
         }
 
         if (shouldFlash) {
-            w.flashPods--;
+            if (!engine.perkRuntime || engine.perkRuntime.shouldConsumeItem(w, 'flashPods')) w.flashPods--;
+            if (w.flashPods <= 0) engine.perkRuntime?.onItemEmpty?.(w, 'flashes');
             engine.monsterFlashUseCount = Number(engine.monsterFlashUseCount || 0) + 1;
             w.itemDuration = 8;
             if (engine.monsterTraitState?.atomicFlightActive) {
@@ -236,18 +245,6 @@ class HuntHunterTurnExecutor {
             engine.showSkillBubble(w.index, '✨ 섬광탄!');
             return;
         }
-
-
-
-        // Personality-based heal probability
-        let healProb = 0.65;
-        if (w.personality === 'offensive') healProb = 0.40;
-        else if (w.personality === 'defensive') healProb = 0.85;
-        else if (w.personality === 'veteran') healProb = 0.80;
-        else if (w.personality === 'support') healProb = 0.75;
-        else if (w.personality === 'newbie') healProb = 0.30;
-        healProb = Math.max(0.05, Math.min(0.98, healProb + Number(w.perkModifiers && w.perkModifiers.healBias || 0)));
-
         // 몬린이 전용 돌발 행동 패턴 (채집 딴짓 20%, 분노 시 공황 도주 35%)
         if (w.personality === 'newbie') {
             const roll = engine.random();
@@ -270,6 +267,7 @@ class HuntHunterTurnExecutor {
                     if (!Array.isArray(w.gatheredMaterials)) w.gatheredMaterials = [];
                     w.gatheredMaterials.push({ kind: find.kind, item: find.item });
                     const reward = HuntHunterTurnExecutor.applyGatherReward(w, find);
+                    engine.perkRuntime?.trigger?.(w, 'gather', { find });
                     engine.updateHunterItemUI?.(w);
                     engine.addLog(`${find.emoji} [몬린이 딴짓] ${w.hunterName} (${w.name})이(가) ${find.node}을(를) 채집하느라 한눈을 팝니다! (획득: ${find.item}${reward} · 파티 채집 ${engine.combatGatherCount}/3)`, find.color);
                     engine.playAudioFile('Unified_SFX/MH - Item Found.mp3', null, .7, { hunterIndex: w.index, action: 'item' });
@@ -287,25 +285,21 @@ class HuntHunterTurnExecutor {
             }
         }
 
-        // Veteran / Support team heal AI (Lifepowder)
-        const isHealer = w.personality === 'veteran' || w.personality === 'support'
-            || (engine.perkRuntime && engine.perkRuntime.constructor.has(w, '광역 분진'));
-        if (isHealer && w.lifepowders && w.lifepowders > 0) {
+        if (supportDecision?.kind === 'powder' && Number(w.lifepowders || 0) > 0) {
             const damagedTeammates = engine.selectedWeapons.filter(m => m.status === 'alive' && m.hp <= m.maxHp * 0.55);
             if (damagedTeammates.length > 0) {
-                if (!engine.perkRuntime || engine.perkRuntime.shouldConsumeItem(w)) w.lifepowders--;
+                if (!engine.perkRuntime || engine.perkRuntime.shouldConsumeItem(w, 'lifepowders')) w.lifepowders--;
                 engine.updateHunterItemUI?.(w);
                 w.itemDuration = engine.perkRuntime ? engine.perkRuntime.itemDuration(w, 15) : 15;
-                const powderHeal = engine.perkRuntime ? engine.perkRuntime.healAmount(w, 25) : 25;
+                let powderHeal = engine.perkRuntime ? engine.perkRuntime.healAmount(w, 25) : 25;
+                if ((w.perks || []).some(perk => perk?.name === '우애')) powderHeal = Math.round(powderHeal * 1.2);
                 engine.selectedWeapons.forEach(m => {
-                    if (m.status === 'alive') {
+                    if (m.status === 'alive' && (!engine.perkRuntime || engine.perkRuntime.canReceiveTeamHealing(m, w))) {
                         m.hp = Math.min(m.maxHp, m.hp + powderHeal);
-                        m.atb = Math.min(100, m.atb + 60);
                         engine.updateHpUI(m);
-                        engine.updateWeaponAtbUI(m.index, m.atb);
                     }
                 });
-                engine.addLog(`🌿 [생명의 가루] ${w.hunterName}이(가) 생명의 가루를 흩뿌려 아군 전체 회복 및 ATB 충전! (+25 HP, +60 ATB)`, '#00ffaa');
+                engine.addLog(`🌿 [생명의 가루] ${w.hunterName}이(가) 생명의 가루로 아군 전체를 +${powderHeal} HP 회복했습니다.`, '#00ffaa');
                 engine.playSFX('lifepowder', null, { hunterIndex: w.index, action: 'support' });
                 engine.showSkillBubble(w.index, "🌿 생명의 가루!");
                 engine.selectedWeapons.forEach(m => {
@@ -315,46 +309,9 @@ class HuntHunterTurnExecutor {
             }
         }
 
-        // Support Trap or Stonefall AI
+        // 지원형은 전투 자원 수급에 우선도를 둔다. 아이템 사용 판단은
+        // HuntHunterDecisionPolicy 한 곳에서만 수행한다.
         if (w.personality === 'support') {
-            // Trapping
-            const trapImmune = engine.isMonsterTrapImmune();
-            if (!trapImmune
-                && engine.monsterTraitRuntime?.canTriggerTrap?.(engine, 'pitfall') !== false
-                && engine.monsterState === 'normal'
-                && (!w.trapsUsed || w.trapsUsed < 2)) {
-                w.trapsUsed = (w.trapsUsed || 0) + 1;
-                w.itemDuration = 20;
-                const trapEffect = engine.beginMonsterTrapControl('pitfall', 40);
-                const trapTicks = trapEffect.durationTicks;
-                engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
-                engine.updateMonsterStateUI('구멍함정 상태', `🕸️ 함정에 빠진 ${engine.selectedMonster.nameKO} 🕸`, { color: '#ff9500', bg: 'rgba(255,149,0,0.1)' });
-                engine.triggerEnvironmentEffect('pitfall', w.index, trapEffect);
-
-                engine.addLog(`🕸️ [함정 설치] ${w.hunterName}이(가) 구멍함정으로 몬스터를 구속했습니다! (${(trapTicks / 10).toFixed(1)}초 · 누적 내성 ${engine.monsterTrapUseCount}단계)`, '#e0ffa3');
-                // Verified trap-impact audio will be added when a labelled event is available.
-                engine.shakeWeapon(w.index, '#e0ffa3');
-                return;
-            }
-            // Stonefall on elder dragons
-            if (trapImmune && (!w.stonesUsed || w.stonesUsed < 2) && engine.random() < 0.6) {
-                w.stonesUsed = (w.stonesUsed || 0) + 1;
-                w.itemDuration = 20;
-                engine.monsterKnockdownDuration = 70;
-                engine.monsterState = 'knocked_down';
-                engine.monsterAtb = 0;
-                engine.updateMonsterAtbUI(0);
-                engine.updateMonsterStateUI('낙석 대경직', `💤 낙석에 깔린 ${engine.selectedMonster.nameKO} 💤`, { color: '#ff9500', bg: 'rgba(255,149,0,0.1)' });
-                
-                if (engine.callbacks.onTriggerMonsterKnockdownAnim) engine.callbacks.onTriggerMonsterKnockdownAnim();
-                engine.triggerEnvironmentEffect('rockfall', w.index);
-
-                engine.addLog(`💥 [낙석격동] ${w.hunterName}이(가) 지형 낙석을 맞춰 몬스터에게 대경직을 유발했습니다! 행동 게이지가 초기화되며 7초간 무력화됩니다.`, '#c98534');
-                // Verified rock-impact audio will be added when a labelled event is available.
-                engine.shakeWeapon(w.index, '#c98534');
-                return;
-            }
-
             // Gather lifepowder if empty
             if ((!w.lifepowders || w.lifepowders === 0) && engine.random() < 0.4 && engine.tryConsumeCombatGather?.()) {
                 const find = HuntHunterTurnExecutor.combatGatherFind(engine.random, w.personality);
@@ -362,6 +319,7 @@ class HuntHunterTurnExecutor {
                 w.gatheredMaterials.push({ kind: find.kind, item: find.item });
                 if (find.kind === 'herb') w.lifepowders = 1;
                 const flashReward = HuntHunterTurnExecutor.applyGatherReward(w, find);
+                engine.perkRuntime?.trigger?.(w, 'gather', { find });
                 engine.updateHunterItemUI?.(w);
                 w.atb = 60;
                 w.isGathering = true;
@@ -375,11 +333,12 @@ class HuntHunterTurnExecutor {
             }
         }
 
-        // Self potion recovery (몬린이는 80% 이하일 때 95% 확률로 조기/강박적 복용)
-        const hpThreshold = w.personality === 'newbie' ? 0.80 : 0.55;
-        const currentHealProb = w.personality === 'newbie' ? 0.95 : healProb;
-        if (w.hp <= w.maxHp * hpThreshold && w.potions > 0 && engine.random() < currentHealProb) {
-            if (!engine.perkRuntime || engine.perkRuntime.shouldConsumeItem(w)) w.potions--;
+        const potionPolicy = HuntHunterTurnExecutor.decisionPolicy()?.potionPolicy(w, engine)
+            || { threshold: .55, chance: .65 };
+        const potionChance = Math.max(.05, Math.min(.98,
+            Number(potionPolicy.chance || 0) + Number(w.perkModifiers?.healBias || 0)));
+        if (w.hp <= w.maxHp * potionPolicy.threshold && w.potions > 0 && engine.random() < potionChance) {
+            if (!engine.perkRuntime || engine.perkRuntime.shouldConsumeItem(w, 'potions')) w.potions--;
             w.itemDuration = engine.perkRuntime ? engine.perkRuntime.itemDuration(w, 5) : 5;
             const baseHeal = Math.round(w.maxHp * 0.60);
             const healAmount = engine.perkRuntime ? engine.perkRuntime.healAmount(w, baseHeal) : baseHeal;
@@ -643,6 +602,7 @@ class HuntHunterTurnExecutor {
             if (engine.perkRuntime) currentCombo.durationTicks = engine.perkRuntime.actionDuration(w, currentCombo, currentCombo.durationTicks);
             if (engine.actionStateMachine) engine.actionStateMachine.begin(w, currentCombo);
             else w.attackDuration = currentCombo.durationTicks;
+            engine.beginHunterBeatAction?.(w, currentCombo);
             if (w.id === 'great_sword') w.greatSwordChargeLocked = true;
             if (!continuingGreatSwordCharge) {
                 HuntHunterTurnExecutor.spendActionAtb(w, currentCombo, actionStartingAtb, beganInDemonMode);
@@ -814,6 +774,7 @@ class HuntHunterTurnExecutor {
             }
 
             if (forceUntargetableWhiff) {
+                engine.perkRuntime?.onAttackMiss?.(w, currentCombo);
                 engine.weaponMechanics?.onAttackMiss?.(engine, w, currentCombo);
                 engine.playSFX(currentCombo.audioCue || 'slash_light', null, {
                     weaponId: w.id,
@@ -839,6 +800,7 @@ class HuntHunterTurnExecutor {
             }
 
             if (engine.monsterFlightRuntime?.shouldEvade(engine, w, currentCombo)) {
+                engine.perkRuntime?.onAttackMiss?.(w, currentCombo);
                 engine.weaponMechanics?.onAttackMiss?.(engine, w, currentCombo);
                 engine.addLog(`🪽 [공중 회피] ${engine.selectedMonster.nameKO}이(가) 비행 기동으로 ${w.hunterName}의 공격을 피했습니다!`, '#8fdcff');
                 engine.showSkillBubble('monster', '🪽 공중 회피!');
@@ -849,9 +811,11 @@ class HuntHunterTurnExecutor {
                 return;
             }
 
-            const hitChance = Math.min(0.99,
-                HuntHunterTurnExecutor.BASE_HIT_CHANCE + Number(w.perkModifiers?.hitChance || 0));
+            const baseHitChance = HuntHunterTurnExecutor.personalityProfiles()?.chance(w, 'hit')
+                ?? Math.min(0.99, HuntHunterTurnExecutor.BASE_HIT_CHANCE + Number(w.perkModifiers?.hitChance || 0));
+            const hitChance = engine.perkRuntime?.hitChance?.(w, baseHitChance) ?? baseHitChance;
             if (engine.random() >= hitChance) {
+                engine.perkRuntime?.onAttackMiss?.(w, currentCombo);
                 engine.weaponMechanics?.onAttackMiss?.(engine, w, currentCombo);
                 engine.addLog(`💨 [빗나감] ${w.hunterName}의 ${presentation?.label || currentCombo.name}이(가) 빗나갔습니다!`, '#a9b8c7');
                 engine.showSkillBubble(w.index, '💨 빗나감!');
@@ -870,6 +834,12 @@ class HuntHunterTurnExecutor {
             }
 
             engine.weaponMechanics?.onConfirmedHit?.(engine, w, currentCombo);
+            damage = engine.resolveSleepWakeDamage?.(damage, {
+                direct: true,
+                groupKey: engine.battleTime,
+                hunterIndex: w.index,
+                actionId: currentCombo.id
+            }) ?? damage;
             const partResult = engine.recordMonsterPartDamage ? engine.recordMonsterPartDamage(w, damage, currentCombo) : null;
             const bounce = partResult && typeof HuntWeaponInstanceCatalog !== 'undefined'
                 ? HuntWeaponInstanceCatalog.bounceCheck(w, partResult.hitzone, currentCombo)
@@ -908,9 +878,6 @@ class HuntHunterTurnExecutor {
             if (currentCombo.stun && currentCombo.stun > 0) {
                 if (engine.addMonsterStun) engine.addMonsterStun(w, currentCombo.stun, partResult);
             }
-
-            // Check monster knockdown milestones
-            engine.checkMonsterKnockdown();
 
             // Weapon sounds are semantic layered cues, never unrelated chat signatures.
             engine.playSFX(currentCombo.audioCue || 'slash_light', null, {

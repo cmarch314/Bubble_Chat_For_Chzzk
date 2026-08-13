@@ -5,6 +5,42 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const HuntMonsterTurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
+const HuntCombatAnimator = require('../js/effects/hunt/HuntCombatAnimator.js');
+const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
+
+const rightDownKnockback = HuntCombatAnimator.knockbackVectorFromRects(
+    { left: 100, top: 100, width: 100, height: 100 },
+    { left: 300, top: 300, width: 100, height: 100 },
+    -1
+);
+assert.ok(rightDownKnockback.x > 0 && rightDownKnockback.y > 0,
+    'a hunter below-right of the monster must tumble down and right');
+assert.ok(Math.abs(Math.hypot(rightDownKnockback.x, rightDownKnockback.y) - 1) < 0.0001,
+    'measured knockback must be a normalized two-dimensional collision vector');
+const leftDownKnockback = HuntCombatAnimator.knockbackVectorFromRects(
+    { left: 400, top: 100, width: 100, height: 100 },
+    { left: 100, top: 260, width: 100, height: 100 },
+    1
+);
+assert.ok(leftDownKnockback.x < 0 && leftDownKnockback.y > 0,
+    'a hunter below-left of the monster must tumble down and left');
+
+for (const kind of ['roar', 'tremor', 'wind']) {
+    const hunter = {
+        index: 0, status: 'alive', atb: 75,
+        counterInvulnerabilityTicks: 10
+    };
+    let interrupted = 0;
+    const engine = {
+        applyHunterInterference: HuntEngine.prototype.applyHunterInterference,
+        callbacks: { onTriggerHunterInterference: () => { interrupted++; } }
+    };
+    assert.strictEqual(engine.applyHunterInterference(hunter, kind, 'large'), false);
+    assert.strictEqual(hunter.atb, 75);
+    assert.strictEqual(hunter.interference, undefined);
+    assert.strictEqual(interrupted, 0,
+        `counter protection must block delayed ${kind} before runtime or visual state changes`);
+}
 
 for (const pattern of [
     { type: 'roar', tags: ['roar'], name: '포효[대]' },
@@ -61,6 +97,13 @@ assert.strictEqual(
     'an authored incoming direction must throw the weapon in the opposite direction'
 );
 assert.strictEqual(HuntMonsterTurnExecutor.isHunterHitRecovering({ hitDuration: 1 }), true);
+{
+    const hunter = {};
+    assert.strictEqual(HuntMonsterTurnExecutor.grantCounterInvulnerability(hunter), 10);
+    assert.strictEqual(HuntMonsterTurnExecutor.isHunterImpactImmune(hunter), true,
+        'a successful counter must ignore every follow-up judgment for one second');
+    assert.strictEqual(hunter.counterInvulnerabilityStartedThisTick, true);
+}
 assert.strictEqual(
     HuntMonsterTurnExecutor.isHunterHitRecovering({ status: 'stunned', hitDuration: 15 }),
     false,
@@ -77,6 +120,18 @@ assert.deepStrictEqual(
     }, { targetMode: 'random-live' }, []),
     [0],
     'a delayed hazard must retain a stunned hunter as a valid vulnerable target'
+);
+assert.deepStrictEqual(
+    HuntMonsterTurnExecutor.resolveImpactEventTargetIndices({
+        selectedWeapons: [
+            { index: 0, status: 'alive', hitDuration: 15 },
+            { index: 1, status: 'alive', hitDuration: 15 }
+        ],
+        perkRuntime: null,
+        random: () => 0
+    }, { targetMode: 'random-live' }, []),
+    [0],
+    'hit recovery must not remove a hunter from targeting or alter the attack path'
 );
 
 const tickPath = path.resolve(__dirname, '../js/effects/hunt/HuntBattleTickExecutor.js');
@@ -150,6 +205,35 @@ function recoveryEngine(durationTicks, pendingStunDuration = 0) {
 }
 
 {
+    const { engine, hunter } = recoveryEngine(0);
+    hunter.counterInvulnerabilityTicks = 10;
+    hunter.counterInvulnerabilityStartedThisTick = true;
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(hunter.counterInvulnerabilityTicks, 10,
+        'the counter success tick must not consume its first protection tick');
+    for (let tick = 0; tick < 10; tick++) context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(hunter.counterInvulnerabilityTicks, 0,
+        'counter protection must expire after exactly one second at 10 ticks per second');
+}
+
+{
+    const { engine, hunter, actions } = recoveryEngine(15);
+    hunter.hitStartedThisTick = true;
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(hunter.hitDuration, 15,
+        'the impact commit tick must not consume the first recovery tick');
+    assert.strictEqual(hunter.hitStartedThisTick, false);
+    assert.strictEqual(actions(), 0);
+    for (let tick = 0; tick < 14; tick++) context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(hunter.hitDuration, 1,
+        'a boundary-timed second hit must still see the hunter as invulnerable before visual return');
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(hunter.hitDuration, 0);
+    assert.strictEqual(actions(), 1,
+        'the hunter may act only after the complete authored recovery window');
+}
+
+{
     const { engine, hunter, actions } = recoveryEngine(15, 50);
     for (let tick = 0; tick < 15; tick++) context.HuntBattleTickExecutor.execute(engine);
     assert.strictEqual(hunter.status, 'stunned', 'stun must begin only after the hunter stands up');
@@ -165,14 +249,52 @@ const turnSource = fs.readFileSync(
 assert.match(turnSource, /isHunterHitRecovering\(target\)[\s\S]*?result: 'invulnerable'[\s\S]*?return;/,
     'repeat hits must silently pass through a recovering hunter before damage/status resolution');
 assert.match(turnSource,
-    /clearHunterInterference\?\.\(target, 'hit'\)[\s\S]*?actionMachine\.cancel\(target, 'hitstun'\)[\s\S]*?target\.hitDuration = hitReaction\.durationTicks/,
+    /isHunterImpactImmune\(target\)[\s\S]*?result: 'invulnerable'[\s\S]*?return;/,
+    'the shared impact gate must reject follow-up judgments during counter protection');
+assert.match(turnSource,
+    /if \(isGreatSwordTackling\)[\s\S]*?grantCounterInvulnerability\(target\)/,
+    'a successful Great Sword tackle must open the shared one-second counter protection window');
+assert.doesNotMatch(turnSource,
+    /isPerfectGuard = true;[\s\S]{0,180}counterProtected = true/,
+    'perfect guard and ordinary guards must not receive counter invulnerability');
+assert.match(turnSource,
+    /clearHunterInterference\?\.\(target, 'hit'\)[\s\S]*?actionMachine\.cancel\(target, 'hitstun'\)[\s\S]*?target\.hitDuration = hitReaction\.durationTicks[\s\S]*?target\.hitStartedThisTick = true/,
     'ordinary damaging hits must replace roar, tremor, and wind reactions before knockback');
 const valstraxSource = fs.readFileSync(
     path.resolve(__dirname, '../js/effects/hunt/HuntValstraxExecutor.js'),
     'utf8'
 );
 assert.match(valstraxSource,
-    /clearHunterInterference\?\.\(target, 'hit'\)[\s\S]*?target\.hitDuration = hitReaction\.durationTicks/,
+    /clearHunterInterference\?\.\(target, 'hit'\)[\s\S]*?target\.hitDuration = hitReaction\.durationTicks[\s\S]*?target\.hitStartedThisTick = true/,
     'Valstrax direct impacts must obey the same interference-to-hit priority');
+const combatAnimatorSource = fs.readFileSync(
+    path.resolve(__dirname, '../js/effects/hunt/HuntCombatAnimator.js'),
+    'utf8'
+);
+assert.match(combatAnimatorSource,
+    /restoreBorder\(wIndex, w\)[\s\S]*?Number\(w\.hitDuration \|\| 0\) > 0\) return/,
+    'resource and buff cleanup must not erase a live hunter hit reaction');
+assert.match(combatAnimatorSource,
+    /triggerHitAnimation\(idx, w, reaction = \{\}\)[\s\S]*?layer\.animate\(keyframes,[\s\S]*?this\.activeWeaponAnimations\.set\(layer, animation\)/,
+    'live hunter hit reactions must own the weapon transform through WAAPI instead of competing CSS');
+assert.match(combatAnimatorSource,
+    /triggerHitAnimation\(idx, w, reaction = \{\}\)[\s\S]*?classList\.remove\('hunter-interference-active', 'roar-stunned'\)[\s\S]*?hunter-interference-overlay/,
+    'a damaging hit must synchronously remove tremor, wind, and roar CSS before starting knockback');
+assert.match(combatAnimatorSource,
+    /cancelHitAnimation\(idx\)[\s\S]*?this\.cancelWeaponAnimation\(layer\)/,
+    'hit recovery cleanup must cancel the owned WAAPI reaction before restoring the home pose');
+assert.match(combatAnimatorSource,
+    /profile\.durationMs = Math\.min\(actionDurationMs, profile\.durationMs\)/,
+    'BEAT action occupancy must not stretch an approved weapon motion into slow motion');
+assert.match(combatAnimatorSource,
+    /beatVisualTickMs = profile\.durationMs \/ Math\.max\(1, Number\(actionOrName\.durationTicks\)\)/,
+    'compressed weapon motion must keep authored hit moments synchronized to its visible timeline');
+const huntEffectSource = fs.readFileSync(
+    path.resolve(__dirname, '../js/effects/HuntEffect.js'),
+    'utf8'
+);
+assert.match(huntEffectSource,
+    /selectedWeapons\.find\(candidate => candidate\?\.index === idx\)/,
+    'live callbacks must resolve stable hunter indexes instead of assuming array order');
 
 console.log('[test] Hunter weak/strong hit recovery and state priority passed.');

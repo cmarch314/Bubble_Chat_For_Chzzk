@@ -10335,6 +10335,51 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
           0
         ]
       ]
+    },
+    {
+      "label": "diablos knockdown_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "knockdown_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 2058782943,
+      "sourceId": 967940364,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_096_967940364.mp3",
+          0.68,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos knockdown_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "knockdown_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 2058782943,
+      "sourceId": 35060887,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_006_35060887.mp3",
+          0.68,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos knockdown_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "knockdown_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 2058782943,
+      "sourceId": 33504928,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_005_33504928.mp3",
+          0.68,
+          0
+        ]
+      ]
     }
   ],
   "diablos:trap": [
@@ -10410,6 +10455,36 @@ const HUNT_WORLD_MONSTER_REVIEW_ROUTES = Object.freeze({
       "layers": [
         [
           "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_039_385764890.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 1757505335,
+      "sourceId": 204946478,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_017_204946478.mp3",
+          0.62,
+          0
+        ]
+      ]
+    },
+    {
+      "label": "diablos small_flinch_vocal",
+      "evidence": "world-user-audition-event-group",
+      "semanticTag": "small_flinch_vocal",
+      "sourceBank": "em007_vo",
+      "eventId": 1757505335,
+      "sourceId": 36455104,
+      "layers": [
+        [
+          "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_007_36455104.mp3",
           0.62,
           0
         ]
@@ -15789,6 +15864,51 @@ const HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = Object.freeze([
     "eventId": 1902115382,
     "sourceId": 706235384,
     "path": "local_assets/monster_hunter/world/monster/em001/em001_vo_nbnk_089_706235384.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em007_vo",
+    "eventId": 1757505335,
+    "sourceId": 204946478,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_017_204946478.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:flinch",
+    "tag": "small_flinch_vocal",
+    "bank": "em007_vo",
+    "eventId": 1757505335,
+    "sourceId": 36455104,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_007_36455104.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:knockdown",
+    "tag": "knockdown_vocal",
+    "bank": "em007_vo",
+    "eventId": 2058782943,
+    "sourceId": 967940364,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_096_967940364.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:knockdown",
+    "tag": "knockdown_vocal",
+    "bank": "em007_vo",
+    "eventId": 2058782943,
+    "sourceId": 35060887,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_006_35060887.mp3"
+  },
+  {
+    "monsterId": "diablos",
+    "routeKey": "diablos:knockdown",
+    "tag": "knockdown_vocal",
+    "bank": "em007_vo",
+    "eventId": 2058782943,
+    "sourceId": 33504928,
+    "path": "local_assets/monster_hunter/world/monster/em007/em007_vo_nbnk_005_33504928.mp3"
   }
 ]);
 const HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED = Object.freeze([

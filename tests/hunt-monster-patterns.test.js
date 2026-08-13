@@ -4,6 +4,7 @@ const HuntMonsterPatternSelector = require('../js/effects/hunt/HuntMonsterPatter
 const HuntMonsterTurnExecutor = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
 const HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
 global.HUNT_MONSTER_PATTERN_OVERRIDES = require('../js/effects/hunt/HuntMonsterProfiles.js');
+global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = require('../js/effects/hunt/data/MonsterPatternMotionOverrides.generated.js');
 global.window = global;
 require('../js/effects/hunt/data/WildsMonsterBehavior.generated.js');
 require('../js/effects/hunt/data/RiseMonsterBehavior.generated.js');
@@ -173,7 +174,7 @@ assert.deepStrictEqual(curated.find(pattern => pattern.id === 'rathalos.backstep
         'Rathalos glide must remain distinct from a target-contact Diablos charge');
     assert.strictEqual(glide.targeting.mode, 'screen-sweep');
     assert.deepStrictEqual([glide.minTargets, glide.maxTargets], [4, 4]);
-    assert.deepStrictEqual(glide.impactTimeline.map(event => event.atTicks), [12, 16, 20, 24],
+    assert.deepStrictEqual(glide.impactTimeline.map(event => event.atTicks), [8, 12, 16, 20],
         'the non-DOM fallback must reserve the off-screen entry and exit portions of the crossing');
     assert.strictEqual(glide.animationProfile, 'aerial-charge-cross');
 }
@@ -212,6 +213,39 @@ for (const monsterId of ['gore_magala', 'seregios', 'mizutsune', 'lagiacrus']) {
     assert.ok(extracted.every(pattern => pattern.sourceActionClass && pattern.evidence === 'installed-game-action-class'));
 }
 const pilotCatalog = HuntMonsterPatternCatalog.build({});
+for (const [monsterId, patterns] of Object.entries(pilotCatalog)) {
+    for (const pattern of patterns) {
+        if (!Array.isArray(pattern.motion) || !pattern.motion.length) continue;
+        const totalTicks = pattern.motion.reduce((sum, beat) => sum + beat.ticks, 0);
+        assert.strictEqual(pattern.movement?.ticks, totalTicks,
+            `${monsterId}/${pattern.id}: live movement must use the edited motion clock`);
+        assert.strictEqual(pattern.animationDurationMs, totalTicks * 100,
+            `${monsterId}/${pattern.id}: animation duration must use the edited motion clock`);
+        const hitTicks = [];
+        pattern.motion.reduce((elapsed, beat) => {
+            if (beat.hit) hitTicks.push(elapsed);
+            return elapsed + beat.ticks;
+        }, 0);
+        if (hitTicks.length) {
+            assert.deepStrictEqual(pattern.impactTimeline.map(event => event.atTicks), hitTicks,
+                `${monsterId}/${pattern.id}: damage must occur at edited HIT beat boundaries`);
+        }
+    }
+}
+const savedTailWhip = pilotCatalog.nargacuga.find(pattern =>
+    pattern.id === 'nargacuga.tail_whip');
+assert.deepStrictEqual(savedTailWhip.motion.map(beat => beat.beat),
+    ['telegraph', 'action-1', 'impact-1', 'action-2'],
+    'tail whip editor phases must be the authored live animation phases');
+const savedTailWhipTicks = savedTailWhip.motion.map(beat => beat.ticks);
+const savedTailWhipTotal = savedTailWhipTicks.reduce((sum, ticks) => sum + ticks, 0);
+assert.strictEqual(savedTailWhip.movement.ticks, savedTailWhipTotal,
+    'saved tail whip editor beats must rebuild the live movement duration');
+assert.strictEqual(savedTailWhip.animationDurationMs, savedTailWhipTotal * 100,
+    'saved tail whip editor beats must rebuild the live animation duration');
+assert.deepStrictEqual(savedTailWhip.impactTimeline.map(event => event.atTicks),
+    [savedTailWhipTicks[0] + savedTailWhipTicks[1]],
+    'tail whip damage must occur at the edited impact beat boundary');
 for (const monsterId of ['bazelgeuse', 'chameleos', 'rathian', 'rathalos', 'diablos']) {
     const patterns = pilotCatalog[monsterId];
     assert.ok(patterns.length >= 7, `${monsterId} needs a recognizable pilot kit`);
@@ -307,9 +341,9 @@ assert.deepStrictEqual(
 );
 assert.strictEqual(carpet.activeTicks, 120);
 assert.strictEqual(
-    HuntAtbConfig.scaleVisualDurationMs(carpet.animationDurationMs),
+    carpet.animationDurationMs,
     12000,
-    'the bombing sequence must remain twelve seconds after the global monster tempo scale'
+    'the approved BEAT clock must keep the bombing sequence at twelve seconds without a second tempo scale'
 );
 assert.strictEqual(carpet.cooldownTicks, 450);
 assert.deepStrictEqual(
@@ -343,12 +377,12 @@ assert.deepStrictEqual(
         .filter(pattern => pattern.id !== 'bazelgeuse.carpet_bombing')
         .map(pattern => [pattern.id, HuntMonsterTurnExecutor.impactDelayTicks(pattern)])),
     {
-        'bazelgeuse.roar': 17,
-        'bazelgeuse.bite': 14,
-        'bazelgeuse.charge': 19,
-        'bazelgeuse.side_tackle': 23,
-        'bazelgeuse.tail_sweep': 23,
-        'bazelgeuse.body_press': 22,
+        'bazelgeuse.roar': 15,
+        'bazelgeuse.bite': 37,
+        'bazelgeuse.charge': 74,
+        'bazelgeuse.side_tackle': 62,
+        'bazelgeuse.tail_sweep': 62,
+        'bazelgeuse.body_press': 59,
         'bazelgeuse.breath': 28
     },
     'every reviewed Bazelgeuse action must resolve on its authored visual contact frame'
@@ -403,8 +437,9 @@ assert.notStrictEqual(new HuntMonsterPatternSelector(() => .16).select(
 'each broken wing must lower the carpet-bomb selection chance by five percentage points');
 const brokenEngine = { monsterPartState: [{ id: 'head', kind: 'head', broken: true }] };
 const diablosBurrowEnter = pilotCatalog.diablos.find(pattern => pattern.id === 'diablos.burrow_enter');
-assert.ok(diablosBurrowEnter?.tags.includes('burrow-enter'), 'Diablos must spend a separate action entering the ground');
-assert.strictEqual(diablosBurrowEnter.damageRatio, 0, 'entering the ground must not deal the ambush hit');
+assert.ok(diablosBurrowEnter?.tags.includes('burrow-combo'), 'Diablos burrow and eruption must be one authored action');
+assert.strictEqual(diablosBurrowEnter.damageRatio, 0.46, 'the merged action must deal its damage on the eruption beat');
+assert.strictEqual(diablosBurrowEnter.followUp, null, 'the merged action must not enqueue a second ATB turn');
 const brokenHornEngine = { monsterPartState: [{ id: 'left-horn', kind: 'left-horn', broken: true }] };
 assert.strictEqual(HuntMonsterTurnExecutor.brokenPartDamageModifier(
     brokenHornEngine,

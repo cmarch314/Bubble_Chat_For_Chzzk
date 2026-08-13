@@ -79,15 +79,6 @@ class HuntMonsterRules {
         return `${name}의 ${materials[index]}`;
     }
 
-    static crossedKnockdownThresholds(hp, maxHp, triggered, monsterId = '') {
-        if (monsterId.includes('valstrax') || hp <= 0 || maxHp <= 0) return [];
-        const ratio = (hp / maxHp) * 100;
-        return [80, 60, 40, 20].filter(threshold => ratio <= threshold && !triggered[threshold]);
-    }
-
-    static crossedKnockdownThreshold(hp, maxHp, triggered, monsterId = '') {
-        return this.crossedKnockdownThresholds(hp, maxHp, triggered, monsterId)[0] || null;
-    }
 }
 
 if (typeof module !== 'undefined' && module.exports) module.exports = HuntMonsterRules;

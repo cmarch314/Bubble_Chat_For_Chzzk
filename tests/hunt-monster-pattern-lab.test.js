@@ -6,6 +6,12 @@ const path = require('path');
 
 const html = fs.readFileSync(path.resolve(__dirname, 'fixtures/hunt-monster-pattern-lab.html'), 'utf8');
 
+assert.match(html, /distinctPasses:pattern\.targeting\?\.distinctPasses===true/,
+    'the preview must preserve authored distinct multi-lane volleys instead of collapsing them to one target');
+
+assert.match(html, /function authoredPattern\(patternId\)/,
+    'the unified preview must resolve authored follow-up BEAT motion instead of trusting a stale server adapter');
+
 assert.match(html, /get\('embed'\) !== '1'/,
     'the retired standalone pattern lab must only run as the unified audio review iframe');
 assert.match(html, /location\.replace\('http:\/\/127\.0\.0\.1:17930\/'\)/,
@@ -111,10 +117,12 @@ assert.match(html, /HUNT_RELEASED_MONSTER_DATA/,
     'the lab must derive its monster dropdown from the reviewed release catalog');
 assert.match(html, /HUNT_MONSTER_PATTERN_OVERRIDES\[monster\.id\]/,
     'pattern buttons must be generated from live authored monster data');
-assert.match(html, /HuntMonsterActionPolicy\.resolveTargeting/,
+assert.match(html, /HuntMonsterActionPolicy\.resolveTargetScenario/,
     'automatic and manual targets must use the shared target policy');
 assert.match(html, /runtimeResolvedImpactTimeline/,
     'multi-impact animations must receive the same resolved timeline used in combat');
+assert.match(html, /pattern\.runtimePrimaryTargetIndex=finalPrimary/,
+    'the preview must keep its selected primary target separate from area judgment recipients');
 assert.match(html, /pattern\.flightTransition==='land'/,
     'pattern lab must reproduce authored landing transitions after landing actions');
 assert.match(html, /applyState\('normal',true\)/,
@@ -127,9 +135,56 @@ assert.match(html, /자동→\$\{linked\+1\}/,
 assert.match(html, /하단 15%/);
 assert.match(html, /bubblechat:pattern-preview/,
     'sound review must be able to preview an unsaved motion draft in the real animator');
+assert.match(html, /new URL\(document\.referrer\)\.origin/,
+    'preview readiness must return to the active loopback review-server origin, including agent-specific ports');
 assert.match(html, /embedded-preview/,
     'embedded production preview must hide its own control overlay');
 assert.match(html, /seekBeatMotion\(message\.progress\)/,
     'the embedded lab must seek the real compiled animation without applying combat damage');
+assert.match(html, /bubblechat:pattern-preview-playback/,
+    'the embedded runtime must acknowledge playback so the editor timeline follows real playback');
+assert.match(html, /!pattern\.runtimePreviewMuteAudio/,
+    'the embedded production renderer must stay silent when the review timeline owns preview audio');
+assert.match(html, /if\(!selection\.targets\.length\)/,
+    'every preview pattern must receive a safe visual target even when combat targeting resolves empty');
+assert.match(html, /bubblechat:pattern-anatomy/,
+    'the editor must be able to toggle the monster anatomy position/direction guide');
+assert.match(html, /monster-anatomy-guide/);
+assert.match(html, /part-handle/,
+    'each anatomy part must expose an interactive drag handle');
+assert.match(html, /syncAnatomyTransform/,
+    'anatomy overlays must track the live monster image transform');
+assert.match(html, /bubblechat:monster-anatomy-edit/,
+    'dragged anatomy coordinates must be persisted through the review editor');
+assert.match(html, /className=['"]motion-gizmo['"]/,
+    'design mode must expose direct move, scale, skew and rotation handles');
+assert.match(html, /bubblechat:pattern-preview-edit/,
+    'gizmo changes must report the selected BEAT transform to the editor');
+assert.match(html, /gizmo-origin/,
+    'the design gizmo must expose a draggable rotation pivot');
+assert.match(html, /kind==='scale-x'/);
+assert.match(html, /kind==='scale-y'/);
+assert.match(html, /kind==='skew-x'/);
+assert.match(html, /kind==='skew-y'/,
+    'move, axis scale and axis skew handles must be independently draggable');
+assert.match(html, /previewScenario\.forcedImpactTargets/,
+    'the lab must render explicit per-impact design targets through the shared resolver');
+assert.match(html, /ANATOMY_LABELS=\{head:'머리'/,
+    'head, limb, wing, and tail markers must use readable labels');
+
+assert.match(html, /const representativePart=pattern\.reactionSize==='large'/,
+    'grouped small/large break previews must resolve a concrete anatomy part');
+assert.match(html, /triggerMonsterPartBreakReaction\(visualType,durationTicks,representativePart\)/,
+    'grouped break previews must pass that part into the material split visual');
+assert.doesNotMatch(html, /triggerMonsterPartBreakReaction\(visualType,durationTicks,null\)/,
+    'grouped break previews must never silently suppress the part-material split visual');
+assert.match(html, /kind==='tail-sever'[\s\S]*?playBeatMotion\(/,
+    'tail-sever playback must dispatch its authored BEAT graph instead of returning silently');
+assert.match(html, /kind==='sleeping'[\s\S]*?triggerMonsterSleepAnim\(\{motion:pattern\.motion\}\)/,
+    'sleep playback must animate collapse, held sleep and wake instead of applying the final sleeping pose immediately');
+assert.match(html, /function resetPatternPreviewPose\(\)\{[\s\S]*?clearPendingReaction\(\);[\s\S]*?clearMonsterAnimations\('pattern-selection'\)/,
+    'selecting another pattern must cancel reaction timers before resetting the monster pose');
+assert.match(html, /if\(message\.resetOnly\)\{[\s\S]*?return;/,
+    'pattern selection reset must not instantiate or play the newly selected motion graph');
 
 console.log('[test] Interactive monster pattern lab contract passed.');

@@ -19,8 +19,203 @@ const HUNT_MONSTER_RELEASE_MANIFEST_DATA = huntPatternDependency(
     './data/MonsterReleaseManifest.generated.js',
     '../js/effects/hunt/data/MonsterReleaseManifest.generated.js'
 );
+const HUNT_BEAT_V2_ADAPTER = huntPatternDependency(
+    globalThis.HuntBeatV2Adapter,
+    './HuntBeatV2Adapter.js',
+    '../js/effects/hunt/HuntBeatV2Adapter.js'
+);
 
 class HuntMonsterPatternCatalog {
+    static legacyTimingBeats(pattern = {}) {
+        const animationTicks = Math.max(1, Math.round(Number(pattern.animationDurationMs || 0) / 100));
+        const impacts = (Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : [])
+            .map((event, index) => ({ event, index, tick: Math.round(Number(event?.atTicks)) }))
+            .filter(item => Number.isFinite(item.tick) && item.tick >= 0)
+            .sort((a, b) => a.tick - b.tick || a.index - b.index);
+        const durationTicks = Math.max(1, Math.round(Number(pattern.movement?.ticks) || 0),
+            animationTicks, ...impacts.map(item => item.tick + 1));
+        const boundaries = new Set([0, durationTicks]);
+        const windupEnd = Math.max(0, Math.min(durationTicks, Math.round(Number(pattern.windupTicks) || 0)));
+        if (windupEnd > 0 && windupEnd < durationTicks) boundaries.add(windupEnd);
+        impacts.forEach(item => {
+            if (item.tick < durationTicks) boundaries.add(item.tick);
+            boundaries.add(Math.min(durationTicks, item.tick + 1));
+        });
+        const points = [...boundaries].sort((a, b) => a - b);
+        let actionIndex = 0;
+        return points.slice(0, -1).map((startTicks, index) => {
+            const endTicks = points[index + 1];
+            const impact = impacts.find(item => item.tick === startTicks);
+            return {
+                beat: impact ? `impact-${impact.index + 1}`
+                    : startTicks === 0 && windupEnd > 0 ? 'telegraph' : `action-${++actionIndex}`,
+                ticks: endTicks - startTicks,
+                hit: Boolean(impact)
+            };
+        }).filter(beat => beat.ticks > 0);
+    }
+
+    static synchronizeMotionTiming(pattern = {}) {
+        if (!Array.isArray(pattern.motion) || !pattern.motion.length) return pattern;
+        let elapsed = 0;
+        const hitTicks = [];
+        const motion = pattern.motion.map((beat, index) => {
+            const ticks = Math.max(1, Math.round(Number(beat?.ticks) || 1));
+            if (beat?.hit) hitTicks.push({ beat, atTicks: elapsed + Math.max(0,
+                Math.min(ticks - 1, Math.round(Number(beat.hitOffsetTicks) || 0))), index: hitTicks.length });
+            elapsed += ticks;
+            return { ...beat, ticks };
+        });
+        const authoredImpacts = Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : [];
+        const judgmentGroups = new Map();
+        let judgmentElapsed = 0;
+        for (const beat of motion) {
+            for (const judgment of Array.isArray(beat.judgments) ? beat.judgments : []) {
+                const group = String(judgment.group || judgment.id || `${beat.beat}-impact`);
+                const item = judgmentGroups.get(group) || {
+                    atTicks: judgmentElapsed + Math.max(0, Number(judgment.offsetTicks) || 0), judgments: []
+                };
+                item.atTicks = Math.min(item.atTicks,
+                    judgmentElapsed + Math.max(0, Number(judgment.offsetTicks) || 0));
+                item.judgments.push(judgment); judgmentGroups.set(group, item);
+            }
+            judgmentElapsed += beat.ticks;
+        }
+        const targetMode = target => ({ primary: 'judgment-primary', left: 'judgment-left',
+            right: 'judgment-right', pair: 'runtime-pair', 'pair-left': 'runtime-pair-left',
+            'pair-right': 'runtime-pair-right', 'primary-adjacent': 'judgment-primary-adjacent',
+            all: 'judgment-all' }[target] || 'judgment-primary');
+        const damagePercents = [...judgmentGroups.values()].flatMap(group => group.judgments)
+            .filter(item => item.kind === 'damage')
+            .map(item => Number(item.damagePercent)).filter(Number.isFinite);
+        const runtimeDamageRatio = Number(pattern.damageRatio || 0) > 0
+            ? Number(pattern.damageRatio) : Math.max(0, ...damagePercents) / 100;
+        const judgmentTimeline = [...judgmentGroups.values()].map((group, index) => {
+            const damage = group.judgments.find(item => item.kind === 'damage');
+            const effect = group.judgments.find(item => ['roar', 'tremor', 'wind'].includes(item.kind));
+            const authority = damage || effect || group.judgments[0];
+            return {
+                // Judgment editing replaces timing/targets, not delivery metadata.
+                // Preserve projectile launch/event/source data from the authored
+                // impact or a reviewed rock volley silently stops spawning.
+                ...(typeof authoredImpacts[index] === 'object' ? authoredImpacts[index] : {}),
+                atTicks: Math.max(1, Math.round(group.atTicks)),
+                targetMode: targetMode(authority?.target),
+                damageScale: damage ? (Number.isFinite(Number(damage.damagePercent))
+                    ? (Number(damage.damagePercent) / 100) / Math.max(.0001, runtimeDamageRatio)
+                    : Number(damage.damageScale ?? 1)) : 0,
+                ...(effect ? { secondaryInterference: { kind: effect.kind,
+                    size: effect.size === 'small' ? 'small' : 'large',
+                    scope: effect.target === 'all' ? 'all' : effect.target === 'primary-adjacent' ? 'adjacent' : 'primary',
+                    directHitSupersedes: effect.directHitSupersedes === true } } : {})
+            };
+        }).sort((left, right) => left.atTicks - right.atTicks);
+        const impactTimeline = judgmentTimeline.length ? judgmentTimeline : hitTicks.length
+            ? hitTicks.map(({ beat, atTicks, index }) => ({
+                ...(typeof authoredImpacts[index] === 'number'
+                    ? { atTicks: authoredImpacts[index] }
+                    : (authoredImpacts[index] || {})),
+                atTicks,
+                ...(beat.damageScale != null ? { damageScale: Number(beat.damageScale) || 1 } : {}),
+                ...(beat.targetMode ? { targetMode: beat.targetMode } : {})
+            }))
+            : authoredImpacts;
+        const authoritativeMotion = judgmentTimeline.length ? motion.map(beat => {
+            const normalized = { ...beat, hit: false };
+            delete normalized.hitOffsetTicks;
+            delete normalized.judgmentOffsets;
+            return normalized;
+        }) : motion;
+        const synchronized = {
+            ...pattern,
+            beatV2Approved: true,
+            ...(judgmentTimeline.length && damagePercents.length ? { damageRatio: runtimeDamageRatio } : {}),
+            motion: authoritativeMotion,
+            movement: { ...(pattern.movement || {}), ticks: elapsed },
+            animationDurationMs: elapsed * 100,
+            ...((hitTicks.length || judgmentTimeline.length) ? { impactTimeline } : {}),
+            ...(judgmentTimeline.length ? { runtimeJudgmentGroups: true } : {})
+        };
+        if (HUNT_BEAT_V2_ADAPTER && Array.isArray(synchronized.motion) && synchronized.motion.length) {
+            synchronized.beatV2 = HUNT_BEAT_V2_ADAPTER.fromMonsterPattern(synchronized, {
+                monsterId: String(synchronized.id || '').split('.')[0] || null,
+                reviewStatus: 'approved'
+            });
+        }
+        return synchronized;
+    }
+
+    static synchronizeProfileMotion(pattern = {}, overrideBeats = null) {
+        if (!Array.isArray(pattern.profileMotion) || !pattern.profileMotion.length) return null;
+        const source = pattern.profileMotion.map((beat, index) => ({
+            ...beat, beat: beat.beat || `beat-${index + 1}`,
+            ticks: Math.max(1, Math.round(Number(beat.ticks) || 1)), hit: Boolean(beat.hit)
+        }));
+        const target = source.map(beat => ({
+            ...beat,
+            ...(typeof overrideBeats?.[beat.beat] === 'object' ? overrideBeats[beat.beat] : {}),
+            ticks: Math.max(1, Math.round(Number(
+                typeof overrideBeats?.[beat.beat] === 'object'
+                    ? overrideBeats[beat.beat].ticks : overrideBeats?.[beat.beat]
+            ) || beat.ticks))
+        }));
+        let elapsed = 0;
+        const impacts = [];
+        for (const beat of target) {
+            if (beat.hit) impacts.push({ atTicks: elapsed + Math.max(0,
+                Math.min(beat.ticks - 1, Math.round(Number(beat.hitOffsetTicks) || 0))) });
+            elapsed += beat.ticks;
+        }
+        const sourceTicks = source.reduce((sum, beat) => sum + beat.ticks, 0);
+        const sourceDurationMs = Math.max(1, Number(pattern.animationDurationMs) || sourceTicks * 100);
+        const synchronized = {
+            ...pattern,
+            beatV2Approved: true,
+            runtimeMotionBackend: 'keyframe-beat',
+            runtimeSourceTimingBeats: source,
+            runtimeTimingBeats: target,
+            movement: { ...(pattern.movement || {}), ticks: elapsed },
+            animationDurationMs: Math.max(1, Math.round(sourceDurationMs * elapsed / sourceTicks)),
+            impactTimeline: impacts
+        };
+        synchronized.beatV2 = HUNT_BEAT_V2_ADAPTER?.fromMonsterPattern({
+            ...synchronized,
+            motion: target
+        }, {
+            monsterId: String(synchronized.id || '').split('.')[0] || null,
+            reviewStatus: 'approved'
+        }) || null;
+        return synchronized;
+    }
+
+    static synchronizeGeneratedKeyframeMotion(pattern = {}, timingBeats = null) {
+        const beats = (Array.isArray(timingBeats) && timingBeats.length
+            ? timingBeats : this.legacyTimingBeats(pattern)).map((beat, index) => ({
+            ...beat,
+            beat: beat.beat || `beat-${index + 1}`,
+            ticks: Math.max(1, Math.round(Number(beat.ticks) || 1))
+        }));
+        if (!beats.length) return pattern;
+        const totalTicks = beats.reduce((sum, beat) => sum + beat.ticks, 0);
+        const synchronized = {
+            ...pattern,
+            beatV2Approved: true,
+            runtimeMotionBackend: 'keyframe-beat',
+            runtimeSourceTimingBeats: beats.map(beat => ({ ...beat })),
+            runtimeTimingBeats: beats.map(beat => ({ ...beat })),
+            movement: { ...(pattern.movement || {}), ticks: totalTicks },
+            animationDurationMs: totalTicks * 100
+        };
+        synchronized.beatV2 = HUNT_BEAT_V2_ADAPTER?.fromMonsterPattern({
+            ...synchronized,
+            motion: beats
+        }, {
+            monsterId: String(synchronized.id || '').split('.')[0] || null,
+            reviewStatus: 'approved'
+        }) || null;
+        return synchronized;
+    }
+
     static displayName(patternOrName, monster = {}) {
         let value = String(patternOrName?.name || patternOrName || '').trim();
         const aliases = [monster.nameKO, monster.nameEN, monster.name, monster.id]
@@ -179,6 +374,13 @@ class HuntMonsterPatternCatalog {
                             isFollowUp: true,
                             tags: pattern.followUp.tags || ['charge', 'burrow', 'burrow-emerge'],
                             impactTimeline: pattern.followUp.impactTimeline || [{ atTicks: pattern.followUp.windupTicks?.normal || 12 }],
+                            motion: Array.isArray(pattern.followUp.motion)
+                                ? pattern.followUp.motion.map(beat => ({ ...beat }))
+                                : null,
+                            animationProfile: pattern.followUp.animationProfile || null,
+                            monsterAtbCost: pattern.followUp.monsterAtbCost,
+                            interference: pattern.followUp.interference || null,
+                            secondaryInterference: pattern.followUp.secondaryInterference || null,
                             // A phased follow-up shares its parent's provenance/policy — it is the
                             // same sourced move, exposed for audio slot mapping and fingerprinting,
                             // and excluded from standalone selection by HuntMonsterPatternSelector.
@@ -244,11 +446,22 @@ class HuntMonsterPatternCatalog {
         const timingOverrides = scope.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES || {};
         Object.entries(result).forEach(([monsterId, patterns]) => {
             result[monsterId] = patterns.map(pattern => {
-                const override = timingOverrides[monsterId]?.[pattern.id];
-                if (!override?.beats) return pattern;
+                const inheritedMotion = pattern.motionOverrideSource;
+                const override = timingOverrides[monsterId]?.[pattern.id]
+                    || (inheritedMotion?.monsterId && inheritedMotion?.patternId
+                        ? timingOverrides[inheritedMotion.monsterId]?.[inheritedMotion.patternId]
+                        : null);
+                const profiled = HuntMonsterPatternCatalog.synchronizeProfileMotion(pattern, override?.beats);
+                if (profiled) return profiled;
+                if (!override?.beats) {
+                    if (Array.isArray(pattern.motion) && pattern.motion.length) {
+                        return HuntMonsterPatternCatalog.synchronizeMotionTiming(pattern);
+                    }
+                    return HuntMonsterPatternCatalog.synchronizeGeneratedKeyframeMotion(pattern);
+                }
                 const beats = override.beats;
                 if (Array.isArray(pattern.motion) && pattern.motion.length) {
-                    return {
+                    return HuntMonsterPatternCatalog.synchronizeMotionTiming({
                         ...pattern,
                         motion: pattern.motion.map((beat, index) => ({
                             ...beat,
@@ -260,18 +473,86 @@ class HuntMonsterPatternCatalog {
                                     : beats[beat.beat || `beat-${index + 1}`]
                             ) || Number(beat.ticks) || 1)
                         }))
+                    });
+                }
+                const projectedLegacyEntries = Object.entries(beats);
+                const isProjectedLegacy = projectedLegacyEntries.some(([key]) =>
+                    /^action-\d+$/.test(key) || /^impact-\d+$/.test(key));
+                if (isProjectedLegacy) {
+                    const derivedSourceTiming = HuntMonsterPatternCatalog.legacyTimingBeats(pattern);
+                    const runtimeSourceTimingBeats = derivedSourceTiming.length === projectedLegacyEntries.length
+                        ? derivedSourceTiming
+                        : projectedLegacyEntries.map(([key, value]) => ({
+                            beat: key,
+                            ticks: Math.max(1, Number(typeof value === 'object' ? value?.ticks : value) || 1),
+                            hit: /^impact-\d+$/.test(key)
+                        }));
+                    let elapsed = 0;
+                    const impactTicks = [];
+                    for (const [key, value] of projectedLegacyEntries) {
+                        const ticks = Math.max(1, Number(
+                            typeof value === 'object' ? value?.ticks : value
+                        ) || 1);
+                        const isHit = typeof value === 'object' && value.hit !== undefined
+                            ? Boolean(value.hit) : /^impact-\d+$/.test(key);
+                        if (isHit) impactTicks.push(elapsed + Math.max(0,
+                            Math.min(ticks - 1, Math.round(Number(value?.hitOffsetTicks) || 0))));
+                        elapsed += ticks;
+                    }
+                    const authoredImpacts = Array.isArray(pattern.impactTimeline)
+                        ? pattern.impactTimeline : [];
+                    const sourceTotalTicks = runtimeSourceTimingBeats
+                        .reduce((sum, beat) => sum + Math.max(1, Number(beat.ticks) || 1), 0);
+                    const sourceDurationMs = Math.max(1, Number(pattern.animationDurationMs)
+                        || Number(pattern.movement?.ticks || sourceTotalTicks) * 100);
+                    const projected = {
+                        ...pattern,
+                        runtimeMotionBackend: 'keyframe-beat',
+                        runtimeSourceTimingBeats,
+                        runtimeTimingBeats: projectedLegacyEntries.map(([key, value]) => ({
+                            ...(typeof value === 'object' ? value : {}),
+                            beat: key,
+                            ticks: Math.max(1, Number(
+                                typeof value === 'object' ? value?.ticks : value
+                            ) || 1),
+                            hit: typeof value === 'object' && value.hit !== undefined
+                                ? Boolean(value.hit) : /^impact-\d+$/.test(key),
+                            hitOffsetTicks: Math.max(0, Math.round(Number(
+                                typeof value === 'object' ? value.hitOffsetTicks : 0
+                            ) || 0))
+                        })),
+                        movement: { ...(pattern.movement || {}), ticks: elapsed },
+                        animationDurationMs: Math.max(1,
+                            Math.round(sourceDurationMs * elapsed / Math.max(1, sourceTotalTicks))),
+                        ...(beats.telegraph != null ? {
+                            windupTicks: Math.max(1, Number(
+                                typeof beats.telegraph === 'object'
+                                    ? beats.telegraph?.ticks : beats.telegraph
+                            ) || 1)
+                        } : {}),
+                        ...(impactTicks.length ? {
+                            impactTimeline: impactTicks.map((atTicks, index) => ({
+                                ...(typeof authoredImpacts[index] === 'object'
+                                    ? authoredImpacts[index] : {}),
+                                atTicks
+                            }))
+                        } : {})
                     };
+                    return HuntMonsterPatternCatalog.synchronizeGeneratedKeyframeMotion(
+                        projected,
+                        projected.runtimeTimingBeats
+                    );
                 }
                 const tickValue = value => typeof value === 'object' ? value?.ticks : value;
                 const active = tickValue(beats.start) ?? tickValue(beats.launch) ?? tickValue(beats.impact)
                     ?? Object.entries(beats).find(([key]) => key.startsWith('impact'))?.[1];
-                return {
+                return HuntMonsterPatternCatalog.synchronizeMotionTiming({
                     ...pattern,
                     ...(beats.telegraph != null ? { windupTicks: Math.max(1, Number(tickValue(beats.telegraph)) || 1) } : {}),
                     ...(active != null ? { activeTicks: Math.max(1, Number(tickValue(active)) || 1) } : {}),
                     ...(beats.recovery != null ? { recoveryTicks: Math.max(1, Number(tickValue(beats.recovery)) || 1) } : {}),
                     ...(beats.travel != null ? { movement: { ...(pattern.movement || {}), ticks: Math.max(1, Number(tickValue(beats.travel)) || 1) } } : {})
-                };
+                });
             });
         });
         return result;

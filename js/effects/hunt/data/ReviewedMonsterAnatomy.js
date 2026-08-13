@@ -53,7 +53,7 @@ const HUNT_REVIEWED_MONSTER_ANATOMY = Object.freeze({
             baseHealth: 5000,
             tailSeverable: true,
             evidence: Object.freeze({
-                breakContract: 'world+rise-kiranico:horns-back-tail',
+                breakContract: 'world-reviewed:horns-back-front-legs-tail;wings-hitzone-only',
                 hitzones: 'mhgudb-sqlite:monster-7',
                 durability: 'bubblechat-normalized',
                 sources: Object.freeze([
@@ -66,7 +66,11 @@ const HUNT_REVIEWED_MONSTER_ANATOMY = Object.freeze({
                 Object.freeze({ id: 'diablos:left-horn', kind: 'left-horn', health: 310, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .42, pierce: .20 }) }),
                 Object.freeze({ id: 'diablos:right-horn', kind: 'right-horn', health: 310, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .42, pierce: .20 }) }),
                 Object.freeze({ id: 'diablos:back', kind: 'back', health: 520, breakable: true, hitzones: Object.freeze({ slash: .23, blunt: .42, pierce: .20 }) }),
+                Object.freeze({ id: 'diablos:left-wing', kind: 'left-wing', health: 460, breakable: false, hitzones: Object.freeze({ slash: .40, blunt: .30, pierce: .60 }) }),
+                Object.freeze({ id: 'diablos:right-wing', kind: 'right-wing', health: 460, breakable: false, hitzones: Object.freeze({ slash: .40, blunt: .30, pierce: .60 }) }),
                 Object.freeze({ id: 'diablos:belly', kind: 'belly', health: 900, breakable: false, hitzones: Object.freeze({ slash: .68, blunt: .75, pierce: .40 }) }),
+                Object.freeze({ id: 'diablos:left-front-leg', kind: 'left-front-leg', health: 500, breakable: true, hitzones: Object.freeze({ slash: .35, blunt: .35, pierce: .35 }) }),
+                Object.freeze({ id: 'diablos:right-front-leg', kind: 'right-front-leg', health: 500, breakable: true, hitzones: Object.freeze({ slash: .35, blunt: .35, pierce: .35 }) }),
                 Object.freeze({ id: 'diablos:tail', kind: 'tail', health: 560, breakable: false, hitzones: Object.freeze({ slash: .50, blunt: .24, pierce: .60 }) })
             ])
         }),
@@ -75,7 +79,7 @@ const HUNT_REVIEWED_MONSTER_ANATOMY = Object.freeze({
             baseHealth: 5400,
             tailSeverable: true,
             evidence: Object.freeze({
-                breakContract: 'world-variant:horns-back-tail',
+                breakContract: 'world-reviewed-variant:horns-back-front-legs-tail;wings-hitzone-only',
                 hitzones: 'diablos-family-reviewed',
                 durability: 'bubblechat-normalized',
                 sources: Object.freeze([
@@ -87,7 +91,11 @@ const HUNT_REVIEWED_MONSTER_ANATOMY = Object.freeze({
                 Object.freeze({ id: 'black_diablos:left-horn', kind: 'left-horn', health: 335, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .42, pierce: .20 }) }),
                 Object.freeze({ id: 'black_diablos:right-horn', kind: 'right-horn', health: 335, breakable: true, hitzones: Object.freeze({ slash: .24, blunt: .42, pierce: .20 }) }),
                 Object.freeze({ id: 'black_diablos:back', kind: 'back', health: 560, breakable: true, hitzones: Object.freeze({ slash: .23, blunt: .42, pierce: .20 }) }),
+                Object.freeze({ id: 'black_diablos:left-wing', kind: 'left-wing', health: 500, breakable: false, hitzones: Object.freeze({ slash: .40, blunt: .30, pierce: .60 }) }),
+                Object.freeze({ id: 'black_diablos:right-wing', kind: 'right-wing', health: 500, breakable: false, hitzones: Object.freeze({ slash: .40, blunt: .30, pierce: .60 }) }),
                 Object.freeze({ id: 'black_diablos:belly', kind: 'belly', health: 960, breakable: false, hitzones: Object.freeze({ slash: .68, blunt: .75, pierce: .40 }) }),
+                Object.freeze({ id: 'black_diablos:left-front-leg', kind: 'left-front-leg', health: 540, breakable: true, hitzones: Object.freeze({ slash: .35, blunt: .35, pierce: .35 }) }),
+                Object.freeze({ id: 'black_diablos:right-front-leg', kind: 'right-front-leg', health: 540, breakable: true, hitzones: Object.freeze({ slash: .35, blunt: .35, pierce: .35 }) }),
                 Object.freeze({ id: 'black_diablos:tail', kind: 'tail', health: 600, breakable: false, hitzones: Object.freeze({ slash: .50, blunt: .24, pierce: .60 }) })
             ])
         }),

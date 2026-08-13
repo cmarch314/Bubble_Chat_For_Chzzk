@@ -70,12 +70,24 @@ class HuntMonsterActionPolicy {
         return [anchor, ...neighbours].slice(0, Math.max(1, Number(count || 1)));
     }
 
-    static returnAdjacentPasses(targetable, totalTargets, random = Math.random) {
-        const lane = this.adjacentLaneTargets(
-            targetable,
-            Math.min(2, Math.max(1, Number(totalTargets || 1))),
-            random
-        );
+    static returnAdjacentPasses(targetable, totalTargets, random = Math.random, primaryIndex = null) {
+        const ordered = this.orderedTargets(targetable);
+        const primary = primaryIndex !== null && primaryIndex !== '' && Number.isInteger(Number(primaryIndex))
+            ? ordered.find(target => Number(target.index) === Number(primaryIndex))
+            : null;
+        const neighbours = primary
+            ? ordered.filter(target => Math.abs(Number(target.index) - Number(primary.index)) === 1)
+            : [];
+        const partner = neighbours.length
+            ? neighbours[Math.min(neighbours.length - 1, Math.floor(random() * neighbours.length))]
+            : null;
+        const lane = (primary && partner
+            ? [primary, partner]
+            : this.adjacentLaneTargets(
+                ordered,
+                Math.min(2, Math.max(1, Number(totalTargets || 1))),
+                random
+            )).sort((left, right) => Number(left.index) - Number(right.index));
         if (!lane.length) return [[], []];
         return lane.length === 1 ? [[lane[0]], [lane[0]]] : [[lane[0]], [lane[1]]];
     }
@@ -134,6 +146,23 @@ class HuntMonsterActionPolicy {
             : -1;
         if (start < 0) start = Math.floor(random() * pairs.length) % pairs.length;
         return Array.from({ length: passes }, (_, i) => pairs[(start + i) % pairs.length]);
+    }
+
+    static adjacentPairSequentialPasses(targetable, random = Math.random, anchorIndex = null) {
+        const lanes = [...targetable].sort((a, b) => Number(a.index) - Number(b.index));
+        if (!lanes.length) return [];
+        if (lanes.length === 1) return [[lanes[0]], [lanes[0]]];
+        const pairs = lanes.slice(0, -1)
+            .map((lane, index) => [lane, lanes[index + 1]])
+            .filter(pair => Number(pair[1].index) - Number(pair[0].index) === 1);
+        if (!pairs.length) return [[lanes[0]], [lanes[0]]];
+        const anchored = Number.isInteger(anchorIndex)
+            ? pairs.filter(pair => pair.some(lane => Number(lane.index) === Number(anchorIndex)))
+            : [];
+        const candidates = anchored.length ? anchored : pairs;
+        const pair = candidates[Math.min(candidates.length - 1,
+            Math.floor(random() * candidates.length))];
+        return pair.map(target => [target]);
     }
 
     /**
@@ -247,13 +276,18 @@ class HuntMonsterActionPolicy {
             };
         }
         if (mode === 'return-adjacent-passes') {
-            const passes = this.returnAdjacentPasses(targetable, count, random);
+            const passes = this.returnAdjacentPasses(targetable, count, random, primaryIndex);
+            const tailPair = [...new Map(passes.flat()
+                .filter(target => Number.isInteger(target?.index))
+                .map(target => [target.index, target])).values()];
             return {
                 targets: passes.flat(),
                 runtime: {
                     runtimeChargePasses: passes.map(pass => pass.map(target => target.index)),
                     runtimeChargeAnchors: passes.map(pass => pass[0]?.index).filter(Number.isInteger),
-                    runtimeChargePassSizes: passes.map(pass => pass.length)
+                    runtimeChargePassSizes: passes.map(pass => pass.length),
+                    runtimePairTargets: tailPair.map(target => target.index).sort((left, right) => left - right),
+                    runtimeTailCrossTargets: tailPair.map(target => target.index).sort((left, right) => left - right)
                 }
             };
         }
@@ -341,6 +375,20 @@ class HuntMonsterActionPolicy {
                 }
             };
         }
+        if (mode === 'adjacent-pair-sequential') {
+            const passes = this.adjacentPairSequentialPasses(
+                targetable, random,
+                Number.isInteger(primaryIndex) ? primaryIndex : defaultTargets[0]?.index);
+            const pair = passes.map(pass => pass[0]).filter(Boolean);
+            return {
+                targets: pair,
+                runtime: {
+                    runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index)),
+                    runtimePivotPairs: [pair.map(target => target.index)],
+                    runtimeImpactAllowEmptySequence: true
+                }
+            };
+        }
         if (mode === 'left-right-halves') {
             const passes = this.leftRightHalfPasses(targetable, count, random);
             return {
@@ -413,6 +461,21 @@ class HuntMonsterActionPolicy {
     static impactDelayTicks(pattern = {}, monsterState = 'normal') {
         const authoredTicks = Number(pattern.impact?.delayTicks ?? pattern.impactDelayTicks ?? 0);
         if (authoredTicks > 0) return Math.max(1, Math.round(authoredTicks));
+        // An interference BEAT's draggable judgment marker is its gameplay
+        // commit. Falling back to a percentage of the full animation made the
+        // visible marker and the actual reaction disagree.
+        const interferenceKind = String(pattern.interference?.kind || '')
+            .replace(/-(?:small|large)$/, '');
+        if (interferenceKind && Array.isArray(pattern.motion)) {
+            let elapsed = 0;
+            for (const beat of pattern.motion) {
+                const offset = Number(beat?.judgmentOffsets?.[interferenceKind]);
+                if (Number.isFinite(offset)) {
+                    return Math.max(1, Math.round(elapsed + Math.max(0, offset)));
+                }
+                elapsed += Math.max(1, Number(beat?.ticks) || 1);
+            }
+        }
         const visualRatio = Number(pattern.impact?.visualRatio);
         const authoredVisualMs = Number(pattern.animationDurationMs || 0);
         if (visualRatio > 0 && authoredVisualMs > 0) {
@@ -446,13 +509,20 @@ class HuntMonsterActionPolicy {
             ? stateTimeline
             : (Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : null);
         if (authored?.length) {
+            const compiledTicks = pattern.beatV2
+                && pattern.runtimeJudgmentGroups === true
+                && pattern.beatV2Approved === true
+                ? this.#beatV2GameplayTicks(pattern.beatV2)
+                : [];
             return authored.map((entry, index) => {
                 const source = typeof entry === 'number' ? { atTicks: entry } : (entry || {});
                 return {
                     index,
                     atTicks: Math.max(1, Math.round(Number(
-                        source.atTicks ?? source.delayTicks ?? source.tick ?? 1
+                        compiledTicks[index] ?? source.atTicks ?? source.delayTicks ?? source.tick ?? 1
                     ))),
+                    launchAtTicks: Number.isFinite(Number(source.launchAtTicks))
+                        ? Math.max(0, Math.round(Number(source.launchAtTicks))) : null,
                     targetIndices: Array.isArray(source.targetIndices)
                         ? source.targetIndices.filter(Number.isInteger)
                         : null,
@@ -506,6 +576,100 @@ class HuntMonsterActionPolicy {
             targetIndices: chargePasses?.[index]?.filter(Number.isInteger) || null,
             damageScale: 1
         }));
+    }
+
+    static resolveTargetScenario({
+        pattern = {}, monsterState = 'normal', targetable = [], count = 1,
+        passCount = 2, random = Math.random, mode = '', defaultTargets = [],
+        primaryIndex = null, distinctPasses = false, forcedTargetIndices = null,
+        forcedImpactTargets = null
+    } = {}) {
+        const byIndex = new Map(targetable.filter(target => Number.isInteger(target?.index))
+            .map(target => [target.index, target]));
+        const warnings = [];
+        const forced = Array.isArray(forcedTargetIndices)
+            ? [...new Set(forcedTargetIndices.filter(Number.isInteger))] : null;
+        forced?.filter(index => !byIndex.has(index))
+            .forEach(index => warnings.push(`target-unavailable:${index}`));
+        const resolved = this.resolveTargeting({ targetable, count, passCount, random, mode,
+            defaultTargets, primaryIndex, distinctPasses });
+        const targets = forced ? forced.map(index => byIndex.get(index)).filter(Boolean) : resolved.targets;
+        const runtime = { ...resolved.runtime };
+        const forcedByImpact = new Map((forcedImpactTargets || [])
+            .filter(item => Number.isInteger(item?.impactIndex))
+            .map(item => [item.impactIndex,
+                [...new Set((item.targetIndices || []).filter(Number.isInteger))]]));
+        const sequence = Array.isArray(runtime.runtimeImpactTargetSequence)
+            ? runtime.runtimeImpactTargetSequence : [];
+        const fallbackIndices = targets.map(target => target.index);
+        const impactTimeline = [];
+        this.impactTimeline({ ...pattern, ...runtime }, monsterState).forEach((event, index) => {
+            const previous = impactTimeline[index - 1]?.targetIndices || [];
+            const chargePassMatch = String(event.targetMode || '').match(/^charge-pass-(\d+)$/);
+            const chargePassTargets = chargePassMatch && Array.isArray(runtime.runtimeChargePasses)
+                ? runtime.runtimeChargePasses[Math.max(0, Number(chargePassMatch[1]) - 1)]
+                : null;
+            let targetIndices = forcedByImpact.has(index) ? forcedByImpact.get(index)
+                : Array.isArray(event.targetIndices) && event.targetIndices.length ? event.targetIndices
+                    : Array.isArray(chargePassTargets) && chargePassTargets.length ? chargePassTargets
+                    : ['runtime-pair', 'runtime-pair-left', 'runtime-pair-right',
+                        'runtime-tail-pair', 'runtime-tail-left', 'runtime-tail-right'].includes(event.targetMode)
+                        && Array.isArray(runtime.runtimePairTargets || runtime.runtimeTailCrossTargets)
+                        ? ['runtime-pair', 'runtime-tail-pair'].includes(event.targetMode)
+                            ? (runtime.runtimePairTargets || runtime.runtimeTailCrossTargets)
+                            : (() => {
+                                const orderedTailTargets = [...(runtime.runtimePairTargets || runtime.runtimeTailCrossTargets)]
+                                    .filter(Number.isInteger).sort((left, right) => left - right);
+                                if (!orderedTailTargets.length) return [];
+                                return [['runtime-pair-right', 'runtime-tail-right'].includes(event.targetMode)
+                                    ? orderedTailTargets.at(-1) : orderedTailTargets[0]];
+                            })()
+                    : event.targetMode === 'all-prepared' ? fallbackIndices
+                    : event.targetMode === 'judgment-all' ? [...byIndex.keys()]
+                    : event.targetMode === 'judgment-primary' ? [primaryIndex ?? fallbackIndices[0]].filter(Number.isInteger)
+                    : event.targetMode === 'judgment-left' ? [Number(primaryIndex ?? fallbackIndices[0]) - 1].filter(index => byIndex.has(index))
+                    : event.targetMode === 'judgment-right' ? [Number(primaryIndex ?? fallbackIndices[0]) + 1].filter(index => byIndex.has(index))
+                    : event.targetMode === 'judgment-primary-adjacent' ? [-1, 0, 1]
+                        .map(delta => Number(primaryIndex ?? fallbackIndices[0]) + delta).filter(index => byIndex.has(index))
+                    : event.targetMode === 'repeat-previous' ? previous
+                        : event.targetMode === 'runtime-dive' && Number.isInteger(runtime.runtimeDiveTargetIndex)
+                            ? [runtime.runtimeDiveTargetIndex]
+                            : event.targetMode === 'random-live' ? null
+                                : Array.isArray(sequence[index]) && sequence[index].length ? sequence[index]
+                                    : event.targetMode === 'sequential' && fallbackIndices.length
+                                        ? [fallbackIndices[index % fallbackIndices.length]] : fallbackIndices;
+            if (Array.isArray(targetIndices)) {
+                targetIndices = [...new Set(targetIndices.filter(Number.isInteger))];
+                targetIndices.filter(targetIndex => !byIndex.has(targetIndex))
+                    .forEach(targetIndex => warnings.push(`impact-${index}-target-unavailable:${targetIndex}`));
+                targetIndices = targetIndices.filter(targetIndex => byIndex.has(targetIndex));
+            }
+            impactTimeline.push({ ...event, targetIndices });
+        });
+        const resolvedImpactIndices = [...new Set(impactTimeline.flatMap(event => event.targetIndices || []))];
+        // random-live deliberately leaves an impact unresolved until impact time. Keep the
+        // prepared target set alive so the turn is not cancelled before that live re-roll.
+        const targetIndices = resolvedImpactIndices.length ? resolvedImpactIndices : fallbackIndices;
+        const resolvedPrimary = Number.isInteger(primaryIndex) && byIndex.has(primaryIndex)
+            ? primaryIndex : targetIndices[0] ?? targets[0]?.index ?? null;
+        return Object.freeze({
+            primaryTargetIndex: resolvedPrimary,
+            targetIndices,
+            targets: targetIndices.map(index => byIndex.get(index)).filter(Boolean),
+            runtime,
+            impactTimeline,
+            warnings: [...new Set(warnings)]
+        });
+    }
+
+    static #beatV2GameplayTicks(compiledAction = {}) {
+        const grouped = new Map();
+        for (const event of compiledAction.events || []) {
+            if (!['damage', 'roar', 'tremor', 'wind'].includes(event.kind)) continue;
+            const group = String(event.group || event.id);
+            grouped.set(group, Math.min(grouped.get(group) ?? Infinity, Number(event.atTicks)));
+        }
+        return [...grouped.values()].filter(Number.isFinite).sort((left, right) => left - right);
     }
 
     static impactSurvivesInterruption(pattern = {}) {

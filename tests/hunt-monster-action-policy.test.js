@@ -31,6 +31,39 @@ const HuntMonsterAnimationCatalog = require('../js/effects/hunt/HuntMonsterAnima
 }
 
 {
+    const hunters = [0, 1, 2, 3].map(index => ({ index }));
+    const scenario = HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern: { targeting: { mode: 'return-adjacent-passes' }, impactTimeline: [
+            { atTicks: 10, targetMode: 'runtime-pair' },
+            { atTicks: 20, targetMode: 'runtime-pair-left' },
+            { atTicks: 30, targetMode: 'runtime-pair-right' }
+        ] },
+        targetable: hunters, count: 2, passCount: 2, random: () => .45,
+        mode: 'return-adjacent-passes', defaultTargets: [hunters[1], hunters[2]]
+    });
+    const pair = scenario.runtime.runtimePairTargets;
+    assert.strictEqual(pair.length, 2, 'the reusable pair preset must own exactly two adjacent hunters');
+    assert.strictEqual(Math.abs(pair[0] - pair[1]), 1, 'the reusable pair preset must be an adjacent lane');
+    assert.deepStrictEqual(scenario.impactTimeline.map(event => event.targetIndices), [
+        [...pair], [Math.min(...pair)], [Math.max(...pair)]
+    ], '2인 동시/좌/우 must resolve from the same selected pair');
+}
+
+{
+    const hunters = [0, 1, 2, 3].map(index => ({ index }));
+    const anchored = HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern: { targeting: { mode: 'return-adjacent-passes' }, impactTimeline: [
+            { atTicks: 10, targetMode: 'runtime-pair-left' },
+            { atTicks: 20, targetMode: 'runtime-pair-right' }
+        ] },
+        targetable: hunters, count: 2, passCount: 2, random: () => 0,
+        mode: 'return-adjacent-passes', primaryIndex: 2
+    });
+    assert.deepStrictEqual(anchored.runtime.runtimePairTargets, [1, 2],
+        'an explicit hunter selection must anchor an adjacent two-hunter lane');
+}
+
+{
     const hunters = [0, 2, 3].map(index => ({ index }));
     assert.deepStrictEqual(
         HuntMonsterActionPolicy.adjacentLaneTargets(hunters, 2, () => 0).map(target => target.index),
@@ -93,6 +126,41 @@ const HuntMonsterAnimationCatalog = require('../js/effects/hunt/HuntMonsterAnima
     assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, pattern, [
         { result: 'hit' }, { result: 'dodge' }
     ]), false, 'authored part damage must be able to disable a whiff opening');
+}
+
+{
+    const hunters = [0, 1, 2, 3].map(index => ({ index }));
+    const simultaneous = HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern: { impactTimeline: [{ atTicks: 8, targetMode: 'all-prepared' }] },
+        targetable: hunters,
+        count: 3,
+        passCount: 3,
+        distinctPasses: true,
+        random: () => 0,
+        mode: 'independent-passes',
+        defaultTargets: [hunters[0]]
+    });
+    assert.deepStrictEqual(simultaneous.impactTimeline[0].targetIndices, [0, 1, 2],
+        'all-prepared must preserve a simultaneous multi-lane volley instead of consuming one pass');
+    const plan = HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern: {
+            impactTimeline: [
+                { atTicks: 11, targetMode: 'sequential' },
+                { atTicks: 24, targetMode: 'sequential' }
+            ]
+        },
+        targetable: hunters,
+        count: 2,
+        passCount: 2,
+        random: () => .6,
+        mode: 'adjacent-pair-sequential',
+        defaultTargets: [hunters[1]],
+        primaryIndex: 1
+    });
+    assert.deepStrictEqual(plan.impactTimeline.map(event => event.targetIndices), [[1], [2]],
+        'an adjacent pair must be struck one hunter at a time from left to right');
+    assert.deepStrictEqual(plan.runtime.runtimePivotPairs, [[1, 2]],
+        'the selected 1-2, 2-3 or 3-4 boundary must remain one stable pivot pair');
 }
 
 {

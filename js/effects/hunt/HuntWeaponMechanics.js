@@ -29,6 +29,13 @@ class HuntWeaponMechanics {
         return HuntWeaponMechanics.LONG_SWORD_SPECIAL_SHEATHE_CHANCE[level];
     }
 
+    static specialActionChance(hunter, authoredBase) {
+        const profiles = typeof HuntPersonalityProfiles !== 'undefined'
+            ? HuntPersonalityProfiles
+            : (typeof require === 'function' ? require('./HuntPersonalityProfiles.js') : null);
+        return profiles?.specialActionChance(hunter, authoredBase) ?? authoredBase;
+    }
+
     static atbConfig() {
         return typeof HuntAtbConfig !== 'undefined'
             ? HuntAtbConfig
@@ -686,10 +693,15 @@ class HuntWeaponMechanics {
             const riskBias = hunter.personality === 'offensive' ? 7
                 : (hunter.personality === 'defensive' || hunter.personality === 'support' ? -6 : 0);
             const continueLimit = (charge === 1 ? 76 : 84) + riskBias + ((this.random() - 0.5) * 12);
+            // Check the charge-cancel reaction before extending the charge.
+            // Previously the early continue return made tackle unreachable through
+            // most of its useful window. An imminent attack is deterministic;
+            // earlier pressure still respects the personality special-action rate.
+            const tackleBase = monsterAtb >= 90 ? .9 : (monsterAtb >= 78 ? .68 : .42);
+            const tackleChance = HuntWeaponMechanics.specialActionChance(hunter, tackleBase);
+            if (hunter._mechanicMonsterPressure
+                && (monsterAtb >= 94 || this.random() < tackleChance)) return byId('great_sword.tackle');
             if (monsterAtb < continueLimit) return byId(`${prefixes[chain]}_${charge + 1}`);
-
-            const tackleChance = monsterAtb >= 90 ? 0.78 : 0.42;
-            if (hunter._mechanicMonsterPressure && this.random() < tackleChance) return byId('great_sword.tackle');
             return byId(releases[chain]);
         }
         if (hunter.id === 'long_sword') {
@@ -716,14 +728,17 @@ class HuntWeaponMechanics {
                 if (context.monsterDowned || this.random() < 0.60) return byId('sword_shield.perfect_rush_1');
                 return byId('sword_shield.charged_slash');
             }
-            if (hunter._mechanicMonsterPressure && this.random() < 0.42) return byId('sword_shield.perfect_guard');
+            if (hunter._mechanicMonsterPressure
+                && this.random() < HuntWeaponMechanics.specialActionChance(hunter, .42)) return byId('sword_shield.perfect_guard');
             if (hunter.snsShieldStep > 0) return byId(`sword_shield.shield_bash_${hunter.snsShieldStep + 1}`) >= 0
                 ? byId(`sword_shield.shield_bash_${hunter.snsShieldStep + 1}`)
                 : byId('sword_shield.guard_slash');
             if (context.monsterDowned && this.random() < 0.34) return byId('sword_shield.shield_bash_1');
             if (context.monsterDowned && Number(hunter.snsChain || 0) >= 2 && this.random() < 0.52) return byId('sword_shield.charged_chop');
-            if (hunter._mechanicMonsterPressure && this.random() < 0.22) return byId('sword_shield.backstep');
-            if (Number(hunter.snsChain || 0) > 0 && this.random() < 0.16) return byId('sword_shield.backstep');
+            if (hunter._mechanicMonsterPressure
+                && this.random() < HuntWeaponMechanics.specialActionChance(hunter, .22)) return byId('sword_shield.backstep');
+            if (Number(hunter.snsChain || 0) > 0
+                && this.random() < HuntWeaponMechanics.specialActionChance(hunter, .16)) return byId('sword_shield.backstep');
             const linked = linkedFromLast();
             if (linked >= 0 && this.random() < 0.86) return linked;
             return byId('sword_shield.chop');
@@ -790,7 +805,8 @@ class HuntWeaponMechanics {
             if (Number(hunter.lanceMobilityStep || 0) === 1) return byId('lance.leaping_thrust');
             if (Number(hunter.lanceDashStep || 0) === 1) return byId('lance.dash_attack');
             if (Number(hunter.lanceDashStep || 0) === 2) return byId('lance.finishing_twin_thrust');
-            if (hunter._mechanicMonsterPressure) return byId(this.random() < 0.35 ? 'lance.power_guard_1' : 'lance.counter_stance');
+            if (hunter._mechanicMonsterPressure) return byId(this.random()
+                < HuntWeaponMechanics.specialActionChance(hunter, .35) ? 'lance.power_guard_1' : 'lance.counter_stance');
             const linked = linkedFromLast();
             if (linked >= 0) return linked;
             const route = this.random();
@@ -828,7 +844,8 @@ class HuntWeaponMechanics {
                 return byId('charge_blade.aed');
             }
             if (hunter.chargeBladeMode === 'sword') {
-                if (hunter._mechanicMonsterPressure && hunter.phials > 0 && this.random() < 0.32) return byId('charge_blade.guard_point');
+                if (hunter._mechanicMonsterPressure && hunter.phials > 0
+                    && this.random() < HuntWeaponMechanics.specialActionChance(hunter, .32)) return byId('charge_blade.guard_point');
                 if (hunter.chargeEnergy >= 45 && hunter.phials < 5) return byId('charge_blade.load_phials');
                 if (hunter.phials >= 3 && hunter.shieldChargeDuration <= 0) return byId('charge_blade.charge_shield');
                 if (hunter.phials >= 3 && hunter.shieldChargeDuration > 0 && hunter.shieldChargeDuration <= 60) return byId('charge_blade.refresh_shield');
@@ -878,7 +895,8 @@ class HuntWeaponMechanics {
             if (hunter._mechanicMonsterWounded && hunter.specialAmmoCooldown <= 0) return byId('heavy_bowgun.focus_blast');
             if (hunter.magazine <= 0) return byId('heavy_bowgun.reload');
             if (hunter.ignitionMode) {
-                if (hunter._mechanicMonsterPressure && hunter.ignitionGauge >= 20 && this.random() < 0.4) return byId('heavy_bowgun.wyverncounter_stance');
+                if (hunter._mechanicMonsterPressure && hunter.ignitionGauge >= 20
+                    && this.random() < HuntWeaponMechanics.specialActionChance(hunter, .4)) return byId('heavy_bowgun.wyverncounter_stance');
                 const step = Number(hunter.wyvernheartStep || 0);
                 if (hunter.ignitionGauge < [15, 20, 25][step]) return byId('heavy_bowgun.exit_ignition');
                 return byId(`heavy_bowgun.wyvernheart_${step + 1}`);
@@ -892,7 +910,8 @@ class HuntWeaponMechanics {
             if (hunter.tracerTicks > 0 && hunter.bowCharge === 3) return byId('bow.tracer_dragon_piercer');
             if (hunter.tracerGauge >= 60 && hunter.tracerTicks <= 0 && hunter.bowCharge <= 1) return byId('bow.tracer_arrow');
             if (hunter.tracerGauge >= 30 && hunter.fuseArrows <= 0 && context.monsterDowned) return byId('bow.arc_shot');
-            if (hunter._mechanicMonsterPressure && hunter.bowStamina >= 15 && this.random() < 0.4) return byId('bow.charging_sidestep');
+            if (hunter._mechanicMonsterPressure && hunter.bowStamina >= 15
+                && this.random() < HuntWeaponMechanics.specialActionChance(hunter, .4)) return byId('bow.charging_sidestep');
             if (hunter.bowPowerStep === 1) return byId('bow.power_shot');
             if (hunter.bowPowerStep === 2) return byId('bow.power_volley');
             if (hunter.bowCharge < 3) return byId(`bow.draw_${hunter.bowCharge + 1}`);

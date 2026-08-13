@@ -1,32 +1,20 @@
 'use strict';
 
 class HuntSupportItemPolicy {
-    static FLASH_LIMITS = Object.freeze({
-        offensive: 0,
-        normal: 1,
-        veteran: 1,
-        defensive: 1,
-        support: 2,
-        newbie: 1
-    });
-
-    static FLASH_USE_CHANCES = Object.freeze({
-        offensive: 0,
-        normal: .50,
-        veteran: 1,
-        defensive: .75,
-        support: .90,
-        newbie: .15
-    });
-
     static MAX_EFFECTIVE_FLASHES = 4;
 
+    static profiles() {
+        if (typeof HuntPersonalityProfiles !== 'undefined') return HuntPersonalityProfiles;
+        if (typeof require === 'function') return require('./HuntPersonalityProfiles.js');
+        return null;
+    }
+
     static initialFlashCount(personality) {
-        return Number(this.FLASH_LIMITS[personality] || 0);
+        return Number(this.profiles()?.get(personality)?.issued?.flashPods || 0);
     }
 
     static flashUseChance(personality) {
-        return Number(this.FLASH_USE_CHANCES[personality] || 0);
+        return Number(this.profiles()?.get(personality)?.ai?.flash || 0);
     }
 
     static hasOtherFlashCarrier(engine, hunter) {

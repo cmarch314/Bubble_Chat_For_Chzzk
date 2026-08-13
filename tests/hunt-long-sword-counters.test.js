@@ -8,9 +8,10 @@ const HuntActionStateMachine = require('../js/effects/hunt/HuntActionStateMachin
 const HuntWeaponMechanics = require('../js/effects/hunt/HuntWeaponMechanics.js');
 const HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
 const HuntMonsterActionPolicy = require('../js/effects/hunt/HuntMonsterActionPolicy.js');
+const HuntPersonalityProfiles = require('../js/effects/hunt/HuntPersonalityProfiles.js');
 
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterTurnExecutor.js');
-const context = vm.createContext({ console, HuntAtbConfig, HuntMonsterActionPolicy });
+const context = vm.createContext({ console, HuntAtbConfig, HuntMonsterActionPolicy, HuntPersonalityProfiles });
 vm.runInContext(
     `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntMonsterTurnExecutor = HuntMonsterTurnExecutor;`,
     context,

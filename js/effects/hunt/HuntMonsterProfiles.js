@@ -42,6 +42,7 @@ function huntPattern(id, name, type, damageRatio, options = {}) {
         // 비트 목록. 있으면 새 모션 경로를 타고, 없으면 animationProfile의
         // 키프레임 경로 그대로다(재설계 3단계).
         motion: options.motion || null,
+        profileMotion: options.profileMotion || null,
         animationProfile: options.animationProfile || null,
         animationDurationMs: options.animationDurationMs || null,
         animationGeometry: options.animationGeometry || null,
@@ -124,13 +125,6 @@ const HUNT_MONSTER_PATTERN_OVERRIDES = {
         ['lagiacrus.thunder_tackle', '뇌전 돌진 태클', 'charge', 0.41, { maxTargets: 3, actionClass: 'cRushThunderTackle', windup: 8, recovery: 12, tags: ['charge', 'elemental'] }],
         ['lagiacrus.ultimate_thunder', '대해룡 궁극 뇌폭', 'ultimate', 0.60, { minTargets: 2, maxTargets: 4, actionClass: 'cSwimUltimateThunder', state: 'enraged', windup: 13, recovery: 18, tags: ['ultimate', 'area', 'elemental'] }]
     ]),
-    diablos: huntProfile('world_iceborne', [
-        ['diablos.roar', '각룡의 포효', 'roar', 0, { maxTargets: 4, tags: ['roar'] }],
-        ['diablos.horn_charge', '각공격 들이받기', 'charge', 0.38, { windup: 7, recovery: 12, tags: ['charge'] }],
-        ['diablos.burrow', '지중 급습 쳐올리기', 'charge', 0.44, { windup: 11, recovery: 14, cooldown: 55, tags: ['charge', 'burrow'] }],
-        ['diablos.tail', '꼬리 회전치기', 'area', 0.30, { minTargets: 2, maxTargets: 3, tags: ['area'] }],
-        ['diablos.rage_chain', '폭주 연쇄 돌진', 'ultimate', 0.52, { minTargets: 2, maxTargets: 4, state: 'enraged', tags: ['ultimate', 'charge', 'cross-charge'] }]
-    ]),
     zinogre: huntProfile('world_iceborne', [
         ['zinogre.roar', '뇌랑룡의 포효', 'roar', 0, { maxTargets: 4, tags: ['roar'] }],
         ['zinogre.paw_slam', '연속 전뇌 펀치', 'physical', 0.31, { maxTargets: 2, tags: ['multi-hit'] }],
@@ -193,7 +187,6 @@ inheritVariant('rathalos', 'azure_rathalos', '창화룡', 1.04);
 inheritVariant('rathalos', 'silver_rathalos', '은화룡', 1.10);
 inheritVariant('rathian', 'pink_rathian', '앵화룡', 1.04);
 inheritVariant('rathian', 'gold_rathian', '금화룡', 1.10);
-inheritVariant('diablos', 'black_diablos', '흑각룡', 1.08);
 inheritVariant('nergigante', 'ruiner_nergigante', '모멸넬기', 1.09);
 inheritVariant('zinogre', 'stygian_zinogre', '옥랑룡', 1.08);
 inheritVariant('valstrax', 'crimson_glow_valstrax', '천혜룡', 1.10);
@@ -224,7 +217,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCE
         maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar'],
         weight: 0.08, active: 40, recovery: 1, animationProfile: 'roar',
         animationDurationMs: 3200, impact: { visualRatio: .43 },
-        ignitesAllScales: true
+        ignitesAllScales: true,
+        motion: [
+            { beat: 'brace', label: '포효 준비', ticks: 8, pose: 'crouch' },
+            { beat: 'roar', label: '폭린 점화 포효', ticks: 8, pose: 'stretch-strong', sfx: 'roar' },
+            { beat: 'hold', label: '포효 유지', ticks: 5, pose: 'brace' },
+            { beat: 'recover', label: '후딜', ticks: 6, pose: 'idle' }
+        ]
     }],
     ['bazelgeuse.bite', '깨물기', 'physical', 0.25, {
         sourceMoveNameJA: '噛みつき', weight: 20, active: 30, recovery: 1,
@@ -232,6 +231,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCE
         tags: ['physical', 'ground-only', 'target-contact', 'ignites-scale-target'],
         animationProfile: 'close-strike', animationDurationMs: 2400,
         impact: { visualRatio: .46 },
+        motion: [
+            { beat: 'approach', label: '깨물기 접근', ticks: 25, to: 'toward:target 82%', face: 'target', pose: 'stretch-soft' },
+            { beat: 'jaw-open', label: '턱 벌리기', ticks: 10, pose: 'crouch' },
+            { beat: 'bite', label: '깨물기', ticks: 3, to: 'target', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'scale-drop', label: '폭린 낙하', ticks: 7, pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 20, to: 'home', pose: 'idle' }
+        ],
         maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
         ignitesScaleTarget: true
     }],
@@ -242,6 +248,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCE
         animationProfile: 'ground-charge', animationDurationMs: 4000,
         movement: { kind: 'ground-charge', ticks: 50, untargetable: true },
         impact: { visualRatio: .38 },
+        motion: [
+            { beat: 'stomp', label: '돌진 준비', ticks: 25, pose: 'crouch', face: 'target' },
+            { beat: 'charge', label: '직선 돌진', ticks: 80, to: 'target', pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact', label: '충돌', ticks: 3, continueTravel: true, hit: true, sfx: 'impact', moveEasing: 'linear' },
+            { beat: 'scale-drop', label: '폭린 낙하', ticks: 8, opacity: 0, pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 40, at: 'offscreen:top', to: 'home', opacity: 1, pose: 'idle' }
+        ],
         scaleDropsByPart: { body: 1, head: 1, tail: 1 }, scaleSlotMode: 'target-adjacent',
         maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
         ignitesScaleTarget: true
@@ -253,6 +266,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCE
         animationProfile: 'side-tackle-contact', animationDurationMs: 3200,
         movement: { kind: 'side-tackle-contact', ticks: 40 },
         impact: { visualRatio: .58 },
+        motion: [
+            { beat: 'side-hop', label: '측면 이동', ticks: 25, to: 'flank:target 170', face: 'target', pose: 'stretch-soft' },
+            { beat: 'shoulder-set', label: '몸통 들이밀기', ticks: 20, pose: 'brace', rotationToward: 14 },
+            { beat: 'tackle', label: '측면 충돌', ticks: 4, to: 'target', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'scale-drop', label: '폭린 낙하', ticks: 6, pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 30, to: 'home', pose: 'idle' }
+        ],
         scaleDropsByPart: { body: 1, head: 1, tail: 1 }, scaleSlotMode: 'target-adjacent',
         maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
         ignitesScaleTarget: true
@@ -264,6 +284,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCE
         tags: ['area', 'tail', 'ground-only', 'target-contact', 'blast-scale-source', 'ignites-scale-target'],
         animationProfile: 'tail-sweep', animationDurationMs: 3200,
         impact: { visualRatio: .58 },
+        motion: [
+            { beat: 'approach', label: '꼬리 사거리 진입', ticks: 25, to: 'toward:target 68%', face: 'target', pose: 'brace' },
+            { beat: 'tail-wind', label: '꼬리 감기', ticks: 20, rotateByFacing: -40, origin: '72% 70%', pose: 'crouch' },
+            { beat: 'tail-sweep', label: '꼬리 휩쓸기', ticks: 4, rotateByFacing: 180, origin: '72% 70%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'scale-drop', label: '폭린 낙하', ticks: 6, pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 30, to: 'home', pose: 'idle', rotation: 0 }
+        ],
         scaleDropsByPart: { body: 1, tail: 2 }, scaleSlotMode: 'target-adjacent',
         brokenPartDamageModifiers: { tail: 0.5 },
         maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
@@ -278,6 +305,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCE
         movement: { kind: 'leap-slam', ticks: 30 },
         postActionRecoverySeconds: 1,
         impact: { visualRatio: .73 },
+        motion: [
+            { beat: 'spring-load', label: '프레스 준비', ticks: 15, pose: 'crouch', face: 'target' },
+            { beat: 'leap', label: '수직 도약', ticks: 20, to: 'above:target 180', pose: 'stretch-strong', moveEasing: 'snap' },
+            { beat: 'press', label: '바디 프레스', ticks: 3, to: 'target', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'scale-drop', label: '폭린 대량 낙하', ticks: 7, pose: 'brace' },
+            { beat: 'return', label: '복귀', ticks: 20, to: 'home', pose: 'idle' }
+        ],
         scaleDropsByPart: { body: 3, head: 1, tail: 1 }, scaleSlotMode: 'target-adjacent',
         secondaryInterference: { kind: 'tremor', size: 'small', scope: 'all-other' },
         maxConsecutiveUsesByState: { normal: 1, enraged: 2 },
@@ -297,6 +331,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCE
                 suppressStatus: true
             },
             { atTicks: 28, damageScale: 1, eventKind: 'breath-impact' }
+        ],
+        motion: [
+            { beat: 'scale-volley', label: '폭린 선투하', ticks: 10, face: 'target', pose: 'crouch' },
+            { beat: 'scales-land', label: '폭린 낙하', ticks: 1, sfx: 'projectile', hit: true },
+            { beat: 'gas-charge', label: '화염가스 준비', ticks: 9, pose: 'brace' },
+            { beat: 'gas-spray', label: '부채꼴 화염가스', ticks: 8, pose: 'stretch-strong', sfx: 'projectile' },
+            { beat: 'breath-impact', label: '가스 착화', ticks: 2, hit: true, sfx: 'impact' },
+            { beat: 'recover', label: '후딜', ticks: 2, pose: 'idle' }
         ],
         scaleDropsByPart: { body: 1, head: 2 }, scaleSlotMode: 'target-adjacent',
         scaleDropTiming: 'before-impact',
@@ -321,6 +363,17 @@ HUNT_MONSTER_PATTERN_OVERRIDES.bazelgeuse = pilot('world_iceborne', PILOT_SOURCE
                 defenseMode: 'emergency-jump',
                 secondaryInterference: { kind: 'tremor', size: 'large', scope: 'all' }
             }
+        ],
+        motion: [
+            { beat: 'charge-out', label: '돌진 이륙', ticks: 12, to: 'offscreen:bottom', face: 'target', pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'initial-impact', label: '돌진 충돌', ticks: 2, hit: true, sfx: 'impact', opacity: 0 },
+            { beat: 'rise-offscreen', label: '화면 상단 상승', ticks: 14, at: 'offscreen:top', opacity: 0, pose: 'brace' },
+            { beat: 'bombing-run', label: '융단 폭격 횡단', ticks: 45, to: 'offscreen:right', opacity: 1, pose: 'stretch-soft', moveEasing: 'linear', sfx: 'projectile' },
+            { beat: 'dive-lineup', label: '급강하 조준', ticks: 18, at: 'offscreen:top', opacity: 0, face: 'target', pose: 'crouch' },
+            { beat: 'dive-impact', label: '급강하 충돌', ticks: 3, to: 'target', opacity: 1, pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'explosion-chain', label: '폭린 연쇄 폭발', ticks: 10, pose: 'brace', sfx: 'explosion' },
+            { beat: 'recover', label: '착지 후딜', ticks: 8, pose: 'settle' },
+            { beat: 'return', label: '복귀', ticks: 8, to: 'home', pose: 'idle' }
         ]
     }]
 ]);
@@ -350,23 +403,48 @@ HUNT_MONSTER_PATTERN_OVERRIDES.chameleos = pilot('rise_sunbreak', PILOT_SOURCES.
 HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.rathalos, [
     ['rathalos.roar', '포효', 'roar', 0, {
         maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar'],
-        weight: 0.16, cooldown: 90, monsterAtbCost: 0.5
+        weight: 0.16, cooldown: 90, monsterAtbCost: 0.5,
+        motion: [
+            { beat: 'brace', label: '몸 낮추기', ticks: 2, pose: 'crouch' },
+            { beat: 'roar', label: '포효', ticks: 4, pose: 'stretch-strong', sfx: 'roar' },
+            { beat: 'settle', label: '자세 회복', ticks: 3, pose: 'idle' }
+        ]
     }],
     ['rathalos.bite', '물어뜯기', 'physical', 0.24, {
         sourceMoveNameJA: '噛みつき', recovery: 1, tags: ['physical', 'ground-only', 'target-contact', 'weak'],
         monsterAtbCost: 0.32, movement: { ticks: 20 }, impact: { delayRatio: 0.6 },
-        animationProfile: 'rathalos-bite-contact', maxConsecutiveUses: 3
+        animationProfile: 'rathalos-bite-contact', maxConsecutiveUses: 3,
+        motion: [
+            { beat: 'approach', label: '접근', ticks: 9, to: 'toward:target 82%', face: 'target', pose: 'stretch-soft' },
+            { beat: 'bite', label: '물어뜯기', ticks: 3, to: 'toward:target 106%', pose: 'stretch-strong', moveEasing: 'snap', hit: true, sfx: 'impact' },
+            { beat: 'recoil', label: '반동', ticks: 3, to: 'toward:target 91%', pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 5, to: 'home', pose: 'idle' }
+        ]
     }],
     ['rathalos.rush', '돌진 물어뜯기', 'charge', 0.30, {
         sourceMoveNameJA: '突進噛みつき', minTargets: 1, maxTargets: 2, windup: 6, recovery: 1,
         tags: ['charge', 'ground-only', 'target-contact'], monsterAtbCost: 0.52,
         movement: { ticks: 32 }, targeting: { mode: 'adjacent-lane' },
-        impact: { delayRatio: 0.61 }, animationProfile: 'rathalos-rush-bite'
+        impact: { delayRatio: 0.61 }, animationProfile: 'rathalos-rush-bite',
+        motion: [
+            { beat: 'brace', label: '돌진 준비', ticks: 6, to: 'toward:target -10%', face: 'target', pose: 'crouch' },
+            { beat: 'rush', label: '직선 돌진', ticks: 13, to: 'toward:target 90%', pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'bite', label: '돌진 물기', ticks: 3, continueTravel: true, pose: 'stretch-strong', hit: true, sfx: 'impact', moveEasing: 'linear' },
+            { beat: 'pass', label: '지나침', ticks: 4, to: 'offscreen:bottom', pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 6, at: 'offscreen:top', to: 'home', pose: 'idle' }
+        ]
     }],
     ['rathalos.fireball', '화염구 브레스', 'projectile', 0.50, {
         sourceMoveNameJA: '火球ブレス', maxTargets: 1, recovery: 1, monsterAtbCost: 0.38,
         tags: ['projectile', 'elemental', 'fire', 'ground-only'], delivery: 'projectile',
         impact: { delayTicks: 17, survivesInterruption: true }, animationProfile: 'rathalos-fireball', originPart: 'head',
+        motion: [
+            { beat: 'aim', label: '조준', ticks: 6, face: 'target', pose: 'brace' },
+            { beat: 'charge', label: '화염 모으기', ticks: 4, pose: 'crouch', sfx: 'charge' },
+            { beat: 'launch', label: '화염구 발사', ticks: 7, pose: 'stretch-strong', sfx: 'projectile' },
+            { beat: 'impact', label: '착탄', ticks: 1, hit: true, sfx: 'impact' },
+            { beat: 'recover', label: '후딜', ticks: 6, pose: 'idle' }
+        ],
         projectileLaunchDelayTicks: 10,
         brokenPartDamageModifiers: { head: 0.60 },
         brokenPartAccuracyModifiers: { head: 0.75 }
@@ -378,6 +456,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         impact: { delayTicks: 17, survivesInterruption: true },
         projectileLaunchDelayTicks: 10,
         animationProfile: 'rathalos-fireball', originPart: 'head',
+        motion: [
+            { beat: 'hover-aim', label: '공중 조준', ticks: 6, face: 'target', offsetY: -85, pose: 'brace' },
+            { beat: 'charge', label: '화염 모으기', ticks: 4, pose: 'crouch', sfx: 'charge' },
+            { beat: 'launch', label: '공중 화염구', ticks: 7, pose: 'stretch-strong', sfx: 'projectile' },
+            { beat: 'impact', label: '착탄', ticks: 1, hit: true, sfx: 'impact' },
+            { beat: 'hover-recover', label: '비행 자세 회복', ticks: 6, pose: 'idle' }
+        ],
         brokenPartDamageModifiers: { head: 0.60 },
         brokenPartAccuracyModifiers: { head: 0.75 }
     }],
@@ -400,6 +485,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         ],
         animationProfile: 'rathalos-triple-fireball', animationDurationMs: 3000, originPart: 'head',
         projectileLaunchDelayTicks: 10,
+        motion: [
+            { beat: 'hover-aim', label: '공중 정면 조준', ticks: 10, face: 'target', offsetY: -85, pose: 'brace' },
+            { beat: 'charge', label: '화염 모으기', ticks: 7, pose: 'crouch', sfx: 'charge' },
+            { beat: 'shot-center', label: '중앙 발사', ticks: 5, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+            { beat: 'shot-left', label: '좌측 발사', ticks: 5, rotateByFacing: -18, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+            { beat: 'shot-right', label: '우측 발사', ticks: 1, rotateByFacing: 36, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+            { beat: 'hover-recover', label: '비행 자세 회복', ticks: 2, pose: 'idle' }
+        ],
         brokenPartDamageModifiers: { head: 0.80 },
         brokenPartAccuracyModifiers: { head: 0.75 }
     }],
@@ -412,13 +505,27 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         flightTransition: 'takeoff', animationProfile: 'rathalos-backstep-fireball', originPart: 'head',
         secondaryInterference: { kind: 'wind', size: 'large' },
         guaranteedWhenInterference: 'roar',
+        motion: [
+            { beat: 'backstep', label: '백스탭', ticks: 6, to: 'toward:target -28%', face: 'target', offsetY: -55, pose: 'stretch-soft', moveEasing: 'snap' },
+            { beat: 'charge', label: '화염 모으기', ticks: 4, pose: 'crouch', sfx: 'charge' },
+            { beat: 'launch', label: '백스탭 브레스', ticks: 7, pose: 'stretch-strong', sfx: 'projectile' },
+            { beat: 'impact', label: '착탄', ticks: 1, hit: true, sfx: 'impact' },
+            { beat: 'takeoff', label: '비행 전환', ticks: 8, offsetY: -120, pose: 'stretch-soft' }
+        ],
         brokenPartDamageModifiers: { head: 0.50 },
         brokenPartAccuracyModifiers: { head: 0.75 }
     }],
     ['rathalos.claw_dive', '독조 강습', 'charge', 0.39, {
         sourceMoveNameJA: '毒爪急襲', maxTargets: 1, windup: 8, recovery: 1,
         tags: ['charge', 'poison', 'flight-only', 'target-contact'], monsterAtbCost: 0.7,
-        movement: { ticks: 36 }, impact: { delayRatio: 0.66 }, animationProfile: 'rathalos-claw-dive'
+        movement: { ticks: 36 }, impact: { delayRatio: 0.66 }, animationProfile: 'rathalos-claw-dive',
+        motion: [
+            { beat: 'hover-track', label: '공중 추적', ticks: 10, offsetY: -115, face: 'target', pose: 'brace' },
+            { beat: 'dive', label: '발톱 급강하', ticks: 14, to: 'target', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'claw-impact', label: '발톱 적중', ticks: 2, to: 'below:target 26', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'rise', label: '다시 상승', ticks: 5, offsetY: -105, pose: 'stretch-soft' },
+            { beat: 'return', label: '비행 위치 복귀', ticks: 5, to: 'home', pose: 'idle' }
+        ]
     }],
     ['rathalos.tail_sweep', '꼬리 회전', 'area', 0.31, {
         sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 3, recovery: 1,
@@ -426,6 +533,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         monsterAtbCost: 0.62, movement: { ticks: 38 }, targeting: { mode: 'lane' },
         impactTimeline: [{ atTicks: 14 }, { atTicks: 24 }],
         animationProfile: 'rathalos-tail-sweep-double', animationDurationMs: 3800,
+        motion: [
+            { beat: 'approach', label: '회전 위치 진입', ticks: 8, to: 'toward:target 68%', face: 'target', pose: 'brace' },
+            { beat: 'wind', label: '꼬리 준비', ticks: 6, rotateByFacing: -30, origin: '76% 72%', pose: 'crouch' },
+            { beat: 'sweep-one', label: '첫 반회전', ticks: 10, rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'sweep-two', label: '둘째 반회전', ticks: 10, rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 4, to: 'home', pose: 'idle', rotation: 0 }
+        ],
         brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.50 }
     }],
     ['rathalos.aerial_tail_sweep', '공중 꼬리 휩쓸기', 'area', 0.32, {
@@ -433,6 +547,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         cooldown: 34, tags: ['area', 'tail', 'flight-only', 'target-contact'],
         monsterAtbCost: 0.58, movement: { ticks: 30 }, targeting: { mode: 'adjacent-lane' },
         impact: { delayRatio: 0.62 }, animationProfile: 'tail-sweep',
+        motion: [
+            { beat: 'hover-approach', label: '공중 접근', ticks: 10, to: 'toward:target 68%', offsetY: -80, face: 'target', pose: 'brace' },
+            { beat: 'wind', label: '꼬리 준비', ticks: 8, rotateByFacing: -36, origin: '76% 72%', pose: 'crouch' },
+            { beat: 'sweep', label: '공중 꼬리 휩쓸기', ticks: 4, to: 'target', rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '비행 위치 복귀', ticks: 8, to: 'home', pose: 'idle', rotation: 0 }
+        ],
         brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.50 }
     }],
     ['rathalos.hop_stomp', '도약 발톱 내려찍기', 'physical', 0.35, {
@@ -440,14 +560,27 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
         cooldown: 32, monsterAtbCost: 0.52,
         tags: ['physical', 'poison', 'ground-only', 'target-contact'],
         movement: { ticks: 26 }, impact: { delayRatio: 0.68 },
-        animationProfile: 'rathalos-stomp'
+        animationProfile: 'rathalos-stomp',
+        motion: [
+            { beat: 'crouch', label: '도약 준비', ticks: 6, pose: 'crouch', face: 'target' },
+            { beat: 'hop', label: '수직 도약', ticks: 7, to: 'toward:target 78%', offsetY: -100, pose: 'stretch-soft', moveEasing: 'snap' },
+            { beat: 'stomp', label: '발톱 내려찍기', ticks: 5, to: 'target', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact', label: '충돌', ticks: 2, pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 6, to: 'home', pose: 'idle' }
+        ]
     }],
     ['rathalos.stomp', '독조 내려찍기', 'physical', 0.35, {
         sourceMoveNameJA: '踏みつけ攻撃', maxTargets: 1, windup: 7, recovery: 1,
         cooldown: 38, monsterAtbCost: 0.58,
         tags: ['physical', 'poison', 'flight-only', 'landing-only', 'target-contact'],
         movement: { ticks: 27 }, impact: { delayRatio: 0.7 },
-        animationProfile: 'rathalos-stomp', flightTransition: 'land'
+        animationProfile: 'rathalos-stomp', flightTransition: 'land',
+        motion: [
+            { beat: 'hover-track', label: '공중 조준', ticks: 7, offsetY: -105, face: 'target', pose: 'brace' },
+            { beat: 'stomp', label: '발톱 착지', ticks: 12, to: 'target', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact', label: '착지 충돌', ticks: 2, pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'recover', label: '착지 후딜', ticks: 6, to: 'home', pose: 'idle' }
+        ]
     }],
     ['rathalos.glide', '저공 활공 돌진', 'charge', 0.30, {
         sourceMoveNameJA: '滑空突進', minTargets: 4, maxTargets: 4, recovery: 1,
@@ -462,6 +595,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
             { atTicks: 24, targetMode: 'sequential', damageScale: 1 }
         ],
         animationProfile: 'aerial-charge-cross', animationDurationMs: 3200
+        , motion: [
+            { beat: 'offscreen-start', label: '화면 밖 진입', ticks: 8, at: 'offscreen:left', opacity: 0, face: 'target', pose: 'stretch-soft' },
+            { beat: 'cross-left', label: '좌측 횡단', ticks: 4, to: 'between:hunter:0,hunter:1', opacity: 1, pose: 'stretch-strong', moveEasing: 'linear', hit: true, sfx: 'impact' },
+            { beat: 'cross-center-left', label: '중앙 좌측 횡단', ticks: 4, to: 'between:hunter:1,hunter:2', pose: 'stretch-strong', moveEasing: 'linear', hit: true, sfx: 'impact' },
+            { beat: 'cross-center-right', label: '중앙 우측 횡단', ticks: 4, to: 'between:hunter:2,hunter:3', pose: 'stretch-strong', moveEasing: 'linear', hit: true, sfx: 'impact' },
+            { beat: 'cross-right', label: '우측 횡단', ticks: 4, to: 'offscreen:right', pose: 'stretch-strong', moveEasing: 'linear', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 16, at: 'offscreen:top', to: 'home', opacity: 1, pose: 'idle' }
+        ]
     }]
 ]).map(pattern => pattern.type === 'roar' ? pattern : ({
     ...pattern,
@@ -472,14 +613,25 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathalos = pilot('world_iceborne', PILOT_SOURCES.
 HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.rathian, [
     ['rathian.roar', '포효', 'roar', 0, {
         maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar'],
-        weight: 0.14, cooldown: 90, monsterAtbCost: 0.48
+        weight: 0.14, cooldown: 90, monsterAtbCost: 0.48,
+        motion: [
+            { beat: 'brace', label: '몸 낮추기', ticks: 2, pose: 'crouch' },
+            { beat: 'roar', label: '포효', ticks: 4, pose: 'stretch-strong', sfx: 'roar' },
+            { beat: 'settle', label: '자세 회복', ticks: 3, pose: 'idle' }
+        ]
     }],
     ['rathian.bite', '물어뜯기', 'physical', 0.22, {
         sourceMoveNameJA: '噛みつき', recovery: 1,
         tags: ['physical', 'ground-only', 'target-contact', 'weak'], monsterAtbCost: 0.30,
         movement: { ticks: 20 }, impact: { visualRatio: 0.55 },
         animationProfile: 'rathalos-bite-contact', animationDurationMs: 2400,
-        maxConsecutiveUses: 1
+        maxConsecutiveUses: 1,
+        motion: [
+            { beat: 'approach', label: '접근', ticks: 9, to: 'toward:target 82%', face: 'target', pose: 'stretch-soft' },
+            { beat: 'bite', label: '물어뜯기', ticks: 3, to: 'toward:target 106%', pose: 'stretch-strong', moveEasing: 'snap', hit: true, sfx: 'impact' },
+            { beat: 'recoil', label: '반동', ticks: 3, to: 'toward:target 91%', pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 5, to: 'home', pose: 'idle' }
+        ]
     }],
     ['rathian.tail_sweep', '이단 꼬리 회전', 'area', 0.27, {
         sourceMoveNameJA: '尻尾回転', minTargets: 4, maxTargets: 4, recovery: 1,
@@ -490,6 +642,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
             { atTicks: 34, damageScale: 1 }
         ],
         animationProfile: 'rathian-tail-sweep-double', animationDurationMs: 4200,
+        motion: [
+            { beat: 'center', label: '중앙 진입', ticks: 12, to: 'arena:center-lower .56', face: 'target', pose: 'brace' },
+            { beat: 'wind', label: '꼬리 준비', ticks: 12, rotateByFacing: -36, origin: '76% 72%', pose: 'crouch' },
+            { beat: 'left-half', label: '좌측 반회전', ticks: 10, rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'right-half', label: '우측 반회전', ticks: 4, rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 4, to: 'home', pose: 'idle', rotation: 0 }
+        ],
         animationGeometry: { anchor: 'arena-center-lower', yRatio: 0.56, approachX: 1, approachY: 1 },
         brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.70 }
     }],
@@ -500,6 +659,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         delivery: 'projectile', impact: { delayTicks: 17, survivesInterruption: true },
         projectileLaunchDelayTicks: 10,
         animationProfile: 'rathalos-fireball', originPart: 'head',
+        motion: [
+            { beat: 'aim', label: '조준', ticks: 6, face: 'target', pose: 'brace' },
+            { beat: 'charge', label: '화염 모으기', ticks: 4, pose: 'crouch', sfx: 'charge' },
+            { beat: 'launch', label: '화염구 발사', ticks: 7, pose: 'stretch-strong', sfx: 'projectile' },
+            { beat: 'impact', label: '착탄', ticks: 1, pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'recover', label: '후딜', ticks: 6, pose: 'idle' }
+        ],
         brokenPartDamageModifiers: { head: 0.80 },
         brokenPartAccuracyModifiers: { head: 0.75 }
     }],
@@ -515,6 +681,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
             { atTicks: 27, targetMode: 'sequential', damageScale: 1 }
         ],
         animationProfile: 'rathian-triple-fireball', animationDurationMs: 2800, originPart: 'head',
+        motion: [
+            { beat: 'aim-center', label: '정면 조준', ticks: 10, face: 'target', pose: 'brace' },
+            { beat: 'charge', label: '화염 모으기', ticks: 7, pose: 'crouch', sfx: 'charge' },
+            { beat: 'shot-center', label: '정면 발사', ticks: 5, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+            { beat: 'shot-left', label: '좌측 발사', ticks: 5, rotateByFacing: -18, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+            { beat: 'shot-right', label: '우측 발사', ticks: 1, rotateByFacing: 36, pose: 'stretch-strong', hit: true, sfx: 'projectile' }
+        ],
         projectileLaunchDelayTicks: 10,
         brokenPartDamageModifiers: { head: 0.80 },
         brokenPartAccuracyModifiers: { head: 0.75 }
@@ -526,14 +699,27 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         monsterAtbCost: 0.38, movement: { ticks: 18 },
         animationProfile: 'rathalos-fireball', animationDurationMs: 1800, originPart: 'head',
         attachedFx: { emoji: '☁️', className: 'breath-fizzle', durationMs: 1800 },
-        suppressPrepareAudio: true
+        suppressPrepareAudio: true,
+        motion: [
+            { beat: 'aim', label: '조준', ticks: 6, face: 'target', pose: 'brace' },
+            { beat: 'charge', label: '불발 준비', ticks: 5, pose: 'crouch' },
+            { beat: 'fizzle', label: '입김 불발', ticks: 3, pose: 'stretch-soft', sfx: 'fizzle' },
+            { beat: 'wheeze', label: '헐떡임', ticks: 4, pose: 'settle' }
+        ]
     }],
     ['rathian.charge', '돌진', 'charge', 0.29, {
         sourceMoveNameJA: '突進', minTargets: 1, maxTargets: 2, windup: 5, recovery: 1,
         forbiddenStates: ['enraged'],
         tags: ['charge', 'ground-only', 'target-contact'], monsterAtbCost: 0.52,
         movement: { ticks: 24, untargetable: true }, targeting: { mode: 'adjacent-lane' },
-        impact: { visualRatio: 0.30 }, animationProfile: 'rathian-ground-charge', animationDurationMs: 3000
+        impact: { visualRatio: 0.30 }, animationProfile: 'rathian-ground-charge', animationDurationMs: 3000,
+        motion: [
+            { beat: 'backstep', label: '짧은 물러남', ticks: 5, to: 'toward:target -12%', face: 'target', pose: 'crouch' },
+            { beat: 'charge', label: '직선 돌진', ticks: 2, to: 'target', pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact', label: '충돌', ticks: 2, continueTravel: true, pose: 'land', hit: true, sfx: 'impact', moveEasing: 'linear' },
+            { beat: 'exit', label: '화면 밖 이탈', ticks: 8, opacity: 0, pose: 'stretch-soft' },
+            { beat: 'return', label: '복귀', ticks: 7, at: 'offscreen:top', to: 'home', opacity: 1, pose: 'idle' }
+        ]
     }],
     ['rathian.triple_charge', '삼연속 돌진', 'charge', 0.30, {
         sourceMoveNameJA: '三連突進', minTargets: 1, maxTargets: 2, windup: 5, recovery: 1,
@@ -542,7 +728,17 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         movement: { kind: 'rathian-triple-charge', ticks: 113, untargetable: true },
         targeting: { mode: 'triple-adjacent-passes' },
         impact: { passRatios: [0.12, 0.43, 0.74], completePathOnTargetLoss: true },
-        animationProfile: 'ground-charge-triple', animationDurationMs: 9000
+        animationProfile: 'ground-charge-triple', animationDurationMs: 9000,
+        motion: [
+            { beat: 'backstep', label: '짧은 물러남', ticks: 5, to: 'toward:target -12%', face: 'target', pose: 'crouch' },
+            { beat: 'pass-one', label: '1차 돌진', ticks: 9, to: 'offscreen:bottom', pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact-one', label: '1차 충돌', ticks: 1, hit: true, sfx: 'impact' },
+            { beat: 'turn-one', label: '화면 밖 선회', ticks: 34, at: 'offscreen:top', opacity: 0, pose: 'brace' },
+            { beat: 'impact-two', label: '2차 충돌', ticks: 1, to: 'offscreen:bottom', opacity: 1, pose: 'stretch-strong', moveEasing: 'linear', hit: true, sfx: 'impact' },
+            { beat: 'turn-two', label: '재선회', ticks: 34, at: 'offscreen:top', opacity: 0, pose: 'brace' },
+            { beat: 'impact-three', label: '3차 충돌', ticks: 1, to: 'offscreen:bottom', opacity: 1, pose: 'stretch-strong', moveEasing: 'linear', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 28, at: 'offscreen:top', to: 'home', opacity: 1, pose: 'idle' }
+        ]
     }],
     ['rathian.somersault', '독가시 서머솔트', 'physical', 0.48, {
         sourceMoveNameJA: 'サマーソルト尻尾攻撃', maxTargets: 1, windup: 8, recovery: 1,
@@ -555,7 +751,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.70 },
         flightTransition: 'land', flight: { takeoffInterference: null },
-        suppressPrepareAudio: true
+        suppressPrepareAudio: true,
+        motion: [
+            { beat: 'approach', label: '도약 접근', ticks: 10, to: 'toward:target 72%', face: 'target', pose: 'stretch-soft', moveEasing: 'accelerate' },
+            { beat: 'coil-back', label: '뒤로 45도 꺾기', ticks: 4, rotateByFacing: -45, origin: '76% 72%', pose: 'crouch' },
+            { beat: 'tail-rise', label: '올려치기 회전', ticks: 5, to: 'target', rotateByFacing: 360, origin: '76% 72%', pose: 'stretch-strong', moveEasing: 'snap' },
+            { beat: 'impact', label: '꼬리 적중', ticks: 2, pose: 'land', hit: true, sfx: 'somersault' },
+            { beat: 'land', label: '착지', ticks: 4, to: 'home', pose: 'idle', rotation: 0 }
+        ]
     }],
     ['rathian.double_somersault', '이단 독가시 서머솔트', 'physical', 0.48, {
         sourceMoveNameJA: 'サマーソルト尻尾攻撃・二連', minTargets: 2, maxTargets: 2,
@@ -571,7 +774,18 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         statusBlockedWhenBroken: ['tail'], brokenPartTargetCaps: { tail: 1 },
         brokenPartDamageModifiers: { tail: 0.70 },
         flightTransition: 'land', flight: { takeoffInterference: null },
-        suppressPrepareAudio: true
+        suppressPrepareAudio: true,
+        motion: [
+            { beat: 'approach-one', label: '1차 접근', ticks: 12, to: 'toward:target 72%', face: 'target', pose: 'stretch-soft' },
+            { beat: 'coil-one', label: '1차 꺾기', ticks: 5, rotateByFacing: -45, origin: '76% 72%', pose: 'crouch' },
+            { beat: 'rise-one', label: '1차 올려치기', ticks: 5, to: 'pass:1', rotateByFacing: 360, origin: '76% 72%', pose: 'stretch-strong' },
+            { beat: 'impact-one', label: '1차 적중', ticks: 2, hit: true, sfx: 'somersault' },
+            { beat: 'reposition', label: '공중 재정렬', ticks: 12, to: 'toward:pass:2 72%', pose: 'brace' },
+            { beat: 'approach-two', label: '2차 접근', ticks: 10, to: 'toward:pass:2 90%', face: 'pass:2', pose: 'stretch-soft' },
+            { beat: 'coil-two', label: '2차 꺾기', ticks: 7, rotateByFacing: -45, origin: '76% 72%', pose: 'crouch' },
+            { beat: 'impact-two', label: '2차 올려치기', ticks: 2, to: 'pass:2', rotateByFacing: 360, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'somersault' },
+            { beat: 'land', label: '착지', ticks: 9, to: 'home', pose: 'idle', rotation: 0 }
+        ]
     }],
     ['rathian.bite_somersault', '공중 물어뜯기 연계', 'physical', 0.48, {
         sourceMoveNameJA: '空中噛みつき・サマーソルト', maxTargets: 1, windup: 7, recovery: 1,
@@ -587,7 +801,17 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         brokenPartDamageModifiers: { tail: 0.70 },
         flightTransition: 'land',
         flight: { takeoffInterference: { kind: 'wind', size: 'small' } },
-        suppressPrepareAudio: true
+        suppressPrepareAudio: true,
+        motion: [
+            { beat: 'takeoff', label: '이륙', ticks: 7, offsetY: -90, face: 'target', pose: 'stretch-soft' },
+            { beat: 'bite-approach', label: '물기 접근', ticks: 13, to: 'target', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'bite-impact', label: '깨물기', ticks: 2, hit: true, sfx: 'impact' },
+            { beat: 'separate', label: '거리 벌리기', ticks: 15, to: 'toward:target 55%', offsetY: -90, pose: 'brace' },
+            { beat: 'coil', label: '뒤로 꺾기', ticks: 10, rotateByFacing: -45, origin: '76% 72%', pose: 'crouch' },
+            { beat: 'rise', label: '올려치기 회전', ticks: 7, to: 'target', rotateByFacing: 360, origin: '76% 72%', pose: 'stretch-strong' },
+            { beat: 'tail-impact', label: '꼬리 적중', ticks: 2, hit: true, sfx: 'somersault' },
+            { beat: 'land', label: '착지', ticks: 10, to: 'home', pose: 'idle', rotation: 0 }
+        ]
     }],
     ['rathian.somersault_glide', '서머솔트 후 저공 활공', 'physical', 0.48, {
         sourceMoveNameJA: 'サマーソルト・滑空突進', minTargets: 2, maxTargets: 2,
@@ -607,7 +831,17 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         originPart: 'tail', statusBlockedWhenBroken: ['tail'],
         brokenPartDamageModifiers: { tail: 0.70 },
         flightTransition: 'land', flight: { takeoffInterference: null },
-        suppressPrepareAudio: true
+        suppressPrepareAudio: true,
+        motion: [
+            { beat: 'approach', label: '서머솔트 접근', ticks: 12, to: 'toward:pass:1 72%', face: 'pass:1', pose: 'stretch-soft' },
+            { beat: 'coil', label: '뒤로 꺾기', ticks: 5, rotateByFacing: -45, origin: '76% 72%', pose: 'crouch' },
+            { beat: 'rise', label: '올려치기 회전', ticks: 4, to: 'pass:1', rotateByFacing: 360, origin: '76% 72%', pose: 'stretch-strong' },
+            { beat: 'tail-impact', label: '꼬리 적중', ticks: 2, hit: true, sfx: 'somersault' },
+            { beat: 'separate', label: '활공 거리 확보', ticks: 13, to: 'toward:pass:2 48%', offsetY: -80, pose: 'brace' },
+            { beat: 'glide', label: 'S자 저공 활공', ticks: 20, to: 'pass:2', pose: 'stretch-strong', moveEasing: 'slow-fast-slow' },
+            { beat: 'glide-impact', label: '활공 충돌', ticks: 2, to: 'offscreen:bottom', hit: true, sfx: 'impact' },
+            { beat: 'land', label: '착지 복귀', ticks: 20, at: 'offscreen:top', to: 'home', pose: 'idle' }
+        ]
     }],
     ['rathian.glide', '저공 활공', 'charge', 0.28, {
         sourceMoveNameJA: '滑空突進', minTargets: 1, maxTargets: 1, windup: 6, recovery: 1,
@@ -620,7 +854,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         }],
         animationProfile: 'rathian-glide', animationDurationMs: 4800,
         flightTransition: 'land',
-        flight: { takeoffInterference: { kind: 'wind', size: 'small' } }
+        flight: { takeoffInterference: { kind: 'wind', size: 'small' } },
+        motion: [
+            { beat: 'takeoff', label: '이륙', ticks: 6, offsetY: -90, face: 'target', pose: 'stretch-soft' },
+            { beat: 'line-up', label: '활공 정렬', ticks: 10, to: 'toward:target 45%', offsetY: -70, pose: 'brace' },
+            { beat: 'glide', label: 'S자 저공 활공', ticks: 17, to: 'target', pose: 'stretch-strong', moveEasing: 'slow-fast-slow' },
+            { beat: 'impact', label: '활공 충돌', ticks: 2, to: 'offscreen:bottom', hit: true, sfx: 'impact' },
+            { beat: 'land', label: '착지 복귀', ticks: 5, at: 'offscreen:top', to: 'home', pose: 'idle' }
+        ]
     }]
 ]);
 
@@ -647,7 +888,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = HUNT_MONSTER_PATTERN_OVERRIDES.rathian.
 HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.diablos, [
     ['diablos.roar', '포효', 'roar', 0, {
         maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar', 'interference-large'],
-        weight: 0.12, cooldown: 95, monsterAtbCost: 0.50, interference: { kind: 'roar', size: 'large' }
+        weight: 0.12, cooldown: 95, monsterAtbCost: 0.50, interference: { kind: 'roar', size: 'large' },
+        motion: [
+            { beat: 'brace', label: '몸 낮추기', ticks: 2, pose: 'crouch' },
+            { beat: 'roar', label: '포효', ticks: 4, pose: 'stretch-strong', sfx: 'roar',
+                judgmentOffsets: { roar: 1 }, judgments: [{ id: 'roar-control', group: 'roar-control',
+                    kind: 'roar', target: 'all', size: 'large', offsetTicks: 1 }] },
+            { beat: 'settle', label: '자세 회복', ticks: 3, pose: 'idle' }
+        ]
     }],
     ['diablos.horn_charge', '뿔 돌진', 'charge', 0.40, {
         sourceMoveNameJA: '突進', maxTargets: 3, windup: 7, recovery: 1,
@@ -655,70 +903,183 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.d
         movement: { ticks: 42, untargetable: true },
         targeting: { mode: 'adjacent-lane' },
         chargeLaunchStyle: 'stomp-burst',
-        animationProfile: 'ground-charge', animationDurationMs: 3360,
+        motion: [
+            { beat: 'stomp', label: '발구르기', ticks: 7, pose: 'crouch', stompSteps: 3 },
+            { beat: 'charge', label: '돌진', ticks: 44, to: 'target', face: 'target',
+                bounds: 'reach', pose: 'idle', instantPose: true, strideFlipTicks: 3, moveEasing: 'linear' },
+            { beat: 'impact', label: '피격', ticks: 2, continueTravel: true, pose: 'land',
+                hit: true, sfx: 'impact', fade: 'out', moveEasing: 'linear',
+                judgments: [{ id: 'horn-charge-hit', group: 'horn-charge-hit', kind: 'damage',
+                    target: 'primary-adjacent', damageScale: 1, offsetTicks: 0 }] },
+            { beat: 'return', label: 'Fade-in 복귀', ticks: 8, at: 'offscreen:top', to: 'home',
+                pose: 'idle', fade: 'in', moveEasing: 'decelerate' }
+        ],
         brokenPartDamageModifiers: { 'left-horn': 0.935, 'right-horn': 0.935 }
     }],
-    ['diablos.burrow_enter', '지중 잠행', 'burrow', 0, {
-        sourceMoveNameJA: '地中潜行', maxTargets: 1, windup: 5, recovery: 1, cooldown: 56,
-        tags: ['burrow', 'burrow-enter'], monsterAtbCost: 0.45,
-        secondaryInterference: { kind: 'wind', size: 'small', scope: 'all' },
-        phase: { kind: 'burrow', enterVisualMs: 1250, emergeVisualMs: 1450 },
-        animationProfile: 'burrow-enter',
-        followUp: {
-            idSuffix: 'burrow_emerge', name: '지중 급습', type: 'charge', damageRatio: 0.46,
-            windupTicks: { normal: 12, enraged: 8 }, activeTicks: 2, recoveryTicks: 1,
-            minTargets: 1, maxTargets: 1, monsterAtbCost: 0.75,
-            tags: ['charge', 'burrow', 'burrow-emerge', 'locked-target', 'horn', 'strong', 'tremor-large'],
-            interference: { kind: 'tremor', size: 'large' },
-            secondaryInterference: { kind: 'tremor', size: 'large' },
-            animationProfile: 'burrow-emerge'
-        },
+    ['diablos.burrow_enter', '지중 잠행·급습', 'charge', 0.46, {
+        sourceMoveNameJA: '地中潜行→地中急襲', maxTargets: 1, windup: 5, recovery: 1, cooldown: 56,
+        tags: ['charge', 'burrow', 'burrow-combo', 'locked-target', 'horn', 'strong', 'tremor-large'], monsterAtbCost: 0.75,
+        // Tremor [L] occupies the eruption lane and its immediate neighbours,
+        // including the directly struck lane. Adjacency is clipped naturally
+        // at the left/right edge.
+        // Digging dust is visual only and must never become legacy wind pressure.
+        interference: { kind: 'tremor', size: 'large', directHitSupersedes: false },
+        motion: [
+            { beat: 'dig', label: '땅 파기', ticks: 3, pose: 'crouch', scaleY: .82,
+                fx: 'burrow-dust', fxDurationTicks: 11 },
+            { beat: 'sink', label: '잠복', ticks: 2, offsetY: 105, scaleY: .42, opacity: .35, moveEasing: 'accelerate' },
+            { beat: 'still', label: '정적', ticks: 30, opacity: 0, pose: 'crouch' },
+            { beat: 'track', label: '지중 추적', ticks: 14, at: 'below:arena:center 150', opacity: 0,
+                pose: 'crouch', fx: 'burrow-tracking-dust', fxAnchor: 'center', fxDurationTicks: 14 },
+            { beat: 'eruption', label: '머리 쳐올리기', ticks: 5, to: 'above:arena:center 20', bounds: 'reach',
+                opacity: 1, instantOpacity: true, pose: 'stretch-strong',
+                scaleX: .88, scaleY: 1.18, rotationToward: 10, moveEasing: 'snap', hit: true,
+                sfx: 'impact', fx: 'burrow-emerge-dust', fxAnchor: 'center', fxDurationTicks: 6,
+                judgmentOffsets: { tremor: 2 }, judgments: [
+                    { id: 'burrow-hit', group: 'burrow-eruption', kind: 'damage', target: 'primary',
+                        damageScale: 1, offsetTicks: 2 },
+                    { id: 'burrow-tremor', group: 'burrow-eruption', kind: 'tremor', target: 'primary-adjacent',
+                        size: 'large', directHitSupersedes: false, offsetTicks: 2 }
+                ] },
+            { beat: 'land', label: '솟구침 반동', ticks: 5, to: 'below:arena:center 28', pose: 'settle',
+                scaleX: 1.03, scaleY: .96, rotation: 0, moveEasing: 'decelerate' },
+            { beat: 'return', label: '천천히 복귀', ticks: 10, to: 'home', pose: 'idle',
+                scaleX: 1, scaleY: 1, rotation: 0, moveEasing: 'decelerate' }
+        ],
         brokenPartDamageModifiers: { 'left-horn': 0.89, 'right-horn': 0.89 }
     }],
     ['diablos.horn_uppercut', '뿔 쳐올리기', 'physical', 0.37, {
         sourceMoveNameJA: '角振り上げ', maxTargets: 1, recovery: 1,
         tags: ['physical', 'horn', 'target-contact'], monsterAtbCost: 0.45,
-        movement: { ticks: 28 },
-        impact: { delayRatio: 0.57 },
-        animationProfile: 'horn-uppercut',
+        movement: { ticks: 32 },
+        impact: { delayTicks: 13 },
+        motion: [
+            { beat: 'telegraph', label: '헌터 앞 접근', ticks: 8, to: 'toward:target 82%', face: 'target', pose: 'stretch-soft', moveEasing: 'linear' },
+            { beat: 'start', label: '뿔 낮추기', ticks: 5, pose: 'crouch', origin: '50% 52%', rotationToward: 10 },
+            { beat: 'impact', label: '뿔 쳐올리기', ticks: 4, to: 'toward:target 98%', offsetY: -24,
+                pose: 'idle', origin: '50% 52%', rotationToward: -34,
+                scaleX: 1, scaleY: 1.03, moveEasing: 'snap', hit: true, sfx: 'impact',
+                fx: 'part-dust', fxAnchor: 'head', fxDurationTicks: 6,
+                fxSecondary: 'target-impact-dust', fxSecondaryAnchor: 'target', fxSecondaryDurationTicks: 6,
+                fxSecondaryAngleMode: 'upward-diagonal',
+                fxAdditional: [{ fx: 'part-swing-arc', anchor: 'head', durationTicks: 5,
+                    angleMode: 'upward-diagonal' }] },
+            { beat: 'recover', label: '상체 복구', ticks: 7, offsetY: -10, pose: 'settle',
+                origin: '50% 52%', rotationToward: -8, moveEasing: 'decelerate' },
+            { beat: 'return', label: '제자리 복귀', ticks: 8, to: 'home', pose: 'idle', rotation: 0,
+                origin: '50% 50%', moveEasing: 'decelerate' }
+        ],
         brokenPartDamageModifiers: { 'left-horn': 0.931, 'right-horn': 0.931 }
     }],
     ['diablos.horn_sweep', '연속 뿔 휘두르기', 'area', 0.39, {
-        sourceMoveNameJA: '連続角振り', minTargets: 2, maxTargets: 3, cooldown: 42, recovery: 1,
+        sourceMoveNameJA: '連続角振り', minTargets: 2, maxTargets: 2, cooldown: 42, recovery: 1,
         tags: ['area', 'horn', 'multi-hit', 'target-contact'], monsterAtbCost: 0.70,
-        movement: { ticks: 34 },
+        movement: { ticks: 42 },
         impactTimeline: [
-            { atTicks: 14, damageScale: 0.54 },
-            { atTicks: 25, damageScale: 0.54 }
+            { atTicks: 11, targetMode: 'sequential', damageScale: 0.54 },
+            { atTicks: 24, targetMode: 'sequential', damageScale: 0.54 }
         ],
-        targeting: { mode: 'lane' },
-        animationProfile: 'horn-sweep-contact',
+        targeting: { mode: 'adjacent-pair-sequential', passCount: 2 },
+        motion: [
+            { beat: 'telegraph', label: '두 헌터 사이 접근', ticks: 7, to: 'between:pass:1,pass:2', face: 'pass:1', pose: 'brace', moveEasing: 'linear' },
+            { beat: 'lower-1', label: '첫 뿔 낮추기', ticks: 4, face: 'pass:1',
+                pose: 'crouch', origin: '50% 52%', rotationToward: 10 },
+            { beat: 'impact-1', label: '첫 쳐올리기', ticks: 4, offsetY: -18,
+                pose: 'idle', origin: '50% 52%', rotationToward: -34, moveEasing: 'snap', hit: true, sfx: 'impact',
+                fx: 'part-dust', fxAnchor: 'head', fxDurationTicks: 6,
+                fxSecondary: 'target-impact-dust', fxSecondaryAnchor: 'target', fxSecondaryDurationTicks: 6,
+                fxSecondaryAngleMode: 'upward-diagonal',
+                fxAdditional: [{ fx: 'part-swing-arc', anchor: 'head', durationTicks: 5,
+                    angleMode: 'upward-diagonal' }] },
+            { beat: 'recenter', label: '중앙 자세 전환', ticks: 5,
+                pose: 'settle', rotation: 0, offsetY: 0, moveEasing: 'decelerate' },
+            { beat: 'lower-2', label: '둘째 뿔 낮추기', ticks: 4, face: 'pass:2',
+                pose: 'crouch', origin: '50% 52%', rotationToward: 10 },
+            { beat: 'impact-2', label: '둘째 쳐올리기', ticks: 4, offsetY: -18,
+                pose: 'idle', origin: '50% 52%', rotationToward: -34, moveEasing: 'snap', hit: true, sfx: 'impact',
+                fx: 'part-dust', fxAnchor: 'head', fxDurationTicks: 6,
+                fxSecondary: 'target-impact-dust', fxSecondaryAnchor: 'target', fxSecondaryDurationTicks: 6,
+                fxSecondaryAngleMode: 'upward-diagonal',
+                fxAdditional: [{ fx: 'part-swing-arc', anchor: 'head', durationTicks: 5,
+                    angleMode: 'upward-diagonal' }] },
+            { beat: 'recover', label: '상체 복구', ticks: 6, offsetY: -8, pose: 'settle',
+                origin: '50% 52%', rotationToward: -8, moveEasing: 'decelerate' },
+            { beat: 'return', label: '제자리 복귀', ticks: 8, to: 'home', pose: 'idle', rotation: 0,
+                origin: '50% 50%', moveEasing: 'decelerate' }
+        ],
         brokenPartDamageModifiers: { 'left-horn': 0.817, 'right-horn': 0.817 }
-    }],
-    ['diablos.tail_sweep', '꼬리 휘두르기', 'area', 0.30, {
-        sourceMoveNameJA: '尻尾振り', minTargets: 2, maxTargets: 2, recovery: 1,
-        tags: ['area', 'tail', 'target-contact', 'charge-follow-up'], monsterAtbCost: 0.65,
-        requiresPreviousPattern: 'diablos.horn_charge', weight: 4,
-        movement: { ticks: 32 }, targeting: { mode: 'lane' },
-        impactTimeline: [{ atTicks: 14 }, { atTicks: 24 }],
-        animationProfile: 'diablos-tail-cross', animationDurationMs: 3200,
-        animationGeometry: { approachX: 0.15, approachY: 0.15 },
-        brokenPartTargetCaps: { tail: 1 }, brokenPartDamageModifiers: { tail: 0.76 }
     }],
     ['diablos.rage_charge', '분노 연속 돌진', 'charge', 0.45, {
         sourceMoveNameJA: '怒り連続突進', minTargets: 2, maxTargets: 4, windup: 8, recovery: 1,
         cooldown: 65, state: 'enraged', tags: ['charge', 'horn', 'cross-charge', 'multi-hit'],
         monsterAtbCost: 0.80,
-        movement: { kind: 'diablos-return-charge', ticks: 133, untargetable: true },
+        movement: { kind: 'diablos-return-charge-tail-cross', ticks: 162, untargetable: true },
         targeting: { mode: 'return-adjacent-passes' },
         impact: {
             // One telegraph owns both passes. Resolve defense only as each
             // off-board traversal physically crosses its locked hunter lane.
-            passRatios: [0.357, 0.773],
+            passRatios: [0.315, 0.772],
             completePathOnTargetLoss: true
         },
+        impactTimeline: [
+            { atTicks: 51, targetMode: 'runtime-pair-left', damageScale: 1 },
+            { atTicks: 125, targetMode: 'runtime-pair-right', damageScale: 1 },
+            { atTicks: 135, targetMode: 'runtime-pair-left', damageScale: .45 },
+            { atTicks: 149, targetMode: 'runtime-pair-right', damageScale: .45 }
+        ],
         chargeLaunchStyle: 'stomp-burst',
-        animationProfile: 'ground-charge-double', animationDurationMs: 10640,
+        animationDurationMs: 16200,
+        motion: [
+            // Reuse the reviewed single-charge cadence verbatim: 7 tick stomp,
+            // 44 tick constant-speed line, then a 2 tick contact pass.
+            { beat: 'stomp', label: '발구르기', ticks: 7, pose: 'crouch', stompSteps: 3 },
+            { beat: 'charge-out', label: '1차 돌진·2인 조 중앙 관통', ticks: 44, to: 'pair:center', face: 'pair:center',
+                bounds: 'reach', pose: 'idle', instantPose: true, strideFlipTicks: 3,
+                moveEasing: 'linear' },
+            { beat: 'exit-bottom', label: '같은 직선으로 화면 하단 이탈', ticks: 8,
+                to: 'through:pair:center 120', face: 'pair:center', pose: 'idle', fade: 'out',
+                moveEasing: 'linear', strideFlipTicks: 3,
+                hit: true, sfx: 'impact', targetMode: 'runtime-pair-left' },
+            { beat: 'hold-outside', label: '화면 하단 밖 대기', ticks: 20,
+                opacity: 0, pose: 'brace' },
+            { beat: 'return-charge', label: '2차 돌진·화면 안 정지', ticks: 44,
+                to: 'above:pair:center 220', face: 'pair:center', bounds: 'pivot', opacity: 1,
+                instantOpacity: true, rotation: 180, pose: 'idle', instantPose: true, strideFlipTicks: 3,
+                moveEasing: 'linear' },
+            { beat: 'return-impact', label: '2차 충돌·정지', ticks: 2,
+                rotation: 180, pose: 'land', strideFlipTicks: 3,
+                hit: true, sfx: 'impact', moveEasing: 'linear',
+                targetMode: 'runtime-pair-right' },
+            { beat: 'tail-wind-left', label: '좌상단 꼬리 준비', ticks: 5,
+                rotation: 165, offsetX: 0, offsetY: 0, skewX: 4,
+                scaleX: 1.01, scaleY: .99, pose: 'stretch-soft', origin: 'part:torso',
+                moveEasing: 'accelerate' },
+            { beat: 'tail-cross-one', label: '후방 X자 좌상→우하', ticks: 5,
+                rotation: 202, offsetX: 0, offsetY: 0, skewX: -6,
+                scaleX: 1.04, scaleY: .96, pose: 'stretch-strong', origin: 'part:torso',
+                moveEasing: 'snap', hit: true, sfx: 'impact', damageScale: .45,
+                targetMode: 'runtime-pair-left', fx: 'target-impact-dust', fxAnchor: 'target', fxDurationTicks: 5 },
+            { beat: 'tail-rebound', label: '꼬리 반동', ticks: 4,
+                rotation: 185, offsetX: 0, offsetY: 0, skewX: -2,
+                scaleX: 1.01, scaleY: .99, pose: 'settle', origin: 'part:torso',
+                moveEasing: 'decelerate' },
+            { beat: 'tail-wind-right', label: '우상단 꼬리 준비', ticks: 5,
+                rotation: 195, offsetX: 0, offsetY: 0, skewX: -4,
+                scaleX: 1.01, scaleY: .99, pose: 'stretch-soft', origin: 'part:torso',
+                moveEasing: 'accelerate', flipFacing: true },
+            { beat: 'tail-cross-two', label: '후방 X자 우상→좌하', ticks: 5,
+                rotation: 158, offsetX: 0, offsetY: 0, skewX: 6,
+                scaleX: 1.04, scaleY: .96, pose: 'stretch-strong', origin: 'part:torso',
+                moveEasing: 'snap', hit: true, sfx: 'impact', damageScale: .45,
+                targetMode: 'runtime-pair-right', fx: 'target-impact-dust', fxAnchor: 'target', fxDurationTicks: 5 },
+            { beat: 'tail-settle', label: '꼬리 회수', ticks: 5,
+                rotation: 176, offsetX: 0, offsetY: 0, skewX: 2,
+                scaleX: 1.01, scaleY: .99, pose: 'settle', origin: 'part:torso',
+                moveEasing: 'decelerate' },
+            { beat: 'return', label: '회전 유지 복귀', ticks: 8, to: 'home',
+                rotation: 180, skewX: 0, scaleX: 1, scaleY: 1, opacity: 1,
+                pose: 'idle', origin: '74% 30%', moveEasing: 'decelerate', flipFacing: true }
+        ],
         whiffReaction: {
             pass: 'last', result: 'dodge',
             disabledWhenAllBroken: ['left-horn', 'right-horn'],
@@ -746,8 +1107,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos.splice(-1, 0, huntPattern(
         sourceGame: 'world_iceborne',
         sourceMoveNameJA: '尻尾たたきつけ・岩飛ばし',
         sourceUrl: PILOT_SOURCES.diablos,
-        minTargets: 2,
-        maxTargets: 2,
+        minTargets: 1,
+        maxTargets: 3,
         windup: 5,
         recovery: 1,
         cooldown: 38,
@@ -755,12 +1116,22 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos.splice(-1, 0, huntPattern(
         delivery: 'projectile',
         projectileVisual: 'rock',
         monsterAtbCost: 0.60,
-        movement: { ticks: 34 },
-        targeting: { mode: 'lane' },
-        animationProfile: 'tail-slam-rock',
+        movement: { ticks: 45 },
+        targeting: { mode: 'independent-passes', passCount: 3, distinctPasses: true },
+        projectileEventKinds: ['diablos-rock-volley'],
+        originPart: 'tail',
+        motion: [
+            { beat: 'brace', label: '제자리 준비', ticks: 5, pose: 'brace' },
+            { beat: 'turn-back', label: '뒤돌기', ticks: 5, rotation: 180, origin: 'part:torso', pose: 'brace', rotationEasing: 'accelerate' },
+            { beat: 'tail-compress', label: '꼬리 높이 들어올리기', ticks: 6, rotation: 145, origin: 'part:torso', scaleX: .9, scaleY: .86, skewX: -8, pose: 'crouch', moveEasing: 'decelerate', rotationEasing: 'decelerate' },
+            { beat: 'tail-slam-volley', label: '꼬리 원호 내려찍기 · 바위 발사', ticks: 4, rotation: 218, origin: 'part:torso', scaleX: 1.16, scaleY: 1.2, skewX: 10, pose: 'stretch-strong', moveEasing: 'snap', rotationEasing: 'snap', fx: 'tail-slam-arc', fxAnchor: 'tail', fxDurationTicks: 4 },
+            { beat: 'volley-flight', label: '바위 3갈래 비행', ticks: 7, rotation: 218, origin: 'part:torso', scaleX: 1.16, scaleY: 1.2, skewX: 10, pose: 'stretch-strong', hit: true, hitOffsetTicks: 6, sfx: 'impact' },
+            { beat: 'recoil', label: '내려찍기 반동', ticks: 5, rotation: 196, origin: 'part:torso', scaleX: 1.03, scaleY: .96, pose: 'land', rotationEasing: 'decelerate' },
+            { beat: 'recover', label: '꼬리 회수', ticks: 5, rotation: 180, origin: 'part:torso', scaleX: 1, scaleY: 1, pose: 'settle', rotationEasing: 'decelerate' },
+            { beat: 'return', label: '제자리 복귀', ticks: 8, to: 'home', pose: 'idle', rotation: 180, origin: 'part:torso', scaleX: 1, scaleY: 1, moveEasing: 'decelerate' }
+        ],
         impactTimeline: [
-            { atTicks: 16, targetMode: 'sequential', damageScale: 1 },
-            { atTicks: 27, targetMode: 'sequential', damageScale: 1.114, audioCue: 'rock' }
+            { atTicks: 26, launchAtTicks: 19, targetMode: 'all-prepared', damageScale: 1, eventKind: 'diablos-rock-volley', audioCue: 'rock', sourcePart: 'tail' }
         ],
         brokenPartTargetCaps: { tail: 1 },
         brokenPartDamageModifiers: { tail: 0.76 },
@@ -777,6 +1148,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos.splice(-1, 0,
         cooldown: 22,
         tags: ['physical', 'bite', 'weak'],
         monsterAtbCost: 0.32,
+        motion: [
+            { beat: 'approach', label: '접근', ticks: 5, to: 'toward:target 82%', face: 'target', aimBodyAt: 'target', pose: 'stretch-soft', moveEasing: 'accelerate' },
+            { beat: 'bite', label: '물어뜯기', ticks: 3, to: 'toward:target 106%', pose: 'stretch-strong', moveEasing: 'snap', hit: true, sfx: 'impact' },
+            { beat: 'recoil', label: '반동', ticks: 3, to: 'toward:target 90%', pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 5, to: 'home', pose: 'idle' }
+        ],
         evidence: 'verified-complete-action',
         confidence: 'cross-checked-behavior'
     }),
@@ -793,7 +1170,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos.splice(-1, 0,
         monsterAtbCost: 0.54,
         movement: { ticks: 30 },
         targeting: { mode: 'lane' },
-        animationProfile: 'side-tackle-contact',
+        motion: [
+            { beat: 'side-hop', label: '측면 도약', ticks: 7, to: 'pair-flank:targets 150', face: 'target-group', pose: 'stretch-soft', moveEasing: 'snap' },
+            { beat: 'shoulder-set', label: '어깨 들이밀기', ticks: 5, pose: 'brace', rotationToward: 14 },
+            { beat: 'tackle', label: '철산고 충돌', ticks: 6, to: 'through-current:target-group 104%', bounds: 'reach', pose: 'stretch-strong', rotationToward: 22, moveEasing: 'slow-fast-slow', hit: true, sfx: 'impact', fx: 'target-impact-dust', fxAnchor: 'target', fxDurationTicks: 6 },
+            { beat: 'step-back', label: '한걸음 후퇴', ticks: 6, to: 'toward:target 82%', pose: 'settle', rotation: 0 },
+            { beat: 'return', label: '복귀', ticks: 6, to: 'home', pose: 'idle', moveEasing: 'decelerate' }
+        ],
         targetDamageRatios: [0.30, 0.15],
         brokenPartTargetCaps: { tail: 1 },
         evidence: 'verified-complete-action',
@@ -801,16 +1184,19 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos.splice(-1, 0,
     })
 );
 
-HUNT_MONSTER_PATTERN_OVERRIDES.diablos = HUNT_MONSTER_PATTERN_OVERRIDES.diablos.map(pattern =>
-    pattern.id === 'diablos.tail_sweep'
-        ? { ...pattern, name: '후방 X자 꼬리치기' }
-        : pattern
-);
-
 // Black Diablos shares the verified body-plan mechanics, but keeps a separate,
 // more aggressive kit instead of inheriting normal Diablos tuning.
+HUNT_MONSTER_PATTERN_OVERRIDES.diablos.forEach(pattern => {
+    pattern.beatV2Approved = true;
+});
 HUNT_MONSTER_PATTERN_OVERRIDES.black_diablos = HUNT_MONSTER_PATTERN_OVERRIDES.diablos.map(pattern => ({
     ...pattern,
+    // Review-editor motion belongs to the shared Diablos body plan. Keep the
+    // authored Black Diablos combat tuning below, but resolve its BEAT graph
+    // from the reviewed base pattern unless this variant receives an explicit
+    // override of its own.
+    motionOverrideSource: { monsterId: 'diablos', patternId: pattern.id },
+    beatV2Approved: false,
     id: pattern.id.replace(/^diablos\./, 'black_diablos.'),
     damageRatio: Math.min(0.62, Number((Number(pattern.damageRatio || 0) * 1.1).toFixed(3))),
     targetDamageRatios: Array.isArray(pattern.targetDamageRatios)
@@ -980,12 +1366,26 @@ worldVariant('bazelgeuse', 'seething_bazelgeuse', 1.08, [
     ['seething_bazelgeuse.purple_scale_barrage', '보라빛 폭린 융단폭격', 'projectile', .43, {
         minTargets: 2, maxTargets: 4, actionClass: 'BombGlide', requiredState: 'enraged',
         tags: ['flight-only', 'projectile', 'blast', 'scale', 'heated-scale', 'multi-hit'], delivery: 'projectile',
-        cooldown: 58, windup: 9, recovery: 14
+        cooldown: 58, windup: 9, recovery: 14,
+        motion: [
+            { beat: 'rise', label: '고공 상승', ticks: 4, offsetY: -140, pose: 'stretch-soft' },
+            { beat: 'line-up', label: '폭격 정렬', ticks: 4, face: 'target', pose: 'brace' },
+            { beat: 'scale-barrage', label: '보라빛 폭린 투하', ticks: 3, to: 'target', pose: 'stretch-strong', sfx: 'projectile' },
+            { beat: 'impact', label: '폭린 착탄', ticks: 1, hit: true, sfx: 'impact' },
+            { beat: 'recover', label: '비행 후딜', ticks: 1, to: 'home', pose: 'idle' }
+        ]
     }],
     ['seething_bazelgeuse.diving_explosion', '홍련 폭린 급강하', 'area', .58, {
         minTargets: 3, maxTargets: 4, actionClass: 'TailAttackTripleStartRedRelease', requiredState: 'enraged',
         tags: ['flight-only', 'area', 'blast', 'scale', 'heated-scale', 'landing-only'], flightTransition: 'land',
-        cooldown: 90, windup: 14, recovery: 18, animationProfile: 'aerial-dive-explosion'
+        cooldown: 90, windup: 14, recovery: 18, animationProfile: 'aerial-dive-explosion',
+        motion: [
+            { beat: 'rise', label: '고공 상승', ticks: 5, to: 'offscreen:top', opacity: 0, pose: 'stretch-soft' },
+            { beat: 'dive-lineup', label: '급강하 조준', ticks: 5, at: 'offscreen:top', opacity: 0, face: 'target', pose: 'crouch' },
+            { beat: 'dive', label: '홍련 급강하', ticks: 6, to: 'target', opacity: 1, pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact', label: '대폭발 착지', ticks: 1, pose: 'land', hit: true, sfx: 'explosion' },
+            { beat: 'recover', label: '착지 후딜', ticks: 1, to: 'home', pose: 'idle' }
+        ]
     }]
 ], pattern => ({
     ...pattern,
@@ -1067,6 +1467,29 @@ function tigrexChargeBranch(id, branchKind, branchLabel, weightByState, normalFi
         originPart: branchKind === 'rock' ? 'lower-front-leg' : null,
         branchKind,
         branchLabel,
+        motion: [
+            { beat: 'backstep', label: '돌진 준비', ticks: 5, to: 'toward:target -12%', face: 'target', pose: 'crouch' },
+            { beat: 'pass-one', label: '1차 직선 돌진', ticks: 9, to: 'offscreen:bottom', pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact-one', label: '1차 충돌', ticks: 1, hit: true, sfx: 'impact' },
+            { beat: 'turn-outside', label: '화면 밖 방향전환', ticks: 27, at: 'offscreen:top', opacity: 0, pose: 'brace' },
+            { beat: 'impact-two', label: '2차 직선 충돌', ticks: 1, to: 'offscreen:bottom', opacity: 1, pose: 'stretch-strong', moveEasing: 'linear', hit: true, sfx: 'impact' },
+            { beat: 'final-lineup', label: '마지막 진입 정렬', ticks: 20, at: 'offscreen:top', opacity: 0, face: 'target', pose: 'brace' },
+            { beat: 'final-approach', label: '목표 앞까지 돌진', ticks: 7, to: 'toward:target 84%', opacity: 1, pose: 'stretch-strong', moveEasing: 'linear' },
+            ...(branchKind === 'rock' ? [
+                { beat: 'hop-home', label: '뒤로 폴짝 복귀', ticks: 8, to: 'home', pose: 'stretch-soft', moveEasing: 'snap' },
+                { beat: 'rock-launch', label: '바위 투척', ticks: 1, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+                { beat: 'rock-recovery', label: '투척 후딜', ticks: 21, pose: 'settle' }
+            ] : branchKind === 'spin' ? [
+                { beat: 'slide-in', label: '미끄러지며 진입', ticks: 8, to: 'target', pose: 'land' },
+                { beat: 'spin-impact', label: '전신 회전', ticks: 4, rotateByFacing: 360, origin: '50% 58%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+                { beat: 'spin-recovery', label: '회전 후딜', ticks: 18, to: 'home', pose: 'idle', rotation: 0 }
+            ] : [
+                { beat: 'bite-contact', label: '깨물기 사거리 진입', ticks: 8, to: 'target', pose: 'stretch-soft' },
+                { beat: 'bite-one', label: '1차 깨물기', ticks: 5, to: 'target', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+                { beat: 'bite-two', label: '2차 깨물기', ticks: 3, rotateByFacing: -16, pose: 'stretch-strong', hit: true, sfx: 'impact' },
+                { beat: 'bite-recovery', label: '깨물기 후딜', ticks: 14, to: 'home', pose: 'idle' }
+            ])
+        ],
         visualAnchors: TIGREX_ANCHORS,
         stateMachine: {
             normalPasses: 2,
@@ -1092,6 +1515,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.tigrex = worldFlying([
         postActionRecoverySeconds: 1.5, animationDurationMs: 2500,
         directDamageScope: 'engaged-melee', brokenPartDamageModifiers: { head: .75 },
         roarVisual: 'sonic-impact',
+        motion: [
+            { beat: 'brace', label: '숨 들이쉬기', ticks: 6, pose: 'crouch' },
+            { beat: 'sonic-roar', label: '충격 포효', ticks: 8, pose: 'stretch-strong', sfx: 'roar', hit: true },
+            { beat: 'roar-hold', label: '포효 유지', ticks: 5, pose: 'brace' },
+            { beat: 'recover', label: '포효 후딜', ticks: 6, pose: 'idle' }
+        ],
         visualAnchors: TIGREX_ANCHORS
     }],
     ['tigrex.foreleg_slam', '앞발 내려찍기', 'physical', .25, {
@@ -1099,6 +1528,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.tigrex = worldFlying([
         cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .32,
         postActionRecoverySeconds: 1, movement: { ticks: 20, returnsToOrigin: true },
         impact: { visualRatio: .56 }, animationProfile: 'tigrex-foreleg-slam', animationDurationMs: 2000,
+        motion: [
+            { beat: 'approach', label: '앞발 접근', ticks: 7, to: 'toward:target 80%', face: 'target', pose: 'stretch-soft' },
+            { beat: 'raise-foreleg', label: '앞발 들기', ticks: 4, pose: 'brace', rotationToward: -10 },
+            { beat: 'foreleg-impact', label: '앞발 내려찍기', ticks: 2, to: 'target', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 7, to: 'home', pose: 'idle' }
+        ],
         partUse: { mode: 'random-front-leg', brokenDamageMultiplier: .70 }, visualAnchors: TIGREX_ANCHORS
     }],
     ['tigrex.bite', '깨물기', 'physical', .25, {
@@ -1107,12 +1542,25 @@ HUNT_MONSTER_PATTERN_OVERRIDES.tigrex = worldFlying([
         postActionRecoverySeconds: 1, movement: { ticks: 22, returnsToOrigin: true },
         impact: { visualRatio: .58 }, brokenPartDamageModifiers: { head: .75 },
         animationProfile: 'tigrex-bite', animationDurationMs: 1800, visualAnchors: TIGREX_ANCHORS
+        , motion: [
+            { beat: 'approach', label: '깨물기 접근', ticks: 8, to: 'toward:target 82%', face: 'target', pose: 'stretch-soft' },
+            { beat: 'bite', label: '깨물기', ticks: 3, to: 'toward:target 108%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'recoil', label: '반동', ticks: 3, to: 'toward:target 92%', pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 8, to: 'home', pose: 'idle' }
+        ]
     }],
     ['tigrex.double_bite', '연속 깨물기', 'physical', .25, {
         maxTargets: 1, actionClass: 'DoubleBite', tags: ['physical', 'target-contact', 'weak', 'multi-hit', 'ground-only'],
         cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .42,
         postActionRecoverySeconds: 1.5, movement: { ticks: 30, returnsToOrigin: true },
         impactTimeline: [{ atTicks: 10 }, { atTicks: 15 }],
+        motion: [
+            { beat: 'approach', label: '연속 물기 접근', ticks: 10, to: 'toward:target 84%', face: 'target', pose: 'stretch-soft' },
+            { beat: 'bite-one', label: '1차 깨물기', ticks: 5, to: 'target', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'bite-two', label: '2차 깨물기', ticks: 3, rotateByFacing: -18, pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'recoil', label: '깨물기 반동', ticks: 4, to: 'toward:target 90%', pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 8, to: 'home', pose: 'idle' }
+        ],
         brokenPartDamageModifiers: { head: .75 }, animationProfile: 'tigrex-double-bite', animationDurationMs: 2400, visualAnchors: TIGREX_ANCHORS
     }],
     ...[
@@ -1126,6 +1574,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.tigrex = worldFlying([
         postActionRecoverySeconds: 3, targeting: { mode: 'primary-adjacent-both' },
         impact: { visualRatio: .82 },
         brokenPartTargetCaps: { tail: 2 }, animationProfile: 'tigrex-clockwise-spin', animationDurationMs: 1540,
+        motion: [
+            { beat: 'approach', label: '회전 사거리 진입', ticks: 6, to: 'toward:target 72%', face: 'target', pose: 'brace' },
+            { beat: 'wind', label: '회전 준비', ticks: 3, rotateByFacing: -28, pose: 'crouch' },
+            { beat: 'spin', label: '전신 회전', ticks: 4, rotateByFacing: 360, origin: '50% 58%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'recover', label: '회전 후딜', ticks: 3, to: 'home', pose: 'idle', rotation: 0 }
+        ],
         visualAnchors: TIGREX_ANCHORS
     }],
     ['tigrex.rock_shot', '바위 날리기', 'projectile', .30, {
@@ -1137,13 +1591,27 @@ HUNT_MONSTER_PATTERN_OVERRIDES.tigrex = worldFlying([
         impact: { visualRatio: .55 }, animationDurationMs: 2200,
         brokenPartTargetCaps: { 'right-front-leg': 1 }, partUse: { fixed: 'right-front-leg' },
         habitatVariants: { snow: 'ice', volcanic: 'fire', wet: 'water', default: 'raw' },
+        motion: [
+            { beat: 'brace', label: '투척 준비', ticks: 5, face: 'target', pose: 'crouch' },
+            { beat: 'foreleg-scoop', label: '앞발로 바위 긁기', ticks: 7, rotateByFacing: -18, pose: 'brace' },
+            { beat: 'rock-launch', label: '바위 발사', ticks: 1, pose: 'stretch-strong', sfx: 'projectile' },
+            { beat: 'rock-impact', label: '바위 착탄', ticks: 1, hit: true, sfx: 'impact' },
+            { beat: 'recover', label: '투척 후딜', ticks: 8, pose: 'idle' }
+        ],
         animationProfile: 'tigrex-rock-shot', visualAnchors: TIGREX_ANCHORS
     }],
     ['tigrex.leap', '도약 덮치기', 'charge', .50, {
         maxTargets: 1, actionClass: 'JumpAttack', tags: ['charge', 'target-contact', 'strong', 'ground-only'],
         chargeMode: 'single', cooldown: 1, weight: .10, maxConsecutiveUses: 99, monsterAtbCost: .58,
         postActionRecoverySeconds: 3, movement: { ticks: 24, returnsToOrigin: true, returnTicks: 15 },
-        impact: { visualRatio: .68 }, animationProfile: 'tigrex-leap', animationDurationMs: 2400, visualAnchors: TIGREX_ANCHORS
+        impact: { visualRatio: .68 }, animationProfile: 'tigrex-leap', animationDurationMs: 2400, visualAnchors: TIGREX_ANCHORS,
+        motion: [
+            { beat: 'spring-load', label: '도약 압축', ticks: 5, pose: 'crouch', face: 'target', scaleY: .82 },
+            { beat: 'leap', label: '수직 도약', ticks: 7, to: 'toward:target 72%', offsetY: -150, pose: 'stretch-strong', moveEasing: 'snap' },
+            { beat: 'descend', label: '목표로 낙하', ticks: 5, to: 'target', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact', label: '도약 덮치기', ticks: 2, to: 'below:target 24', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 5, to: 'home', pose: 'idle' }
+        ]
     }]
 ]);
 
@@ -1179,7 +1647,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
     'https://monsterhunterrise.wiki.fextralife.com/Nargacuga', [
     ['nargacuga.roar', '포효', 'roar', 0, {
         maxTargets: 4, sourceMoveNameJA: '咆哮', tags: ['roar', 'transition-roar'],
-        weight: 0.13, cooldown: 88, monsterAtbCost: 0.44
+        weight: 0.13, cooldown: 88, monsterAtbCost: 0.44,
+        motion: [
+            { beat: 'brace', label: '몸 낮추기', ticks: 2, pose: 'crouch' },
+            { beat: 'roar', label: '포효', ticks: 4, pose: 'stretch-strong', sfx: 'roar' },
+            { beat: 'settle', label: '자세 회복', ticks: 3, pose: 'idle' }
+        ]
     }],
 
     // ── 평상시 · 근접 모드 ──────────────────────────────────────────────────
@@ -1212,6 +1685,16 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         // 상관없는 사람들이 맞는다. 주 표적과 이웃 하나를 훑는 1패스로 고정한다.
         targeting: { mode: 'primary-flank-passes', passCount: 1 },
         impactTimeline: [{ atTicks: 15, damageScale: 1 }],
+        // 편집기의 네 구간이 실제 모션을 직접 소유한다. 이전 CSS 프로필은
+        // 타격점을 전체 길이의 62.5%에 고정해, 구간 틱을 바꿔도 화면과 판정이
+        // 어긋났다. 저장된 override는 같은 beat id에 병합되므로 새로고침 뒤에도
+        // 전조/접근·휘두르기/접촉 유지/복귀가 편집한 폭 그대로 재생된다.
+        motion: [
+            { beat: 'telegraph', label: '전조', ticks: 5, pose: 'crouch', face: 'target' },
+            { beat: 'action-1', label: '접근·휘두르기', ticks: 10, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-whip', moveEasing: 'slow-fast-slow' },
+            { beat: 'impact-1', label: '꼬리 접촉', ticks: 2, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'settle', hit: true, sfx: 'impact' },
+            { beat: 'action-2', label: '회수·복귀', ticks: 8, to: 'home', pose: 'idle', moveEasing: 'decelerate', rotationEasing: 'decelerate' }
+        ],
         // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
         animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-tail-whip', animationDurationMs: 2400,
@@ -1227,6 +1710,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         monsterAtbCost: 0.62, movement: { ticks: 26 },
         targeting: { mode: 'primary-flank-passes', passCount: 1 },
         impactTimeline: [{ atTicks: 18, damageScale: 1 }],
+        motion: [
+            { beat: 'center', label: '회전 위치 진입', ticks: 8, to: 'toward:target 70%', face: 'target', pose: 'brace' },
+            { beat: 'wind', label: '꼬리 감기', ticks: 10, rotateByFacing: -42, origin: '62% 28%', pose: 'crouch' },
+            { beat: 'sweep', label: '꼬리 반회전', ticks: 2, rotateByFacing: 180, origin: '62% 28%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'follow-through', label: '회전 관성', ticks: 2, rotateByFacing: 180, origin: '62% 28%', pose: 'land' },
+            { beat: 'return', label: '복귀', ticks: 4, to: 'home', pose: 'idle', rotation: 0 }
+        ],
         animationProfile: 'nargacuga-pivot-spin', animationDurationMs: 2600,
         originPart: 'tail',
         brokenPartDamageModifiers: { tail: 0.68 }
@@ -1254,10 +1744,12 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         motion: [
             { beat: 'windup', ticks: 9, pose: 'crouch' },
             { beat: 'rise', ticks: 8, to: 'above:target 300', pose: 'stretch' },
-            { beat: 'aim', ticks: 5, to: 'above:target 260', pose: 'stretch-soft' },
+            // 내려찍기 직전부터 꼬리를 길게 편다. slam에서 같은 축 보정을 유지하지
+            // 않으면 180도 회전 보간 중 꼬리가 먼저 접힌 뒤 내려치는 것처럼 보인다.
+            { beat: 'aim', ticks: 5, to: 'above:target 260', pose: 'stretch-soft', scaleX: .92, scaleY: 1.20 },
             // bounds 'reach' — 접합 보정이 채팅 안전선을 넘어야 한다. 여기서는 회전축이
             // 곧 접합 부위(꼬리)라, 180도 회전이 몸을 도로 위로 올린다.
-            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-slam', hit: true, sfx: 'impact' },
+            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-slam', scaleX: .92, scaleY: 1.08, hit: true, sfx: 'impact' },
             // 꼬리가 박힌 채 버틴다. 회전은 유지되고 idle이 풀어준다.
             { beat: 'brace', ticks: 26, pose: 'brace' },
             { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
@@ -1280,6 +1772,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         monsterAtbCost: 0.58, movement: { ticks: 34, untargetable: true },
         targeting: { mode: 'adjacent-lane' },
         impactTimeline: [{ atTicks: 24, damageScale: 1 }],
+        motion: [
+            { beat: 'flank-hop', label: '측면 도약', ticks: 10, to: 'flank:target 180', face: 'target', pose: 'stretch-soft', moveEasing: 'snap' },
+            { beat: 'circle', label: '사각 파고들기', ticks: 8, to: 'toward:target 66%', opacity: .55, pose: 'brace' },
+            { beat: 'lunge', label: '칼날깃 돌진', ticks: 6, to: 'target', opacity: 1, pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact', label: '칼날깃 적중', ticks: 2, hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 8, to: 'home', pose: 'idle' }
+        ],
         animationProfile: 'nargacuga-flank-charge', animationDurationMs: 3400,
         brokenPartDamageModifiers: { 'left-wing': 0.78, 'right-wing': 0.78 }
     }],
@@ -1289,13 +1788,31 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         forbiddenStates: ['enraged'], cooldown: 46, weight: 1.15,
         tags: ['charge', 'ambush', 'vanish', 'target-contact', 'strong', 'stance-ranged'],
         monsterAtbCost: 0.74,
-        movement: { ticks: 26, untargetable: true },
-        impactTimeline: [{ atTicks: 18, damageScale: 1 }],
+        movement: { ticks: 31, untargetable: true },
+        impactTimeline: [{ atTicks: 21, damageScale: 1 }],
+        // 31틱 전체를 실전과 검수기가 함께 읽는 단일 비트 모션으로 저작한다.
+        // 측후방 페이드인이 끝난 뒤 3틱 동안 조준 자세를 노출하고 급습한다.
+        // hit 비트 시작이 곧 21틱 판정이다.
+        motion: [
+            { beat: 'windup', label: '도약 압축', ticks: 5, pose: 'crouch', sfx: 'start' },
+            { beat: 'leap-out', label: '화면 밖 도약', ticks: 4, to: 'offscreen:left', offsetY: -280, pose: 'stretch', fade: 'out', alignRotationToTravel: true, moveEasing: 'accelerate' },
+            { beat: 'vanish', label: '사각 이동', ticks: 3, pose: 'stretch', opacity: 0 },
+            // 출현 비트를 직접 선택하거나 스크럽해도 첫 프레임부터 보여야 한다.
+            // fade-in은 비트 시작을 투명 상태로 남겨 실제로는 다음 조준 비트에서
+            // 갑자기 나타나는 것처럼 보였으므로, 숨은 이동이 끝나는 경계에서 즉시
+            // 측후방 좌표와 가시성을 확정한다.
+            { beat: 'reappear', label: '측후방 출현', ticks: 2, at: 'polar:target 315deg 700', face: 'target', bounds: 'reach', pose: 'crouch', opacity: 1, instantOpacity: true, aimBodyAt: 'target' },
+            { beat: 'ambush-aim', label: '측후방 조준', ticks: 3, face: 'target', pose: 'crouch', opacity: 1, aimBodyAt: 'target' },
+            { beat: 'dive', label: '칼날깃 급습', ticks: 4, to: 'target', face: 'target', align: 'part:left-wing', bounds: 'reach', pose: 'stretch-strong', alignRotationToTravel: true, moveEasing: 'accelerate' },
+            { beat: 'impact', label: '칼날깃 충돌', ticks: 2, to: 'target', align: 'part:left-wing', bounds: 'reach', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'pass-through', label: '관통 이탈', ticks: 4, to: 'offscreen:right', offsetY: 620, pose: 'stretch', fade: 'out', alignRotationToTravel: true, moveEasing: 'accelerate' },
+            { beat: 'return', label: '상단 복귀', ticks: 4, at: 'offscreen:top', to: 'home', pose: 'idle', fade: 'in', moveEasing: 'decelerate' }
+        ],
         // 급습은 표적 좌표까지 온전히 도달해야 한다. 기본 접근 배율(.92)은 헌터
         // 앞에서 멈추라고 넣은 값인데, 45도 아래에서 뛰어드는 이 패턴에서는
         // 표적 중심에서 안쪽으로 밀려 좌측 헌터를 노릴 때 우측을 때리게 된다.
         animationGeometry: { approachX: 1 },
-        animationProfile: 'nargacuga-leap-ambush', animationDurationMs: 2600,
+        animationProfile: 'nargacuga-leap-ambush', animationDurationMs: 3100,
         originPart: 'left-wing',
         brokenPartDamageModifiers: { 'left-wing': 0.76, 'right-wing': 0.76 }
     }],
@@ -1311,6 +1828,15 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { atTicks: 24, targetMode: 'sequential', damageScale: 1 },
             { atTicks: 48, targetMode: 'sequential', damageScale: 1 }
         ],
+        motion: [
+            { beat: 'line-up', label: '1차 정렬', ticks: 8, face: 'pass:1', pose: 'crouch' },
+            { beat: 'lunge-one', label: '1차 런지', ticks: 16, to: 'pass:1', pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact-one', label: '1차 적중', ticks: 2, to: 'offscreen:bottom', hit: true, sfx: 'impact' },
+            { beat: 'turn-outside', label: '화면 밖 전환', ticks: 10, at: 'offscreen:top', opacity: 0, face: 'pass:2', pose: 'brace' },
+            { beat: 'lunge-two', label: '2차 런지', ticks: 12, to: 'pass:2', opacity: 1, pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact-two', label: '2차 적중', ticks: 2, to: 'offscreen:bottom', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 6, at: 'offscreen:top', to: 'home', pose: 'idle' }
+        ],
         // 1타가 급습과 같은 구조이므로 접근 배율도 같이 맞춘다(표적 좌표까지 온전히 도달).
         animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-offscreen-charge', animationDurationMs: 5600
@@ -1324,6 +1850,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         impactTimeline: [
             { atTicks: 15, targetMode: 'sequential', damageScale: 1 },
             { atTicks: 23, targetMode: 'sequential', damageScale: 0.80 }
+        ],
+        motion: [
+            { beat: 'aim', label: '꼬리깃 조준', ticks: 8, face: 'target', pose: 'brace' },
+            { beat: 'fan-open', label: '가시깃 펼치기', ticks: 7, rotateByFacing: -22, origin: '62% 28%', pose: 'crouch' },
+            { beat: 'shot-one', label: '1차 사출', ticks: 1, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+            { beat: 're-aim', label: '재조준', ticks: 7, rotateByFacing: 18, pose: 'brace' },
+            { beat: 'shot-two', label: '2차 사출', ticks: 1, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+            { beat: 'recover', label: '사출 후딜', ticks: 2, pose: 'idle' }
         ],
         animationProfile: 'ranged-cast', animationDurationMs: 2600,
         originPart: 'tail',
@@ -1343,6 +1877,13 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         monsterAtbCost: 0.26,
         movement: { ticks: 30, untargetable: true },
         impactTimeline: [{ atTicks: 24, damageScale: 1 }],
+        motion: [
+            { beat: 'vanish-hop', label: '화면 밖 도약', ticks: 6, to: 'offscreen:top', opacity: 0, pose: 'stretch-soft' },
+            { beat: 'flank-shift', label: '측면 재배치', ticks: 10, at: 'flank:target 240', opacity: 0, face: 'target', pose: 'crouch' },
+            { beat: 'reappear', label: '재출현', ticks: 8, opacity: 1, pose: 'stretch-soft' },
+            { beat: 'feint', label: '견제 타격', ticks: 2, to: 'toward:target 82%', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 4, to: 'home', pose: 'idle' }
+        ],
         animationProfile: 'nargacuga-stance-hop', animationDurationMs: 3000,
         weight: 0.35, maxConsecutiveUses: 1
     }],
@@ -1382,9 +1923,22 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         // 화면 밖으로 빠졌다 되돌아오는 연출의 의미가 없어진다.
         targeting: { mode: 'independent-passes', passCount: 3, distinctPasses: true },
         impactTimeline: [
-            { atTicks: 22, targetMode: 'sequential', damageScale: 1 },
-            { atTicks: 38, targetMode: 'sequential', damageScale: 0.92 },
+            { atTicks: 22, targetMode: 'sequential', damageScale: 1, hitRecoveryTicks: 15, hitReactionKind: 'weak' },
+            { atTicks: 38, targetMode: 'sequential', damageScale: 0.92, hitRecoveryTicks: 15, hitReactionKind: 'weak' },
             { atTicks: 54, targetMode: 'sequential', damageScale: 0.92 }
+        ],
+        motion: [
+            { beat: 'vanish', label: '도약 이탈', ticks: 6, to: 'offscreen:top', opacity: 0, pose: 'stretch-soft' },
+            { beat: 'aim-one', label: '1차 측후방 출현', ticks: 6, at: 'polar:pass:1 315deg 620', opacity: 1, face: 'pass:1', pose: 'crouch' },
+            { beat: 'dive-one', label: '1차 급습', ticks: 10, to: 'pass:1', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact-one', label: '1차 적중', ticks: 2, hit: true, sfx: 'impact' },
+            { beat: 'aim-two', label: '2차 재출현', ticks: 6, at: 'polar:pass:2 45deg 620', opacity: 1, face: 'pass:2', pose: 'crouch' },
+            { beat: 'dive-two', label: '2차 급습', ticks: 8, to: 'pass:2', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact-two', label: '2차 적중', ticks: 2, hit: true, sfx: 'impact' },
+            { beat: 'aim-three', label: '3차 재출현', ticks: 6, at: 'polar:pass:3 315deg 620', opacity: 1, face: 'pass:3', pose: 'crouch' },
+            { beat: 'dive-three', label: '3차 급습', ticks: 8, to: 'pass:3', pose: 'stretch-strong', moveEasing: 'accelerate' },
+            { beat: 'impact-three', label: '3차 적중', ticks: 2, hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 10, to: 'home', pose: 'idle' }
         ],
         animationGeometry: { approachX: 1 },
         animationProfile: 'nargacuga-leap-ambush-triple', animationDurationMs: 6600,
@@ -1405,6 +1959,14 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { atTicks: 18, targetMode: 'pair', damageScale: 1 },
             { atTicks: 38, targetMode: 'pair', damageScale: 1 }
         ],
+        motion: [
+            { beat: 'center', label: '회전 위치 진입', ticks: 8, to: 'arena:center-lower .56', face: 'target', pose: 'brace' },
+            { beat: 'wind-one', label: '정회전 준비', ticks: 10, rotateByFacing: -42, origin: '62% 28%', pose: 'crouch' },
+            { beat: 'spin-one', label: '정회전', ticks: 2, rotateByFacing: 180, origin: '62% 28%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'wind-two', label: '역회전 준비', ticks: 18, rotateByFacing: 42, origin: '62% 28%', pose: 'brace' },
+            { beat: 'spin-two', label: '역회전', ticks: 2, rotateByFacing: -180, origin: '62% 28%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'return', label: '복귀', ticks: 4, to: 'home', pose: 'idle', rotation: 0 }
+        ],
         animationProfile: 'nargacuga-twin-pivot-spin', animationDurationMs: 4400,
         originPart: 'tail', brokenPartTargetCaps: { tail: 2 },
         brokenPartDamageModifiers: { tail: 0.68 }
@@ -1421,6 +1983,17 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         impactTimeline: [
             { atTicks: 26, targetMode: 'sequential', damageScale: 1 },
             { atTicks: 44, targetMode: 'sequential', damageScale: 1 }
+        ],
+        motion: [
+            { beat: 'wind-one', label: '1차 꼬리 준비', ticks: 8, pose: 'crouch' },
+            { beat: 'rise-one', label: '1차 도약', ticks: 8, to: 'above:pass:1 280', pose: 'stretch-soft' },
+            { beat: 'aim-one', label: '1차 조준', ticks: 10, face: 'pass:1', origin: '62% 28%', pose: 'brace' },
+            { beat: 'slam-one', label: '1차 내려찍기', ticks: 3, to: 'pass:1', rotateByFacing: 180, origin: '62% 28%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'rebound', label: '꼬리 뽑기', ticks: 7, to: 'above:pass:2 240', pose: 'stretch-soft' },
+            { beat: 'aim-two', label: '2차 조준', ticks: 8, face: 'pass:2', pose: 'brace' },
+            { beat: 'slam-two', label: '2차 내려찍기', ticks: 3, to: 'pass:2', rotateByFacing: 180, origin: '62% 28%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'stuck', label: '꼬리 박힘 후딜', ticks: 23, pose: 'brace' },
+            { beat: 'return', label: '복귀', ticks: 10, to: 'home', pose: 'idle', rotation: 0 }
         ],
         // 꼬리가 표적에 닿아야 하므로 접근 배율을 줄이지 않는다.
         animationGeometry: { approachX: 1 },
@@ -1443,6 +2016,18 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { atTicks: 22, targetMode: 'sequential', damageScale: 1 },
             { atTicks: 40, targetMode: 'sequential', damageScale: 0.92 },
             { atTicks: 62, targetMode: 'sequential', damageScale: 1, audioCue: 'narga-combo-finish' }
+        ],
+        motion: [
+            { beat: 'line-up-one', label: '1차 정렬', ticks: 6, face: 'pass:1', pose: 'crouch' },
+            { beat: 'lunge-one', label: '1차 런지', ticks: 16, to: 'pass:1', pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact-one', label: '1차 적중', ticks: 2, to: 'offscreen:bottom', hit: true, sfx: 'impact' },
+            { beat: 'turn-one', label: '1차 화면 밖 전환', ticks: 8, at: 'offscreen:top', opacity: 0, face: 'pass:2', pose: 'brace' },
+            { beat: 'lunge-two', label: '2차 런지', ticks: 8, to: 'pass:2', opacity: 1, pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact-two', label: '2차 적중', ticks: 2, to: 'offscreen:bottom', hit: true, sfx: 'impact' },
+            { beat: 'turn-two', label: '2차 화면 밖 전환', ticks: 8, at: 'offscreen:top', opacity: 0, face: 'pass:3', pose: 'brace' },
+            { beat: 'lunge-three', label: '3차 런지', ticks: 12, to: 'pass:3', opacity: 1, pose: 'stretch-strong', moveEasing: 'linear' },
+            { beat: 'impact-three', label: '마무리 적중', ticks: 2, to: 'offscreen:bottom', hit: true, sfx: 'narga-combo-finish' },
+            { beat: 'return', label: '복귀', ticks: 8, at: 'offscreen:top', to: 'home', pose: 'idle' }
         ],
         // 1·2타가 급습과 같은 구조이므로 접근 배율도 같이 맞춘다(표적 좌표까지 온전히 도달).
         animationGeometry: { approachX: 1 },
@@ -1481,24 +2066,30 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
     ['barioth.roar', '포효', 'roar', 0, {
         maxTargets: 4, actionClass: 'Roar', sourceMoveNameJA: '咆哮',
         tags: ['roar', 'transition-roar'], weight: .12, cooldown: 88, monsterAtbCost: .44,
-        interference: { kind: 'roar', size: 'small' }
+        movement: { ticks: 9 },
+        interference: { kind: 'roar', size: 'small' },
+        motion: [
+            { beat: 'brace', label: '몸 낮추기', ticks: 2, pose: 'crouch' },
+            { beat: 'roar', label: '포효', ticks: 4, pose: 'stretch-strong', sfx: 'roar' },
+            { beat: 'settle', label: '자세 회복', ticks: 3, pose: 'idle' }
+        ]
     }],
 
     // 前方に飛びかかりかみついて攻撃する — 제자리에서 무는 것이 아니라 앞으로
     // 뛰어들며 문다. 그래서 접근 비트가 가속이고, 무는 순간이 곧 착지다.
     ['barioth.bite', '물어뜯기', 'physical', .22, {
         maxTargets: 1, actionClass: 'BiteSlammedLatter', sourceMoveNameJA: '噛みつき',
-        tags: ['physical', 'ground-only', 'target-contact', 'weak'], recovery: 1,
-        monsterAtbCost: .30, movement: { ticks: 16 }, maxConsecutiveUses: 2,
-        impactTimeline: [{ atTicks: 7, damageScale: 1 }],
+        tags: ['physical', 'ground-only', 'target-contact', 'weak', 'butt-stumble'], recovery: 1,
+        monsterAtbCost: .26, movement: { ticks: 10 }, maxConsecutiveUses: 2,
+        impactTimeline: [{ atTicks: 5, damageScale: 1 }],
         motion: [
-            { beat: 'crouch', ticks: 3, pose: 'crouch', face: 'target' },
-            { beat: 'leap-in', ticks: 4, to: 'toward:target 76%', pose: 'stretch', moveEasing: 'accelerate' },
-            { beat: 'bite', ticks: 2, to: 'target', align: 'part:mouth', pose: 'land', hit: true, sfx: 'impact', moveEasing: 'snap' },
-            { beat: 'jaw-hold', ticks: 3, pose: 'settle' },
-            { beat: 'return', ticks: 4, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+            { beat: 'bite-load', label: '순간 압축', ticks: 1, pose: 'crouch', face: 'target', origin: 'part:head', scaleX: 1.06, scaleY: .88 },
+            { beat: 'leaping-bite', label: '도약 물어뜯기', ticks: 4, to: 'toward:target 112%', align: 'part:mouth', pose: 'stretch-strong', face: 'target', origin: 'part:head', rotationToward: 16, scaleX: 1.16, scaleY: .88, moveEasing: 'snap', rotationEasing: 'accelerate' },
+            { beat: 'bite-impact', label: '턱 충돌', ticks: 1, pose: 'brace', origin: 'part:head', rotationToward: 16, scaleX: 1.10, scaleY: .78, hit: true, sfx: 'impact' },
+            { beat: 'bite-recoil', label: '짧은 반동', ticks: 1, to: 'toward:target 96%', pose: 'land', origin: 'part:head', rotationToward: 7, scaleX: .98, scaleY: 1.04, moveEasing: 'snap' },
+            { beat: 'bite-return', label: '즉시 복귀', ticks: 3, to: 'home', pose: 'idle', rotation: 0, scaleX: 1, scaleY: 1, moveEasing: 'decelerate', rotationEasing: 'decelerate' }
         ],
-        animationProfile: 'barioth-bite-contact', animationDurationMs: 1600,
+        animationProfile: 'barioth-leaping-bite-contact', animationDurationMs: 1000,
         originPart: 'head', brokenPartDamageModifiers: { head: .82 }
     }],
 
@@ -1512,17 +2103,17 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
     ['barioth.shoulder_check', '철산고', 'physical', .32, {
         minTargets: 1, maxTargets: 2, actionClass: 'BiteSlammedLatterR', sourceMoveNameJA: 'ショートタックル',
         tags: ['physical', 'ground-only', 'target-contact', 'slip-eligible'], recovery: 1,
-        monsterAtbCost: .48, movement: { ticks: 30 }, targeting: { mode: 'adjacent-lane' },
-        impactTimeline: [{ atTicks: 8, damageScale: 1 }],
+        monsterAtbCost: .48, movement: { ticks: 25 }, targeting: { mode: 'adjacent-lane' },
+        impactTimeline: [{ atTicks: 13, damageScale: 1 }],
         motion: [
-            { beat: 'turn-side', ticks: 5, pose: 'brace', face: 'target' },
-            { beat: 'hop', ticks: 3, to: 'above:home 44', pose: 'crouch', moveEasing: 'decelerate' },
-            { beat: 'tackle', ticks: 6, to: 'target', align: 'part:torso', pose: 'stretch-strong', hit: true, sfx: 'impact', moveEasing: 'accelerate' },
-            { beat: 'skid', ticks: 5, to: 'toward:target 128%', pose: 'land', moveEasing: 'decelerate' },
-            { beat: 'plant', ticks: 5, pose: 'brace' },
-            { beat: 'return', ticks: 6, to: 'home', pose: 'idle', moveEasing: 'smooth' }
+            { beat: 'spring-load', label: '도약 압축', ticks: 2, pose: 'crouch', face: 'target', scaleX: 1.10, scaleY: .80 },
+            { beat: 'flank-hop', label: '측면 도약', ticks: 5, to: 'flank:target 210', pose: 'stretch-strong', face: 'target', scaleX: .90, scaleY: 1.14, moveEasing: 'snap' },
+            { beat: 'shoulder-set', label: '어깨 들이밀기', ticks: 3, pose: 'brace', face: 'target', origin: 'part:torso', rotationToward: 12, scaleX: .96, scaleY: 1.06, rotationEasing: 'accelerate' },
+            { beat: 'lateral-slam', label: '횡이동 충돌', ticks: 3, to: 'target', align: 'part:torso', pose: 'stretch-strong', origin: 'part:torso', rotationToward: 30, moveEasing: 'snap', rotationEasing: 'slow-fast-slow' },
+            { beat: 'shoulder-impact', label: '철산고 충돌', ticks: 2, pose: 'brace', origin: 'part:torso', hit: true, sfx: 'impact' },
+            { beat: 'slow-return', label: '느린 자세 복귀', ticks: 10, to: 'home', pose: 'brace', rotation: 0, scaleX: 1, scaleY: 1, moveEasing: 'decelerate', rotationEasing: 'decelerate' }
         ],
-        animationProfile: 'side-tackle-contact', animationDurationMs: 3000,
+        animationProfile: 'side-tackle-contact', animationDurationMs: 2500,
         originPart: 'torso'
     }],
 
@@ -1532,21 +2123,21 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
     ['barioth.spin_claw', '회전 할퀴기', 'physical', .40, {
         minTargets: 1, maxTargets: 2, actionClass: 'JumpAttack', sourceMoveNameJA: '回転ひっかき',
         tags: ['physical', 'ground-only', 'target-contact', 'multi-hit', 'slip-eligible'], recovery: 1,
-        monsterAtbCost: .54, movement: { ticks: 26 }, targeting: { mode: 'adjacent-lane' },
+        monsterAtbCost: .54, movement: { ticks: 28 }, targeting: { mode: 'adjacent-lane' },
         impactTimeline: [
-            { atTicks: 10, damageScale: 1 },
-            { atTicks: 14, targetMode: 'repeat-previous', damageScale: .6 }
+            { atTicks: 9, damageScale: 1 },
+            { atTicks: 15, targetMode: 'repeat-previous', damageScale: .5 }
         ],
         motion: [
-            { beat: 'wind-up', ticks: 5, pose: 'crouch', face: 'target' },
-            { beat: 'lunge', ticks: 5, to: 'toward:target 72%', pose: 'stretch', moveEasing: 'accelerate' },
-            { beat: 'first-claw', ticks: 4, to: 'target', align: 'part:left-front-leg', pose: 'spin-right', hit: true, sfx: 'impact', moveEasing: 'snap' },
-            { beat: 'second-claw', ticks: 3, to: 'target', align: 'part:right-front-leg', pose: 'land', hit: true, damageScale: .6 },
-            { beat: 'recover', ticks: 4, pose: 'settle', moveEasing: 'decelerate' },
+            { beat: 'step-back', ticks: 5, to: 'toward:target -32%', pose: 'brace', face: 'target', moveEasing: 'decelerate' },
+            { beat: 'coil', ticks: 4, pose: 'crouch' },
+            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
+            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotateBy: 26, origin: 'part:torso', hit: true, damageScale: .5 },
+            { beat: 'unwind', ticks: 4, pose: 'brace', moveEasing: 'decelerate' },
             { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
         ],
-        animationProfile: 'barioth-lateral-pounce', animationDurationMs: 2600,
-        originPart: 'left-front-leg',
+        animationProfile: 'barioth-wide-tail-sweep', animationDurationMs: 2800,
+        originPart: 'tail',
         weightWhenBroken: { 'left-front-leg': .72, 'right-front-leg': .72 }
     }],
 
@@ -1721,11 +2312,26 @@ worldVariant('barioth', 'frostfang_barioth', 1.08, [
         minTargets: 2, maxTargets: 4, actionClass: 'BreathNormal', tags: ['area', 'ice', 'frost-ground', 'elemental'],
         delivery: 'ground-wave', attachedFx: { emoji: '❄️', className: 'freezing-floor', durationMs: 4200 },
         interference: { kind: 'frost-root' }, brokenPartDamageModifiers: { head: .68 },
-        brokenPartAccuracyModifiers: { head: .75 }, statusBlockedWhenBroken: ['head']
+        movement: { ticks: 9 }, impactTimeline: [{ atTicks: 7 }],
+        brokenPartAccuracyModifiers: { head: .75 }, statusBlockedWhenBroken: ['head'],
+        motion: [
+            { beat: 'aim', label: '지면 조준', ticks: 3, face: 'target', pose: 'brace' },
+            { beat: 'frost-charge', label: '냉기 모으기', ticks: 4, pose: 'crouch', sfx: 'charge' },
+            { beat: 'floor-breath', label: '빙결 지면 분사', ticks: 1, pose: 'stretch-strong', hit: true, sfx: 'projectile' },
+            { beat: 'recover', label: '후딜', ticks: 1, pose: 'idle' }
+        ]
     }],
     ['frostfang_barioth.frost_leap', '서리 지면 도약', 'charge', .44, {
         maxTargets: 3, actionClass: 'BiteSlammedLatterR', requiredState: 'enraged',
-        tags: ['charge', 'ice', 'frost-ground', 'multi-hit'], chargeMode: 'wide', cooldown: 58
+        tags: ['charge', 'ice', 'frost-ground', 'multi-hit'], chargeMode: 'wide', cooldown: 58,
+        movement: { ticks: 17 }, impactTimeline: [{ atTicks: 7 }, { atTicks: 9 }],
+        motion: [
+            { beat: 'spring-load', label: '도약 압축', ticks: 3, pose: 'crouch', face: 'target' },
+            { beat: 'frost-leap', label: '서리 도약', ticks: 4, to: 'above:target 180', pose: 'stretch-strong', moveEasing: 'snap' },
+            { beat: 'impact', label: '빙결 착지', ticks: 2, to: 'target', pose: 'land', hit: true, sfx: 'impact' },
+            { beat: 'frost-wave', label: '서리 확산', ticks: 3, pose: 'brace', hit: true, sfx: 'projectile' },
+            { beat: 'return', label: '복귀', ticks: 5, to: 'home', pose: 'idle' }
+        ]
     }]
 ]);
 

@@ -87,6 +87,17 @@ class HuntMotionCompiler {
         }, bounds);
     }
 
+    static #placeFromCurrent(spec, beat, anchors, partOffset, facing, current) {
+        const match = String(spec || '').trim().match(/^through-current:(\S+)\s+(-?\d+(?:\.\d+)?)%$/);
+        if (!match) return null;
+        const destination = this.#place(match[1], beat, anchors, partOffset, facing);
+        const ratio = Number(match[2]) / 100;
+        return anchors.clamp({
+            x: current.x + (destination.x - current.x) * ratio,
+            y: current.y + (destination.y - current.y) * ratio
+        }, beat.bounds || 'contact');
+    }
+
     static compile(beats, {
         anchors, rig = 'winged', poses = null, ticksPerSecond = null, partOffset = null
     } = {}) {
@@ -126,10 +137,14 @@ class HuntMotionCompiler {
 
         const placement = [{ offset: 0, ...this.#placementFrame(state) }];
         const pose = [{ offset: 0, ...this.#poseFrame(state) }];
-        const facing = [{ offset: 0, direction: state.facing }];
+        const facing = [];
         const impacts = [];
         const cues = [];
+        const visualCues = [];
+        const strideWindows = [];
         const timeline = [];
+        let facingActive = false;
+        let lastTravel = null;
 
         let elapsed = 0;
         beats.forEach((beat, index) => {
@@ -152,13 +167,33 @@ class HuntMotionCompiler {
                 state.point = this.#place(beat.at, beat, anchors, offsetOf, state.facing);
                 placement.push({ offset: Math.max(0, startAt - this.EPS), ...this.#placementFrame(previous) });
             }
-            if (beat.to) {
-                state.point = this.#place(beat.to, beat, anchors, offsetOf, state.facing);
+            // `at` is an instantaneous placement at the beat boundary. Keep
+            // that point as the interpolation start instead of restoring the
+            // previous point in the generic start frame below.
+            const placementStart = beat.at
+                ? { ...previous, point: { ...state.point } }
+                : previous;
+            if (beat.continueTravel) {
+                if (!lastTravel || !lastTravel.ticks) {
+                    throw new HuntMotionCompilerError('continueTravel은 직전 이동 BEAT 뒤에서만 사용할 수 있습니다', index);
+                }
+                state.point = {
+                    x: previous.point.x + lastTravel.dx / lastTravel.ticks * Number(beat.ticks),
+                    y: previous.point.y + lastTravel.dy / lastTravel.ticks * Number(beat.ticks)
+                };
+            } else if (beat.to) {
+                state.point = this.#placeFromCurrent(
+                    beat.to, beat, anchors, offsetOf, state.facing, previous.point
+                ) || this.#place(beat.to, beat, anchors, offsetOf, state.facing);
             }
             state.point = {
                 x: state.point.x + (Number(beat.offsetX) || 0),
                 y: state.point.y + (Number(beat.offsetY) || 0)
             };
+            const travel = { dx: state.point.x - previous.point.x, dy: state.point.y - previous.point.y,
+                ticks: Number(beat.ticks) };
+            if (travel.dx || travel.dy) lastTravel = travel;
+            else if (beat.at) lastTravel = null;
 
             // ---- 원근 ----
             // 명시하지 않으면 이전 값을 잇는다. 앵커에서 자동 파생하는 것은 아직
@@ -191,23 +226,40 @@ class HuntMotionCompiler {
 
             // ---- 방향 (규칙 3) ----
             // facing을 저작 데이터에서 받지 않는다. 목적지에서 파생시킨다.
-            const facingTarget = beat.face || beat.to || beat.at;
+            const facingTarget = beat.flipFacing || beat.face || beat.to || beat.at || beat.continueTravel;
+            const wasFacingActive = facingActive;
             if (facingTarget) {
-                const aim = beat.face
-                    ? anchors.resolve(beat.face, { bounds: 'pivot' })
-                    : state.point;
-                const direction = Math.sign(aim.x - previous.point.x);
-                if (direction) state.facing = direction;
+                const faceCommand = String(beat.face || '').trim();
+                let direction = 0;
+                if (beat.flipFacing) direction = -(previous.facing || 1);
+                else if (faceCommand === 'left') direction = -1;
+                else if (faceCommand === 'right') direction = 1;
+                else {
+                    // The editor historically stored "toward-target" while
+                    // authored graphs use "target". Both are facing commands,
+                    // not stage-anchor names. Unknown custom anchors are allowed,
+                    // but a bad facing value must never abort the whole pattern.
+                    const faceAnchor = faceCommand === 'toward-target' ? 'target' : faceCommand;
+                    let aim = state.point;
+                    if (faceAnchor) {
+                        try { aim = anchors.resolve(faceAnchor, { bounds: 'pivot' }); }
+                        catch (_) { aim = state.point; }
+                    }
+                    direction = Math.sign(aim.x - previous.point.x);
+                }
+                if (direction) {
+                    state.facing = direction;
+                    facingActive = true;
+                }
             }
-            if (state.facing !== previous.facing) {
+            if (state.facing !== previous.facing || (!wasFacingActive && facingActive)) {
                 facing.push({ offset: startAt, direction: state.facing });
             }
+            const strideFlipTicks = Math.max(0, Math.floor(Number(beat.strideFlipTicks) || 0));
+            if (strideFlipTicks > 0) strideWindows.push({ startTicks, endTicks, intervalTicks: strideFlipTicks });
 
             // ---- 키프레임 ----
-            if (beat.at) {
-                placement.push({ offset: startAt, ...this.#placementFrame({ ...state, opacity: previous.opacity }) });
-            }
-            if (beat.fade) {
+            if (false) { // destination-at-EPS frame disabled: it caused visible teleportation
                 // 페이드는 비트 전체에 걸린다. 시작점에 이전 불투명도를 못박지
                 // 않으면 앞 비트부터 서서히 사라져 이탈이 흐릿해진다.
                 placement.push({
@@ -215,7 +267,16 @@ class HuntMotionCompiler {
                     ...this.#placementFrame({ ...state, opacity: previous.opacity })
                 });
             }
-            placement.push({ offset: startAt, ...this.#placementFrame(previous), easing: this.easing(beat.moveEasing) });
+            const startOpacity = beat.instantOpacity
+                ? (beat.opacity !== undefined
+                    ? Math.max(0, Math.min(1, Number(beat.opacity)))
+                    : beat.fade === 'in' ? 1 : beat.fade === 'out' ? 0 : previous.opacity)
+                : previous.opacity;
+            placement.push({
+                offset: startAt,
+                ...this.#placementFrame({ ...placementStart, opacity: startOpacity }),
+                easing: this.easing(beat.moveEasing)
+            });
             placement.push({ offset: endAt, ...this.#placementFrame(state) });
 
             // 복귀 중 rotate(Ndeg) -> rotate(0deg)를 보간하면 완료한 회전을
@@ -245,7 +306,42 @@ class HuntMotionCompiler {
             // 명시적 편집값은 포즈의 기본 리셋보다 우선한다.
             if (beat.origin) state.origin = beat.origin;
             if (beat.rotation !== undefined) state.rotation = Number(beat.rotation) || 0;
-            const rotationDelta = beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0 : Number(definition.rotate) || 0;
+            if (beat.rotationToward !== undefined) {
+                const degrees = Number(beat.rotationToward) || 0;
+                const travelX = state.point.x - previous.point.x;
+                const direction = Math.sign(travelX) || state.facing || 1;
+                state.rotation = direction * degrees;
+            }
+            if (beat.alignRotationToTravel) {
+                const travelX = state.point.x - previous.point.x;
+                const travelY = state.point.y - previous.point.y;
+                if (travelX || travelY) {
+                    const direction = Math.sign(travelX) || state.facing || 1;
+                    state.rotation = direction * Math.atan2(travelY, Math.max(1e-6, Math.abs(travelX))) * 180 / Math.PI;
+                }
+            }
+            if (beat.aimBodyAt) {
+                const aim = anchors.resolve(beat.aimBodyAt, { bounds: 'pivot' });
+                const torso = offsetOf('part:torso', state.facing);
+                const leftFoot = offsetOf('part:left-front-leg', state.facing);
+                const rightFoot = offsetOf('part:right-front-leg', state.facing);
+                const feetMidpoint = {
+                    x: (leftFoot.x + rightFoot.x) / 2,
+                    y: (leftFoot.y + rightFoot.y) / 2
+                };
+                const nativeX = feetMidpoint.x - torso.x;
+                const nativeY = feetMidpoint.y - torso.y;
+                const aimX = aim.x - previous.point.x;
+                const aimY = aim.y - previous.point.y;
+                if ((nativeX || nativeY) && (aimX || aimY)) {
+                    const nativeAngle = Math.atan2(nativeY, nativeX);
+                    const aimAngle = Math.atan2(aimY, aimX);
+                    state.rotation = (aimAngle - nativeAngle) * 180 / Math.PI;
+                }
+            }
+            const rotationDelta = beat.rotateByFacing !== undefined
+                ? Math.abs(Number(beat.rotateByFacing) || 0) * (state.facing || 1)
+                : beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0 : Number(definition.rotate) || 0;
             if (rotationDelta) {
                 const sign = Math.sign(rotationDelta);
                 const windup = Number(definition.windup) || 0;
@@ -263,26 +359,88 @@ class HuntMotionCompiler {
                     ...this.#poseFrame({ ...state, rotation: swung })
                 });
                 state.rotation = swung - sign * recoil;
-            } else if (definition.hold) {
+            } else if (definition.hold && ![
+                'rotation', 'rotationToward', 'rotateBy', 'rotateByFacing',
+                'alignRotationToTravel', 'aimBodyAt', 'scaleX', 'scaleY',
+                'skewX', 'skewY'
+            ].some(key => beat[key] !== undefined && beat[key] !== null && beat[key] !== false)) {
                 // 정지를 만든다. 같은 값을 두 프레임 적는 일을 저작자가 하지 않는다.
                 // 이게 "휙! 착지!"의 멈춤을 만든다.
                 pose.push({ offset: startAt + this.EPS, ...this.#poseFrame(state) });
             }
-            pose.push({ offset: startAt, ...this.#poseFrame(previous), easing: this.easing(beat.rotationEasing) });
+            const stompSteps = Math.max(0, Math.floor(Number(beat.stompSteps) || 0));
+            if (stompSteps > 0) {
+                const span = endAt - startAt;
+                for (let step = 0; step < stompSteps; step += 1) {
+                    const sectionStart = step / stompSteps;
+                    const downAt = startAt + span * (sectionStart + .34 / stompSteps);
+                    const reboundAt = startAt + span * (sectionStart + .78 / stompSteps);
+                    const side = step % 2 === 0 ? -1 : 1;
+                    pose.push({
+                        offset: downAt,
+                        ...this.#poseFrame({ ...state, rotation: side * 7, squash: 1,
+                            scaleX: 1.08, scaleY: .82 })
+                    });
+                    pose.push({
+                        offset: reboundAt,
+                        ...this.#poseFrame({ ...state, rotation: side * 1.5, squash: 1,
+                            scaleX: .98, scaleY: 1.04 })
+                    });
+                }
+            }
+            pose.push({
+                offset: startAt,
+                ...this.#poseFrame(beat.instantPose
+                    ? state
+                    : { ...previous, origin: beat.origin || previous.origin }),
+                easing: this.easing(beat.rotationEasing)
+            });
             pose.push({ offset: endAt, ...this.#poseFrame(state) });
 
             // ---- 판정과 음향 ----
             // 타격은 비트 시작이다. 그림과 같은 곳에서 나오므로 어긋날 수 없다.
-            if (beat.hit) {
+            const damageJudgment = (Array.isArray(beat.judgments) ? beat.judgments : [])
+                .find(judgment => judgment?.kind === 'damage');
+            const hasImpact = Boolean(damageJudgment || beat.hit);
+            const hitOffsetTicks = hasImpact
+                ? Math.max(0, Math.min(Number(beat.ticks) - 1,
+                    Math.round(Number(damageJudgment?.offsetTicks ?? beat.hitOffsetTicks) || 0)))
+                : 0;
+            if (hasImpact) {
                 impacts.push({
-                    atTicks: startTicks,
+                    atTicks: startTicks + hitOffsetTicks,
                     beat: beat.beat || `beat-${index}`,
-                    damageScale: Number(beat.damageScale) || 1,
-                    targetMode: beat.targetMode || 'sequential'
+                    damageScale: Number(damageJudgment?.damageScale ?? beat.damageScale) || 1,
+                    targetMode: beat.targetMode || 'sequential',
+                    ...(beat.eventKind ? { eventKind: String(beat.eventKind) } : {})
                 });
             }
-            if (beat.sfx) {
-                cues.push({ atTicks: startTicks, beat: beat.beat || `beat-${index}`, sfx: beat.sfx });
+            cues.push({
+                atTicks: startTicks,
+                beat: beat.beat || `beat-${index}`,
+                audioSlot: `beat:${beat.beat || `beat-${index}`}`,
+                authoredSfx: beat.sfx || null
+            });
+            const appendVisualCue = (fx, anchor, durationTicks, angleMode = null) => {
+                if (!fx) return;
+                const targetImpactFx = String(fx) === 'target-impact-dust' && hasImpact;
+                visualCues.push({
+                    atTicks: startTicks + (targetImpactFx ? hitOffsetTicks : 0),
+                    beat: beat.beat || `beat-${index}`,
+                    fx: String(fx),
+                    anchor: anchor || 'monster',
+                    ...((beat.targetMode || targetImpactFx)
+                        ? { targetMode: beat.targetMode || 'sequential' }
+                        : {}),
+                    durationTicks: Math.max(1, Number(durationTicks) || Number(beat.ticks))
+                    , ...(angleMode ? { angleMode: String(angleMode) } : {})
+                });
+            };
+            appendVisualCue(beat.fx, beat.fxAnchor, beat.fxDurationTicks, beat.fxAngleMode);
+            appendVisualCue(beat.fxSecondary, beat.fxSecondaryAnchor, beat.fxSecondaryDurationTicks,
+                beat.fxSecondaryAngleMode);
+            for (const extraFx of Array.isArray(beat.fxAdditional) ? beat.fxAdditional : []) {
+                appendVisualCue(extraFx?.fx, extraFx?.anchor, extraFx?.durationTicks, extraFx?.angleMode);
             }
 
             timeline.push({
@@ -294,9 +452,19 @@ class HuntMotionCompiler {
                 offsetX: Number(beat.offsetX) || 0,
                 offsetY: Number(beat.offsetY) || 0,
                 rotation: state.rotation,
+                rotationToward: beat.rotationToward === undefined ? null : Number(beat.rotationToward) || 0,
+                alignRotationToTravel: Boolean(beat.alignRotationToTravel),
+                continueTravel: Boolean(beat.continueTravel),
+                aimBodyAt: beat.aimBodyAt || null,
+                instantOpacity: Boolean(beat.instantOpacity),
+                instantPose: Boolean(beat.instantPose),
+                rotateByFacing: beat.rotateByFacing === undefined ? null : Number(beat.rotateByFacing) || 0,
+                strideFlipTicks,
+                stompSteps,
                 moveEasing: beat.moveEasing || 'smooth',
                 rotationEasing: beat.rotationEasing || 'smooth',
-                hit: Boolean(beat.hit)
+                hit: hasImpact,
+                hitOffsetTicks
             });
         });
 
@@ -306,8 +474,11 @@ class HuntMotionCompiler {
             placement: this.#tidy(placement),
             pose: this.#tidy(pose),
             facing,
+            facingActive,
             impacts,
             cues,
+            visualCues,
+            strideWindows,
             timeline
         };
     }

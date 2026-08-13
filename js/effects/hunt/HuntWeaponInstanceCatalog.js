@@ -61,7 +61,13 @@ class HuntWeaponInstanceCatalog {
     static sharpenThreshold(hunter) {
         if (!hunter?.sharpnessProfile) return 0;
         const maximum = Math.max(0, Number(hunter.maxSharpness || this.total(hunter.sharpnessProfile)));
-        if (!maximum || hunter.personality === 'newbie') return 0;
+        if (!maximum) return 0;
+        // New hunters neglect maintenance until the weapon has fallen all the
+        // way into its red band, but must still sharpen instead of remaining
+        // permanently at minimum sharpness.
+        if (hunter.personality === 'newbie') {
+            return Math.max(0, Number(hunter.sharpnessProfile.red || 0));
+        }
         const wearRatio = this.SHARPEN_WEAR_RATIO[hunter.personality]
             ?? this.SHARPEN_WEAR_RATIO.normal;
         return maximum * (1 - wearRatio);
@@ -69,7 +75,6 @@ class HuntWeaponInstanceCatalog {
 
     static shouldSharpen(hunter, _random = Math.random) {
         if (!hunter?.sharpnessProfile) return false;
-        if (hunter.personality === 'newbie') return false;
         const maximum = Math.max(0, Number(hunter.maxSharpness || this.total(hunter.sharpnessProfile)));
         const current = Math.max(0, Math.min(maximum, Number(hunter.sharpness || 0)));
         if (!maximum || current >= maximum) return false;

@@ -6,12 +6,12 @@ const Policy = require('../js/effects/hunt/HuntSupportItemPolicy.js');
 assert.deepStrictEqual(
     ['offensive', 'normal', 'veteran', 'defensive', 'support', 'newbie']
         .map(personality => Policy.initialFlashCount(personality)),
-    [0, 1, 1, 1, 2, 1]
+    [1, 1, 2, 0, 2, 2]
 );
 assert.deepStrictEqual(
     ['offensive', 'normal', 'veteran', 'defensive', 'support', 'newbie']
         .map(personality => Policy.flashUseChance(personality)),
-    [0, .5, 1, .75, .9, .15]
+    [.55, .5, 1, 0, .9, .15]
 );
 
 const support = { personality: 'support', status: 'alive', flashPods: 2 };
@@ -37,6 +37,8 @@ assert.strictEqual(Policy.canUseFlash(engine, veteran, () => 0), false,
     'personality flash stock is reserved for an airborne monster');
 
 global.HuntSupportItemPolicy = Policy;
+global.HuntPersonalityProfiles = require('../js/effects/hunt/HuntPersonalityProfiles.js');
+global.HuntHunterDecisionPolicy = require('../js/effects/hunt/HuntHunterDecisionPolicy.js');
 const HuntHunterTurnExecutor = require('../js/effects/hunt/HuntHunterTurnExecutor.js');
 {
     const events = [];
@@ -108,11 +110,12 @@ const HuntHunterTurnExecutor = require('../js/effects/hunt/HuntHunterTurnExecuto
         monsterFlightState: 'airborne',
         monsterFlashUseCount: 0,
         monsterAtb: 100,
-        random: () => .99,
+        random: (() => { const values = [.5, .99, .5, 0]; return () => values.shift() ?? 0; })(),
         isMonsterTrapImmune: () => false,
         updateHunterItemUI: () => {},
         triggerEnvironmentEffect: kind => { runtimeEngine.effectKind = kind; },
-        addLog: () => {}
+        addLog: () => {},
+        showSkillBubble: () => {}
     };
     HuntHunterTurnExecutor.execute(runtimeEngine, hunter);
     assert.strictEqual(hunter.shockTraps, 0);
@@ -120,7 +123,7 @@ const HuntHunterTurnExecutor = require('../js/effects/hunt/HuntHunterTurnExecuto
         hunterIndex: 0,
         hunterName: '함정냥'
     });
-    assert.strictEqual(runtimeEngine.effectKind, 'shocktrap-pending');
+    assert.strictEqual(runtimeEngine.effectKind, 'pitfall-pending');
 }
 
 console.log('[test] Personality flash inventory, priority, probability, and resistance passed.');

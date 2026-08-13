@@ -1,6 +1,12 @@
 class HuntEngine {
     static CART_CAMP_TICKS = 300;
 
+    static personalityProfiles() {
+        if (typeof HuntPersonalityProfiles !== 'undefined') return HuntPersonalityProfiles;
+        if (typeof require === 'function') return require('./HuntPersonalityProfiles.js');
+        return null;
+    }
+
     constructor(config) {
         this.selectedWeapons = config.selectedWeapons;
         this.selectedMonster = config.selectedMonster;
@@ -15,6 +21,39 @@ class HuntEngine {
         this.random = config.random || Math.random;
         this.schedule = config.schedule || ((callback, delay) => setTimeout(callback, delay));
         this.actionStateMachine = config.actionStateMachine || new HuntActionStateMachine();
+        const BeatActionRuntime = typeof HuntBeatActionRuntime !== 'undefined'
+            ? HuntBeatActionRuntime
+            : (typeof require === 'function' ? require('./HuntBeatActionRuntime.js') : null);
+        this.monsterBeatRuntimeEvents = [];
+        this.monsterBeatJudgmentTicks = new Map();
+        this.hunterBeatRuntimeEvents = new Map();
+        this.monsterBeatRuntime = config.monsterBeatRuntime || (BeatActionRuntime
+            ? new BeatActionRuntime({
+                onEvent: (state, event) => {
+                    if (String(state.actorKey).startsWith('hunter:')) {
+                        const hunterIndex = Number(state.context?.hunterIndex);
+                        const queue = this.hunterBeatRuntimeEvents.get(hunterIndex) || [];
+                        queue.push(event);
+                        if (queue.length > 32) queue.shift();
+                        this.hunterBeatRuntimeEvents.set(hunterIndex, queue);
+                    } else {
+                        this.monsterBeatRuntimeEvents.push(event);
+                        if (this.monsterBeatRuntimeEvents.length > 64) this.monsterBeatRuntimeEvents.shift();
+                        this.dispatchMonsterBeatEvent?.(state, event);
+                    }
+                },
+                onComplete: state => {
+                    if (String(state.actorKey).startsWith('hunter:')) {
+                        this.callbacks?.onHunterBeatActionComplete?.(state.action, state.context);
+                    } else this.callbacks?.onMonsterBeatActionComplete?.(state.action, state.context);
+                },
+                onCancel: (state, reason) => {
+                    if (String(state.actorKey).startsWith('hunter:')) {
+                        this.callbacks?.onHunterBeatActionCancel?.(state.action, reason, state.context);
+                    } else this.callbacks?.onMonsterBeatActionCancel?.(state.action, reason, state.context);
+                }
+            })
+            : null);
         this.weaponMechanics = config.weaponMechanics || new HuntWeaponMechanics(this.random);
         this.weaponMechanics.engine = this;
         this.perkRuntime = config.perkRuntime || (typeof HuntPerkRuntime !== 'undefined' ? new HuntPerkRuntime(this) : null);
@@ -25,12 +64,20 @@ class HuntEngine {
         this.monsterTraitRuntime = config.monsterTraitRuntime || (typeof HuntMonsterTraitRuntime !== 'undefined' ? new HuntMonsterTraitRuntime(this.random) : null);
         this.teamTactic = config.teamTactic || 'balanced';
         this.telemetry = config.telemetry || new HuntBalanceTelemetry();
+        this.teamIntentCoordinator = config.teamIntentCoordinator
+            || (typeof HuntTeamIntentCoordinator !== 'undefined' ? new HuntTeamIntentCoordinator() : null);
         
         // Monster Stats
         this.monsterTier = config.monsterTier || 'normal';
         this.monsterHp = config.monsterHp || 15600;
         this.monsterMaxHp = config.monsterMaxHp || 15600;
         this.monsterSpeedMultiplier = config.monsterSpeedMultiplier !== undefined ? config.monsterSpeedMultiplier : 1.0;
+        const DifficultyProfile = typeof HuntDifficultyProfile !== 'undefined'
+            ? HuntDifficultyProfile
+            : (typeof require === 'function' ? require('./HuntDifficultyProfile.js') : null);
+        this.difficultyProfile = DifficultyProfile
+            ? DifficultyProfile.normalize(config.difficultyProfile)
+            : Object.freeze({ id: 'standard', monsterDamageMultiplier: 1, rewardMultiplier: 1 });
         this.monsterAtbSpeedMod = config.monsterAtbSpeedMod || 1.15;
         this.monsterAtb = Number.isFinite(Number(config.monsterAtb))
             ? Math.max(0, Math.min(HuntAtbConfig.GAUGE_MAX, Number(config.monsterAtb)))
@@ -55,15 +102,20 @@ class HuntEngine {
         this.monsterStunAccum = config.monsterStunAccum || 0;
         this.monsterStunThreshold = config.monsterStunThreshold || 390;
         this.monsterStunDuration = config.monsterStunDuration || 0;
+        this.monsterStunCount = Math.max(0, Number(config.monsterStunCount || 0));
         this.monsterKnockdownDuration = config.monsterKnockdownDuration || 0;
+        this.monsterSleepGeneration = 0;
+        this.monsterSleepWakeBatch = null;
         this.monsterDeathCuePlayed = Boolean(config.monsterDeathCuePlayed);
         this.monsterTrapUseCount = Math.max(0, Number(config.monsterTrapUseCount || 0));
         this.activeTrapControl = config.activeTrapControl || null;
         this.monsterFlashUseCount = Math.max(0, Number(config.monsterFlashUseCount || 0));
-        this.monsterKnockdownTriggered = config.monsterKnockdownTriggered || { 80: false, 60: false, 40: false, 20: false };
         this.monsterRecoveryDuration = 0;
         this.pendingMonsterAction = config.pendingMonsterAction || null;
         this.pendingMonsterImpact = config.pendingMonsterImpact || null;
+        this.monsterActionPresentationTicks = Math.max(0, Number(config.monsterActionPresentationTicks || 0));
+        this.pendingMonsterPartReactions = Array.isArray(config.pendingMonsterPartReactions)
+            ? config.pendingMonsterPartReactions.slice() : [];
         this.pendingMonsterEncounterRoar = Boolean(config.pendingMonsterEncounterRoar);
         this.pendingMonsterRageRoar = Boolean(config.pendingMonsterRageRoar);
         this.monsterBurrowState = config.monsterBurrowState || null;
@@ -121,7 +173,7 @@ class HuntEngine {
             w.isGathering = false;
         });
         this.sharedSupply = config.sharedSupply && typeof HuntSharedSupply !== 'undefined'
-            ? HuntSharedSupply.bindHunters(this.selectedWeapons, config.sharedSupply)
+            ? HuntSharedSupply.normalize(config.sharedSupply)
             : null;
         this.updateMonsterPartsUI();
     }
@@ -153,6 +205,84 @@ class HuntEngine {
         return generation;
     }
 
+    beginMonsterBeatAction(compiledAction, context = {}) {
+        if (!compiledAction || compiledAction.backend !== 'beat-v2' || !this.monsterBeatRuntime) return null;
+        this.monsterBeatRuntimeEvents.length = 0;
+        if (!(this.monsterBeatJudgmentTicks instanceof Map)) this.monsterBeatJudgmentTicks = new Map();
+        this.monsterBeatJudgmentTicks.clear();
+        return this.monsterBeatRuntime.begin('monster', compiledAction, context);
+    }
+
+    isMonsterActionSessionActive() {
+        return Boolean(
+            this.monsterBeatRuntime?.has?.('monster')
+            || Number(this.monsterActionPresentationTicks || 0) > 0
+            || this.pendingMonsterAction
+            || this.pendingMonsterImpact
+            || this.monsterTraversalState
+            || this.monsterBurrowState
+            || Number(this.monsterActionLockTicks || 0) > 0
+        );
+    }
+
+    dispatchMonsterBeatEvent(state, event) {
+        if (['damage', 'judgment', 'roar', 'tremor', 'wind'].includes(event?.kind)) {
+            if (!(this.monsterBeatJudgmentTicks instanceof Map)) {
+                this.monsterBeatJudgmentTicks = new Map();
+            }
+            const judgmentTick = Number(event.atTicks || 0);
+            this.monsterBeatJudgmentTicks.set(
+                judgmentTick,
+                Number(this.monsterBeatJudgmentTicks.get(judgmentTick) || 0) + 1
+            );
+            return true;
+        }
+        if (event?.kind !== 'audio') return false;
+        const pattern = state?.context?.pattern || null;
+        const patternId = String(pattern?.id || state?.context?.patternId || state?.action?.id || '');
+        if (!patternId) return false;
+        return this.playSFX?.('monster_attack', null, {
+            monsterId: this.selectedMonster?.id,
+            patternId,
+            patternName: pattern?.name || patternId,
+            patternType: pattern?.type || 'attack',
+            patternTags: pattern?.tags || [],
+            patternSlot: `beat:${event.beatId}`,
+            beatEventId: event.id,
+            audioPhase: 'beat-event',
+            overrideOnly: true
+        }) || false;
+    }
+
+    tickMonsterBeatAction() {
+        return this.monsterBeatRuntime?.tick?.('monster') || null;
+    }
+
+    cancelMonsterBeatAction(reason = 'interrupted') {
+        this.monsterBeatRuntimeEvents.length = 0;
+        this.monsterBeatJudgmentTicks?.clear?.();
+        return this.monsterBeatRuntime?.cancel?.('monster', reason) || false;
+    }
+
+    beginHunterBeatAction(hunter, action) {
+        if (!hunter || !action || typeof HuntHunterBeatCatalog === 'undefined') return null;
+        const compiled = HuntHunterBeatCatalog.compile(hunter.id, action);
+        if (!compiled || !this.monsterBeatRuntime) return null;
+        const actorKey = `hunter:${hunter.index}`;
+        this.hunterBeatRuntimeEvents.set(hunter.index, []);
+        return this.monsterBeatRuntime.begin(actorKey, compiled, { hunterIndex: hunter.index, action });
+    }
+
+    tickHunterBeatActions() {
+        this.selectedWeapons.forEach(hunter => this.monsterBeatRuntime?.tick?.(`hunter:${hunter.index}`));
+    }
+
+    cancelHunterBeatAction(hunter, reason = 'interrupted') {
+        if (!hunter) return false;
+        this.hunterBeatRuntimeEvents.delete(hunter.index);
+        return this.monsterBeatRuntime?.cancel?.(`hunter:${hunter.index}`, reason) || false;
+    }
+
     clearMonsterTraversal(reason = 'complete') {
         const previous = this.monsterTraversalState;
         this.monsterTraversalState = null;
@@ -171,6 +301,10 @@ class HuntEngine {
         };
         this.pendingMonsterAction = null;
         this.pendingMonsterImpact = null;
+        this.cancelMonsterBeatAction(reason);
+        // Presentation belongs to the interrupted action. Leaving this debt
+        // alive lets a trap/control pose and the cancelled BEAT graph coexist.
+        this.monsterActionPresentationTicks = 0;
         const interruptedPattern = interrupted.pendingImpact?.pattern || interrupted.pendingAction?.pattern;
         if (interruptedPattern?.tags?.includes('rage-opener')
             && this.monsterFlightState !== 'airborne') {
@@ -361,25 +495,11 @@ class HuntEngine {
     resupplyHunterAtCamp(hunter) {
         if (!hunter) return false;
         const perks = new Set((hunter.perks || []).map(perk => perk?.name));
-        const baseTraps = hunter.personality === 'support' ? 2 : hunter.personality === 'veteran' ? 1 : 0;
-
-        if (!this.sharedSupply) {
-            hunter.potions = 10
-                + (perks.has('버섯 애호가') ? 1 : 0)
-                + (perks.has('벌꿀 주세요') ? 2 : 0);
-            hunter.lifepowders = 1 + (perks.has('광역 분진') ? 1 : 0);
-            if (perks.has('보급관')) hunter.lifepowders++;
-            hunter.shockTraps = baseTraps;
-            hunter.bombs = 1 + (perks.has('폭파광') ? 2 : 0);
-            if (perks.has('폭탄 배달부')) hunter.bombs++;
-            if (perks.has('수레 단골')) hunter.potions++;
-        }
-        hunter.perkTraps = perks.has('덫 장인') ? 2 : 0;
-        hunter.perkFlashes = perks.has('섬광 조제사') ? 2 : 0;
-        const supportItemPolicy = typeof HuntSupportItemPolicy !== 'undefined'
-            ? HuntSupportItemPolicy
-            : (typeof require === 'function' ? require('./HuntSupportItemPolicy') : null);
-        hunter.flashPods = supportItemPolicy?.initialFlashCount(hunter.personality) || 0;
+        const issuedRuntime = typeof HuntIssuedSupplyRuntime !== 'undefined'
+            ? HuntIssuedSupplyRuntime
+            : (typeof require === 'function' ? require('./HuntIssuedSupplyRuntime.js') : null);
+        if (this.sharedSupply) issuedRuntime?.resupplyFromCamp?.(hunter, this.sharedSupply);
+        else issuedRuntime?.grant?.(hunter, `camp:${Number(hunter.cartCount || 0)}`, { force: true });
 
         if (hunter.sharpnessProfile) hunter.sharpness = Number(hunter.maxSharpness || 0);
         if (Number.isFinite(Number(hunter.maxMagazine))) hunter.magazine = Number(hunter.maxMagazine);
@@ -427,6 +547,7 @@ class HuntEngine {
         this.interruptHunterItemAction(target, 'cart', { log: false });
         this.clearHunterInterference(target, 'cart');
         if (this.actionStateMachine) this.actionStateMachine.cancel(target, 'cart');
+        this.cancelHunterBeatAction(target, 'cart');
         target.status = 'dead';
         target.hp = 0; // 체력을 명확하게 0으로 설정
         this.updateHpUI(target); // [FIX] 수레 탈 때 체력바도 즉시 0으로 갱신하여 UI 동기화
@@ -438,9 +559,12 @@ class HuntEngine {
         if (this.callbacks.onTriggerStunUI) this.callbacks.onTriggerStunUI(target.index, false); // [FIX] 기절 UI 강제 해제
         target.hitDuration = 0; // 피격 경직 상태 해제
         target.hitRecoveryTotalTicks = 0;
+        target.hitStartedThisTick = false;
         target.hitReactionKind = null;
         target.hitKnockbackDirection = 0;
         target.pendingStunDuration = 0;
+        target.counterInvulnerabilityTicks = 0;
+        target.counterInvulnerabilityStartedThisTick = false;
         this.callbacks.onCancelHitAnimation?.(target.index, 'cart');
         target.rollDuration = 0;
         target.guardDuration = 0;
@@ -451,6 +575,7 @@ class HuntEngine {
         this.updateWeaponAtbUI(target.index, 0); // UI 게이지 초기화
         this.cartCount++;
         target.cartCount = Number(target.cartCount || 0) + 1;
+        this.perkRuntime?.onCart?.(target);
         const baseCartTicks = HuntEngine.CART_CAMP_TICKS;
         target.cartTimer = this.perkRuntime
             ? this.perkRuntime.cartRecoveryTicks(target, baseCartTicks)
@@ -503,6 +628,10 @@ class HuntEngine {
 
     applyHunterInterference(hunter, kind, size = 'small') {
         if (!hunter || hunter.status !== 'alive') return false;
+        // Damage and control judgments share the same post-counter immunity.
+        // A delayed tremor must not bypass the counter that answered the
+        // preceding direct impact.
+        if (Number(hunter.counterInvulnerabilityTicks || 0) > 0) return false;
         const pattern = { name: kind === 'tremor' ? '지진' : kind === 'wind' ? '풍압' : '포효', type: kind };
         const resistedBy = this.perkRuntime?.ignoresPattern?.(hunter, pattern)
             || (kind === 'roar' && this.perkRuntime?.roarDuration?.(hunter, 1) === 0 ? '귀마개' : null);
@@ -521,6 +650,7 @@ class HuntEngine {
                 pattern: { id: `interference.${kind}`, type: kind, interference: { kind, size }, tags: ['interference'] }
             });
             if (foresight.success) {
+                HuntMonsterTurnExecutor.grantCounterInvulnerability?.(hunter);
                 this.addLog(`⚡ [간파베기] ${hunter.name}이(가) ${kind === 'tremor' ? '지진' : kind === 'wind' ? '풍압' : '포효'} 판정을 흘리고 대회전베기를 준비합니다!`, '#c98534');
                 this.playSFX('hunter_guard', null, { hunterIndex: hunter.index, action: 'counter' });
                 this.showSkillBubble(hunter.index, '간파베기!');
@@ -537,9 +667,7 @@ class HuntEngine {
             const hasShield = actionAllowsGuard && !isGreatSwordCharging
                 && (hunter.type === 'shield' || hunter.id === 'heavy_bowgun');
             const guaranteedLanceGuard = hunter.id === 'lance' && hasShield;
-            const baseGuard = hunter.personality === 'veteran' ? 0.78
-                : hunter.personality === 'newbie' ? 0.30 : 0.62;
-            const guardChance = Math.min(0.97, baseGuard + Number(hunter.perkModifiers?.guardChance || 0));
+            const guardChance = HuntEngine.personalityProfiles()?.chance(hunter, 'guard') ?? .62;
             if (hasShield && (guaranteedLanceGuard || this.random() < guardChance)) {
                 this.actionStateMachine?.cancel(hunter, 'guard');
                 hunter.guardDuration = 6;
@@ -555,6 +683,7 @@ class HuntEngine {
         const cost = config ? config.interferenceCostGauge(size) : (size === 'large' ? 100 : 50);
         this.interruptHunterItemAction(hunter, kind);
         this.actionStateMachine?.cancel(hunter, `${kind}_stun`);
+        this.cancelHunterBeatAction(hunter, `${kind}_stun`);
         this.weaponMechanics?.onHit?.(hunter);
         this.callbacks?.onInterruptWeaponVisual?.(hunter.index);
         hunter.atb = Math.max(0, Number(hunter.atb || 0) - cost);
@@ -576,7 +705,7 @@ class HuntEngine {
         hunter.actionState = 'idle';
         this.callbacks?.onTriggerHunterInterference?.(hunter.index, kind, size, false);
         if (kind === 'roar') this.callbacks?.onTriggerRoarStun?.(hunter.index, false);
-        if (reason === 'recovered') this.perkRuntime?.onRecovered?.(hunter);
+        if (reason === 'recovered') this.perkRuntime?.onRecovered?.(hunter, kind);
         return true;
     }
 
@@ -645,8 +774,63 @@ class HuntEngine {
         );
         const perkDamage = this.perkRuntime ? this.perkRuntime.partDamage(weapon, rawDamage) : rawDamage;
         const strikeWeapon = action?.tags?.includes('blunt') ? { ...weapon, damageTypeOverride: 'blunt' } : weapon;
-        const result = HuntMonsterAnatomyCatalog.applyPartDamage(this.monsterPartState, strikeWeapon, perkDamage, scale, this.random);
-        if (result?.newlyBroken || result?.repeatedTopple) {
+        const result = HuntMonsterAnatomyCatalog.applyPartDamage(
+            this.monsterPartState,
+            strikeWeapon,
+            perkDamage,
+            scale,
+            this.random,
+            part => this.perkRuntime?.partTargetWeight?.(weapon, part) || 1
+        );
+        if (result) result.sourceHunterIndex = Number(weapon?.index);
+        if (result?.newlyBroken || result?.newlyFlinched || result?.repeatedTopple) {
+            if (HuntEngine.prototype.isMonsterActionPresenting.call(this)) {
+                if (result.newlyBroken) {
+                    result.part.broken = false;
+                    result.part.severed = false;
+                    result.part.breakPending = true;
+                    result.part.hitzones = { ...(result.previousHitzones || result.part.hitzones || {}) };
+                }
+                this.pendingMonsterPartReactions.push(result);
+                result.reactionDeferred = true;
+                return result;
+            }
+            HuntEngine.prototype.resolveMonsterPartReaction.call(this, result);
+        }
+        return result;
+    }
+
+    isMonsterActionPresenting() {
+        return Boolean(this.monsterBeatRuntime?.has?.('monster'))
+            || Number(this.monsterActionPresentationTicks || 0) > 0
+            || Boolean(this.pendingMonsterAction)
+            || Boolean(this.pendingMonsterImpact)
+            || Boolean(this.monsterTraversalState)
+            || Boolean(this.monsterBurrowState)
+            || Number(this.monsterRoarDuration || 0) > 0;
+    }
+
+    flushPendingMonsterPartReaction() {
+        if (!this.pendingMonsterPartReactions?.length
+            || HuntEngine.prototype.isMonsterActionPresenting.call(this)) return false;
+        if (Number(this.monsterKnockdownDuration || 0) > 0
+            || Number(this.monsterStunDuration || 0) > 0
+            || Number(this.monsterActionLockTicks || 0) > 0
+            || ['knocked_down', 'stunned', 'paralyzed', 'sleeping'].includes(this.monsterState)) return false;
+        const result = this.pendingMonsterPartReactions.shift();
+        HuntEngine.prototype.resolveMonsterPartReaction.call(this, result);
+        return true;
+    }
+
+    resolveMonsterPartReaction(result) {
+            if (result?.newlyBroken && result.part?.breakPending) {
+                result.part.breakPending = false;
+                result.part.broken = true;
+                result.part.severed = Boolean(result.newlySevered && result.part.severable);
+                if (result.part.breakHitzones) {
+                    result.part.hitzones = { ...result.part.breakHitzones };
+                }
+            }
             const atbConfig = typeof HuntAtbConfig !== 'undefined'
                 ? HuntAtbConfig
                 : require('./HuntAtbConfig.js');
@@ -654,6 +838,8 @@ class HuntEngine {
             if (result.newlyBroken) {
                 this.monsterTraitRuntime?.refresh?.(this);
                 this.updateMonsterPartsUI();
+                const sourceHunter = this.selectedWeapons?.find(hunter => Number(hunter.index) === Number(result.sourceHunterIndex));
+                this.perkRuntime?.onPartBreak?.(sourceHunter, result);
             }
             if (result.newlySevered) {
                 this.severedTail.available = true;
@@ -665,50 +851,73 @@ class HuntEngine {
                 this.addLog(`💥 [부위 경직] ${this.selectedMonster.nameKO} · ${result.part.kind}`, '#ffcf70');
             }
             const airborne = this.monsterFlightState === 'airborne' || this.monsterState === 'valstrax_flying';
-            const reaction = HuntMonsterAnatomyCatalog.breakReaction(
-                this.selectedMonster.id,
-                result.part.kind,
-                airborne
-            );
+            const reaction = result.newlyFlinched && !result.newlyBroken
+                ? HuntMonsterAnatomyCatalog.flinchReaction(this.selectedMonster.id, result.part.kind)
+                : HuntMonsterAnatomyCatalog.breakReaction(
+                    this.selectedMonster.id,
+                    result.part.kind,
+                    airborne
+                );
+            if (!reaction) return result;
+            const partBreakSize = result.newlyBroken
+                ? HuntMonsterAnatomyCatalog.breakAudioSize(result, reaction)
+                : null;
+            const reactionProfile = reaction.reactionProfile || (reaction.type === 'flinch'
+                ? 'flinch' : reaction.type === 'tail_sever_roll' ? 'tail' : 'knockdown');
+            if (result.newlyBroken) {
+                // Material break is independent from body control. It always
+                // cracks and plays its reviewed break audio, even if the body
+                // is already unable to react in another control state.
+                this.callbacks.onTriggerMonsterPartBreakVisual?.(result.part.kind);
+                this.playSFX?.('monster_part_break_visual', null, {
+                    monsterId: this.selectedMonster.id,
+                    partBreakVisualProfile: reactionProfile === 'flinch' ? 'small' : 'large'
+                });
+            }
             if (airborne && this.monsterFlightRuntime?.onPartBreak(
                 this,
                 result.part,
                 reaction,
-                { retainedAtb: partBreakAtb }
+                { retainedAtb: partBreakAtb, partBreakSize }
             )) {
                 result.reaction = reaction;
                 return result;
             }
-            this.interruptMonsterMovement(`part-break:${result.part.kind}`);
-            this.monsterKnockdownDuration = Math.max(
-                Number(this.monsterKnockdownDuration || 0),
-                Number(reaction.durationTicks || 0)
-            );
-            this.monsterState = 'knocked_down';
-            this.monsterAtb = partBreakAtb;
+            const isFlinch = reaction.type === 'flinch';
+            const bodyReactionBlocked = Number(this.monsterStunDuration || 0) > 0
+                || Number(this.monsterKnockdownDuration || 0) > 0
+                || Boolean(this.activeTrapControl)
+                || ['stunned', 'paralyzed', 'sleeping', 'knocked_down'].includes(this.monsterState);
+            if (!bodyReactionBlocked) this.interruptMonsterMovement(`part-break:${result.part.kind}`);
+            if (!bodyReactionBlocked && isFlinch) {
+                this.monsterActionLockTicks = Math.max(
+                    Number(this.monsterActionLockTicks || 0),
+                    Number(reaction.durationTicks || 0)
+                );
+            } else if (!bodyReactionBlocked) {
+                this.monsterKnockdownDuration = Math.max(
+                    Number(this.monsterKnockdownDuration || 0),
+                    Number(reaction.durationTicks || 0)
+                );
+                this.monsterState = 'knocked_down';
+            }
+            this.monsterAtb = isFlinch
+                ? (bodyReactionBlocked ? this.monsterAtb : atbConfig.monsterAtbAfterControl('flinch'))
+                : (bodyReactionBlocked ? this.monsterAtb : partBreakAtb);
             this.monsterPartReactionKind = reaction.visualType || reaction.type;
-            const isLargeBreakReaction = result.newlySevered
-                || ['knockdown', 'aerial_topple', 'tail_sever_roll'].includes(reaction.type);
-            this.playSFX?.(
-                isLargeBreakReaction ? 'monster_knockdown' : 'monster_flinch',
-                null,
-                {
-                    monsterId: this.selectedMonster.id,
-                    sourcePart: result.part.kind
-                }
+            if (!bodyReactionBlocked) this.playSFX?.(
+                isFlinch ? 'monster_flinch' : 'monster_knockdown', null,
+                { monsterId: this.selectedMonster.id, reactionProfile }
             );
             this.updateMonsterAtbUI(this.monsterAtb);
-            if (this.callbacks.onTriggerMonsterPartBreakReaction) {
+            if (!bodyReactionBlocked && this.callbacks.onTriggerMonsterPartBreakReaction) {
                 this.callbacks.onTriggerMonsterPartBreakReaction(
                     this.monsterPartReactionKind,
                     Number(reaction.durationTicks || 0),
                     result.newlyBroken ? result.part.kind : null
                 );
-            } else {
-                this.callbacks.onTriggerMonsterKnockdownAnim?.();
             }
             result.reaction = reaction;
-        }
         return result;
     }
 
@@ -720,7 +929,11 @@ class HuntEngine {
         const multipliers = [1, .7, .45, .25];
         const multiplier = multipliers[Math.min(this.monsterTrapUseCount, multipliers.length - 1)];
         this.monsterTrapUseCount++;
-        const durationTicks = Math.max(10, Math.round(Number(baseTicks || 0) * multiplier));
+        const TrapConfig = typeof HuntTrapConfig !== 'undefined'
+            ? HuntTrapConfig
+            : (typeof require === 'function' ? require('./HuntTrapConfig.js') : null);
+        const minimumTicks = TrapConfig?.minimumDurationTicks?.(this.monsterTrapUseCount) || 14;
+        const durationTicks = Math.max(minimumTicks, Math.round(Number(baseTicks || 0) * multiplier));
         const atbConfig = typeof HuntAtbConfig !== 'undefined'
             ? HuntAtbConfig
             : require('./HuntAtbConfig.js');
@@ -739,7 +952,13 @@ class HuntEngine {
     }
 
     beginMonsterTrapControl(kind, baseTicks) {
-        this.interruptMonsterMovement?.(`trap:${kind}`);
+        const TrapConfig = typeof HuntTrapConfig !== 'undefined'
+            ? HuntTrapConfig
+            : (typeof require === 'function' ? require('./HuntTrapConfig.js') : null);
+        const runtimeKind = TrapConfig
+            ? TrapConfig.normalizeKind(kind)
+            : (!kind || kind === 'trap' ? 'pitfall' : kind);
+        this.interruptMonsterMovement?.(`trap:${runtimeKind}`);
         const trapEffect = this.consumeTrapEffect(baseTicks);
         const atbConfig = typeof HuntAtbConfig !== 'undefined'
             ? HuntAtbConfig
@@ -748,12 +967,33 @@ class HuntEngine {
         this.monsterKnockdownDuration = trapEffect.durationTicks;
         atbConfig.applyMonsterTrapAtb(this, trapEffect.multiplier);
         this.activeTrapControl = {
-            kind,
+            kind: runtimeKind,
             durationTicks: trapEffect.durationTicks,
             recoveryPerTick: trapEffect.recoveryPerTick,
             retainedAtb: trapEffect.retainedAtb,
-            useCount: trapEffect.useCount
+            useCount: trapEffect.useCount,
+            elapsedTicks: 0,
+            struggleSchedule: TrapConfig?.struggleSchedule?.(
+                trapEffect.durationTicks,
+                trapEffect.useCount
+            ) || [],
+            nextStruggleIndex: 0,
+            releasing: false
         };
+        const trapReaction = typeof HuntMonsterReactionCatalog !== 'undefined'
+            ? HuntMonsterReactionCatalog.resolvePitfall?.(
+                this.selectedMonster?.id,
+                TrapConfig?.struggleCount?.(trapEffect.useCount) || 0,
+                trapEffect.durationTicks
+            )
+            : null;
+        trapEffect.motion = trapReaction?.motion || [];
+        this.playSFX?.('monster_trap', null, {
+            monsterId: this.selectedMonster.id,
+            trapKind: runtimeKind,
+            trapPhase: 'fall',
+            overrideOnly: true
+        });
         return trapEffect;
     }
 
@@ -776,6 +1016,7 @@ class HuntEngine {
         if (!target) return;
         target.hitDuration = 0;
         target.hitRecoveryTotalTicks = 0;
+        target.hitStartedThisTick = false;
         target.hitReactionKind = null;
         target.hitKnockbackDirection = 0;
         target.pendingStunDuration = 0;
@@ -808,13 +1049,28 @@ class HuntEngine {
         };
         const config = states[kind];
         if (!config || this.monsterHp <= 0) return false;
-        const duration = Math.max(1, Number(durationTicks || 1));
+        const stateBeforeControl = this.monsterState;
+        let duration = Math.max(1, Number(durationTicks || 1));
+        if (kind === 'sleep' && typeof HuntMonsterReactionCatalog !== 'undefined') {
+            const sleepProfile = HuntMonsterReactionCatalog.resolveSleep?.(this.selectedMonster?.id);
+            if (sleepProfile?.motion?.length) duration = sleepProfile.motion.reduce((sum, beat) =>
+                sum + Math.max(1, Number(beat.ticks) || 1), 0);
+        }
         const wasAirborne = Boolean(this.monsterFlightRuntime?.groundForStatus(this, kind));
 
         this.interruptMonsterMovement(`status:${kind}`);
         this.setMonsterAtbForControl(kind);
         this.monsterControlStateKind = kind;
         if (kind === 'stun') {
+            this.monsterStunCount += 1;
+            const struggleCount = Math.max(3, 6 - this.monsterStunCount);
+            const reaction = typeof HuntMonsterReactionCatalog !== 'undefined'
+                ? HuntMonsterReactionCatalog.resolveKnockdown(this.selectedMonster?.id, struggleCount)
+                : null;
+            if (reaction?.motion?.length) {
+                duration = reaction.motion.reduce((sum, beat) =>
+                    sum + Math.max(1, Number(beat.ticks) || 1), 0);
+            }
             this.monsterStunDuration = Math.max(Number(this.monsterStunDuration || 0), duration);
             this.monsterKnockdownDuration = 0;
         } else {
@@ -822,13 +1078,121 @@ class HuntEngine {
             this.monsterKnockdownDuration = Math.max(Number(this.monsterKnockdownDuration || 0), duration);
         }
         this.monsterState = config.state;
+        if (kind === 'sleep') {
+            this.monsterSleepRestoreState = ['enraged', 'exhausted'].includes(stateBeforeControl)
+                ? stateBeforeControl : 'normal';
+        }
         this.updateMonsterStateUI(config.stateName, config.title, {
             color: config.color,
             bg: config.bg
         });
+        if (kind === 'paralysis') {
+            this.playSFX?.('monster_attack', null, {
+                monsterId: this.selectedMonster.id,
+                patternId: '__reaction.paralysis',
+                patternSlot: 'beat:held',
+                overrideOnly: true
+            });
+        } else if (kind === 'sleep') {
+            const sleepGeneration = ++this.monsterSleepGeneration;
+            const sleepMotion = typeof HuntMonsterReactionCatalog !== 'undefined'
+                ? HuntMonsterReactionCatalog.resolveSleep?.(this.selectedMonster?.id)?.motion || []
+                : [];
+            this.callbacks?.onTriggerMonsterSleepAnim?.({ durationTicks: duration, motion: sleepMotion });
+            let elapsedTicks = 0;
+            sleepMotion.forEach(beat => {
+                const playBeat = () => {
+                    if (this.monsterState !== 'sleeping'
+                        || this.monsterSleepGeneration !== sleepGeneration) return;
+                    this.playSFX?.('monster_attack', null, {
+                        monsterId: this.selectedMonster.id,
+                        patternId: '__reaction.sleep',
+                        patternSlot: `beat:${beat.beat}`,
+                        overrideOnly: true
+                    });
+                };
+                if (elapsedTicks <= 0) playBeat();
+                else this.schedule(playBeat, elapsedTicks * 100);
+                if (beat.beat === 'held') {
+                    const heldStartTicks = elapsedTicks;
+                    const heldTicks = Math.max(1, Number(beat.ticks) || 1);
+                    // Sleeping VO/SE is ambience owned by the held phase. The
+                    // first cue plays on entering held, then repeats every 3s
+                    // without extending beyond the authored held duration.
+                    for (let repeatAt = heldStartTicks + 30;
+                        repeatAt < heldStartTicks + heldTicks; repeatAt += 30) {
+                        this.schedule(playBeat, repeatAt * 100);
+                    }
+                }
+                elapsedTicks += Math.max(1, Number(beat.ticks) || 1);
+            });
+        }
+        if (kind === 'stun') {
+            // KO shares the authored large-knockdown body reaction. The
+            // renderer adds only the head marker as stun-specific presentation.
+            this.callbacks?.onTriggerMonsterKnockdownAnim?.({
+                kind: 'stun', durationTicks: duration,
+                struggleCount: Math.max(3, 6 - this.monsterStunCount)
+            });
+        }
         if (wasAirborne) {
             this.addLog(`🪽 [강제 착지] ${this.selectedMonster.nameKO}(이)가 공중에서 ${config.stateName.replace(' 상태', '')}에 걸려 즉시 추락했습니다.`, config.color);
         }
+        return true;
+    }
+
+    resolveSleepWakeDamage(rawDamage, options = {}) {
+        const damage = Math.max(0, Number(rawDamage) || 0);
+        if (!damage || options.direct === false) return damage;
+        const groupKey = String(options.groupKey ?? this.battleTime ?? 0);
+        let batch = this.monsterSleepWakeBatch;
+        if (this.monsterState === 'sleeping') {
+            const generation = ++this.monsterSleepGeneration;
+            batch = { groupKey, maxDamage: 0, generation };
+            this.monsterSleepWakeBatch = batch;
+            this.wakeMonsterFromSleep();
+            this.schedule(() => {
+                if (this.monsterSleepWakeBatch?.generation === generation) {
+                    this.monsterSleepWakeBatch = null;
+                }
+            }, 0);
+        }
+        if (!batch || batch.groupKey !== groupKey) return damage;
+        // Every simultaneous hit keeps its ordinary damage. Exactly one bonus
+        // copy of the largest hit is shared by the whole impact group.
+        const bonusDelta = Math.max(0, damage - Number(batch.maxDamage || 0));
+        batch.maxDamage = Math.max(Number(batch.maxDamage || 0), damage);
+        return damage + bonusDelta;
+    }
+
+    wakeMonsterFromSleep() {
+        if (this.monsterState !== 'sleeping') return false;
+        const profile = typeof HuntMonsterReactionCatalog !== 'undefined'
+            ? HuntMonsterReactionCatalog.resolveSleep?.(this.selectedMonster?.id) : null;
+        const wakeMotion = (profile?.motion || []).filter(beat => beat.beat === 'wake');
+        this.monsterKnockdownDuration = 0;
+        this.monsterStunDuration = 0;
+        this.monsterAtb = HuntAtbConfig.GAUGE_MAX;
+        this.monsterState = this.monsterStaminaRuntime?.isExhausted?.(this)
+            ? 'exhausted' : (this.monsterSleepRestoreState || 'normal');
+        this.monsterSleepRestoreState = null;
+        this.monsterSpeed = this.getMonsterSpeedForState(this.monsterState);
+        this.callbacks?.onTriggerMonsterSleepAnim?.({ motion: wakeMotion, wakeOnly: true });
+        this.playSFX?.('monster_attack', null, {
+            monsterId: this.selectedMonster.id,
+            patternId: '__reaction.sleep', patternSlot: 'beat:wake', overrideOnly: true
+        });
+        this.updateMonsterAtbUI(this.monsterAtb);
+        const wakeStateUi = this.monsterState === 'enraged'
+            ? ['분노 상태', `🔥 분노한 ${this.selectedMonster.nameKO} 🔥`,
+                { color: '#ff3b30', bg: 'rgba(255,59,48,0.1)' }]
+            : this.monsterState === 'exhausted'
+                ? ['탈진 상태', `💨 탈진한 ${this.selectedMonster.nameKO} 💨`,
+                    { color: '#00a8ff', bg: 'rgba(0,168,255,0.1)' }]
+                : ['일반 상태', this.selectedMonster.nameKO,
+                    { color: '#00ffaa', bg: 'rgba(0,255,170,0.08)' }];
+        this.updateMonsterStateUI(...wakeStateUi);
+        this.addLog(`❗ [수면 기상] ${this.selectedMonster.nameKO}이(가) 기상 일격에 깨어났습니다!`, '#ffd27a');
         return true;
     }
 
@@ -843,12 +1207,6 @@ class HuntEngine {
         this.showSkillBubble('monster', '💫 머리 타격 · 기절!');
         this.addLog(`💫 [기절] ${hunter.hunterName || hunter.name}의 머리 타격으로 기절치가 한계에 도달했습니다! (6초)`, '#e58e26');
         return true;
-    }
-
-    checkMonsterKnockdown() {
-        // Compatibility entry point. HP thresholds no longer invent a
-        // knockdown; authored part breaks, KO, status, traps and patterns own it.
-        return false;
     }
 
     executeHunterTurn(w) {
@@ -914,22 +1272,14 @@ class HuntEngine {
             const hasShield = actionAllowsGuard && !isGreatSwordCharging
                 && (w.type === 'shield' || w.id === 'heavy_bowgun');
             const guaranteedLanceGuard = w.id === 'lance' && hasShield;
-            let guardProb = actionAllowsGuard ? 0.62 : 0;
-            let dodgeProb = actionAllowsEvade ? 0.48 : 0;
+            const personalityProfiles = HuntEngine.personalityProfiles();
+            let guardProb = actionAllowsGuard ? (personalityProfiles?.chance(w, 'guard') ?? .62) : 0;
+            let dodgeProb = actionAllowsEvade ? (personalityProfiles?.chance(w, 'evade') ?? .48) : 0;
 
             let foresightProb = typeof HuntMonsterTurnExecutor !== 'undefined'
                 ? HuntMonsterTurnExecutor.longSwordForesightChance(w)
                 : 0.75;
-            if (w.personality === 'veteran') {
-                guardProb = 0.78;
-                dodgeProb = 0.75;
-            } else if (w.personality === 'newbie') {
-                guardProb = 0.30;
-                dodgeProb = 0.22;
-            }
             const perkModifiers = w.perkModifiers || {};
-            guardProb += Number(perkModifiers.guardChance || 0);
-            dodgeProb += Number(perkModifiers.evadeChance || 0);
             if (!actionAllowsGuard) guardProb = 0;
             if (!actionAllowsEvade) dodgeProb = 0;
 
@@ -960,6 +1310,7 @@ class HuntEngine {
                 if (this.weaponMechanics?.onHit) this.weaponMechanics.onHit(w);
                 else { w.greatSwordCharge = 0; w.greatSwordChain = 0; }
                 this.actionStateMachine.cancel(w, 'idle');
+                this.cancelHunterBeatAction(w, 'defensive-cancel');
                 this.callbacks.onInterruptWeaponVisual?.(w.index);
             }
 
@@ -972,6 +1323,7 @@ class HuntEngine {
                 w.rollDuration = 6;
             } else if (isGuard) {
                 this.actionStateMachine.cancel(w, 'guard');
+                this.cancelHunterBeatAction(w, 'guard');
                 this.addLog(`🛡️ [방패 가드] ${w.name}이(가) 포효를 방패로 막아내며 흔들림 없이 버팁니다!`, '#00ffff');
                 this.playSFX('hunter_guard', null, { hunterIndex: w.index, action: 'guard' });
                 this.showSkillBubble(w.index, "가드!");
@@ -980,6 +1332,7 @@ class HuntEngine {
                 w.guardDuration = 6;
             } else if (isDodge) {
                 this.actionStateMachine.cancel(w, 'evade');
+                this.cancelHunterBeatAction(w, 'evade');
                 this.addLog(`🌀 [프레임 회피] ${w.name}이(가) 구르기 무적 시간으로 포효의 음파를 피해냈습니다!`, '#2eff7b');
                 this.playSFX('hunter_evade', null, { hunterIndex: w.index, action: 'evade' });
                 this.showSkillBubble(w.index, "회피!");

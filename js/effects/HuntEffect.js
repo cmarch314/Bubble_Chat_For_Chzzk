@@ -22,6 +22,10 @@ class HuntEffect extends BaseEffect {
 
         this.renderer = new HuntRenderer();
         this.audioManager = new HuntAudioManager(director, this.config);
+        // BEAT cues are scheduled by the renderer, but HuntAudioManager owns
+        // playback. HuntRenderer intentionally has no playSFX API.
+        this.renderer.onMonsterPatternAudio = (fileName, fallbackKey, context) =>
+            this.audioManager.playMHAsset(fileName, fallbackKey, context);
         this.renderer.onMonsterStrideAudio = monster =>
             this.audioManager.playMonsterAction(monster, 'charge_stride_step');
         this.renderer.onMonsterProjectileLaunchAudio = (monster, pattern = {}) => {
@@ -973,12 +977,10 @@ class HuntEffect extends BaseEffect {
         const journeySupply = this.huntMode === 'journey' && this.runDirector
             ? { ...this.runDirector.state.supply }
             : null;
-        if (journeySupply) this.selectedWeapons.forEach(hunter => {
-            hunter.potions = journeySupply.potions;
-            hunter.lifepowders = journeySupply.lifepowders;
-            hunter.shockTraps = journeySupply.shockTraps;
-            hunter.bombs = journeySupply.bombs;
-        });
+        const supplyGrantId = this.huntMode === 'journey' && this.runDirector
+            ? `${this.runDirector.state.runId}:${this.runDirector.state.nodeIndex}`
+            : `single:${Date.now()}`;
+        this.initializer.grantIssuedSupplies(this.selectedWeapons, supplyGrantId);
         const defaultCartLimit = 3 + this.selectedWeapons.filter(hunter =>
             (hunter.perks || []).some(perk => perk.name === '수레 애호가')
         ).length;
@@ -1016,6 +1018,7 @@ class HuntEffect extends BaseEffect {
             monsterSpeed: HuntAtbConfig.FILL_PER_TICK * this.monsterAtbSpeedMod,
             monsterState: 'normal',
             monsterDamageMod: this.monsterDamageMod,
+            difficultyProfile: this.huntMode === 'journey' ? this.runDirector?.state?.difficulty : null,
             monsterAtbSpeedMod: this.monsterAtbSpeedMod,
             monsterStunThreshold: baseStunThreshold,
             cartLimit,
@@ -1035,19 +1038,22 @@ class HuntEffect extends BaseEffect {
                 onCancelWhetstoneCue: hunterIndex => this.audioManager.cancelWhetstoneCue(hunterIndex),
                 onPlayAudioFile: (subPath, durationLimitMs, volumeMultiplier, audioContext) => this.audioManager.playMHAudioFile(subPath, durationLimitMs, volumeMultiplier, audioContext),
                 onShakeWeapon: (idx, borderClr, isAttack, actionOrName, isDodge = false, hitContext = null) => {
-                    const w = this.selectedWeapons[idx];
+                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
+                        || this.selectedWeapons[idx];
                     this.renderer.shakeWeapon(idx, w, borderClr, isAttack, actionOrName, isDodge, hitContext);
                 },
                 onShakeMonster: () => this.renderer.shakeMonster(),
                 onRestoreBorder: (idx) => {
-                    const w = this.selectedWeapons[idx];
+                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
+                        || this.selectedWeapons[idx];
                     this.renderer.restoreBorder(idx, w);
                 },
                 onUpdateHpUI: (w) => this.renderer.updateHpUI(w),
                 onUpdateMonsterHpUI: (hp, maxHp) => this.renderer.updateMonsterHpUI(hp, maxHp),
                 onUpdateSmallMonsterSwarmUI: (state) => this.renderer.updateSmallMonsterSwarmUI(state),
                 onUpdateWeaponAtbUI: (idx, atb) => {
-                    const w = this.selectedWeapons[idx];
+                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
+                        || this.selectedWeapons[idx];
                     this.renderer.updateWeaponAtbUI(idx, atb, w);
                 },
                 onUpdateSharpnessUI: (idx, hunter) => this.renderer.updateSharpnessUI(idx, hunter),
@@ -1059,7 +1065,7 @@ class HuntEffect extends BaseEffect {
                 onUpdateMonsterPartsUI: parts => this.renderer.updateMonsterPartsUI(parts),
                 onUpdateTailSeverUI: (visible, carved, displayName) => this.renderer.updateTailSeverUI(visible, carved, displayName),
                 onUpdatePotionCountUI: (idx, count) => this.renderer.updatePotionCountUI(idx, count),
-                onUpdateHunterItemUI: (hunter) => this.renderer.updateHunterItemUI(hunter),
+                onUpdateHunterItemUI: (hunter) => this.renderer.updateHunterItemUI(hunter, this.engine?.sharedSupply),
                 onUpdateOverheatUI: (idx, duration) => this.renderer.updateOverheatUI(idx, duration),
                 onUpdatePhialsUI: (idx, phials) => this.renderer.updatePhialsUI(idx, phials),
                 onUpdateExtractsUI: (idx, buffs) => this.renderer.updateExtractsUI(idx, buffs),
@@ -1095,24 +1101,31 @@ class HuntEffect extends BaseEffect {
                     this.renderer.combatAnimator.triggerGuardImpact(idx);
                 },
                 onInterruptWeaponVisual: (idx) => {
-                    const w = this.selectedWeapons[idx];
+                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
+                        || this.selectedWeapons[idx];
                     this.renderer.combatAnimator.interruptWeaponVisual(idx, w);
                 },
                 onTriggerRollAnimation: (idx) => this.renderer.triggerRollAnimation(idx),
                 onTriggerInvincibleJump: (idx, active) => this.renderer.triggerInvincibleJump(idx, active),
                 onTriggerHitAnimation: (idx, reaction) => {
-                    const w = this.selectedWeapons[idx];
+                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
+                        || this.selectedWeapons[idx];
                     this.renderer.triggerHitAnimation(idx, w, reaction);
                 },
                 onCancelHitAnimation: (idx) => this.renderer.cancelHitAnimation(idx),
                 onTriggerDeathTag: (idx, timerSeconds) => {
-                    const w = this.selectedWeapons[idx];
+                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
+                        || this.selectedWeapons[idx];
                     this.renderer.triggerDeathTag(idx, w, timerSeconds || 5);
-                    this.triggerCartAnimation(w);
+                },
+                onTriggerHunterReturn: (idx) => {
+                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
+                        || this.selectedWeapons[idx];
+                    this.renderer.triggerHunterReturn(idx, w);
                 },
                 onTriggerStunUI: (idx, isStunned) => this.renderer.triggerStunUI(idx, isStunned),
                 onTriggerRoarStun: (idx, isStunned) => this.renderer.triggerRoarStun(idx, isStunned),
-                onTriggerMonsterKnockdownAnim: () => {
+                onTriggerMonsterKnockdownAnim: (details = null) => {
                     // Traps, perks, and forced landings can trigger knockdown
                     // outside HuntEngine.checkMonsterKnockdown().
                     if (this.engine?.pendingMonsterAction
@@ -1121,7 +1134,7 @@ class HuntEffect extends BaseEffect {
                         || Number(this.engine?.monsterActionLockTicks || 0) > 0) {
                         this.engine.interruptMonsterMovement?.('knockdown');
                     }
-                    this.renderer.triggerMonsterKnockdownAnim();
+                    this.renderer.triggerMonsterKnockdownAnim(details);
                 },
                 onTriggerMonsterPartBreakReaction: (kind, durationTicks, partKind) => {
                     if (this.engine?.pendingMonsterAction
@@ -1132,6 +1145,10 @@ class HuntEffect extends BaseEffect {
                     }
                     this.renderer.triggerMonsterPartBreakReaction(kind, durationTicks, partKind);
                 },
+                onTriggerMonsterPartBreakVisual: partKind =>
+                    this.renderer.triggerMonsterPartBreakVisual(partKind),
+                onTriggerMonsterSleepAnim: details =>
+                    this.renderer.triggerMonsterSleepAnim(details),
                 onTriggerMonsterTraitReaction: (kind, durationTicks) =>
                     this.renderer.triggerMonsterTraitReaction(kind, durationTicks),
                 onTriggerEnvironmentEffect: (kind, hunterIndex, details) =>
@@ -1143,7 +1160,17 @@ class HuntEffect extends BaseEffect {
                 }
             }
         });
-        if (this.engine.sharedSupply) this.selectedWeapons.forEach(hunter => this.renderer.updateHunterItemUI(hunter));
+        if (this.engine.sharedSupply) this.selectedWeapons.forEach(hunter =>
+            this.renderer.updateHunterItemUI(hunter, this.engine.sharedSupply));
+        this.selectedWeapons.forEach(hunter => {
+            const buff = typeof HuntPersonalityProfiles !== 'undefined'
+                ? HuntPersonalityProfiles.get(hunter.personality)?.startBuff : null;
+            if (!buff) return;
+            const label = buff.kind === 'attack' ? '⚔️ 공격력 +20%' : '🛡️ 받는 피해 -20%';
+            this.addCombatLog(`${label} · ${hunter.hunterName}의 수렵 시작 보너스 (90초)`,
+                buff.kind === 'attack' ? '#ff7777' : '#8eb5ff');
+            this.renderer.showSkillBubble(hunter.index, `${label} · 90초`);
+        });
 
         // The loadout DOM is replaced before HuntEngine applies entry perks.
         // Synchronize once immediately so camp/normal cards never spend the
@@ -1258,30 +1285,6 @@ class HuntEffect extends BaseEffect {
         } else {
             return Math.random() < 0.15 ? rare : tail;
         }
-    }
-
-    triggerCartAnimation(weapon) {
-        if (!weapon) return;
-        const container = document.createElement('div');
-        container.className = 'game-hunt-cart-container';
-        container.innerHTML = `
-            <div class="game-hunt-cart-sprite">
-                <div class="game-hunt-cart-fainter">
-                    <img src="img/weapons/${weapon.filename}" style="width: 55px; height: 55px; filter: grayscale(0.5);" />
-                </div>
-                <div style="font-size: 3.5rem; margin-top: -10px;">🛒</div>
-                <div style="font-size: 0.95rem; font-weight: bold; background: rgba(0,0,0,0.85); color: #ff3b30; border: 1px solid #ff3b30; padding: 2px 8px; border-radius: 6px; margin-top: 5px; white-space: nowrap;">
-                    ${weapon.name} 수레행
-                </div>
-            </div>
-        `;
-        // [FIX] 렌더러 컨테이너 내부에 종속시켜 !중단 시 함께 삭제되도록 수정
-        if (this.renderer && this.renderer.container) {
-            this.renderer.container.appendChild(container);
-        } else {
-            document.body.appendChild(container);
-        }
-        this.timers.timeout(() => { if (container.parentNode) container.remove(); }, 4000);
     }
 
     clearAllTimers() {
@@ -1425,7 +1428,11 @@ class HuntEffect extends BaseEffect {
                 const reward = HuntJourneyRewardCatalog.award(this.runDirector.state.seals, currentNode.monsterId, currentNode.tier);
                 patch.seals = reward.seals;
                 patch.zenny = HuntJourneyEconomy.clampZenny(Number(this.runDirector.state.zenny || 0)
-                    + HuntJourneyRewardCatalog.coinFor(currentNode.tier, currentNode.isBoss));
+                    + HuntJourneyRewardCatalog.coinFor(
+                        currentNode.tier,
+                        currentNode.isBoss,
+                        this.runDirector.state.difficulty
+                    ));
             }
             if (isVictory && currentNode?.isBoss && currentNode.stageIndex < 2) patch.upgradePendingStage = currentNode.stageIndex + 1;
             this.journeySettlementPromise = isVictory

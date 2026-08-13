@@ -28,7 +28,11 @@ assert.match(huntRenderer, /class="hunt-combat-info"/);
 assert.match(huntRenderer, /renderWeaponResourceGlyphs\(w\)/);
 assert.match(huntRenderer, /id="potion-count-\$\{w\.index\}"[\s\S]*?id="trap-count-\$\{w\.index\}"[\s\S]*?id="lifepowder-count-\$\{w\.index\}"/,
     'hunter cards must show potion, trap, and healing-powder counts together');
-assert.match(huntRenderer, /updateHunterItemUI\(hunter\)/, 'all three combat item counts need a shared refresh path');
+assert.match(
+    huntRenderer,
+    /updateHunterItemUI\(hunter, sharedSupply = null\)[\s\S]*?#potion-count-\$\{hunter\.index\}[\s\S]*?#trap-count-\$\{hunter\.index\}[\s\S]*?#lifepowder-count-\$\{hunter\.index\}[\s\S]*?#bomb-count-\$\{hunter\.index\}[\s\S]*?#flash-count-\$\{hunter\.index\}/,
+    'all issued and shared combat item counts need one shared refresh path'
+);
 assert.match(huntRenderer, /id="bomb-count-\$\{w\.index\}"/, 'hunter cards must show remaining barrel bombs');
 assert.match(huntRenderer, /weapon-icon-resource-glyph/);
 assert.match(huntRenderer, /class="hunt-weapon-special-resource">\$\{this\.renderWeaponResourceGlyphs\(w\)\}/,
@@ -118,7 +122,7 @@ assert.match(css, /\.hunter-interference-overlay\s*\{[^}]*inset:3px[^}]*z-index:
 assert.match(css, /\.hunter-interference-overlay\.is-small\s*\{[^}]*opacity:\.88/);
 assert.match(css, /\.hunter-interference-overlay\.is-large\s*\{[^}]*opacity:\.98/);
 assert.match(css,
-    /\.hunter-interference-active \.game-hunt-weapon-img:not\(\.small-hit-anim\):not\(\.large-hit-anim\)/,
+    /\.hunter-interference-active \.game-hunt-weapon-img\s*\{/,
     'hit knockback animations must override stale roar, tremor, or wind wobble selectors');
 for (const kind of ['roar', 'tremor', 'wind']) {
     assert.match(css, new RegExp(`\\.hunter-interference-overlay\\.is-${kind}[^}]*--hunter-interference-color`),
@@ -211,22 +215,32 @@ assert.match(huntAnimator, /triggerHitAnimation\(idx, w, reaction = \{\}\)\s*\{[
     'hunter hit reactions must interrupt the currently running weapon animation');
 assert.match(huntAnimator, /triggerHitAnimation\(idx, w, reaction = \{\}\)[\s\S]*?'\.game-hunt-weapon-img, \.hunt-split-shield, \.game-hunt-weapon-overlay'/,
     'hunter hit knockback must target weapon, split shield, and attached weapon effect layers');
-assert.match(huntAnimator, /weaponCard\.classList\.add\(cardShakeClass\)[\s\S]*?weaponLayers\.forEach\(layer => layer\.classList\.add\(hitClass\)\)/,
-    'a hunter hit may shake the fixed card while applying knockback only to its weapon layers');
-assert.match(css, /\.game-hunt-weapon-img\.small-hit-anim,[\s\S]*?animation:\s*weapon-small-hit 1\.5s/,
-    'weak hit recovery must last exactly 1.5 seconds');
-assert.match(css, /\.game-hunt-weapon-img\.large-hit-anim,[\s\S]*?animation:\s*weapon-large-hit 4s/,
-    'strong hit recovery must last exactly 4 seconds');
+assert.match(huntAnimator, /weaponCard\.classList\.add\(cardShakeClass\)[\s\S]*?weaponLayers\.forEach\(layer => \{[\s\S]*?layer\.animate\(keyframes/,
+    'a hunter hit may shake the fixed card while WAAPI applies knockback only to its weapon layers');
+assert.doesNotMatch(huntAnimator, /layer\.classList\.add\(hitClass\)/,
+    'legacy CSS hunter hit animation must not coexist with the WAAPI owner');
+assert.match(huntAnimator, /kind === 'weak' \? 1500 : 4000/,
+    'migrated weak and strong hit recovery must preserve the approved 1.5s and 4s timing');
+assert.match(huntAnimator, /knockbackVectorFromRects[\s\S]*?offset: \.25[\s\S]*?translate\(\$\{x\}px, \$\{y \+ yOffset\}px\)[\s\S]*?offset: \.75/,
+    'strong hit recovery must fall along the measured monster-to-hunter collision vector');
+assert.doesNotMatch(css, /@keyframes\s+weapon-(?:small|large)-hit/,
+    'legacy CSS hunter hit keyframes must be removed after WAAPI migration');
 assert.doesNotMatch(huntAnimator, /weaponCard\.style\.animation\s*=\s*'cart-card-slide-out/,
     'carting must never rotate or throw the entire hunter card away');
-assert.match(huntAnimator, /layers\.forEach\(layer => layer\.classList\.add\('weapon-carted-out'\)\)/,
-    'carting must throw only the hunter weapon layers out of the fixed card');
+assert.match(huntAnimator, /triggerDeathTag\(idx, w, timerVal = 5\)[\s\S]*?fallDistance = 220[\s\S]*?rotate\(720deg\)[\s\S]*?hunter-cart-sequence-cart/,
+    'carting must use the authored two-turn fall and converging cart sequence');
+assert.match(huntAnimator, /\(imgContainer \|\| weaponCard\)\.appendChild\(cart\)[\s\S]*?translate\(0,\$\{fallDistance\}px\)/,
+    'the cart must share the weapon image coordinate space and converge on its exact fallen position');
+assert.match(css, /\.hunter-cart-sequence-cart,[\s\S]*?top:50%/,
+    'cart and weapon coordinates must share the image-container center origin');
+assert.match(huntAnimator, /triggerHunterReturn\(idx, w\)[\s\S]*?translateY\(230px\)[\s\S]*?translateY\(0\)/,
+    'camp return must jump vertically from below the hunter card back to home');
 assert.doesNotMatch(huntAnimator, /weaponCard\.style\.animation\s*=\s*'none'/,
     'reviving must not leave an inline animation override that disables later card shakes');
 assert.doesNotMatch(css, /@keyframes\s+cart-card-slide-out/,
     'obsolete whole-card cart rotation must not remain available');
-assert.match(css, /\.game-hunt-weapon-img\.weapon-carted-out,\s*\n\.hunt-split-shield\.weapon-carted-out\s*\{/,
-    'cart knockback must remain scoped to weapon and shield images');
+assert.doesNotMatch(css, /weapon-carted-out|game-hunt-cart-container|cart-ride/,
+    'the former CSS cart paths must not coexist with the WAAPI sequence');
 assert.match(huntAnimator, /triggerRollAnimation\(idx\)[\s\S]*?querySelectorAll\(`#[^`]* \.game-hunt-weapon-img,[^`]*\.hunt-split-shield`\)/,
     'evade rotation must target only weapon/shield image layers, never chat or resource containers');
 assert.match(huntAnimator, /idxOrMonster === 'monster'[\s\S]*?'skill-bubble monster-skill-bubble'/,
@@ -263,6 +277,12 @@ assert.doesNotMatch(css, /\.weapon-(?:great_sword|hammer)\.weapon-charge-stage-3
 assert.match(css, /\.hunt-perk-icon\s*\{[\s\S]*?width:\s*28px/);
 assert.match(css, /\.hunt-severed-tail img\s*\{\s*width:\s*81px;\s*height:\s*81px/,
     'the severed-tail item image must render at 1.5x its original 54px size');
+assert.match(huntRenderer, /const hunterGap = hunterCards\.length > 1/,
+    'a severed tail must derive its throw distance from the visible spacing between hunters');
+assert.match(huntRenderer, /--tail-flight-x/,
+    'a severed tail must travel laterally from the live monster position instead of dropping at a random board point');
+assert.match(css, /var\(--tail-flight-arc\)/,
+    'the severed-tail throw must preserve a visible airborne arc');
 assert.match(css, /\.hunt-loadout-board \.hunt-loadout-build-line\s*\{[\s\S]*?display:\s*flex/);
 assert.match(css, /\.hunt-loadout-board \.hunt-loadout-card\.hunt-loadout-ready\s*\{[\s\S]*?border-color:\s*#62f59c/,
     'ready hunters need a visible locked-in border at 1080p');
@@ -397,17 +417,17 @@ const veteranLongSwordRates = perkRenderer.renderHunterProbabilityBadges({
     id: 'long_sword', type: 'melee', personality: 'veteran', perkModifiers: { evadeChance: .10 }
 });
 assert.match(veteranLongSwordRates, /🎯<\/b>90%/);
-assert.match(veteranLongSwordRates, /💥<\/b>0%/);
-assert.match(veteranLongSwordRates, /💨<\/b>85%/);
+assert.match(veteranLongSwordRates, /💥<\/b>60%/);
+assert.match(veteranLongSwordRates, /💨<\/b>90%/);
 assert.match(veteranLongSwordRates, /👁️<\/b>80%/);
-assert.match(veteranLongSwordRates, /⚡<\/b>82%/);
+assert.match(veteranLongSwordRates, /⚡<\/b>60%/);
 const newbieShieldRates = perkRenderer.renderHunterProbabilityBadges({
     id: 'lance', type: 'shield', personality: 'newbie', perkModifiers: { guardChance: .10 }
 });
-assert.match(newbieShieldRates, /🛡️<\/b>40%/);
-assert.match(newbieShieldRates, /💨<\/b>22%/,
+assert.match(newbieShieldRates, /🛡️<\/b>80%/);
+assert.match(newbieShieldRates, /💨<\/b>70%/,
     'shield weapons still need their separately applied evade chance');
-assert.match(newbieShieldRates, /🔱<\/b>65%/);
+assert.match(newbieShieldRates, /🔱<\/b>40%/);
 assert.match(perkRenderer.hunterHpBarBackground({ elementalBlights: { poison: 10 } }, 80), /#b84de0/);
 assert.match(perkRenderer.hunterHpBarBackground({ elementalBlights: { fire: 10 } }, 80), /#ff5426/);
 assert.match(perkRenderer.hunterHpBarBackground({ environmentDotType: 'effluvium' }, 80), /#799b26/);

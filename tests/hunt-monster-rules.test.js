@@ -32,13 +32,4 @@ assert.strictEqual(Rules.stateForBattleTime(2300, rathalosSchedule), 'enraged',
 assert.strictEqual(Rules.speedForState('exhausted', 'vaal_hazak', 1), HuntAtbConfig.FILL_PER_TICK * 0.5 * 0.75);
 assert.strictEqual(Rules.materialFor('리오레우스', () => 0), '리오레우스의 비늘');
 assert.strictEqual(Rules.materialFor('리오레우스', () => 0.999), '리오레우스의 꼬리뼈');
-assert.strictEqual(Rules.crossedKnockdownThreshold(790, 1000, {}, 'rathalos'), 80);
-assert.strictEqual(Rules.crossedKnockdownThreshold(590, 1000, { 80: true }, 'rathalos'), 60);
-assert.strictEqual(Rules.crossedKnockdownThreshold(100, 1000, {}, 'valstrax'), null);
-assert.deepStrictEqual(
-    Array.from(Rules.crossedKnockdownThresholds(190, 1000, {}, 'rathalos')),
-    [80, 60, 40, 20],
-    'one large hit must consume every crossed threshold without chaining knockdowns'
-);
-
 console.log('[test] Hunt monster pure rules contract passed.');

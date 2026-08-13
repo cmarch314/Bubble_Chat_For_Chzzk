@@ -1,7 +1,7 @@
 class HuntSharedSupply {
-    static KEYS = Object.freeze(['potions', 'lifepowders', 'shockTraps', 'bombs']);
-    static CAPS = Object.freeze({ potions: 10, lifepowders: 9, shockTraps: 9, bombs: 9 });
-    static INITIAL = Object.freeze({ potions: 10, lifepowders: 1, shockTraps: 0, bombs: 1 });
+    static KEYS = Object.freeze(['potions', 'lifepowders', 'shockTraps', 'flashPods', 'bombs']);
+    static CAPS = Object.freeze({ potions: 40, lifepowders: 18, shockTraps: 12, flashPods: 12, bombs: 24 });
+    static INITIAL = Object.freeze({ potions: 10, lifepowders: 1, shockTraps: 0, flashPods: 0, bombs: 1 });
 
     static normalize(value = {}) {
         return Object.fromEntries(this.KEYS.map(key => [
@@ -21,19 +21,6 @@ class HuntSharedSupply {
                 return recorded.length ? Math.max(...recorded) : this.INITIAL[key];
             })()
         ])));
-    }
-
-    static bindHunters(hunters = [], supply = {}) {
-        const shared = this.normalize(supply);
-        for (const hunter of hunters) for (const key of this.KEYS) {
-            Object.defineProperty(hunter, key, {
-                configurable: true,
-                enumerable: true,
-                get: () => shared[key],
-                set: value => { shared[key] = Math.max(0, Math.min(this.CAPS[key], Math.floor(Number(value) || 0))); }
-            });
-        }
-        return shared;
     }
 
     static add(supply, key, amount = 1) {

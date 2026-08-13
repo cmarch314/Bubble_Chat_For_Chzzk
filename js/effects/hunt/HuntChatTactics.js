@@ -118,7 +118,6 @@ class HuntChatTactics {
             }
             const trapEffect = engine.beginMonsterTrapControl('pitfall', 35);
             const trapTicks = trapEffect.durationTicks;
-            engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
             engine.triggerEnvironmentEffect?.('pitfall', null, trapEffect);
             engine.addLog(`🪤 [시청자 함정] ${nickname}의 함정 성공! ${(trapTicks / 10).toFixed(1)}초 집중 공격 기회입니다.`, '#ffcf66');
             return { handled: true, accepted: true, feedback: '🪤 함정 성공' };
@@ -126,11 +125,13 @@ class HuntChatTactics {
 
         if (command === 'rockfall') {
             if (!this.spendGauge(80)) return { handled: true, accepted: false, feedback: `🪨 80 필요 · ${this.supportGauge}/100` };
-            const damage = Math.max(1, Math.floor(engine.monsterMaxHp * 0.04));
+            let damage = Math.max(1, Math.floor(engine.monsterMaxHp * 0.04));
+            damage = engine.resolveSleepWakeDamage?.(damage, {
+                direct: true, groupKey: engine.battleTime, actionId: 'support.rockfall'
+            }) ?? damage;
             engine.monsterHp = Math.max(0, engine.monsterHp - damage);
             engine.triggerEnvironmentEffect?.('rockfall');
             engine.updateMonsterHpUI();
-            engine.checkMonsterKnockdown();
             engine.addLog(`🪨 [환경 낙석] ${nickname}의 신호로 낙석 명중! -${damage} HP`, '#ffb05c');
             return { handled: true, accepted: true, feedback: `🪨 낙석 -${damage}` };
         }

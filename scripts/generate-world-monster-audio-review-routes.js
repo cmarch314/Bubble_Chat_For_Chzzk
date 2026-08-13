@@ -239,6 +239,40 @@ function render(result) {
         + `else { window.HUNT_WORLD_MONSTER_REVIEW_ROUTES = HUNT_WORLD_MONSTER_REVIEW_ROUTES; window.HUNT_WORLD_MONSTER_REVIEW_EVIDENCE = HUNT_WORLD_MONSTER_REVIEW_EVIDENCE; window.HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED = HUNT_WORLD_MONSTER_REVIEW_UNRESOLVED; window.HUNT_WORLD_MONSTER_SE_FALLBACKS = HUNT_WORLD_MONSTER_SE_FALLBACKS; window.HUNT_WORLD_MONSTER_SILENT_VOICE_IDS = HUNT_WORLD_MONSTER_SILENT_VOICE_IDS; window.HUNT_WORLD_MONSTER_VOICE_FALLBACK_FAMILIES = HUNT_WORLD_MONSTER_VOICE_FALLBACK_FAMILIES; }\n`;
 }
 
+function sleepSync(milliseconds) {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
+function replaceGeneratedFile(temporary, destination, contents) {
+    const retryable = new Set(['EPERM', 'EACCES', 'EBUSY']);
+    let lastError = null;
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+        try {
+            fs.renameSync(temporary, destination);
+            return;
+        } catch (error) {
+            if (!retryable.has(error?.code)) throw error;
+            lastError = error;
+            sleepSync(25 * (attempt + 1));
+        }
+    }
+    // Windows virus scanners and a concurrently refreshing review server can
+    // briefly deny replacement of an existing generated module. A final
+    // in-place write is preferable to losing the already committed review
+    // label. Verify it byte-for-byte before removing the private temp file.
+    try {
+        fs.writeFileSync(destination, contents, 'utf8');
+        if (fs.readFileSync(destination, 'utf8') !== contents) {
+            throw new Error('generated route verification mismatch');
+        }
+        fs.rmSync(temporary, { force: true });
+    } catch (error) {
+        throw new Error(`Generated route replacement failed after retries: ${lastError?.message || error.message}`, {
+            cause: error
+        });
+    }
+}
+
 function generate(options = {}) {
     const labels = readJson(options.labelsPath || LABELS_PATH, { records: [] });
     const bankMap = readJson(options.bankMapPath || BANK_MAP_PATH, {});
@@ -247,9 +281,10 @@ function generate(options = {}) {
     const result = runtimeRoutes(labels, bankMap, graphLoader);
     const outputPath = options.outputPath || OUTPUT_PATH;
     fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-    const temporary = `${outputPath}.tmp`;
-    fs.writeFileSync(temporary, render(result), 'utf8');
-    fs.renameSync(temporary, outputPath);
+    const contents = render(result);
+    const temporary = `${outputPath}.${process.pid}.${Date.now()}.tmp`;
+    fs.writeFileSync(temporary, contents, 'utf8');
+    replaceGeneratedFile(temporary, outputPath, contents);
     return {
         routes: Object.keys(result.routes).length,
         clips: result.evidence.length,
@@ -263,4 +298,4 @@ if (require.main === module) {
     console.log(`[world-audio-review] routes=${summary.routes} clips=${summary.clips} unresolved=${summary.unresolved}`);
 }
 
-module.exports = { TAG_ROUTES, applyRuntimePolicy, clipIndex, generate, render, runtimeRoutes };
+module.exports = { TAG_ROUTES, applyRuntimePolicy, clipIndex, generate, render, replaceGeneratedFile, runtimeRoutes };

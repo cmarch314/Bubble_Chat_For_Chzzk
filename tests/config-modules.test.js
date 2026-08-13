@@ -30,6 +30,11 @@ assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['헐']), ['헐'
 assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['나루호도']), ['나루호도', '나루호도2']);
 assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['소나노']), ['소나노', '소나노2']);
 assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['색']), ['색1', '색2', '색3', '색4', '색5', '색6']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['박수']), ['박수1', '박수2', '박수3', '박수4', '박수5']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['ㅋㅋㅋ']), ['ㅋㅋㅋ']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['더워']), ['더워']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['더워죽']), ['더워죽']);
+assert.deepStrictEqual(Array.from(window.HIVE_CMC_COMMAND_GROUPS['뜨거워']), ['뜨거워']);
 assert.ok(window.HIVE_CMC_VOICE_COMMANDS.length >= 400, 'live CMC chat voice group must remain substantially complete');
 assert.ok(window.HIVE_CMC_VOICE_COMMANDS.every(command => window.HIVE_SOUND_CONFIG[command]),
     'every CMC voice command must resolve through the live chat sound catalog');

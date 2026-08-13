@@ -25,26 +25,16 @@ assert.ok(Catalog.partDamageScale(state, 15600) > 0,
 assert.strictEqual(Catalog.damageTypeForWeapon({ type: 'ranged' }), 'pierce');
 assert.strictEqual(Catalog.breakReaction('rathalos', 'head', true).type, 'aerial_topple',
     'any actual part break in flight must become a forced landing');
-assert.deepStrictEqual(
-    Catalog.breakReaction('rathalos', 'left-wing', false),
-    {
-        type: 'part_break_topple',
-        visualType: 'part_break_topple',
-        durationTicks: 40,
-        label: '부위 파괴 넘어짐'
-    },
-    'every grounded part break uses the shared short topple reaction'
-);
-assert.deepStrictEqual(
-    Catalog.breakReaction('rathalos', 'tail', false),
-    {
-        type: 'tail_sever_roll',
-        visualType: 'tail_sever_roll',
-        durationTicks: 60,
-        label: '꼬리 절단 나뒹굴기'
-    },
-    'tail severing uses the stronger shared rolling reaction'
-);
+const wingBreak = Catalog.breakReaction('rathalos', 'left-wing', false);
+assert.strictEqual(wingBreak.type, 'flinch');
+assert.strictEqual(wingBreak.reactionProfile, 'flinch');
+assert.strictEqual(wingBreak.durationTicks, 30,
+    'ordinary grounded part breaks use the shared short BEAT flinch');
+const tailBreak = Catalog.breakReaction('rathalos', 'tail', false);
+assert.strictEqual(tailBreak.type, 'knockdown');
+assert.strictEqual(tailBreak.reactionProfile, 'tail');
+assert.strictEqual(tailBreak.durationTicks, 60,
+    'tail severing uses the stronger shared rolling BEAT reaction');
 assert.strictEqual(
     Catalog.breakReaction('rathalos', 'tail', true).visualType,
     'tail_sever_roll',
@@ -78,21 +68,25 @@ assert.deepStrictEqual(
 );
 assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'head'), { x: .18, y: .72, kind: 'head' });
 assert.deepStrictEqual(Catalog.visualPoint({ id: 'rathian' }, 'left-wing'), { x: .53, y: .20, kind: 'left-wing' });
+assert.deepStrictEqual(Catalog.visualPoint({ id: 'diablos' }, 'torso'), { x: .50, y: .50, kind: 'torso' },
+    'Diablos BEAT rotations require an authored torso pivot');
+assert.deepStrictEqual(Catalog.visualPoint({ id: 'black_diablos' }, 'torso'), { x: .50, y: .50, kind: 'torso' },
+    'the reviewed Black Diablos variant must inherit the base torso pivot');
 for (const id of ['diablos', 'black_diablos']) {
     const reviewedDiablos = Catalog.find({ id });
     const partState = Catalog.createPartState(reviewedDiablos);
     const slots = Catalog.partDisplaySlots(partState);
     assert.deepStrictEqual(
         slots.map(part => part.kind),
-        ['head', 'head', 'back', 'tail'],
-        `${id} must display two horn breaks, the back break, and the severable tail`
+        ['head', 'head', 'back', 'leg', 'leg', 'tail'],
+        `${id} must display two horn breaks, the back, both front legs, and the severable tail`
     );
     assert.deepStrictEqual(
         slots.map(part => part.sourceKind),
-        ['left-horn', 'right-horn', 'back', 'tail'],
-        `${id} must not invent leg or wing break slots`
+        ['left-horn', 'right-horn', 'back', 'left-front-leg', 'right-front-leg', 'tail'],
+        `${id} must omit non-breakable wings while retaining front-leg break slots`
     );
-    assert.match(reviewedDiablos.evidence.breakContract, /horns-back-tail/);
+    assert.match(reviewedDiablos.evidence.breakContract, /wings-hitzone-only/);
     assert.deepStrictEqual(
         partState.find(part => part.kind === 'head').hitzones,
         { slash: .45, blunt: .63, pierce: .40 },
@@ -103,6 +97,32 @@ for (const id of ['diablos', 'black_diablos']) {
         .42,
         `${id} horn blunt hitzone must use the reviewed World value`
     );
+    assert.ok(partState.every(part => part.flinchHealth > 0),
+        `${id} must accumulate ordinary part flinches independently of visible breaks`);
+    assert.strictEqual(Catalog.breakReaction(id, 'left-horn').type, 'flinch',
+        `${id} horn destruction is a short flinch, not a generic full knockdown`);
+    assert.strictEqual(partState.find(part => part.kind === 'left-wing').breakable, false,
+        `${id} wings are damageable hitzones but not visible break slots in World`);
+    assert.deepStrictEqual(partState.find(part => part.kind === 'left-wing').hitzones,
+        { slash: .40, blunt: .30, pierce: .60 },
+        `${id} wings must use their reviewed soft projectile hitzone`);
+    assert.strictEqual(Catalog.breakReaction(id, 'back').type, 'flinch',
+        `${id} back destruction is a short flinch, not a generic full knockdown`);
+    for (const side of ['left', 'right']) {
+        const reaction = Catalog.breakReaction(id, `${side}-front-leg`);
+        assert.strictEqual(reaction.type, 'knockdown', `${id} ${side} front-leg destruction must topple`);
+        assert.strictEqual(reaction.durationTicks, 76, `${id} ${side} front-leg destruction must use the authored shared BEAT knockdown`);
+    }
+    assert.strictEqual(Catalog.breakReaction(id, 'tail').reactionProfile, 'tail');
+    const ordinaryFlinch = Catalog.applyPartDamage(
+        partState,
+        { id: 'great_sword', type: 'melee' },
+        partState[0].flinchHealth * 2,
+        1,
+        () => 0
+    );
+    assert.strictEqual(ordinaryFlinch.newlyFlinched, true,
+        `${id} non-breakable head damage must still produce an accumulated small flinch`);
 }
 
 const reviewedWorldFamilies = {

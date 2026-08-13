@@ -55,7 +55,8 @@ for (const monster of released) {
                 `${monster.id}/${pattern.id} recovery must remain within 1-3 seconds`);
             const postGap = recoverySeconds
                 * HuntAtbConfig.TICKS_PER_SECOND
-                * recoveryPerTick;
+                * recoveryPerTick
+                * (Number(pattern.monsterAtbCostMultiplier) || 1);
             const expectedCost = Math.min(
                 HuntAtbConfig.GAUGE_MAX * HuntAtbConfig.MAX_MONSTER_ACTION_DEBT_GAUGES,
                 timing.occupancyTicks * recoveryPerTick + postGap
@@ -82,16 +83,25 @@ assert.strictEqual(
         { type: 'physical', damageRatio: 0.2, monsterAtbCost: 1 },
         { occupancyTicks: 60, recoveryPerTick: 1 }
     ),
-    70,
-    'a six-second light animation must ignore fixed legacy costs and add one recovery second'
+    71,
+    'a six-second light animation must ignore fixed legacy costs and add its damage-scaled 1.1-second recovery'
 );
 
 assert.strictEqual(
     HuntAtbConfig.monsterPostActionRecoverySeconds({
         type: 'physical', damageRatio: 0.3, tags: ['physical', 'weak']
     }),
-    1,
-    'an authored weak tag must retain light recovery even when its tuned damage exceeds the legacy cutoff'
+    1.3,
+    'damage must continuously tune recovery even when an obsolete strength tag disagrees'
+);
+
+assert.ok(
+    HuntAtbConfig.monsterPostActionRecoverySeconds({
+        type: 'physical', damageRatio: 0.7, maxTargets: 4, tags: ['multi-hit']
+    }) > HuntAtbConfig.monsterPostActionRecoverySeconds({
+        type: 'physical', damageRatio: 0.25, maxTargets: 1
+    }),
+    'high-damage team-wide chains must leave a longer opening than a light single-target hit'
 );
 
 assert.strictEqual(

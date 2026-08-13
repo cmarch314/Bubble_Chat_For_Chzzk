@@ -8,9 +8,12 @@ const {
     huntToGraphId,
     patternAudioSlots,
     patternReviewTimeline,
+    bindAudioSlotsToTimeline,
     buildMonsterPatternAudioMap,
     loadHuntPatternAudioMap,
+    refreshHuntCatalogSources,
     savePatternRoute,
+    movePatternRouteFile,
     savePatternMotion
 } = require('../tools/hunt-audio-pattern-map');
 
@@ -21,6 +24,20 @@ assert.ok(loadHuntPatternAudioMap('em002').patterns.length >= 12, 'em002 (Rathal
 assert.ok(loadHuntPatternAudioMap('em001').patterns.length >= 13, 'em001 (Rathian) must load patterns');
 assert.ok(loadHuntPatternAudioMap('em032').patterns.length >= 10, 'em032 (Tigrex) must load patterns');
 assert.ok(loadHuntPatternAudioMap('em007').patterns.length >= 10, 'em007 (Diablos) must load patterns');
+const liveBarioth = loadHuntPatternAudioMap('em042').patterns.find(pattern => pattern.id === 'barioth.shoulder_check');
+assert.deepStrictEqual(liveBarioth.timeline.beats.map(beat => beat.label), [
+    '도약 압축', '측면 도약', '어깨 들이밀기', '횡이동 충돌', '철산고 충돌', '느린 자세 복귀'
+], 'the review API must project the same current Barioth motion authored for the real hunt');
+assert.deepStrictEqual(liveBarioth.slots.map(slot => slot.beatId),
+    liveBarioth.timeline.beats.map(beat => beat.id),
+    'every authored motion beat must be an equally selectable sound moment');
+assert.deepStrictEqual(liveBarioth.slots.map(slot => slot.atTicks),
+    liveBarioth.timeline.beats.map(beat => beat.startTicks),
+    'sound moments must follow the latest user-edited cumulative timing instead of stale hardcoded ticks');
+assert.strictEqual(refreshHuntCatalogSources(), false,
+    'unchanged hunt sources must stay cached instead of reloading on every review request');
+assert.strictEqual(refreshHuntCatalogSources({ force: true }), true,
+    'the review server must be able to refresh authored hunt sources without restarting');
 
 // slot derivation covers the distinct audio moments per pattern shape.
 const roarSlots = patternAudioSlots({ id: 'x.roar', type: 'roar', tags: ['roar'] }).map(s => s.slot);
@@ -42,33 +59,60 @@ assert.strictEqual(rock.find(s => s.slot === 'telegraph').runtimeReady, true, 't
 const charge = patternAudioSlots({ id: 'diablos.horn_charge', type: 'charge', tags: ['charge'], chargeLaunchStyle: 'stomp-burst', movement: { ticks: 42 }, impactTimeline: [{ atTicks: 20 }] });
 assert.deepStrictEqual(charge.map(s => s.phase), ['telegraph', 'start', 'travel', 'impact', 'recovery']);
 
-const emergeSlots = patternAudioSlots({ id: 'diablos.burrow_emerge', type: 'charge', tags: ['charge', 'burrow-emerge'] })
-    .map(s => s.slot);
-assert.deepStrictEqual(emergeSlots, ['telegraph', 'impact'],
-    'burrow emerge must expose a telegraph and a physical impact slot');
+const mergedBurrow = loadHuntPatternAudioMap('em007').patterns
+    .find(pattern => pattern.id === 'diablos.burrow_enter');
+assert.deepStrictEqual(mergedBurrow.timeline.beats.map(beat => beat.id),
+    ['dig', 'sink', 'still', 'track', 'eruption', 'land', 'return'],
+    'burrow and eruption must expose one complete sound-synchronised BEAT timeline');
+assert.ok(!loadHuntPatternAudioMap('em007').patterns.some(pattern => pattern.id === 'diablos.burrow_emerge'),
+    'audio review must not retain the removed second action');
 
 const beatTimeline = patternReviewTimeline({
     motion: [
-        { beat: 'windup', ticks: 5, pose: 'crouch' },
+        { beat: 'windup', label: '도약 압축', ticks: 5, pose: 'crouch' },
         { beat: 'bite', ticks: 2, to: 'target', hit: true, sfx: 'impact' },
         { beat: 'return', ticks: 3, to: 'home', pose: 'idle' }
     ]
 });
 assert.strictEqual(beatTimeline.source, 'beat-motion');
 assert.strictEqual(beatTimeline.durationTicks, 10);
+assert.strictEqual(beatTimeline.beats[0].label, '도약 압축',
+    'review timelines must show authored phase labels instead of raw internal beat ids');
 assert.deepStrictEqual(beatTimeline.beats.map(beat => [beat.id, beat.startTicks, beat.endTicks, beat.hit]), [
     ['windup', 0, 5, false],
     ['bite', 5, 7, true],
     ['return', 7, 10, false]
 ]);
 
+const boundPhysical = bindAudioSlotsToTimeline(
+    patternAudioSlots({ id: 'x.shoulder', type: 'physical', impactTimeline: [{ atTicks: 13 }] }),
+    patternReviewTimeline({ motion: [
+        { beat: 'spring-load', ticks: 2 },
+        { beat: 'flank-hop', ticks: 5, to: 'flank:target' },
+        { beat: 'shoulder-set', ticks: 3 },
+        { beat: 'lateral-slam', ticks: 3, to: 'target' },
+        { beat: 'shoulder-impact', ticks: 2, hit: true, sfx: 'impact' },
+        { beat: 'slow-return', ticks: 10, to: 'home' }
+    ] })
+);
+assert.deepStrictEqual(boundPhysical.slots.map(slot => [slot.slot, slot.beatId, slot.atTicks]), [
+    ['telegraph', 'spring-load', 0],
+    ['start', 'lateral-slam', 10],
+    ['impact', 'shoulder-impact', 13]
+], 'physical audio phases must bind to authored motion beats instead of UI guesses or array positions');
+assert.deepStrictEqual(boundPhysical.errors, []);
+assert.deepStrictEqual(boundPhysical.timeline.beats.find(beat => beat.id === 'shoulder-impact').audioSlots, ['impact']);
+
 const legacyTimeline = patternReviewTimeline({
     animationDurationMs: 2600,
     movement: { ticks: 20 },
     impactTimeline: [{ atTicks: 15 }]
 });
-assert.strictEqual(legacyTimeline.source, 'legacy-phases');
-assert.strictEqual(legacyTimeline.durationTicks, 27);
+assert.strictEqual(legacyTimeline.source, 'keyframe-motion');
+assert.strictEqual(legacyTimeline.durationTicks, 26,
+    'runtime timing projection must cover the longest live animation/movement/impact clock');
+assert.deepStrictEqual(legacyTimeline.beats.filter(beat => beat.hit).map(beat => beat.startTicks), [15],
+    'legacy review timelines must use the live impact tick instead of fabricated phase sums');
 
 // build map reflects the hand-authored catalog: diablos roar/burrow are curated.
 const catalog = {
@@ -92,26 +136,52 @@ assert.ok(roarPattern.slots[0].current, 'roar slot must report its curated route
 const rockPattern = map.patterns.find(p => p.id === 'diablos.tail_slam_rock');
 assert.ok(rockPattern.timeline && rockPattern.timeline.beats.length,
     'review projection must expose a left-to-right motion timeline');
-const launch = rockPattern.slots.find(s => s.slot === 'launch');
+const launch = rockPattern.slots.find(s => s.phase === 'launch');
 assert.strictEqual(launch.current, null, 'uncurated launch slot must read as fallback');
 assert.strictEqual(launch.assigned, null);
 
 // save an override and confirm it round-trips into the built map.
-savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: 'launch', files: ['local_assets/x/em007_se_launch.mp3'], gain: 0.8 }, tmp);
+savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: launch.slot, files: ['local_assets/x/em007_se_launch.mp3'], gain: 0.8 }, tmp);
 map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
-const assigned = map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === 'launch');
+const assigned = map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === launch.slot);
 assert.ok(assigned.assigned && assigned.assigned.layers[0][0].endsWith('em007_se_launch.mp3'),
     'saved override must appear on the slot');
 
-savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: 'launch',
+savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: launch.slot,
     files: ['local_assets/x/a.mp3', 'local_assets/x/b.mp3'], mode: 'random' }, tmp);
 map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
-const randomAssigned = map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === 'launch');
+const randomAssigned = map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === launch.slot);
 assert.strictEqual(randomAssigned.effective.mode, 'random');
 assert.strictEqual(randomAssigned.effective.layers.length, 2);
 
+savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: launch.slot,
+    files: ['local_assets/x/selected-only.mp3'] }, tmp);
+map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
+const singleAssigned = map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === launch.slot);
+assert.strictEqual(singleAssigned.effective.mode, undefined,
+    'choosing one source must clear a previous random-group mode');
+assert.deepStrictEqual(singleAssigned.effective.layers.map(layer => layer[0]),
+    ['local_assets/x/selected-only.mp3'], 'single assignment must replace the whole previous group');
+
+const movePattern = loadHuntPatternAudioMap('barioth', { overridesPath: tmp })
+    .patterns.find(pattern => pattern.id === 'barioth.spin_claw');
+const [moveFrom, moveTo] = movePattern.slots;
+savePatternRoute({ huntId: 'barioth', patternId: movePattern.id, slot: moveFrom.slot,
+    files: ['local_assets/x/move-a.mp3', 'local_assets/x/stay-b.mp3'], mode: 'random' }, tmp);
+savePatternRoute({ huntId: 'barioth', patternId: movePattern.id, slot: moveTo.slot,
+    files: ['local_assets/x/target-c.mp3'] }, tmp);
+movePatternRouteFile({ huntId: 'barioth', patternId: movePattern.id, fromSlot: moveFrom.slot,
+    toSlot: moveTo.slot, file: 'local_assets/x/move-a.mp3' }, tmp);
+const movedPattern = loadHuntPatternAudioMap('barioth', { overridesPath: tmp })
+    .patterns.find(pattern => pattern.id === movePattern.id);
+assert.deepStrictEqual(movedPattern.slots[0].effective.layers.map(layer => layer[0]), ['local_assets/x/stay-b.mp3']);
+assert.deepStrictEqual(movedPattern.slots[1].effective.layers.map(layer => layer[0]),
+    ['local_assets/x/target-c.mp3', 'local_assets/x/move-a.mp3'],
+    'drag move atomically removes one group member and appends it without replacing the target route');
+
 // Explicit removal suppresses both an override and any catalog fallback.
-savePatternRoute({ huntId: 'diablos', patternId: 'diablos.roar', slot: 'roar', files: [], disabled: true }, tmp);
+const roarSlot = roarPattern.slots[0].slot;
+savePatternRoute({ huntId: 'diablos', patternId: 'diablos.roar', slot: roarSlot, files: [], disabled: true }, tmp);
 map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
 const mutedRoar = map.patterns.find(p => p.id === 'diablos.roar').slots[0];
 assert.strictEqual(mutedRoar.effective, null);
@@ -119,22 +189,62 @@ assert.strictEqual(mutedRoar.muted, true);
 assert.deepStrictEqual(mutedRoar.override, { disabled: true });
 
 // Empty files without disabled still clears a custom override and restores fallback.
-savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: 'launch', files: [] }, tmp);
+savePatternRoute({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', slot: launch.slot, files: [] }, tmp);
 map = buildMonsterPatternAudioMap({ huntId: 'diablos', patterns, catalog, overridesPath: tmp });
-assert.strictEqual(map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === 'launch').assigned, null);
+assert.strictEqual(map.patterns.find(p => p.id === 'diablos.tail_slam_rock').slots.find(s => s.slot === launch.slot).assigned, null);
 
 const motionSave = savePatternMotion({
     huntId: 'diablos', patternId: 'diablos.tail_slam_rock',
-    beats: { telegraph: 12, launch: 3, 'impact:rock': 2, recovery: 18 }
+    beats: { telegraph: { ticks: 12, strideFlipTicks: 0 }, launch: 3,
+        'impact:rock': { ticks: 2, hit: true, hitOffsetTicks: 1 }, recovery: 18 }
 }, motionTmp);
-assert.deepStrictEqual(motionSave.beats, { telegraph: 12, launch: 3, 'impact:rock': 2, recovery: 18 });
+assert.deepStrictEqual(motionSave.beats, {
+    telegraph: { ticks: 12, strideFlipTicks: 0 }, launch: 3,
+    'impact:rock': { ticks: 2, hitOffsetTicks: 1, hit: true }, recovery: 18
+});
+const unifiedMotionSave = savePatternMotion({
+    huntId: 'diablos', patternId: 'diablos.rage_double_charge',
+    beats: { charge: { ticks: 8, hit: true, hitOffsetTicks: 6,
+        judgments: [{ id: 'charge-hit', group: 'charge-1', kind: 'damage',
+            target: 'primary', offsetTicks: 2, damagePercent: 50 }] } }
+}, motionTmp);
+assert.strictEqual(unifiedMotionSave.beats.charge.hit, false,
+    'the save boundary must reject dual legacy/new HIT ownership');
+assert.strictEqual(unifiedMotionSave.beats.charge.hitOffsetTicks, undefined);
+assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].offsetTicks, 2);
+const duplicateJudgmentSave = savePatternMotion({
+    huntId: 'diablos', patternId: 'diablos.rage_charge', beats: {
+        first: { ticks: 5, judgments: [{ id: 'same-hit', group: 'same-group', kind: 'damage',
+            target: 'primary', offsetTicks: 3, damagePercent: 50 }] },
+        old: { ticks: 5, judgments: [{ id: 'same-hit', group: 'same-group', kind: 'damage',
+            target: 'primary', offsetTicks: 0, damagePercent: 50 }] }
+    }
+}, motionTmp);
+assert.strictEqual(duplicateJudgmentSave.beats.first.judgments.length, 1);
+assert.deepStrictEqual(duplicateJudgmentSave.beats.old.judgments, [],
+    'the save boundary must remove a judgment from its previous beat after a drag');
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', reset: true }, motionTmp);
+savePatternMotion({ huntId: 'diablos', patternId: 'diablos.rage_double_charge', reset: true }, motionTmp);
+savePatternMotion({ huntId: 'diablos', patternId: 'diablos.rage_charge', reset: true }, motionTmp);
 assert.strictEqual(JSON.parse(fs.readFileSync(motionTmp, 'utf8')).overrides.diablos, undefined);
 
 // the real reviewed catalog resolves diablos without throwing.
 const live = loadHuntPatternAudioMap('diablos', { overridesPath: tmp });
 assert.ok(live.patterns.length >= 8, 'diablos must expose its reviewed pattern set');
 assert.ok(live.patterns.some(p => p.id === 'diablos.tail_slam_rock'));
+
+// Release guard: every reviewable audio moment for a released monster must
+// resolve to an authored motion beat. The editor intentionally exposes
+// unreleased reference monsters before their BEAT authoring is complete.
+const bindingFailures = [];
+const releasedIds = require('../js/effects/hunt/data/MonsterReleaseManifest.generated.js')
+    .records.map(record => String(record.id).replace(/[-']/g, '_'));
+for (const huntId of releasedIds) {
+    for (const pattern of loadHuntPatternAudioMap(huntId, { overridesPath: tmp }).patterns) {
+        if (pattern.audioBindingErrors.length) bindingFailures.push(`${huntId}/${pattern.id}: ${pattern.audioBindingErrors.join(', ')}`);
+    }
+}
+assert.deepStrictEqual(bindingFailures, [], `all motion/audio moments must be explicitly bound:\n${bindingFailures.join('\n')}`);
 
 try { fs.unlinkSync(tmp); } catch { /* best effort */ }
 try { fs.unlinkSync(motionTmp); } catch { /* best effort */ }
@@ -165,6 +275,9 @@ console.log('[test] hunt audio pattern-map derivation, overrides, and live catal
     }
     const orphans = [];
     for (const [monsterId, patternRoutes] of Object.entries(routes)) {
+        const reviewPatternIds = monsterId === 'common' ? ['__visual.part-break']
+            : loadHuntPatternAudioMap(monsterId).patterns.map(pattern => pattern.id);
+        reviewPatternIds.forEach(patternId => known.add(patternId));
         for (const patternId of Object.keys(patternRoutes || {})) {
             if (!known.has(patternId)) orphans.push(`${monsterId} → ${patternId}`);
         }

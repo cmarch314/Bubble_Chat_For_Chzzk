@@ -40,6 +40,68 @@ const AMBUSH = [
 
 const built = HuntMotionCompiler.compile(AMBUSH, { anchors });
 
+const heldRotation = HuntMotionCompiler.compile([
+    { beat: 'brace', ticks: 5, pose: 'brace' },
+    { beat: 'turn-back', ticks: 5, pose: 'brace', rotation: 180,
+        origin: 'part:torso', rotationEasing: 'accelerate' }
+], { anchors });
+const turnBoundary = 5 / 10;
+assert.ok(!heldRotation.pose.some(frame => frame.offset > turnBoundary
+    && frame.offset < 1 && frame.transform.includes('rotate(180.00deg)')),
+    'held poses must not snap an authored rotation to its final angle at beat start');
+assert.ok(heldRotation.pose.some(frame => frame.offset === 1
+    && frame.transform.includes('rotate(180.00deg)')),
+    'authored rotation must reach its final angle at the end of the beat');
+assert.ok(heldRotation.pose.some(frame => frame.offset === turnBoundary
+    && frame.transform.includes('rotate(0.00deg)') && frame.pivot === 'part:torso'),
+    'the authored pivot must be active from the first frame of the rotation interval');
+
+const reviewedCutwingAmbush = HuntMotionCompiler.compile([
+    { beat: 'windup', ticks: 5, pose: 'crouch' },
+    { beat: 'leap-out', ticks: 4, to: 'offscreen:left', offsetY: -280, pose: 'stretch', opacity: 0 },
+    { beat: 'vanish', ticks: 3, pose: 'stretch', opacity: 0 },
+    { beat: 'reappear', ticks: 2, at: 'polar:hunter:2 315deg 700', face: 'hunter:2', pose: 'crouch', opacity: 1, instantOpacity: true, aimBodyAt: 'hunter:2' },
+    { beat: 'ambush-aim', ticks: 3, face: 'hunter:2', pose: 'crouch', opacity: 1, aimBodyAt: 'hunter:2' },
+    { beat: 'dive', ticks: 4, to: 'hunter:2', face: 'hunter:2', pose: 'stretch-strong', alignRotationToTravel: true },
+    { beat: 'impact', ticks: 2, to: 'hunter:2', pose: 'land', hit: true },
+    { beat: 'pass-through', ticks: 4, to: 'offscreen:right', offsetY: 620, pose: 'stretch', opacity: 0 },
+    { beat: 'return', ticks: 4, at: 'offscreen:top', to: 'home', pose: 'idle', opacity: 1 }
+], { anchors });
+const cutwingReappear = reviewedCutwingAmbush.timeline.find(beat => beat.beat === 'reappear');
+const cutwingAim = reviewedCutwingAmbush.timeline.find(beat => beat.beat === 'ambush-aim');
+const cutwingReappearFrame = reviewedCutwingAmbush.placement
+    .filter(frame => Math.abs(frame.offset - (12 / 31)) < 1e-8).at(-1);
+const cutwingAimFrame = reviewedCutwingAmbush.placement
+    .filter(frame => Math.abs(frame.offset - (14 / 31)) < 1e-8).at(-1);
+assert.strictEqual(cutwingReappear.startTicks, 12);
+assert.strictEqual(cutwingReappear.instantOpacity, true);
+assert.strictEqual(cutwingReappearFrame.opacity, 1,
+    '측후방 출현은 해당 비트의 첫 프레임부터 보여야 한다');
+assert.notStrictEqual(cutwingReappearFrame.transform, 'translate(0px, 0px)',
+    '측후방 출현은 홈이 아니라 목표 주변 좌표에 배치되어야 한다');
+assert.strictEqual(cutwingAimFrame.transform, cutwingReappearFrame.transform,
+    '측후방 조준은 출현 좌표를 유지해야 한다');
+assert.deepStrictEqual(reviewedCutwingAmbush.impacts.map(impact => impact.atTicks), [21],
+    '급습 충돌은 dive가 목표에 도착한 21틱에 발생해야 한다');
+
+const fadingLeap = HuntMotionCompiler.compile([
+    { beat: 'leap', ticks: 4, to: 'offscreen:left', pose: 'stretch', fade: 'out' }
+], { anchors });
+assert.ok(fadingLeap.placement
+    .filter(frame => frame.offset === 0)
+    .every(frame => frame.transform === 'translate(0px, 0px)'),
+'a fading leap must begin at home instead of teleporting to its destination on the first frame');
+assert.ok(!fadingLeap.placement.some(frame => frame.offset > 0 && frame.offset < 1),
+    'fade must share the travel interval instead of injecting a destination EPS frame');
+
+const reentry = HuntMotionCompiler.compile([
+    { beat: 'hidden', ticks: 2, opacity: 0 },
+    { beat: 'appear', ticks: 2, at: 'polar:hunter:2 315deg 700', fade: 'in' }
+], { anchors });
+const reentryBoundary = reentry.placement.filter(frame => frame.offset === .5);
+assert.notStrictEqual(reentryBoundary.at(-1).transform, 'translate(0px, 0px)',
+    '`at` must remain the final frame at its boundary instead of being overwritten by the previous point');
+
 const transformed = HuntMotionCompiler.compile([{
     beat: 'edited', ticks: 10, to: 'hunter:1', offsetX: 12, offsetY: -8,
     rotation: 30, rotateBy: 180, scaleX: 1.2, scaleY: .8,
@@ -51,6 +113,162 @@ assert.ok(transformed.pose.some(frame => frame.easing === HuntMotionCompiler.EAS
 assert.ok(transformed.pose.some(frame => frame.transform.includes('skew(5.00deg, -3.00deg)')));
 assert.ok(transformed.pose.some(frame => frame.transform.includes('scale(1.2000, 0.8000)')));
 assert.ok(transformed.pose.some(frame => frame.origin === '25% 75%'));
+
+const continuousCharge = HuntMotionCompiler.compile([
+    { beat: 'charge', ticks: 5, to: 'hunter:1', moveEasing: 'linear' },
+    { beat: 'impact', ticks: 3, continueTravel: true, hit: true, moveEasing: 'linear' }
+], { anchors });
+const chargeStart = continuousCharge.placement.find(frame => frame.offset === 0);
+const contact = continuousCharge.placement.filter(frame => frame.offset === 5 / 8).at(-1);
+const passThrough = continuousCharge.placement.at(-1);
+const chargeXY = frame => frame.transform.match(/translate\((-?\d+)px, (-?\d+)px\)/).slice(1).map(Number);
+const [startX, startY] = chargeXY(chargeStart), [contactX, contactY] = chargeXY(contact),
+    [endX, endY] = chargeXY(passThrough);
+assert.ok(Math.abs((contactX - startX) / 5 - (endX - contactX) / 3) <= 1
+    && Math.abs((contactY - startY) / 5 - (endY - contactY) / 3) <= 1,
+    '돌진과 피격 BEAT는 같은 방향과 픽셀/틱 속도로 한 직선을 계속 달려야 한다');
+assert.strictEqual(continuousCharge.timeline[1].continueTravel, true);
+
+const directionalTilt = HuntMotionCompiler.compile([
+    { beat: 'right-hit', ticks: 3, to: 'hunter:3', pose: 'brace', rotationToward: 28 },
+    { beat: 'recover', ticks: 5, to: 'home', pose: 'brace', rotation: 0 }
+], { anchors });
+assert.strictEqual(directionalTilt.timeline[0].rotation, 28,
+    'rightward shoulder travel tilts the sprite upper edge to the right');
+assert.strictEqual(directionalTilt.timeline[1].rotation, 0,
+    'explicit recovery returns the sprite upright');
+
+const travelAligned = HuntMotionCompiler.compile([
+    { beat: 'left-flight', ticks: 4, to: 'hunter:0', face: 'hunter:0', pose: 'stretch', alignRotationToTravel: true },
+    { beat: 'plant', ticks: 2, pose: 'brace', origin: 'part:left-front-leg' },
+    { beat: 'pivot', ticks: 4, pose: 'stretch-strong', origin: 'part:left-front-leg', rotateBy: 180 }
+], { anchors });
+assert.ok(travelAligned.timeline[0].rotation < 0,
+    'a leftward descending flight aligns the sprite angle to its actual travel vector');
+assert.strictEqual(travelAligned.timeline[0].alignRotationToTravel, true);
+assert.strictEqual(travelAligned.timeline[1].to, null,
+    'planting a foreleg does not translate the monster');
+assert.ok(Math.abs(travelAligned.timeline[2].rotation - (travelAligned.timeline[0].rotation + 180)) < 1e-6,
+    'the planted foreleg pivot adds exactly one half-turn after arrival');
+
+const anatomicalAim = HuntMotionCompiler.compile([{
+    beat: 'feet-forward', ticks: 4, to: 'toward:hunter:0 70%', face: 'hunter:0',
+    pose: 'stretch', aimBodyAt: 'hunter:0'
+}], {
+    anchors,
+    partOffset: name => ({
+        'part:torso': { x: 0, y: 0 },
+        'part:left-front-leg': { x: -40, y: 100 },
+        'part:right-front-leg': { x: 40, y: 100 }
+    }[name] || { x: 0, y: 0 })
+});
+assert.strictEqual(anatomicalAim.timeline[0].aimBodyAt, 'hunter:0');
+assert.ok(anatomicalAim.timeline[0].rotation > 0,
+    'body aim rotates the torso-to-forefeet axis toward the hunter instead of aligning the sprite edge to travel');
+
+const rightOnlyFacing = HuntMotionCompiler.compile([
+    { beat: 'spring-load', ticks: 2, face: 'hunter:3', pose: 'crouch' },
+    { beat: 'flank-hop', ticks: 5, to: 'flank:hunter:3 210', face: 'hunter:3', pose: 'stretch-strong' },
+    { beat: 'impact', ticks: 2, to: 'hunter:3', face: 'hunter:3', hit: true }
+], { anchors });
+assert.strictEqual(rightOnlyFacing.facingActive, true,
+    'a consistently right-facing motion must still activate the facing layer');
+assert.strictEqual(rightOnlyFacing.facing[0].direction, 1);
+assert.strictEqual(rightOnlyFacing.facing.length, 1,
+    'the regression case has no direction change and therefore needs facingActive, not frame-count guessing');
+const temporaryMirror = HuntMotionCompiler.compile([
+    { beat: 'first-swing', ticks: 4, pose: 'stretch' },
+    { beat: 'second-swing', ticks: 4, pose: 'stretch', flipFacing: true },
+    { beat: 'settle', ticks: 4, pose: 'settle', flipFacing: true }
+], { anchors });
+assert.deepStrictEqual(temporaryMirror.facing.map(frame => [frame.offset, frame.direction]), [
+    [4 / 12, -1], [8 / 12, 1]
+], 'a temporary mirrored strike must flip only its authored BEAT and restore on settle');
+const pairAnchors = primaryTarget => new HuntStageAnchors({
+    monsterRect: anchors.monsterRect,
+    cardRect: anchors.cardRect,
+    stageWidth: anchors.stageWidth,
+    hunters: anchors.hunters,
+    primaryTarget,
+    targetSequence: [1, 2],
+    targetGroup: [1, 2]
+});
+const pairFromLeft = pairAnchors(1);
+const pairFromRight = pairAnchors(2);
+assert.ok(pairFromLeft.resolve('pair-flank:targets 150').x < pairFromLeft.resolve('hunter:1').x,
+    'an adjacent pair led by its left member must be approached from outside hunter 2');
+assert.ok(pairFromRight.resolve('pair-flank:targets 150').x > pairFromRight.resolve('hunter:2').x,
+    'an adjacent pair led by its right member must be approached from outside hunter 3');
+const inwardTackle = HuntMotionCompiler.compile([
+    { beat: 'outside', ticks: 2, to: 'pair-flank:targets 150', bounds: 'reach' },
+    { beat: 'cross', ticks: 4, to: 'through-current:target-group 200%', bounds: 'reach',
+        hit: true, hitOffsetTicks: 2, fx: 'target-impact-dust', fxAnchor: 'target' }
+], { anchors: pairFromRight });
+const placementX = frame => Number(String(frame.transform).match(/translate\((-?\d+)px/)?.[1]);
+const outsideBoundary = inwardTackle.timeline.find(beat => beat.beat === 'outside').endTicks
+    / inwardTackle.totalTicks;
+const outsideX = placementX(inwardTackle.placement.filter(frame => frame.offset === outsideBoundary).at(-1));
+const finalX = placementX(inwardTackle.placement.at(-1));
+const pairCenterX = pairFromRight.resolve('target-group').x;
+assert.ok(outsideX > pairFromRight.resolve('hunter:2').x && finalX < pairCenterX,
+    'increasing shoulder-check distance must cross both adjacent hunters on the same inward line');
+assert.deepStrictEqual(inwardTackle.visualCues.find(cue => cue.fx === 'target-impact-dust'), {
+    atTicks: 4,
+    beat: 'cross',
+    fx: 'target-impact-dust',
+    anchor: 'target',
+    targetMode: 'sequential',
+    durationTicks: 4
+}, 'target impact dust must follow the independently edited HIT tick and target route');
+
+const layeredImpact = HuntMotionCompiler.compile([
+    { beat: 'impact', ticks: 4, hit: true, fx: 'part-dust', fxAnchor: 'head',
+        fxSecondary: 'target-impact-dust', fxSecondaryAnchor: 'target', fxSecondaryDurationTicks: 6,
+        fxAdditional: [{ fx: 'part-swing-arc', anchor: 'head', durationTicks: 5 }] }
+], { anchors, rig: 'winged' });
+assert.deepStrictEqual(layeredImpact.visualCues.map(cue => [cue.fx, cue.anchor]), [
+    ['part-dust', 'head'],
+    ['target-impact-dust', 'target'],
+    ['part-swing-arc', 'head']
+], 'one HIT beat may retain part dust while adding target dust and a directional swing arc');
+const leftOnlyFacing = HuntMotionCompiler.compile([
+    { beat: 'spring-load', ticks: 2, face: 'hunter:0', pose: 'crouch' },
+    { beat: 'flank-hop', ticks: 5, to: 'flank:hunter:0 210', face: 'hunter:0', pose: 'stretch-strong' },
+    { beat: 'impact', ticks: 2, to: 'hunter:0', face: 'hunter:0', hit: true }
+], { anchors });
+assert.deepStrictEqual(leftOnlyFacing.facing, [{ offset: 0, direction: -1 }],
+    'a consistently left-facing shoulder check must not retain a conflicting default frame at offset zero');
+const editorFacingAlias = HuntMotionCompiler.compile([
+    { beat: 'approach', ticks: 5, to: 'hunter:0', face: 'toward-target', pose: 'stretch-soft' }
+], { anchors });
+assert.deepStrictEqual(editorFacingAlias.facing, [{ offset: 0, direction: -1 }],
+    'the editor target-facing command must resolve as target instead of aborting compilation');
+const explicitRightFacing = HuntMotionCompiler.compile([
+    { beat: 'approach', ticks: 5, to: 'hunter:0', face: 'right', pose: 'stretch-soft' }
+], { anchors });
+assert.deepStrictEqual(explicitRightFacing.facing, [{ offset: 0, direction: 1 }],
+    'explicit left/right facing controls must not be parsed as stage anchors');
+
+const strideFlip = HuntMotionCompiler.compile([
+    { beat: 'stomp', ticks: 3, pose: 'crouch', stompSteps: 3 },
+    { beat: 'charge', ticks: 10, to: 'hunter:3', face: 'hunter:3', pose: 'idle', instantPose: true, strideFlipTicks: 3 }
+], { anchors });
+assert.deepStrictEqual(
+    strideFlip.strideWindows,
+    [{ startTicks: 3, endTicks: 13, intervalTicks: 3 }],
+    '돌진 스텝은 전조가 끝난 뒤 실제 돌진 구간에만 0.3초 교대 창을 열어야 한다'
+);
+assert.strictEqual(strideFlip.timeline[1].strideFlipTicks, 3);
+const chargeStartPose = strideFlip.pose.filter(frame => frame.offset === 3 / 13).at(-1);
+assert.match(chargeStartPose.transform, /scale\(1\.0000, 1\.0000\)/,
+    '돌진 시작 프레임부터 몬스터 이미지의 원래 종횡비를 유지해야 한다');
+assert.strictEqual(strideFlip.timeline[0].stompSteps, 3);
+assert.ok(strideFlip.pose.some(frame => frame.offset > 0 && frame.offset < 3 / 13
+    && /rotate\(-7\.00deg\)/.test(frame.transform)),
+    '발구르기 전조에는 왼발을 찍는 하강 프레임이 있어야 한다');
+assert.ok(strideFlip.pose.some(frame => frame.offset > 0 && frame.offset < 3 / 13
+    && /rotate\(7\.00deg\)/.test(frame.transform)),
+    '발구르기 전조에는 오른발을 찍는 하강 프레임이 있어야 한다');
 
 // ---- 길이는 틱에서만 나온다 ----
 
@@ -66,9 +284,32 @@ assert.notStrictEqual(built.durationMs, 2500, '시각 배율이 이중 적용되
 assert.strictEqual(built.impacts.length, 1, '타격이 하나다');
 assert.strictEqual(built.impacts[0].atTicks, 10, 'strike 비트의 시작 틱이 곧 접촉이다');
 assert.strictEqual(built.impacts[0].beat, 'strike');
+const offsetImpact = HuntMotionCompiler.compile([
+    { beat: 'approach', ticks: 5, to: 'hunter:2', pose: 'idle' },
+    { beat: 'strike', ticks: 4, pose: 'land', hit: true, hitOffsetTicks: 2 }
+], { anchors, rig: 'winged' });
+assert.strictEqual(offsetImpact.impacts[0].atTicks, 7,
+    '독립 HIT 오프셋은 BEAT 길이를 바꾸지 않고 실제 판정 틱만 이동해야 한다');
 
 // 음향도 같은 틱에서 나온다. 둘을 따로 적지 않으므로 어긋날 수 없다.
-assert.deepStrictEqual(built.cues, [{ atTicks: 10, beat: 'strike', sfx: 'impact' }]);
+assert.deepStrictEqual(built.cues.map(cue => [cue.atTicks, cue.beat, cue.audioSlot, cue.authoredSfx]), [
+    [0, 'windup', 'beat:windup', null],
+    [5, 'leap', 'beat:leap', null],
+    [8, 'appear', 'beat:appear', null],
+    [10, 'strike', 'beat:strike', 'impact'],
+    [14, 'hold', 'beat:hold', null],
+    [16, 'return', 'beat:return', null]
+], 'every authored beat must expose one stable audio slot at the same timeline offset');
+
+const burrowFx = HuntMotionCompiler.compile([
+    { beat: 'dig', ticks: 5, fx: 'burrow-dust', fxDurationTicks: 11 },
+    { beat: 'sink', ticks: 6, opacity: .35 },
+    { beat: 'track', ticks: 8, fx: 'burrow-tracking-dust', fxAnchor: 'target', fxDurationTicks: 8 }
+], { anchors });
+assert.deepStrictEqual(burrowFx.visualCues, [
+    { atTicks: 0, beat: 'dig', fx: 'burrow-dust', anchor: 'monster', durationTicks: 11 },
+    { atTicks: 11, beat: 'track', fx: 'burrow-tracking-dust', anchor: 'target', durationTicks: 8 }
+], '지중 진입·추적 먼지 FX는 각 BEAT 시작 틱과 지속 틱에 묶여야 한다');
 
 // 타이밍 계획서와 대조할 수 있도록 비트 구간을 그대로 내보낸다.
 assert.deepStrictEqual(built.timeline.map(step => [step.beat, step.startTicks, step.endTicks]), [

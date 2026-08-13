@@ -126,6 +126,8 @@ for (const { name, body: rawBody } of keyframeBlocks(runtimeStyle)) {
 }
 assert.match(animatorSource, /easing: 'step-end'/,
     'direction changes must flip the image discretely without a scale-through-zero squash');
+assert.match(animatorSource, /built\.facing\.length === 1[\s\S]*?offset: 1/,
+    'a motion that faces one direction for its full duration must still hold that image orientation');
 assert.match(animatorSource, /tigrexRouteFallback = 'css'/,
     'Tigrex charge must retain a moving CSS fallback if dynamic route keyframes fail');
 assert.match(runtimeStyle, /\.game-hunt-monster-img\.enraged\s*\{[\s\S]*?filter:\s*drop-shadow\(0 0 18px/,
@@ -363,7 +365,7 @@ assert.strictEqual(HuntMonsterAttackAnimator.usesElementalDelivery('elemental', 
     type: 'projectile',
     delivery: 'projectile'
 }), true, 'elemental projectiles must retain the shared projectile renderer');
-for (const id of ['ground-charge-zigzag', 'ground-charge-double', 'aerial-charge-cross', 'lateral-sweep', 'pounce-chain', 'burrow-enter', 'burrow-emerge', 'tail-sweep-double', 'tail-slam-rock', 'side-tackle-contact', 'horn-sweep-contact', 'diablos-tail-cross']) {
+for (const id of ['ground-charge-zigzag', 'ground-charge-double', 'aerial-charge-cross', 'lateral-sweep', 'pounce-chain', 'burrow-enter', 'burrow-emerge', 'tail-sweep-double']) {
     assert(css.includes(`.monster-motion-${id}`), `${id} class must exist`);
     assert(css.includes(`@keyframes monster-motion-${id}`), `${id} keyframes must exist`);
 }
@@ -389,9 +391,13 @@ assert(css.includes('var(--monster-charge-second-x)'), 'return charge needs a se
 assert(css.includes('var(--monster-charge-cross-y)'), 'wide aerial charges need a hunter-row crossing route');
 assert(css.includes('.monster-uppercut-launched'), 'uppercut launch reactions must be reusable across monsters');
 assert(!css.includes('.diablos-horn-launched'), 'shared launch reactions must not retain monster-specific selectors');
-const ironMountainFrames = css.match(/@keyframes monster-motion-side-tackle-contact\s*\{[\s\S]*?\n\}/)?.[0] || '';
-assert.ok(ironMountainFrames, 'Iron Mountain contact keyframes must exist');
-assert.ok(!/rotate\(90deg\)/.test(ironMountainFrames), 'Iron Mountain must not rotate the whole Diablos sprite by 90 degrees');
+for (const legacyDiablosMotion of [
+    'tail-slam-rock', 'side-tackle-contact', 'horn-sweep-contact',
+    'diablos-tail-cross', 'horn-uppercut'
+]) {
+    assert.ok(!css.includes(`@keyframes monster-motion-${legacyDiablosMotion}`),
+        `${legacyDiablosMotion} must remain BEAT-only instead of restoring its legacy CSS graph`);
+}
 {
     const burrowFrames = css.match(/@keyframes monster-motion-burrow-emerge\s*\{([\s\S]*?)\n\}/)?.[1] || '';
     assert.match(burrowFrames, /--monster-burrow-apex-y/,
@@ -616,6 +622,32 @@ for (const rig of ['quadruped', 'winged', 'serpentine', 'arthropod']) {
     assert(!properties.has('transform'));
     assert(!cardClasses.has('hunt-monster-underground'));
     assert(!cardClasses.has('monster-charge-rumble'));
+}
+
+{
+    const cards = [0, 1, 2, 3].map(index => ({
+        index,
+        querySelector: () => null,
+        getBoundingClientRect: () => ({
+            left: index * 240, right: index * 240 + 220,
+            top: 700, bottom: 980, width: 220, height: 280,
+            x: index * 240, y: 700
+        })
+    }));
+    const animator = Object.create(HuntMonsterAttackAnimator.prototype);
+    animator.owner = { card: { querySelector: selector => {
+        const match = String(selector).match(/fight-card-(\d+)/);
+        return match ? cards[Number(match[1])] || null : null;
+    } } };
+    const visualTargets = animator.resolveRockVolleyVisualTargets(
+        { targetIndices: [2, 3] },
+        { tags: ['tail-slam-rock'], runtimePrimaryTargetIndex: 3 },
+        [{ index: 2 }, { index: 3 }]
+    );
+    assert.strictEqual(visualTargets.length, 3,
+        'an edge-targeted three-rock volley must keep three visuals while damage clips to live adjacent hunters');
+    assert.ok(visualTargets[2].getBoundingClientRect().left > cards[3].getBoundingClientRect().left,
+        'the third edge rock must visibly fly beyond hunter 4 instead of creating a phantom hit on hunter 2');
 }
 
 console.log('[test] Monster animation semantic and wide-lane coverage passed.');

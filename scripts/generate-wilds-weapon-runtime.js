@@ -27,6 +27,15 @@ const keep = weapon => ({
     raw: Number(weapon.damage?.raw || 0),
     affinity: Number(weapon.affinity || 0),
     element: (weapon.specials || []).find(special => special?.kind === 'element' && !special.hidden)?.element || null,
+    specials: ['bow', 'light-bowgun', 'heavy-bowgun'].includes(String(weapon.kind || '')) ? []
+        : (weapon.specials || [])
+            .filter(special => special?.kind === 'status' && special?.hidden !== true)
+            .map(special => ({
+                kind: 'status',
+                status: special.status === 'blastblight' ? 'blast' : String(special.status || ''),
+                raw: Number(special.damage?.raw || 0),
+                hidden: false
+            })),
     sharpness: weapon.sharpness ? Object.fromEntries(
         ['red', 'orange', 'yellow', 'green', 'blue', 'white', 'purple'].map(color => [color, Number(weapon.sharpness[color] || 0)])
     ) : null,

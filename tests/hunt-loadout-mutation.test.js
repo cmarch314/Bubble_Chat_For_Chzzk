@@ -40,10 +40,10 @@ assert.strictEqual(hunter.personality, 'offensive');
 assert.strictEqual(hunter.perks[0].id, 'fixed');
 assert.strictEqual(initializer.rerollHunterPerks(hunter), true);
 
-for (const [personality, expected] of [['support', 2], ['veteran', 1], ['offensive', 0], ['defensive', 0], ['normal', 0], ['newbie', 0]]) {
+for (const [personality, expected] of [['support', 2], ['veteran', 1], ['offensive', 0], ['defensive', 0], ['normal', 1], ['newbie', 2]]) {
     assert.strictEqual(initializer.syncLoadoutItems({ personality }).shockTraps, expected, `${personality} initial trap count`);
 }
-for (const [personality, expected] of [['support', 2], ['veteran', 1], ['offensive', 0], ['defensive', 1], ['normal', 1], ['newbie', 1]]) {
+for (const [personality, expected] of [['support', 2], ['veteran', 2], ['offensive', 1], ['defensive', 0], ['normal', 1], ['newbie', 2]]) {
     assert.strictEqual(initializer.syncLoadoutItems({ personality }).flashPods, expected, `${personality} initial flash count`);
 }
 assert.strictEqual(hunter.perks[0].id, 'fixed', 'reroll must retain the locked perk in the first position');

@@ -11,7 +11,7 @@ assert.strictEqual(result.zenny, 9);
 assert.strictEqual(Economy.buy(result, [0], 'lifepowder'), true);
 assert.strictEqual(result.zenny, 7);
 assert.strictEqual(result.supply.lifepowders, 1);
-const capped = { zenny: 3, rerolls: 0, supply: { potions: 10, lifepowders: 0, shockTraps: 0, bombs: 0 }, party: [{}] };
+const capped = { zenny: 3, rerolls: 0, supply: { potions: 40, lifepowders: 0, shockTraps: 0, flashPods: 0, bombs: 0 }, party: [{}] };
 assert.strictEqual(Economy.buy(capped, [0], 'potion'), false);
 assert.strictEqual(capped.zenny, 3, 'a full shared stock must not consume currency for a fake purchase');
 const discounted = { zenny: 1, rerolls: 0, supply: {}, party: [] };

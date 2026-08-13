@@ -4,9 +4,13 @@ const HuntCommandRules = typeof HuntCommandCatalog !== 'undefined'
 const HuntPersistentProfileRules = typeof HuntProfileContract !== 'undefined'
     ? HuntProfileContract
     : (typeof require === 'function' ? require('./HuntProfileContract') : null);
-const HuntSupportItemRules = typeof HuntSupportItemPolicy !== 'undefined'
-    ? HuntSupportItemPolicy
-    : (typeof require === 'function' ? require('./HuntSupportItemPolicy') : null);
+const HuntPersonalityRules = typeof HuntPersonalityProfiles !== 'undefined'
+    ? HuntPersonalityProfiles
+    : (typeof require === 'function' ? require('./HuntPersonalityProfiles') : null);
+const HuntIssuedSupplyRules = typeof HuntIssuedSupplyRuntime !== 'undefined'
+    ? HuntIssuedSupplyRuntime
+    : (typeof require === 'function' ? require('./HuntIssuedSupplyRuntime') : null);
+const HUNT_EXCLUDED_CROSSOVER_MONSTERS = new Set(['leshen', 'ancient_leshen']);
 
 class HuntInitializer {
     constructor(options = {}) {
@@ -64,6 +68,9 @@ class HuntInitializer {
     }
 
     parseCommand(message, monsters) {
+        monsters = (monsters || []).filter(monster => !HUNT_EXCLUDED_CROSSOVER_MONSTERS.has(
+            String(monster?.id || '').toLowerCase().replace(/-/g, '_')
+        ));
         let consecutiveCount = 1;
         let targetMonsterName = null;
         let chosenWeaponIds = [];
@@ -226,20 +233,21 @@ class HuntInitializer {
     }
 
     initialTrapCount(personality) {
-        if (personality === 'support') return 2;
-        if (personality === 'veteran') return 1;
-        return 0;
+        return Number(HuntPersonalityRules?.get(personality)?.issued?.shockTraps || 0);
     }
 
     initialFlashCount(personality) {
-        return HuntSupportItemRules?.initialFlashCount(personality) || 0;
+        return Number(HuntPersonalityRules?.get(personality)?.issued?.flashPods || 0);
     }
 
     syncLoadoutItems(hunter) {
         if (!hunter) return hunter;
-        hunter.shockTraps = this.initialTrapCount(hunter.personality);
-        hunter.flashPods = this.initialFlashCount(hunter.personality);
+        HuntIssuedSupplyRules?.grant(hunter, 'loadout', { force: true });
         return hunter;
+    }
+
+    grantIssuedSupplies(hunters, grantId) {
+        return (hunters || []).map(hunter => HuntIssuedSupplyRules?.grant(hunter, grantId));
     }
 
     buildSelectedWeapons(chosenWeaponIds) {
@@ -260,6 +268,7 @@ class HuntInitializer {
             const initialSpeedGroup = w.speedGroup;
             const personality = personalities[Math.floor(this.random() * personalities.length)];
             const perks = typeof HuntPerkCatalog !== 'undefined' ? HuntPerkCatalog.roll(this.random) : [];
+            const issued = HuntPersonalityRules?.get(personality)?.issued || {};
             const hunter = {
                 ...w,
                 speedGroup: initialSpeedGroup,
@@ -278,11 +287,11 @@ class HuntInitializer {
                 lockedPerkId: null,
                 perkRerollCount: 0,
                 perkModifiers: typeof HuntPerkCatalog !== 'undefined' ? HuntPerkCatalog.aggregate(perks) : {},
-                potions: 10,
-                lifepowders: 1,
-                shockTraps: this.initialTrapCount(personality),
-                flashPods: this.initialFlashCount(personality),
-                bombs: 1,
+                potions: Number(issued.potions || 0),
+                lifepowders: Number(issued.lifepowders || 0),
+                shockTraps: Number(issued.shockTraps || 0),
+                flashPods: Number(issued.flashPods || 0),
+                bombs: Number(issued.bombs || 0),
                 spiritLevel: 0,
                 demonModeDuration: 0,
                 phials: w.id === 'charge_blade' ? 0 : 5,
@@ -313,6 +322,7 @@ class HuntInitializer {
             perkRerollCount: Number(hunter.perkRerollCount || (hunter.perkRerolled ? 1 : 0))
         };
         const initialSpeedGroup = matchedWeapon.speedGroup;
+        const issued = HuntPersonalityRules?.get(preserved.personality)?.issued || {};
         Object.assign(hunter, {
             ...matchedWeapon,
             ...preserved,
@@ -326,11 +336,11 @@ class HuntInitializer {
             atb: 0,
             comboIndex: 0,
             respawnTimer: 0,
-            potions: 10,
-            lifepowders: 1,
-            shockTraps: this.initialTrapCount(preserved.personality),
-            flashPods: this.initialFlashCount(preserved.personality),
-            bombs: 1,
+            potions: Number(issued.potions || 0),
+            lifepowders: Number(issued.lifepowders || 0),
+            shockTraps: Number(issued.shockTraps || 0),
+            flashPods: Number(issued.flashPods || 0),
+            bombs: Number(issued.bombs || 0),
             spiritLevel: 0,
             demonModeDuration: 0,
             phials: matchedWeapon.id === 'charge_blade' ? 0 : 5,

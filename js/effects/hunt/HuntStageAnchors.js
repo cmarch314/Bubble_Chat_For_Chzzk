@@ -65,13 +65,16 @@ class HuntStageAnchors {
     // rect: {left, top, width, height}
     constructor({
         monsterRect, cardRect = null, stageWidth = null, hunters = null,
-        primaryTarget = null, targetSequence = null
+        primaryTarget = null, targetSequence = null, targetGroup = null
     } = {}) {
         // 비트는 몇 번 헌터인지 적지 않는다. 표적은 매번 달라지므로 번호를 박으면
         // 패턴이 늘 같은 사람만 때린다. `target`이 이번 턴의 주 표적을 가리킨다.
         this.primaryTarget = Number.isInteger(Number(primaryTarget)) ? Number(primaryTarget) : null;
         this.targetSequence = Array.isArray(targetSequence)
             ? targetSequence.map(Number).filter(Number.isInteger)
+            : [];
+        this.targetGroup = Array.isArray(targetGroup)
+            ? [...new Set(targetGroup.map(Number).filter(Number.isInteger))]
             : [];
         if (!monsterRect) throw new HuntStageAnchorError('monsterRect가 없다');
         this.monsterRect = monsterRect;
@@ -96,7 +99,7 @@ class HuntStageAnchors {
     // 헌터 번호는 세지 않고 DOM에서 발견한다. 이 프로젝트의 fight-card는 0부터
     // 시작하고 인원수도 가변이라, 범위를 가정하면 0번을 놓치고 없는 번호를
     // 지어낸다(실제로 1..4로 훑다가 그렇게 됐다).
-    static fromDom(card, monsterImg, { primaryTarget = null, targetSequence = null } = {}) {
+    static fromDom(card, monsterImg, { primaryTarget = null, targetSequence = null, targetGroup = null } = {}) {
         const monsterRect = monsterImg?.getBoundingClientRect?.();
         if (!monsterRect) throw new HuntStageAnchorError('몬스터 이미지를 계측할 수 없다');
         const hunters = new Map();
@@ -113,7 +116,8 @@ class HuntStageAnchors {
             stageWidth: monsterImg.closest?.('.hunt-monster-motion-stage')?.clientWidth || null,
             hunters,
             primaryTarget,
-            targetSequence
+            targetSequence,
+            targetGroup
         });
     }
 
@@ -151,7 +155,7 @@ class HuntStageAnchors {
     // 연산자의 것인지 문법으로 구분되지 않기 때문이다. 허용하면 안쪽 연산자가
     // 조용히 기본값을 쓰고 잘못된 좌표를 낸다 — 신호 없는 오답은 만들지 않는다.
     static TERMINAL_KINDS = Object.freeze([
-        'home', 'self', 'hunter', 'target', 'pass', 'between', 'arena', 'offscreen'
+        'home', 'self', 'hunter', 'target', 'target-group', 'pair', 'pass', 'adjacent', 'between', 'arena', 'offscreen'
     ]);
 
     #parse(spec, nested = false) {
@@ -222,6 +226,33 @@ class HuntStageAnchors {
                 return this.#handlers().hunter(`${this.primaryTarget}${edge}`, args, spec);
             },
 
+            'target-group': (arg, args, spec) => {
+                const points = this.targetGroup.map(index => this.#handlers().hunter(String(index), [], spec));
+                if (!points.length) return this.#handlers().target('', [], spec);
+                return {
+                    x: points.reduce((sum, point) => sum + point.x, 0) / points.length,
+                    y: points.reduce((sum, point) => sum + point.y, 0) / points.length
+                };
+            },
+
+            // The selected adjacent lane owns movement independently from its
+            // judgments. Editing HIT recipients must never redirect the route.
+            pair: (arg, args, spec) => {
+                const members = this.targetGroup
+                    .map(index => ({ index, point: this.#handlers().hunter(String(index), [], spec) }))
+                    .sort((left, right) => left.point.x - right.point.x);
+                if (!members.length) throw new HuntStageAnchorError('선택된 2인 조가 없다', spec);
+                if (arg === 'left') return members[0].point;
+                if (arg === 'right') return members.at(-1).point;
+                if (arg && arg !== 'center') {
+                    throw new HuntStageAnchorError(`알 수 없는 2인 조 앵커: ${arg}`, spec);
+                }
+                return {
+                    x: members.reduce((sum, member) => sum + member.point.x, 0) / members.length,
+                    y: members.reduce((sum, member) => sum + member.point.y, 0) / members.length
+                };
+            },
+
             // `pass:1` / `pass:2.top` — impactTimeline의 순차 표적. 복수 돌진을
             // 하나의 주 표적으로 축소하지 않는다. 번호는 저작자가 읽기 쉬운 1부터다.
             pass: (arg, args, spec) => {
@@ -235,6 +266,21 @@ class HuntStageAnchors {
                     throw new HuntStageAnchorError(`${ordinal}번째 순차 표적이 없다`, spec);
                 }
                 return this.#handlers().hunter(`${hunterIndex}.${edge}`, args, spec);
+            },
+
+            // Prefer the next distinct authored target. With only one live target,
+            // continue toward its arena-center flank so mirrored sweep motions
+            // remain valid instead of failing their whole action.
+            adjacent: (arg, args, spec) => {
+                if (arg !== 'target' || this.primaryTarget === null) {
+                    throw new HuntStageAnchorError('adjacent currently requires target', spec);
+                }
+                const hunterIndex = this.targetSequence.find(index => Number.isInteger(index) && index !== this.primaryTarget);
+                if (Number.isInteger(hunterIndex)) return this.#handlers().hunter(String(hunterIndex), [], spec);
+                const destination = this.#handlers().target('', [], spec);
+                const distance = num(args[0] ?? '180', spec, 'distance');
+                const towardCenter = destination.x > 0 ? -1 : 1;
+                return { ...destination, x: destination.x + towardCenter * distance };
             },
 
             between: (arg, args, spec) => {
@@ -267,10 +313,61 @@ class HuntStageAnchors {
                 return { x: destination.x * ratio, y: destination.y * ratio };
             },
 
+            // `flank:target 180` — use the target's arena-center side so an
+            // edge hunter never pushes a lateral attack off the board.
+            flank: (arg, args, spec) => {
+                const destination = this.#parse(arg, true);
+                const distance = num(args[0], spec, 'distance');
+                const towardCenter = destination.x > 0 ? -1 : 1;
+                return { ...destination, x: destination.x + towardCenter * distance };
+            },
+
+            // Shoulder checks need the opposite geometry: jump to the outside
+            // of the selected hunter, then drive inward across that hunter.
+            // For the middle pair this means hunter 2's left or hunter 3's right,
+            // never the empty midpoint between them.
+            'outer-flank': (arg, args, spec) => {
+                const destination = this.#parse(arg, true);
+                const distance = num(args[0], spec, 'distance');
+                const awayFromCenter = destination.x >= 0 ? 1 : -1;
+                return { ...destination, x: destination.x + awayFromCenter * distance };
+            },
+
+            'pair-flank': (arg, args, spec) => {
+                if (arg !== 'targets') throw new HuntStageAnchorError('pair-flank requires targets', spec);
+                const members = this.targetGroup
+                    .map(index => ({ index, point: this.#handlers().hunter(String(index), [], spec) }))
+                    .sort((left, right) => left.point.x - right.point.x);
+                if (!members.length) throw new HuntStageAnchorError('target pair is empty', spec);
+                const distance = num(args[0], spec, 'distance');
+                const useLeft = this.primaryTarget === members[0].index;
+                const edge = useLeft ? members[0].point : members.at(-1).point;
+                return { ...edge, x: edge.x + (useLeft ? -distance : distance) };
+            },
+
             above: shift('y', -1),
             below: shift('y', +1),
             left: shift('x', -1),
             right: shift('x', +1),
+
+            // `through:pass:1 120` — home에서 지정 앵커를 관통한 동일 직선을
+            // 화면 밖까지 연장한다. 돌진이 헌터 위치에서 꺾이거나 멈춘 뒤
+            // 별도 하단 이동으로 보이는 것을 구조적으로 막는다.
+            through: (arg, args, spec) => {
+                const destination = this.#parse(arg, true);
+                const margin = args.length ? num(args[0], spec, '여백') : 120;
+                const outY = (this.cardRect?.height || this.stageWidth * .6) / 2
+                    + this.monsterRect.height / 2 + margin;
+                if (!(destination.y > 0)) {
+                    throw new HuntStageAnchorError('하단 관통 앵커는 홈보다 아래에 있어야 한다', spec);
+                }
+                const scale = outY / destination.y;
+                return {
+                    x: destination.x * scale,
+                    y: outY,
+                    unclamped: true
+                };
+            },
 
             // `polar:hunter:2 225deg 320` — 0도가 위, 시계 방향.
             polar: (arg, args, spec) => {

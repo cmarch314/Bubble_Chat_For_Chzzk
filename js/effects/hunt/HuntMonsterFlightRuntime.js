@@ -318,7 +318,7 @@ class HuntMonsterFlightRuntime {
         engine.pendingLandingTrap = null;
         let trapEffect;
         if (typeof engine.beginMonsterTrapControl === 'function') {
-            trapEffect = engine.beginMonsterTrapControl('shocktrap', 40);
+            trapEffect = engine.beginMonsterTrapControl('pitfall', 40);
         } else {
             const trapTicks = engine.consumeTrapDuration?.(40) || 40;
             engine.monsterState = 'knocked_down';
@@ -334,8 +334,7 @@ class HuntMonsterFlightRuntime {
             }
             trapEffect = { durationTicks: trapTicks, retainedAtb: engine.monsterAtb, useCount: 1 };
         }
-        engine.playSFX?.('monster_trap', null, { monsterId: engine.selectedMonster.id });
-        engine.triggerEnvironmentEffect?.('shocktrap', pendingTrap.hunterIndex, trapEffect);
+        engine.triggerEnvironmentEffect?.('pitfall', pendingTrap.hunterIndex, trapEffect);
         engine.addLog?.(`🪤 [착지 함정] ${engine.selectedMonster.nameKO}(이)가 설치된 함정을 밟았습니다!`, '#ffe66d');
         return true;
     }
@@ -382,7 +381,10 @@ class HuntMonsterFlightRuntime {
             : 0;
         engine.monsterState = 'knocked_down';
         engine.monsterKnockdownDuration = Math.max(Number(engine.monsterKnockdownDuration || 0), aerialTicks);
-        engine.playSFX?.('monster_knockdown', null, { monsterId: engine.selectedMonster.id });
+        engine.playSFX?.('monster_knockdown', null, {
+            monsterId: engine.selectedMonster.id,
+            reactionProfile: options.partReactionKind === 'tail_sever_roll' ? 'tail' : 'knockdown'
+        });
         engine.updateMonsterAtbUI(engine.monsterAtb);
         engine.updateMonsterStateUI('격추 대경직', `💥 격추된 ${engine.selectedMonster.nameKO} 💥`, {
             color: '#8fdcff',
@@ -424,7 +426,8 @@ class HuntMonsterFlightRuntime {
             {
                 partReactionKind,
                 partKind: part.kind || null,
-                retainedAtb: options.retainedAtb
+                retainedAtb: options.retainedAtb,
+                partBreakSize: options.partBreakSize || 'large'
             }
         );
     }

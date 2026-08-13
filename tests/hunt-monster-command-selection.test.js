@@ -41,4 +41,11 @@ assert.strictEqual(initializer.parseCommand('!수렵 레우스', monsters).huntM
 assert.strictEqual(initializer.parseCommand('!토벌 레우스', monsters).huntMode, 'single');
 assert.strictEqual(initializer.parseCommand('!몬헌 레우스', monsters).huntMode, 'journey');
 assert.strictEqual(selected('!몬헌 레우스'), 'azure_rathalos', 'journey encounter choice must ignore manual monster tokens');
+const crossoverFiltered = initializer.parseCommand(null, [
+    { id: 'leshen', nameEN: 'Leshen', nameKO: '레셴' },
+    { id: 'ancient_leshen', nameEN: 'Ancient Leshen', nameKO: '고대 레셴' },
+    { id: 'rathalos', nameEN: 'Rathalos', nameKO: '리오레우스' }
+]);
+assert.strictEqual(crossoverFiltered.selectedMonster.id, 'rathalos',
+    'Leshen crossover guests are excluded from random and journey hunt pools');
 console.log('[test] Exact monster command selection takes priority over variants.');

@@ -24,9 +24,12 @@ class HuntJourneyRewardCatalog {
         return { ...reward, seals: [...new Set([...(Array.isArray(seals) ? seals : []), reward.seal])].slice(-9) };
     }
 
-    static coinFor(tier, isBoss = false) {
+    static coinFor(tier, isBoss = false, difficultyProfile = null) {
         const base = { small: 1, medium: 1, normal: 2, large: 2, elder: 3, colossal: 3 }[String(tier)] || 1;
-        return Math.min(3, base + (isBoss && base < 3 ? 1 : 0));
+        const earned = base + (isBoss && base < 3 ? 1 : 0);
+        const DifficultyProfile = typeof HuntDifficultyProfile !== 'undefined' ? HuntDifficultyProfile
+            : (typeof require === 'function' ? require('./HuntDifficultyProfile') : null);
+        return DifficultyProfile ? DifficultyProfile.scaleReward(earned, difficultyProfile) : earned;
     }
 }
 

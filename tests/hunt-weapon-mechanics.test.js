@@ -54,6 +54,15 @@ pressuredGreatSword.greatSwordCharge = 1;
 assert.strictEqual(mechanics.damageMultiplier(pressuredGreatSword, greatSwordActions.find(row => row.id === 'great_sword.strong_charged_slash')), 0.55);
 pressuredGreatSword.greatSwordCharge = 3;
 assert.strictEqual(mechanics.damageMultiplier(pressuredGreatSword, greatSwordActions.find(row => row.id === 'great_sword.strong_charged_slash')), 1);
+const cautiousRandomMechanics = new HuntWeaponMechanics(() => .99);
+const cautiousSelector = new HuntWeaponActionSelector(() => .99, cautiousRandomMechanics);
+const imminentGreatSword = { id: 'great_sword', hunterName: 'GS IMMINENT', hp: 100, maxHp: 100, greatSwordChain: 0, greatSwordCharge: 1 };
+cautiousRandomMechanics.initialize(imminentGreatSword);
+assert.strictEqual(
+    cautiousSelector.select(imminentGreatSword, greatSwordActions, { monsterAtb: 94, monsterPressure: true }).action.id,
+    'great_sword.tackle',
+    'an imminent attack must permit charge tackle even when the random roll would otherwise extend charge'
+);
 
 const switchActions = HuntWeaponMechanics.actionsFor('switch_axe');
 const switchAxe = { id: 'switch_axe', hunterName: 'SA' };

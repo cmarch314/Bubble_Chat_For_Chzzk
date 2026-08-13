@@ -41,8 +41,8 @@ class HuntRenderer {
     clearCombatTransientVisuals() {
         this.clearAnimationTimers();
         const selectors = [
-            '.game-hunt-cart-container',
-            '.game-hunt-cart-local',
+            '.hunter-cart-sequence-cart',
+            '.hunter-cart-sequence-flash',
             '.victory-emoji-bubble',
             '.skill-bubble',
             '.monster-skill-bubble',
@@ -60,7 +60,7 @@ class HuntRenderer {
         // Cart overlays normally belong to the hunt container, but the guarded
         // fallback path can attach one to body before renderer ownership exists.
         if (typeof document !== 'undefined') {
-            document.querySelectorAll?.('.game-hunt-cart-container,.game-hunt-cart-local')
+            document.querySelectorAll?.('.hunter-cart-sequence-cart,.hunter-cart-sequence-flash')
                 ?.forEach(node => node.remove());
         }
         this.card?.classList?.remove?.(
@@ -109,48 +109,42 @@ class HuntRenderer {
     }
 
     renderHunterProbabilityBadges(hunter = {}) {
-        const modifiers = hunter.perkModifiers || {};
-        const personality = hunter.personality || 'normal';
+        const profiles = typeof HuntPersonalityProfiles !== 'undefined'
+            ? HuntPersonalityProfiles
+            : (typeof require === 'function' ? require('./HuntPersonalityProfiles.js') : null);
         const perkNames = new Set((hunter.perks || []).map(perk => perk?.name));
-        const base = personality === 'veteran'
-            ? { evade: .75, guard: .78, foresight: .80, iai: .82 }
-            : personality === 'newbie'
-                ? { evade: .22, guard: .30, foresight: .50, iai: .22 }
-                : personality === 'defensive'
-                    ? { evade: .48, guard: .62, foresight: .85, iai: .58 }
-                    : personality === 'offensive'
-                        ? { evade: .48, guard: .62, foresight: .80, iai: .58 }
-                        : { evade: .48, guard: .62, foresight: .75, iai: .58 };
-        const percent = value => Math.round(Math.max(0, Math.min(.97, Number(value) || 0)) * 100);
+        const percent = value => Math.round(Math.max(0, Math.min(.99, Number(value) || 0)) * 100);
         const weaponAffinity = Math.max(0, Number(hunter.weaponInstance?.affinity ?? hunter.affinity ?? 0)) / 100;
-        const affinity = weaponAffinity + Number(modifiers.critChance || 0) + (perkNames.has('간파') ? .18 : 0);
+        const chance = stat => profiles?.chance(hunter, stat) || 0;
+        const affinity = Math.min(.95, weaponAffinity + chance('critical') + (perkNames.has('간파') ? .18 : 0));
+        const special = chance('special');
         const badges = [
-            { icon: '🎯', value: percent(.90 + Number(modifiers.hitChance || 0)), label: '적중률' },
+            { icon: '🎯', value: percent(chance('hit')), label: '적중률' },
             { icon: '💥', value: percent(affinity), label: '회심률' },
-            { icon: '💨', value: percent(base.evade + Number(modifiers.evadeChance || 0)), label: '회피율' }
+            { icon: '💨', value: percent(chance('evade')), label: '회피율' }
         ];
         const usesGuard = hunter.type === 'shield' || hunter.id === 'heavy_bowgun';
 
         if (usesGuard) {
-            badges.push({ icon: '🛡️', value: percent(base.guard + Number(modifiers.guardChance || 0)), label: '가드율' });
+            badges.push({ icon: '🛡️', value: percent(chance('guard')), label: '가드율' });
         }
 
         const specials = {
-            great_sword: [{ icon: '🦬', value: .42, label: '태클 선택률' }],
+            great_sword: [{ icon: '🦬', value: special, label: '태클 선택률' }],
             long_sword: [
-                { icon: '👁️', value: base.foresight, label: '간파베기 성공률' },
-                { icon: '⚡', value: base.iai, label: '거합베기 성공률' }
+                { icon: '👁️', value: profiles?.longSwordForesightChance(hunter) || .75, label: '간파베기 성공률' },
+                { icon: '⚡', value: special, label: '거합베기 성공률' }
             ],
             sword_shield: [
-                { icon: '↩️', value: .22, label: '백스텝 선택률' },
-                { icon: '✨', value: .42, label: '퍼펙트 가드 선택률' }
+                { icon: '↩️', value: special, label: '백스텝 선택률' },
+                { icon: '✨', value: special, label: '퍼펙트 가드 선택률' }
             ],
-            hammer: [{ icon: '🔨', value: .32, label: '상쇄 자세 선택률' }],
-            lance: [{ icon: '🔱', value: .65, label: '카운터 자세 선택률' }],
-            switch_axe: [{ icon: '⚔️', value: .38, label: '검 카운터 선택률' }],
-            charge_blade: [{ icon: '🛡️⚡', value: .32, label: '가드 포인트 선택률' }],
-            heavy_bowgun: [{ icon: '💣', value: .40, label: '용열 카운터 선택률' }],
-            bow: [{ icon: '🪽', value: .40, label: '차지 스텝 선택률' }]
+            hammer: [{ icon: '🔨', value: special, label: '상쇄 자세 선택률' }],
+            lance: [{ icon: '🔱', value: special, label: '카운터 자세 선택률' }],
+            switch_axe: [{ icon: '⚔️', value: special, label: '검 카운터 선택률' }],
+            charge_blade: [{ icon: '🛡️⚡', value: special, label: '가드 포인트 선택률' }],
+            heavy_bowgun: [{ icon: '💣', value: special, label: '용열 카운터 선택률' }],
+            bow: [{ icon: '🪽', value: special, label: '차지 스텝 선택률' }]
         };
         (specials[hunter.id] || []).forEach(stat => badges.push({ ...stat, value: percent(stat.value) }));
 
@@ -216,7 +210,7 @@ class HuntRenderer {
             if (!group.synergy) return renderBubble(group.perks[0]);
             const synergy = group.synergy;
             const label = `<span class="hunt-perk-synergy-label">${synergy.icon} ${this.escapeHTML(synergy.label)}</span>`;
-            return `<span class="hunt-perk-synergy${compact ? ' hunt-perk-synergy--compact' : ''}" style="--synergy-color:${this.safeColor(synergy.color, '#ffd66b')}" title="${this.escapeHTML(`${synergy.label} 조합 발동`)}">${label}<span class="hunt-perk-synergy-chain">${group.perks.map(perk => renderBubble(perk, synergy)).join('')}</span></span>`;
+            return `<span class="hunt-perk-synergy${compact ? ' hunt-perk-synergy--compact' : ''}" style="--synergy-color:${this.safeColor(synergy.color, '#ffd66b')}" title="${this.escapeHTML(`${synergy.label}: ${synergy.bonus?.summary || '조합 발동'}`)}">${label}<span class="hunt-perk-synergy-chain">${group.perks.map(perk => renderBubble(perk, synergy)).join('')}</span></span>`;
         }).join('');
     }
 
@@ -943,9 +937,10 @@ class HuntRenderer {
                 ? '<div class="hunt-combat-hot-join" id="hunt-combat-hot-join">👤 AI 교대 <strong>!참가</strong></div>' : ''}
             ${sharedSupply ? `<div class="hunt-shared-supply" aria-label="공용 캠프 보급고">
                 <b>⛺ 공용 보급</b>
-                <span id="shared-potion-count">🧪 ${Number(sharedSupply.potions || 0)}/10</span>
+                <span id="shared-potion-count">🧪 ${Number(sharedSupply.potions || 0)}</span>
                 <span id="shared-trap-count">🪤 ${Number(sharedSupply.shockTraps || 0)}</span>
                 <span id="shared-lifepowder-count">💚 ${Number(sharedSupply.lifepowders || 0)}</span>
+                <span id="shared-flash-count">✨ ${Number(sharedSupply.flashPods || 0)}</span>
                 <span id="shared-bomb-count">💣 ${Number(sharedSupply.bombs || 0)}</span>
             </div>` : ''}
 
@@ -1098,10 +1093,45 @@ class HuntRenderer {
         const label = tail.querySelector('b');
         if (label) label.textContent = displayName;
         if (visible && !carved) {
-            const width = Math.max(640, this.card.clientWidth || 1920);
-            const height = Math.max(520, Math.min((this.card.clientHeight || 900) * .68, 680));
-            tail.style.left = `${Math.round(width * (.12 + Math.random() * .76))}px`;
-            tail.style.top = `${Math.round(130 + Math.random() * Math.max(160, height - 280))}px`;
+            const cardRect = this.card.getBoundingClientRect?.() || { left: 0, top: 0, width: 1920, height: 900 };
+            const monster = this.card.querySelector('#fight-monster-img');
+            const monsterRect = monster?.getBoundingClientRect?.();
+            const hunterCards = [...this.card.querySelectorAll('.game-hunt-weapon-card')]
+                .map(card => card.getBoundingClientRect?.())
+                .filter(rect => rect && rect.width > 0)
+                .sort((a, b) => a.left - b.left);
+            const hunterGap = hunterCards.length > 1
+                ? Math.abs((hunterCards[1].left + hunterCards[1].width / 2)
+                    - (hunterCards[0].left + hunterCards[0].width / 2))
+                : Math.max(220, cardRect.width * .22);
+            const startX = monsterRect
+                ? monsterRect.left - cardRect.left + monsterRect.width / 2
+                : cardRect.width / 2;
+            const startY = monsterRect
+                ? monsterRect.top - cardRect.top + monsterRect.height / 2
+                : Math.max(180, cardRect.height * .34);
+            const minDistance = hunterGap * .9;
+            const distance = hunterGap * (.9 + Math.random() * .25);
+            const edgePadding = 90;
+            const roomLeft = startX - edgePadding;
+            const roomRight = cardRect.width - edgePadding - startX;
+            const direction = roomLeft < minDistance ? 1
+                : roomRight < minDistance ? -1
+                    : (Math.random() < .5 ? -1 : 1);
+            const endX = Math.max(edgePadding, Math.min(cardRect.width - edgePadding,
+                startX + direction * distance));
+            const endY = Math.max(110, Math.min(cardRect.height - 130,
+                startY + hunterGap * (.04 + Math.random() * .12)));
+            const travelX = endX - startX;
+            const travelY = endY - startY;
+            tail.style.left = `${Math.round(startX)}px`;
+            tail.style.top = `${Math.round(startY)}px`;
+            tail.style.setProperty('--tail-flight-x', `${Math.round(travelX)}px`);
+            tail.style.setProperty('--tail-flight-y', `${Math.round(travelY)}px`);
+            tail.style.setProperty('--tail-flight-mid-x', `${Math.round(travelX * .48)}px`);
+            tail.style.setProperty('--tail-flight-mid-y', `${Math.round(travelY * .48)}px`);
+            tail.style.setProperty('--tail-flight-arc', `${Math.round(Math.max(110, hunterGap * .55))}px`);
+            tail.dataset.flightDirection = direction < 0 ? 'left' : 'right';
             tail.classList.remove('is-dropping');
             void tail.offsetWidth;
             tail.classList.add('is-dropping');
@@ -1453,6 +1483,7 @@ class HuntRenderer {
         const hpCenterText = this.card.querySelector('#monster-hp-center-text');
         const monsterImg = this.card.querySelector('#fight-monster-img');
         const state = String(stateName || '');
+        const stunned = state.includes('기절');
         const icon = state.includes('일반') ? ''
             : state.includes('분노') ? '😡'
                 : state.includes('탈진') ? '🤤'
@@ -1471,9 +1502,12 @@ class HuntRenderer {
                                                             : '❗';
 
         if (statusIcon) {
-            statusIcon.textContent = icon;
-            statusIcon.hidden = !icon;
-            statusIcon.setAttribute('aria-label', icon ? stateName : '');
+            // KO owns a head-following marker. Showing the generic state icon
+            // as well creates two identical stun symbols in different places.
+            const visibleIcon = stunned ? '' : icon;
+            statusIcon.textContent = visibleIcon;
+            statusIcon.hidden = !visibleIcon;
+            statusIcon.setAttribute('aria-label', visibleIcon ? stateName : '');
         }
 
         if (hpCenterText) hpCenterText.style.color = '';
@@ -1485,11 +1519,8 @@ class HuntRenderer {
                 monsterImg.classList.remove('enraged');
             }
 
-            if (stateName.includes('기절')) {
-                monsterImg.classList.add('stunned_monster');
-            } else {
-                monsterImg.classList.remove('stunned_monster');
-            }
+            monsterImg.classList.remove('stunned_monster');
+            if (!stunned) this.combatAnimator?.setMonsterStunHeadMarker?.(false);
 
             monsterImg.classList.toggle('monster-paralyzed', stateName.includes('마비') && !stateName.includes('마비함정'));
             monsterImg.classList.toggle('monster-sleeping', stateName.includes('수면'));
@@ -1500,34 +1531,41 @@ class HuntRenderer {
                 monsterImg.classList.remove('valstrax-flying');
             }
 
-            if (stateName.includes('대경직') || stateName.includes('함정')) {
-                const authoredPartReaction = monsterImg.classList.contains('monster-tail-sever-roll')
-                    || monsterImg.classList.contains('monster-part-break-topple');
-                monsterImg.classList.toggle('monster-knockdown-anim', !authoredPartReaction);
+            if (stateName.includes('대경직')) {
+                const authoredPartReaction = Boolean(monsterImg.dataset.partBreakReaction);
+                const authoredKnockdown = monsterImg.dataset.monsterKnockdownSequence === 'active';
+                monsterImg.classList.toggle(
+                    'monster-knockdown-anim',
+                    !authoredPartReaction && !authoredKnockdown
+                );
             } else {
-                monsterImg.classList.remove('monster-knockdown-anim');
+                monsterImg.classList.remove('monster-knockdown-anim', 'monster-knockdown-sequence');
+                delete monsterImg.dataset.monsterKnockdownSequence;
             }
 
             if (!stateName.includes('구멍함정')) {
-                monsterImg.classList.remove('monster-pitfall-caught', 'monster-pitfall-struggling');
+                // Escape owns the visual handoff for 0.8s. State restoration may
+                // happen on the same engine tick, but must not teleport the image
+                // out of the authored pitfall exit.
+                if (!monsterImg.classList.contains('monster-pitfall-releasing')) {
+                    monsterImg.classList.remove(
+                        'monster-pitfall-caught',
+                        'monster-pitfall-struggling',
+                        'monster-pitfall-struggle-pulse'
+                    );
+                    delete monsterImg.dataset.pitfallLifecycle;
+                }
             }
         }
     }
 
     updatePotionCountUI(idx, count) {
         if (!this.card) return;
-        this.updateSharedPotionUI(count);
         const el = this.card.querySelector(`#potion-count-${idx}`);
         if (el) el.textContent = `🧪 ${count}`;
     }
 
-    updateSharedPotionUI(count) {
-        if (!this.card) return;
-        const sharedPotion = this.card.querySelector('#shared-potion-count');
-        if (sharedPotion) sharedPotion.textContent = `🧪 ${Number(count || 0)}/10`;
-    }
-
-    updateHunterItemUI(hunter) {
+    updateHunterItemUI(hunter, sharedSupply = null) {
         if (!this.card || !hunter) return;
         const potion = this.card.querySelector(`#potion-count-${hunter.index}`);
         const trap = this.card.querySelector(`#trap-count-${hunter.index}`);
@@ -1542,11 +1580,13 @@ class HuntRenderer {
         const sharedPotion = this.card?.querySelector('#shared-potion-count');
         const sharedTrap = this.card?.querySelector('#shared-trap-count');
         const sharedPowder = this.card?.querySelector('#shared-lifepowder-count');
+        const sharedFlash = this.card?.querySelector('#shared-flash-count');
         const sharedBomb = this.card?.querySelector('#shared-bomb-count');
-        if (sharedPotion) sharedPotion.textContent = `🧪 ${Number(hunter.potions || 0)}/10`;
-        if (sharedTrap) sharedTrap.textContent = `🪤 ${Number(hunter.shockTraps || 0)}`;
-        if (sharedPowder) sharedPowder.textContent = `💚 ${Number(hunter.lifepowders || 0)}`;
-        if (sharedBomb) sharedBomb.textContent = `💣 ${Number(hunter.bombs || 0)}`;
+        if (sharedPotion && sharedSupply) sharedPotion.textContent = `🧪 ${Number(sharedSupply.potions || 0)}`;
+        if (sharedTrap && sharedSupply) sharedTrap.textContent = `🪤 ${Number(sharedSupply.shockTraps || 0)}`;
+        if (sharedPowder && sharedSupply) sharedPowder.textContent = `💚 ${Number(sharedSupply.lifepowders || 0)}`;
+        if (sharedFlash && sharedSupply) sharedFlash.textContent = `✨ ${Number(sharedSupply.flashPods || 0)}`;
+        if (sharedBomb && sharedSupply) sharedBomb.textContent = `💣 ${Number(sharedSupply.bombs || 0)}`;
     }
 
     updateOverheatUI(idx, duration) {
@@ -1627,10 +1667,19 @@ class HuntRenderer {
     triggerStunUI(idx, isStunned) { return this.combatAnimator.triggerStunUI(idx, isStunned); }
 
     triggerDeathTag(idx, w, timerVal = 5) { return this.combatAnimator.triggerDeathTag(idx, w, timerVal); }
+    triggerHunterReturn(idx, w) { return this.combatAnimator.triggerHunterReturn(idx, w); }
 
-    triggerMonsterKnockdownAnim() { return this.combatAnimator.triggerMonsterKnockdownAnim(); }
+    triggerMonsterKnockdownAnim(details = null) {
+        return this.combatAnimator.triggerMonsterKnockdownAnim(details);
+    }
     triggerMonsterPartBreakReaction(kind, durationTicks, partKind) {
         return this.combatAnimator.triggerMonsterPartBreakReaction(kind, durationTicks, partKind);
+    }
+    triggerMonsterPartBreakVisual(partKind) {
+        return this.combatAnimator.triggerMonsterPartBreakVisual(partKind);
+    }
+    triggerMonsterSleepAnim(details = null) {
+        return this.combatAnimator.triggerMonsterSleepAnim(details);
     }
 
     triggerEnvironmentEffect(kind, hunterIndex = null, details = null) {

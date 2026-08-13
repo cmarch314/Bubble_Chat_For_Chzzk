@@ -7,6 +7,18 @@ assert.strictEqual(new Set(entries.map(entry => entry.kind)).size, 14, 'all 14 w
 assert.ok(entries.every(entry => entry.evidence === 'wilds-game-files-via-mhdb'), 'every runtime weapon must preserve extraction evidence');
 assert.strictEqual(entries.filter(entry => entry.element).length, 180, 'all extracted elemental weapons must preserve their element');
 assert.deepStrictEqual([...new Set(entries.filter(entry => entry.element).map(entry => entry.element))].sort(), ['dragon', 'fire', 'ice', 'thunder', 'water']);
+const meleeStatusSpecials = entries.flatMap(entry => entry.specials || []);
+assert.strictEqual(meleeStatusSpecials.length, 49,
+    'all extracted final melee status weapons must survive compact runtime generation');
+assert.deepStrictEqual(Object.fromEntries(['poison', 'paralysis', 'sleep', 'blast'].map(status => [
+    status, meleeStatusSpecials.filter(special => special.status === status).length
+])), { poison: 19, paralysis: 12, sleep: 7, blast: 11 });
+assert.ok(meleeStatusSpecials.every(special => special.kind === 'status'
+    && special.hidden === false && special.raw > 0),
+    'runtime status specials need normalized kinds and extracted positive buildup values');
+assert.ok(entries.filter(entry => ['bow', 'light_bowgun', 'heavy_bowgun'].includes(entry.kind))
+    .every(entry => entry.specials.length === 0),
+    'ranged coatings and ammo must not be misrepresented as permanent melee status');
 assert.ok(entries.every(entry => entry.nameKo && /[가-힣]/.test(entry.nameKo)), 'every extracted weapon must use its official Korean localized name');
 const catalog = new HuntWeaponInstanceCatalog(entries, () => 0);
 for (const kind of [...new Set(entries.map(entry => entry.kind))]) assert.ok(catalog.pick(kind), `${kind} needs a selectable weapon instance`);
@@ -36,6 +48,8 @@ assert.strictEqual(HuntWeaponInstanceCatalog.sharpenThreshold({ sharpnessProfile
 assert.strictEqual(HuntWeaponInstanceCatalog.sharpenThreshold({ sharpnessProfile: whetstoneProfile, maxSharpness: 300, personality: 'normal' }), 195);
 assert.strictEqual(HuntWeaponInstanceCatalog.sharpenThreshold({ sharpnessProfile: whetstoneProfile, maxSharpness: 300, personality: 'support' }), 180);
 assert.strictEqual(HuntWeaponInstanceCatalog.sharpenThreshold({ sharpnessProfile: whetstoneProfile, maxSharpness: 300, personality: 'defensive' }), 165);
+assert.strictEqual(HuntWeaponInstanceCatalog.sharpenThreshold({ sharpnessProfile: whetstoneProfile, maxSharpness: 300, personality: 'newbie' }), 50,
+    'newbie hunters must wait for the extracted red band instead of disabling whetstones');
 const thinWhiteOffensive = { sharpnessProfile: { red: 100, orange: 50, yellow: 50, green: 50, blue: 45, white: 5 }, maxSharpness: 300, sharpness: 300, personality: 'offensive' };
 assert.strictEqual(HuntWeaponInstanceCatalog.shouldSharpen(thinWhiteOffensive, () => 0), false,
     'a thin top-color band must never make a full weapon sharpen');

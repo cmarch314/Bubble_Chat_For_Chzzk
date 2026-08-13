@@ -27,6 +27,10 @@ class HuntAudioManager {
         this.cmcVoiceProfile = null;
         this.lastCharacterDialogueAt = 0;
         this.activeTransientAudios = new Set();
+        // Random routes are shuffle bags, not independent coin flips. With a
+        // two-file audition pool this guarantees both cues are actually heard
+        // instead of the same file appearing to be permanently selected.
+        this.patternRouteLastRandomLayer = new Map();
         // CMC is a chat catalog feature and must remain available even when a
         // private extracted game manifest is absent or still loading.
         this.buildHunterVoiceProfileCatalog();
@@ -783,6 +787,14 @@ class HuntAudioManager {
         return null;
     }
 
+    hasBeatAudioRoutes(monsterId, patternId) {
+        if (!monsterId || !patternId) return false;
+        const globalScope = typeof window !== 'undefined' ? window : globalThis;
+        const map = globalScope.HUNT_MONSTER_PATTERN_AUDIO_ROUTES;
+        const candidates = [monsterId, String(monsterId).toLowerCase(), this.monsterGroup?.(monsterId)];
+        return candidates.some(id => id && Object.keys(map?.[id]?.[patternId] || {}).some(slot => slot.startsWith('beat:')));
+    }
+
     static resolveOverrideSlot(kind, options = {}) {
         if (options.patternSlot) return options.patternSlot;
         const normalized = String(kind || '').toLowerCase();
@@ -795,10 +807,15 @@ class HuntAudioManager {
         return null;
     }
 
-    playPatternAudioRoute(route) {
+    playPatternAudioRoute(route, routeKey = '') {
         if (!route || !Array.isArray(route.layers) || !route.layers.length) return false;
         if ((route.mode === 'random' || route.random === true) && route.layers.length > 1) {
-            const picked = route.layers[Math.floor(Math.random() * route.layers.length)];
+            this.patternRouteLastRandomLayer ||= new Map();
+            const stableKey = routeKey || route.layers.map(layer => layer?.[0] || '').join('|');
+            const previous = this.patternRouteLastRandomLayer.get(stableKey);
+            const candidates = route.layers.filter((_, index) => index !== previous);
+            const picked = candidates[Math.floor(Math.random() * candidates.length)] || route.layers[0];
+            this.patternRouteLastRandomLayer.set(stableKey, route.layers.indexOf(picked));
             return this.playVerifiedLayers({ ...route, layers: [picked] });
         }
         return this.playVerifiedLayers(route);
@@ -807,12 +824,116 @@ class HuntAudioManager {
     playMonsterAction(monster, kind = 'attack', options = {}) {
         const actionKind = this.normalizedMonsterAudioKind(kind);
         const monsterId = monster && monster.id ? monster.id : monster;
+        if (['flinch', 'knockdown', 'trap', 'death'].includes(actionKind)) {
+            if (actionKind === 'trap' && options.trapPhase) {
+                const phase = String(options.trapPhase);
+                const beatId = ({ fall: 'reaction', struggle: 'held-1', escape: 'release' })[phase]
+                    || phase;
+                const reactionId = options.trapKind === 'shocktrap'
+                    ? '__reaction.shocktrap'
+                    : '__reaction.pitfall';
+                let playedTrapLayer = false;
+                let hasTrapLayer = false;
+                const trapLayers = [
+                    [`beat:${beatId}-se`, this.patternAudioRoute(monsterId, reactionId, `beat:${beatId}-se`)],
+                    [`beat:${beatId}-vo`, this.patternAudioRoute(monsterId, reactionId, `beat:${beatId}-vo`)]
+                ];
+                if (beatId.startsWith('held-')) {
+                    trapLayers[0][1] ||= this.patternAudioRoute(monsterId, reactionId, 'beat:held-se');
+                    trapLayers[1][1] ||= this.patternAudioRoute(monsterId, reactionId, 'beat:held-vo');
+                }
+                if (!trapLayers[1][1]) {
+                    trapLayers[1][1] = this.patternAudioRoute(monsterId, reactionId, `beat:${beatId}`)
+                        || (beatId.startsWith('held-')
+                            ? this.patternAudioRoute(monsterId, reactionId, 'beat:held')
+                            : null);
+                }
+                for (const [slot, route] of trapLayers) {
+                    if (!route) continue;
+                    hasTrapLayer = true;
+                    if (route.disabled === true) continue;
+                    playedTrapLayer = this.playPatternAudioRoute(
+                        route, `${monsterId}:${reactionId}:${slot}`
+                    ) || playedTrapLayer;
+                }
+                if (hasTrapLayer) return playedTrapLayer;
+                if (options.overrideOnly) return false;
+            }
+            const playBreakLayers = (reactionId, allowLegacyReaction = false) => {
+                if (!reactionId) return { authored: false, played: false };
+                let played = false;
+                let authored = false;
+                const layers = [
+                    ['beat:break-se', this.patternAudioRoute(monsterId, reactionId, 'beat:break-se')],
+                    ['beat:break-vo', this.patternAudioRoute(monsterId, reactionId, 'beat:break-vo')]
+                ];
+                if (allowLegacyReaction && !layers[1][1]) layers[1][1] = this.patternAudioRoute(
+                    monsterId, reactionId, 'beat:reaction');
+                for (const [slot, route] of layers) {
+                    if (!route) continue;
+                    authored = true;
+                    if (route.disabled === true) continue;
+                    played = this.playPatternAudioRoute(
+                        route, `${monsterId}:${reactionId}:${slot}`
+                    ) || played;
+                }
+                return { authored, played };
+            };
+            if (options.partBreakVisualProfile) {
+                const visualId = '__visual.part-break';
+                const slot = 'beat:se';
+                const route = this.patternAudioRoute('common', visualId, slot);
+                if (route?.disabled === true) return false;
+                if (route) return this.playPatternAudioRoute(route, `common:${visualId}:${slot}`);
+                if (options.overrideOnly) return false;
+            }
+            if (options.partBreakSize) {
+                const groupedReactionId = `__reaction.part-break-${options.partBreakSize === 'large' ? 'large' : 'small'}`;
+                const grouped = playBreakLayers(groupedReactionId, true);
+                if (grouped.authored) return grouped.played;
+            }
+            if (options.sourcePart) {
+                const partReactionId = `__part.${options.sourcePart}`;
+                // Existing reviewed part vocals used beat:reaction. Preserve
+                // them only as a compatibility fallback after the shared
+                // large/small group has been checked.
+                const legacyPart = playBreakLayers(partReactionId, true);
+                if (legacyPart.authored) return legacyPart.played;
+            }
+            const reactionIds = [
+                options.reactionProfile === 'tail' ? '__reaction.tail-sever' : null,
+                options.sourcePart ? `__part.${options.sourcePart}` : null,
+                `__reaction.${actionKind}`
+            ].filter(Boolean);
+            for (const reactionId of reactionIds) {
+                const reactionRoute = this.patternAudioRoute(
+                    monsterId, reactionId, 'beat:reaction');
+                if (reactionRoute?.disabled === true) return false;
+                if (reactionRoute) return this.playPatternAudioRoute(
+                    reactionRoute, `${monsterId}:${reactionId}:beat:reaction`);
+            }
+        }
         const overrideSlot = HuntAudioManager.resolveOverrideSlot(kind, options);
+        const isBeatSlot = String(overrideSlot || '').startsWith('beat:');
+        // A reviewed BEAT graph owns the complete pattern audio timeline.
+        // The turn executor still emits legacy impact/recovery hooks for
+        // unmigrated patterns; never let those stale phase routes layer over
+        // an exact beat:<id> assignment.
+        if (options.patternId && overrideSlot && !isBeatSlot
+            && this.hasBeatAudioRoutes(monsterId, options.patternId)) {
+            return false;
+        }
         if (options.patternId && overrideSlot) {
             const route = this.patternAudioRoute(monsterId, options.patternId, overrideSlot);
             if (route?.disabled === true) return false;
-            if (route) return this.playPatternAudioRoute(route);
+            if (route) return this.playPatternAudioRoute(route,
+                `${monsterId}:${options.patternId}:${overrideSlot}`);
             if (options.overrideOnly) return false;
+        }
+        // Beat-native reviewed patterns own their whole audio timeline. Do not
+        // also emit legacy phase/catalog fallbacks at prepare/start/impact.
+        if (options.patternId && !options.patternSlot && this.hasBeatAudioRoutes(monsterId, options.patternId)) {
+            return false;
         }
         const normalizedMonsterId = String(monsterId || '').toLowerCase().replace(/[-']/g, '_');
         const globalScope = typeof window !== 'undefined' ? window : globalThis;

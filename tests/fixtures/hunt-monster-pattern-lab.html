@@ -53,6 +53,8 @@
     .hunt-monster-attack-motion{position:relative;width:390px;height:390px;display:grid;place-items:center;overflow:visible}
     .hunt-monster-facing-layer{position:relative;width:100%;height:100%;display:grid;place-items:center;overflow:visible}
     #fight-monster-img{width:390px;height:390px;object-fit:contain;filter:drop-shadow(0 28px 24px #000c)}
+    .monster-anatomy-guide{position:absolute;z-index:45;pointer-events:none;overflow:visible;transform-box:border-box}.monster-anatomy-guide .part-handle{pointer-events:all;cursor:grab}.monster-anatomy-guide .part-handle:active{cursor:grabbing}.monster-anatomy-guide .part-line{stroke:#5de1ff;stroke-width:4;filter:drop-shadow(0 0 4px #001b2c)}.monster-anatomy-guide .part-path{fill:none;stroke:#ffd467;stroke-width:5;stroke-dasharray:10 7}.monster-anatomy-guide .part-dot{fill:#08141d;stroke:#fff;stroke-width:4}.monster-anatomy-guide .part-label{fill:#fff;paint-order:stroke;stroke:#071018;stroke-width:7px;font:900 22px "Noto Sans KR",sans-serif;letter-spacing:-1px}.monster-anatomy-guide .part-hit{fill:transparent;stroke:transparent;stroke-width:30}.monster-anatomy-guide .part-handle:hover .part-line,.monster-anatomy-guide .part-handle.is-dragging .part-line{stroke:#fff36a;stroke-width:7}.monster-anatomy-guide .part-handle:hover .part-path,.monster-anatomy-guide .part-handle.is-dragging .part-path{stroke:#ff7bd5;stroke-width:9;filter:drop-shadow(0 0 8px #ff3cab)}.monster-anatomy-guide .part-handle:hover .part-dot,.monster-anatomy-guide .part-handle.is-dragging .part-dot{fill:#ffcf33;stroke:#fff;stroke-width:6}.monster-anatomy-guide .part-handle:hover .part-label,.monster-anatomy-guide .part-handle.is-dragging .part-label{fill:#fff36a;stroke-width:10px}
+    .motion-gizmo{position:absolute;z-index:90;width:390px;height:390px;border:3px solid #ffd15d;box-shadow:0 0 0 1px #000,0 0 18px #ffc84b66;pointer-events:none;touch-action:none;transform-origin:50% 50%}.motion-gizmo[hidden]{display:none}.motion-gizmo .gizmo-move{position:absolute;z-index:1;inset:20px;pointer-events:auto;cursor:move;touch-action:none}.motion-gizmo .gizmo-handle{position:absolute;z-index:4;width:26px;height:26px;border:3px solid #fff;background:#dfaa32;box-shadow:0 2px 8px #000b;pointer-events:auto;touch-action:none}.motion-gizmo .gizmo-scale{right:-14px;bottom:-14px;cursor:nwse-resize}.motion-gizmo .gizmo-scale-x{right:-14px;top:25%;border-radius:4px;cursor:ew-resize}.motion-gizmo .gizmo-scale-y{left:25%;bottom:-14px;border-radius:4px;cursor:ns-resize}.motion-gizmo .gizmo-skew-x{right:-14px;top:62%;border-radius:50%;background:#62d4ff;cursor:ew-resize}.motion-gizmo .gizmo-skew-y{left:62%;bottom:-14px;border-radius:50%;background:#62d4ff;cursor:ns-resize}.motion-gizmo .gizmo-rotate{left:50%;top:-58px;transform:translateX(-50%);border-radius:50%;background:#ff758d;cursor:grab}.motion-gizmo .gizmo-rotate:after{content:'';position:absolute;left:9px;top:23px;width:3px;height:34px;background:#ffd15d}.motion-gizmo .gizmo-origin{z-index:6;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;border-color:#19120a;background:radial-gradient(circle,#fff 0 18%,#ffbd42 20% 46%,#24202b 48% 62%,#ffbd42 64%);cursor:crosshair}.motion-gizmo .gizmo-origin:after{content:'축';position:absolute;left:31px;top:4px;padding:2px 5px;border-radius:4px;background:#17120ce6;color:#ffe5a5;font:900 11px sans-serif;white-space:nowrap}
     #state-marker{position:absolute;z-index:35;top:24px;left:50%;transform:translateX(-50%);font-size:52px;filter:drop-shadow(0 4px 6px #000);pointer-events:none}
     #state-marker:empty{display:none}
     .lab-exhausted{animation:lab-exhausted 1.1s ease-in-out infinite!important;filter:grayscale(.28) brightness(.82) drop-shadow(0 24px 20px #000b)!important}
@@ -197,6 +199,9 @@
   <script src="../../js/effects/hunt/data/ReleasedMonsterRuntimeIndex.generated.js"></script>
   <script src="../../js/effects/hunt/HuntAtbConfig.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterArchetypeCatalog.js"></script>
+  <script src="../../js/effects/hunt/data/MonsterVisualGeometryOverrides.generated.js"></script>
+  <script src="../../js/effects/hunt/data/MonsterPatternMotionOverrides.generated.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterReactionCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterAnatomyCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterProfiles.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterAnimationCatalog.js"></script>
@@ -208,6 +213,8 @@
   <script src="../../js/effects/hunt/HuntStageAnchors.js"></script>
   <script src="../../js/effects/hunt/HuntMotionPoses.js"></script>
   <script src="../../js/effects/hunt/HuntMotionCompiler.js"></script>
+  <script src="../../js/effects/hunt/data/MonsterProfileKeyframes.generated.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterProfileMotionRuntime.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterGeometryChoreography.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterFacingChoreography.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterAttackAnimator.js"></script>
@@ -237,10 +244,25 @@
     const stateButtons=document.getElementById('state-buttons');
     const targetButtons=document.getElementById('target-buttons');
     let targetMode='auto';
+    let previewScenario=null;
     let currentState='normal';
     let activePatternId='';
     let labAudio=null;
     let pendingFlightTransitionTimer=null;
+    let pendingReactionTimer=null;
+    let pendingReactionBeatTimers=[];
+
+    function installMotionGizmo(){
+      const image=document.getElementById('fight-monster-img'),host=image?.parentElement;if(!image||!host)return;
+      const gizmo=document.createElement('div');gizmo.className='motion-gizmo';gizmo.hidden=true;gizmo.innerHTML='<span class="gizmo-move" title="이동"></span><span class="gizmo-handle gizmo-scale" title="균등 크기"></span><span class="gizmo-handle gizmo-scale-x" title="가로 크기"></span><span class="gizmo-handle gizmo-scale-y" title="세로 크기"></span><span class="gizmo-handle gizmo-skew-x" title="가로 기울기"></span><span class="gizmo-handle gizmo-skew-y" title="세로 기울기"></span><span class="gizmo-handle gizmo-rotate" title="회전"></span><span class="gizmo-handle gizmo-origin" title="회전 중심축"></span>';host.appendChild(gizmo);
+      const parseOrigin=value=>{const parts=String(value||'50% 50%').match(/(-?[\d.]+)%?\s+(-?[\d.]+)%?/);return parts?[Number(parts[1]),Number(parts[2])]:[50,50]};
+      const applyOrigin=origin=>{const [x,y]=parseOrigin(origin);const value=`${x}% ${y}%`;gizmo.style.transformOrigin=value;image.style.transformOrigin=value;const handle=gizmo.querySelector('.gizmo-origin');handle.style.left=`${x}%`;handle.style.top=`${y}%`};
+      const refresh=()=>{const design=previewScenario?.view==='design';gizmo.hidden=!design;gizmo.dataset.beat=previewScenario?.selectedBeatId||'';if(!design)return;const rect=image.getBoundingClientRect(),parentBounds=host.getBoundingClientRect();gizmo.style.left=`${rect.left-parentBounds.left}px`;gizmo.style.top=`${rect.top-parentBounds.top}px`;gizmo.style.width=`${rect.width}px`;gizmo.style.height=`${rect.height}px`;applyOrigin(previewScenario?.editBeat?.origin)};
+      const begin=(event,kind)=>{if(previewScenario?.view!=='design'||!previewScenario.selectedBeatId)return;event.preventDefault();event.stopPropagation();const startX=event.clientX,startY=event.clientY,beat=previewScenario.editBeat||{},bounds=gizmo.getBoundingClientRect(),base={offsetX:Number(beat.offsetX)||0,offsetY:Number(beat.offsetY)||0,rotation:Number(beat.rotation)||0,scaleX:Number(beat.scaleX)||1,scaleY:Number(beat.scaleY)||1,skewX:Number(beat.skewX)||0,skewY:Number(beat.skewY)||0,origin:beat.origin||'50% 50%'},target=event.currentTarget;let lastPatch=null;target.setPointerCapture(event.pointerId);const move=next=>{const dx=next.clientX-startX,dy=next.clientY-startY,patch={};if(kind==='move'){patch.offsetX=Math.round(base.offsetX+dx);patch.offsetY=Math.round(base.offsetY+dy);image.style.translate=`${dx}px ${dy}px`;gizmo.style.translate=`${dx}px ${dy}px`}else if(kind==='scale'){const amount=Math.max(.1,1+(dx+dy)/Math.max(120,bounds.width+bounds.height));patch.scaleX=Number((base.scaleX*amount).toFixed(3));patch.scaleY=Number((base.scaleY*amount).toFixed(3));image.style.scale=amount;gizmo.style.scale=amount}else if(kind==='scale-x'){const amount=Math.max(.1,1+dx/Math.max(80,bounds.width));patch.scaleX=Number((base.scaleX*amount).toFixed(3));image.style.scale=`${amount} 1`;gizmo.style.scale=`${amount} 1`}else if(kind==='scale-y'){const amount=Math.max(.1,1+dy/Math.max(80,bounds.height));patch.scaleY=Number((base.scaleY*amount).toFixed(3));image.style.scale=`1 ${amount}`;gizmo.style.scale=`1 ${amount}`}else if(kind==='rotate'){const [ox,oy]=parseOrigin(base.origin),centerX=bounds.left+bounds.width*ox/100,centerY=bounds.top+bounds.height*oy/100,startAngle=Math.atan2(startY-centerY,startX-centerX),nextAngle=Math.atan2(next.clientY-centerY,next.clientX-centerX),angle=(nextAngle-startAngle)*180/Math.PI;patch.rotation=Math.round(base.rotation+angle);image.style.rotate=`${angle}deg`;gizmo.style.rotate=`${angle}deg`}else if(kind==='skew-x'){patch.skewX=Math.round(base.skewX+dx/3);image.style.setProperty('transform',`skewX(${dx/3}deg)`,'important')}else if(kind==='skew-y'){patch.skewY=Math.round(base.skewY+dy/3);image.style.setProperty('transform',`skewY(${dy/3}deg)`,'important')}else if(kind==='origin'){const x=Math.max(0,Math.min(100,(next.clientX-bounds.left)/Math.max(1,bounds.width)*100)),y=Math.max(0,Math.min(100,(next.clientY-bounds.top)/Math.max(1,bounds.height)*100));patch.origin=`${x.toFixed(1)}% ${y.toFixed(1)}%`;applyOrigin(patch.origin)}lastPatch=patch;previewScenario.editBeat={...(previewScenario.editBeat||{}),...patch};parent.postMessage({type:'bubblechat:pattern-preview-edit',beatId:previewScenario.selectedBeatId,patch,commit:false},'*')};const finish=()=>{target.onpointermove=null;target.onpointerup=null;target.onpointercancel=null;if(lastPatch)parent.postMessage({type:'bubblechat:pattern-preview-edit',beatId:previewScenario.selectedBeatId,patch:{},commit:true},'*')};target.onpointermove=move;target.onpointerup=finish;target.onpointercancel=finish};
+      gizmo.querySelector('.gizmo-move').onpointerdown=event=>begin(event,'move');gizmo.querySelector('.gizmo-scale').onpointerdown=event=>begin(event,'scale');gizmo.querySelector('.gizmo-scale-x').onpointerdown=event=>begin(event,'scale-x');gizmo.querySelector('.gizmo-scale-y').onpointerdown=event=>begin(event,'scale-y');gizmo.querySelector('.gizmo-skew-x').onpointerdown=event=>begin(event,'skew-x');gizmo.querySelector('.gizmo-skew-y').onpointerdown=event=>begin(event,'skew-y');gizmo.querySelector('.gizmo-origin').onpointerdown=event=>begin(event,'origin');gizmo.querySelector('.gizmo-rotate').onpointerdown=event=>begin(event,'rotate');
+      owner.refreshMotionGizmo=refresh;addEventListener('resize',refresh);
+    }
+    installMotionGizmo();
 
     function clearPendingFlightTransition(){
       if(pendingFlightTransitionTimer!==null){
@@ -252,7 +274,8 @@
     function clearStateClasses(){
       const image=document.getElementById('fight-monster-img');
       const stage=image.closest('.hunt-monster-motion-stage');
-      image.classList.remove('enraged','lab-exhausted','monster-airborne','monster-knockdown-anim','stunned_monster','monster-paralyzed','monster-sleeping');
+      image.classList.remove('enraged','lab-exhausted','monster-airborne','monster-knockdown-anim','monster-knockdown-sequence','stunned_monster','monster-paralyzed','monster-sleeping');
+      combat.setMonsterStunHeadMarker?.(false);
       stage.classList.remove('monster-flight-stage-airborne');
     }
     function applyState(state, fromPattern=false){
@@ -267,13 +290,15 @@
       const facing=image.closest('.hunt-monster-facing-layer');
       const marker=document.getElementById('state-marker');
       const spec=stateSpecs.find(entry=>entry[0]===state)||stateSpecs[0];
-      marker.textContent=spec[2];
+      // Stun owns a single anatomy-following head marker. The generic state
+      // badge would duplicate the same emoji at the monster name.
+      marker.textContent=state==='stunned'?'':spec[2];
       if(state==='enraged'){
         image.classList.add('enraged');
       }else if(state==='exhausted')image.classList.add('lab-exhausted');
       else if(state==='airborne'){image.classList.add('monster-airborne');stage.classList.add('monster-flight-stage-airborne')}
-      else if(state==='knockdown')image.classList.add('monster-knockdown-anim');
-      else if(state==='stunned')image.classList.add('stunned_monster');
+      else if(state==='knockdown')combat.triggerMonsterKnockdownAnim();
+      else if(state==='stunned')combat.triggerMonsterKnockdownAnim({kind:'stun'});
       else if(state==='paralyzed')image.classList.add('monster-paralyzed');
       else if(state==='sleeping')image.classList.add('monster-sleeping');
       stateButtons.querySelectorAll('.state-btn').forEach(button=>button.classList.toggle('is-active',button.dataset.state===state));
@@ -395,14 +420,21 @@
         button.className='target-btn';button.dataset.target=String(hunter.index);button.textContent=`${hunter.index+1}번`;
         button.style.setProperty('--target-color',slotColors[hunter.index]);return button;
       });
-      targetButtons.replaceChildren(auto,...numbered);updateTargetSelection([]);
+      const pairs=[[0,1],[1,2],[2,3]].map(indices=>{
+        const button=document.createElement('button');
+        button.className='target-btn pair-target-btn';button.dataset.target=`pair:${indices.join(',')}`;
+        button.textContent=`${indices[0]+1}${indices[1]+1} 사이`;
+        button.style.setProperty('--target-color',slotColors[indices[0]]);return button;
+      });
+      targetButtons.replaceChildren(auto,...numbered,...pairs);updateTargetSelection([]);
     }
     function updateTargetSelection(indices, primary=null){
       const selected=new Set(indices);
       document.querySelectorAll('.game-hunt-weapon-card').forEach((card,index)=>card.classList.toggle('is-targeted',selected.has(index)));
       targetButtons.querySelectorAll('.target-btn').forEach(button=>{
         const index=Number(button.dataset.target);
-        const active=button.dataset.target==='auto'?targetMode==='auto':selected.has(index);
+        const active=button.dataset.target==='auto'?targetMode==='auto'
+          :button.dataset.target.startsWith('pair:')?button.dataset.target===targetMode:selected.has(index);
         button.classList.toggle('is-selected',active);
         if(button.dataset.target==='auto'){
           const linked=Number.isInteger(primary)?primary:null;
@@ -417,8 +449,12 @@
       return hunters.slice(start,start+take);
     }
     function resolvePreviewTargets(pattern){
-      const primary=targetMode==='auto'?Math.floor(Math.random()*hunters.length):Number(targetMode);
-      const random=()=>Math.min(.999,(primary+.25)/hunters.length);
+      const selectedPair=targetMode.startsWith('pair:')
+        ?targetMode.slice(5).split(',').map(Number).filter(Number.isInteger):null;
+      const primary=selectedPair?.length===2?selectedPair[0]
+        :targetMode==='auto'?Math.floor(Math.random()*hunters.length):Number(targetMode);
+      const random=()=>selectedPair?.length===2&&primary>0&&selectedPair[1]>primary
+        ?.999:Math.min(.999,(primary+.25)/hunters.length);
       const count=Math.max(1,Math.min(4,Number(pattern.maxTargets||pattern.minTargets||1)));
       // 프로덕션(HuntMonsterTurnExecutor)과 같은 순서로 패스 수를 정한다.
       // 예전에는 passCountByState만 보고 나머지는 2로 떨어뜨려, targeting.passCount가
@@ -428,40 +464,144 @@
         ||pattern.targeting?.passCount
         ||pattern.impactTimelineByState?.[owner.monsterState]?.length
         ||pattern.impactTimeline?.length||2);
-      const resolved=HuntMonsterActionPolicy.resolveTargeting({
-        targetable:hunters,count,passCount,random,
-        mode:pattern.targeting?.mode||'',defaultTargets:laneFromPrimary(primary,count),primaryIndex:primary
+      const resolved=HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern,monsterState:owner.monsterState,targetable:hunters,count,passCount,random,
+        mode:pattern.targeting?.mode||'',defaultTargets:laneFromPrimary(primary,count),
+        distinctPasses:pattern.targeting?.distinctPasses===true,
+        primaryIndex:previewScenario?.view==='design'&&Number.isInteger(previewScenario.primaryTargetIndex)
+          ?previewScenario.primaryTargetIndex:primary,
+        forcedTargetIndices:previewScenario?.view==='design'?previewScenario.forcedTargetIndices:null,
+        forcedImpactTargets:previewScenario?.view==='design'?previewScenario.forcedImpactTargets:null
       });
       Object.assign(pattern,resolved.runtime);
-      const sequence=pattern.runtimeImpactTargetSequence||[];
-      const finalPrimary=sequence.flat().filter(Number.isInteger).at(-1)??primary;
-      const timeline=HuntMonsterActionPolicy.impactTimeline(pattern,owner.monsterState).map((event,index)=>({
-        ...event,
-        targetIndices:Array.isArray(event.targetIndices)&&event.targetIndices.length?event.targetIndices
-          :event.targetMode==='repeat-previous'?[finalPrimary]
-            :Array.isArray(sequence[index])&&sequence[index].length?sequence[index]
-              :resolved.targets.map(target=>target.index)
-      }));
+      const finalPrimary=resolved.primaryTargetIndex??primary;
+      // Keep the authored primary target separate from the union of every
+      // judgment target.  A primary hit plus an all-hunter tremor otherwise
+      // produces [0,1,2,3], which made the animator aim at hunter 1.
+      pattern.runtimePrimaryTargetIndex=finalPrimary;
+      const timeline=resolved.impactTimeline;
       pattern.runtimeResolvedImpactTimeline=timeline;
       pattern.runtimeImpactPending=true;
-      const active=[...new Set(timeline.flatMap(event=>event.targetIndices||[]))];
-      return {targets:active.map(index=>({index,result:'pending'})),indices:active,primary:finalPrimary};
+      return {targets:resolved.targetIndices.map(index=>({index,result:'pending'})),indices:resolved.targetIndices,primary:finalPrimary};
     }
     function patternEmoji(pattern){
       const tags=new Set(pattern.tags||[]);
       return tags.has('fire')?'🔥':tags.has('ice')?'❄️':tags.has('water')?'💧':tags.has('thunder')?'⚡':tags.has('dragon')?'🐉':tags.has('poison')?'☠️':'💥';
     }
+    function clearPendingReaction(){
+      if(pendingReactionTimer!==null){clearTimeout(pendingReactionTimer);pendingReactionTimer=null}
+      pendingReactionBeatTimers.forEach(timer=>clearTimeout(timer));pendingReactionBeatTimers=[];
+      combat.triggerEnvironmentEffect?.('trap-release');
+    }
+    function authoredPattern(patternId){
+      const installed=HUNT_MONSTER_PATTERN_OVERRIDES[owner.selectedMonster.id]||[];
+      const direct=installed.find(pattern=>pattern.id===patternId);
+      if(direct)return direct;
+      for(const parentPattern of installed){
+        const followUp=parentPattern.followUp;
+        if(!followUp)continue;
+        const id=followUp.id||(parentPattern.id.split('.')[0]+'.'+followUp.idSuffix);
+        if(id!==patternId)continue;
+        return {...followUp,id,name:followUp.name||id,type:followUp.type||'charge',
+          damageRatio:followUp.damageRatio||0,tags:[...(followUp.tags||[])],
+          motion:Array.isArray(followUp.motion)?followUp.motion.map(beat=>({...beat})):null};
+      }
+      return null;
+    }
+    function playRuntimeReaction(pattern){
+      if(pattern?.type!=='reaction'&&!String(pattern?.id||'').startsWith('__reaction.')
+        &&!String(pattern?.id||'').startsWith('__part.'))return null;
+      const durationTicks=Math.max(1,(pattern.motion||[]).reduce((sum,beat)=>sum+Math.max(1,Number(beat.ticks)||1),0));
+      const durationMs=durationTicks*100;
+      // Scrubbing must use the same BEAT graph as ordinary attacks so edited
+      // position/rotation values are visible at the selected tick.  Playback
+      // below keeps the runtime reaction owner for state markers and audio.
+      if(pattern.runtimePreviewScrub)return null;
+      clearPendingReaction();
+      animator.clearMonsterAnimations?.('reaction-preview');
+      const kind=pattern.reactionKind
+        ||(pattern.id.startsWith('__part.')?'part-break':pattern.id.replace('__reaction.',''));
+      const part=pattern.reactionPart||pattern.id.replace('__part.','');
+      if(kind==='part-break-group'){
+        const visualType=pattern.reactionSize==='large'?'tail_sever_roll':'part_flinch';
+        // Grouped reactions still need a concrete anatomy part so the runtime
+        // can resolve and split the same material icon used by a real break.
+        // Prefer a severable tail for [large], and an ordinary breakable part
+        // for [small], while keeping safe catalog fallbacks for sparse profiles.
+        const representativePart=pattern.reactionSize==='large'
+          ?(partState.find(entry=>entry.severable||/(^|[-_])tail($|[-_])/.test(String(entry.kind||'')))?.kind||'tail')
+          :(partState.find(entry=>(entry.breakable||entry.severable)
+              &&!entry.severable&&!/(^|[-_])tail($|[-_])/.test(String(entry.kind||'')))?.kind
+            ||partState.find(entry=>entry.breakable||entry.severable)?.kind
+            ||'head');
+        combat.triggerMonsterPartBreakReaction(visualType,durationTicks,representativePart);
+      }else if(kind==='part-break'){
+        const reaction=HuntMonsterAnatomyCatalog.breakReaction(owner.selectedMonster?.id,part,currentState==='airborne');
+        combat.triggerMonsterPartBreakReaction(reaction.visualType,reaction.durationTicks,part);
+      }else if(kind==='flinch'){
+        combat.triggerMonsterPartBreakReaction('part_flinch',durationTicks);
+      }else if(kind==='tail-sever'){
+        // Tail sever is an authored reaction row, not a fresh part-break event.
+        // Play its current BEAT graph directly so editor timing/transform edits
+        // are previewed without also spawning the independent split-part layer.
+        const monsterImg=document.getElementById('fight-monster-img');
+        if(monsterImg)combat.monsterAttackAnimator?.playBeatMotion(
+          monsterImg,pattern,pattern.id,null,[]);
+      }else if(kind==='knockdown'){
+        combat.triggerMonsterKnockdownAnim({kind:'knockdown',motion:pattern.motion});
+      }else if(kind==='shocktrap'||kind==='trap'||kind==='pitfall'){
+        combat.triggerEnvironmentEffect(kind==='shocktrap'?'shocktrap':'pitfall',null,
+          {retainedAtb:.5,useCount:1});
+        if(kind!=='shocktrap'){
+          let elapsedTicks=0;
+          for(const beat of pattern.motion||[]){
+            if(String(beat.beat||'').startsWith('held-')){
+              pendingReactionBeatTimers.push(setTimeout(()=>{
+                combat.triggerEnvironmentEffect?.('trap-struggle',null,
+                  {kind:'pitfall',struggleIndex:Number(String(beat.beat).split('-')[1])||1});
+              },elapsedTicks*100));
+            }else if(beat.beat==='release'){
+              pendingReactionBeatTimers.push(setTimeout(()=>{
+                combat.triggerEnvironmentEffect?.('trap-release',null,{kind:'pitfall',useCount:1});
+              },elapsedTicks*100));
+            }
+            elapsedTicks+=Math.max(1,Number(beat.ticks)||1);
+          }
+        }
+      }else if(kind==='sleeping'){
+        applyState(kind,true);
+        combat.triggerMonsterSleepAnim({motion:pattern.motion});
+      }else if(['stunned','paralyzed'].includes(kind)){
+        applyState(kind,true);
+      }else if(kind==='death'){
+        combat.triggerMonsterPartBreakReaction('part_break_topple',durationTicks);
+      }
+      if(!pattern.runtimePreviewMuteAudio)labAudio?.playPattern(pattern,[]);
+      pendingReactionTimer=setTimeout(()=>{
+        pendingReactionTimer=null;
+        if(kind!=='pitfall'&&kind!=='trap'&&kind!=='shocktrap')
+          combat.triggerEnvironmentEffect?.('trap-release');
+        applyState('normal',true);
+      },durationMs);
+      return {ok:true,durationMs,patternId:pattern.id};
+    }
     function playPattern(patternId, previewPattern=null){
       clearPendingFlightTransition();
-      const authored=(HUNT_MONSTER_PATTERN_OVERRIDES[owner.selectedMonster.id]||[]).find(pattern=>pattern.id===patternId);
+      const authored=authoredPattern(patternId);
       const source=previewPattern?{...(authored||{}),...previewPattern,
         motion:previewPattern.motion||authored?.motion,
         targeting:previewPattern.targeting||authored?.targeting}:authored;
-      if(!source)return;
+      if(!source)return {ok:false,reason:'pattern-not-found',durationMs:0};
       const pattern={...source,tags:[...(source.tags||[])],targeting:source.targeting?{...source.targeting}:null};
+      const reactionPlayback=playRuntimeReaction(pattern);
+      if(reactionPlayback)return reactionPlayback;
       const required=pattern.requiredState||(pattern.tags.includes('flight-only')?'airborne':null);
       if(required)applyState(required,true);else applyState(currentState,true);
       const selection=resolvePreviewTargets(pattern);
+      if(!selection.targets.length){
+        const fallback=Number.isInteger(selection.primary)?selection.primary:0;
+        selection.primary=fallback;selection.indices=[fallback];selection.targets=[{index:fallback,result:'pending'}];
+      }
       updateTargetSelection(selection.indices,selection.primary);
       activePatternId=pattern.id;
       patternButtons.querySelectorAll('.pattern-btn').forEach(button=>{
@@ -470,7 +610,9 @@
       });
       document.documentElement.style.setProperty('--target',slotColors[selection.primary]);
       document.getElementById('run-readout').textContent=`${pattern.name} · ${targetMode==='auto'?'자동 ':''}${selection.indices.map(index=>index+1).join('·')}번`;
-      labAudio?.playPattern(pattern,pattern.runtimeResolvedImpactTimeline||[]);
+      if(!pattern.runtimePreviewScrub&&!pattern.runtimePreviewMuteAudio){
+        labAudio?.playPattern(pattern,pattern.runtimeResolvedImpactTimeline||[]);
+      }
       animator.triggerMonsterAttack(pattern.type,patternEmoji(pattern),selection.targets,pattern.name,pattern);
       if(pattern.flightTransition==='takeoff'){
         pendingFlightTransitionTimer=setTimeout(()=>{
@@ -483,6 +625,21 @@
           applyState('normal',true);
         },Math.max(1,Number(pattern.animationDurationMs||1800)));
       }
+      return {ok:true,durationMs:Math.max(100,Number(pattern.animationDurationMs
+        ||pattern.movement?.ticks*100||1800)),patternId:pattern.id};
+    }
+    function resetPatternPreviewPose(){
+      clearPendingFlightTransition();
+      clearPendingReaction();
+      combat.clearMonsterAnimations('pattern-selection');
+      const image=document.getElementById('fight-monster-img');
+      const gizmo=document.querySelector('.motion-gizmo');
+      for(const element of [image,gizmo]){
+        if(!element?.style)continue;
+        for(const property of ['translate','rotate','scale','transform','transform-origin'])
+          element.style.removeProperty(property);
+      }
+      activePatternId='';
     }
     function showMonster(id, previewMonster=null){
       labAudio?.cancelPatternAudio();
@@ -575,21 +732,111 @@
       if(slot&&!slot.disabled)togglePart(slot.dataset.partKind);
     });
     targetButtons.addEventListener('click',event=>{const button=event.target.closest('.target-btn');if(!button)return;targetMode=button.dataset.target;updateTargetSelection([],null);if(activePatternId)playPattern(activePatternId)});
+    const ANATOMY_LABELS={head:'머리',mouth:'입',torso:'몸통',tail:'꼬리','left-wing':'좌익','right-wing':'우익',
+      'left-front-leg':'좌앞발','right-front-leg':'우앞발','left-foreleg':'좌앞발','right-foreleg':'우앞발',foot:'앞발'};
+    let anatomyGuideEnabled=false,anatomyGuideFrame=0,anatomyDraft=null;
+    const cloneGeometry=value=>value?JSON.parse(JSON.stringify(value)):null;
+    function syncAnatomyTransform(){
+      cancelAnimationFrame(anatomyGuideFrame);
+      const svg=document.querySelector('.monster-anatomy-guide'),image=document.getElementById('fight-monster-img');
+      if(!anatomyGuideEnabled||!svg||!image)return;
+      const style=getComputedStyle(image);
+      Object.assign(svg.style,{left:`${image.offsetLeft}px`,top:`${image.offsetTop}px`,width:`${image.offsetWidth}px`,height:`${image.offsetHeight}px`,transform:style.transform,transformOrigin:style.transformOrigin,translate:style.translate,rotate:style.rotate,scale:style.scale,opacity:style.opacity});
+      anatomyGuideFrame=requestAnimationFrame(syncAnatomyTransform);
+    }
+    function installAnatomyDrag(group,kind,part,svg){
+      group.onpointerdown=event=>{
+        event.preventDefault();event.stopPropagation();group.setPointerCapture(event.pointerId);group.classList.add('is-dragging');
+        const startX=event.clientX,startY=event.clientY,base=cloneGeometry(part),rect=svg.getBoundingClientRect();
+        const move=next=>{const dx=(next.clientX-startX)/Math.max(1,rect.width),dy=(next.clientY-startY)/Math.max(1,rect.height),clamp=value=>Math.max(0,Math.min(1,value));if(Array.isArray(base.path))part.path=base.path.map(point=>({x:clamp(point.x+dx),y:clamp(point.y+dy)}));else{part.x=clamp(base.x+dx);part.y=clamp(base.y+dy)}group.setAttribute('transform',`translate(${dx*512} ${dy*512})`)};
+        const finish=()=>{group.onpointermove=null;group.onpointerup=null;group.onpointercancel=null;group.classList.remove('is-dragging');renderAnatomyGuide();parent.postMessage({type:'bubblechat:monster-anatomy-edit',monsterId:owner.selectedMonster?.id||'',geometry:anatomyDraft},'*')};
+        group.onpointermove=move;group.onpointerup=finish;group.onpointercancel=finish;
+      };
+    }
+    function renderAnatomyGuide(){
+      cancelAnimationFrame(anatomyGuideFrame);document.querySelector('.monster-anatomy-guide')?.remove();
+      if(!anatomyGuideEnabled)return;
+      const image=document.getElementById('fight-monster-img'),facingLayer=image?.closest('.hunt-monster-facing-layer');
+      const source=HuntMonsterAnatomyCatalog.visualGeometry(owner.selectedMonster);
+      if(!image||!facingLayer||!source)return;
+      if(!anatomyDraft||anatomyDraft.monsterId!==(owner.selectedMonster?.id||''))anatomyDraft={...cloneGeometry(source),monsterId:owner.selectedMonster?.id||''};
+      const geometry=anatomyDraft,svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.classList.add('monster-anatomy-guide');svg.setAttribute('viewBox','0 0 512 512');
+      svg.innerHTML='<defs><marker id="part-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5de1ff"/></marker></defs>';
+      const torso=geometry.parts.torso||{x:.5,y:.5},pointOf=point=>({x:point.x*512,y:point.y*512});
+      for(const [kind,part] of Object.entries(geometry.parts||{})){
+        const group=document.createElementNS(svg.namespaceURI,'g');group.setAttribute('class','part-handle');group.dataset.partKind=kind;
+        const rawPoints=Array.isArray(part.path)&&part.path.length?part.path:[part],points=rawPoints.map(pointOf),point=points[points.length-1],center=pointOf(torso);
+        if(points.length>1){const path=document.createElementNS(svg.namespaceURI,'polyline');path.setAttribute('class','part-path');path.setAttribute('points',points.map(item=>`${item.x},${item.y}`).join(' '));group.appendChild(path);const hit=path.cloneNode();hit.setAttribute('class','part-hit');group.appendChild(hit)}
+        let dx=point.x-center.x,dy=point.y-center.y,length=Math.hypot(dx,dy)||1;if(kind==='head'&&geometry.baseFacing!=='front'){dx=geometry.baseFacing==='left'?-1:1;dy=0;length=1}
+        const line=document.createElementNS(svg.namespaceURI,'line');line.setAttribute('class','part-line');line.setAttribute('x1',point.x);line.setAttribute('y1',point.y);line.setAttribute('x2',point.x+dx/length*48);line.setAttribute('y2',point.y+dy/length*48);line.setAttribute('marker-end','url(#part-arrow)');group.appendChild(line);
+        const dot=document.createElementNS(svg.namespaceURI,'circle');dot.setAttribute('class','part-dot');dot.setAttribute('cx',point.x);dot.setAttribute('cy',point.y);dot.setAttribute('r','10');group.appendChild(dot);
+        const label=document.createElementNS(svg.namespaceURI,'text');label.setAttribute('class','part-label');label.setAttribute('x',point.x+12);label.setAttribute('y',point.y-13);label.textContent=ANATOMY_LABELS[kind]||kind;group.appendChild(label);
+        installAnatomyDrag(group,kind,part,svg);svg.appendChild(group);
+      }
+      facingLayer.appendChild(svg);syncAnatomyTransform();
+    }
     addEventListener('message',event=>{
       if(event.source!==parent||!/^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(event.origin))return;
       const message=event.data||{};
+      if(message.type==='bubblechat:pattern-anatomy'){
+        anatomyGuideEnabled=Boolean(message.enabled);renderAnatomyGuide();return;
+      }
+      if(message.type==='bubblechat:pattern-preview-settings'){
+        previewScenario=message.scenario||previewScenario;
+        if(message.target!=null)targetMode=String(message.target);
+        updateTargetSelection(previewScenario?.forcedTargetIndices||[],previewScenario?.primaryTargetIndex??null);
+        if(message.state&&message.state!==currentState)applyState(message.state,true);
+        owner.refreshMotionGizmo?.();
+        return;
+      }
       if(message.type!=='bubblechat:pattern-preview'||!message.monsterId||!message.pattern?.id)return;
+      previewScenario=message.scenario||null;
+      if(message.resetPreviewPose)resetPatternPreviewPose();
       if(owner.selectedMonster?.id!==message.monsterId){monsterSelect.value=message.monsterId;showMonster(message.monsterId,message.monster)}
       if(message.target!=null){targetMode=String(message.target);updateTargetSelection([],null)}
       if(message.state)applyState(message.state,true);
-      playPattern(message.pattern.id,message.pattern);
+      if(message.resetOnly){
+        requestAnimationFrame(()=>owner.refreshMotionGizmo?.());
+        if(anatomyGuideEnabled)requestAnimationFrame(renderAnatomyGuide);
+        return;
+      }
+      let playback;
+      try{
+        playback=playPattern(message.pattern.id,message.pattern);
+      }catch(error){
+        playback={ok:false,reason:error?.message||String(error),durationMs:0};
+        console.error('[pattern-preview] playback failed',message.pattern.id,error);
+      }
+      if(message.playbackToken){
+        document.documentElement.dataset.previewPlaybackToken=String(message.playbackToken);
+        parent.postMessage({type:'bubblechat:pattern-preview-playback',
+          playbackToken:message.playbackToken,...playback},event.origin);
+      }
+      requestAnimationFrame(()=>owner.refreshMotionGizmo?.());
+      if(anatomyGuideEnabled)requestAnimationFrame(renderAnatomyGuide);
     });
     addEventListener('message',event=>{
       if(event.source!==parent||!/^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(event.origin))return;
       const message=event.data||{};
       if(message.type==='bubblechat:pattern-preview-seek')animator.seekBeatMotion(message.progress);
+      if(message.type==='bubblechat:pattern-preview-transport'){
+        const controller=animator.activeBeatMotionPreview;
+        if(message.action==='pause')controller?.animations?.forEach(animation=>animation.pause());
+        if(message.action==='resume')controller?.animations?.forEach(animation=>animation.play());
+        if(message.action==='pause')controller?.cssTracks?.forEach(track=>track.element.style.setProperty('animation-play-state','paused','important'));
+        if(message.action==='resume')controller?.cssTracks?.forEach(track=>track.element.style.setProperty('animation-play-state','running','important'));
+        if(message.action==='stop')animator.cancelBeatMotionPreview(controller);
+      }
     });
-    if(parent!==window)parent.postMessage({type:'bubblechat:pattern-preview-ready'},'http://127.0.0.1:17930');
+    if(parent!==window){
+      let reviewOrigin='http://127.0.0.1:17930';
+      try{
+        const referrerOrigin=new URL(document.referrer).origin;
+        if(/^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(referrerOrigin))reviewOrigin=referrerOrigin;
+      }catch(_){/* direct fixture fallback */}
+      parent.postMessage({type:'bubblechat:pattern-preview-ready'},reviewOrigin);
+    }
     addEventListener('load',initialize);
   </script>
 </body>

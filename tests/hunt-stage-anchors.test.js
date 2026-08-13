@@ -70,6 +70,23 @@ assert.deepStrictEqual(sequentialAnchors.resolve('pass:2.top'), anchors.resolve(
 assert.throws(() => sequentialAnchors.resolve('pass:4'), HuntStageAnchorError,
     '존재하지 않는 순차 표적은 주 표적으로 조용히 대체하면 안 된다');
 
+const pairAnchors = new HuntStageAnchors({
+    monsterRect: rect(660, 100, 380, 380),
+    cardRect: rect(0, 0, 1700, 900),
+    stageWidth: 1700,
+    hunters: anchors.hunters,
+    primaryTarget: 2,
+    targetGroup: [2, 3]
+});
+const pairBounds = { minX: -5000, maxX: 5000, minY: -5000, maxY: 5000 };
+const pairLeft = pairAnchors.resolve('pair:left', { bounds: pairBounds });
+const pairRight = pairAnchors.resolve('pair:right', { bounds: pairBounds });
+const pairCenter = pairAnchors.resolve('pair:center', { bounds: pairBounds });
+assert.strictEqual(pairCenter.x, Math.round((pairLeft.x + pairRight.x) / 2),
+    'pair:center must remain midway between the locked adjacent hunters');
+assert.strictEqual(pairAnchors.resolve('above:pair:center 220', { bounds: pairBounds }).x, pairCenter.x,
+    'pair:center must compose with offsets without becoming a primary target');
+
 // ---- between ----
 
 // 1번(260)과 2번(660)의 중점 460 - 850 = -390
@@ -135,6 +152,12 @@ assert.ok(out.x < -anchors.maxX,
     '화면 밖 앵커는 이동 한계를 넘어야 한다 (나가라고 지시한 것이다)');
 assert.strictEqual(anchors.resolve('offscreen:right').x, -out.x, '좌우가 대칭이다');
 
+const through = sequentialAnchors.resolve('through:pass:1 120');
+const throughTarget = sequentialAnchors.resolve('pass:1', { bounds: WIDE });
+assert.ok(through.y > throughTarget.y, '관통 돌진 종점은 타겟보다 화면 아래에 있어야 한다');
+assert.ok(Math.abs((through.x / through.y) - (throughTarget.x / throughTarget.y)) < 0.001,
+    '관통 종점은 홈→타겟 직선과 같은 기울기를 유지해야 한다');
+
 // ---- 클램프는 해석기만 한다 ----
 
 const contact = anchors.clamp({ x: 5000, y: 5000 }, 'contact');
@@ -184,6 +207,16 @@ assert.deepStrictEqual(targeted.resolve('target.top'), targeted.resolve('hunter:
     '콜론 없이 붙은 .edge도 인자로 갈려야 한다');
 assert.deepStrictEqual(targeted.resolve('above:target 150'), targeted.resolve('above:hunter:3 150'),
     'target은 연산자 안에서도 쓸 수 있다');
+assert.ok(targeted.resolve('flank:target 180', { bounds: WIDE }).x
+    < targeted.resolve('target', { bounds: WIDE }).x,
+    'a right-side target uses its arena-center flank');
+const leftTargeted = new HuntStageAnchors({
+    monsterRect: rect(660, 100, 380, 380), cardRect: rect(0, 0, 1700, 900),
+    stageWidth: 1700, hunters: anchors.hunters, primaryTarget: 1
+});
+assert.ok(leftTargeted.resolve('flank:target 180', { bounds: WIDE }).x
+    > leftTargeted.resolve('target', { bounds: WIDE }).x,
+    'a left-side target uses its arena-center flank');
 assert.throws(() => anchors.resolve('target'), HuntStageAnchorError,
     '주 표적이 없으면 조용히 원점이 아니라 예외다');
 

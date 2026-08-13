@@ -79,12 +79,58 @@ for (const pattern of patterns) {
 
 // 噛みつき「前方に飛びかかり」— 앞으로 뛰어든다. 측면으로 돌지 않는다.
 const bite = byId('barioth.bite');
-const biteApproach = bite.motion.find(beat => beat.beat === 'leap-in');
-assert.match(biteApproach.to, /^toward:target/,
-    '물어뜯기는 표적 정면으로 뛰어든다 (측면 우회가 아니다)');
+assert.deepStrictEqual(bite.motion.map(beat => beat.beat), [
+    'bite-load', 'leaping-bite', 'bite-impact', 'bite-recoil', 'bite-return'
+], 'bite owns a distinct fast forward leap instead of reusing the shoulder-check flank choreography');
+assert.strictEqual(bite.motion.reduce((sum, beat) => sum + beat.ticks, 0), 10,
+    'leaping bite completes in one second');
+const biteLunge = bite.motion.find(beat => beat.beat === 'leaping-bite');
+assert.strictEqual(biteLunge.to, 'toward:target 112%',
+    'jump and mouth extension travel through the target in the same beat');
+assert.strictEqual(biteLunge.align, 'part:mouth');
+assert.ok(biteLunge.scaleX > 1 && biteLunge.scaleY < 1,
+    'the mouth extends while the monster is airborne');
+const biteImpact = bite.motion.find(beat => beat.hit);
+assert.strictEqual(biteImpact.beat, 'bite-impact');
+assert.strictEqual(biteImpact.scaleY, .78,
+    'the impact compresses the jaw vertically for a visible snap');
+assert.ok(bite.tags.includes('butt-stumble'),
+    'Barioth bite inflicts the authored butt-stumble reaction');
+assert.strictEqual(bite.motion.at(-1).rotation, 0,
+    'the quick return restores the original upright image');
 
 // 尻尾「一歩後退した後」— 먼저 물러난다. toward의 음수 비율이 곧 물러남이다.
+const shoulder = byId('barioth.shoulder_check');
+assert.deepStrictEqual(shoulder.motion.map(beat => beat.beat), [
+    'spring-load', 'flank-hop', 'shoulder-set',
+    'lateral-slam', 'shoulder-impact', 'slow-return'
+], 'shoulder check owns a spring, flank landing, lateral hit, and slow recovery');
+assert.deepStrictEqual(shoulder.motion.map(beat => beat.label), [
+    '도약 압축', '측면 도약', '어깨 들이밀기',
+    '횡이동 충돌', '철산고 충돌', '느린 자세 복귀'
+], 'the editor exposes the authored shoulder-check phases instead of legacy turn-side names');
+assert.strictEqual(shoulder.motion[1].to, 'flank:target 210',
+    'the shoulder check springs directly to the hunter flank');
+assert.strictEqual(shoulder.motion.find(beat => beat.beat === 'lateral-slam').align, 'part:torso',
+    'the shoulder check aligns its torso, not its head, to the hunter');
+assert.strictEqual(shoulder.motion.find(beat => beat.beat === 'lateral-slam').rotationToward, 30,
+    'the upper body tilts into the lateral impact direction');
+assert.strictEqual(shoulder.motion.find(beat => beat.hit).beat, 'shoulder-impact',
+    'damage happens only after the lateral drive reaches the hunter');
+assert.strictEqual(shoulder.motion.at(-1).beat, 'slow-return');
+assert.strictEqual(shoulder.motion.at(-1).rotation, 0,
+    'the return eases the image back upright');
+assert.ok(!shoulder.motion.some(beat => beat.beat === 'skid'),
+    'normal shoulder check has no skid; broken forelegs own that reaction');
+
+const spinClaw = byId('barioth.spin_claw');
 const tail = byId('barioth.tail_sweep');
+assert.deepStrictEqual(spinClaw.motion, tail.motion,
+    'spin claw temporarily reuses the reviewed tail-sweep choreography exactly');
+assert.deepStrictEqual(spinClaw.impactTimeline, tail.impactTimeline,
+    'the copied choreography keeps both impact frames synchronized');
+assert.strictEqual(spinClaw.movement.ticks, tail.movement.ticks,
+    'the copied choreography keeps the same total duration');
 const stepBack = tail.motion[0];
 assert.match(stepBack.to, /^toward:target -/,
     '꼬리 휩쓸기는 먼저 한 걸음 물러나야 한다');

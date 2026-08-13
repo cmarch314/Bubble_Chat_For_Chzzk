@@ -2,9 +2,19 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const HuntTrapConfig = require('../js/effects/hunt/HuntTrapConfig.js');
+
+assert.deepStrictEqual([1, 2, 3, 4].map(useCount => HuntTrapConfig.struggleCount(useCount)),
+    [6, 3, 1, 0], 'pitfall resistance must reduce the authored struggle count');
+assert.strictEqual(HuntTrapConfig.STRUGGLE_TICKS, 12,
+    'each pitfall escape attempt must have a full 1.2 second authored cycle');
+assert.deepStrictEqual(HuntTrapConfig.struggleSchedule(40, 1), [6, 18, 30, 42, 54, 66],
+    'the first pitfall must run six non-overlapping escape attempts after entry');
+assert.deepStrictEqual(HuntTrapConfig.struggleSchedule(14, 4), [],
+    'the fourth pitfall must retain entry and escape without a struggle pulse');
 
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntEngine.js');
-const context = vm.createContext({ console, window: {}, setTimeout });
+const context = vm.createContext({ console, window: {}, setTimeout, HuntTrapConfig });
 const atbConfigPath = path.resolve(__dirname, '../js/effects/hunt/HuntAtbConfig.js');
 const rulesPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterRules.js');
 const actionStatePath = path.resolve(__dirname, '../js/effects/hunt/HuntActionStateMachine.js');
@@ -155,11 +165,16 @@ assert.strictEqual(vm.runInContext("HuntHunterTurnExecutor.applyGatherReward(glo
 assert.strictEqual(vm.runInContext("globalThis.__thunderHunter.shockTraps", context), 1, 'gathered Thunderbugs must craft one usable shock trap');
 assert.deepStrictEqual([
     engine.consumeTrapDuration(40), engine.consumeTrapDuration(40), engine.consumeTrapDuration(40), engine.consumeTrapDuration(40)
-], [40, 28, 18, 10], 'repeated traps must rapidly shorten as monster resistance accumulates');
+], [86, 50, 26, 14], 'repeated traps must shorten by removing full struggle cycles while preserving entry and escape');
 engine.monsterTrapUseCount = 0;
 engine.monsterAtb = -80;
-const firstTrap = engine.beginMonsterTrapControl('shocktrap', 40);
-assert.strictEqual(firstTrap.durationTicks, 40);
+const firstTrap = engine.beginMonsterTrapControl('trap', 40);
+assert.strictEqual(firstTrap.durationTicks, 86,
+    'the first pitfall must reserve six complete 1.2 second struggles plus entry and escape');
+assert.strictEqual(engine.activeTrapControl.kind, 'pitfall',
+    'the generic live-hunt trap item must deploy the default pitfall without save-key churn');
+assert.strictEqual(HuntTrapConfig.normalizeKind('shocktrap'), 'shocktrap',
+    'an explicit paralysis trap must remain a distinct future item kind');
 assert.strictEqual(engine.monsterAtb, 50,
     'first trap entry must replace action debt with a fixed half gauge');
 assert.strictEqual(engine.activeTrapControl.retainedAtb, 50,

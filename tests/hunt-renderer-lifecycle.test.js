@@ -56,7 +56,7 @@ assert.deepStrictEqual(Array.from(renderer.lobbyTimeouts), []);
     };
     renderer.clearCombatTransientVisuals();
     assert.deepStrictEqual(removedTransient, ['cart', 'emotion', 'stun']);
-    assert.match(transientSelector, /\.game-hunt-cart-container/);
+    assert.match(transientSelector, /\.hunter-cart-sequence-cart/);
     assert.match(transientSelector, /\.victory-emoji-bubble/);
     assert.match(transientSelector, /\.hunter-stun-orbit/);
 }

@@ -1,0 +1,809 @@
+﻿js/effects/HuntEffect.js:1083:                    this.renderer.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
+js/effects/HuntEffect.js:1089:                    this.renderer.combatAnimator.triggerMonsterBurrowPhase(phase, targetIndex, durationMs);
+js/effects/HuntEffect.js:1091:                onResetMonsterMotion: reason => {
+js/effects/HuntEffect.js:1121:                    if (this.engine?.pendingMonsterAction
+js/effects/HuntEffect.js:1130:                    if (this.engine?.pendingMonsterAction
+js/effects/HuntEffect.js:1201:            engine.pendingMonsterAction = null;
+styles/hunt-runtime.css:101:@keyframes monster-idle {
+styles/hunt-runtime.css:246:@keyframes log-fade-in {
+styles/hunt-runtime.css:331:@keyframes enraged-glow {
+styles/hunt-runtime.css:381:@keyframes hunt-valstrax-star { to { transform: scale(2.4); opacity: .45; } }
+styles/hunt-runtime.css:393:@keyframes hunt-valstrax-impact-burst {
+styles/hunt-runtime.css:438:@keyframes hunt-pending-trap-pulse { to { opacity:1; filter:drop-shadow(0 10px 7px #000) drop-shadow(0 0 13px #fff); } }
+styles/hunt-runtime.css:439:@keyframes hunt-triggered-web { to { transform:translateX(-50%) scaleY(.46) scaleX(1.03); filter:brightness(1.45); } }
+styles/hunt-runtime.css:445:@keyframes hunt-bomb-place { from{transform:translateX(-50%) translateY(-70px) scale(.45);opacity:0} to{transform:translateX(-50%) scale(1);opacity:1} }
+styles/hunt-runtime.css:446:@keyframes hunt-bomb-burst { 0%{opacity:0;transform:scale(.12)} 12%{opacity:1;transform:scale(1.35)} 45%{opacity:.95;transform:scale(1)} 100%{opacity:0;transform:scale(2.2)} }
+styles/hunt-runtime.css:447:@keyframes hunt-bomb-flash { 0%,20%{opacity:1} 36%{filter:brightness(2.8)} 100%{opacity:0} }
+styles/hunt-runtime.css:448:@keyframes monster-bomb-hit { 0%,30%,100%{transform:none} 38%{transform:translateY(-24px) rotate(-8deg) scale(1.08)} 48%{transform:translate(18px,12px) rotate(7deg) scale(.94)} 62%{transform:translate(-10px,5px) rotate(-3deg)} }
+styles/hunt-runtime.css:449:@keyframes hunt-bomb-screen-shake { 0%,100%{transform:none} 12%{transform:translate(-18px,10px)} 27%{transform:translate(15px,-9px)} 43%{transform:translate(-11px,7px)} 62%{transform:translate(8px,-5px)} 80%{transform:translate(-4px,2px)} }
+styles/hunt-runtime.css:450:@keyframes hunt-shock-jitter { to { transform: translate(6px,-3px) scale(1.08); } }
+styles/hunt-runtime.css:454:@keyframes hunt-flash-screen { 0% { opacity:0; transform:scale(.2); } 12% { opacity:1; transform:scale(1); } 100% { opacity:0; transform:scale(1.35); } }
+styles/hunt-runtime.css:457:@keyframes stun-shake {
+styles/hunt-runtime.css:499:@keyframes hunter-stun-orbit-spin {
+styles/hunt-runtime.css:514:@keyframes monster-stun-head-orbit {
+styles/hunt-runtime.css:520:@keyframes monster-knockdown-wiggle {
+styles/hunt-runtime.css:549:@keyframes monster-knockdown-sequence {
+styles/hunt-runtime.css:578:@keyframes weapon-roll {
+styles/hunt-runtime.css:605:@keyframes hunter-invincible-jump {
+styles/hunt-runtime.css:615:@keyframes card-large-shake {
+styles/hunt-runtime.css:626:@keyframes card-small-shake {
+styles/hunt-runtime.css:663:@keyframes hunt-preview-impact-badge {
+styles/hunt-runtime.css:669:@keyframes hunter-card-hit-three-shakes {
+styles/hunt-runtime.css:677:@keyframes hunter-card-guard-one-half-shakes {
+styles/hunt-runtime.css:684:@keyframes weapon-large-hit {
+styles/hunt-runtime.css:709:@keyframes weapon-small-hit {
+styles/hunt-runtime.css:746:@keyframes weapon-carted-out {
+styles/hunt-runtime.css:780:@keyframes hunt-damage-number-pop {
+styles/hunt-runtime.css:820:@keyframes hunt-hit-dust {
+styles/hunt-runtime.css:875:@keyframes hunt-critical-slash {
+styles/hunt-runtime.css:946:@keyframes bubble-fade-in {
+styles/hunt-runtime.css:951:@keyframes bubble-fade-out {
+styles/hunt-runtime.css:970:@keyframes ls-spirit-img-pulse-3 {
+styles/hunt-runtime.css:985:@keyframes db-demon-pulse {
+styles/hunt-runtime.css:996:@keyframes db-demon-img-pulse {
+styles/hunt-runtime.css:1009:@keyframes w-db-dance-demon {
+styles/hunt-runtime.css:1040:@keyframes w-db-levi-demon {
+styles/hunt-runtime.css:1095:@keyframes melee-slash {
+styles/hunt-runtime.css:1104:@keyframes hammer-kkt-anim {
+styles/hunt-runtime.css:1117:@keyframes hammer-sway-anim {
+styles/hunt-runtime.css:1126:@keyframes hammer-upper-anim {
+styles/hunt-runtime.css:1135:@keyframes hammer-smash-anim {
+styles/hunt-runtime.css:1144:@keyframes hammer-tornado-anim {
+styles/hunt-runtime.css:1156:@keyframes hammer-hit {
+styles/hunt-runtime.css:1165:@keyframes gs-charge1-anim {
+styles/hunt-runtime.css:1174:@keyframes gs-charge2-anim {
+styles/hunt-runtime.css:1183:@keyframes gs-charge3-anim {
+styles/hunt-runtime.css:1192:@keyframes bowgun-recoil {
+styles/hunt-runtime.css:1253:@keyframes monster-paralyzed-pose {
+styles/hunt-runtime.css:1257:@keyframes monster-sleeping-pose {
+styles/hunt-runtime.css:1265:@keyframes monster-flight-high-hover {
+styles/hunt-runtime.css:1386:@keyframes hunt-part-break-flash {
+styles/hunt-runtime.css:1412:    animation-name:monster-part-break-left;
+styles/hunt-runtime.css:1416:    animation-name:monster-part-break-right;
+styles/hunt-runtime.css:1431:@keyframes monster-part-break-visual {
+styles/hunt-runtime.css:1438:@keyframes monster-part-break-left {
+styles/hunt-runtime.css:1444:@keyframes monster-part-break-right {
+styles/hunt-runtime.css:1529:@keyframes monster-aim-settle {
+styles/hunt-runtime.css:1578:.monster-motion-close-strike[data-monster-rig="herbivore"] { animation-name:monster-motion-close-strike-quadruped !important; }
+styles/hunt-runtime.css:1579:.monster-motion-close-strike[data-monster-rig="winged"] { animation-name:monster-motion-close-strike-winged !important; }
+styles/hunt-runtime.css:1581:.monster-motion-close-strike[data-monster-rig="cephalopod"] { animation-name:monster-motion-close-strike-serpentine !important; }
+styles/hunt-runtime.css:1582:.monster-motion-close-strike[data-monster-rig="arthropod"] { animation-name:monster-motion-close-strike-arthropod !important; }
+styles/hunt-runtime.css:1597:.monster-motion-tigrex-charge-chain[data-tigrex-charge-passes="3"] { animation-name:tigrex-charge-chain-three !important; }
+styles/hunt-runtime.css:1607:@keyframes tigrex-charge-stride-flip {
+styles/hunt-runtime.css:1630:@keyframes monster-beat-stride-flip {
+styles/hunt-runtime.css:1888:@keyframes hunt-blast-scale-drop {
+styles/hunt-runtime.css:1900:@keyframes hunt-blast-scale-warning {
+styles/hunt-runtime.css:1904:@keyframes hunt-blast-scale-unheated-pulse {
+styles/hunt-runtime.css:1908:@keyframes hunt-blast-scale-explode {
+styles/hunt-runtime.css:1914:@keyframes monster-motion-bazel-carpet-bombing {
+styles/hunt-runtime.css:1932:@keyframes monster-motion-close-strike { 0%,100%{transform:none} 18%{transform:translate(calc(var(--monster-attack-x)*-.12),12px) rotate(-5deg) scale(.92)} 48%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(7deg) scale(1.16)} 62%{transform:translate(calc(var(--monster-attack-x)*.86),calc(var(--monster-attack-y)*.86)) rotate(-3deg) scale(1.08)} }
+styles/hunt-runtime.css:1933:@keyframes monster-motion-close-strike-quadruped { 0%,100%{transform:none} 18%{transform:translateY(30px) scale(1.09,.82)} 45%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(3deg) scale(1.2,.94)} 66%{transform:translate(calc(var(--monster-attack-x)*.78),calc(var(--monster-attack-y)*.72)) rotate(-2deg) scale(1.08)} }
+styles/hunt-runtime.css:1934:@keyframes monster-motion-close-strike-winged { 0%,100%{transform:none} 16%{transform:translateY(-30px) rotate(-7deg) scale(.9)} 46%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(4deg) scale(1.08)} 65%{transform:translate(calc(var(--monster-attack-x)*.74),calc(var(--monster-attack-y)*.62)) rotate(-5deg) scale(1.03)} }
+styles/hunt-runtime.css:1935:@keyframes monster-motion-legiana-hop-strike {
+styles/hunt-runtime.css:1943:@keyframes monster-motion-close-strike-serpentine { 0%,100%{transform:none} 18%{transform:translateX(calc(var(--monster-attack-x)*-.16)) rotate(-10deg) scale(.96,1.02)} 48%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(5deg) scale(1.06,.98)} 70%{transform:translate(calc(var(--monster-attack-x)*.66),calc(var(--monster-attack-y)*.55)) rotate(-7deg)} }
+styles/hunt-runtime.css:1944:@keyframes monster-motion-close-strike-arthropod { 0%,100%{transform:none} 14%{transform:translate(-28px,18px) rotate(-5deg) scale(1.06,.86)} 34%{transform:translate(34px,-8px) rotate(5deg) scale(.96,1.05)} 55%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-2deg) scale(1.08)} 72%{transform:translate(calc(var(--monster-attack-x)*.7),0) rotate(2deg)} }
+styles/hunt-runtime.css:1947:@keyframes monster-motion-ground-charge {
+styles/hunt-runtime.css:1963:    animation-name:monster-motion-ground-charge-stomp-burst !important;
+styles/hunt-runtime.css:1966:@keyframes monster-motion-ground-charge-stomp-burst {
+styles/hunt-runtime.css:1982:@keyframes monster-motion-ground-charge-cross {
+styles/hunt-runtime.css:1997:@keyframes monster-charge-footfall { 0%{opacity:0;scale:.4} 28%{opacity:.95;scale:1.35} 100%{opacity:0;scale:2.7} }
+styles/hunt-runtime.css:1999:@keyframes monster-charge-rumble { 0%,100%{translate:0 0} 35%{translate:-5px 3px} 70%{translate:5px -2px} }
+styles/hunt-runtime.css:2000:@keyframes monster-motion-tail-sweep { 0%{transform:none} 23%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(.98)} 39%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-18deg) scale(.97)} 78%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(342deg) scale(1.12)} 100%{transform:translate(0,0) rotate(360deg) scale(1)} }
+styles/hunt-runtime.css:2001:@keyframes monster-motion-tail-sweep-double { 0%{transform:none} 15%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(.98)} 26%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-18deg) scale(.97)} 52%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(162deg) scale(1.12)} 59%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(158deg) scale(1.04)} 85%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(342deg) scale(1.14)} 100%{transform:translate(0,0) rotate(360deg) scale(1)} }
+styles/hunt-runtime.css:2007:@keyframes monster-motion-ground-charge-zigzag {
+styles/hunt-runtime.css:2019:@keyframes monster-motion-ground-charge-double {
+styles/hunt-runtime.css:2035:    animation-name:monster-motion-ground-charge-double-stomp-burst !important;
+styles/hunt-runtime.css:2039:@keyframes monster-motion-ground-charge-double-stomp-burst {
+styles/hunt-runtime.css:2092:@keyframes monster-stomp-dust-anim {
+styles/hunt-runtime.css:2098:@keyframes monster-motion-ground-charge-triple {
+styles/hunt-runtime.css:2113:@keyframes monster-motion-lateral-sweep { 0%,100%{transform:none} 14%{transform:translateX(calc(var(--monster-lane-x)*-.72)) rotate(-8deg) scale(.92)} 42%{transform:translateX(calc(var(--monster-lane-x)*.88)) rotate(9deg) scale(1.13)} 68%{transform:translateX(calc(var(--monster-lane-x)*-.55)) rotate(-6deg) scale(1.08)} 84%{transform:translateX(calc(var(--monster-lane-x)*.22)) rotate(3deg) scale(1.02)} }
+styles/hunt-runtime.css:2114:@keyframes monster-motion-pounce-chain { 0%,100%{transform:none} 15%{transform:translateX(calc(var(--monster-lane-x)*-.68)) translateY(-45px) rotate(-9deg) scale(.92)} 34%{transform:translateX(calc(var(--monster-lane-x)*.46)) translateY(35px) rotate(8deg) scale(1.16)} 51%{transform:translateX(calc(var(--monster-lane-x)*.82)) translateY(-65px) rotate(12deg) scale(.98)} 70%{transform:translateX(calc(var(--monster-lane-x)*-.48)) translateY(55px) rotate(-11deg) scale(1.2)} 86%{transform:translateX(calc(var(--monster-lane-x)*.18)) rotate(4deg) scale(1.04)} }
+styles/hunt-runtime.css:2115:@keyframes tigrex-charge-chain {
+styles/hunt-runtime.css:2127:@keyframes monster-motion-rathian-ground-charge {
+styles/hunt-runtime.css:2141:@keyframes tigrex-charge-chain-three {
+styles/hunt-runtime.css:2151:@keyframes tigrex-branch-approach {
+styles/hunt-runtime.css:2155:@keyframes tigrex-exhausted-trip {0%{transform:translate(calc(var(--monster-attack-x)*-.9),calc(var(--monster-attack-y)*.18)) rotate(-5deg)} 12%{transform:translate(calc(var(--monster-attack-x)*-.45),calc(var(--monster-attack-y)*.38)) rotate(-18deg) scale(1.08,.88)} 25%,88%{transform:translate(calc(var(--monster-attack-x)*-.28),calc(var(--monster-attack-y)*.48)) rotate(-82deg) scale(1.12,.82)} 100%{transform:none}}
+styles/hunt-runtime.css:2156:@keyframes tigrex-rock-hop {0%,8%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 22%{transform:translate(0,-68px) scale(.92)} 34%{transform:translate(0,0) scale(1.04,.92)} 38%{transform:translate(0,0) rotate(10deg) scale(1.1,.9)} 58%{transform:translate(-16px,0) rotate(-4deg) scale(1.02)} 100%{transform:none}}
+styles/hunt-runtime.css:2157:@keyframes tigrex-sliding-spin {0%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 18%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(35deg) scale(1.08)} 68%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(360deg) scale(1.16)} 82%{transform:translate(var(--tigrex-branch-x),var(--tigrex-branch-y)) rotate(360deg)} 100%{transform:translate(0,0) rotate(360deg)}}
+styles/hunt-runtime.css:2158:@keyframes tigrex-running-double-bite {0%{transform:var(--tigrex-branch-start-transform,translate(var(--tigrex-branch-x),var(--tigrex-branch-y)))} 34%{transform:translate(var(--tigrex-bite-contact-x),var(--tigrex-bite-contact-y)) rotate(-11deg) scale(1.12)} 62%{transform:translate(var(--tigrex-bite-finish-x),var(--tigrex-bite-finish-y)) rotate(10deg) scale(1.14)} 82%,100%{transform:translate(var(--tigrex-bite-finish-x),var(--tigrex-bite-finish-y)) rotate(2deg)}}
+styles/hunt-runtime.css:2159:@keyframes tigrex-foreleg-slam {0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*.45),calc(var(--monster-attack-y)*.38 - 20px)) rotate(-8deg)} 56%{transform:translate(calc(var(--monster-attack-x)*.72),calc(var(--monster-attack-y)*.72)) rotate(9deg) scale(1.12,.9)} 78%{transform:translate(calc(var(--monster-attack-x)*.35),calc(var(--monster-attack-y)*.3))}}
+styles/hunt-runtime.css:2160:@keyframes tigrex-bite {0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*.18),calc(var(--monster-attack-y)*.12)) rotate(7deg) scale(.96)} 58%{transform:translate(calc(var(--monster-attack-x)*.82),calc(var(--monster-attack-y)*.78)) rotate(-8deg) scale(1.13)} 74%{transform:translate(calc(var(--monster-attack-x)*.7),calc(var(--monster-attack-y)*.66)) rotate(5deg)}}
+styles/hunt-runtime.css:2161:@keyframes tigrex-double-bite {0%,100%{transform:none} 18%{transform:translate(calc(var(--tigrex-bite-contact-x)*.3),calc(var(--tigrex-bite-contact-y)*.3)) scale(.95)} 43%{transform:translate(var(--tigrex-bite-contact-x),var(--tigrex-bite-contact-y)) rotate(-11deg) scale(1.12)} 66%{transform:translate(var(--tigrex-bite-finish-x),var(--tigrex-bite-finish-y)) rotate(10deg) scale(1.14)} 79%{transform:translate(var(--tigrex-bite-finish-x),var(--tigrex-bite-finish-y)) rotate(2deg)}}
+styles/hunt-runtime.css:2162:@keyframes tigrex-clockwise-spin {0%{transform:none} 12%{transform:translate(calc(var(--monster-attack-x)*.18),calc(var(--monster-attack-y)*.14)) rotate(-12deg) scale(.94)} 50%{transform:translate(calc(var(--monster-attack-x)*.82),calc(var(--monster-attack-y)*.78)) rotate(-12deg) scale(1.02)} 82%{transform:translate(calc(var(--monster-attack-x)*.92),calc(var(--monster-attack-y)*.88)) rotate(360deg) scale(1.15)} 92%{transform:translate(calc(var(--monster-attack-x)*.68),calc(var(--monster-attack-y)*.62)) rotate(360deg)} 100%{transform:translate(0,0) rotate(360deg)}}
+styles/hunt-runtime.css:2163:@keyframes tigrex-rock-shot {0%,100%{transform:none} 28%{transform:translate(calc(var(--monster-attack-x)*.15),calc(var(--monster-attack-y)*.12)) rotate(-12deg) scale(.96)} 55%{transform:translate(calc(var(--monster-attack-x)*.3),calc(var(--monster-attack-y)*.26)) rotate(11deg) scale(1.12,.9)} 70%{transform:translate(calc(var(--monster-attack-x)*.24),calc(var(--monster-attack-y)*.2)) rotate(-4deg)}}
+styles/hunt-runtime.css:2164:@keyframes tigrex-leap {
+styles/hunt-runtime.css:2173:@keyframes monster-motion-body-spin { 0%{transform:none} 20%{transform:scale(.9) rotate(-12deg)} 62%{transform:translate(var(--monster-attack-x),calc(var(--monster-attack-y)*.35)) rotate(360deg) scale(1.16)} 78%{transform:translate(calc(var(--monster-attack-x)*.7),0) rotate(390deg)} 100%{transform:translate(0,0) rotate(390deg) scale(1)} }
+styles/hunt-runtime.css:2174:@keyframes monster-motion-leap-slam { 0%,100%{transform:none} 18%{transform:translateY(28px) scale(1.08,.84)} 50%{transform:translate(calc(var(--monster-attack-x)*.55),-185px) rotate(-6deg) scale(.88,1.12)} 73%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) scale(1.24,.78);filter:brightness(1.35) drop-shadow(0 26px 12px #0008)} }
+styles/hunt-runtime.css:2175:@keyframes monster-motion-aerial-dive { 0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*-.2),-210px) rotate(-12deg) scale(.72);filter:drop-shadow(0 35px 15px #0008)} 52%{transform:translate(calc(var(--monster-attack-x)*.4),-250px) rotate(12deg) scale(.8)} 76%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-8deg) scale(1.26);filter:brightness(1.5)} }
+styles/hunt-runtime.css:2176:@keyframes monster-motion-burrow-enter { 0%{transform:none;opacity:1} 28%{transform:translateY(18px) rotate(-4deg) scale(1.04);opacity:1} 68%{transform:translateY(210px) rotate(8deg) scale(.92);opacity:.8;filter:sepia(.35) blur(1px)} 100%{transform:translateY(280px) scale(.82);opacity:0;filter:sepia(.55) blur(3px)} }
+styles/hunt-runtime.css:2177:@keyframes monster-motion-burrow-emerge {
+styles/hunt-runtime.css:2188:@keyframes monster-local-vortex { 0%,18%,100%{opacity:0;transform:translate(-50%,-50%) scale(.45) rotate(0)} 28%{opacity:.68} 78%{opacity:.76;transform:translate(-50%,-50%) scale(1.45) rotate(720deg)} 88%{opacity:0} }
+styles/hunt-runtime.css:2192:@keyframes monster-local-wind { 0%{opacity:0;transform:translate(-50%,-50%) scale(.45)} 35%{opacity:.75} 100%{opacity:0;transform:translate(-50%,80%) scale(1.65)} }
+styles/hunt-runtime.css:2197:@keyframes monster-local-burrow-cloud { 0%{opacity:0;transform:translate(-50%,-8%) scale(.3,.18)} 24%{opacity:.95;transform:translate(-50%,-35%) scale(1.15,.58)} 68%{opacity:.8;transform:translate(-50%,-72%) scale(1.9,.9)} 100%{opacity:0;transform:translate(-50%,-110%) scale(2.5,1.15)} }
+styles/hunt-runtime.css:2198:@keyframes monster-local-cloud { 0%{opacity:0;transform:translate(-50%,-20%) scale(.35)} 35%{opacity:.8} 100%{opacity:0;transform:translate(-50%,-75%) scale(1.8)} }
+styles/hunt-runtime.css:2201:@keyframes monster-local-impact { 0%{opacity:0;transform:translate(-50%,-50%) scale(.2)} 25%{opacity:1;transform:translate(-50%,-50%) scale(1.3)} 100%{opacity:0;transform:translate(-50%,-50%) scale(2)} }
+styles/hunt-runtime.css:2204:@keyframes monster-tail-slam-dust { 0%,38%,100%{opacity:0;transform:translate(-50%,-20%) scale(.3)} 48%{opacity:.82;transform:translate(-50%,-50%) scale(1.25)} 70%{opacity:0;transform:translate(-50%,-85%) scale(2)} }
+styles/hunt-runtime.css:2246:@keyframes monster-tail-rock-projectile {
+styles/hunt-runtime.css:2282:@keyframes monster-burrow-dust-fly { 0%{opacity:0;transform:translate(-50%,-50%) scale(.25)} 28%{opacity:1} 100%{opacity:0;transform:translate(calc(-50% + var(--dust-x,45px)),calc(-50% + var(--dust-y,-85px))) scale(2.5)} }
+styles/hunt-runtime.css:2283:@keyframes monster-burrow-crack { 0%{opacity:.25;transform:translate(-50%,-50%) scale(.45) rotate(-4deg)} 100%{opacity:.9;transform:translate(-50%,-50%) scale(1.25) rotate(5deg)} }
+styles/hunt-runtime.css:2284:@keyframes monster-burrow-track { 0%{transform:translate(-50%,-50%);opacity:.25} 12%{opacity:1} 88%{opacity:1} 100%{transform:translate(calc(-50% + var(--burrow-track-x)),calc(-50% + var(--burrow-track-y)));opacity:.9} }
+styles/hunt-runtime.css:2285:@keyframes monster-burrow-track-puff { 0%{opacity:0;transform:translate(-50%,-30%) scale(.3)} 35%{opacity:.95} 100%{opacity:0;transform:translate(calc(-50% + var(--dust-x,34px)),calc(-50% + var(--dust-y,-58px))) scale(1.55)} }
+styles/hunt-runtime.css:2286:@keyframes monster-burrow-track-rumble { from{opacity:.55;transform:translate(-50%,-50%) scale(.48) rotate(-3deg)} to{opacity:.9;transform:translate(-50%,-50%) scale(.72) rotate(3deg)} }
+styles/hunt-runtime.css:2311:@keyframes monster-tail-slam-sweep{0%{opacity:0;transform:rotate(-42deg) scale(.54)}18%{opacity:.9}72%{opacity:1;transform:rotate(8deg) scale(1.03)}100%{opacity:0;transform:rotate(18deg) scale(1.14)}}
+styles/hunt-runtime.css:2312:@keyframes monster-tail-slam-impact{0%,72%{opacity:0;transform:scale(.2)}78%{opacity:1;transform:scale(1.25)}100%{opacity:0;transform:scale(.82)}}
+styles/hunt-runtime.css:2313:@keyframes monster-part-dust-burst{0%{opacity:0;transform:rotate(calc(var(--impact-angle,0deg) + var(--dust-angle))) translateX(4px) scale(.25)}18%{opacity:.95}100%{opacity:0;transform:rotate(calc(var(--impact-angle,0deg) + var(--dust-angle))) translateX(var(--dust-range)) scale(1.55)}}
+styles/hunt-runtime.css:2314:@keyframes monster-part-dust-ring{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(1.25)}}
+styles/hunt-runtime.css:2315:@keyframes hunter-target-dust-cloud{0%{opacity:0;transform:rotate(var(--impact-angle,0deg)) translateX(0) scale(.2)}16%{opacity:.96;transform:rotate(var(--impact-angle,0deg)) translateX(10px) scale(.72)}48%{opacity:.88;transform:rotate(var(--impact-angle,0deg)) translateX(36px) scale(1.16)}100%{opacity:0;transform:rotate(var(--impact-angle,0deg)) translateX(84px) scale(1.48)}}
+styles/hunt-runtime.css:2316:@keyframes hunter-target-dust-wave{0%{opacity:0;transform:translateX(-8px) scale(.45)}20%{opacity:.95}100%{opacity:0;transform:translateX(46px) scale(1.18)}}
+styles/hunt-runtime.css:2317:@keyframes monster-part-swing-sketch{0%{opacity:0;clip-path:inset(48% 0 48% 94%);transform:rotate(-5deg) scale(.94)}24%{opacity:.92;clip-path:inset(4% 0 4% 12%);transform:rotate(1deg) scale(1)}58%{opacity:.78;clip-path:inset(0);transform:rotate(0) scale(1.025)}100%{opacity:0;clip-path:inset(0);transform:rotate(1deg) scale(1.03)}}
+styles/hunt-runtime.css:2320:@keyframes monster-uppercut-launched { 0%,100%{transform:none} 57%{transform:translateY(-105px) scale(1.05)} 70%{transform:translateY(-86px)} 88%{transform:translateY(12px)} }
+styles/hunt-runtime.css:2324:@keyframes hunter-interference-wobble { from{transform:translateX(-8px) rotate(-4deg)} to{transform:translateX(8px) rotate(4deg)} }
+styles/hunt-runtime.css:2352:@keyframes hunter-interference-overlay {
+styles/hunt-runtime.css:2356:@keyframes monster-motion-ranged-cast { 0%,100%{transform:none} 22%{transform:translate(calc(var(--monster-attack-x)*-.1),12px) scale(.93) rotate(-4deg)} 48%{transform:translate(calc(var(--monster-attack-x)*.08),-12px) scale(1.12) rotate(3deg);filter:brightness(1.45)} 62%{transform:translate(calc(var(--monster-attack-x)*-.04),5px) scale(.98)} }
+styles/hunt-runtime.css:2357:@keyframes monster-motion-area-burst { 0%,100%{transform:none} 18%{transform:translateY(24px) scale(.82);filter:brightness(.7)} 48%{transform:translateY(-28px) scale(1.25);filter:brightness(1.8) drop-shadow(0 0 40px #fff8)} 62%{transform:scale(1.12) rotate(-4deg)} 68%{transform:scale(1.18) rotate(4deg)} 74%{transform:scale(1.12) rotate(-3deg)} }
+styles/hunt-runtime.css:2358:@keyframes monster-motion-roar { 0%,100%{transform:none} 22%{transform:translateY(18px) scale(.9)} 43%{transform:translateY(-18px) scale(1.2);filter:brightness(1.45)} 52%{transform:translate(-8px,-14px) scale(1.17)} 61%{transform:translate(8px,-14px) scale(1.17)} 70%{transform:translate(-5px,-10px) scale(1.14)} }
+styles/hunt-runtime.css:2359:@keyframes monster-motion-rathalos-bite-contact { 0%,100%{transform:none} 18%{transform:translate(calc(var(--monster-attack-x)*-.12),-22px) rotate(-7deg) scale(.92)} 55%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(8deg) scale(1.16)} 68%{transform:translate(calc(var(--monster-attack-x)*.9),calc(var(--monster-attack-y)*.9)) rotate(-5deg) scale(1.08)} }
+styles/hunt-runtime.css:2360:@keyframes monster-motion-rathalos-rush-bite { 0%,100%{transform:none} 12%{transform:translateY(-18px) rotate(-5deg) scale(.94)} 58%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(7deg) scale(1.26)} 69%{transform:translate(calc(var(--monster-attack-x)*1.08),calc(var(--monster-attack-y)*1.08)) rotate(-4deg) scale(1.18)} 88%{transform:translate(calc(var(--monster-attack-x)*.24),calc(var(--monster-attack-y)*.2)) scale(1.02)} }
+styles/hunt-runtime.css:2361:@keyframes monster-motion-rathalos-fireball { 0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*-.06),15px) rotate(-5deg) scale(.94)} 46%{transform:translate(calc(var(--monster-attack-x)*.08),-20px) rotate(4deg) scale(1.14);filter:brightness(1.45) drop-shadow(0 0 18px #ff7b32)} 62%{transform:translate(calc(var(--monster-attack-x)*-.03),4px) scale(1)} }
+styles/hunt-runtime.css:2367:@keyframes monster-motion-rathalos-triple-fireball {
+styles/hunt-runtime.css:2378:@keyframes monster-motion-rathalos-step-fireball { 0%,100%{transform:none} 13%{transform:translateX(calc(var(--monster-lane-x)*-.35)) rotate(-5deg) scale(.95)} 25%{transform:translateX(calc(var(--monster-lane-x)*-.28)) translateY(-18px) rotate(4deg) scale(1.1);filter:brightness(1.4)} 43%{transform:translateX(calc(var(--monster-lane-x)*.24)) translateY(-16px) rotate(-4deg) scale(1.12);filter:brightness(1.48)} 61%{transform:translateX(calc(var(--monster-lane-x)*-.1)) translateY(-20px) rotate(3deg) scale(1.13);filter:brightness(1.52)} 84%{transform:translateX(calc(var(--monster-lane-x)*.08)) scale(1.02)} }
+styles/hunt-runtime.css:2379:@keyframes monster-motion-rathalos-backstep-fireball { 0%,100%{transform:none} 24%{transform:translate(calc(var(--monster-attack-x)*.08),28px) rotate(4deg) scale(1.05)} 44%{transform:translate(calc(var(--monster-attack-x)*-.12),-18px) rotate(-6deg) scale(1.12);filter:brightness(1.55) drop-shadow(0 0 20px #ff6a24)} 73%{transform:translate(calc(var(--monster-attack-x)*-.18),-190px) rotate(-10deg) scale(.78)} 100%{transform:none} }
+styles/hunt-runtime.css:2380:@keyframes monster-motion-rathalos-claw-dive { 0%,100%{transform:none} 20%{transform:translate(calc(var(--monster-attack-x)*-.18),-220px) rotate(-13deg) scale(.73)} 45%{transform:translate(calc(var(--monster-attack-x)*.38),-260px) rotate(12deg) scale(.8)} 66%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-10deg) scale(1.28);filter:brightness(1.5) drop-shadow(0 20px 12px #0009)} 82%{transform:translate(calc(var(--monster-attack-x)*.55),-150px) rotate(7deg) scale(.88)} }
+styles/hunt-runtime.css:2381:@keyframes monster-motion-rathalos-air-kick-combo { 0%,100%{transform:none} 18%{transform:translate(calc(var(--monster-attack-x)*-.2),-205px) rotate(-10deg) scale(.76)} 42%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(12deg) scale(1.24)} 55%{transform:translate(calc(var(--monster-attack-x)*.3),-175px) rotate(-12deg) scale(.82)} 72%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-9deg) scale(1.29);filter:brightness(1.45)} 86%{transform:translate(calc(var(--monster-attack-x)*.2),-120px) scale(.9)} }
+styles/hunt-runtime.css:2382:@keyframes monster-motion-rathalos-tail-sweep-double { 0%{transform:none} 14%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(-12deg) scale(.96)} 39%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(168deg) scale(1.13)} 48%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(158deg) scale(1.04)} 73%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(348deg) scale(1.16)} 88%{transform:translate(calc(var(--monster-attack-x)*.35),calc(var(--monster-attack-y)*.28)) rotate(360deg) scale(1.03)} 100%{transform:translate(0,0) rotate(360deg) scale(1)} }
+styles/hunt-runtime.css:2383:@keyframes monster-motion-rathalos-flame-sweep { 0%,100%{transform:none} 12%{transform:translateY(-34px) rotate(-6deg) scale(.96)} 28%{transform:translateX(calc(var(--monster-lane-x)*-.28)) translateY(-52px) rotate(-12deg) scale(1.08);filter:brightness(1.45)} 48%{transform:translateX(calc(var(--monster-lane-x)*.3)) translateY(-48px) rotate(12deg) scale(1.14);filter:brightness(1.55) drop-shadow(0 0 24px #ff6a24)} 68%{transform:translateX(calc(var(--monster-lane-x)*-.18)) translateY(-42px) rotate(-8deg) scale(1.1)} 84%{transform:translateY(-25px) scale(1.03)} }
+styles/hunt-runtime.css:2384:@keyframes monster-motion-rathalos-stomp { 0%,100%{transform:none} 20%{transform:translate(calc(var(--monster-attack-x)*.12),-185px) rotate(7deg) scale(.78)} 48%{transform:translate(calc(var(--monster-attack-x)*.5),-220px) rotate(-5deg) scale(.84)} 70%{transform:translate(var(--monster-attack-x),var(--monster-attack-y)) rotate(4deg) scale(1.28,.82);filter:brightness(1.5) drop-shadow(0 24px 12px #0009)} 82%{transform:translate(calc(var(--monster-attack-x)*.65),calc(var(--monster-attack-y)*.45)) scale(1.06)} }
+styles/hunt-runtime.css:2385:@keyframes monster-motion-rathalos-glide { 0%,100%{transform:none;opacity:1} 16%{transform:translate(calc(var(--monster-attack-x)*-.2),-225px) rotate(-12deg) scale(.73)} 43%{transform:translate(calc(var(--monster-attack-x)*.55),calc(var(--monster-attack-y)*.42)) rotate(8deg) scale(1.04)} 64%{transform:translate(calc(var(--monster-attack-x)*1.18),calc(var(--monster-attack-y) + 540px)) rotate(-6deg) scale(1.42);opacity:1} 65%{opacity:0} 75%{transform:translateY(-185px) scale(.78);opacity:0} 82%{opacity:1} }
+styles/hunt-runtime.css:2386:@keyframes monster-motion-rathian-triple-fireball {
+styles/hunt-runtime.css:2400:@keyframes monster-motion-rathian-tail-sweep-double {
+styles/hunt-runtime.css:2417:@keyframes monster-motion-rathian-somersault {
+styles/hunt-runtime.css:2427:@keyframes monster-motion-rathian-somersault-double {
+styles/hunt-runtime.css:2441:@keyframes monster-motion-rathian-bite-somersault {
+styles/hunt-runtime.css:2452:@keyframes monster-motion-rathian-somersault-glide {
+styles/hunt-runtime.css:2472:@keyframes monster-motion-rathian-glide {
+styles/hunt-runtime.css:2501:@keyframes monster-motion-nargacuga-dash-bite {
+styles/hunt-runtime.css:2521:@keyframes monster-motion-nargacuga-tail-whip {
+styles/hunt-runtime.css:2553:@keyframes monster-motion-nargacuga-pivot-spin {
+styles/hunt-runtime.css:2581:@keyframes monster-motion-nargacuga-twin-pivot-spin {
+styles/hunt-runtime.css:2607:@keyframes monster-motion-nargacuga-turn-tail-slam {
+styles/hunt-runtime.css:2630:@keyframes monster-motion-nargacuga-turn-tail-slam-double {
+styles/hunt-runtime.css:2664:@keyframes monster-motion-nargacuga-flank-charge {
+styles/hunt-runtime.css:2683:@keyframes nargacuga-charge-stride-flip {
+styles/hunt-runtime.css:2697:@keyframes monster-motion-nargacuga-offscreen-charge {
+styles/hunt-runtime.css:2731:@keyframes monster-motion-nargacuga-leap-ambush {
+styles/hunt-runtime.css:2760:@keyframes monster-motion-nargacuga-leap-ambush-triple {
+styles/hunt-runtime.css:2810:@keyframes monster-motion-nargacuga-bite-spin-return {
+styles/hunt-runtime.css:2836:@keyframes monster-motion-nargacuga-lunge-finish {
+styles/hunt-runtime.css:2882:@keyframes monster-motion-nargacuga-stance-hop {
+styles/hunt-runtime.css:2912:@keyframes monster-motion-rath-flight-stagger {
+styles/hunt-runtime.css:2921:@keyframes monster-motion-rath-flight-wobble {
+styles/hunt-runtime.css:2929:@keyframes monster-breath-fizzle {
+styles/hunt-runtime.css:2935:@keyframes barioth-ice-tornado {
+styles/hunt-runtime.css:2943:@keyframes barioth-spring-leap {
+styles/hunt-runtime.css:2957:@keyframes barioth-glide-circle-land {
+styles/hunt-runtime.css:2969:@keyframes monster-flight-stagger-fx {
+styles/hunt-runtime.css:2977:@keyframes monster-motion-aerial-charge-cross {
+styles/hunt-runtime.css:3178:@keyframes monster-gas-cloud {
+styles/hunt-runtime.css:3366:.hunter-blight.blight-fire { color: #ff4b16; animation-name: hunter-blight-fire; }
+styles/hunt-runtime.css:3370:.hunter-blight.blight-dragon { color: #db4dff; animation-name: hunter-blight-dragon; }
+styles/hunt-runtime.css:3374:@keyframes hunter-blight-sleep { 0%,100%{transform:translate(-3px,4px) scale(.85);opacity:.55} 50%{transform:translate(6px,-8px) scale(1.15);opacity:1} }
+styles/hunt-runtime.css:3375:@keyframes hunter-blight-pulse { from { transform: scale(.88); } to { transform: scale(1.08); } }
+styles/hunt-runtime.css:3376:@keyframes hunter-blight-fire { from { transform: translateY(5px) scale(.9); } to { transform: translateY(-5px) scale(1.12); } }
+styles/hunt-runtime.css:3377:@keyframes hunter-blight-dragon { from { transform: rotate(-7deg) scale(.9); } to { transform: rotate(7deg) scale(1.08); } }
+styles/hunt-runtime.css:3427:@keyframes monster-motion-legiana-drill-cross {
+styles/hunt-runtime.css:3445:@keyframes legiana-ice-charge {
+styles/hunt-runtime.css:3461:@keyframes legiana-rage-ice-release {
+styles/hunt-runtime.css:3485:@keyframes legiana-rage-claw-ice {
+styles/hunt-runtime.css:3491:@keyframes legiana-rage-tail-ice {
+styles/hunt-runtime.css:3499:@keyframes environment-label-pop { 0%{opacity:0;transform:translateX(-50%) scale(.3)} 18%,70%{opacity:1;transform:translateX(-50%) scale(1)} 100%{opacity:0;transform:translateX(-50%) translateY(-24px)} }
+styles/hunt-runtime.css:3500:@keyframes pitfall-open { 0%{transform:translateX(-50%) scale(.05);opacity:0} 18%,82%{transform:translateX(-50%) scale(1);opacity:1} 100%{transform:translateX(-50%) scale(.75);opacity:0} }
+styles/hunt-runtime.css:3501:@keyframes pitfall-open-held { 0%{transform:translateX(-50%) scale(.05);opacity:0} 100%{transform:translateX(-50%) scale(1);opacity:1} }
+styles/hunt-runtime.css:3502:@keyframes pitfall-net-held { 0%{opacity:0;transform:translateX(-50%) scale(.15) rotate(-18deg)} 100%{opacity:.9;transform:translateX(-50%) scale(1) rotate(0)} }
+styles/hunt-runtime.css:3503:@keyframes hunt-trap-atb-pulse { from{opacity:.58;filter:brightness(.9)} to{opacity:1;filter:brightness(1.3)} }
+styles/hunt-runtime.css:3504:@keyframes pitfall-crack-burst { 0%{opacity:0;transform:translateX(-50%) scale(.2)} 22%{opacity:1;transform:translateX(-50%) scale(1)} 100%{opacity:0;transform:translateX(-50%) scale(1.2)} }
+styles/hunt-runtime.css:3505:@keyframes pitfall-net-catch { 0%{opacity:0;transform:translateX(-50%) scale(.15) rotate(-18deg)} 22%,75%{opacity:.9;transform:translateX(-50%) scale(1) rotate(0)} 100%{opacity:0;transform:translateX(-50%) scale(.7)} }
+styles/hunt-runtime.css:3506:@keyframes pitfall-dirt-fly { 0%{opacity:0;transform:translate(0,0) scale(.4)} 18%{opacity:1} 100%{opacity:0;transform:rotate(var(--angle)) translateX(175px) translateY(-100px) rotate(240deg)} }
+styles/hunt-runtime.css:3507:@keyframes rockfall-warning { 0%,100%{opacity:.25;transform:translateX(-50%) scale(.8)} 50%{opacity:1;transform:translateX(-50%) scale(1.15)} }
+styles/hunt-runtime.css:3508:@keyframes rockfall-drop { 0%{transform:translateY(0) rotate(-35deg);opacity:0} 12%{opacity:1} 100%{transform:translateY(510px) rotate(170deg);opacity:1} }
+styles/hunt-runtime.css:3509:@keyframes rockfall-impact-ring { 0%{opacity:1;transform:translateX(-50%) scale(.1)} 100%{opacity:0;transform:translateX(-50%) scale(6)} }
+styles/hunt-runtime.css:3510:@keyframes rockfall-debris-burst { 0%{opacity:1;transform:translate(0,0) rotate(calc(var(--i) * 27deg))} 100%{opacity:0;transform:rotate(calc(var(--i) * 27deg)) translateX(230px) translateY(-120px) rotate(280deg)} }
+styles/hunt-runtime.css:3511:@keyframes monster-pitfall-caught { 0%{transform:translateY(0) scale(1);clip-path:inset(0 0 0 0)} 25%{transform:translateY(35px) scaleY(.78);clip-path:inset(0 0 8% 0)} 35%,82%{transform:translateY(92px) scaleY(.58);clip-path:inset(0 0 34% 0)} 100%{transform:translateY(50px) scaleY(.72);clip-path:inset(0 0 27% 0)} }
+styles/hunt-runtime.css:3512:@keyframes monster-pitfall-struggle {
+styles/hunt-runtime.css:3521:@keyframes monster-pitfall-release {
+styles/hunt-runtime.css:3529:@keyframes pitfall-close {
+styles/hunt-runtime.css:3533:@keyframes monster-rockfall-hit { 0%,38%{transform:translateY(0) rotate(0)} 44%{transform:translateY(28px) rotate(-9deg) scale(.93)} 51%{transform:translateY(10px) rotate(7deg)} 60%,100%{transform:translateY(58px) rotate(90deg) scale(.9)} }
+styles/hunt-runtime.css:3534:@keyframes hunt-rockfall-screen-shake { 0%,100%{transform:translate(0)} 15%{transform:translate(-13px,7px)} 32%{transform:translate(11px,-8px)} 48%{transform:translate(-8px,5px)} 65%{transform:translate(6px,-3px)} 82%{transform:translate(-3px,2px)} }
+styles/hunt-runtime.css:3594:@keyframes monster-ultimate-vignette { 0%,100%{opacity:0} 12%,82%{opacity:1} }
+styles/hunt-runtime.css:3595:@keyframes monster-ultimate-flash { 0%{opacity:0} 20%{opacity:1} 100%{opacity:0} }
+styles/hunt-runtime.css:3596:@keyframes monster-ultimate-title { 0%{opacity:0;transform:translateX(-50%) scale(1.5)} 14%,68%{opacity:1;transform:translateX(-50%) scale(1)} 100%{opacity:0;transform:translateX(-50%) translateY(-22px) scale(.96)} }
+styles/hunt-runtime.css:3597:@keyframes monster-ultimate-core { 0%{opacity:0;transform:translate(-50%,-50%) scale(.1)} 24%{opacity:1;transform:translate(-50%,-50%) scale(1.1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(2.5)} }
+styles/hunt-runtime.css:3598:@keyframes monster-ultimate-ring { 0%{opacity:1;transform:scale(.15)} 100%{opacity:0;transform:scale(7)} }
+styles/hunt-runtime.css:3599:@keyframes monster-ultimate-ring-b { 0%{opacity:1;transform:scale(.15) rotate(0)} 100%{opacity:0;transform:scale(6) rotate(180deg)} }
+styles/hunt-runtime.css:3600:@keyframes monster-ultimate-shockwave { 0%{opacity:1;transform:scale(.2)} 100%{opacity:0;transform:scale(15)} }
+styles/hunt-runtime.css:3601:@keyframes monster-ultimate-shard { 0%{opacity:1;transform:translate(-50%,-50%) rotate(var(--shard-angle)) translateX(35px) scale(.4)} 100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--shard-angle)) translateX(780px) scale(1.4)} }
+styles/hunt-runtime.css:3602:@keyframes monster-signature-ultimate { 0%{transform:scale(1)} 22%{transform:scale(.72) translateY(-35px);filter:brightness(.35)} 46%{transform:scale(1.35) translateY(50px);filter:brightness(2.2) drop-shadow(0 0 30px var(--fx-color,#ffb020))} 100%{transform:scale(1);filter:none} }
+styles/hunt-runtime.css:3603:@keyframes monster-ultimate-board-shake { 0%,100%{transform:translate(0)} 25%{transform:translate(-8px,5px)} 50%{transform:translate(7px,-5px)} 75%{transform:translate(-5px,-3px)} }
+styles/hunt-runtime.css:3607:@keyframes monster-element-wash {
+styles/hunt-runtime.css:3612:@keyframes monster-element-muzzle {
+styles/hunt-runtime.css:3618:@keyframes monster-element-beam {
+styles/hunt-runtime.css:3625:@keyframes monster-element-projectile {
+styles/hunt-runtime.css:3638:@keyframes monster-element-projectile-quill {
+styles/hunt-runtime.css:3644:@keyframes monster-element-projectile-reduced {
+styles/hunt-runtime.css:3649:@keyframes monster-element-stream {
+styles/hunt-runtime.css:3655:@keyframes monster-element-current {
+styles/hunt-runtime.css:3659:@keyframes monster-element-head {
+styles/hunt-runtime.css:3665:@keyframes monster-element-impact {
+styles/hunt-runtime.css:3671:@keyframes monster-element-particle {
+styles/hunt-runtime.css:3676:@keyframes element-impact-card-shake {
+styles/hunt-runtime.css:3712:@keyframes victory-jump {
+styles/hunt-runtime.css:3720:@keyframes victory-bounce {
+styles/hunt-runtime.css:3758:@keyframes stamp-press {
+styles/hunt-runtime.css:3779:@keyframes monster-tailspin {
+styles/hunt-runtime.css:3788:@keyframes roar-vibrate {
+styles/hunt-runtime.css:3805:@keyframes speaker-grow-shake-fade {
+styles/hunt-runtime.css:3833:@keyframes monster-charge-slide {
+styles/hunt-runtime.css:3865:@keyframes card-heavy-shake {
+styles/hunt-runtime.css:3890:@keyframes charge-dust-fade {
+styles/hunt-runtime.css:3907:@keyframes tailspin-slash-anim {
+styles/hunt-runtime.css:3940:@keyframes roar-wave-expand {
+styles/hunt-runtime.css:3947:@keyframes hunter-roar-vibrate {
+styles/hunt-runtime.css:3993:@keyframes tigrex-sonic-impact-ring {
+styles/hunt-runtime.css:4009:@keyframes hunt-sever-accent {
+styles/hunt-runtime.css:4014:@keyframes hunt-blunt-accent {
+styles/hunt-runtime.css:4019:@keyframes hunt-projectile-accent {
+styles/hunt-runtime.css:4024:@keyframes hunt-explosive-accent {
+styles/hunt-runtime.css:4029:@keyframes hunt-counter-accent {
+styles/hunt-runtime.css:4034:@keyframes hunt-multi-accent {
+styles/hunt-runtime.css:4044:@keyframes w-gs-smash {
+styles/hunt-runtime.css:4054:@keyframes w-ls-slash {
+styles/hunt-runtime.css:4065:@keyframes w-db-dance {
+styles/hunt-runtime.css:4077:@keyframes w-db-levi {
+styles/hunt-runtime.css:4095:@keyframes w-sns-bash {
+styles/hunt-runtime.css:4106:@keyframes w-hm-spin-smash {
+styles/hunt-runtime.css:4116:@keyframes w-hh-swing {
+styles/hunt-runtime.css:4125:@keyframes w-lc-thrust {
+styles/hunt-runtime.css:4137:@keyframes w-gl-blast {
+styles/hunt-runtime.css:4147:@keyframes w-sa-morph {
+styles/hunt-runtime.css:4158:@keyframes w-cb-aed {
+styles/hunt-runtime.css:4169:@keyframes w-ig-copter {
+styles/hunt-runtime.css:4180:@keyframes w-lbg-shoot {
+styles/hunt-runtime.css:4194:@keyframes w-hbg-shoot {
+styles/hunt-runtime.css:4205:@keyframes w-bow-shoot {
+styles/hunt-runtime.css:4236:@keyframes roar-ear-block-pulse {
+styles/hunt-runtime.css:4251:@keyframes crying-shake {
+styles/hunt-runtime.css:4289:@keyframes tear-fall-left {
+styles/hunt-runtime.css:4309:@keyframes tear-fall-right {
+styles/hunt-runtime.css:4380:@keyframes lobby-particle-fade {
+styles/hunt-runtime.css:4467:@keyframes quest-stamp-impact {
+styles/hunt-runtime.css:4615:@keyframes w-gs-smash-0 {
+styles/hunt-runtime.css:4621:@keyframes w-gs-smash-1 {
+styles/hunt-runtime.css:4627:@keyframes w-gs-smash-2 {
+styles/hunt-runtime.css:4633:@keyframes w-gs-smash-3 {
+styles/hunt-runtime.css:4639:@keyframes w-ls-slash-0 {
+styles/hunt-runtime.css:4646:@keyframes w-ls-slash-1 {
+styles/hunt-runtime.css:4653:@keyframes w-ls-slash-2 {
+styles/hunt-runtime.css:4660:@keyframes w-ls-slash-3 {
+styles/hunt-runtime.css:4667:@keyframes w-db-dance-0 {
+styles/hunt-runtime.css:4675:@keyframes w-db-dance-1 {
+styles/hunt-runtime.css:4683:@keyframes w-db-dance-2 {
+styles/hunt-runtime.css:4691:@keyframes w-db-dance-3 {
+styles/hunt-runtime.css:4699:@keyframes w-db-levi-0 {
+styles/hunt-runtime.css:4713:@keyframes w-db-levi-1 {
+styles/hunt-runtime.css:4727:@keyframes w-db-levi-2 {
+styles/hunt-runtime.css:4741:@keyframes w-db-levi-3 {
+styles/hunt-runtime.css:4755:@keyframes w-sns-bash-0 {
+styles/hunt-runtime.css:4762:@keyframes w-sns-bash-1 {
+styles/hunt-runtime.css:4769:@keyframes w-sns-bash-2 {
+styles/hunt-runtime.css:4776:@keyframes w-sns-bash-3 {
+styles/hunt-runtime.css:4783:@keyframes w-hm-spin-smash-0 {
+styles/hunt-runtime.css:4789:@keyframes w-hm-spin-smash-1 {
+styles/hunt-runtime.css:4795:@keyframes w-hm-spin-smash-2 {
+styles/hunt-runtime.css:4801:@keyframes w-hm-spin-smash-3 {
+styles/hunt-runtime.css:4807:@keyframes w-hh-swing-0 {
+styles/hunt-runtime.css:4812:@keyframes w-hh-swing-1 {
+styles/hunt-runtime.css:4817:@keyframes w-hh-swing-2 {
+styles/hunt-runtime.css:4822:@keyframes w-hh-swing-3 {
+styles/hunt-runtime.css:4827:@keyframes w-lc-thrust-0 {
+styles/hunt-runtime.css:4835:@keyframes w-lc-thrust-1 {
+styles/hunt-runtime.css:4843:@keyframes w-lc-thrust-2 {
+styles/hunt-runtime.css:4851:@keyframes w-lc-thrust-3 {
+styles/hunt-runtime.css:4859:@keyframes w-gl-blast-0 {
+styles/hunt-runtime.css:4865:@keyframes w-gl-blast-1 {
+styles/hunt-runtime.css:4871:@keyframes w-gl-blast-2 {
+styles/hunt-runtime.css:4877:@keyframes w-gl-blast-3 {
+styles/hunt-runtime.css:4883:@keyframes w-sa-morph-0 {
+styles/hunt-runtime.css:4890:@keyframes w-sa-morph-1 {
+styles/hunt-runtime.css:4897:@keyframes w-sa-morph-2 {
+styles/hunt-runtime.css:4904:@keyframes w-sa-morph-3 {
+styles/hunt-runtime.css:4911:@keyframes w-cb-aed-0 {
+styles/hunt-runtime.css:4918:@keyframes w-cb-aed-1 {
+styles/hunt-runtime.css:4925:@keyframes w-cb-aed-2 {
+styles/hunt-runtime.css:4932:@keyframes w-cb-aed-3 {
+styles/hunt-runtime.css:4939:@keyframes w-ig-copter-0 {
+styles/hunt-runtime.css:4946:@keyframes w-ig-copter-1 {
+styles/hunt-runtime.css:4953:@keyframes w-ig-copter-2 {
+styles/hunt-runtime.css:4960:@keyframes w-ig-copter-3 {
+styles/hunt-runtime.css:4967:@keyframes w-lbg-shoot-0 {
+styles/hunt-runtime.css:4977:@keyframes w-lbg-shoot-1 {
+styles/hunt-runtime.css:4987:@keyframes w-lbg-shoot-2 {
+styles/hunt-runtime.css:4997:@keyframes w-lbg-shoot-3 {
+styles/hunt-runtime.css:5007:@keyframes w-hbg-shoot-0 {
+styles/hunt-runtime.css:5014:@keyframes w-hbg-shoot-1 {
+styles/hunt-runtime.css:5021:@keyframes w-hbg-shoot-2 {
+styles/hunt-runtime.css:5028:@keyframes w-hbg-shoot-3 {
+styles/hunt-runtime.css:5035:@keyframes w-bow-shoot-0 {
+styles/hunt-runtime.css:5043:@keyframes w-bow-shoot-1 {
+styles/hunt-runtime.css:5051:@keyframes w-bow-shoot-2 {
+styles/hunt-runtime.css:5059:@keyframes w-bow-shoot-3 {
+styles/hunt-runtime.css:5067:@keyframes w-db-dance-demon-0 {
+styles/hunt-runtime.css:5093:@keyframes w-db-dance-demon-1 {
+styles/hunt-runtime.css:5119:@keyframes w-db-dance-demon-2 {
+styles/hunt-runtime.css:5145:@keyframes w-db-dance-demon-3 {
+styles/hunt-runtime.css:5171:@keyframes w-db-levi-demon-0 {
+styles/hunt-runtime.css:5189:@keyframes w-db-levi-demon-1 {
+styles/hunt-runtime.css:5207:@keyframes w-db-levi-demon-2 {
+styles/hunt-runtime.css:5225:@keyframes w-db-levi-demon-3 {
+styles/hunt-runtime.css:5446:@keyframes ig-kinsect-extract {
+styles/hunt-runtime.css:5455:@keyframes ig-kinsect-assault {
+styles/hunt-runtime.css:6192:@keyframes hunt-loadout-change-flash {
+styles/hunt-runtime.css:6246:@keyframes hunt-perk-synergy-glow {
+styles/hunt-runtime.css:6314:@keyframes hunt-dung-rainbow {
+styles/hunt-runtime.css:6318:@keyframes hunt-dung-pulse {
+styles/hunt-runtime.css:6323:@keyframes hunt-dung-icon-party {
+styles/hunt-runtime.css:6475:@keyframes hunt-tail-drop {
+styles/hunt-runtime.css:6624:@keyframes hunt-horn-buff-arrive {
+styles/hunt-runtime.css:6748:@keyframes hunt-loadout-ready-pulse {
+styles/hunt-runtime.css:7082:@keyframes hunt-guard-impact-shake {
+styles/hunt-runtime.css:7145:@keyframes hunt-hot-join-pulse {
+styles/hunt-runtime.css:7768:@keyframes hunt-journey-current-pulse {
+styles/hunt-runtime.css:7855:@keyframes hunt-monster-limb-slip {
+styles/hunt-runtime.css:7863:@keyframes hunt-monster-fatigue-stumble {
+js/effects/hunt\HuntEngine.js:113:        this.pendingMonsterAction = config.pendingMonsterAction || null;
+js/effects/hunt\HuntEngine.js:114:        this.pendingMonsterImpact = config.pendingMonsterImpact || null;
+js/effects/hunt\HuntEngine.js:115:        this.monsterActionPresentationTicks = Math.max(0, Number(config.monsterActionPresentationTicks || 0));
+js/effects/hunt\HuntEngine.js:216:            || Number(this.monsterActionPresentationTicks || 0) > 0
+js/effects/hunt\HuntEngine.js:217:            || this.pendingMonsterAction
+js/effects/hunt\HuntEngine.js:218:            || this.pendingMonsterImpact
+js/effects/hunt\HuntEngine.js:238:            audioPhase: 'beat-event',
+js/effects/hunt\HuntEngine.js:271:    clearMonsterTraversal(reason = 'complete') {
+js/effects/hunt\HuntEngine.js:276:        this.callbacks?.onResetMonsterMotion?.(reason);
+js/effects/hunt\HuntEngine.js:282:            pendingAction: this.pendingMonsterAction,
+js/effects/hunt\HuntEngine.js:283:            pendingImpact: this.pendingMonsterImpact,
+js/effects/hunt\HuntEngine.js:287:        this.pendingMonsterAction = null;
+js/effects/hunt\HuntEngine.js:288:        this.pendingMonsterImpact = null;
+js/effects/hunt\HuntEngine.js:292:        this.monsterActionPresentationTicks = 0;
+js/effects/hunt\HuntEngine.js:304:        this.clearMonsterTraversal(reason);
+js/effects/hunt\HuntEngine.js:567:            this.pendingMonsterAction = null;
+js/effects/hunt\HuntEngine.js:568:            this.pendingMonsterImpact = null;
+js/effects/hunt\HuntEngine.js:782:            || Number(this.monsterActionPresentationTicks || 0) > 0
+js/effects/hunt\HuntEngine.js:783:            || Boolean(this.pendingMonsterAction)
+js/effects/hunt\HuntEngine.js:784:            || Boolean(this.pendingMonsterImpact)
+tests\hunt-audio-reaction-review.test.js:20:assert.doesNotMatch(css, /@keyframes monster-part-flinch/,
+tests\hunt-audio-catalog.test.js:138:assert.strictEqual(rathianFireballImpact.audioPhase, 'impact',
+tests\dolphin-rainbow.test.js:14:assert.match(styleSource, /@keyframes rainbow-dolphin-hue/, 'style.css must contain @keyframes rainbow-dolphin-hue');
+tests\hunt-battle-tick.test.js:107:        pendingMonsterAction: { pattern, remainingTicks: 1, totalTicks: 3 },
+tests\hunt-battle-tick.test.js:112:    assert.strictEqual(engine.pendingMonsterAction, null);
+tests\hunt-battle-tick.test.js:119:        pendingMonsterImpact: {
+tests\hunt-battle-tick.test.js:131:    assert.strictEqual(engine.pendingMonsterImpact.remainingTicks, 1);
+tests\hunt-battle-tick.test.js:135:    assert.strictEqual(engine.pendingMonsterImpact, null);
+tests\hunt-battle-tick.test.js:142:        pendingMonsterImpact: {
+tests\hunt-battle-tick.test.js:199:        pendingMonsterImpact: {
+tests\hunt-battle-tick.test.js:232:        pendingMonsterImpact: {
+tests\hunt-battle-tick.test.js:241:    assert.strictEqual(engine.pendingMonsterImpact, null);
+tests\hunt-battle-tick.test.js:247:        pendingMonsterImpact: {
+tests\hunt-battle-tick.test.js:267:    assert.strictEqual(engine.pendingMonsterImpact.remainingTicks, 2);
+tests\hunt-battle-tick.test.js:275:    assert.strictEqual(engine.pendingMonsterImpact, null);
+tests\hunt-battle-tick.test.js:281:        pendingMonsterAction: { pattern: { id: 'test.wait', name: '준비 중' }, remainingTicks: 2 }
+tests\hunt-battle-tick.test.js:297:        pendingMonsterAction: { pattern: { id: 'small.wait', name: '물어뜯기' }, remainingTicks: 2 },
+tests\hunt-battle-tick.test.js:313:        pendingMonsterAction: { pattern: { id: 'test.cancel', name: '취소될 공격' }, remainingTicks: 1 },
+tests\hunt-battle-tick.test.js:318:    assert.strictEqual(engine.pendingMonsterAction, null);
+tests\hunt-battle-tick.test.js:431:        pendingMonsterAction: { pattern, remainingTicks: 2, totalTicks: 2 },
+tests\hunt-battle-tick.test.js:459:        pendingMonsterImpact: {
+tests\hunt-battle-tick.test.js:471:    engine.pendingMonsterImpact = null;
+tests\hunt-battle-tick.test.js:486:        pendingMonsterImpact: { remainingTicks: 400 }
+tests\hunt-battle-tick.test.js:492:    engine.pendingMonsterImpact = null;
+tests\hunt-battle-tick.test.js:698:        monsterActionPresentationTicks: 2,
+tests\hunt-beat-v2-live-runtime.test.js:12:        onResetMonsterMotion: reason => events.push(`reset:${reason}`)
+tests\hunt-beat-v2-live-runtime.test.js:23:    engine.pendingMonsterAction = null;
+tests\hunt-beat-v2-live-runtime.test.js:24:    engine.pendingMonsterImpact = null;
+tests\hunt-beat-v2-live-runtime.test.js:29:    engine.monsterActionPresentationTicks = 0;
+tests\hunt-beat-v2-live-runtime.test.js:76:    engine.pendingMonsterImpact = { pattern: { id: 'horn-charge', tags: [] } };
+tests\hunt-beat-v2-live-runtime.test.js:78:    engine.monsterActionPresentationTicks = 8;
+tests\hunt-beat-v2-live-runtime.test.js:84:    assert.strictEqual(engine.pendingMonsterImpact, null,
+tests\hunt-beat-v2-live-runtime.test.js:86:    assert.strictEqual(engine.monsterActionPresentationTicks, 0,
+tests\hunt-blunt-head-stun.test.js:26:        this.pendingMonsterAction = { pattern: {} };
+tests\hunt-blunt-head-stun.test.js:38:        this.pendingMonsterAction = null;
+tests\hunt-blunt-head-stun.test.js:52:assert.strictEqual(engine.pendingMonsterAction, null, 'KO must interrupt a telegraphed monster action');
+tests\hunt-colossal-phase.test.js:8:    pendingMonsterAction: { id: 'slam' }, monsterKnockdownDuration: 0, monsterState: 'normal',
+tests\hunt-colossal-phase.test.js:15:assert.strictEqual(engine.pendingMonsterAction, null);
+tests\fixtures\hunt-world-flying-wyverns-preview.html:112:      const trigger=()=>animator.triggerMonsterAttack(pattern.type,pattern.tags?.includes('ice')?'❄️':pattern.tags?.includes('fire')?'🔥':'💥',targets,pattern.name,pattern);
+js/effects/hunt\HuntResultPresenter.js:390:            container.style.animation = "game-fade-out 0.5s ease-in forwards";
+tests\hunt-charge-acceleration.test.js:35:    /@keyframes (monster-motion-[\w-]*charge[\w-]*|tigrex-charge-chain[\w-]*)\s*\{/g)]
+tests\hunt-charge-acceleration.test.js:69:        new RegExp(`@keyframes ${name}\\s*\\{([\\s\\S]*?)\\n\\}`));
+tests\hunt-charge-acceleration.test.js:95:        /@keyframes monster-motion-ground-charge\s*\{([\s\S]*?)\n\}/)[1];
+js/effects/hunt\HuntBattleTickExecutor.js:29:            || Number(engine.monsterActionPresentationTicks || 0) > 0
+js/effects/hunt\HuntBattleTickExecutor.js:30:            || engine.pendingMonsterAction
+js/effects/hunt\HuntBattleTickExecutor.js:31:            || engine.pendingMonsterImpact
+js/effects/hunt\HuntBattleTickExecutor.js:83:            || Number(engine.monsterActionPresentationTicks || 0) > 0
+js/effects/hunt\HuntBattleTickExecutor.js:84:            || engine.pendingMonsterAction
+js/effects/hunt\HuntBattleTickExecutor.js:85:            || engine.pendingMonsterImpact
+js/effects/hunt\HuntBattleTickExecutor.js:131:        if (Number(engine.monsterActionPresentationTicks || 0) > 0) {
+js/effects/hunt\HuntBattleTickExecutor.js:132:            engine.monsterActionPresentationTicks--;
+js/effects/hunt\HuntBattleTickExecutor.js:155:                    engine.pendingMonsterImpact
+js/effects/hunt\HuntBattleTickExecutor.js:157:                        engine.pendingMonsterImpact.pattern
+js/effects/hunt\HuntBattleTickExecutor.js:160:                if (detachedImpact) engine.clearMonsterTraversal?.('interrupted');
+js/effects/hunt\HuntBattleTickExecutor.js:162:                else engine.clearMonsterTraversal?.('interrupted');
+js/effects/hunt\HuntBattleTickExecutor.js:170:                engine.clearMonsterTraversal?.('complete');
+js/effects/hunt\HuntBattleTickExecutor.js:181:        if (engine.pendingMonsterImpact) {
+js/effects/hunt\HuntBattleTickExecutor.js:187:                    engine.pendingMonsterImpact.pattern
+js/effects/hunt\HuntBattleTickExecutor.js:193:                    engine.pendingMonsterImpact = null;
+js/effects/hunt\HuntBattleTickExecutor.js:194:                    engine.clearMonsterTraversal?.('impact-interrupted');
+js/effects/hunt\HuntBattleTickExecutor.js:199:                    engine.pendingMonsterImpact.pattern?.beatV2Approved === true
+js/effects/hunt\HuntBattleTickExecutor.js:200:                    && beatState?.action === engine.pendingMonsterImpact.pattern?.beatV2
+js/effects/hunt\HuntBattleTickExecutor.js:203:                    const eventIndex = Number(engine.pendingMonsterImpact.nextEventIndex || 0);
+js/effects/hunt\HuntBattleTickExecutor.js:204:                    const dueEvent = engine.pendingMonsterImpact.events?.[eventIndex];
+js/effects/hunt\HuntBattleTickExecutor.js:205:                    engine.pendingMonsterImpact.remainingTicks = Math.max(
+js/effects/hunt\HuntBattleTickExecutor.js:210:                    engine.pendingMonsterImpact.remainingTicks--;
+js/effects/hunt\HuntBattleTickExecutor.js:212:                if (engine.pendingMonsterImpact.remainingTicks <= 0) {
+js/effects/hunt\HuntBattleTickExecutor.js:213:                    const pendingImpact = engine.pendingMonsterImpact;
+js/effects/hunt\HuntBattleTickExecutor.js:230:                        engine.pendingMonsterImpact = null;
+js/effects/hunt\HuntBattleTickExecutor.js:266:                        engine.pendingMonsterImpact = null;
+js/effects/hunt\HuntBattleTickExecutor.js:296:                            animationProfile: resolvedEvent.animationProfile
+js/effects/hunt\HuntBattleTickExecutor.js:297:                                || pendingImpact.pattern.animationProfile,
+js/effects/hunt\HuntBattleTickExecutor.js:308:        if (engine.pendingMonsterAction) {
+js/effects/hunt\HuntBattleTickExecutor.js:313:                    engine.pendingMonsterAction.pattern, engine.selectedMonster);
+js/effects/hunt\HuntBattleTickExecutor.js:318:                    engine.pendingMonsterAction = null;
+js/effects/hunt\HuntBattleTickExecutor.js:319:                    engine.clearMonsterTraversal?.('interrupted');
+js/effects/hunt\HuntBattleTickExecutor.js:324:                    engine.pendingMonsterAction.remainingTicks--;
+js/effects/hunt\HuntBattleTickExecutor.js:327:            if (engine.pendingMonsterAction && engine.pendingMonsterAction.remainingTicks <= 0) {
+js/effects/hunt\HuntBattleTickExecutor.js:328:                const preparedAction = engine.pendingMonsterAction;
+js/effects/hunt\HuntBattleTickExecutor.js:329:                engine.pendingMonsterAction = null;
+js/effects/hunt\HuntBattleTickExecutor.js:651:        if (engine.pendingMonsterAction || engine.pendingMonsterImpact) {
+js/effects/hunt\HuntBattleTickExecutor.js:911:        engine.pendingMonsterAction = null;
+js/effects/hunt\HuntBattleTickExecutor.js:912:        engine.pendingMonsterImpact = null;
+js/effects/hunt\HuntCombatAnimator.js:286:        monsterImg.classList.remove('monster-roar-vibrate');
+js/effects/hunt\HuntCombatAnimator.js:288:        monsterImg.classList.add('monster-roar-vibrate');
+js/effects/hunt\HuntCombatAnimator.js:289:        this.animationTimers.timeout(() => monsterImg.classList.remove('monster-roar-vibrate'), 1200);
+js/effects/hunt\HuntCombatAnimator.js:335:            monsterImg.classList.remove('monster-charge-slide');
+js/effects/hunt\HuntCombatAnimator.js:337:            monsterImg.classList.add('monster-charge-slide');
+js/effects/hunt\HuntCombatAnimator.js:338:            this.animationTimers.timeout(() => monsterImg.classList.remove('monster-charge-slide'), 750);
+js/effects/hunt\HuntCombatAnimator.js:342:    triggerMonsterAttack(type, emoji, targets, attackName = '', pattern = null) {
+js/effects/hunt\HuntCombatAnimator.js:343:        return this.monsterAttackAnimator.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
+js/effects/hunt\HuntCombatAnimator.js:350:    triggerMonsterBurrowPhase(phase, targetIndex, durationMs) {
+js/effects/hunt\HuntCombatAnimator.js:351:        return this.monsterAttackAnimator.triggerMonsterBurrowPhase(phase, targetIndex, durationMs);
+js/effects/hunt\HuntCombatAnimator.js:631:            monsterImg.classList.remove('stunned_monster', 'monster-knockdown-anim', 'monster-knockdown-sequence');
+js/effects/hunt\HuntCombatAnimator.js:692:            } else monsterImg.classList.add('monster-knockdown-sequence');
+js/effects/hunt\HuntCombatAnimator.js:722:                monsterImg.classList.remove('monster-knockdown-sequence');
+js/effects/hunt\HuntCombatAnimator.js:753:        monsterImg.classList.remove('monster-knockdown-anim');
+js/effects/hunt\HuntCombatAnimator.js:792:        monsterImg.classList.remove('monster-sleeping');
+js/effects/hunt\HuntCombatAnimator.js:844:                weaponImg.style.animation = ''; // [FIX] 'none'으로 고정하면 진행 중인 공격 애니메이션(CSS Class)이 즉시 취소됨
+js/effects/hunt\HuntCombatAnimator.js:1128:            monsterImg.classList.remove('monster-pitfall-struggle-pulse');
+js/effects/hunt\HuntCombatAnimator.js:1130:            monsterImg.classList.add('monster-pitfall-struggle-pulse');
+js/effects/hunt\HuntCombatAnimator.js:1189:                monsterImg.classList.remove('monster-bomb-hit');
+js/effects/hunt\HuntCombatAnimator.js:1191:                monsterImg.classList.add('monster-bomb-hit');
+js/effects/hunt\HuntCombatAnimator.js:1197:                monsterImg.classList.remove('monster-bomb-hit');
+js/effects/hunt\HuntCombatAnimator.js:1204:            monsterImg.classList.remove('monster-flash-hit');
+js/effects/hunt\HuntCombatAnimator.js:1206:            monsterImg.classList.add('monster-flash-hit');
+js/effects/hunt\HuntCombatAnimator.js:1207:            this.animationTimers.timeout(() => monsterImg.classList.remove('monster-flash-hit'), 1200);
+js/effects/hunt\HuntCombatAnimator.js:1230:            monsterImg.classList.add('monster-pitfall-caught');
+js/effects/hunt\HuntCombatAnimator.js:1234:                    monsterImg.classList.add('monster-pitfall-struggling');
+js/effects/hunt\HuntCombatAnimator.js:1244:            monsterImg.classList.remove('monster-rockfall-hit');
+js/effects/hunt\HuntCombatAnimator.js:1246:            monsterImg.classList.add('monster-rockfall-hit');
+js/effects/hunt\HuntCombatAnimator.js:1249:                monsterImg.classList.remove('monster-rockfall-hit');
+tests\fixtures\hunt-elemental-effects-preview.html:46:      animator.triggerMonsterAttack('elemental', '🔥', [
+tests\hunt-invincible-jump.test.js:23:assert.match(css, /@keyframes hunter-invincible-jump[\s\S]*?translateY\(760px\)/,
+tests\fixtures\hunt-pitfall-knockdown-preview.html:20:    @keyframes fill-atb { from { transform:scaleX(.5); } to { transform:scaleX(1); } }
+tests\fixtures\hunt-rathian-preview.html:74:      fireball:{id:'rathian.fireball',name:'단발 화염구',type:'projectile',tags:['projectile','fire'],delivery:'projectile',animationProfile:'rathalos-fireball'},
+tests\fixtures\hunt-rathian-preview.html:75:      triple_fireball:{id:'rathian.triple_fireball',name:'3연 화염구',type:'projectile',tags:['projectile','fire','multi-hit'],delivery:'projectile',animationProfile:'rathian-triple-fireball'},
+tests\fixtures\hunt-rathian-preview.html:76:      triple_charge:{id:'rathian.triple_charge',name:'3연속 돌진',type:'charge',tags:['charge','multi-hit'],animationProfile:'ground-charge-triple',runtimeChargeAnchors:[0,1,2]},
+tests\fixtures\hunt-rathian-preview.html:77:      somersault:{id:'rathian.somersault',name:'서머솔트',type:'physical',tags:['tail','poison','target-contact'],animationProfile:'rathian-somersault'},
+tests\fixtures\hunt-rathian-preview.html:78:      double_somersault:{id:'rathian.double_somersault',name:'2연 서머솔트',type:'physical',tags:['tail','poison','target-contact','multi-hit'],animationProfile:'rathian-somersault-double'}
+tests\hunt-environment-effects.test.js:169:    assert.ok(css.includes(`@keyframes ${keyframe}`), `${keyframe} animation must remain defined`);
+tests\hunt-environment-effects.test.js:177:assert.match(css, /@keyframes monster-pitfall-struggle[\s\S]*?translate\(15px,27px\)[\s\S]*?translate\(-10px,23px\)[\s\S]*?translate\(0,59px\)[\s\S]*?translateY\(50px\)/,
+tests\hunt-environment-effects.test.js:181:assert.match(css, /@keyframes monster-pitfall-release[\s\S]*?55%[\s\S]*?translate\(7px,31px\)[\s\S]*?90%[\s\S]*?translateY\(-8px\)/,
+tests\hunt-environment-effects.test.js:183:assert.match(css, /@keyframes pitfall-close\s*\{[\s\S]*?0%,72%\{opacity:1\}/,
+tests\hunt-environment-effects.test.js:187:assert.match(css, /@keyframes monster-pitfall-caught[\s\S]*?clip-path:inset\(0 0 34% 0\)/,
+tests\hunt-environment-effects.test.js:198:assert.match(css, /@keyframes hunter-stun-orbit-spin/);
+tests\fixtures\hunt-diablos-preview.html:77:    function reset(){animator.triggerMonsterBurrowPhase('cancel')}
+tests\fixtures\hunt-diablos-preview.html:80:      if(phase==='enter') animator.triggerMonsterBurrowPhase('enter',null,1250);
+tests\fixtures\hunt-diablos-preview.html:81:      if(phase==='telegraph'){board.classList.add('hunt-monster-underground');animator.triggerMonsterBurrowPhase('telegraph',2,1200)}
+tests\fixtures\hunt-diablos-preview.html:82:      if(phase==='emerge'){board.classList.add('hunt-monster-underground');animator.triggerMonsterBurrowPhase('telegraph',2,1200);setTimeout(()=>animator.triggerMonsterBurrowPhase('emerge',2,1450),700)}
+tests\fixtures\hunt-diablos-preview.html:83:      if(phase==='uppercut') animator.triggerMonsterAttack('physical','💥',hit(1),'뿔 쳐올리기',{id:'diablos.horn_uppercut',name:'뿔 쳐올리기',tags:['horn','target-contact']});
+tests\fixtures\hunt-diablos-preview.html:84:      if(phase==='tail') animator.triggerMonsterAttack('physical','💥',[{index:1,result:'hit'},{index:2,result:'hit'}],'꼬리 휘두르기',{id:'diablos.tail_sweep',name:'꼬리 휘두르기',tags:['tail']});
+tests\fixtures\hunt-diablos-preview.html:85:      if(phase==='rageTail') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'hit'},{index:1,result:'hit'},{index:2,result:'hit'}],'꼬리 휘두르기',{id:'diablos.tail_sweep',name:'꼬리 휘두르기',tags:['tail','double-sweep','multi-hit']});
+tests\fixtures\hunt-diablos-preview.html:86:      if(phase==='tailRock') animator.triggerMonsterAttack('physical','💥',[{index:1,result:'hit'},{index:2,result:'hit'}],'꼬리 내려찍기·바위 날리기',{id:'diablos.tail_slam_rock',name:'꼬리 내려찍기·바위 날리기',type:'projectile',tags:['tail','tail-slam-rock','projectile'],delivery:'projectile',animationProfile:'tail-slam-rock'});
+tests\fixtures\hunt-diablos-preview.html:87:      if(phase==='sideTackle') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'hit'},{index:1,result:'hit'}],'철산고',{id:'diablos.side_tackle',name:'철산고',tags:['physical','side-tackle','target-contact'],animationProfile:'side-tackle-contact'});
+tests\fixtures\hunt-diablos-preview.html:88:      if(phase==='charge') animator.triggerMonsterAttack('physical','💨',[{index:1,result:'hit'}],'뿔 돌진',{id:'diablos.horn_charge',name:'뿔 돌진',type:'charge',tags:['charge','horn','strong'],chargeLaunchStyle:'stomp-burst',animationProfile:'ground-charge'});
+tests\fixtures\hunt-diablos-preview.html:89:      if(phase==='rageCharge') animator.triggerMonsterAttack('physical','💥',[{index:0,result:'dodge'},{index:1,result:'hit'},{index:3,result:'dodge'}],'분노 연속 돌진',{id:'diablos.rage_charge',name:'분노 연속 돌진',type:'charge',tags:['charge','cross-charge','multi-hit'],chargeLaunchStyle:'stomp-burst',animationProfile:'ground-charge-double',animationDurationMs:10640,impact:{passRatios:[.357,.773]},runtimeChargeAnchors:[0,3],runtimeChargePassSizes:[2,1]});
+js/effects/hunt\HuntRenderer.js:835:        this.card.style.animation = 'none';
+js/effects/hunt\HuntRenderer.js:1415:        (traits || []).forEach(trait => monsterImg.classList.add(`monster-trait-${trait}`));
+js/effects/hunt\HuntRenderer.js:1522:            monsterImg.classList.remove('stunned_monster');
+js/effects/hunt\HuntRenderer.js:1542:                monsterImg.classList.remove('monster-knockdown-anim', 'monster-knockdown-sequence');
+js/effects/hunt\HuntRenderer.js:1655:    triggerMonsterAttack(type, emoji, targets, attackName = '', pattern = null) { return this.combatAnimator.triggerMonsterAttack(type, emoji, targets, attackName, pattern); }
+tests\hunt-diablos-runtime.test.js:40:    profiles.diablos.filter(pattern => pattern.animationProfile).map(pattern => pattern.id),
+tests\hunt-diablos-runtime.test.js:42:    'reviewed Diablos must not retain legacy CSS animationProfile fallbacks'
+tests\hunt-diablos-runtime.test.js:88:        assert.strictEqual(engine.pendingMonsterImpact.targetIndex, intendedTarget.index,
+tests\hunt-diablos-runtime.test.js:90:        assert.deepStrictEqual(engine.pendingMonsterImpact.events[0].targetIndices, [intendedTarget.index],
+tests\hunt-diablos-runtime.test.js:304:    assert.strictEqual(engine.pendingMonsterImpact.targetIndex, 1);
+tests\hunt-diablos-runtime.test.js:305:    assert.strictEqual(engine.pendingMonsterImpact.remainingTicks, 13);
+tests\hunt-diablos-runtime.test.js:306:    assert.strictEqual(engine.pendingMonsterImpact.pattern.runtimeImpactCommit, true);
+tests\hunt-diablos-runtime.test.js:308:        engine.pendingMonsterImpact.pattern.runtimeDefenseIntents[1],
+tests\hunt-diablos-runtime.test.js:486:    assert.strictEqual(tailRock.animationProfile, null,
+tests\hunt-diablos-runtime.test.js:570:        callbacks: { onResetMonsterMotion() {} },
+tests\hunt-diablos-runtime.test.js:576:    traversal.clearMonsterTraversal = HuntEngine.prototype.clearMonsterTraversal;
+tests\hunt-diablos-runtime.test.js:581:    traversal.pendingMonsterAction = { pattern: { id: 'diablos.rage_charge' } };
+tests\hunt-diablos-runtime.test.js:582:    traversal.pendingMonsterImpact = { pattern: { id: 'diablos.horn_uppercut' } };
+tests\hunt-diablos-runtime.test.js:589:    assert.strictEqual(traversal.pendingMonsterAction, null);
+tests\hunt-diablos-runtime.test.js:590:    assert.strictEqual(traversal.pendingMonsterImpact, null);
+tests\hunt-monster-pattern-lab-audio.test.js:37:assert.strictEqual(global.audioManagerProbe.calls[0].context.audioPhase, 'action-start');
+tests\hunt-monster-pattern-lab-audio.test.js:41:assert.strictEqual(global.audioManagerProbe.calls[1].context.audioPhase, 'impact');
+js/effects/hunt\HuntAudioManager.js:547:    monsterCueLayersForPhase(variant, audioPhase = null) {
+js/effects/hunt\HuntAudioManager.js:549:        if (!audioPhase) return layers;
+js/effects/hunt\HuntAudioManager.js:550:        const phase = String(audioPhase).toLowerCase();
+js/effects/hunt\HuntAudioManager.js:552:        const explicitPhase = String(variant.audioPhase || '').toLowerCase();
+js/effects/hunt\HuntAudioManager.js:612:        }).filter(variant => this.monsterCueLayersForPhase(variant, options.audioPhase).length > 0);
+js/effects/hunt\HuntAudioManager.js:619:        if (variant && options.audioPhase) {
+js/effects/hunt\HuntAudioManager.js:622:                layers: this.monsterCueLayersForPhase(variant, options.audioPhase)
+js/effects/hunt\HuntAudioManager.js:763:        if (String(options.audioPhase || '').toLowerCase() === 'action-start') return false;
+js/effects/hunt\HuntAudioManager.js:806:        if (String(options.audioPhase || '').toLowerCase() === 'action-start') return 'start';
+js/effects/hunt\HuntAudioManager.js:1096:        if (this.playMonsterAction(monster, 'roar', { audioPhase: 'action-start' })) return;
+js/effects/hunt\HuntAudioManager.js:1119:        if (fileName === 'monster_impact' || fileName === 'monster_recovery' || fileName === 'monster_travel') {
+tests\hunt-combat-deadlock-recovery.test.js:11:    pendingMonsterAction: { pattern: {} },
+tests\hunt-combat-deadlock-recovery.test.js:28:assert.strictEqual(engine.pendingMonsterAction, null);
+tests\hunt-monster-part-break-reaction.test.js:115:        monsterActionPresentationTicks: Number(options.presentationTicks || 0),
+tests\hunt-monster-part-break-reaction.test.js:116:        pendingMonsterAction: options.pendingMonsterAction || null,
+tests\hunt-monster-part-break-reaction.test.js:117:        pendingMonsterImpact: null,
+tests\hunt-monster-part-break-reaction.test.js:168:deferredHeadBreak.engine.monsterActionPresentationTicks = 0;
+tests\hunt-monster-part-break-reaction.test.js:292:assert.match(css, /\.monster-stun-head-marker[\s\S]*?@keyframes monster-stun-head-orbit/,
+tests\hunt-monster-part-break-reaction.test.js:298:assert.doesNotMatch(css, /@keyframes monster-part-break-topple|@keyframes monster-part-flinch|@keyframes monster-tail-sever-roll/,
+tests\hunt-monster-part-break-reaction.test.js:300:assert.match(css, /@keyframes monster-knockdown-sequence/);
+tests\hunt-monster-part-break-reaction.test.js:303:const knockdownCss = css.match(/@keyframes monster-knockdown-sequence[\s\S]*?\n\}/)?.[0] || '';
+tests\hunt-monster-part-break-reaction.test.js:326:assert.match(css, /@keyframes monster-part-break-left[\s\S]*?20% \{ opacity:1[\s\S]*?60% \{ opacity:1/s,
+tests\hunt-monster-part-break-reaction.test.js:332:assert.doesNotMatch(css, /\.hunt-monster-part-break-burst|@keyframes hunt-part-break-fragment/,
+tests\fixtures\hunt-monster-hud-preview.html:59:      previewMonster.classList.add(`monster-motion-${previewMotion}`);
+tests\layout-contracts.test.js:159:    const largeHitShake = css.match(/@keyframes card-large-shake\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\layout-contracts.test.js:160:    const smallHitShake = css.match(/@keyframes card-small-shake\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\layout-contracts.test.js:226:assert.doesNotMatch(css, /@keyframes\s+cart-card-slide-out/,
+tests\layout-contracts.test.js:315:assert.match(css, /@keyframes ig-kinsect-extract/);
+tests\layout-contracts.test.js:316:assert.match(css, /@keyframes ig-kinsect-assault/);
+tests\layout-contracts.test.js:388:assert.doesNotMatch(css, /@keyframes hunt-critical-slash[\s\S]{0,900}scaleX\(/,
+tests\hunt-monster-animation-catalog.test.js:17:        Catalog.resolve({ id: `test.${authored}`, animationProfile: authored }, '', '', { species: 'Flying Wyvern' }).id,
+tests\hunt-monster-animation-catalog.test.js:35:    while ((cursor = source.indexOf('@keyframes ', cursor)) >= 0) {
+tests\hunt-monster-animation-catalog.test.js:322:    id: 'diablos.tail_sweep', tags: ['tail'], animationProfile: 'diablos-tail-cross'
+tests\hunt-monster-animation-catalog.test.js:325:    id: 'future_monster.tail_slam_rock', tags: ['tail', 'projectile'], animationProfile: 'tail-slam-rock'
+tests\hunt-monster-animation-catalog.test.js:328:    id: 'future_monster.side_tackle', tags: ['target-contact'], animationProfile: 'side-tackle-contact'
+tests\hunt-monster-animation-catalog.test.js:333:    animationProfile: 'ground-charge-double'
+tests\hunt-monster-animation-catalog.test.js:370:    assert(css.includes(`@keyframes monster-motion-${id}`), `${id} keyframes must exist`);
+tests\hunt-monster-animation-catalog.test.js:378:    assert.strictEqual(Catalog.resolve({ animationProfile: id }).id, id);
+tests\hunt-monster-animation-catalog.test.js:380:    assert(css.includes(`@keyframes monster-motion-${id}`), `${id} keyframes must exist`);
+tests\hunt-monster-animation-catalog.test.js:398:    assert.ok(!css.includes(`@keyframes monster-motion-${legacyDiablosMotion}`),
+tests\hunt-monster-animation-catalog.test.js:402:    const burrowFrames = css.match(/@keyframes monster-motion-burrow-emerge\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\hunt-monster-animation-catalog.test.js:411:    const doubleChargeFrames = css.match(/@keyframes monster-motion-ground-charge-double\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\hunt-monster-animation-catalog.test.js:478:        animationProfile: 'horn-uppercut',
+tests\hunt-monster-animation-catalog.test.js:486:        animationProfile: 'side-tackle-contact'
+tests\hunt-monster-flight.test.js:48:    monsterAtb: 100, pendingMonsterAction: { pattern: aerial }, monsterKnockdownDuration: 0
+tests\hunt-monster-flight.test.js:71:assert.strictEqual(engine.pendingMonsterAction, null);
+tests\hunt-monster-flight.test.js:80:    pendingMonsterAction: { pattern: aerial }
+tests\hunt-monster-flight.test.js:86:assert.strictEqual(automaticEngine.pendingMonsterAction, null);
+tests\hunt-monster-flight.test.js:169:    pendingMonsterAction: null,
+js/effects/hunt\HuntColossalPhaseRuntime.js:15:            engine.pendingMonsterAction = null;
+js/effects/hunt\HuntColossalPhaseRuntime.js:16:            engine.pendingMonsterImpact = null;
+tests\fixtures\hunt-monster-pattern-lab-audio.js:115:    audioContext(pattern, audioPhase, event = null) {
+tests\fixtures\hunt-monster-pattern-lab-audio.js:122:            audioPhase,
+tests\fixtures\hunt-monster-pattern-lab-audio.js:169:        if (kind) this.audioManager.playMonsterAction(monster, kind, { audioPhase: 'action-start' });
+tests\fixtures\hunt-monster-pattern-pilot-preview.html:47:    function play(){animator.triggerMonsterAttack('elemental','☠️',[{index:0,result:'hit'},{index:1,result:'hit'},{index:2,result:'hit'},{index:3,result:'dodge'}],pattern.name,pattern)}
+tests\hunt-rathalos-runtime.test.js:74:        pattern.animationProfile
+tests\hunt-rathalos-runtime.test.js:101:const tailFrames = css.match(/@keyframes monster-motion-rathalos-tail-sweep-double\s*\{([^}]*(?:\}[^@]*)?)/)?.[0] || '';
+tests\fixtures\hunt-rathalos-preview.html:109:      animator.triggerMonsterAttack(p.type,p.emoji,results,p.name,{id:`rathalos.${key}`,name:p.name,tags:p.tags,delivery:p.delivery||null,chargeMode:p.wide?'wide':null,animationProfile:p.profile,runtimeSweepDirection:p.wide?'left-to-right':null,runtimeImpactPending:p.type==='elemental',runtimeImpactDelayTicks:8});
+js/effects/hunt\HuntPerkRuntime.js:425:        if (names.has('임기응변') && this.engine.pendingMonsterAction) value *= 1.12;
+js/effects/hunt\HuntAudioCatalog.js:391:        audioPhase: 'impact',
+tests\fixtures\hunt-monster-pattern-lab.html:61:    @keyframes lab-exhausted{0%,100%{transform:translateY(18px) rotate(-3deg) scaleY(.94)}50%{transform:translateY(25px) rotate(3deg) scaleY(.88)}}
+tests\fixtures\hunt-monster-pattern-lab.html:277:      image.classList.remove('enraged','lab-exhausted','monster-airborne','monster-knockdown-anim','monster-knockdown-sequence','stunned_monster','monster-paralyzed','monster-sleeping');
+tests\fixtures\hunt-monster-pattern-lab.html:279:      stage.classList.remove('monster-flight-stage-airborne');
+tests\fixtures\hunt-monster-pattern-lab.html:299:      else if(state==='airborne'){image.classList.add('monster-airborne');stage.classList.add('monster-flight-stage-airborne')}
+tests\fixtures\hunt-monster-pattern-lab.html:302:      else if(state==='paralyzed')image.classList.add('monster-paralyzed');
+tests\fixtures\hunt-monster-pattern-lab.html:303:      else if(state==='sleeping')image.classList.add('monster-sleeping');
+tests\fixtures\hunt-monster-pattern-lab.html:616:      animator.triggerMonsterAttack(pattern.type,patternEmoji(pattern),selection.targets,pattern.name,pattern);
+tests\fixtures\hunt-monster-pattern-lab.html:752:        const finish=()=>{group.onpointermove=null;group.onpointerup=null;group.onpointercancel=null;group.classList.remove('is-dragging');renderAnatomyGuide();parent.postMessage({type:'bubblechat:monster-anatomy-edit',monsterId:owner.selectedMonster?.id||'',geometry:anatomyDraft},'*')};
+tests\fixtures\hunt-monster-pattern-lab.html:764:      svg.classList.add('monster-anatomy-guide');svg.setAttribute('viewBox','0 0 512 512');
+tests\hunt-legiana-runtime.test.js:65:assert.strictEqual(hopClaw.animationProfile, 'legiana-hop-strike');
+tests\hunt-legiana-runtime.test.js:176:assert.match(css, /@keyframes monster-motion-legiana-drill-cross/);
+tests\hunt-legiana-runtime.test.js:178:assert.match(css, /@keyframes monster-motion-legiana-hop-strike/);
+js/effects/hunt\HuntMonsterTurnExecutor.js:188:        engine.pendingMonsterImpact = null;
+js/effects/hunt\HuntMonsterTurnExecutor.js:201:        engine.clearMonsterTraversal?.(reason);
+js/effects/hunt\HuntMonsterTurnExecutor.js:258:            engine.pendingMonsterAction = null;
+js/effects/hunt\HuntMonsterTurnExecutor.js:259:            engine.pendingMonsterImpact = null;
+js/effects/hunt\HuntMonsterTurnExecutor.js:264:            engine.clearMonsterTraversal?.(reason);
+js/effects/hunt\HuntMonsterTurnExecutor.js:272:        const pending = engine.pendingMonsterAction;
+js/effects/hunt\HuntMonsterTurnExecutor.js:714:        if (engine.pendingMonsterAction) return false;
+js/effects/hunt\HuntMonsterTurnExecutor.js:789:        const animationProfile = HuntMonsterTurnExecutor.animationCatalog()?.resolve?.(
+js/effects/hunt\HuntMonsterTurnExecutor.js:795:        const animationTicks = Math.max(1, Math.ceil(Number(animationProfile?.duration || 0) / 100));
+js/effects/hunt\HuntMonsterTurnExecutor.js:831:        engine.pendingMonsterAction = {
+js/effects/hunt\HuntMonsterTurnExecutor.js:950:                audioPhase: 'action-start'
+js/effects/hunt\HuntMonsterTurnExecutor.js:959:                audioPhase: 'action-start'
+js/effects/hunt\HuntMonsterTurnExecutor.js:967:            engine.playSFX?.('monster_impact', null, {
+js/effects/hunt\HuntMonsterTurnExecutor.js:975:                engine.playSFX?.('monster_recovery', null, {
+js/effects/hunt\HuntMonsterTurnExecutor.js:1119:            engine.pendingMonsterImpact = {
+js/effects/hunt\HuntMonsterTurnExecutor.js:1143:            engine.monsterActionPresentationTicks = Math.max(
+js/effects/hunt\HuntMonsterTurnExecutor.js:1144:                Number(engine.monsterActionPresentationTicks || 0),
+js/effects/hunt\HuntMonsterTurnExecutor.js:1170:            engine.pendingMonsterImpact.remainingTicks = synchronizedImpactDelay;
+js/effects/hunt\HuntMonsterTurnExecutor.js:1171:            engine.pendingMonsterImpact.totalTicks = synchronizedImpactDelay;
+js/effects/hunt\HuntMonsterTurnExecutor.js:1199:                audioPhase: 'impact',
+js/effects/hunt\HuntMonsterTurnExecutor.js:1649:            engine.monsterActionPresentationTicks = Math.max(
+js/effects/hunt\HuntMonsterTurnExecutor.js:1650:                Number(engine.monsterActionPresentationTicks || 0),
+tests\hunt-local-audio.test.js:186:        audioPhase: 'action-start'
+tests\hunt-local-audio.test.js:190:        audioPhase: 'impact'
+tests\hunt-local-audio.test.js:200:        audioPhase: 'action-start'
+tests\hunt-monster-action-policy.test.js:288:        animationProfile: 'ground-charge-double'
+tests\hunt-monster-breath-delivery.test.js:66:assert.match(css, /@keyframes monster-element-projectile-reduced[\s\S]*?prefers-reduced-motion[\s\S]*?monster-element-projectile-reduced/,
+tests\hunt-tigrex-runtime.test.js:60:    /onTriggerMonsterAttack\?\.\([\s\S]*?synchronizedImpactDelay[\s\S]*?events\[0\]\?\.atTicks[\s\S]*?pendingMonsterImpact\.remainingTicks = synchronizedImpactDelay/,
+tests\hunt-tigrex-runtime.test.js:69:assert.match(turnExecutorSource, /tigrex-final-vocal[\s\S]*?audioPhase: 'action-start'/,
+tests\hunt-tigrex-runtime.test.js:124:    const resolved = AnimationCatalog.resolve({ animationProfile: profile }, '', '', { id: 'tigrex' });
+tests\hunt-tigrex-runtime.test.js:130:assert.match(css, /@keyframes tigrex-charge-chain-three/,
+tests\hunt-tigrex-runtime.test.js:136:const strideFlipFrames = css.match(/@keyframes tigrex-charge-stride-flip \{[\s\S]*?\n\}/)?.[0] || '';
+tests\hunt-tigrex-runtime.test.js:140:assert.match(css, /@keyframes tigrex-sonic-impact-ring/);
+tests\hunt-tigrex-runtime.test.js:145:    css.match(/@keyframes tigrex-charge-chain \{[\s\S]*?\n\}/)?.[0] || '',
+tests\hunt-tigrex-runtime.test.js:149:const normalChargeFrames = css.match(/@keyframes tigrex-charge-chain \{[\s\S]*?\n\}/)?.[0] || '';
+tests\hunt-tigrex-runtime.test.js:150:const enragedChargeFrames = css.match(/@keyframes tigrex-charge-chain-three \{[\s\S]*?\n\}/)?.[0] || '';
+tests\hunt-tigrex-runtime.test.js:161:const branchApproachFrames = css.match(/@keyframes tigrex-branch-approach \{[\s\S]*?\n\}/)?.[0] || '';
+tests\hunt-tigrex-runtime.test.js:168:const rockHopFrames = css.match(/@keyframes tigrex-rock-hop \{[^\n]*\}/)?.[0] || '';
+tests\hunt-tigrex-runtime.test.js:171:const runningBiteFrames = css.match(/@keyframes tigrex-running-double-bite \{[^\n]*\}/)?.[0] || '';
+tests\hunt-tigrex-runtime.test.js:174:const doubleBiteFrames = css.match(/@keyframes tigrex-double-bite \{[^\n]*\}/)?.[0] || '';
+tests\hunt-tigrex-runtime.test.js:177:const leapFrames = css.match(/@keyframes tigrex-leap \{[\s\S]*?\n\}/)?.[0] || '';
+tests\hunt-tigrex-runtime.test.js:180:const slidingSpinFrames = css.match(/@keyframes tigrex-sliding-spin \{[^\n]*\}/)?.[0] || '';
+js/effects/hunt\HuntMonsterAnimationCatalog.js:14:        const authoredProfile = String(pattern.animationProfile || '');
+tests\hunt-precision-audio-timing.test.js:125:assert.match(monsterTurnSource, /audioPhase:\s*'action-start'/,
+tests\hunt-precision-audio-timing.test.js:127:assert.match(monsterTurnSource, /requiresDelayedImpact\(pattern\)[\s\S]*?return;[\s\S]*?audioPhase:\s*'impact'/,
+tests\hunt-precision-audio-timing.test.js:129:assert.match(monsterTurnSource, /audioPhase:\s*'impact'[\s\S]*?targetsToHit\.forEach/,
+tests\hunt-precision-audio-timing.test.js:138:    audioPhase: 'impact'
+tests\hunt-monster-airborne-status.test.js:26:        this.pendingMonsterAction = { id: 'air-attack' };
+tests\hunt-monster-airborne-status.test.js:27:        this.pendingMonsterImpact = { id: 'air-impact' };
+tests\hunt-monster-airborne-status.test.js:33:        this.pendingMonsterAction = null;
+tests\hunt-monster-airborne-status.test.js:34:        this.pendingMonsterImpact = null;
+tests\hunt-monster-airborne-status.test.js:59:    assert.strictEqual(engine.pendingMonsterAction, null);
+tests\hunt-monster-airborne-status.test.js:60:    assert.strictEqual(engine.pendingMonsterImpact, null);
+tests\hunt-monster-trait-runtime.test.js:314:        clearMonsterTraversal() {}
+js/effects/hunt\HuntMonsterTraitRuntime.js:299:        engine.clearMonsterTraversal?.(reason);
+js/effects/hunt\HuntMonsterTraitRuntime.js:313:        engine.clearMonsterTraversal?.('aerial-trap-intercept');
+tests\hunt-monster-atb-cadence.test.js:153:assert.ok(preparedEngine.pendingMonsterAction.timing.occupancyTicks >= 100,
+tests\hunt-monster-patterns.test.js:179:    assert.strictEqual(glide.animationProfile, 'aerial-charge-cross');
+tests\hunt-pattern-audio-runtime.test.js:23:assert.strictEqual(HuntAudioManager.resolveOverrideSlot('anything', { audioPhase: 'action-start' }), 'start');
+js/effects/hunt\HuntMonsterActionPolicy.js:540:                    animationProfile: source.animationProfile || null,
+tests\hunt-renderer-lifecycle.test.js:96:assert.match(fs.readFileSync(animatorPath, 'utf8'), /return this\.monsterAttackAnimator\.triggerMonsterAttack/);
+js/effects/hunt\HuntMonsterStaminaRuntime.js:144:        const pendingImpact = engine.pendingMonsterImpact || null;
+js/effects/hunt\HuntMonsterStaminaRuntime.js:153:        if (detachedImpact) engine.pendingMonsterImpact = pendingImpact;
+js/effects/hunt\HuntMonsterStaminaRuntime.js:154:        engine.pendingMonsterAction = null;
+tests\hunt-rathian-runtime.test.js:115:assert.strictEqual(byId('rathian.tail_sweep').animationProfile, 'rathian-tail-sweep-double');
+tests\hunt-rathian-runtime.test.js:123:assert.strictEqual(byId('rathian.charge').animationProfile, 'rathian-ground-charge');
+tests\hunt-rathian-runtime.test.js:220:    && event[5]?.animationProfile === 'rath-flight-stagger'));
+tests\hunt-rathian-runtime.test.js:235:    assert.strictEqual(animation.id, pattern.animationProfile);
+tests\hunt-rathian-runtime.test.js:250:const tripleChargeFrames = css.match(/@keyframes monster-motion-ground-charge-triple\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\hunt-rathian-runtime.test.js:260:const singleChargeFrames = css.match(/@keyframes monster-motion-rathian-ground-charge\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\hunt-rathian-runtime.test.js:265:    line.includes('@keyframes monster-motion-tail-sweep-double')) || '';
+tests\hunt-rathian-runtime.test.js:281:    assert.match(css, new RegExp(`@keyframes monster-motion-${animationName}`));
+tests\hunt-rathian-runtime.test.js:283:const somersaultFrames = css.match(/@keyframes monster-motion-rathian-somersault\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\hunt-rathian-runtime.test.js:297:    const frames = css.match(new RegExp(`@keyframes monster-motion-${animationName}\\s*\\{([\\s\\S]*?)\\n\\}`))?.[1] || '';
+tests\hunt-rathian-runtime.test.js:303:const somersaultGlideFrames = css.match(/@keyframes monster-motion-rathian-somersault-glide\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\hunt-rathian-runtime.test.js:312:const glideFrames = css.match(/@keyframes monster-motion-rathian-glide\s*\{([\s\S]*?)\n\}/)?.[1] || '';
+tests\hunt-split-weapon-layers.test.js:23:assert.match(css, /@keyframes hunt-guard-impact-shake\s*\{[\s\S]*?rotate\(-9deg\)[\s\S]*?rotate\(8deg\)[\s\S]*?rotate\(-6deg\)/,
+tests\hunt-small-monster-swarm.test.js:43:        pendingMonsterAction: null,
+tests\hunt-small-monster-swarm.test.js:57:    assert.strictEqual(engine.pendingMonsterAction.attackerIndex, 0, 'the ready unit identity must survive the windup');
+js/effects/hunt\HuntMonsterProfiles.js:42:        // 비트 목록. 있으면 새 모션 경로를 타고, 없으면 animationProfile의
+js/effects/hunt\HuntMonsterProfiles.js:46:        animationProfile: options.animationProfile || null,
+js/effects/hunt\HuntMonsterProfiles.js:218:        weight: 0.08, active: 40, recovery: 1, animationProfile: 'roar',
+js/effects/hunt\HuntMonsterProfiles.js:232:        animationProfile: 'close-strike', animationDurationMs: 2400,
+js/effects/hunt\HuntMonsterProfiles.js:248:        animationProfile: 'ground-charge', animationDurationMs: 4000,
+js/effects/hunt\HuntMonsterProfiles.js:266:        animationProfile: 'side-tackle-contact', animationDurationMs: 3200,
+js/effects/hunt\HuntMonsterProfiles.js:285:        animationProfile: 'tail-sweep', animationDurationMs: 3200,
+js/effects/hunt\HuntMonsterProfiles.js:304:        animationProfile: 'leap-slam', animationDurationMs: 2400,
+js/effects/hunt\HuntMonsterProfiles.js:326:        animationProfile: 'ranged-cast', animationDurationMs: 3200,
+js/effects/hunt\HuntMonsterProfiles.js:354:        animationProfile: 'bazel-carpet-bombing', animationDurationMs: 9600,
+js/effects/hunt\HuntMonsterProfiles.js:416:        animationProfile: 'rathalos-bite-contact', maxConsecutiveUses: 3,
+js/effects/hunt\HuntMonsterProfiles.js:428:        impact: { delayRatio: 0.61 }, animationProfile: 'rathalos-rush-bite',
+js/effects/hunt\HuntMonsterProfiles.js:440:        impact: { delayTicks: 17, survivesInterruption: true }, animationProfile: 'rathalos-fireball', originPart: 'head',
+js/effects/hunt\HuntMonsterProfiles.js:458:        animationProfile: 'rathalos-fireball', originPart: 'head',
+js/effects/hunt\HuntMonsterProfiles.js:486:        animationProfile: 'rathalos-triple-fireball', animationDurationMs: 3000, originPart: 'head',
+js/effects/hunt\HuntMonsterProfiles.js:505:        flightTransition: 'takeoff', animationProfile: 'rathalos-backstep-fireball', originPart: 'head',
+js/effects/hunt\HuntMonsterProfiles.js:521:        movement: { ticks: 36 }, impact: { delayRatio: 0.66 }, animationProfile: 'rathalos-claw-dive',
+js/effects/hunt\HuntMonsterProfiles.js:535:        animationProfile: 'rathalos-tail-sweep-double', animationDurationMs: 3800,
+js/effects/hunt\HuntMonsterProfiles.js:549:        impact: { delayRatio: 0.62 }, animationProfile: 'tail-sweep',
+js/effects/hunt\HuntMonsterProfiles.js:563:        animationProfile: 'rathalos-stomp',
+js/effects/hunt\HuntMonsterProfiles.js:577:        animationProfile: 'rathalos-stomp', flightTransition: 'land',
+js/effects/hunt\HuntMonsterProfiles.js:597:        animationProfile: 'aerial-charge-cross', animationDurationMs: 3200
+js/effects/hunt\HuntMonsterProfiles.js:627:        animationProfile: 'rathalos-bite-contact', animationDurationMs: 2400,
+js/effects/hunt\HuntMonsterProfiles.js:644:        animationProfile: 'rathian-tail-sweep-double', animationDurationMs: 4200,
+js/effects/hunt\HuntMonsterProfiles.js:661:        animationProfile: 'rathalos-fireball', originPart: 'head',
+js/effects/hunt\HuntMonsterProfiles.js:683:        animationProfile: 'rathian-triple-fireball', animationDurationMs: 2800, originPart: 'head',
+js/effects/hunt\HuntMonsterProfiles.js:700:        animationProfile: 'rathalos-fireball', animationDurationMs: 1800, originPart: 'head',
+js/effects/hunt\HuntMonsterProfiles.js:715:        impact: { visualRatio: 0.30 }, animationProfile: 'rathian-ground-charge', animationDurationMs: 3000,
+js/effects/hunt\HuntMonsterProfiles.js:731:        animationProfile: 'ground-charge-triple', animationDurationMs: 9000,
+js/effects/hunt\HuntMonsterProfiles.js:750:        animationProfile: 'rathian-somersault', animationDurationMs: 3200,
+js/effects/hunt\HuntMonsterProfiles.js:773:        animationProfile: 'rathian-somersault-double', animationDurationMs: 6400, originPart: 'tail',
+js/effects/hunt\HuntMonsterProfiles.js:799:        animationProfile: 'rathian-bite-somersault', animationDurationMs: 6600,
+js/effects/hunt\HuntMonsterProfiles.js:830:        animationProfile: 'rathian-somersault-glide', animationDurationMs: 7800,
+js/effects/hunt\HuntMonsterProfiles.js:855:        animationProfile: 'rathian-glide', animationDurationMs: 4800,
+js/effects/hunt\HuntMonsterProfiles.js:1253:        animationProfile: 'legiana-hop-strike', animationDurationMs: 1400
+js/effects/hunt\HuntMonsterProfiles.js:1260:        animationProfile: 'legiana-hop-strike', animationDurationMs: 1500
+js/effects/hunt\HuntMonsterProfiles.js:1266:        impact: { delayRatio: .50 }, animationProfile: 'ground-charge', animationDurationMs: 2600
+js/effects/hunt\HuntMonsterProfiles.js:1272:        brokenPartTargetCaps: { tail: 1 }, animationProfile: 'tail-sweep', animationDurationMs: 2200,
+js/effects/hunt\HuntMonsterProfiles.js:1281:        animationProfile: 'aerial-dive', animationDurationMs: 1800
+js/effects/hunt\HuntMonsterProfiles.js:1290:        animationProfile: 'lateral-sweep', animationDurationMs: 2200
+js/effects/hunt\HuntMonsterProfiles.js:1298:        animationProfile: 'aerial-dive', animationDurationMs: 2500
+js/effects/hunt\HuntMonsterProfiles.js:1307:        animationProfile: 'legiana-drill-cross', animationDurationMs: 3000,
+js/effects/hunt\HuntMonsterProfiles.js:1315:        animationProfile: 'aerial-dive', animationDurationMs: 2800
+js/effects/hunt\HuntMonsterProfiles.js:1345:        flightTransition: 'land', secondaryInterference: { kind: 'wind-small' }, animationProfile: 'aerial-slam'
+js/effects/hunt\HuntMonsterProfiles.js:1379:        cooldown: 90, windup: 14, recovery: 18, animationProfile: 'aerial-dive-explosion',
+js/effects/hunt\HuntMonsterProfiles.js:1415:        animationProfile: branchProfile,
+js/effects/hunt\HuntMonsterProfiles.js:1437:            animationProfile: 'tigrex-exhausted-trip',
+js/effects/hunt\HuntMonsterProfiles.js:1461:        animationProfile: 'tigrex-charge-chain',
+js/effects/hunt\HuntMonsterProfiles.js:1528:        impact: { visualRatio: .56 }, animationProfile: 'tigrex-foreleg-slam', animationDurationMs: 2000,
+js/effects/hunt\HuntMonsterProfiles.js:1542:        animationProfile: 'tigrex-bite', animationDurationMs: 1800, visualAnchors: TIGREX_ANCHORS
+js/effects/hunt\HuntMonsterProfiles.js:1562:        brokenPartDamageModifiers: { head: .75 }, animationProfile: 'tigrex-double-bite', animationDurationMs: 2400, visualAnchors: TIGREX_ANCHORS
+js/effects/hunt\HuntMonsterProfiles.js:1574:        brokenPartTargetCaps: { tail: 2 }, animationProfile: 'tigrex-clockwise-spin', animationDurationMs: 1540,
+js/effects/hunt\HuntMonsterProfiles.js:1599:        animationProfile: 'tigrex-rock-shot', visualAnchors: TIGREX_ANCHORS
+js/effects/hunt\HuntMonsterProfiles.js:1605:        impact: { visualRatio: .68 }, animationProfile: 'tigrex-leap', animationDurationMs: 2400, visualAnchors: TIGREX_ANCHORS,
+js/effects/hunt\HuntMonsterProfiles.js:1669:        animationProfile: 'nargacuga-dash-bite', animationDurationMs: 1600,
+js/effects/hunt\HuntMonsterProfiles.js:1698:        animationProfile: 'nargacuga-tail-whip', animationDurationMs: 2400,
+js/effects/hunt\HuntMonsterProfiles.js:1718:        animationProfile: 'nargacuga-pivot-spin', animationDurationMs: 2600,
+js/effects/hunt\HuntMonsterProfiles.js:1757:        animationProfile: 'nargacuga-turn-tail-slam', animationDurationMs: 5500,
+js/effects/hunt\HuntMonsterProfiles.js:1780:        animationProfile: 'nargacuga-flank-charge', animationDurationMs: 3400,
+js/effects/hunt\HuntMonsterProfiles.js:1813:        animationProfile: 'nargacuga-leap-ambush', animationDurationMs: 3100,
+js/effects/hunt\HuntMonsterProfiles.js:1840:        animationProfile: 'nargacuga-offscreen-charge', animationDurationMs: 5600
+js/effects/hunt\HuntMonsterProfiles.js:1860:        animationProfile: 'ranged-cast', animationDurationMs: 2600,
+js/effects/hunt\HuntMonsterProfiles.js:1885:        animationProfile: 'nargacuga-stance-hop', animationDurationMs: 3000,
+js/effects/hunt\HuntMonsterProfiles.js:1909:        animationProfile: 'nargacuga-bite-spin-return', animationDurationMs: 3600,
+js/effects/hunt\HuntMonsterProfiles.js:1942:        animationProfile: 'nargacuga-leap-ambush-triple', animationDurationMs: 6600,
+js/effects/hunt\HuntMonsterProfiles.js:1968:        animationProfile: 'nargacuga-twin-pivot-spin', animationDurationMs: 4400,
+js/effects/hunt\HuntMonsterProfiles.js:1998:        animationProfile: 'nargacuga-turn-tail-slam-double', animationDurationMs: 8000,
+js/effects/hunt\HuntMonsterProfiles.js:2032:        animationProfile: 'nargacuga-lunge-finish', animationDurationMs: 7200
+js/effects/hunt\HuntMonsterProfiles.js:2090:        animationProfile: 'barioth-leaping-bite-contact', animationDurationMs: 1000,
+js/effects/hunt\HuntMonsterProfiles.js:2114:        animationProfile: 'side-tackle-contact', animationDurationMs: 2500,
+js/effects/hunt\HuntMonsterProfiles.js:2137:        animationProfile: 'barioth-wide-tail-sweep', animationDurationMs: 2800,
+js/effects/hunt\HuntMonsterProfiles.js:2167:        animationProfile: 'barioth-wide-tail-sweep', animationDurationMs: 2800, originPart: 'tail',
+js/effects/hunt\HuntMonsterProfiles.js:2197:        animationProfile: 'barioth-ice-tornado-cast', animationDurationMs: 3000, originPart: 'mouth',
+js/effects/hunt\HuntMonsterProfiles.js:2220:        animationProfile: 'barioth-ice-tornado-cast', animationDurationMs: 3200, originPart: 'mouth',
+js/effects/hunt\HuntMonsterProfiles.js:2244:        animationProfile: 'barioth-wall-pounce', animationDurationMs: 4200, originPart: 'head',
+js/effects/hunt\HuntMonsterProfiles.js:2266:        animationProfile: 'barioth-glide-circle-land', animationDurationMs: 3600,
+js/effects/hunt\HuntMonsterProfiles.js:2288:        animationProfile: 'barioth-spring-leap',
+js/effects/hunt\HuntMonsterProfiles.js:2303:        animationProfile: 'barioth-exhausted-breath-fizzle', animationDurationMs: 2000, originPart: 'mouth',
+js/effects/hunt\HuntHunterDecisionPolicy.js:18:        const pattern = engine?.pendingMonsterAction?.pattern || engine?.pendingMonsterImpact?.pattern || null;
+js/effects/hunt\HuntHunterTurnExecutor.js:218:                engine.pendingMonsterAction = null;
+js/effects/hunt\HuntHunterTurnExecutor.js:219:                engine.pendingMonsterImpact = null;
+js/effects/hunt\HuntMonsterFlightRuntime.js:94:                } else if (!engine.pendingMonsterAction
+js/effects/hunt\HuntMonsterFlightRuntime.js:95:                    && !engine.pendingMonsterImpact
+js/effects/hunt\HuntMonsterFlightRuntime.js:232:                animationProfile: profile,
+js/effects/hunt\HuntMonsterFlightRuntime.js:376:            engine.pendingMonsterAction = null;
+js/effects/hunt\HuntMonsterFlightRuntime.js:377:            engine.pendingMonsterImpact = null;
+js/effects/hunt\HuntMonsterAttackAnimator.js:557:            ghost.style.animationDelay = `${index * 70}ms`;
+js/effects/hunt\HuntMonsterAttackAnimator.js:558:            ghost.style.animationFillMode = 'both';
+js/effects/hunt\HuntMonsterAttackAnimator.js:568:        motionElement.classList.remove(...Array.from(motionElement.classList).filter(name => name.startsWith('monster-motion-')));
+js/effects/hunt\HuntMonsterAttackAnimator.js:661:            monsterImg.classList.remove('monster-horn-stuck-anim', 'monster-beat-stride-flip');
+js/effects/hunt\HuntMonsterAttackAnimator.js:918:                cssStyle.textContent += `@keyframes ${name}{${keyframes}}`;
+js/effects/hunt\HuntMonsterAttackAnimator.js:1059:                    monsterImg.classList.remove('monster-beat-stride-flip');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1061:                    monsterImg.classList.add('monster-beat-stride-flip');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1064:                    monsterImg.classList.remove('monster-beat-stride-flip');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1819:    triggerMonsterBurrowPhase(phase, targetIndex = null, durationMs = 0) {
+js/effects/hunt\HuntMonsterAttackAnimator.js:1844:            this.card.classList.remove('hunt-monster-underground');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1845:            motionElement.classList.remove('monster-motion-burrow-enter', 'monster-motion-burrow-emerge');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1862:            this.card.classList.add('hunt-monster-underground');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1867:            this.card.classList.remove('hunt-monster-underground');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1873:            if (phase === 'emerge') this.card?.classList.remove('hunt-monster-underground');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1997:        this.card.classList.remove('monster-charge-rumble');
+js/effects/hunt\HuntMonsterAttackAnimator.js:1999:        this.card.classList.add('monster-charge-rumble');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2035:                    this.card.classList.remove('monster-charge-rumble');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2037:                    this.card.classList.add('monster-charge-rumble');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2098:                monsterImg.classList.remove('monster-knockdown-anim');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2099:                monsterImg.classList.add('monster-horn-stuck-anim');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2104:            this.card?.classList.remove('monster-charge-rumble');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2209:        if (!branchEvent?.animationProfile) return;
+js/effects/hunt\HuntMonsterAttackAnimator.js:2247:                    animationProfile: branchEvent.animationProfile,
+js/effects/hunt\HuntMonsterAttackAnimator.js:2545:        this.card.classList.add('monster-ultimate-board-shake');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2546:        this.animationTimers.timeout(() => this.card?.classList.remove('monster-ultimate-board-shake'), 1500);
+js/effects/hunt\HuntMonsterAttackAnimator.js:2562:    triggerMonsterAttack(type, emoji, targets, attackName = '', pattern = null) {
+js/effects/hunt\HuntMonsterAttackAnimator.js:2757:                weapon.classList.remove('monster-uppercut-launched');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2759:                weapon.classList.add('monster-uppercut-launched');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2762:                    weapon.classList.remove('monster-uppercut-launched');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2914:            monsterImg.classList.remove('monster-signature-ultimate');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2916:            monsterImg.classList.add('monster-signature-ultimate');
+js/effects/hunt\HuntMonsterAttackAnimator.js:2917:            this.animationTimers.timeout(() => monsterImg.classList.remove('monster-signature-ultimate'), 1700);
+js/effects/hunt\HuntMonsterPatternCatalog.js:342:                            animationProfile: pattern.followUp.animationProfile || null,

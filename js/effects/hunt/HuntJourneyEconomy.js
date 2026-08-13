@@ -1,6 +1,6 @@
 class HuntJourneyEconomy {
     static MAX_ZENNY = 9;
-    static PRICES = Object.freeze({ potion: 1, lifepowder: 2, shockTrap: 2, bomb: 1, reroll: 3 });
+    static PRICES = Object.freeze({ potion: 1, lifepowder: 2, shockTrap: 2, flashPod: 1, bomb: 1, reroll: 3 });
 
     static clampZenny(value) { return Math.max(0, Math.min(this.MAX_ZENNY, Math.floor(Number(value) || 0))); }
     static stock(result) {
@@ -10,6 +10,7 @@ class HuntJourneyEconomy {
             potions: Math.max(0, Math.min(10, Number(result.supply?.potions ?? 10))),
             lifepowders: Math.max(0, Math.min(9, Number(result.supply?.lifepowders ?? 1))),
             shockTraps: Math.max(0, Math.min(9, Number(result.supply?.shockTraps || 0))),
+            flashPods: Math.max(0, Math.min(9, Number(result.supply?.flashPods || 0))),
             bombs: Math.max(0, Math.min(9, Number(result.supply?.bombs ?? 1)))
         };
         return result.supply;
@@ -31,7 +32,7 @@ class HuntJourneyEconomy {
         const price = priceOverride == null ? Number(this.PRICES[item]) : Math.max(0, Math.floor(Number(priceOverride) || 0));
         if (!price || Number(result.zenny || 0) < price) return false;
         if (item === 'reroll') return Number(result.rerolls || 0) < 9;
-        const fields = { potion: 'potions', lifepowder: 'lifepowders', shockTrap: 'shockTraps', bomb: 'bombs' };
+        const fields = { potion: 'potions', lifepowder: 'lifepowders', shockTrap: 'shockTraps', flashPod: 'flashPods', bomb: 'bombs' };
         const field = fields[item];
         if (!field) return false;
         const stock = this.stock(result);
@@ -45,7 +46,7 @@ class HuntJourneyEconomy {
         if (!this.canBuy(result, item, quantity, priceOverride)) return false;
         const price = priceOverride == null ? Number(this.PRICES[item]) : Math.max(0, Math.floor(Number(priceOverride) || 0));
         if (!this.spend(result, price)) return false;
-        const fields = { potion: 'potions', lifepowder: 'lifepowders', shockTrap: 'shockTraps', bomb: 'bombs' };
+        const fields = { potion: 'potions', lifepowder: 'lifepowders', shockTrap: 'shockTraps', flashPod: 'flashPods', bomb: 'bombs' };
         if (item === 'reroll') result.rerolls = Math.min(9, Number(result.rerolls || 0) + quantity);
         else if (fields[item]) {
             const stock = this.stock(result);
@@ -60,9 +61,21 @@ class HuntJourneyEconomy {
     static gather(result, indexes, deep = false) {
         this.earn(result, deep ? 2 : 1);
         const stock = this.stock(result);
-        stock.potions = Math.min(10, Number(stock.potions || 0) + 1);
+        const Supply = typeof HuntSharedSupply !== 'undefined' ? HuntSharedSupply
+            : (typeof require === 'function' ? require('./HuntSharedSupply') : null);
+        if (Supply) Supply.add(stock, 'potions', 1);
+        else stock.potions = Math.min(10, Number(stock.potions || 0) + 1);
         if (deep) result.ambushHook = { chance: .35, source: 'deep-gather' };
         return result;
+    }
+
+    static addSupply(result, key, amount = 1) {
+        const stock = this.stock(result);
+        const Supply = typeof HuntSharedSupply !== 'undefined' ? HuntSharedSupply
+            : (typeof require === 'function' ? require('./HuntSharedSupply') : null);
+        if (Supply) Supply.add(stock, key, amount);
+        else stock[key] = Math.max(0, Number(stock[key] || 0) + Number(amount || 0));
+        return stock[key];
     }
 }
 

@@ -13,7 +13,7 @@ assert.notStrictEqual(Catalog.choosePart(parts, 'slash', () => .70).kind, 'head'
 
 const engineSource = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntEngine.js'), 'utf8');
 const start = engineSource.indexOf('    addMonsterStun(');
-const end = engineSource.indexOf('\n    checkMonsterKnockdown(', start);
+const end = engineSource.indexOf('\n    executeHunterTurn(', start);
 assert(start >= 0 && end > start, 'head-stun accumulation must be owned by HuntEngine');
 
 class Harness {

@@ -5,17 +5,41 @@ const http = require('http');
 const path = require('path');
 const { URL } = require('url');
 const { generate: generateReviewRoutes } = require('../scripts/generate-world-monster-audio-review-routes');
-const { loadHuntPatternAudioMap, savePatternRoute, savePatternMotion } = require('./hunt-audio-pattern-map');
+const { loadHuntPatternAudioMap, savePatternRoute, movePatternRouteFile, savePatternMotion,
+    savePartReactionMappings } = require('./hunt-audio-pattern-map');
+const { CATEGORY_CATALOG, categoryForMonster } = require('./hunt-monster-review-categories');
 
 const ROOT = path.resolve(__dirname, '..');
 const GRAPH_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'audio_graph');
 const AUDIO_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'monster');
+const COMMON_AUDIO_ROOT = path.join(AUDIO_ROOT, 'common');
 const LABELS_PATH = path.join(ROOT, 'data', 'hunt', 'world-monster-audio-review-labels.json');
+const ANATOMY_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-visual-geometry-overrides.json');
+const ANATOMY_RUNTIME_PATH = path.join(ROOT, 'js', 'effects', 'hunt', 'data', 'MonsterVisualGeometryOverrides.generated.js');
+const PATTERN_AUDIO_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-pattern-audio-routes.json');
+const PATTERN_MOTION_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-pattern-motion-overrides.json');
 const UI_PATH = path.join(__dirname, 'monster-audio-review.html');
+const APP_PATH = path.join(__dirname, 'monster-audio-review-app.js');
+const PREVIEW_PATH = path.join(ROOT, 'tests', 'fixtures', 'hunt-monster-pattern-lab.html');
 const HOST = '127.0.0.1';
 const DEFAULT_PORT = 17930;
 const BODY_LIMIT = 64 * 1024;
-const REVIEW_API_VERSION = 2;
+const REVIEW_API_VERSION = 3;
+const REVIEW_SCHEMA_VERSION = 3;
+const REVIEW_BUILD_ID = 'unified-editor-v3';
+// Crossover guests remain in the source archive but are not part of BubbleChat's
+// Monster Hunter review or playable roster.
+const EXCLUDED_REVIEW_GRAPH_IDS = new Set(['em127']);
+const MONSTER_CATALOG = readJson(path.join(ROOT, 'img', 'monsters', 'monsters.json'), []);
+const monsterIdentityKey = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+const MONSTER_BY_ID = new Map(MONSTER_CATALOG.flatMap(monster => [
+    [String(monster.id).toLowerCase(), monster],
+    [monsterIdentityKey(monster.id), monster]
+]));
+const GRAPH_ID_TO_CATALOG_ID = Object.freeze({
+    em102: 'pukei-pukei', em104: "safi'jiiva", em105: "xeno'jiiva",
+    em107: 'kulu-ya-ku', em109: 'tobi-kadachi', em120: 'tzitzi-ya-ku', em127: 'leshen'
+});
 
 const PRESETS = Object.freeze({
     roar: { label: '포효', tags: ['monster_roar'] },
@@ -210,6 +234,39 @@ function groupEvents(graph, labels) {
         .sort((a, b) => a.bank.localeCompare(b.bank) || a.eventId - b.eventId);
 }
 
+function listCommonAudioGroups(labels = { records: [] }) {
+    if (!fs.existsSync(COMMON_AUDIO_ROOT)) return [];
+    const records = labels.records || [];
+    return fs.readdirSync(COMMON_AUDIO_ROOT, { withFileTypes: true })
+        .filter(entry => entry.isFile() && /\.(mp3|wav|ogg)$/i.test(entry.name))
+        .sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }))
+        .map((entry, index) => {
+            const match = entry.name.match(/_(\d+)\.[^.]+$/);
+            const sourceId = Number(match?.[1] || index + 1);
+            const bank = 'em_cmn_se';
+            const reviews = records.filter(record => record.bank === bank && Number(record.sourceId) === sourceId);
+            return {
+                key: `${bank}:${sourceId}`,
+                bank,
+                eventId: sourceId,
+                sourceLayer: 'sound-effect',
+                reuseScope: 'cross-title-semantic',
+                structures: ['single'],
+                sources: [{
+                    sourceId,
+                    stream: null,
+                    duration: null,
+                    path: path.relative(ROOT, path.join(COMMON_AUDIO_ROOT, entry.name)).replace(/\\/g, '/'),
+                    variant: 'common',
+                    structure: ['single']
+                }],
+                groupTags: [...new Set(reviews.flatMap(record => record.tags || []))],
+                reviewedSources: reviews.length,
+                common: true
+            };
+        });
+}
+
 function normalizeTags(category, customLabel) {
     if (PRESETS[category]) return [...PRESETS[category].tags];
     if (category !== 'custom') return [];
@@ -373,14 +430,24 @@ function listMonsters(labelsPath = LABELS_PATH) {
     const runtimePolicy = readJson(labelsPath, { runtimePolicy: {} }).runtimePolicy || {};
     const bankMap = readJson(path.join(ROOT, 'data', 'hunt', 'world-monster-audio-banks.json'), {});
     
+    const describe = (item, graphId) => {
+        const graphMonsterIds = bankMap[`${graphId}_vo`] || [];
+        const candidates = [item.id, ...graphMonsterIds, GRAPH_ID_TO_CATALOG_ID[graphId]].filter(Boolean);
+        const catalogId = candidates.find(id => MONSTER_BY_ID.has(String(id).toLowerCase()) || MONSTER_BY_ID.has(monsterIdentityKey(id)));
+        const catalog = MONSTER_BY_ID.get(String(catalogId || '').toLowerCase()) || MONSTER_BY_ID.get(monsterIdentityKey(catalogId)) || { id: item.id };
+        return { category: categoryForMonster(catalog), species: catalog.species || null, tier: catalog.tier || null };
+    };
+
     const huntMonsters = MONSTER_DISPLAY_LIST.map(item => {
         const graphPath = path.join(GRAPH_ROOT, item.graphId, 'audio-graph.json');
         const graph = fs.existsSync(graphPath) ? readJson(graphPath, { events: [] }) : { events: [] };
         return {
             id: item.id,
+            graphId: item.graphId,
             name: item.name,
             groups: groupEvents(graph, { records: [] }).length,
-            reviewStatus: reviewStatusForGraphId(item.graphId, runtimePolicy, bankMap)
+            reviewStatus: reviewStatusForGraphId(item.graphId, runtimePolicy, bankMap),
+            ...describe(item, item.graphId)
         };
     });
 
@@ -388,15 +455,21 @@ function listMonsters(labelsPath = LABELS_PATH) {
     const otherMonsters = fs.readdirSync(GRAPH_ROOT, { withFileTypes: true })
         .filter(entry => entry.isDirectory())
         .map(entry => entry.name)
+        .filter(id => !EXCLUDED_REVIEW_GRAPH_IDS.has(id))
         .filter(id => !knownGraphIds.has(id) && fs.existsSync(path.join(GRAPH_ROOT, id, 'audio-graph.json')))
         .sort()
         .map(id => {
             const graph = readJson(path.join(GRAPH_ROOT, id, 'audio-graph.json'), { events: [] });
+            const monsterIds = bankMap[`${id}_vo`] || [];
+            const huntId = monsterIds.find(monsterId => MONSTER_BY_ID.has(String(monsterId).toLowerCase())
+                || MONSTER_BY_ID.has(monsterIdentityKey(monsterId))) || id;
             return {
                 id,
+                graphId: id,
                 name: MONSTER_NAMES[id] || id,
                 groups: groupEvents(graph, { records: [] }).length,
-                reviewStatus: reviewStatusForGraphId(id, runtimePolicy, bankMap)
+                reviewStatus: reviewStatusForGraphId(id, runtimePolicy, bankMap),
+                ...describe({ id: huntId }, id)
             };
         });
 
@@ -415,6 +488,33 @@ function sendJson(response, status, value) {
         'X-Content-Type-Options': 'nosniff'
     });
     response.end(JSON.stringify(value));
+}
+
+function validatePatternRouteInput(input) {
+    const huntId = String(input?.huntId || '').toLowerCase();
+    const patternId = String(input?.patternId || '');
+    const slot = String(input?.slot || '');
+    const pattern = loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
+    if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
+    if (!slot.startsWith('beat:')) throw new Error(`구형 사운드 슬롯 저장은 차단되었습니다: ${slot}`);
+    if (!pattern.slots.some(item => item.slot === slot)) throw new Error(`현재 모션에 존재하지 않는 사운드 순간입니다: ${slot}`);
+    return { ...input, huntId, patternId, slot };
+}
+
+function validatePatternMotionInput(input) {
+    const huntId = String(input?.huntId || '').toLowerCase();
+    const patternId = String(input?.patternId || '');
+    const pattern = loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
+    if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
+    if (input?.reset) return { ...input, huntId, patternId };
+    const expected = new Set(pattern.timeline.beats.map(beat => beat.id));
+    const submitted = Object.keys(input?.beats || {});
+    const unknown = submitted.filter(id => !expected.has(id));
+    const missing = [...expected].filter(id => !submitted.includes(id));
+    if (unknown.length || missing.length) {
+        throw new Error(`모션 BEAT 불일치 · 누락:${missing.join(',') || '-'} · 알 수 없음:${unknown.join(',') || '-'}`);
+    }
+    return { ...input, huntId, patternId };
 }
 
 function readBody(request) {
@@ -439,6 +539,49 @@ function readBody(request) {
     });
 }
 
+function saveMonsterVisualGeometry(input) {
+    const monsterId = String(input?.monsterId || '').toLowerCase();
+    if (!/^[a-z0-9_-]+$/.test(monsterId)) throw new Error('잘못된 몬스터 ID입니다.');
+    const geometry = input?.geometry;
+    if (!geometry || !geometry.parts || typeof geometry.parts !== 'object') throw new Error('부위 좌표가 없습니다.');
+    const clampPoint = point => {
+        const x = Number(point?.x), y = Number(point?.y);
+        if (!Number.isFinite(x) || !Number.isFinite(y)) throw new Error('부위 좌표가 올바르지 않습니다.');
+        return { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
+    };
+    const parts = Object.fromEntries(Object.entries(geometry.parts).map(([kind, part]) => {
+        if (!/^[a-z0-9_-]+$/i.test(kind)) throw new Error('잘못된 부위 이름입니다.');
+        return [kind, Array.isArray(part?.path) ? { path: part.path.map(clampPoint) } : clampPoint(part)];
+    }));
+    const previousSource = fs.existsSync(ANATOMY_OVERRIDES_PATH) ? fs.readFileSync(ANATOMY_OVERRIDES_PATH, 'utf8') : null;
+    const previousRuntime = fs.existsSync(ANATOMY_RUNTIME_PATH) ? fs.readFileSync(ANATOMY_RUNTIME_PATH, 'utf8') : null;
+    const document = readJson(ANATOMY_OVERRIDES_PATH, { version: 1, monsters: {} });
+    document.monsters[monsterId] = {
+        sourceSize: geometry.sourceSize || { width: 512, height: 512 },
+        baseFacing: String(geometry.baseFacing || 'front'),
+        parts
+    };
+    const temporary = `${ANATOMY_OVERRIDES_PATH}.tmp`;
+    try {
+        fs.writeFileSync(temporary, `${JSON.stringify(document, null, 2)}\n`, 'utf8');
+        fs.renameSync(temporary, ANATOMY_OVERRIDES_PATH);
+        const persisted = readJson(ANATOMY_OVERRIDES_PATH, null);
+        if (JSON.stringify(persisted?.monsters?.[monsterId]) !== JSON.stringify(document.monsters[monsterId])) throw new Error('좌표 재로드 검증 실패');
+        const runtime = `(function(root,factory){const value=factory();if(typeof module!=='undefined'&&module.exports)module.exports=value;else root.HUNT_MONSTER_VISUAL_GEOMETRY_OVERRIDES=value;})(typeof globalThis!=='undefined'?globalThis:this,function(){'use strict';return Object.freeze(${JSON.stringify(document.monsters)});});\n`;
+        const runtimeTemporary = `${ANATOMY_RUNTIME_PATH}.tmp`;
+        fs.writeFileSync(runtimeTemporary, runtime, 'utf8');
+        fs.renameSync(runtimeTemporary, ANATOMY_RUNTIME_PATH);
+        delete require.cache[require.resolve('../js/effects/hunt/data/MonsterVisualGeometryOverrides.generated.js')];
+        const generated = require('../js/effects/hunt/data/MonsterVisualGeometryOverrides.generated.js');
+        if (JSON.stringify(generated[monsterId]) !== JSON.stringify(document.monsters[monsterId])) throw new Error('런타임 좌표 검증 실패');
+        return { monsterId, geometry: document.monsters[monsterId] };
+    } catch (error) {
+        const restore = (file, contents) => { if (contents == null) fs.rmSync(file, { force: true }); else { const rollback = `${file}.rollback.tmp`; fs.writeFileSync(rollback, contents, 'utf8'); fs.renameSync(rollback, file); } };
+        restore(ANATOMY_OVERRIDES_PATH, previousSource); restore(ANATOMY_RUNTIME_PATH, previousRuntime);
+        throw new Error(`부위 좌표 저장 롤백됨: ${error.message}`);
+    }
+}
+
 function safeAudioPath(relativePath) {
     const normalized = String(relativePath || '').replace(/\\/g, '/');
     if (!normalized.toLowerCase().endsWith('.mp3')) return null;
@@ -446,6 +589,36 @@ function safeAudioPath(relativePath) {
     const relative = path.relative(AUDIO_ROOT, absolute);
     if (relative.startsWith('..') || path.isAbsolute(relative)) return null;
     return absolute;
+}
+
+function fileRevision(file) {
+    if (!fs.existsSync(file)) return 'missing';
+    const stat = fs.statSync(file);
+    return `${stat.size}:${Math.round(stat.mtimeMs)}`;
+}
+
+function assertExpectedRevision(input, file, label) {
+    const expected = String(input?.expectedRevision || '');
+    const current = fileRevision(file);
+    if (expected && expected !== current) throw new Error(`${label}이 다른 작업에서 변경되었습니다. 새로고침 후 다시 시도하세요.`);
+}
+
+function safeEditorAssetPath(pathname) {
+    const decoded = decodeURIComponent(String(pathname || ''));
+    const allowed = ['/js/', '/styles/', '/tests/fixtures/', '/img/', '/local_assets/', '/style.css'];
+    if (!allowed.some(prefix => decoded === prefix || decoded.startsWith(prefix))) return null;
+    const absolute = path.resolve(ROOT, `.${decoded}`);
+    const relative = path.relative(ROOT, absolute);
+    if (relative.startsWith('..') || path.isAbsolute(relative)) return null;
+    return absolute;
+}
+
+function contentTypeFor(file) {
+    const extension = path.extname(file).toLowerCase();
+    return ({ '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+        '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.webp': 'image/webp',
+        '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg' })[extension]
+        || 'application/octet-stream';
 }
 
 function createServer(options = {}) {
@@ -464,11 +637,48 @@ function createServer(options = {}) {
                     'Cache-Control': 'no-store',
                     'X-Content-Type-Options': 'nosniff'
                 });
-                response.end(fs.readFileSync(UI_PATH));
+                const shell = fs.readFileSync(UI_PATH, 'utf8').replace(
+                    /<script>\s*const state=[\s\S]*?<\/script>\s*<\/body>/,
+                    '<script src="/review-app.js"></script>\n</body>'
+                );
+                response.end(shell);
+                return;
+            }
+            if (request.method === 'GET' && url.pathname === '/review-app.js') {
+                response.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8',
+                    'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+                response.end(fs.readFileSync(APP_PATH));
+                return;
+            }
+            if (request.method === 'GET' && (url.pathname === '/preview' || url.pathname === '/preview/')) {
+                response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8',
+                    'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+                response.end(fs.readFileSync(PREVIEW_PATH));
+                return;
+            }
+            if (request.method === 'GET') {
+                const assetPath = safeEditorAssetPath(url.pathname);
+                if (assetPath && fs.existsSync(assetPath) && fs.statSync(assetPath).isFile()) {
+                    response.writeHead(200, { 'Content-Type': contentTypeFor(assetPath),
+                        'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+                    fs.createReadStream(assetPath).pipe(response);
+                    return;
+                }
+            }
+            if (request.method === 'GET' && url.pathname === '/review-state.js') {
+                response.writeHead(200, {
+                    'Content-Type': 'application/javascript; charset=utf-8',
+                    'Cache-Control': 'no-store',
+                    'X-Content-Type-Options': 'nosniff'
+                });
+                response.end(fs.readFileSync(path.join(__dirname, 'monster-audio-review-state.js')));
                 return;
             }
             if (request.method === 'GET' && url.pathname === '/api/monsters') {
-                sendJson(response, 200, { apiVersion: REVIEW_API_VERSION, monsters: listMonsters(labelsPath), presets: PRESETS });
+                sendJson(response, 200, { apiVersion: REVIEW_API_VERSION, schemaVersion: REVIEW_SCHEMA_VERSION,
+                    buildId: REVIEW_BUILD_ID, previewPath: '/preview/?embed=1',
+                    capabilities: ['timeline-v3', 'motion-transform', 'anatomy-drag', 'transactional-save'],
+                    monsters: listMonsters(labelsPath), categories: CATEGORY_CATALOG, presets: PRESETS });
                 return;
             }
             if (request.method === 'GET' && url.pathname === '/api/groups') {
@@ -489,20 +699,63 @@ function createServer(options = {}) {
                 });
                 return;
             }
+            if (request.method === 'GET' && url.pathname === '/api/common-groups') {
+                const labels = readJson(labelsPath, { records: [] });
+                sendJson(response, 200, {
+                    monster: 'common',
+                    name: 'COMMON · 범용 음향',
+                    groups: listCommonAudioGroups(labels)
+                });
+                return;
+            }
             if (request.method === 'GET' && url.pathname === '/api/hunt-patterns') {
                 const huntId = String(url.searchParams.get('monster') || '').toLowerCase();
                 if (!/^[a-z0-9_]+$/i.test(huntId)) throw new Error('잘못된 몬스터 ID입니다.');
-                sendJson(response, 200, loadHuntPatternAudioMap(huntId));
+                sendJson(response, 200, { ...loadHuntPatternAudioMap(huntId), revisions: {
+                    audio: fileRevision(PATTERN_AUDIO_OVERRIDES_PATH),
+                    motion: fileRevision(PATTERN_MOTION_OVERRIDES_PATH),
+                    anatomy: fileRevision(ANATOMY_OVERRIDES_PATH)
+                } });
                 return;
             }
             if (request.method === 'POST' && url.pathname === '/api/hunt-pattern-route') {
-                const result = savePatternRoute(await readBody(request));
-                sendJson(response, 200, { ok: true, ...result });
+                const input = validatePatternRouteInput(await readBody(request));
+                assertExpectedRevision(input, PATTERN_AUDIO_OVERRIDES_PATH, '사운드 매핑');
+                const result = savePatternRoute(input);
+                sendJson(response, 200, { ok: true, ...result, sourceRevision: fileRevision(PATTERN_AUDIO_OVERRIDES_PATH) });
+                return;
+            }
+            if (request.method === 'POST' && url.pathname === '/api/hunt-pattern-route-move') {
+                const input = await readBody(request);
+                assertExpectedRevision(input, PATTERN_AUDIO_OVERRIDES_PATH, '사운드 매핑');
+                const from = validatePatternRouteInput({ ...input, slot: input.fromSlot });
+                validatePatternRouteInput({ ...input, slot: input.toSlot });
+                const result = movePatternRouteFile({ ...input, huntId: from.huntId, patternId: from.patternId });
+                sendJson(response, 200, { ok: true, ...result, sourceRevision: fileRevision(PATTERN_AUDIO_OVERRIDES_PATH) });
                 return;
             }
             if (request.method === 'POST' && url.pathname === '/api/hunt-pattern-motion') {
-                const result = savePatternMotion(await readBody(request));
-                sendJson(response, 200, { ok: true, ...result });
+                const input = validatePatternMotionInput(await readBody(request));
+                assertExpectedRevision(input, PATTERN_MOTION_OVERRIDES_PATH, '모션 데이터');
+                const result = savePatternMotion(input);
+                sendJson(response, 200, { ok: true, ...result, sourceRevision: fileRevision(PATTERN_MOTION_OVERRIDES_PATH) });
+                return;
+            }
+            if (request.method === 'POST' && url.pathname === '/api/hunt-part-reactions') {
+                const input = await readBody(request);
+                const huntId = String(input?.huntId || '').toLowerCase();
+                if (!/^[a-z0-9_]+$/i.test(huntId)) throw new Error('잘못된 몬스터 ID입니다.');
+                assertExpectedRevision(input, PATTERN_MOTION_OVERRIDES_PATH, '부위 리액션');
+                const result = savePartReactionMappings({ huntId, mappings: input?.mappings || {} });
+                sendJson(response, 200, { ok: true, ...result,
+                    sourceRevision: fileRevision(PATTERN_MOTION_OVERRIDES_PATH) });
+                return;
+            }
+            if (request.method === 'POST' && url.pathname === '/api/hunt-monster-anatomy') {
+                const input = await readBody(request);
+                assertExpectedRevision(input, ANATOMY_OVERRIDES_PATH, '부위 좌표');
+                const result = saveMonsterVisualGeometry(input);
+                sendJson(response, 200, { ok: true, ...result, sourceRevision: fileRevision(ANATOMY_OVERRIDES_PATH) });
                 return;
             }
             if (request.method === 'POST' && url.pathname === '/api/group-label') {
@@ -557,11 +810,16 @@ module.exports = {
     createServer,
     evidenceScope,
     groupEvents,
+    CATEGORY_CATALOG,
+    EXCLUDED_REVIEW_GRAPH_IDS,
+    categoryForMonster,
     listMonsters,
     normalizeStoredLabels,
     normalizeTags,
     orderedSources,
     reviewStatusForGraphId,
     saveReviewCompletion,
-    saveGroupReview
+    saveGroupReview,
+    validatePatternRouteInput,
+    validatePatternMotionInput
 };

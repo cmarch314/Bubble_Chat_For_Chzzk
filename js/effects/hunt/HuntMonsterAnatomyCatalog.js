@@ -112,6 +112,23 @@ class HuntMonsterAnatomyCatalog {
                 tail: Object.freeze({ x: .50, y: .20 })
             })
         }),
+        diablos: Object.freeze({
+            // The reviewed front-facing sprite keeps its body mass around the
+            // image centre. BEAT rotations (notably the reversed rear X-tail
+            // follow-up) need this authored torso pivot; falling back to a
+            // missing part aborts the entire animation before playback starts.
+            sourceSize: Object.freeze({ width: 512, height: 512 }),
+            baseFacing: 'front',
+            parts: Object.freeze({
+                head: Object.freeze({ x: .50, y: .64 }),
+                torso: Object.freeze({ x: .50, y: .50 }),
+                'left-wing': Object.freeze({ x: .24, y: .42 }),
+                'right-wing': Object.freeze({ x: .76, y: .42 }),
+                'left-front-leg': Object.freeze({ x: .32, y: .76 }),
+                'right-front-leg': Object.freeze({ x: .68, y: .76 }),
+                tail: Object.freeze({ x: .50, y: .20 })
+            })
+        }),
         tigrex: Object.freeze({
             sourceSize: Object.freeze({ width: 512, height: 512 }),
             baseFacing: 'left',
@@ -204,7 +221,10 @@ class HuntMonsterAnatomyCatalog {
     static visualGeometry(monster) {
         const id = this.normalize(monster?.id || monster?.nameEN || monster?.name);
         const baseId = this.REVIEWED_VARIANT_BASES[id];
-        return this.VISUAL_GEOMETRY[id] || this.VISUAL_GEOMETRY[baseId] || null;
+        const overrides = typeof HUNT_MONSTER_VISUAL_GEOMETRY_OVERRIDES !== 'undefined'
+            ? HUNT_MONSTER_VISUAL_GEOMETRY_OVERRIDES
+            : (typeof require === 'function' ? require('./data/MonsterVisualGeometryOverrides.generated.js') : {});
+        return overrides[id] || overrides[baseId] || this.VISUAL_GEOMETRY[id] || this.VISUAL_GEOMETRY[baseId] || null;
     }
 
     static baseFacing(monster) {
@@ -321,8 +341,10 @@ class HuntMonsterAnatomyCatalog {
         }
         if (flying) {
             parts.push(
-                { id: `${id}:left-wing`, kind: 'left-wing', health: 460, breakable: true, hitzones: { slash: .44, blunt: .40, pierce: .48 } },
-                { id: `${id}:right-wing`, kind: 'right-wing', health: 460, breakable: true, hitzones: { slash: .44, blunt: .40, pierce: .48 } }
+                { id: `${id}:left-wing`, kind: 'left-wing', health: 460,
+                    breakable: !['diablos', 'black_diablos'].includes(id), hitzones: { slash: .44, blunt: .40, pierce: .48 } },
+                { id: `${id}:right-wing`, kind: 'right-wing', health: 460,
+                    breakable: !['diablos', 'black_diablos'].includes(id), hitzones: { slash: .44, blunt: .40, pierce: .48 } }
             );
         } else {
             const legKind = forelegTopple ? 'front-leg' : 'leg';
@@ -343,6 +365,23 @@ class HuntMonsterAnatomyCatalog {
     static breakReaction(monsterId, partKind, airborne = false) {
         const id = this.normalize(monsterId);
         const kind = String(partKind || '').toLowerCase();
+        const catalog = typeof HuntMonsterReactionCatalog !== 'undefined'
+            ? HuntMonsterReactionCatalog
+            : (typeof require === 'function' ? require('./HuntMonsterReactionCatalog.js') : null);
+        if (catalog) {
+            const profile = catalog.resolve(id, kind, airborne);
+            const durationTicks = profile.motion.reduce((sum, beat) => sum + Number(beat.ticks || 0), 0);
+            return {
+                type: airborne ? 'aerial_topple' : profile.controlType,
+                visualType: profile.visualType,
+                durationTicks,
+                reactionProfile: profile.id,
+                motion: profile.motion,
+                label: profile.id === 'flinch'
+                    ? '소경직'
+                    : (profile.id === 'tail' ? '꼬짤경직' : '대경직')
+            };
+        }
         const tailSever = /tail/.test(kind);
         if (airborne) {
             return {
@@ -360,6 +399,30 @@ class HuntMonsterAnatomyCatalog {
                 label: '꼬리 절단 나뒹굴기'
             };
         }
+        if ((id === 'diablos' || id === 'black_diablos') && /horn/.test(kind)) {
+            return {
+                type: 'flinch',
+                visualType: 'part_flinch',
+                durationTicks: 30,
+                label: '뿔 파괴 경직'
+            };
+        }
+        if ((id === 'diablos' || id === 'black_diablos') && /back/.test(kind)) {
+            return {
+                type: 'flinch',
+                visualType: 'part_flinch',
+                durationTicks: 24,
+                label: '등 파괴 경직'
+            };
+        }
+        if ((id === 'diablos' || id === 'black_diablos') && /(?:left|right)-front-leg/.test(kind)) {
+            return {
+                type: 'knockdown',
+                visualType: 'part_break_topple',
+                durationTicks: 80,
+                label: '앞발 파괴 대경직'
+            };
+        }
         if (id === 'tigrex' && /(?:left|right)-front-leg/.test(kind)) {
             return {
                 type: 'knockdown',
@@ -373,6 +436,18 @@ class HuntMonsterAnatomyCatalog {
             visualType: 'part_break_topple',
             durationTicks: 40,
             label: '부위 파괴 넘어짐'
+        };
+    }
+
+    static flinchReaction(monsterId, partKind) {
+        const id = this.normalize(monsterId);
+        if (id !== 'diablos' && id !== 'black_diablos') return null;
+        const kind = String(partKind || '').toLowerCase();
+        return {
+            type: 'flinch',
+            visualType: 'part_flinch',
+            durationTicks: /horn|head/.test(kind) ? 18 : 14,
+            label: `${kind || 'part'} 누적 경직`
         };
     }
 
@@ -399,6 +474,10 @@ class HuntMonsterAnatomyCatalog {
                 severed: false,
                 broken: false,
                 damageAccumulated: 0,
+                flinchHealth: ['diablos', 'black_diablos'].includes(monsterId)
+                    ? Math.max(1, Number(part.flinchHealth || part.health))
+                    : Math.max(0, Number(part.flinchHealth || 0)),
+                flinchAccumulated: 0,
                 repeatToppleHealthMultiplier: Number(part.repeatToppleHealthMultiplier || 0),
                 postBreakDamageAccumulated: 0,
                 essence: part.essence || null,
@@ -417,7 +496,7 @@ class HuntMonsterAnatomyCatalog {
         return 'slash';
     }
 
-    static choosePart(parts, damageType, random = Math.random) {
+    static choosePart(parts, damageType, random = Math.random, weightModifier = null) {
         // Broken parts remain hittable in the original games; only a severed tail
         // leaves the target pool. This also lets blunt weapons keep pursuing the head.
         const candidates = (parts || []).filter(part => !part.severed);
@@ -433,6 +512,7 @@ class HuntMonsterAnatomyCatalog {
                 * (damageType === 'blunt' && /(^|[-_])(head|horn|chin)([-_]|$)/.test(part.kind) ? 4.5 : 1)
                 * (damageType === 'slash' && part.severable ? this.SLASH_TAIL_WEIGHT : 1)
                 * (damageType !== 'slash' && part.severable ? 0.02 : 1)
+                * Math.max(0.1, Number(weightModifier?.(part) || 1))
         }));
         const total = weighted.reduce((sum, entry) => sum + entry.weight, 0);
         let roll = Math.max(0, Math.min(0.999999, Number(random()) || 0)) * total;
@@ -452,9 +532,9 @@ class HuntMonsterAnatomyCatalog {
         return totalBreakHealth / (hp * this.TARGET_FULL_BREAK_DAMAGE_FRACTION);
     }
 
-    static applyPartDamage(parts, weapon, rawDamage, scale, random = Math.random) {
+    static applyPartDamage(parts, weapon, rawDamage, scale, random = Math.random, weightModifier = null) {
         const damageType = this.damageTypeForWeapon(weapon);
-        const part = this.choosePart(parts, damageType, random);
+        const part = this.choosePart(parts, damageType, random, weightModifier);
         if (!part) return null;
         const hitzone = Math.max(0, Number(part.hitzones?.[damageType] || 0));
         const canDamage = !part.severable || damageType === 'slash';
@@ -466,14 +546,24 @@ class HuntMonsterAnatomyCatalog {
             ? Math.max(0, Number(rawDamage) || 0) * Math.max(0, Number(scale) || 0) * hitzonePartRate
             : 0;
         const wasBroken = part.broken;
+        const previousHitzones = { ...(part.hitzones || {}) };
         const repeatThreshold = Number(part.maxHealth || part.health || 0)
             * Math.max(1, Number(part.repeatToppleHealthMultiplier || 0));
         part.damageAccumulated += applied;
         part.health = Math.max(0, part.health - applied);
-        if ((part.breakable || part.severable) && part.health <= 0) part.broken = true;
+        if ((part.breakable || part.severable) && part.health <= 0 && !part.breakPending) part.broken = true;
         if (part.severable && part.broken) part.severed = true;
         if (!wasBroken && part.broken && part.breakHitzones) {
             part.hitzones = { ...part.breakHitzones };
+        }
+        const flinchThreshold = Math.max(0, Number(part.flinchHealth || 0));
+        let newlyFlinched = false;
+        if (flinchThreshold > 0 && applied > 0) {
+            part.flinchAccumulated = Number(part.flinchAccumulated || 0) + applied;
+            if (part.flinchAccumulated >= flinchThreshold) {
+                part.flinchAccumulated %= flinchThreshold;
+                newlyFlinched = !(!wasBroken && part.broken);
+            }
         }
         let repeatedTopple = false;
         if (wasBroken && repeatThreshold > 0) {
@@ -483,7 +573,19 @@ class HuntMonsterAnatomyCatalog {
                 repeatedTopple = true;
             }
         }
-        return { part, damageType, hitzone, applied, newlyBroken: !wasBroken && part.broken, newlySevered: !wasBroken && part.severed, repeatedTopple };
+        return { part, damageType, hitzone, applied, previousHitzones,
+            newlyBroken: !wasBroken && part.broken, newlySevered: !wasBroken && part.severed,
+            newlyFlinched, repeatedTopple };
+    }
+
+    static breakAudioSize(result = {}, reaction = {}) {
+        return result.newlySevered || String(reaction.type || 'flinch') !== 'flinch'
+            ? 'large'
+            : 'small';
+    }
+
+    static breakAudioPatternId(size = 'small') {
+        return `__reaction.part-break-${size === 'large' ? 'large' : 'small'}`;
     }
 }
 

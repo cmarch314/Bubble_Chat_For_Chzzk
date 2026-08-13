@@ -94,6 +94,8 @@ assert.match(read('js/effects/hunt/HuntMonsterArchetypeCatalog.js'), /telegraph[
     'all monster skeletons must share the telegraph-to-recovery action contract');
 assert.doesNotMatch(read('js/effects/hunt/HuntEngine.js'), /crossedKnockdownThresholds\(/,
     'runtime knockdowns must be caused by authored parts, status, traps, or patterns rather than HP bands');
+assert.doesNotMatch(read('js/effects/hunt/HuntEngine.js'), /checkMonsterKnockdown\(/,
+    'the removed HP-threshold knockdown compatibility entry point must not return');
 assert.match(read('js/effects/hunt/HuntMonsterRules.js'), /cartRecoveryTicks/,
     'freshly returned hunters must not be targeted immediately');
 assert.match(read('js/effects/hunt/HuntMonsterTurnExecutor.js'), /Rules\.isHunterTargetable/,

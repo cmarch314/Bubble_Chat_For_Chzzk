@@ -7,6 +7,7 @@ const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntBattleTickExe
 const context = vm.createContext({ console });
 context.HuntMonsterRules = require('../js/effects/hunt/HuntMonsterRules.js');
 context.HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
+context.HuntTrapConfig = require('../js/effects/hunt/HuntTrapConfig.js');
 vm.runInContext(
     `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntBattleTickExecutor = HuntBattleTickExecutor;`,
     context,
@@ -625,8 +626,13 @@ function createEngine(overrides = {}) {
     assert.strictEqual(hunter.status, 'alive');
     assert.strictEqual(hunter.hp, 137, 'a hunter must return from camp at full health');
     assert.strictEqual(hunter.cartRecoveryTicks, 9, 'camp return protection must survive the respawn tick');
+    assert.strictEqual(hunter.atb, 0, 'return animation must hold ATB at zero before its final 30%');
     assert.strictEqual(campResupplies, 1, 'a hunter must resupply exactly once while returning from camp');
     assert.deepStrictEqual([hunter.potions, hunter.lifepowders, hunter.bombs], [12, 2, 3]);
+    for (let tick = 0; tick < 5; tick++) context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(hunter.atb, 0, 'ATB must remain stopped through the first 70% of the return jump');
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.ok(hunter.atb > 0, 'ATB must begin charging near the final 30% of the return jump');
 }
 
 {
@@ -646,29 +652,63 @@ function createEngine(overrides = {}) {
 
 {
     const effects = [];
+    let monsterTurns = 0;
     const { engine } = createEngine({
         monsterAtb: 75,
         monsterState: 'knocked_down',
-        monsterKnockdownDuration: 2,
+        monsterKnockdownDuration: 10,
         activeTrapControl: {
             kind: 'shocktrap',
-            durationTicks: 2,
-            recoveryPerTick: 12.5,
+            durationTicks: 10,
+            recoveryPerTick: 2.5,
             retainedAtb: 75,
-            useCount: 3
+            useCount: 3,
+            elapsedTicks: 0,
+            struggleSchedule: [],
+            nextStruggleIndex: 0,
+            releasing: false
         },
-        triggerEnvironmentEffect: (...args) => effects.push(args)
+        triggerEnvironmentEffect: (...args) => effects.push(args),
+        prepareMonsterTurn: () => { monsterTurns++; }
     });
     context.HuntBattleTickExecutor.execute(engine);
-    assert.strictEqual(engine.monsterAtb, 87.5);
+    assert.strictEqual(engine.monsterAtb, 77.5);
     assert.ok(engine.activeTrapControl,
         'the trap visual state must remain active while its ATB recovery is incomplete');
     context.HuntBattleTickExecutor.execute(engine);
-    assert.strictEqual(engine.monsterAtb, 100);
-    assert.strictEqual(engine.activeTrapControl, null);
+    assert.strictEqual(engine.monsterAtb, 80);
+    assert.strictEqual(engine.activeTrapControl.releasing, true,
+        'escape must begin at the start of its reserved eight-tick timeline segment');
     assert.strictEqual(JSON.stringify(effects),
         JSON.stringify([['trap-release', null, { kind: 'shocktrap', useCount: 3 }]]),
-        'the trap visual must release on the exact tick the monster ATB becomes full');
+        'the trap visual must release exactly once at the authored escape beat');
+    assert.strictEqual(monsterTurns, 0,
+        'trap release and the next monster pattern must never share a frame');
+    for (let tick = 0; tick < 8; tick++) {
+        context.HuntBattleTickExecutor.execute(engine);
+        assert.strictEqual(monsterTurns, 0,
+            'the monster must stay locked until the authored escape animation completes');
+    }
+    assert.strictEqual(engine.activeTrapControl, null);
+    assert.strictEqual(effects.length, 1, 'escape must not be emitted again when its final tick completes');
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(monsterTurns, 1,
+        'the full ATB action may start only after the complete escape handoff');
+}
+
+{
+    let monsterTurns = 0;
+    const { engine } = createEngine({
+        monsterAtb: 100,
+        monsterActionPresentationTicks: 2,
+        prepareMonsterTurn: () => { monsterTurns++; }
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(monsterTurns, 0,
+        'a new pattern must not start while the prior BEAT presentation still owns the monster');
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(monsterTurns, 1,
+        'the next pattern may start after the presentation reaches its clean boundary');
 }
 
 console.log('[test] Hunt battle tick terminal-transition contract passed.');

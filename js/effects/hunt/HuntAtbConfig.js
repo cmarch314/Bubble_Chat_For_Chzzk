@@ -47,7 +47,10 @@ class HuntAtbConfig {
     }
     static get MIN_MONSTER_POST_ACTION_RECOVERY_SECONDS() { return 1; }
     static get MAX_MONSTER_POST_ACTION_RECOVERY_SECONDS() { return 3; }
-    static get MAX_MONSTER_ACTION_DEBT_GAUGES() { return 3; }
+    // Long reviewed chains (multi-pass charges, carpet bombing) can occupy
+    // well over thirty seconds. Debt is internal and the UI still clamps to
+    // zero; this ceiling only prevents malformed data from growing forever.
+    static get MAX_MONSTER_ACTION_DEBT_GAUGES() { return 10; }
     static get MONSTER_ENCOUNTER_START_ATB_RATIO() { return 0.75; }
     static get MONSTER_STAMINA_MAX() { return 100; }
     static get MONSTER_STAMINA_DRAIN_PER_ATB() { return 0.02; }
@@ -134,21 +137,41 @@ class HuntAtbConfig {
 
     static monsterPostActionRecoverySeconds(pattern = {}) {
         const explicit = Number(pattern.postActionRecoverySeconds);
-        const actionClass = this.monsterActionClass(pattern);
-        const classRecovery = Number(
-            this.MONSTER_POST_ACTION_RECOVERY_SECONDS[actionClass]
-            ?? this.MONSTER_POST_ACTION_RECOVERY_SECONDS.normal
-        );
         const authoredRecovery = Math.max(
             0,
             Number(pattern.recoveryTicks || 0) / this.TICKS_PER_SECOND
         );
-        const seconds = Number.isFinite(explicit)
-            ? explicit
-            : Math.max(classRecovery, authoredRecovery);
+        if (Number.isFinite(explicit)) return Math.max(
+            this.MIN_MONSTER_POST_ACTION_RECOVERY_SECONDS,
+            Math.min(this.MAX_MONSTER_POST_ACTION_RECOVERY_SECONDS, explicit)
+        );
+
+        const tags = new Set(pattern.tags || []);
+        const actionClass = this.monsterActionClass(pattern);
+        let derived;
+        if (actionClass === 'roar' || actionClass === 'burrowEnter') derived = 1;
+        else if (actionClass === 'burrowEmerge') derived = 2;
+        else if (actionClass === 'ultimate') derived = 3;
+        else {
+            // Visible BEAT occupancy is already charged separately. This is
+            // only the vulnerable/repositioning gap after it, continuously
+            // scaled by lethality instead of the retired light/normal/strong
+            // buckets. Multi-target and multi-hit actions need slightly more
+            // breathing room because their total team pressure is higher.
+            const damage = Math.max(0, Number(pattern.damageRatio || 0));
+            const damagePressure = Math.max(0, Math.min(1, (damage - 0.18) / 0.52));
+            const targetCount = Math.max(1, Number(pattern.maxTargets || pattern.minTargets || 1));
+            const targetPressure = Math.min(0.45, Math.max(0, targetCount - 1) * 0.15);
+            const sequencePressure = tags.has('multi-hit') ? 0.2 : 0;
+            const controlPressure = pattern.interference || pattern.secondaryInterference ? 0.15 : 0;
+            derived = 1 + damagePressure * 1.4
+                + targetPressure + sequencePressure + controlPressure;
+        }
+        const seconds = Math.max(derived, authoredRecovery);
         return Math.max(
             this.MIN_MONSTER_POST_ACTION_RECOVERY_SECONDS,
-            Math.min(this.MAX_MONSTER_POST_ACTION_RECOVERY_SECONDS, seconds)
+            Math.min(this.MAX_MONSTER_POST_ACTION_RECOVERY_SECONDS,
+                Math.round(seconds * 10) / 10)
         );
     }
 
@@ -160,10 +183,11 @@ class HuntAtbConfig {
             // an authored/derived 1-3 second opening. Fixed legacy costs must
             // never make a short, visually finished attack wait off-screen.
             const recoverySeconds = this.monsterPostActionRecoverySeconds(pattern);
-            const cost = (
-                occupancyTicks
-                + recoverySeconds * this.TICKS_PER_SECOND
-            ) * recoveryPerTick;
+            const authoredMultiplier = Number(pattern.monsterAtbCostMultiplier);
+            const recoveryMultiplier = Number.isFinite(authoredMultiplier) && authoredMultiplier > 0
+                ? authoredMultiplier : 1;
+            const cost = occupancyTicks * recoveryPerTick
+                + recoverySeconds * this.TICKS_PER_SECOND * recoveryPerTick * recoveryMultiplier;
             const maxDebt = this.GAUGE_MAX * this.MAX_MONSTER_ACTION_DEBT_GAUGES;
             return Math.round(Math.max(0, Math.min(maxDebt, cost)) * 1000000) / 1000000;
         }

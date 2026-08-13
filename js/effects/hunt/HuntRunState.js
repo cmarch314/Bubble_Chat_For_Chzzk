@@ -1,5 +1,5 @@
 class HuntRunState {
-    static SCHEMA_VERSION = 4;
+    static SCHEMA_VERSION = 5;
     static CATALOG_VERSION = 5;
     static NODE_COUNT = 15;
     static MAX_BYTES = 32 * 1024;
@@ -57,6 +57,8 @@ class HuntRunState {
         const rawParty = Array.isArray(state.party) ? state.party : [];
         const Supply = typeof HuntSharedSupply !== 'undefined' ? HuntSharedSupply
             : (typeof require === 'function' ? require('./HuntSharedSupply') : null);
+        const DifficultyProfile = typeof HuntDifficultyProfile !== 'undefined' ? HuntDifficultyProfile
+            : (typeof require === 'function' ? require('./HuntDifficultyProfile') : null);
         const nodes = (Array.isArray(state.nodes) ? state.nodes : []).slice(0, this.NODE_COUNT)
             .map((node, index) => this.normalizeNode(node, index));
         const nodeIndex = this.clamp(state.nodeIndex, 0, Math.max(0, nodes.length));
@@ -72,10 +74,14 @@ class HuntRunState {
             zenny: this.clamp(state.zenny, 0, 9),
             lockLimit: this.clamp(state.lockLimit || 1, 1, 3),
             rerolls: this.clamp(state.rerolls, 0, 9),
+            difficulty: DifficultyProfile
+                ? DifficultyProfile.normalize(state.difficulty)
+                : { id: 'standard', monsterDamageMultiplier: 1, rewardMultiplier: 1 },
             supply: Supply ? (state.supply ? Supply.normalize(state.supply) : Supply.fromLegacyParty(rawParty)) : {
                 potions: this.clamp(state.supply?.potions ?? 10, 0, 10),
                 lifepowders: this.clamp(state.supply?.lifepowders ?? 1, 0, 9),
                 shockTraps: this.clamp(state.supply?.shockTraps, 0, 9),
+                flashPods: this.clamp(state.supply?.flashPods, 0, 9),
                 bombs: this.clamp(state.supply?.bombs ?? 1, 0, 9)
             },
             seals: [...new Set(Array.isArray(state.seals) ? state.seals : [])].map(String).slice(-9),

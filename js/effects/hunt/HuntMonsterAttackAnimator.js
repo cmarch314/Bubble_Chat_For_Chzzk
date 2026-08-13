@@ -1,7 +1,8 @@
 class HuntMonsterAttackAnimator {
-    constructor(owner, onRoar) {
+    constructor(owner, onRoar, onInterference = null) {
         this.owner = owner;
         this.onRoar = onRoar;
+        this.onInterference = onInterference;
         this.motionGeneration = 0;
         this.activeMonsterMotion = null;
         this.activeBeatMotionPreview = null;
@@ -167,12 +168,12 @@ class HuntMonsterAttackAnimator {
     // 좌표 어휘 해석기. 매 모션마다 새로 계측한다 — 레이아웃이 바뀌면 앵커도 따라
     // 가야 하고, 캐시하면 예전 사고(430 클램프와 실제 거리 505의 차이를 --narga-drop
     // 으로 메우던 일)가 그대로 재현된다.
-    resolveStageAnchors(monsterImg, primaryTarget = null, targetSequence = null) {
+    resolveStageAnchors(monsterImg, primaryTarget = null, targetSequence = null, targetGroup = null) {
         const Anchors = typeof HuntStageAnchors !== 'undefined'
             ? HuntStageAnchors
             : (typeof require === 'function' ? require('./HuntStageAnchors.js') : null);
         if (!Anchors) throw new Error('HuntStageAnchors가 로드되지 않았다');
-        return Anchors.fromDom(this.card, monsterImg, { primaryTarget, targetSequence });
+        return Anchors.fromDom(this.card, monsterImg, { primaryTarget, targetSequence, targetGroup });
     }
 
     // 겨냥 레이어는 몸 방향 전용이다. 없으면(구형 fixture) null을 돌려 무시한다.
@@ -503,6 +504,8 @@ class HuntMonsterAttackAnimator {
         if (active.timeoutId !== undefined) this.animationTimers.clear?.(active.timeoutId);
         active.element.classList.remove(active.motionClass);
         active.element.style.removeProperty('animation');
+        active.element.style.removeProperty('animation-delay');
+        active.element.style.removeProperty('animation-play-state');
         active.element.style.removeProperty('transform');
         active.element.style.removeProperty('transition');
         delete active.element.dataset.tigrexChargePasses;
@@ -581,6 +584,7 @@ class HuntMonsterAttackAnimator {
             element: motionElement,
             motionClass,
             generation,
+            durationMs: Math.max(1, Number(duration) || 1),
             timeoutId: undefined,
             finishers: onFinish ? [onFinish] : [],
             expectedAnimationNames,
@@ -588,6 +592,7 @@ class HuntMonsterAttackAnimator {
             isolatedLayer: motionElement.classList.contains?.('hunt-monster-attack-motion') || false
         };
         active.finish = event => {
+            if (active.scrubbing) return;
             if (event) {
                 if (event.target !== motionElement) {
                     this.traceMonsterMotion('ignored-child-event', {
@@ -628,8 +633,13 @@ class HuntMonsterAttackAnimator {
     }
 
     clearMonsterMotion(reason = 'dispose') {
+        this.motionGeneration++;
+        // A BEAT preview owns WAAPI/CSS tracks outside activeMonsterMotion.
+        // Dropping only the controller reference leaves those filled tracks on
+        // screen, so selecting another pattern can inherit its predecessor's
+        // position, rotation, facing, scale and skew.
+        const clearedBeatPreview = this.cancelBeatMotionPreview();
         const cleared = this.clearActiveMonsterMotion(null, reason);
-        this.activeBeatMotionPreview = null;
         this.card?.classList?.remove?.('hunt-monster-underground', 'monster-charge-rumble');
         this.card?.querySelectorAll?.('.hunt-monster-attack-motion')?.forEach(motionElement => {
             const motionClasses = Array.from(motionElement.classList || [])
@@ -645,9 +655,16 @@ class HuntMonsterAttackAnimator {
             layer.style?.removeProperty?.('transform');
             delete layer.dataset.monsterFacingPlan;
         });
-        this.card?.querySelectorAll?.('.monster-local-action-fx,.monster-charge-track,.monster-burrow-dust,.hunt-monster-eye-trail')
+        this.card?.querySelectorAll?.('.monster-local-action-fx,.monster-charge-track,.monster-stomp-dust,.monster-wall-stuck-fx,.monster-burrow-dust,.monster-tail-slam-arc,.monster-part-swing-arc,.hunt-monster-eye-trail')
             ?.forEach(node => node.remove());
-        return cleared;
+        this.card?.querySelectorAll?.('#fight-monster-img,.hunt-small-monster')?.forEach(monsterImg => {
+            monsterImg.classList.remove('monster-horn-stuck-anim', 'monster-beat-stride-flip');
+            delete monsterImg.dataset.hornStuck;
+            for (const property of ['--stuck-x', '--stuck-y', '--monster-stride-cycle']) {
+                monsterImg.style.removeProperty(property);
+            }
+        });
+        return cleared || clearedBeatPreview;
     }
 
     triggerMonsterRoar(pattern = null) {
@@ -657,19 +674,133 @@ class HuntMonsterAttackAnimator {
     // 비트 목록을 가진 패턴은 새 경로를 탄다. 없으면 종전 키프레임 경로 그대로다.
     // 병존이 되므로 몬스터를 하나씩 옮길 수 있고, 어느 시점에 멈춰도 나머지는
     // 그대로 동작한다.
-    playBeatMotion(monsterImg, pattern, profileId, targetCard = null, targets = []) {
-        if (pattern?.runtimePreviewScrub && this.activeBeatMotionPreview?.animations) {
-            this.activeBeatMotionPreview.animations.forEach(animation => {
-                try { animation.cancel(); } catch (_) { /* detached preview layer */ }
-            });
+    cancelBeatMotionPreview(controller = this.activeBeatMotionPreview) {
+        if (!controller) return false;
+        controller.animations?.forEach(animation => {
+            try { animation.cancel(); } catch (_) { /* detached preview layer */ }
+        });
+        if (this.activeBeatMotionPreview === controller) {
+            const element = controller.motionElement;
+            if (element?.dataset) {
+                delete element.dataset.monsterBeatTimeline;
+                delete element.dataset.monsterBeatImpacts;
+            }
             this.activeBeatMotionPreview = null;
         }
+        controller.monsterImg?.classList?.remove?.('monster-beat-stride-flip');
+        controller.monsterImg?.style?.removeProperty?.('--monster-stride-cycle');
+        controller.cssTracks?.forEach(track => {
+            track.element?.style?.removeProperty?.('animation');
+            track.element?.style?.removeProperty?.('animation-delay');
+            track.element?.style?.removeProperty?.('animation-play-state');
+        });
+        controller.cssStyle?.remove?.();
+        if (controller.motionElement?.dataset) delete controller.motionElement.dataset.monsterBeatBackend;
+        return true;
+    }
+
+    static remapKeyframeBeats(keyframes = [], sourceBeats = [], targetBeats = []) {
+        const normalize = beats => {
+            let elapsed = 0;
+            return beats.map((beat, index) => {
+                const ticks = Math.max(1, Number(beat?.ticks) || 1);
+                const item = { id: beat?.beat || `beat-${index + 1}`, start: elapsed, end: elapsed + ticks };
+                elapsed += ticks;
+                return item;
+            });
+        };
+        const source = normalize(sourceBeats), target = normalize(targetBeats);
+        const sourceTotal = source.at(-1)?.end || 0, targetTotal = target.at(-1)?.end || 0;
+        if (!sourceTotal || !targetTotal || source.length !== target.length) return keyframes;
+        return keyframes.map(frame => {
+            const sourceTick = Math.max(0, Math.min(sourceTotal, Number(frame.offset) * sourceTotal));
+            let index = source.findIndex((beat, beatIndex) => sourceTick < beat.end
+                || beatIndex === source.length - 1);
+            if (index < 0) index = source.length - 1;
+            const sourceBeat = source[index], targetBeat = target[index];
+            const ratio = sourceBeat.end > sourceBeat.start
+                ? (sourceTick - sourceBeat.start) / (sourceBeat.end - sourceBeat.start) : 0;
+            return { ...frame, offset: Math.max(0, Math.min(1,
+                (targetBeat.start + ratio * (targetBeat.end - targetBeat.start)) / targetTotal)) };
+        });
+    }
+
+    static applyProfileAdapterEdits(keyframes = [], beats = []) {
+        const normalized = [];
+        let elapsed = 0;
+        for (const beat of beats || []) {
+            const ticks = Math.max(1, Number(beat?.ticks) || 1);
+            normalized.push({ ...beat, start: elapsed, end: elapsed + ticks });
+            elapsed += ticks;
+        }
+        if (!elapsed || !normalized.length) return keyframes;
+        return keyframes.map(frame => {
+            const tick = Math.max(0, Math.min(elapsed - Number.EPSILON,
+                Math.max(0, Math.min(1, Number(frame.offset) || 0)) * elapsed));
+            const beat = normalized.find((item, index) => tick < item.end
+                || index === normalized.length - 1) || {};
+            const additions = [];
+            const x = Number(beat.offsetX) || 0, y = Number(beat.offsetY) || 0;
+            if (x || y) additions.push(`translate(${x}px, ${y}px)`);
+            if (beat.rotation !== undefined && beat.rotation !== null) additions.push(`rotate(${Number(beat.rotation) || 0}deg)`);
+            else if (beat.rotateBy !== undefined && beat.rotateBy !== null) additions.push(`rotate(${Number(beat.rotateBy) || 0}deg)`);
+            if (beat.scaleX !== undefined && beat.scaleX !== null) additions.push(`scaleX(${Math.max(.05, Number(beat.scaleX) || 1)})`);
+            if (beat.scaleY !== undefined && beat.scaleY !== null) additions.push(`scaleY(${Math.max(.05, Number(beat.scaleY) || 1)})`);
+            if (beat.skewX !== undefined && beat.skewX !== null) additions.push(`skewX(${Number(beat.skewX) || 0}deg)`);
+            if (beat.skewY !== undefined && beat.skewY !== null) additions.push(`skewY(${Number(beat.skewY) || 0}deg)`);
+            return {
+                ...frame,
+                ...(additions.length ? { transform: `${frame.transform && frame.transform !== 'none' ? frame.transform : ''} ${additions.join(' ')}`.trim() } : {}),
+                ...(beat.opacity !== undefined && beat.opacity !== null
+                    ? { opacity: Math.max(0, Math.min(1, Number(beat.opacity))) } : {})
+            };
+        });
+    }
+
+    playProfileGraphMotion(active, pattern, profile, frames, timing = {}) {
+        if (!active?.element || !Array.isArray(frames) || !frames.length
+            || typeof active.element.animate !== 'function') return false;
+        const source = pattern?.runtimeSourceTimingBeats;
+        const target = pattern?.runtimeTimingBeats;
+        const retimed = Array.isArray(source) && Array.isArray(target) && source.length === target.length
+            ? HuntMonsterAttackAnimator.remapKeyframeBeats(frames, source, target)
+            : frames;
+        const edited = HuntMonsterAttackAnimator.applyProfileAdapterEdits(retimed, target || []);
+        if (timing.origin) active.element.style.transformOrigin = timing.origin;
+        const animation = active.element.animate(edited, {
+            duration: active.durationMs,
+            easing: timing.easing || 'linear',
+            fill: 'both'
+        });
+        active.retimedAnimations = [animation];
+        active.element.dataset.monsterMotionBackend = 'profile-graph';
+        active.finishers.push(() => {
+            try { animation.cancel(); } catch (_) { /* detached profile graph */ }
+            active.element.style?.removeProperty?.('transform-origin');
+            delete active.element.dataset.monsterMotionBackend;
+        });
+        return true;
+    }
+
+    playBeatMotion(monsterImg, pattern, profileId, targetCard = null, targets = []) {
+        // 에디터의 정지 프레임과 전체 재생, 또는 연속 패턴의 이전 모션이
+        // 동시에 같은 레이어를 잡으면 위치·투명도·복귀가 서로 덮어쓴다.
+        // 새 비트 모션은 항상 단일 owner가 되게 기존 컨트롤러부터 폐기한다.
+        this.cancelBeatMotionPreview();
+        this.clearActiveMonsterMotion(null, 'beat-replaced');
         const Compiler = typeof HuntMotionCompiler !== 'undefined'
             ? HuntMotionCompiler
             : (typeof require === 'function' ? require('./HuntMotionCompiler.js') : null);
         const motionElement = this.resolveMotionElement(monsterImg);
         const poseLayer = this.resolvePoseLayer(monsterImg);
         if (!Compiler || !motionElement || !poseLayer) return null;
+        const legacyMotionClasses = Array.from(motionElement.classList || [])
+            .filter(name => name.startsWith('monster-motion-'));
+        if (legacyMotionClasses.length) motionElement.classList.remove(...legacyMotionClasses);
+        for (const property of ['animation', 'animation-delay', 'animation-play-state',
+            'transition', 'transform', 'opacity']) motionElement.style.removeProperty(property);
+        if (pattern?.chargeLaunchStyle) motionElement.dataset.chargeLaunchStyle = pattern.chargeLaunchStyle;
+        else delete motionElement.dataset.chargeLaunchStyle;
 
         const rig = HuntMonsterAnimationCatalog?.resolveRig?.(this.owner?.selectedMonster)?.id || 'winged';
         // 비트의 `target`이 가리킬 이번 턴의 주 표적. 비트는 번호를 박지 않는다.
@@ -681,21 +812,46 @@ class HuntMonsterAttackAnimator {
                 .map(event => event?.targetIndices?.[0])
                 .filter(Number.isInteger)
             : [];
-        const targetSequence = resolvedPasses.length
+        const resolvedTargetGroup = Array.isArray(pattern?.runtimePairTargets)
+            && pattern.runtimePairTargets.some(Number.isInteger)
+            ? [...new Set(pattern.runtimePairTargets.filter(Number.isInteger))]
+            : Array.isArray(pattern?.runtimeResolvedImpactTimeline)
+            ? [...new Set(pattern.runtimeResolvedImpactTimeline
+                .flatMap(event => event?.targetIndices || []).filter(Number.isInteger))]
+            : (Array.isArray(targets) ? [...new Set(targets.map(target => target?.index)
+                .filter(Number.isInteger))] : []);
+        const targetSequence = Array.isArray(pattern?.runtimePairTargets)
+            && pattern.runtimePairTargets.some(Number.isInteger)
+            ? pattern.runtimePairTargets.filter(Number.isInteger)
+            : resolvedPasses.length
             ? resolvedPasses
             : (Array.isArray(targets) ? targets.map(target => target?.index).filter(Number.isInteger) : []);
         // align이 쓸 부위 오프셋. 이미지 중심 기준 픽셀이다. 스프라이트 크기를
         // 실측해서 곱하므로 이미지 크기가 바뀌어도 따라간다.
         const monsterRect = monsterImg.getBoundingClientRect();
         const partOffset = (name, facing) => {
-            const point = this.resolvePosePivot(name, facing);
+            let point = null;
+            try {
+                point = this.resolvePosePivot(name, facing);
+            } catch (error) {
+                this.traceMonsterMotion('part-anchor-fallback', {
+                    patternId: pattern?.id || null,
+                    part: name,
+                    reason: error?.message || String(error)
+                });
+            }
+            // 부위 데이터 누락은 해당 정렬만 포기한다. 한 앵커 때문에 유효한
+            // BEAT 그래프 전체가 재생 전 예외로 중단되어서는 안 된다.
+            if (!point || !Number.isFinite(point.xPercent) || !Number.isFinite(point.yPercent)) {
+                return { x: 0, y: 0 };
+            }
             return {
                 x: (point.xPercent / 100 - .5) * monsterRect.width,
                 y: (point.yPercent / 100 - .5) * monsterRect.height
             };
         };
         const built = Compiler.compile(pattern.motion, {
-            anchors: this.resolveStageAnchors(monsterImg, primaryTarget, targetSequence),
+            anchors: this.resolveStageAnchors(monsterImg, primaryTarget, targetSequence, resolvedTargetGroup),
             rig,
             partOffset
         });
@@ -721,17 +877,55 @@ class HuntMonsterAttackAnimator {
         ].filter(Boolean);
 
         const facingLayer = this.resolveFacingLayer(monsterImg);
-        if (facingLayer && built.facing.length > 1) {
+        let facingFrames = [];
+        if (facingLayer && built.facingActive) {
             const baseFacing = HuntMonsterAnatomyCatalog.baseFacing(this.owner?.selectedMonster);
             const flip = direction => (baseFacing === 'left'
                 ? (direction < 0 ? 1 : -1)
                 : (direction > 0 ? 1 : -1));
-            const facingFrames = built.facing.map(step => ({
+            const facingSteps = built.facing.length === 1
+                ? [{ ...built.facing[0], offset: 0 }, { ...built.facing[0], offset: 1 }]
+                : built.facing;
+            facingFrames = facingSteps.map(step => ({
                 offset: step.offset, transform: `scaleX(${flip(step.direction)})`
             }));
             const animation = facingLayer.animate?.(facingFrames,
                 { duration: built.durationMs, easing: 'step-end', fill: 'both' });
             if (animation) animations.push(animation);
+        }
+
+        // OBS/WebView builds can expose neither Element.animate nor Animation.
+        // Silently optional-chaining animate() used to leave a valid BEAT graph
+        // with zero moving tracks. Compile the same frames into scoped CSS so
+        // playback, pause and timeline seeking retain one authoritative graph.
+        let cssStyle = null;
+        const cssTracks = [];
+        if (!animations.length) {
+            const generation = this.motionGeneration + 1;
+            const declarations = frame => [
+                frame.transform != null ? `transform:${frame.transform}` : '',
+                frame.opacity != null ? `opacity:${frame.opacity}` : '',
+                frame.filter != null ? `filter:${frame.filter}` : '',
+                frame.transformOrigin != null ? `transform-origin:${frame.transformOrigin}` : '',
+                frame.easing ? `animation-timing-function:${frame.easing}` : ''
+            ].filter(Boolean).join(';');
+            const addTrack = (element, suffix, frames) => {
+                if (!element || !frames.length) return;
+                const name = `monster-beat-${generation}-${suffix}`;
+                const keyframes = frames.map(frame =>
+                    `${(Math.max(0, Math.min(1, Number(frame.offset) || 0)) * 100).toFixed(4)}%{${declarations(frame)}}`
+                ).join('');
+                cssStyle.textContent += `@keyframes ${name}{${keyframes}}`;
+                element.style.setProperty('animation', `${name} ${built.durationMs}ms linear both`, 'important');
+                cssTracks.push({ element, name });
+            };
+            cssStyle = document.createElement('style');
+            cssStyle.dataset.monsterBeatFallback = String(generation);
+            (document.head || document.documentElement).appendChild(cssStyle);
+            motionElement.dataset.monsterBeatBackend = 'css-fallback';
+            addTrack(motionElement, 'placement', built.placement);
+            addTrack(poseLayer, 'pose', poseFrames);
+            addTrack(facingLayer, 'facing', facingFrames);
         }
 
         // 검수 화면이 비트 구간과 접촉 시점을 그대로 읽을 수 있게 남긴다.
@@ -740,15 +934,141 @@ class HuntMonsterAttackAnimator {
         motionElement.dataset.monsterBeatImpacts = built.impacts
             .map(impact => impact.atTicks).join(',');
 
-        const previewController = { animations, durationMs: built.durationMs };
+        const previewController = { animations, cssTracks, cssStyle,
+            durationMs: built.durationMs, motionElement, monsterImg };
         this.activeBeatMotionPreview = previewController;
+        // Timeline scrubbing is a still-frame editor, not playback. WAAPI
+        // animations start running as soon as `animate()` returns, so pause
+        // them in the same task before the browser can paint the first frame.
+        if (pattern?.runtimePreviewScrub) {
+            this.freezeBeatMotionPreview(previewController, pattern.runtimePreviewProgress || 0);
+        }
         const clear = () => {
-            for (const animation of animations) { try { animation.cancel(); } catch (_) { /* detached */ } }
-            if (this.activeBeatMotionPreview === previewController) this.activeBeatMotionPreview = null;
-            delete motionElement.dataset.monsterBeatTimeline;
-            delete motionElement.dataset.monsterBeatImpacts;
+            if (this.activeBeatMotionPreview === previewController) {
+                this.cancelBeatMotionPreview(previewController);
+            } else {
+                for (const animation of animations) { try { animation.cancel(); } catch (_) { /* detached */ } }
+            }
         };
         if (!pattern?.runtimePreviewScrub) this.animationTimers.timeout(clear, built.durationMs + 60);
+
+        const audioGeneration = ++this.motionGeneration;
+        if (!pattern?.runtimePreviewScrub) {
+            // The review shell mutes only renderer-owned audio. Visual BEAT cues
+            // (burrow dust, tracking trails, emergence dust) and stride motion
+            // remain part of the authored animation and must still run.
+            // Live approved audio is emitted by HuntBeatActionRuntime. Keeping
+            // this renderer timer would play the same assigned slot twice and
+            // would survive on a clock unrelated to gameplay interruption.
+            if (pattern?.beatV2Approved !== true && !pattern?.runtimePreviewMuteAudio) for (const cue of built.cues || []) {
+                this.animationTimers.timeout(() => {
+                    if (this.motionGeneration !== audioGeneration) return;
+                    this.owner.onMonsterPatternAudio?.('monster_attack', null, {
+                        monsterId: this.owner.selectedMonster?.id,
+                        patternId: pattern.id,
+                        patternName: pattern.name,
+                        patternType: pattern.type,
+                        patternSlot: cue.audioSlot,
+                        overrideOnly: true
+                    });
+                }, Math.round(Number(cue.atTicks || 0) * 1000 / HuntMotionCompiler.TICKS_PER_SECOND));
+            }
+            // Scrubbing/pattern selection must produce a still frame only.
+            // Running authored FX here made merely selecting a pattern emit
+            // dust, roar waves and other combat spectacle without playback.
+            if (!pattern?.runtimePreviewScrub) for (const cue of built.visualCues || []) {
+                this.animationTimers.timeout(() => {
+                    if (this.motionGeneration !== audioGeneration) return;
+                    if (cue.fx === 'burrow-tracking-dust') {
+                        this.createBurrowTrackingDustEffect(
+                            monsterImg,
+                            targetCard || monsterImg,
+                            Math.round(Number(cue.durationTicks || 1) * 1000 / HuntMotionCompiler.TICKS_PER_SECOND)
+                        );
+                    } else if (cue.fx === 'burrow-dust' || cue.fx === 'burrow-emerge-dust') {
+                        this.createBurrowDustEffect(
+                            cue.anchor === 'target' ? targetCard : monsterImg,
+                            cue.fx === 'burrow-emerge-dust' ? 'emerge' : 'enter',
+                            Math.round(Number(cue.durationTicks || 1) * 1000 / HuntMotionCompiler.TICKS_PER_SECOND)
+                        );
+                    } else if (cue.fx === 'part-dust') {
+                        this.createMonsterPartDustEffect(
+                            monsterImg,
+                            cue.anchor || 'head',
+                            Math.round(Number(cue.durationTicks || 1) * 1000 / HuntMotionCompiler.TICKS_PER_SECOND)
+                        );
+                    } else if (cue.fx === 'target-impact-dust') {
+                        const impactEvents = Array.isArray(pattern.runtimeResolvedImpactTimeline)
+                            ? pattern.runtimeResolvedImpactTimeline : [];
+                        const sameTickEvents = impactEvents.filter(event =>
+                            Number.isFinite(Number(event?.atTicks))
+                            && Number(event.atTicks) === Number(cue.atTicks));
+                        const matchingEvents = sameTickEvents.length
+                            ? sameTickEvents
+                            : impactEvents.filter(event => event?.targetMode === cue.targetMode);
+                        const fallbackTargetIndices = Array.isArray(targets)
+                            ? targets.map(target => target?.index).filter(Number.isInteger)
+                            : [];
+                        const resolvedImpactTargets = matchingEvents
+                            .flatMap(event => event?.targetIndices || [])
+                            .filter(Number.isInteger);
+                        const resolvedTargetCards = [...new Set(
+                            resolvedImpactTargets.length ? resolvedImpactTargets : fallbackTargetIndices
+                        )]
+                            .filter(Number.isInteger)
+                            .map(index => this.card.querySelector?.(`#fight-card-${index}`))
+                            .filter(Boolean);
+                        const dustTargets = resolvedTargetCards.length
+                            ? resolvedTargetCards
+                            : [targetCard].filter(Boolean);
+                        for (const dustTarget of dustTargets) {
+                            this.createTargetImpactDustEffect(
+                                dustTarget,
+                                Math.round(Number(cue.durationTicks || 1) * 1000 / HuntMotionCompiler.TICKS_PER_SECOND),
+                                { angleMode: cue.angleMode }
+                            );
+                        }
+                    } else if (cue.fx === 'part-swing-arc') {
+                        const impactEvents = Array.isArray(pattern.runtimeResolvedImpactTimeline)
+                            ? pattern.runtimeResolvedImpactTimeline : [];
+                        const matchingEvent = impactEvents.find(event =>
+                            Number(event?.atTicks) === Number(cue.atTicks)
+                            && (!cue.targetMode || event?.targetMode === cue.targetMode))
+                            || impactEvents.find(event => event?.targetMode === cue.targetMode);
+                        const swingTargetIndex = matchingEvent?.targetIndices?.[0];
+                        const swingTarget = Number.isInteger(swingTargetIndex)
+                            ? this.card.querySelector?.(`#fight-card-${swingTargetIndex}`)
+                            : targetCard;
+                        this.createMonsterPartSwingArcEffect(
+                            monsterImg,
+                            cue.anchor || 'head',
+                            swingTarget,
+                            Math.round(Number(cue.durationTicks || 1) * 1000 / HuntMotionCompiler.TICKS_PER_SECOND),
+                            { angleMode: cue.angleMode }
+                        );
+                    } else if (cue.fx === 'tail-slam-arc') {
+                        this.createTailSlamArcEffect(
+                            monsterImg,
+                            Math.round(Number(cue.durationTicks || 1) * 1000 / HuntMotionCompiler.TICKS_PER_SECOND)
+                        );
+                    }
+                }, Math.round(Number(cue.atTicks || 0) * 1000 / HuntMotionCompiler.TICKS_PER_SECOND));
+            }
+            for (const stride of built.strideWindows || []) {
+                const tickMs = 1000 / HuntMotionCompiler.TICKS_PER_SECOND;
+                this.animationTimers.timeout(() => {
+                    if (this.motionGeneration !== audioGeneration) return;
+                    monsterImg.style.setProperty('--monster-stride-cycle', `${stride.intervalTicks * tickMs * 2}ms`);
+                    monsterImg.classList.remove('monster-beat-stride-flip');
+                    void monsterImg.offsetWidth;
+                    monsterImg.classList.add('monster-beat-stride-flip');
+                }, Math.round(stride.startTicks * tickMs));
+                this.animationTimers.timeout(() => {
+                    monsterImg.classList.remove('monster-beat-stride-flip');
+                    monsterImg.style.removeProperty('--monster-stride-cycle');
+                }, Math.round(stride.endTicks * tickMs));
+            }
+        }
 
         return Object.freeze({
             id: profileId || pattern.id || 'beat-motion',
@@ -763,21 +1083,89 @@ class HuntMonsterAttackAnimator {
 
     seekBeatMotion(progress = 0) {
         const controller = this.activeBeatMotionPreview;
-        if (!controller?.animations?.length) return false;
+        if (controller?.animations?.length) {
+            this.freezeBeatMotionPreview(controller, progress);
+            return true;
+        }
+        return this.freezeKeyframeMotionPreview(progress);
+    }
+
+    freezeKeyframeMotionPreview(progress = 0) {
+        const active = this.activeMonsterMotion;
+        if (!active?.element) return false;
+        active.scrubbing = true;
+        if (active.timeoutId !== undefined) {
+            this.animationTimers.clear?.(active.timeoutId);
+            active.timeoutId = undefined;
+        }
         const ratio = Math.max(0, Math.min(1, Number(progress) || 0));
-        controller.animations.forEach(animation => {
+        if (active.retimedAnimations?.length) {
+            active.retimedAnimations.forEach(animation => {
+                try {
+                    animation.pause();
+                    animation.currentTime = active.durationMs * ratio;
+                } catch (_) { /* detached retimed preview layer */ }
+            });
+            return true;
+        }
+        // Extracted keyframe graphs are authoritative for reviewed profile motion.
+        // wyverns. Pause the actual class animation and seek it with a negative
+        // delay; this works even in OBS/WebView builds where getAnimations() is
+        // absent or returns no CSSAnimation objects.
+        // Recreate the CSSAnimation after changing its negative delay. Merely
+        // changing animation-delay on an already paused animation does not seek
+        // currentTime consistently in Chromium/OBS; it can keep the old frame.
+        active.element.classList.remove(active.motionClass);
+        active.element.style.setProperty('animation-delay', `${-active.durationMs * ratio}ms`, 'important');
+        active.element.style.setProperty('animation-play-state', 'running', 'important');
+        void active.element.offsetWidth;
+        active.element.classList.add(active.motionClass);
+        const pauseCssFrame = () => {
+            if (this.activeMonsterMotion === active && active.scrubbing) {
+                active.element.style.setProperty('animation-play-state', 'paused', 'important');
+            }
+        };
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(pauseCssFrame);
+        else pauseCssFrame();
+        const animations = active.element.getAnimations?.({ subtree: true }) || [];
+        for (const animation of animations) {
+            try {
+                animation.pause();
+                const timing = animation.effect?.getComputedTiming?.();
+                const duration = Number(timing?.activeDuration);
+                animation.currentTime = (Number.isFinite(duration) && duration > 0
+                    ? duration : active.durationMs) * ratio;
+            } catch (_) { /* detached legacy preview layer */ }
+        }
+        return true;
+    }
+
+    freezeBeatMotionPreview(controller, progress = 0) {
+        const ratio = Math.max(0, Math.min(1, Number(progress) || 0));
+        controller?.animations?.forEach(animation => {
             try {
                 animation.pause();
                 animation.currentTime = controller.durationMs * ratio;
             } catch (_) { /* detached preview layer */ }
         });
-        return true;
+        controller?.cssTracks?.forEach(track => {
+            track.element.style.setProperty('animation-delay', `${-controller.durationMs * ratio}ms`, 'important');
+            track.element.style.setProperty('animation-play-state', 'paused', 'important');
+        });
     }
 
     playPatternMotion(monsterImg, targetCard, pattern, attackName, type, targets = []) {
         if (Array.isArray(pattern?.motion) && pattern.motion.length) {
             const beatProfile = this.playBeatMotion(monsterImg, pattern, pattern.id, targetCard, targets);
             if (beatProfile) return beatProfile;
+            // Authored BEAT motion is authoritative. Falling through to an old
+            // CSS profile after a transient compile/DOM failure can execute a
+            // second, differently timed choreography for the same action.
+            this.traceMonsterMotion('skip', {
+                reason: 'beat-motion-unavailable',
+                patternId: pattern?.id || null
+            }, true);
+            return null;
         }
         const Catalog = typeof HuntMonsterAnimationCatalog !== 'undefined' ? HuntMonsterAnimationCatalog : null;
         const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
@@ -1129,7 +1517,9 @@ class HuntMonsterAttackAnimator {
                     String(pattern.runtimeTigrexBranchApproachDurationMs);
                 tigrexStrideDelayMs = Math.round(profile.duration * (passCount === 3 ? .09 : .10));
                 motionElement.style.setProperty('--tigrex-stride-delay', `${tigrexStrideDelayMs}ms`);
-                const timeline = Array.isArray(pattern.runtimeResolvedImpactTimeline)
+                const timeline = pattern?.beatV2Approved === true
+                    ? []
+                    : Array.isArray(pattern.runtimeResolvedImpactTimeline)
                     ? pattern.runtimeResolvedImpactTimeline
                     : [];
                 // Engine ticks stay at 100 ms. The profile duration is already
@@ -1168,6 +1558,12 @@ class HuntMonsterAttackAnimator {
         const motionClass = `monster-motion-${profile.id}`;
         const useDynamicTigrexRoute = Boolean(
             tigrexRouteKeyframes?.length && typeof motionElement.animate === 'function');
+        const ProfileMotionRuntime = typeof HuntMonsterProfileMotionRuntime !== 'undefined'
+            ? HuntMonsterProfileMotionRuntime
+            : (typeof require === 'function' ? require('./HuntMonsterProfileMotionRuntime.js') : null);
+        const profileGraphFrames = !useDynamicTigrexRoute
+            ? ProfileMotionRuntime?.frames?.(profile.id, pattern, profile.rig.id) : null;
+        const profileGraphTiming = ProfileMotionRuntime?.timing?.(profile.id) || {};
         const activeMotion = this.startMonsterMotion(
             motionElement,
             motionClass,
@@ -1175,7 +1571,7 @@ class HuntMonsterAttackAnimator {
             null,
             {
                 patternId: pattern?.id || null,
-                disableCssAnimation: useDynamicTigrexRoute
+                disableCssAnimation: useDynamicTigrexRoute || Boolean(profileGraphFrames?.length)
             }
         );
         if (useDynamicTigrexRoute) {
@@ -1209,7 +1605,19 @@ class HuntMonsterAttackAnimator {
                     reason: String(error?.message || error || 'waapi-failed')
                 });
             }
+        } else if (profileGraphFrames?.length) {
+            this.playProfileGraphMotion(activeMotion, pattern, profile, profileGraphFrames, profileGraphTiming);
+        } else {
+            this.traceMonsterMotion('profile-graph-missing', {
+                generation: activeMotion.generation,
+                motionClass,
+                patternId: pattern?.id || null,
+                profileId: profile.id
+            });
         }
+        // Stride is a continuous locomotion loop, not a legacy pattern-start
+        // cue. Keep it bound to the authored 0.3 s gait while BEAT owns the
+        // action milestones and impact audio.
         if (profile.id === 'tigrex-charge-chain') {
             this.scheduleTigrexStrideAudio(activeMotion, tigrexStrideDelayMs);
         }
@@ -1237,6 +1645,183 @@ class HuntMonsterAttackAnimator {
         motionElement.style.setProperty('--monster-burrow-target-y', `${targetY}px`);
         motionElement.style.setProperty('--monster-burrow-apex-y', `${apexY}px`);
         return { targetX, targetY, apexY };
+    }
+
+    createBurrowDustEffect(anchor, phase = 'enter', durationMs = 1250) {
+        const monsterImg = this.card?.querySelector?.('#fight-monster-img');
+        const stage = monsterImg?.closest?.('.hunt-monster-motion-stage')
+            || this.card?.querySelector?.('#monster-showcase-panel');
+        if (!anchor || !stage) return null;
+        const stageRect = stage.getBoundingClientRect();
+        const anchorRect = anchor.getBoundingClientRect();
+        const dust = document.createElement('div');
+        dust.className = `monster-burrow-dust is-${phase}`;
+        dust.style.left = `${anchorRect.left - stageRect.left + anchorRect.width / 2}px`;
+        dust.style.top = `${anchorRect.top - stageRect.top + anchorRect.height * 0.78}px`;
+        dust.innerHTML = '<i></i><i></i><i></i><i></i><b></b>';
+        stage.appendChild(dust);
+        this.createLocalEmojiFx(stage, '☁️', 'burrow-cloud', Math.max(900, Number(durationMs || 1250)), {
+            left: dust.style.left,
+            top: dust.style.top
+        });
+        void dust.offsetWidth;
+        dust.classList.add('is-playing');
+        this.animationTimers.timeout(() => dust.remove(), Math.max(300, Number(durationMs || 1250) + 180));
+        return dust;
+    }
+
+    createMonsterPartDustEffect(monsterImg, partKind = 'head', durationMs = 600) {
+        const stage = monsterImg?.closest?.('.hunt-monster-motion-stage')
+            || this.card?.querySelector?.('#monster-showcase-panel');
+        if (!monsterImg || !stage) return null;
+        const stageRect = stage.getBoundingClientRect();
+        const imageRect = monsterImg.getBoundingClientRect();
+        const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
+            ? HuntMonsterAnatomyCatalog : null;
+        const point = anatomy?.visualPoint?.(this.owner?.selectedMonster, partKind, 0)
+            || anatomy?.visualPoint?.(this.owner?.selectedMonster, 'head', 0)
+            || { x: .5, y: .45 };
+        const dust = document.createElement('div');
+        dust.className = 'monster-part-impact-dust';
+        dust.style.left = `${imageRect.left - stageRect.left + imageRect.width * point.x}px`;
+        dust.style.top = `${imageRect.top - stageRect.top + imageRect.height * point.y}px`;
+        dust.style.setProperty('--part-dust-duration', `${Math.max(320, Number(durationMs) || 600)}ms`);
+        dust.innerHTML = '<i></i><i></i><i></i><i></i><i></i><b></b>';
+        stage.appendChild(dust);
+        void dust.offsetWidth;
+        dust.classList.add('is-playing');
+        this.animationTimers.timeout(() => dust.remove(), Math.max(420, Number(durationMs || 600) + 120));
+        return dust;
+    }
+
+    createTargetImpactDustEffect(targetCard, durationMs = 600, options = {}) {
+        if (!targetCard) return null;
+        const weapon = targetCard.querySelector?.('.game-hunt-weapon-img-container');
+        const fxStage = targetCard.closest?.('.hunt-combat-board') || this.card || targetCard;
+        const stageRect = fxStage.getBoundingClientRect?.();
+        const weaponRect = weapon?.getBoundingClientRect?.();
+        const monsterRect = (this.card?.querySelector?.('#fight-monster-img')
+            || this.card?.querySelector?.('.hunt-monster-img'))?.getBoundingClientRect?.();
+        const dust = document.createElement('div');
+        dust.className = 'monster-part-impact-dust hunter-target-impact-dust';
+        // Keep target impact FX outside the weapon transform/isolation layer.
+        // Hit knockback, guard recoil and split-weapon transforms can otherwise
+        // clip or bury a correctly timed dust node. Measure the live weapon
+        // centre, then place the effect in the hunter card's top FX layer.
+        const hasLiveRects = stageRect && weaponRect
+            && Number.isFinite(stageRect.left) && Number.isFinite(weaponRect.left);
+        dust.style.left = hasLiveRects
+            ? `${weaponRect.left - stageRect.left + weaponRect.width / 2}px`
+            : '50%';
+        dust.style.top = hasLiveRects
+            ? `${weaponRect.top - stageRect.top + weaponRect.height * .58}px`
+            : '52%';
+        if (weaponRect && monsterRect) {
+            const targetX = weaponRect.left + weaponRect.width / 2;
+            const monsterX = monsterRect.left + monsterRect.width / 2;
+            const impactAngle = options.angleMode === 'upward-diagonal'
+                ? (targetX < monsterX ? -125 : -55)
+                : Math.atan2(
+                    weaponRect.top + weaponRect.height * .58 - (monsterRect.top + monsterRect.height / 2),
+                    targetX - monsterX
+                ) * 180 / Math.PI;
+            dust.style.setProperty('--impact-angle', `${impactAngle.toFixed(2)}deg`);
+        }
+        dust.style.setProperty('--part-dust-duration', `${Math.max(320, Number(durationMs) || 600)}ms`);
+        dust.innerHTML = '<i></i><i></i><i></i><i></i><i></i><b></b><em><u></u><u></u><u></u></em>';
+        dust.dataset.targetCard = targetCard.id || '';
+        fxStage.appendChild(dust);
+        void dust.offsetWidth;
+        dust.classList.add('is-playing');
+        this.animationTimers.timeout(() => dust.remove(), Math.max(420, Number(durationMs || 600) + 120));
+        return dust;
+    }
+
+    createMonsterPartSwingArcEffect(monsterImg, partKind = 'head', targetCard = null, durationMs = 500,
+        options = {}) {
+        const stage = monsterImg?.closest?.('.hunt-monster-motion-stage')
+            || this.card?.querySelector?.('#monster-showcase-panel');
+        if (!monsterImg || !stage) return null;
+        const stageRect = stage.getBoundingClientRect();
+        const imageRect = monsterImg.getBoundingClientRect();
+        const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
+            ? HuntMonsterAnatomyCatalog : null;
+        const point = anatomy?.visualPoint?.(this.owner?.selectedMonster, partKind, 0)
+            || { x: .5, y: .5 };
+        const originX = imageRect.left - stageRect.left + imageRect.width * point.x;
+        const originY = imageRect.top - stageRect.top + imageRect.height * point.y;
+        const targetRect = (targetCard?.querySelector?.('.game-hunt-weapon-img-container')
+            || targetCard)?.getBoundingClientRect?.();
+        const targetX = targetRect ? targetRect.left + targetRect.width / 2 - stageRect.left : originX + 120;
+        const targetY = targetRect ? targetRect.top + targetRect.height / 2 - stageRect.top : originY;
+        const angle = options.angleMode === 'upward-diagonal'
+            ? (targetX < originX ? -125 : -55)
+            : Math.atan2(targetY - originY, targetX - originX) * 180 / Math.PI;
+        const arc = document.createElement('div');
+        arc.className = 'monster-part-swing-arc';
+        arc.style.left = `${originX}px`;
+        arc.style.top = `${originY}px`;
+        arc.style.setProperty('--swing-angle', `${angle.toFixed(2)}deg`);
+        arc.style.setProperty('--swing-duration', `${Math.max(280, Number(durationMs) || 500)}ms`);
+        arc.innerHTML = '<i></i><i></i><i></i>';
+        stage.appendChild(arc);
+        void arc.offsetWidth;
+        arc.classList.add('is-playing');
+        this.animationTimers.timeout(() => arc.remove(), Math.max(400, Number(durationMs || 500) + 120));
+        return arc;
+    }
+
+    createTailSlamArcEffect(monsterImg, durationMs = 400) {
+        const stage = monsterImg?.closest?.('.hunt-monster-motion-stage')
+            || this.card?.querySelector?.('#monster-showcase-panel');
+        if (!monsterImg || !stage) return null;
+        const stageRect = stage.getBoundingClientRect();
+        const imageRect = monsterImg.getBoundingClientRect();
+        const anatomy = typeof HuntMonsterAnatomyCatalog !== 'undefined'
+            ? HuntMonsterAnatomyCatalog : null;
+        const tail = anatomy?.visualPoint?.(this.owner?.selectedMonster, 'tail', 0)
+            || { x: .72, y: .18 };
+        const arc = document.createElement('div');
+        arc.className = 'monster-tail-slam-arc';
+        arc.style.left = `${imageRect.left - stageRect.left + imageRect.width * tail.x}px`;
+        arc.style.top = `${imageRect.top - stageRect.top + imageRect.height * tail.y}px`;
+        arc.style.setProperty('--tail-slam-duration', `${Math.max(280, Number(durationMs) || 400)}ms`);
+        arc.innerHTML = '<i></i><i></i><i></i><b>💥</b>';
+        stage.appendChild(arc);
+        void arc.offsetWidth;
+        arc.classList.add('is-playing');
+        const duration = Math.max(280, Number(durationMs) || 400);
+        this.animationTimers.timeout(() => this.createMonsterPartDustEffect(monsterImg, 'tail', 620),
+            Math.round(duration * .78));
+        this.animationTimers.timeout(() => arc.remove(), duration + 220);
+        return arc;
+    }
+
+    createBurrowTrackingDustEffect(fromAnchor, targetAnchor, durationMs = 800) {
+        const monsterImg = this.card?.querySelector?.('#fight-monster-img');
+        const stage = monsterImg?.closest?.('.hunt-monster-motion-stage')
+            || this.card?.querySelector?.('#monster-showcase-panel');
+        if (!fromAnchor || !targetAnchor || !stage) return null;
+        const stageRect = stage.getBoundingClientRect();
+        const fromRect = fromAnchor.getBoundingClientRect();
+        const targetRect = targetAnchor.getBoundingClientRect();
+        const startX = fromRect.left - stageRect.left + fromRect.width / 2;
+        const startY = fromRect.top - stageRect.top + fromRect.height * .78;
+        const targetX = targetRect.left - stageRect.left + targetRect.width / 2;
+        const targetY = targetRect.top - stageRect.top + targetRect.height * .82;
+        const dust = document.createElement('div');
+        dust.className = 'monster-burrow-dust is-track';
+        dust.style.left = `${startX}px`;
+        dust.style.top = `${startY}px`;
+        dust.style.setProperty('--burrow-track-x', `${targetX - startX}px`);
+        dust.style.setProperty('--burrow-track-y', `${targetY - startY}px`);
+        dust.style.setProperty('--burrow-track-duration', `${Math.max(300, Number(durationMs) || 800)}ms`);
+        dust.innerHTML = '<i></i><i></i><i></i><i></i><b></b>';
+        stage.appendChild(dust);
+        void dust.offsetWidth;
+        dust.classList.add('is-playing');
+        this.animationTimers.timeout(() => dust.remove(), Math.max(480, Number(durationMs || 800) + 180));
+        return dust;
     }
 
     triggerMonsterBurrowPhase(phase, targetIndex = null, durationMs = 0) {
@@ -1275,20 +1860,7 @@ class HuntMonsterAttackAnimator {
             ? this.card.querySelector(`#fight-card-${targetIndex}`)
             : null;
         const anchor = targetCard?.querySelector('.game-hunt-weapon-img-container') || monsterImg;
-        const stageRect = stage.getBoundingClientRect();
-        const anchorRect = anchor.getBoundingClientRect();
-        const dust = document.createElement('div');
-        dust.className = `monster-burrow-dust is-${phase}`;
-        dust.style.left = `${anchorRect.left - stageRect.left + anchorRect.width / 2}px`;
-        dust.style.top = `${anchorRect.top - stageRect.top + anchorRect.height * 0.78}px`;
-        dust.innerHTML = '<i></i><i></i><i></i><i></i><b></b>';
-        stage.appendChild(dust);
-        this.createLocalEmojiFx(stage, '☁️', 'burrow-cloud', Math.max(900, Number(durationMs || 1250)), {
-            left: dust.style.left,
-            top: dust.style.top
-        });
-        void dust.offsetWidth;
-        dust.classList.add('is-playing');
+        const dust = this.createBurrowDustEffect(anchor, phase, durationMs || (phase === 'enter' ? 1250 : 1450));
         const scaledDuration = typeof HuntAtbConfig !== 'undefined' && HuntAtbConfig.scaleVisualDurationMs
             ? HuntAtbConfig.scaleVisualDurationMs(durationMs || (phase === 'enter' ? 1250 : 1450))
             : Number(durationMs || (phase === 'enter' ? 1250 : 1450));
@@ -1297,7 +1869,7 @@ class HuntMonsterAttackAnimator {
         if (phase === 'enter') {
             this.card.classList.add('hunt-monster-underground');
         } else if (phase === 'telegraph') {
-            this.animationTimers.timeout(() => dust.remove(), Math.max(300, scaledDuration + 180));
+            this.animationTimers.timeout(() => dust?.remove(), Math.max(300, scaledDuration + 180));
             return;
         } else if (phase === 'emerge') {
             this.card.classList.remove('hunt-monster-underground');
@@ -1308,7 +1880,7 @@ class HuntMonsterAttackAnimator {
         const finish = () => {
             if (phase === 'emerge') this.card?.classList.remove('hunt-monster-underground');
             if (phase === 'emerge') clearBurrowPosition();
-            dust.remove();
+            dust?.remove();
         };
         const active = this.activeMonsterMotion;
         if (active?.element === motionElement && active.motionClass === motionClass) {
@@ -1324,13 +1896,100 @@ class HuntMonsterAttackAnimator {
         );
     }
 
+    schedulePreviewImpactCardReactions(pattern, targets = []) {
+        const timeline = Array.isArray(pattern?.runtimeResolvedImpactTimeline)
+            ? pattern.runtimeResolvedImpactTimeline : [];
+        if (!timeline.length || !this.card) return;
+        const ticksPerSecond = typeof HuntAtbConfig !== 'undefined'
+            ? Math.max(1, Number(HuntAtbConfig.TICKS_PER_SECOND || 10)) : 10;
+        const resultByIndex = new Map(targets.map(target => [Number(target.index), target.result]));
+        const hasDirectDamage = Number(pattern?.damageRatio || 0) > 0;
+        timeline.forEach(event => {
+            if (Number(event?.damageScale ?? 1) <= 0) return;
+            const indices = Array.isArray(event.targetIndices) ? event.targetIndices : [];
+            this.animationTimers.timeout(() => {
+                indices.forEach(index => {
+                    const card = this.card?.querySelector(`#fight-card-${index}`);
+                    const result = resultByIndex.get(Number(index));
+                    if (!card || result === 'dodge') return;
+                    if (!hasDirectDamage && pattern?.interference?.kind) return;
+                    const guarded = ['guard', 'perfect-guard', 'counter'].includes(result);
+                    const className = guarded
+                        ? 'hunter-card-guard-shake' : 'hunter-card-hit-shake';
+                    card.classList.remove('hunter-card-hit-shake', 'hunter-card-guard-shake');
+                    card.querySelectorAll('.hunt-preview-impact-badge').forEach(badge => badge.remove());
+                    void card.offsetWidth;
+                    card.classList.add(className);
+                    const badge = document.createElement('span');
+                    badge.className = `hunt-preview-impact-badge${guarded ? ' is-guard' : ' is-hit'}`;
+                    badge.textContent = guarded ? 'GUARD' : 'HIT';
+                    badge.setAttribute('aria-hidden', 'true');
+                    card.appendChild(badge);
+                    this.animationTimers.timeout(() => card?.classList.remove(className),
+                        className === 'hunter-card-guard-shake' ? 300 : 360);
+                    this.animationTimers.timeout(() => badge?.remove(), guarded ? 520 : 620);
+                });
+            }, Math.max(0, Math.round(Number(event.atTicks || 0) * 1000 / ticksPerSecond)));
+        });
+        if (!hasDirectDamage && String(pattern?.interference?.kind || '').startsWith('roar')) {
+            const firstTick = Math.min(...timeline.map(event => Number(event?.atTicks || 0)));
+            this.animationTimers.timeout(() => this.triggerMonsterRoar(pattern),
+                Math.max(0, Math.round(firstTick * 1000 / ticksPerSecond)));
+        }
+        this.schedulePreviewInterferenceReactions(pattern, targets, ticksPerSecond);
+    }
+
+    schedulePreviewInterferenceReactions(pattern, targets = [], ticksPerSecond = 10) {
+        const definitions = [pattern?.interference, pattern?.secondaryInterference]
+            .filter(value => value?.kind);
+        if (!definitions.length || !this.card) return;
+        const allIndices = [...this.card.querySelectorAll('[id^="fight-card-"]')]
+            .map(card => Number(String(card.id).replace('fight-card-', '')))
+            .filter(Number.isInteger);
+        const targetIndices = [...new Set(targets.map(target => Number(target.index)).filter(Number.isInteger))];
+        const impactTicks = Array.isArray(pattern?.runtimeResolvedImpactTimeline)
+            ? Number(pattern.runtimeResolvedImpactTimeline[0]?.atTicks || 0) : 0;
+        definitions.forEach(definition => {
+            const rawKind = String(definition.kind || '');
+            const kind = rawKind.replace(/-(?:small|large)$/, '');
+            const size = definition.size || (rawKind.endsWith('-large') ? 'large' : 'small');
+            let elapsed = 0;
+            let judgmentTick = null;
+            for (const beat of (pattern.motion || [])) {
+                const offset = Number(beat?.judgmentOffsets?.[kind]);
+                if (Number.isFinite(offset)) {
+                    judgmentTick = elapsed + Math.max(0, offset);
+                    break;
+                }
+                elapsed += Math.max(1, Number(beat?.ticks) || 1);
+            }
+            const atTicks = Number.isFinite(judgmentTick) ? judgmentTick : impactTicks;
+            const indices = definition.scope === 'all' ? allIndices : targetIndices;
+            this.animationTimers.timeout(() => {
+                indices.forEach(index => this.onInterference?.(index, kind, size, true));
+                this.animationTimers.timeout(() => indices.forEach(index =>
+                    this.onInterference?.(index, kind, size, false)), 900);
+            }, Math.max(0, Math.round(atTicks * 1000 / Math.max(1, ticksPerSecond))));
+        });
+    }
+
     createChargeSpectacle(monsterImg, targets, crossScreen, durationMs = 0, pattern = null) {
+        const spectacleGeneration = this.motionGeneration;
+        const isCurrent = () => this.motionGeneration === spectacleGeneration;
         const stage = monsterImg.closest('.hunt-monster-motion-stage');
         if (!stage) return;
         const motionDuration = Math.max(900, Number(durationMs || (crossScreen ? 2150 : 2000)));
         const isStompBurst = stage.querySelector('[data-charge-launch-style="stomp-burst"]') !== null;
         const multiPassCharge = Array.isArray(this._activeChargePassSizes);
-        const launchRatio = multiPassCharge ? .317 : .476;
+        const motionBeats = Array.isArray(pattern?.motion) ? pattern.motion : [];
+        const totalMotionTicks = motionBeats.reduce((sum, beat) => sum + Math.max(1, Number(beat.ticks) || 1), 0);
+        const chargeBeatIndex = motionBeats.findIndex(beat => beat.strideFlipTicks || beat.beat === 'charge');
+        const authoredLaunchTicks = chargeBeatIndex > 0
+            ? motionBeats.slice(0, chargeBeatIndex).reduce((sum, beat) => sum + Math.max(1, Number(beat.ticks) || 1), 0)
+            : 0;
+        const launchRatio = authoredLaunchTicks && totalMotionTicks
+            ? authoredLaunchTicks / totalMotionTicks
+            : multiPassCharge ? .317 : .476;
         const track = document.createElement('div');
         track.className = `monster-charge-track${crossScreen ? ' is-cross' : ' is-forward'}${isStompBurst ? ' is-delayed' : ''}`;
         if (isStompBurst) {
@@ -1363,10 +2022,13 @@ class HuntMonsterAttackAnimator {
             });
         };
         if (isStompBurst) {
-            const stompRatios = multiPassCharge ? [.075, .17, .275] : [.09, .235, .39];
+            const stompRatios = authoredLaunchTicks
+                ? [launchRatio * .22, launchRatio * .58, launchRatio * .92]
+                : multiPassCharge ? [.075, .17, .275] : [.09, .235, .39];
             const footRatios = [.34, .66, .50];
             stompRatios.forEach((ratio, index) => {
                 this.animationTimers.timeout(() => {
+                    if (!isCurrent()) return;
                     if (!monsterImg.isConnected || !stage.isConnected) return;
                     const stageRect = stage.getBoundingClientRect();
                     const monsterRect = monsterImg.getBoundingClientRect();
@@ -1391,12 +2053,19 @@ class HuntMonsterAttackAnimator {
             ? Number(impactRatios?.[0] ?? .22)
             : .36;
         const secondImpactProgress = Number(impactRatios?.[1] ?? .68);
-        this.animationTimers.timeout(() => shakeTargets(0), Math.round(motionDuration * firstImpactProgress));
-        if (Array.isArray(this._activeChargePassSizes)) {
-            this.animationTimers.timeout(() => shakeTargets(1), Math.round(motionDuration * secondImpactProgress));
+        if (!pattern?.runtimeImpactPending) {
+            this.animationTimers.timeout(() => {
+                if (isCurrent()) shakeTargets(0);
+            }, Math.round(motionDuration * firstImpactProgress));
+            if (Array.isArray(this._activeChargePassSizes)) {
+                this.animationTimers.timeout(() => {
+                    if (isCurrent()) shakeTargets(1);
+                }, Math.round(motionDuration * secondImpactProgress));
+            }
         }
         if (pattern?.runtimeWhiffStuck) {
             this.animationTimers.timeout(() => {
+                if (!isCurrent()) return;
                 const motionElement = stage.querySelector('[data-monster-rig]') || stage;
                 const secondExitX = motionElement.style.getPropertyValue('--monster-charge-second-exit-x')
                     || motionElement.style.getPropertyValue('--monster-charge-first-exit-x')
@@ -1500,6 +2169,43 @@ class HuntMonsterAttackAnimator {
         rockFx?.style.setProperty('--tail-rock-mid-x', `${arc.midX}px`);
         rockFx?.style.setProperty('--tail-rock-mid-y', `${arc.midY}px`);
         return rockFx;
+    }
+
+    resolveRockVolleyVisualTargets(event = {}, pattern = {}, fallbackTargets = []) {
+        const indices = Array.isArray(event.targetIndices) && event.targetIndices.length
+            ? event.targetIndices.filter(Number.isInteger)
+            : fallbackTargets.map(target => target?.index).filter(Number.isInteger);
+        if (!pattern.tags?.includes('tail-slam-rock')) {
+            return indices.map(index => this.card.querySelector(`#fight-card-${index}`)).filter(Boolean);
+        }
+        const primary = Number.isInteger(pattern.runtimePrimaryTargetIndex)
+            ? pattern.runtimePrimaryTargetIndex
+            : indices[Math.floor(indices.length / 2)];
+        if (!Number.isInteger(primary)) return [];
+        const realCards = [0, 1, 2, 3]
+            .map(index => this.card.querySelector(`#fight-card-${index}`)).filter(Boolean);
+        const rects = realCards.map(card => card.getBoundingClientRect());
+        const pitch = rects.length > 1
+            ? Math.abs(rects[1].left - rects[0].left)
+            : (rects[0]?.width || 220);
+        return [primary - 1, primary, primary + 1].map(index => {
+            const real = this.card.querySelector(`#fight-card-${index}`);
+            if (real) return real;
+            const edgeIndex = index < 0 ? 0 : 3;
+            const edge = this.card.querySelector(`#fight-card-${edgeIndex}`);
+            const rect = edge?.getBoundingClientRect?.();
+            if (!rect) return null;
+            const shift = index < 0 ? -pitch : pitch;
+            return {
+                querySelector: () => null,
+                getBoundingClientRect: () => ({
+                    left: rect.left + shift, right: rect.right + shift,
+                    top: rect.top, bottom: rect.bottom,
+                    width: rect.width, height: rect.height,
+                    x: rect.x + shift, y: rect.y
+                })
+            };
+        }).filter(Boolean);
     }
 
     scheduleTigrexBranchMotion(monsterImg, pattern = {}) {
@@ -1887,12 +2593,18 @@ class HuntMonsterAttackAnimator {
         }
 
         const firstTarget = targets[0];
-        const targetCard = this.card.querySelector(`#fight-card-${firstTarget.index}`);
+        // `targets` is the union of all judgment recipients.  Area interference
+        // (roar/tremor/wind) can put hunter 0 first even when a different hunter
+        // is the authored primary movement target.
+        const primaryTargetIndex = Number.isInteger(pattern?.runtimePrimaryTargetIndex)
+            ? pattern.runtimePrimaryTargetIndex
+            : firstTarget.index;
+        const targetCard = this.card.querySelector(`#fight-card-${primaryTargetIndex}`);
         if (!targetCard) {
             this.traceMonsterMotion('skip', {
                 patternId,
                 reason: 'target-card-missing',
-                targetIndex: firstTarget.index
+                targetIndex: primaryTargetIndex
             }, true);
             return;
         }
@@ -1919,6 +2631,24 @@ class HuntMonsterAttackAnimator {
         const isValstraxAmbush = pattern?.id === 'valstrax.crimson_comet_ambush'
             || /붉은 혜성 강습/.test(attackName);
         const motionProfile = this.playPatternMotion(monsterImg, targetCard, pattern, attackName, type, targets);
+        // Every delayed spectacle below belongs to this exact playback. Trap,
+        // stun, part break, flash, or a replacement action increments the
+        // generation in clearMonsterMotion(); stale callbacks must become inert.
+        const playbackGeneration = this.motionGeneration;
+        const isPlaybackCurrent = () => this.motionGeneration === playbackGeneration;
+        if (pattern?.runtimePreviewCardReactions && !pattern?.runtimePreviewScrub) {
+            this.schedulePreviewImpactCardReactions(pattern, targets);
+        }
+        // The review scrubber controls extracted keyframe graphs as well as BEAT
+        // motion. Previously only BEAT animations were paused/searched, leaving
+        // most reviewed wyverns to play independently of the timeline.
+        if (pattern?.runtimePreviewScrub && !this.activeBeatMotionPreview) {
+            this.freezeKeyframeMotionPreview(pattern.runtimePreviewProgress || 0);
+        }
+        // The editor loads a selected pattern through the same renderer so its
+        // first frame is accurate. Everything below this point is live combat
+        // spectacle/state and must only run after an explicit Play command.
+        if (pattern?.runtimePreviewScrub) return;
         this.scheduleTigrexBranchMotion(monsterImg, pattern);
         const isRoar = type === 'roar'
             || pattern?.type === 'roar'
@@ -1931,6 +2661,20 @@ class HuntMonsterAttackAnimator {
             ? pattern.runtimeChargePassSizes
             : null;
         const stage = monsterImg.closest('.hunt-monster-motion-stage');
+        const usesChargeSpectacle = pattern?.chargeLaunchStyle === 'stomp-burst'
+            || motionProfile?.id === 'ground-charge' || motionProfile?.id === 'ground-charge-cross'
+            || motionProfile?.id === 'ground-charge-zigzag' || motionProfile?.id === 'ground-charge-double'
+            || motionProfile?.id === 'ground-charge-triple' || motionProfile?.id === 'aerial-charge-cross'
+            || motionProfile?.id === 'legiana-drill-cross';
+        if (usesChargeSpectacle) {
+            const crossScreenCharge = motionProfile.id !== 'ground-charge'
+                && (pattern?.tags?.includes('cross-charge')
+                    || pattern?.tags?.includes('global-charge')
+                    || motionProfile.id !== pattern?.id);
+            // Delayed-impact actions return before the generic spectacle section.
+            // Charge telegraphs therefore start here, together with their BEAT motion.
+            this.createChargeSpectacle(monsterImg, targets, crossScreenCharge, motionProfile.duration, pattern);
+        }
         if (pattern?.attachedFx) {
             this.createMonsterAttachedEmojiFx(
                 monsterImg,
@@ -1949,6 +2693,7 @@ class HuntMonsterAttackAnimator {
                 (typeof HuntAtbConfig !== 'undefined' && HuntAtbConfig?.TICKS_PER_SECOND) || 10
             ));
             this.animationTimers.timeout(() => {
+                if (!isPlaybackCurrent()) return;
                 const liveTarget = this.card.querySelector(`#fight-card-${targets[0]?.index}`) || targetCard;
                 const anchor = liveTarget?.querySelector?.('.game-hunt-weapon-img-container') || liveTarget;
                 const targetRect = anchor?.getBoundingClientRect?.();
@@ -1965,10 +2710,14 @@ class HuntMonsterAttackAnimator {
                 );
             }, Math.max(0, Math.round(impactTicks * tickMs)));
         }
-        if (motionProfile?.id === 'tail-slam-rock') {
+        // Authored BEAT tail slams launch their rocks from resolved impact
+        // events below. Keep this branch only for a truly legacy profile that
+        // has no motion graph, otherwise it would add a fourth phantom rock.
+        if (motionProfile?.id === 'tail-slam-rock' && !Array.isArray(pattern?.motion)) {
             const duration = Number(motionProfile?.duration || 3400);
             this.createLocalEmojiFx(stage, '☁️', 'tail-slam-dust', duration);
             this.animationTimers.timeout(() => {
+                if (!isPlaybackCurrent()) return;
                 const rockTarget = targets[1] || targets[0];
                 const rockCard = this.card.querySelector(`#fight-card-${rockTarget.index}`) || targetCard;
                 const rockRect = (rockCard.querySelector('.game-hunt-weapon-img-container') || rockCard).getBoundingClientRect();
@@ -1999,6 +2748,7 @@ class HuntMonsterAttackAnimator {
         } else if (motionProfile?.id === 'horn-uppercut') {
             this.createLocalEmojiFx(stage, '☁️', 'uppercut-dust', motionProfile?.duration || 2800);
             this.animationTimers.timeout(() => {
+                if (!isPlaybackCurrent()) return;
                 const targetRect = (targetCard.querySelector('.game-hunt-weapon-img-container') || targetCard).getBoundingClientRect();
                 const stageRect = stage?.getBoundingClientRect();
                 this.createLocalEmojiFx(stage, '💥', 'uppercut-impact', 650, stageRect ? {
@@ -2016,6 +2766,7 @@ class HuntMonsterAttackAnimator {
                 void weapon.offsetWidth;
                 weapon.classList.add('monster-uppercut-launched');
                 this.animationTimers.timeout(() => {
+                    if (!isPlaybackCurrent()) return;
                     weapon.classList.remove('monster-uppercut-launched');
                     weapon.style.removeProperty('--monster-uppercut-launch-duration');
                 }, launchDuration + 80);
@@ -2032,7 +2783,7 @@ class HuntMonsterAttackAnimator {
                 const ticksPerSecond = typeof HuntAtbConfig !== 'undefined'
                     ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10)
                     : 10;
-                const travelMs = 720;
+                const defaultTravelMs = 720;
                 const timeline = Array.isArray(pattern.runtimeResolvedImpactTimeline)
                     ? pattern.runtimeResolvedImpactTimeline
                     : [{
@@ -2046,18 +2797,23 @@ class HuntMonsterAttackAnimator {
                     && (requiredKinds.size === 0 || requiredKinds.has(event.eventKind))
                 );
                 rockEvents.forEach(event => {
-                    const launchDelayMs = Math.max(0,
-                        Number(event.atTicks || pattern.runtimeImpactDelayTicks || 0)
-                            * 1000 / ticksPerSecond - travelMs);
+                    const impactTicks = Number(event.atTicks || pattern.runtimeImpactDelayTicks || 0);
+                    const authoredLaunchTicks = Number(event.launchAtTicks);
+                    const hasAuthoredLaunch = Number.isFinite(authoredLaunchTicks)
+                        && authoredLaunchTicks >= 0 && authoredLaunchTicks <= impactTicks;
+                    const travelMs = hasAuthoredLaunch
+                        ? Math.max(100, (impactTicks - authoredLaunchTicks) * 1000 / ticksPerSecond)
+                        : defaultTravelMs;
+                    const launchDelayMs = Math.max(0, hasAuthoredLaunch
+                        ? authoredLaunchTicks * 1000 / ticksPerSecond
+                        : impactTicks * 1000 / ticksPerSecond - travelMs);
                     this.animationTimers.timeout(() => {
+                        if (!isPlaybackCurrent()) return;
                         if (!this.card) return;
-                        const indices = Array.isArray(event.targetIndices) && event.targetIndices.length
-                            ? event.targetIndices
-                            : targets.map(target => target.index);
+                        const visualTargets = this.resolveRockVolleyVisualTargets(event, pattern, targets);
                         this.owner?.onMonsterProjectileLaunchAudio?.(this.owner.selectedMonster, pattern);
-                        indices.forEach(index => {
-                            const liveCard = this.card.querySelector(`#fight-card-${index}`);
-                            if (liveCard) this.createRockProjectile(monsterImg, liveCard, pattern, travelMs);
+                        visualTargets.forEach(visualTarget => {
+                            this.createRockProjectile(monsterImg, visualTarget, pattern, travelMs);
                         });
                     }, launchDelayMs);
                 });
@@ -2092,6 +2848,7 @@ class HuntMonsterAttackAnimator {
                         visualTravelMs
                     );
                     this.animationTimers.timeout(() => {
+                        if (!isPlaybackCurrent()) return;
                         if (!this.card) return;
                         const liveContainerRect = this.card.getBoundingClientRect();
                         const sequenced = targetSequence?.[eventIndex];
@@ -2167,19 +2924,7 @@ class HuntMonsterAttackAnimator {
             monsterImg.classList.add('monster-signature-ultimate');
             this.animationTimers.timeout(() => monsterImg.classList.remove('monster-signature-ultimate'), 1700);
         }
-        if (motionProfile?.id === 'ground-charge' || motionProfile?.id === 'ground-charge-cross'
-            || motionProfile?.id === 'ground-charge-zigzag' || motionProfile?.id === 'ground-charge-double'
-            || motionProfile?.id === 'ground-charge-triple' || motionProfile?.id === 'aerial-charge-cross'
-            || motionProfile?.id === 'legiana-drill-cross') {
-            this.createChargeSpectacle(
-                monsterImg,
-                targets,
-                motionProfile.id !== 'ground-charge',
-                motionProfile.duration,
-                pattern
-            );
-            return;
-        }
+        if (usesChargeSpectacle) return;
 
         // Named exceptions stay below the semantic profile resolver. Every pattern receives
         // a motion profile even when it has no one-off animation.
@@ -2199,6 +2944,7 @@ class HuntMonsterAttackAnimator {
                     hitCard.classList.add('element-impact-shake');
                 });
                 this.animationTimers.timeout(() => {
+                    if (!isPlaybackCurrent()) return;
                     this.card?.classList.remove('hunt-valstrax-impact');
                     this.card?.querySelectorAll('.element-impact-shake').forEach(card => card.classList.remove('element-impact-shake'));
                 }, 1800);
@@ -2226,6 +2972,7 @@ class HuntMonsterAttackAnimator {
                 showcase.appendChild(slash);
                 this.animationTimers.timeout(() => slash.remove(), 700);
                 this.animationTimers.timeout(() => {
+                    if (!isPlaybackCurrent()) return;
                     if (!this.card) return;
                     this.card.classList.remove('card-heavy-shake-anim');
                     void this.card.offsetWidth;
@@ -2244,6 +2991,7 @@ class HuntMonsterAttackAnimator {
 
                 // Card heavy shake on impact
                 this.animationTimers.timeout(() => {
+                    if (!isPlaybackCurrent()) return;
                     if (this.card) {
                         this.card.classList.remove('card-heavy-shake-anim');
                         void this.card.offsetWidth;
@@ -2272,6 +3020,7 @@ class HuntMonsterAttackAnimator {
 
                 for (let i = 0; i < 4; i++) {
                     this.animationTimers.timeout(() => {
+                        if (!isPlaybackCurrent()) return;
                         if (!this.card) return;
                         const dust = document.createElement('div');
                         dust.className = 'charge-dust-particle';
@@ -2290,6 +3039,7 @@ class HuntMonsterAttackAnimator {
                 // override every species motion and stale timers could freeze all
                 // later monster animations.
                 this.animationTimers.timeout(() => {
+                    if (!isPlaybackCurrent()) return;
                     if (this.card) {
                         this.card.classList.remove('card-heavy-shake-anim');
                         void this.card.offsetWidth;
@@ -2315,6 +3065,7 @@ class HuntMonsterAttackAnimator {
         // another action began before the reset timer fired.
         if (motionProfile) {
             this.animationTimers.timeout(() => {
+                if (!isPlaybackCurrent()) return;
                 if (!this.card) return;
                 this.card.classList.remove('card-heavy-shake-anim');
                 void this.card.offsetWidth;
@@ -2336,6 +3087,7 @@ class HuntMonsterAttackAnimator {
 
             // Trigger card shake on physical impact
             this.animationTimers.timeout(() => {
+                if (!isPlaybackCurrent()) return;
                 if (this.card) {
                     this.card.classList.remove('card-heavy-shake-anim');
                     void this.card.offsetWidth;
@@ -2349,9 +3101,11 @@ class HuntMonsterAttackAnimator {
                 monsterImg.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
 
                 this.animationTimers.timeout(() => {
+                    if (!isPlaybackCurrent()) return;
                     monsterImg.style.transition = 'transform 0.3s ease-in-out';
                     monsterImg.style.transform = '';
                     this.animationTimers.timeout(() => {
+                        if (!isPlaybackCurrent()) return;
                         monsterImg.style.transition = '';
                     }, 300);
                 }, 200);
@@ -2378,6 +3132,7 @@ class HuntMonsterAttackAnimator {
                 rightEmoji.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
 
                 this.animationTimers.timeout(() => {
+                    if (!isPlaybackCurrent()) return;
                     monsterImg.style.transition = 'transform 0.3s ease-in-out';
                     monsterImg.style.transform = '';
 
@@ -2389,6 +3144,7 @@ class HuntMonsterAttackAnimator {
                     rightEmoji.style.opacity = '0';
 
                     this.animationTimers.timeout(() => {
+                        if (!isPlaybackCurrent()) return;
                         monsterImg.style.transition = '';
                         leftEmoji.remove();
                         rightEmoji.remove();

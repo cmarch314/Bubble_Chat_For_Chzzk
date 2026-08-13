@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const Archetypes = require('../js/effects/hunt/HuntMonsterArchetypeCatalog.js');
 const Anatomy = require('../js/effects/hunt/HuntMonsterAnatomyCatalog.js');
+const PatternCatalog = require('../js/effects/hunt/HuntMonsterPatternCatalog.js');
 const profiles = require('../js/effects/hunt/HuntMonsterProfiles.js');
 
 const review = JSON.parse(fs.readFileSync(
@@ -51,6 +52,58 @@ assert(profiles.brute_tigrex.some(pattern =>
     pattern.tags.includes('sonic') && Number(pattern.damageRatio) > 0));
 assert(profiles.nargacuga.some(pattern =>
     pattern.tags.includes('bleed') && pattern.tags.includes('ground-hazard')));
+const nargacugaTriple = profiles.nargacuga.find(pattern =>
+    pattern.id === 'nargacuga.leaping_cutwing_triple');
+assert.deepStrictEqual(nargacugaTriple.impactTimeline.map(event => event.hitRecoveryTicks ?? 40),
+    [15, 15, 40],
+    'Nargacuga triple rush must let a hunter recover before a returning third pass');
+const nargacugaAmbush = profiles.nargacuga.find(pattern =>
+    pattern.id === 'nargacuga.leaping_cutwing');
+const ambushReappear = nargacugaAmbush.motion.find(beat => beat.beat === 'reappear');
+const ambushAim = nargacugaAmbush.motion.find(beat => beat.beat === 'ambush-aim');
+assert.match(ambushReappear.at, /^polar:target\b/,
+    'Nargacuga cutwing ambush must visibly reappear beside and behind its target');
+assert(ambushAim && ambushAim.ticks >= 3 && !ambushAim.to && !ambushAim.at,
+    'Nargacuga cutwing ambush must hold its revealed flank position before diving');
+assert.strictEqual(nargacugaAmbush.motion.reduce((ticks, beat) => ticks + beat.ticks, 0),
+    nargacugaAmbush.movement.ticks,
+    'Nargacuga cutwing ambush review timeline must cover the exact live animation');
+const ambushHitTick = nargacugaAmbush.motion.reduce((result, beat) => ({
+    elapsed: result.elapsed + beat.ticks,
+    hit: result.hit ?? (beat.hit ? result.elapsed : null)
+}), { elapsed: 0, hit: null }).hit;
+assert.strictEqual(ambushHitTick, nargacugaAmbush.impactTimeline[0].atTicks,
+    'Nargacuga cutwing ambush damage must occur on the authored impact beat');
+const synchronizedQuickBite = PatternCatalog.synchronizeMotionTiming({
+    ...profiles.nargacuga.find(pattern => pattern.id === 'nargacuga.quick_bite'),
+    motion: [
+        { beat: 'windup', ticks: 4 },
+        { beat: 'approach', ticks: 3 },
+        { beat: 'bite', ticks: 3, hit: true },
+        { beat: 'return', ticks: 6 }
+    ]
+});
+assert.strictEqual(synchronizedQuickBite.impactTimeline[0].atTicks, 7,
+    'saved beat lengths must move live damage to the same authored hit boundary');
+assert.strictEqual(synchronizedQuickBite.movement.ticks, 16);
+assert.strictEqual(synchronizedQuickBite.animationDurationMs, 1600);
+const nargacugaTailSlam = profiles.nargacuga.find(pattern =>
+    pattern.id === 'nargacuga.spiked_tail_slam');
+const tailAimBeat = nargacugaTailSlam.motion.find(beat => beat.beat === 'aim');
+const tailImpactBeat = nargacugaTailSlam.motion.find(beat => beat.beat === 'slam');
+assert(tailAimBeat.scaleY > 1 && tailImpactBeat.scaleY > 1,
+    'Nargacuga spiked tail must remain extended through the slam impact');
+assert.strictEqual(tailImpactBeat.scaleX, tailAimBeat.scaleX,
+    'Nargacuga spiked tail must not contract sideways at impact');
+const MonsterTurns = require('../js/effects/hunt/HuntMonsterTurnExecutor.js');
+assert.strictEqual(MonsterTurns.hitReactionForPattern({
+    tags: ['strong'], runtimeImpactHitRecoveryTicks: 15, runtimeImpactHitReactionKind: 'weak'
+}).durationTicks, 15,
+    'per-impact recovery metadata must override the parent strong pattern');
+const battleTickSource = fs.readFileSync(
+    path.resolve(__dirname, '../js/effects/hunt/HuntBattleTickExecutor.js'), 'utf8');
+assert.match(battleTickSource, /runtimeImpactHitRecoveryTicks:[\s\S]*?resolvedEvent\.hitRecoveryTicks/,
+    'the pending multi-hit timeline must forward per-impact recovery metadata');
 assert(profiles.frostfang_barioth.some(pattern =>
     pattern.tags.includes('frost-ground') && pattern.delivery === 'ground-wave'));
 assert(profiles.gold_rathian.some(pattern => pattern.tags.includes('blue-flame')));

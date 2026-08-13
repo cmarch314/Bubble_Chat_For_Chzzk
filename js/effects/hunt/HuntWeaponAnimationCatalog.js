@@ -6,18 +6,27 @@ class HuntWeaponAnimationCatalog {
 
     static buildProfiles() {
         const profiles = {};
+        const directionalBladeWeapons = new Set([
+            'great_sword', 'long_sword', 'sword_shield', 'dual_blades',
+            'switch_axe', 'charge_blade', 'insect_glaive'
+        ]);
         const add = (weaponId, actionIds, motion, durationMs, effect = 'sever', options = {}) => {
             actionIds.forEach(actionId => {
                 profiles[`${weaponId}.${actionId}`] = Object.freeze({
                     actionId: `${weaponId}.${actionId}`,
+                    weaponId,
                     motion,
                     durationMs,
                     effect,
                     impact: effect !== 'none',
                     animateWeapon: options.animateWeapon !== false,
                     releaseChargePose: options.releaseChargePose === true,
-                    trackTarget: options.trackTarget === true,
-                    transformOrigin: options.transformOrigin || (weaponId === 'long_sword' ? '82% 18%' : '50% 50%'),
+                    trackTarget: options.trackTarget === true
+                        || (directionalBladeWeapons.has(weaponId)
+                            && ['sever', 'multi', 'counter'].includes(effect)),
+                    transformOrigin: options.transformOrigin || (weaponId === 'long_sword'
+                        ? '82% 18%'
+                        : (weaponId === 'great_sword' ? '50% 88%' : '50% 50%')),
                     kinsect: options.kinsect || 'none',
                     source: 'capcom-controls+wilds-action-class'
                 });
@@ -247,8 +256,14 @@ class HuntWeaponAnimationCatalog {
             charge: [idle, [.3, 0, 0, -12, .92, -10, 10], [.7, 0, 0, -7, 1.12, -5, 5], end],
             great_sword_charge_raise: [idle, [.42, 0, 0, -68, .98, -16, 2], [.76, 0, 0, -102, 1.04, -25, -10], [1, 0, 0, -104, 1.06, -27, -12]],
             great_sword_charge_hold: [[0, 0, 0, -104, 1.06, -27, -12], [.42, 0, 0, -108, 1.1, -29, -14], [.72, 0, 0, -101, 1.04, -25, -10], [1, 0, 0, -104, 1.07, -27, -12]],
-            great_sword_charged_release: [[0, 0, 0, -104, 1.07, -27, -12], [.22, 0, 0, -119, 1.1, -35, -18], [.48, .16, .14, -68, 1.13, -4, -8], [.72, 1, 1, 42, 1.2, 0, 0], [.86, .88, .86, 48, 1.12, 0, 5], end],
-            great_sword_true_release: [[0, 0, 0, -108, 1.1, -31, -15], [.2, 0, 0, -128, 1.14, -42, -24], [.42, .12, .1, -84, 1.18, -8, -12], [.66, 1, 1, 52, 1.32, 0, 0], [.78, .84, .82, 60, 1.2, 0, 8], [.9, 1.02, .96, 56, 1.16, 0, 3], end],
+            // The source stands vertically: blade edge left, grip at the bottom.
+            // Pull slightly farther back, then rotate clockwise through the
+            // target. The source is vertical with its grip at the bottom, so
+            // this sign produces a top-to-bottom chop instead of an uppercut.
+            great_sword_charged_release: [[0, 0, 0, -104, 1.07, -27, -12], [.2, 0, 0, -128, 1.1, -35, -18], [.46, .82, .82, -206, 1.13, -4, -118], [.72, 1, 1, -318, 1.2, 0, 0], [.86, .88, .86, -344, 1.12, 0, 5], [1, 0, 0, -360, 1, 0, 0]],
+            // True Charged Slash completes two continuous clockwise turns
+            // before contact: -104deg + 720deg = 616deg.
+            great_sword_true_release: [[0, 0, 0, -104, 1.1, -31, -15], [.1, 0, 0, -152, 1.14, -42, -24], [.24, .38, .34, -304, 1.16, -8, -112], [.38, .46, .42, -464, 1.24, 0, 4], [.5, .48, .44, -464, 1.12, 0, 16], [.58, .5, .46, -508, 1.2, -5, -18], [.72, .84, .82, -642, 1.24, 0, -116], [.86, 1, 1, -824, 1.34, 0, 0], [.93, .88, .86, -842, 1.18, 0, 6], [1, 0, 0, -824, 1, 0, 0]],
             heavy_overhead: [idle, [.3, 0, 0, -92, 1.04, -26, 18], [.52, .18, .18, -42, 1.08, 0, 0], [.76, 1, 1, 38, 1.15, 0, 0], end],
             true_charged_slash: [idle, [.24, 0, 0, -115, 1.08, -34, 22], [.48, .14, .12, -78, 1.14, 0, 0], [.68, 1, 1, 48, 1.28, 0, 0], [.82, .88, .84, 56, 1.18, 0, 0], end],
             shoulder_tackle: [idle, [.25, 0, 0, -8, .96, -18, 5], [.62, .65, .58, 9, 1.13, 0, 0], end],
@@ -408,15 +423,31 @@ class HuntWeaponAnimationCatalog {
         const fallbackVector = vectors[Math.max(0, Math.min(3, Number(hunterIndex) || 0))];
         const hasMeasuredTarget = Number.isFinite(targetVector?.x) && Number.isFinite(targetVector?.y);
         const v = hasMeasuredTarget
-            ? { x: Number(targetVector.x), y: Number(targetVector.y), side: fallbackVector.side }
+            ? { x: Number(targetVector.x), y: Number(targetVector.y), side: Number(targetVector.x) < 0 ? -1 : 1 }
             : fallbackVector;
         const spec = this.MOTIONS[profile?.motion] || this.MOTIONS.horizontal_slash;
-        const preserveGreatSwordBladeDirection = String(profile?.motion || '').startsWith('great_sword_');
-        const greatSwordBladeMirror = preserveGreatSwordBladeDirection && v.side > 0 ? -1 : 1;
+        const directionalBladeWeapons = new Set([
+            'great_sword', 'long_sword', 'sword_shield', 'dual_blades',
+            'switch_axe', 'charge_blade', 'insect_glaive'
+        ]);
+        const directionalBlade = directionalBladeWeapons.has(String(profile?.weaponId || ''));
+        const greatSwordRelease = ['great_sword_charged_release', 'great_sword_true_release']
+            .includes(String(profile?.motion || ''));
+        const authoredStartRotation = Number(spec[0]?.[3] || 0);
+        const rotationFor = rotation => greatSwordRelease
+            // Keep the raised stance at the side-specific upper corner, then
+            // reverse only the swing delta so the blade comes down through the
+            // monster instead of rising from the lower outside corner.
+            ? authoredStartRotation * v.side + (rotation - authoredStartRotation) * -v.side
+            : rotation * v.side;
+        // Slots 1/2 share one stance; slots 3/4 are its true visual mirror.
+        // Mirroring the whole weapon is intentional here: the cutting edge must
+        // face inward after the hunter crosses to the other side of the monster.
+        const bladeMirror = directionalBlade ? v.side : 1;
         return spec.map(([offset, xRatio, yRatio, rotation, scale, xNudge, yNudge]) => ({
             offset,
             transformOrigin: profile?.transformOrigin || '50% 50%',
-            transform: `translate(${Math.round(v.x * xRatio + xNudge * v.side)}px, ${Math.round(v.y * yRatio + yNudge)}px) rotate(${Math.round(rotation * (preserveGreatSwordBladeDirection ? 1 : v.side))}deg) scale(${scale})${preserveGreatSwordBladeDirection ? ` scaleX(${greatSwordBladeMirror})` : ''}`
+            transform: `translate(${Math.round(v.x * xRatio + xNudge * v.side)}px, ${Math.round(v.y * yRatio + yNudge)}px) rotate(${Math.round(rotationFor(rotation))}deg) scale(${scale})${directionalBlade ? ` scaleX(${bladeMirror})` : ''}`
         }));
     }
 }

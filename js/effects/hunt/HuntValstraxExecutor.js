@@ -1,4 +1,9 @@
 class HuntValstraxExecutor {
+    static personalityProfiles() {
+        if (typeof HuntPersonalityProfiles !== 'undefined') return HuntPersonalityProfiles;
+        if (typeof require === 'function') return require('./HuntPersonalityProfiles.js');
+        return null;
+    }
     static executeChargeSuccess(engine) {
         engine.monsterAtb = 0;
         engine.updateMonsterAtbUI(0);
@@ -65,7 +70,7 @@ class HuntValstraxExecutor {
         const attackResults = [];
 
         targets.forEach(target => {
-            if (Number(target.hitDuration || 0) > 0) {
+            if (HuntMonsterTurnExecutor.isHunterImpactImmune(target)) {
                 attackResults.push({ index: target.index, result: 'invulnerable' });
                 return;
             }
@@ -84,17 +89,11 @@ class HuntValstraxExecutor {
             const actionAllowsGuard = !actionMachine || actionMachine.canGuard(target);
             const hasShield = !isStunned && actionAllowsGuard
                 && (target.type === 'shield' || target.id === 'heavy_bowgun');
-            let guardProb = isStunned ? 0 : 0.85;
-            let dodgeProb = isStunned ? 0 : 0.75;
+            const profiles = HuntValstraxExecutor.personalityProfiles();
+            let guardProb = isStunned ? 0 : (profiles?.chance(target, 'guard') ?? .85);
+            let dodgeProb = isStunned ? 0 : (profiles?.chance(target, 'evade') ?? .75);
 
             let foresightProb = HuntMonsterTurnExecutor.longSwordForesightChance(target);
-            if (target.personality === 'veteran') {
-                guardProb = 0.90;
-                dodgeProb = 0.90;
-            } else if (target.personality === 'newbie') {
-                guardProb = 0.45;
-                dodgeProb = 0.35;
-            }
 
             const actionAllowsEvade = !actionMachine || actionMachine.canEvade(target);
             // Every weapon keeps its signature counter against the ambush ultimate,
@@ -107,12 +106,21 @@ class HuntValstraxExecutor {
             });
             if (counter.handled) {
                 ({ damage, isGuard, isDodge, isForesightSlash, isIaiCounter } = counter);
+                if (counter.counterProtected) {
+                    HuntMonsterTurnExecutor.grantCounterInvulnerability(target);
+                }
             } else if (hasShield && defendRoll < guardProb) {
                 damage = Math.max(1, Math.floor(damage * 0.08));
                 isGuard = true;
             } else if (!hasShield && defendRoll < dodgeProb) {
                 damage = 0;
                 isDodge = true;
+            }
+            if (engine.perkRuntime) {
+                if (isGuard) damage = engine.perkRuntime.guardedDamage(target, damage);
+                damage = engine.perkRuntime.incomingDamage(target, damage, {
+                    pattern: { id: 'valstrax.ambush_landing', tags: ['ultimate'] }, isUltimate: true
+                });
             }
 
             if (damage > 0) {
@@ -146,6 +154,7 @@ class HuntValstraxExecutor {
                         const hitReaction = { kind: 'strong', durationTicks: 40, knockbackDirection: target.index < 2 ? -1 : 1 };
                         target.hitDuration = hitReaction.durationTicks;
                         target.hitRecoveryTotalTicks = hitReaction.durationTicks;
+                        target.hitStartedThisTick = true;
                         target.hitReactionKind = hitReaction.kind;
                         target.hitKnockbackDirection = hitReaction.knockbackDirection;
                         engine.addLog(`💥 [피격] ${target.name}이(가) 혜성 습격 직격! 치명적인 데미지를 입었습니다. (-${damage} HP)`, '#ff5555');

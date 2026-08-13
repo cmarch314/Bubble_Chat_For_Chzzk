@@ -5,13 +5,20 @@ const fs = require('fs');
 const path = require('path');
 
 class StubMonsterAttackAnimator {
-    constructor() {}
+    constructor() { this.played = []; }
     clearMonsterMotion() {}
     getMonsterMotionTrace() { return []; }
+    playBeatMotion(monsterImg, pattern) { this.played.push(pattern); return { durationMs: 1 }; }
 }
 global.HuntMonsterAttackAnimator = StubMonsterAttackAnimator;
+global.HuntMonsterReactionCatalog = require('../js/effects/hunt/HuntMonsterReactionCatalog.js');
 global.HuntMonsterAnatomyCatalog = require('../js/effects/hunt/HuntMonsterAnatomyCatalog.js');
 global.HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
+
+assert.deepStrictEqual([5, 4, 3, 2].map(count =>
+    global.HuntMonsterReactionCatalog.resolveKnockdown('diablos', count).motion
+        .filter(beat => /^struggle-/.test(beat.beat)).length),
+[5, 4, 3, 2], 'the canonical knockdown resolver must trim struggle beats deterministically');
 
 const HuntCombatAnimator = require('../js/effects/hunt/HuntCombatAnimator.js');
 const HuntEngine = require('../js/effects/hunt/HuntEngine.js');
@@ -53,37 +60,41 @@ const animator = new HuntCombatAnimator({
 const queuedPartBreakVisuals = [];
 animator.queueMonsterPartBreakVisual = partKind => queuedPartBreakVisuals.push(partKind);
 
-animator.triggerMonsterPartBreakReaction('part_break_topple', 35, 'head');
-assert.strictEqual(monsterImg.classList.contains('monster-part-break-topple'), true);
+animator.triggerMonsterPartBreakReaction('part_flinch', 30, 'head');
+assert.strictEqual(monsterImg.classList.contains('monster-part-break-topple'), false,
+    'part reactions must not start the retired CSS motion');
 assert.strictEqual(monsterImg.classList.contains('monster-tail-sever-roll'), false);
-assert.strictEqual(styles.get('--monster-part-reaction-duration'), '3500ms');
 assert.strictEqual(monsterImg.dataset.partBreakKind, 'head');
-assert.strictEqual(scheduled.at(-1).delay, 3580);
+assert.strictEqual(animator.monsterAttackAnimator.played.at(-1).id, '__reaction.flinch');
+assert.strictEqual(scheduled.at(-1).delay, 3080);
 
 animator.triggerMonsterPartBreakReaction('tail_sever_roll', 55, 'tail');
 assert.strictEqual(monsterImg.classList.contains('monster-part-break-topple'), false);
-assert.strictEqual(monsterImg.classList.contains('monster-tail-sever-roll'), true);
-assert.strictEqual(styles.get('--monster-part-reaction-duration'), '5500ms');
+assert.strictEqual(monsterImg.classList.contains('monster-tail-sever-roll'), false);
 assert.strictEqual(monsterImg.dataset.partBreakKind, 'tail');
-assert.strictEqual(scheduled.at(-1).delay, 5580);
+assert.strictEqual(animator.monsterAttackAnimator.played.at(-1).id, '__reaction.knockdown');
+assert.strictEqual(scheduled.at(-1).delay, 6080);
 animator.triggerMonsterKnockdownAnim();
-assert.strictEqual(monsterImg.classList.contains('monster-tail-sever-roll'), true,
-    'a generic knocked-down refresh must not erase the authored tail-sever tumble');
 assert.strictEqual(monsterImg.classList.contains('monster-knockdown-anim'), false,
-    'tail sever owns the pose until its reaction generation finishes');
+    'a generic knockdown refresh must not replace an active authored part reaction');
 assert.deepStrictEqual(queuedPartBreakVisuals, ['head', 'tail'],
     'each part break must enqueue exactly one material-split visual');
 
 // An old cleanup must not cancel a newer reaction.
 scheduled[0].callback();
-assert.strictEqual(monsterImg.classList.contains('monster-tail-sever-roll'), true);
+assert.strictEqual(monsterImg.dataset.partBreakKind, 'tail');
 scheduled.at(-1).callback();
 assert.strictEqual(monsterImg.classList.contains('monster-tail-sever-roll'), false);
-assert.strictEqual(styles.has('--monster-part-reaction-duration'), false);
 
-function breakPart(part, weapon, monsterId = 'test') {
+animator.triggerMonsterPartBreakReaction('part_flinch', 14, null);
+assert.strictEqual(animator.monsterAttackAnimator.played.at(-1).id, '__reaction.flinch',
+    'an accumulated small flinch must use the shared authored BEAT profile');
+assert.strictEqual(monsterImg.classList.contains('monster-part-break-topple'), false);
+
+function breakPart(part, weapon, monsterId = 'test', rawDamage = 10000, options = {}) {
     const reactions = [];
     const sounds = [];
+    const soundContexts = [];
     const engine = {
         monsterAnatomy: { id: monsterId },
         monsterPartState: [{
@@ -99,7 +110,15 @@ function breakPart(part, weapon, monsterId = 'test') {
         monsterState: 'normal',
         monsterFlightState: 'grounded',
         monsterKnockdownDuration: 0,
+        monsterActionLockTicks: 0,
         monsterAtb: 100,
+        monsterActionPresentationTicks: Number(options.presentationTicks || 0),
+        pendingMonsterAction: options.pendingMonsterAction || null,
+        pendingMonsterImpact: null,
+        monsterTraversalState: null,
+        monsterBurrowState: null,
+        pendingMonsterPartReactions: [],
+        monsterStunDuration: 0,
         selectedMonster: { id: monsterId, nameKO: '시험 몬스터' },
         severedTail: { available: false },
         callbacks: {
@@ -110,11 +129,11 @@ function breakPart(part, weapon, monsterId = 'test') {
         updateTailSeverUI: () => {},
         addLog: () => {},
         interruptMonsterMovement: () => {},
-        playSFX: kind => sounds.push(kind),
+        playSFX: (kind, _variant, context) => { sounds.push(kind); soundContexts.push(context); },
         updateMonsterAtbUI: () => {}
     };
-    const result = HuntEngine.prototype.recordMonsterPartDamage.call(engine, weapon, 10000);
-    return { engine, reactions, sounds, result };
+    const result = HuntEngine.prototype.recordMonsterPartDamage.call(engine, weapon, rawDamage);
+    return { engine, reactions, sounds, soundContexts, result };
 }
 
 const headBreak = breakPart(
@@ -122,10 +141,59 @@ const headBreak = breakPart(
     { id: 'hammer' }
 );
 assert.strictEqual(headBreak.result.newlyBroken, true);
-assert.strictEqual(headBreak.engine.monsterKnockdownDuration, 40);
+assert.strictEqual(headBreak.engine.monsterKnockdownDuration, 0);
+assert.strictEqual(headBreak.engine.monsterActionLockTicks, 30);
 assert.strictEqual(headBreak.engine.monsterAtb, 50);
-assert.strictEqual(headBreak.engine.monsterState, 'knocked_down');
-assert.deepStrictEqual(headBreak.reactions[0], ['part_break_topple', 40, 'head']);
+assert.strictEqual(headBreak.engine.monsterState, 'normal');
+assert.deepStrictEqual(headBreak.reactions[0], ['part_flinch', 30, 'head']);
+assert.strictEqual(headBreak.soundContexts[0].partBreakSize, 'small',
+    'an ordinary break must route through the shared small-break group');
+
+const deferredHeadBreak = breakPart(
+    { id: 'test:deferred-head', kind: 'head', health: 10, breakable: true, severable: false },
+    { id: 'hammer' },
+    'test',
+    10000,
+    { presentationTicks: 12 }
+);
+assert.strictEqual(deferredHeadBreak.result.newlyBroken, true,
+    'part durability must still accumulate during a monster attack');
+assert.strictEqual(deferredHeadBreak.result.reactionDeferred, true);
+assert.strictEqual(deferredHeadBreak.result.part.broken, false,
+    'the broken flag and changed hitzones must remain pending during the authored attack');
+assert.strictEqual(deferredHeadBreak.result.part.breakPending, true);
+assert.strictEqual(deferredHeadBreak.reactions.length, 0,
+    'a part-break pose must not interrupt an active monster pattern');
+assert.strictEqual(deferredHeadBreak.engine.monsterState, 'normal');
+deferredHeadBreak.engine.monsterActionPresentationTicks = 0;
+assert.strictEqual(
+    HuntEngine.prototype.flushPendingMonsterPartReaction.call(deferredHeadBreak.engine),
+    true
+);
+assert.deepStrictEqual(deferredHeadBreak.reactions[0], ['part_flinch', 30, 'head'],
+    'the queued break must resolve immediately after the authored pattern finishes');
+assert.strictEqual(deferredHeadBreak.result.part.broken, true);
+assert.strictEqual(deferredHeadBreak.result.part.breakPending, false);
+
+const diablosHeadFlinch = breakPart(
+    {
+        id: 'diablos:head', kind: 'head', health: 100000, breakable: true,
+        severable: false, flinchHealth: 10, flinchAccumulated: 0
+    },
+    { id: 'hammer' },
+    'diablos',
+    20
+);
+assert.strictEqual(diablosHeadFlinch.result.newlyFlinched, true);
+assert.strictEqual(diablosHeadFlinch.engine.monsterState, 'normal',
+    'an ordinary Diablos part flinch must not masquerade as a full knockdown');
+assert.strictEqual(diablosHeadFlinch.engine.monsterKnockdownDuration, 0);
+assert.strictEqual(diablosHeadFlinch.engine.monsterActionLockTicks, 18);
+assert.strictEqual(diablosHeadFlinch.engine.monsterAtb, 50);
+assert.deepStrictEqual(diablosHeadFlinch.reactions[0], ['part_flinch', 18, null]);
+assert.strictEqual(diablosHeadFlinch.sounds[0], 'monster_flinch');
+assert.strictEqual(diablosHeadFlinch.soundContexts[0].partBreakSize, null,
+    'ordinary accumulated flinches must remain generic flinches, not small part breaks');
 
 const tailBreak = breakPart(
     { id: 'test:tail', kind: 'tail', health: 10, breakable: false, severable: true },
@@ -143,10 +211,22 @@ for (const side of ['left', 'right']) {
         { id: 'great_sword' },
         'tigrex'
     );
-    assert.strictEqual(forelegBreak.engine.monsterKnockdownDuration, 80);
-    assert.deepStrictEqual(forelegBreak.reactions[0], ['part_break_topple', 80, `${side}-front-leg`]);
+    assert.strictEqual(forelegBreak.engine.monsterKnockdownDuration, 60);
+    assert.deepStrictEqual(forelegBreak.reactions[0], ['part_break_topple', 60, `${side}-front-leg`]);
     assert.strictEqual(forelegBreak.sounds[0], 'monster_knockdown',
         'Tigrex foreleg breaks must use the large-knockdown reaction and sound');
+}
+
+for (const side of ['left', 'right']) {
+    const forelegBreak = breakPart(
+        { id: `diablos:${side}-front-leg`, kind: `${side}-front-leg`, health: 10, breakable: true, severable: false },
+        { id: 'great_sword' },
+        'diablos'
+    );
+    assert.strictEqual(forelegBreak.engine.monsterKnockdownDuration, 60);
+    assert.strictEqual(forelegBreak.engine.monsterState, 'knocked_down');
+    assert.deepStrictEqual(forelegBreak.reactions[0], ['part_break_topple', 60, `${side}-front-leg`]);
+    assert.strictEqual(forelegBreak.sounds[0], 'monster_knockdown');
 }
 
 assert.strictEqual(HuntAtbConfig.monsterAtbAfterPartBreak(60), 50);
@@ -192,15 +272,49 @@ const animatorSource = fs.readFileSync(
     path.join(__dirname, '..', 'js', 'effects', 'hunt', 'HuntCombatAnimator.js'),
     'utf8'
 );
-assert.match(css, /@keyframes monster-part-break-topple/);
-assert.match(css, /@keyframes monster-tail-sever-roll/);
-assert.match(
-    css,
-    /@keyframes monster-tail-sever-roll[\s\S]*?78%\s*\{[^}]*rotate\(720deg\)[^}]*\}[\s\S]*?91%\s*\{[^}]*rotate\(720deg\)[^}]*\}[\s\S]*?100%\s*\{[^}]*rotate\(720deg\)/,
-    'tail-sever recovery must hold the completed forward-roll angle instead of rewinding it'
+const rendererSource = fs.readFileSync(
+    path.join(__dirname, '..', 'js', 'effects', 'hunt', 'HuntRenderer.js'),
+    'utf8'
 );
-assert.match(css, /\.game-hunt-monster-img\.monster-part-break-topple/);
-assert.match(css, /\.game-hunt-monster-img\.monster-tail-sever-roll/);
+const engineSourceForStun = fs.readFileSync(
+    path.join(__dirname, '..', 'js', 'effects', 'hunt', 'HuntEngine.js'),
+    'utf8'
+);
+assert.match(engineSourceForStun,
+    /kind === 'stun'[\s\S]*?onTriggerMonsterKnockdownAnim\?\.\(\{[\s\S]*?kind: 'stun'[\s\S]*?struggleCount/,
+    'monster KO must invoke the same large-knockdown body reaction');
+assert.match(engineSourceForStun, /const struggleCount = Math\.max\(3, 6 - this\.monsterStunCount\)/,
+    'successive KO reactions must use 5, 4, then at least 3 struggles');
+assert.match(engineSourceForStun, /stunBlocksKnockdown[\s\S]*?!stunBlocksKnockdown/,
+    'part-break knockdowns must not start while KO is active');
+assert.doesNotMatch(css, /monster-stun-shake|\.game-hunt-monster-img\.stunned_monster/,
+    'monster KO must not retain a competing shake-only CSS body motion');
+assert.match(css, /\.monster-stun-head-marker[\s\S]*?@keyframes monster-stun-head-orbit/,
+    'monster KO must render a dedicated visible marker at the head');
+assert.match(animatorSource, /getBoxQuads\?\.\(\)[\s\S]*?requestAnimationFrame\(followHead\)/,
+    'the single KO marker must follow the transformed anatomy head every frame');
+assert.match(rendererSource, /const visibleIcon = stunned \? '' : icon/,
+    'the generic monster-state badge must not duplicate the KO head marker');
+assert.doesNotMatch(css, /@keyframes monster-part-break-topple|@keyframes monster-part-flinch|@keyframes monster-tail-sever-roll/,
+    'legacy CSS part-reaction timelines must not coexist with the shared BEAT owner');
+assert.match(css, /@keyframes monster-knockdown-sequence/);
+assert.match(css, /monster-knockdown-sequence var\(--monster-knockdown-duration, 7\.6s\)/,
+    'large knockdown duration must follow its authored BEAT total');
+const knockdownCss = css.match(/@keyframes monster-knockdown-sequence[\s\S]*?\n\}/)?.[0] || '';
+assert.match(knockdownCss, /rotate\(30deg\) scale\(1\.08,\.68\) skewX\(-10deg\)/,
+    'large knockdown must reuse the tail-sever sideways squashed pose');
+assert.strictEqual((knockdownCss.match(/rotate\(15deg\)/g) || []).length, 5,
+    'each struggle must rise from 30 degrees to 15 degrees before collapsing');
+assert.match(knockdownCss, /100% \{ transform:rotate\(0deg\) scale\(1\) skewX\(0\)/,
+    'the monster must retain its 30 degree topple through every struggle and stand upright only during rise');
+assert.match(css, /transform-origin:50% 100% !important/,
+    'large knockdown must pivot around the planted legs instead of sliding the whole image');
+assert.match(animatorSource, /savedBeats[\s\S]*?elapsedTicks \* 100[\s\S]*?audioPatternId/,
+    'each struggle and rise sound must derive from the saved BEAT timeline instead of fixed milliseconds');
+assert.match(animatorSource, /Stun differs only by its head marker[\s\S]*?const audioPatternId = '__reaction\.knockdown'/,
+    'stun must reuse the reviewed knockdown audio route as well as its body timing');
+assert.match(animatorSource, /monsterAttackAnimator\.playBeatMotion/,
+    'live part reactions must execute the same authored BEAT motion exposed by the editor');
 assert.match(css, /\.monster-part-break-visual\s*\{[^}]*left:50%[^}]*top:50%[^}]*z-index:75/s,
     'part-break material must be fixed over the visible monster-stage center');
 assert.match(css, /animation:monster-part-break-visual 2500ms linear both/,

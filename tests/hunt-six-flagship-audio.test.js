@@ -38,7 +38,7 @@ for (const monsterId of FLAGSHIP_MONSTERS) {
         // Check phase validity
         for (const slot of pattern.slots) {
             assert.ok(
-                ['telegraph', 'start', 'launch', 'travel', 'impact', 'recovery', 'roar', 'burrow'].includes(slot.phase),
+                ['telegraph', 'start', 'launch', 'travel', 'impact', 'recovery', 'roar', 'burrow', 'motion', 'reaction'].includes(slot.phase),
                 `Invalid audio phase ${slot.phase} in pattern ${pattern.id}`
             );
         }
@@ -52,9 +52,11 @@ console.log('✓ 6 flagship monsters pattern slot derivation verified.');
 const tigrexMap = loadHuntPatternAudioMap('tigrex');
 const tigrexCharge = tigrexMap.patterns.find(p => p.id === 'tigrex.charge_rock' || p.id === 'tigrex.charge_spin' || p.id === 'tigrex.charge_bite');
 assert.ok(tigrexCharge, 'Tigrex must have consecutive charge pattern (charge_rock/spin/bite)');
-const tigrexTravelSlot = tigrexCharge.slots.find(s => s.phase === 'travel');
-assert.ok(tigrexTravelSlot, 'Tigrex consecutive charge must have travel slot');
-assert.strictEqual(tigrexTravelSlot.runtimeReady, 'partial', 'Tigrex travel slot must be marked runtime ready');
+const tigrexTravelSlot = tigrexCharge.slots.find(s => s.phase === 'travel')
+    || tigrexCharge.slots.find(s => s.beatId === 'action-2');
+assert.ok(tigrexTravelSlot, 'Tigrex consecutive charge must expose its travel motion beat');
+assert.strictEqual(tigrexTravelSlot.runtimeReady, true,
+    'Tigrex travel BEAT must be fully runtime-ready through the shared motion compiler');
 
 // --- Diablos (디아블로스) ---
 const diablosCues = AudioCatalog.HUNT_VERIFIED_LOCAL_MONSTER_CUES['diablos:burrow'];
@@ -114,8 +116,8 @@ const legianaMap = loadHuntPatternAudioMap('legiana');
 const legianaColdSweep = legianaMap.patterns.find(p => p.id === 'legiana.aerial_cold_sweep');
 assert.ok(legianaColdSweep, 'Legiana aerial cold sweep pattern must exist');
 assert.ok(
-    legianaColdSweep.slots.some(s => s.phase === 'launch'),
-    'Legiana cold sweep must have launch phase slot for frost release'
+    legianaColdSweep.slots.some(s => s.phase === 'impact' && s.runtimeReady === true),
+    'Legiana cold sweep must expose a runtime-ready frost impact BEAT'
 );
 
 // --- Bazelgeuse (바젤기우스) ---
@@ -126,8 +128,8 @@ const bazelMap = loadHuntPatternAudioMap('bazelgeuse');
 const bazelCarpet = bazelMap.patterns.find(p => p.id === 'bazelgeuse.carpet_bombing');
 assert.ok(bazelCarpet, 'Bazelgeuse carpet bombing pattern must exist');
 assert.ok(
-    bazelCarpet.slots.some(s => s.phase === 'travel'),
-    'Bazelgeuse carpet bombing must have travel phase slot'
+    bazelCarpet.slots.some(s => s.phase === 'travel' || s.beatId === 'bombing-run'),
+    'Bazelgeuse carpet bombing must expose its travel motion beat'
 );
 
 console.log('✓ Individual audio precision rules for all 6 flagship monsters passed!');
