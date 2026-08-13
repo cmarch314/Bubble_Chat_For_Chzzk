@@ -1275,8 +1275,9 @@ class HuntMonsterTurnExecutor {
             );
         }
 
+        const beatDriven = pattern.beatV2Approved === true && Boolean(pattern.beatV2);
         const traversal = HuntMonsterTurnExecutor.movementForPattern(pattern, engine.monsterState);
-        if (!isImpactCommit && traversal) {
+        if (!beatDriven && !isImpactCommit && traversal) {
             engine.beginMonsterTraversal?.(
                 traversal.kind,
                 traversal.ticks,
@@ -1321,7 +1322,6 @@ class HuntMonsterTurnExecutor {
             ]));
             const impactDelayTicks = events[0]?.atTicks
                 || HuntMonsterTurnExecutor.impactDelayTicks(pattern, engine.monsterState);
-            const beatDriven = pattern.beatV2Approved === true && Boolean(pattern.beatV2);
             const sessionPattern = {
                 ...pattern,
                 runtimeSweepVector: measuredImpact?.runtimeSweepVector,
@@ -1352,13 +1352,15 @@ class HuntMonsterTurnExecutor {
                 };
             }
             const { type: pendingAttackType, emoji: pendingEmoji } = engine.getMonsterAttackType(attackName, pattern);
-            engine.monsterActionPresentationTicks = Math.max(
-                Number(engine.monsterActionPresentationTicks || 0),
-                Number(pattern.movement?.ticks || 0),
-                Array.isArray(pattern.motion)
-                    ? pattern.motion.reduce((sum, beat) => sum + Math.max(1, Number(beat?.ticks) || 1), 0)
-                    : 0
-            );
+            if (!beatDriven) {
+                engine.monsterActionPresentationTicks = Math.max(
+                    Number(engine.monsterActionPresentationTicks || 0),
+                    Number(pattern.movement?.ticks || 0),
+                    Array.isArray(pattern.motion)
+                        ? pattern.motion.reduce((sum, beat) => sum + Math.max(1, Number(beat?.ticks) || 1), 0)
+                        : 0
+                );
+            }
             engine.callbacks.onTriggerMonsterAttack?.(
                 pendingAttackType,
                 pendingEmoji,
@@ -1381,7 +1383,7 @@ class HuntMonsterTurnExecutor {
             }
             const synchronizedFinalImpactTick = events.reduce((latest, event) =>
                 Math.max(latest, Number(event?.atTicks || 0)), synchronizedImpactDelay);
-            if (engine.monsterTraversalState) {
+            if (!beatDriven && engine.monsterTraversalState) {
                 engine.monsterTraversalState.remainingTicks = Math.max(
                     Number(engine.monsterTraversalState.remainingTicks || 0),
                     synchronizedFinalImpactTick
@@ -1922,13 +1924,15 @@ class HuntMonsterTurnExecutor {
         // Trigger dynamic monster attack animation
         const { type: attackType, emoji } = engine.getMonsterAttackType(attackName, pattern);
         if (!isImpactCommit && engine.callbacks.onTriggerMonsterAttack) {
-            engine.monsterActionPresentationTicks = Math.max(
-                Number(engine.monsterActionPresentationTicks || 0),
-                Number(pattern.movement?.ticks || 0),
-                Array.isArray(pattern.motion)
-                    ? pattern.motion.reduce((sum, beat) => sum + Math.max(1, Number(beat?.ticks) || 1), 0)
-                    : 0
-            );
+            if (!beatDriven) {
+                engine.monsterActionPresentationTicks = Math.max(
+                    Number(engine.monsterActionPresentationTicks || 0),
+                    Number(pattern.movement?.ticks || 0),
+                    Array.isArray(pattern.motion)
+                        ? pattern.motion.reduce((sum, beat) => sum + Math.max(1, Number(beat?.ticks) || 1), 0)
+                        : 0
+                );
+            }
             engine.callbacks.onTriggerMonsterAttack(attackType, emoji, attackResults, attackName, pattern);
         }
         const authoredInterference = pattern.interference?.kind

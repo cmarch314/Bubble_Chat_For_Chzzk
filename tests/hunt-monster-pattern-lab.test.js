@@ -44,8 +44,13 @@ assert.doesNotMatch(html, /\.js\?v=/,
     '패턴 랩은 손관리 캐시 토큰을 쓰지 않는다 (프리뷰 서버가 no-store를 보낸다)');
 assert.match(html, /id="css-build"/,
     '무엇이 로드됐는지 눈으로 확인할 빌드 표시가 필요하다');
-assert.match(html, /labAudio\?\.playPattern\(pattern,pattern\.runtimeResolvedImpactTimeline\|\|\[\]\)/,
-    'preview audio must follow the resolved multi-impact timeline');
+assert.match(html, /createPreviewRuntime\(pattern,selection\)/,
+    'Preview must submit the pattern to the shared HuntCombatRuntime');
+assert.match(html, /previewRuntime\.executeMonsterPattern\(pattern/,
+    'Preview judgments and audio must be emitted by the real HuntEngine BEAT session');
+assert.doesNotMatch(html,
+    /labAudio\?\.playPattern\(pattern,pattern\.runtimeResolvedImpactTimeline\|\|\[\]\)/,
+    'Preview must not schedule a second audio/impact timeline beside the BEAT engine');
 assert.match(html, /onMonsterProjectileLaunchAudio=.*playProjectileLaunch/,
     'the pattern lab must reproduce projectile launch audio callbacks');
 assert.match(html, /\.lab-controls\{position:fixed;z-index:2147483647;/,
@@ -139,8 +144,8 @@ assert.match(html, /new URL\(document\.referrer\)\.origin/,
     'preview readiness must return to the active loopback review-server origin, including agent-specific ports');
 assert.match(html, /embedded-preview/,
     'embedded production preview must hide its own control overlay');
-assert.match(html, /seekBeatMotion\(message\.progress\)/,
-    'the embedded lab must seek the real compiled animation without applying combat damage');
+assert.match(html, /seekPreviewRuntime\(message\.progress\)/,
+    'the embedded lab must rebuild and seek the real engine/BEAT session');
 assert.match(html, /bubblechat:pattern-preview-playback/,
     'the embedded runtime must acknowledge playback so the editor timeline follows real playback');
 assert.match(html, /!pattern\.runtimePreviewMuteAudio/,

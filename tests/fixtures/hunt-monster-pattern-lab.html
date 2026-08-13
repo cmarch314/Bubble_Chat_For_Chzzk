@@ -204,7 +204,26 @@
   <script src="../../js/effects/hunt/HuntMonsterReactionCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterAnatomyCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterProfiles.js"></script>
+  <script src="../../js/effects/hunt/HuntTrapConfig.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterRules.js"></script>
+  <script src="../../js/effects/hunt/HuntWeaponMechanics.js"></script>
+  <script src="../../js/effects/hunt/HuntWeaponActionSelector.js"></script>
+  <script src="../../js/effects/hunt/HuntBeatV2Contract.js"></script>
+  <script src="../../js/effects/hunt/HuntBeatV2Adapter.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterPatternCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntBeatActionRuntime.js"></script>
+  <script src="../../js/effects/hunt/HuntCombatJudgmentRuntime.js"></script>
+  <script src="../../js/effects/hunt/HuntCombatJudgmentResolver.js"></script>
+  <script src="../../js/effects/hunt/HuntHunterBeatCatalog.js"></script>
+  <script src="../../js/effects/hunt/HuntActionStateMachine.js"></script>
+  <script src="../../js/effects/hunt/HuntBalanceTelemetry.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterPatternSelector.js"></script>
+  <script src="../../js/effects/hunt/HuntBattleTickExecutor.js"></script>
+  <script src="../../js/effects/hunt/HuntMonsterTurnExecutor.js"></script>
+  <script src="../../js/effects/hunt/HuntHunterTurnExecutor.js"></script>
+  <script src="../../js/effects/hunt/HuntEngine.js"></script>
+  <script src="../../js/effects/hunt/HuntCombatClock.js"></script>
+  <script src="../../js/effects/hunt/HuntCombatRuntime.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterAnimationCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterActionPolicy.js"></script>
   <!-- 애니메이터보다 먼저 로드해야 한다. 이 두 레지스트리가 없으면 몬스터별 CSS 변수
@@ -233,7 +252,7 @@
       ['normal','일반',''],['enraged','분노','😡'],['exhausted','탈진','🤤'],['airborne','비행','🪽'],
       ['knockdown','대경직','💥'],['stunned','기절','💫'],['paralyzed','마비','⚡'],['sleeping','수면','💤']
     ];
-    const owner={card:document.getElementById('lab'),selectedMonster:null,monsterState:'normal',monsterFlightState:'grounded',animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)},clear(id){clearTimeout(id)}}};
+    const owner={card:document.getElementById('lab'),selectedMonster:null,selectedWeapons:hunters,monsterState:'normal',monsterFlightState:'grounded',animationTimers:{timeout(fn,ms){return setTimeout(fn,ms)},clear(id){clearTimeout(id)}}};
     // 부위 파괴 반응은 실수렵과 같은 코드(HuntCombatAnimator)로 재생한다.
     // 랩에서 따로 구현하면 검수 화면과 실제 화면이 갈라진다.
     // 공격 애니메이터는 새로 만들지 않고 전투 애니메이터가 들고 있는 것을 쓴다 —
@@ -252,6 +271,116 @@
     let pendingFlightTransitionTimer=null;
     let pendingReactionTimer=null;
     let pendingReactionBeatTimers=[];
+    let previewRuntime=null;
+    let previewRuntimeTimer=null;
+    let previewRuntimePattern=null;
+    let previewRuntimeSelection=null;
+
+    function stopPreviewRuntime(reason='preview-reset'){
+      if(previewRuntimeTimer!==null){clearInterval(previewRuntimeTimer);previewRuntimeTimer=null}
+      previewRuntime?.cancelMonsterAction?.(reason);
+      previewRuntime?.stop?.();
+      previewRuntime=null;
+      previewRuntimePattern=null;
+      previewRuntimeSelection=null;
+    }
+
+    function createPreviewRuntime(pattern,selection){
+      stopPreviewRuntime('preview-replaced');
+      document.documentElement.dataset.previewDependencies=[
+        typeof HuntEngine,typeof HuntCombatRuntime,typeof HuntBeatActionRuntime
+      ].join(',');
+      document.documentElement.dataset.previewBeatApproved=String(pattern.beatV2Approved===true);
+      document.documentElement.dataset.previewBeatBackend=String(pattern.beatV2?.backend||'');
+      const engineHunters=hunters.map(hunter=>({
+        ...hunter,id:'great_sword',name:`Hunter ${hunter.index+1}`,
+        hunterName:`Hunter ${hunter.index+1}`,type:'melee',personality:'balanced',
+        hp:1000,maxHp:1000,atb:0,potions:10,sharpness:100,perks:[]
+      }));
+      previewRuntime=new HuntCombatRuntime({
+        mode:'preview',clockMode:'manual',
+        onTrace:entry=>{
+          document.documentElement.dataset.previewClock='hunt-combat-runtime';
+          document.documentElement.dataset.previewTick=String(entry.tick||0);
+          document.documentElement.dataset.previewTraceType=entry.type;
+        },
+        engineConfig:{
+          selectedWeapons:engineHunters,selectedMonster:owner.selectedMonster,
+          monsterTier:'large',monsterHp:100000,monsterMaxHp:100000,
+          monsterAtb:0,monsterSpeed:.0001,hunterSpeedMultiplier:0,
+          MONSTER_ATTACKS:{},MONSTER_PATTERNS:{[owner.selectedMonster.id]:[pattern]},COMBO_LIST:{},
+          callbacks:{
+            onLog(){},onUpdateHpUI(){},onUpdateMonsterHpUI(){},onUpdateWeaponAtbUI(){},
+            onUpdateMonsterAtbUI(){},onUpdateMonsterStateUI(){},onUpdateTimerUI(){},
+            onShowSkillBubble(){},onShakeWeapon(){},onShakeMonster(){},onRestoreBorder(){},
+            onPlaySFX:(fileName,fallbackKey,context)=>labAudio?.playEngineAsset(fileName,fallbackKey,context),
+            onTriggerMonsterAttack:(type,emoji,targets,name,runtimePattern)=>{
+              animator.triggerMonsterAttack(type,emoji,targets,name,runtimePattern);
+            },
+            onTriggerHitAnimation:(index,reaction)=>combat.triggerHitAnimation(index,engineHunters[index],reaction),
+            onTriggerHunterInterference:(index,kind,size,active)=>combat.triggerHunterInterference(index,kind,size,active),
+            onTriggerGuardShake:(index,outcome)=>combat.triggerGuardImpact(index,outcome),
+            onTriggerEnvironmentEffect:(kind,index,details)=>combat.triggerEnvironmentEffect(kind,index,details),
+            onTriggerMonsterBurrowPhase:(phase,index,durationMs)=>animator.triggerMonsterBurrowPhase(phase,index,durationMs),
+            onMonsterBeatActionComplete:()=>{
+              if(previewRuntimeTimer!==null){clearInterval(previewRuntimeTimer);previewRuntimeTimer=null}
+            },
+            onMonsterBeatActionCancel:()=>{}
+          }
+        }
+      });
+      previewRuntimePattern=pattern;
+      previewRuntimeSelection={
+        primary:selection.primary,
+        indices:[...selection.indices]
+      };
+      previewRuntime.start();
+      const accepted=previewRuntime.executeMonsterPattern(pattern,{
+        primaryTargetIndex:selection.primary,
+        targetIndices:selection.indices,
+        impactTargets:(pattern.runtimeResolvedImpactTimeline||[]).map(event=>event.targetIndices||[])
+      });
+      document.documentElement.dataset.previewActionAccepted=String(accepted!==false);
+      document.documentElement.dataset.previewBeatActive=String(
+        Boolean(previewRuntime.engine.monsterBeatRuntime?.has?.('monster')));
+      return previewRuntime;
+    }
+
+    function playPreviewRuntime(){
+      if(!previewRuntime)return;
+      previewRuntimeTimer=setInterval(()=>{
+        previewRuntime.step(1);
+        const active=previewRuntime.engine.monsterBeatRuntime?.get?.('monster');
+        const total=Math.max(1,Number(active?.compiled?.totalTicks||previewRuntimePattern?.animationDurationMs/100||1));
+        const elapsed=Math.max(0,Number(active?.elapsedTicks||previewRuntime.clock.elapsedTicks));
+        animator.seekBeatMotion(Math.min(1,elapsed/total));
+        if(!active&&previewRuntimeTimer!==null){clearInterval(previewRuntimeTimer);previewRuntimeTimer=null}
+      },100);
+    }
+
+    function pausePreviewRuntime(){
+      if(previewRuntimeTimer!==null){clearInterval(previewRuntimeTimer);previewRuntimeTimer=null}
+      previewRuntime?.pause?.();
+      const controller=animator.activeBeatMotionPreview;
+      controller?.animations?.forEach(animation=>animation.pause());
+    }
+
+    function resumePreviewRuntime(){
+      if(!previewRuntime||previewRuntimeTimer!==null)return;
+      previewRuntime.resume?.();
+      playPreviewRuntime();
+    }
+
+    function seekPreviewRuntime(progress){
+      if(!previewRuntimePattern||!previewRuntimeSelection)return;
+      const pattern=previewRuntimePattern;
+      const selection={...previewRuntimeSelection,targets:previewRuntimeSelection.indices.map(index=>({index,result:'pending'}))};
+      const total=Math.max(1,(pattern.motion||[]).reduce((sum,beat)=>sum+Math.max(1,Number(beat.ticks)||1),0));
+      createPreviewRuntime(pattern,selection);
+      pausePreviewRuntime();
+      previewRuntime.step(Math.max(0,Math.min(total,Math.round(Number(progress||0)*total))));
+      animator.seekBeatMotion(Math.max(0,Math.min(1,Number(progress||0))));
+    }
 
     function installMotionGizmo(){
       const image=document.getElementById('fight-monster-img'),host=image?.parentElement;if(!image||!host)return;
@@ -623,10 +752,15 @@
       });
       document.documentElement.style.setProperty('--target',slotColors[selection.primary]);
       document.getElementById('run-readout').textContent=`${pattern.name} · ${targetMode==='auto'?'자동 ':''}${selection.indices.map(index=>index+1).join('·')}번`;
-      if(!pattern.runtimePreviewScrub&&!pattern.runtimePreviewMuteAudio){
-        labAudio?.playPattern(pattern,pattern.runtimeResolvedImpactTimeline||[]);
+      // Preview does not call the animator directly. It submits the authored
+      // pattern to the same HuntEngine/BEAT runtime used by a live hunt; the
+      // renderer callbacks above merely observe that runtime session.
+      createPreviewRuntime(pattern,selection);
+      if(pattern.runtimePreviewScrub){
+        previewRuntime.step(Math.max(0,Number(previewScenario?.scrubTick||0)));
+      }else{
+        playPreviewRuntime();
       }
-      animator.triggerMonsterAttack(pattern.type,patternEmoji(pattern),selection.targets,pattern.name,pattern);
       if(pattern.flightTransition==='takeoff'){
         pendingFlightTransitionTimer=setTimeout(()=>{
           pendingFlightTransitionTimer=null;
@@ -642,6 +776,7 @@
         ||pattern.movement?.ticks*100||1800)),patternId:pattern.id};
     }
     function resetPatternPreviewPose(){
+      stopPreviewRuntime('pattern-selection');
       clearPendingFlightTransition();
       clearPendingReaction();
       combat.clearMonsterAnimations('pattern-selection');
@@ -832,14 +967,11 @@
     addEventListener('message',event=>{
       if(event.source!==parent||!/^http:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?$/.test(event.origin))return;
       const message=event.data||{};
-      if(message.type==='bubblechat:pattern-preview-seek')animator.seekBeatMotion(message.progress);
+      if(message.type==='bubblechat:pattern-preview-seek')seekPreviewRuntime(message.progress);
       if(message.type==='bubblechat:pattern-preview-transport'){
-        const controller=animator.activeBeatMotionPreview;
-        if(message.action==='pause')controller?.animations?.forEach(animation=>animation.pause());
-        if(message.action==='resume')controller?.animations?.forEach(animation=>animation.play());
-        if(message.action==='pause')controller?.cssTracks?.forEach(track=>track.element.style.setProperty('animation-play-state','paused','important'));
-        if(message.action==='resume')controller?.cssTracks?.forEach(track=>track.element.style.setProperty('animation-play-state','running','important'));
-        if(message.action==='stop')animator.cancelBeatMotionPreview(controller);
+        if(message.action==='pause')pausePreviewRuntime();
+        if(message.action==='resume')resumePreviewRuntime();
+        if(message.action==='stop')resetPatternPreviewPose();
       }
     });
     if(parent!==window){

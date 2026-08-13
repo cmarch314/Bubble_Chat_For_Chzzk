@@ -1002,8 +1002,17 @@ class HuntEffect extends BaseEffect {
             this.renderer.spawnCombatChatBubble(hunter.index, '💩🌈 퍽 발현!');
         });
 
-        // Initialize pure Simulation Engine
-        this.engine = new HuntEngine({
+        // Live and Preview advance the same HuntEngine through one BEAT clock.
+        // HuntEffect owns lifecycle/UI only; it must not create a second tick loop.
+        this.combatRuntime = new HuntCombatRuntime({
+            mode: 'live',
+            clockMode: 'auto',
+            tickMs: 100,
+            timers: this.timers,
+            tick: () => {
+                if (this.phase === 'fighting') this.processFightTickSafely();
+            },
+            engineConfig: {
             selectedWeapons: this.selectedWeapons,
             selectedMonster: this.selectedMonster,
             bets: this.bets,
@@ -1169,7 +1178,9 @@ class HuntEffect extends BaseEffect {
                     this.renderer.triggerValstraxAmbushWarning();
                 }
             }
+            }
         });
+        this.engine = this.combatRuntime.engine;
         if (this.engine.sharedSupply) this.selectedWeapons.forEach(hunter =>
             this.renderer.updateHunterItemUI(hunter, this.engine.sharedSupply));
         this.selectedWeapons.forEach(hunter => {
@@ -1195,11 +1206,10 @@ class HuntEffect extends BaseEffect {
         const initialLimit = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 480;
         this.renderer.updateTimerUI(initialLimit);
 
-        // Tick loop (Process through HuntEngine)
-        this.fightInterval = this.timers.interval(() => {
-            if (this.phase !== 'fighting') return;
-            this.processFightTickSafely();
-        }, 100);
+        // One transport owns every gameplay tick. `fightInterval` remains a
+        // compatibility marker only and never stores a browser timer handle.
+        this.combatRuntime.start();
+        this.fightInterval = this.combatRuntime.clock;
         if (this.huntMode === 'journey' && this.runDirector) {
             this.runDirector.checkpoint({
                 party: HuntRunPartyAdapter.snapshot(this.selectedWeapons),
@@ -1299,7 +1309,8 @@ class HuntEffect extends BaseEffect {
 
     clearAllTimers() {
         if (this.gameTimer) { this.timers.clear(this.gameTimer); this.gameTimer = null; }
-        if (this.fightInterval) { this.timers.clear(this.fightInterval); this.fightInterval = null; }
+        this.combatRuntime?.stop?.();
+        this.fightInterval = null;
         this.timers.clearAll();
         this.victoryEmojiTimeouts = [];
     }
@@ -1417,11 +1428,9 @@ class HuntEffect extends BaseEffect {
         // Restore borders
         this.selectedWeapons.forEach(w => this.renderer.restoreBorder(w.index, w));
 
-        // Restart Tick loop (Process through HuntEngine)
-        this.fightInterval = this.timers.interval(() => {
-            if (this.phase !== 'fighting') return;
-            this.processFightTickSafely();
-        }, 100);
+        // Resume the same engine/BEAT transport for the next monster.
+        this.combatRuntime?.start?.();
+        this.fightInterval = this.combatRuntime?.clock || null;
     }
 
     endGame(container, isVictory, winner = null) {
