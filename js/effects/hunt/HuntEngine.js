@@ -638,7 +638,9 @@ class HuntEngine {
         // Damage and control judgments share the same post-counter immunity.
         // A delayed tremor must not bypass the counter that answered the
         // preceding direct impact.
-        if (Number(hunter.counterInvulnerabilityTicks || 0) > 0) return false;
+        if (Number(hunter.counterInvulnerabilityTicks || 0) > 0
+            && !(typeof HuntMonsterTurnExecutor !== 'undefined'
+                && HuntMonsterTurnExecutor.hasFreshCounterAttempt?.(hunter))) return false;
         const pattern = { name: kind === 'tremor' ? '지진' : kind === 'wind' ? '풍압' : '포효', type: kind };
         const resistedBy = this.perkRuntime?.ignoresPattern?.(hunter, pattern)
             || (kind === 'roar' && this.perkRuntime?.roarDuration?.(hunter, 1) === 0 ? '귀마개' : null);
@@ -665,6 +667,9 @@ class HuntEngine {
                 return false;
             }
             foresightFailed = foresight.attempted;
+            if (foresight.attempted && !foresight.success) {
+                HuntMonsterTurnExecutor.clearCounterInvulnerability?.(hunter);
+            }
         }
         if (!foresightFailed) {
             const actionAllowsGuard = !this.actionStateMachine || this.actionStateMachine.canGuard(hunter);

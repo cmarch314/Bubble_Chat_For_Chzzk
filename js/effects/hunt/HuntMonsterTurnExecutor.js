@@ -156,12 +156,27 @@ class HuntMonsterTurnExecutor {
         return Number(target.hitDuration || 0) > 0;
     }
 
-    static isHunterImpactImmune(target = {}) {
-        return HuntMonsterTurnExecutor.hunterImpactImmunityReason(target) !== null;
+    static isHunterImpactImmune(target = {}, options = {}) {
+        return HuntMonsterTurnExecutor.hunterImpactImmunityReason(target, options) !== null;
     }
 
-    static hunterImpactImmunityReason(target = {}) {
-        if (Number(target.counterInvulnerabilityTicks || 0) > 0) return 'counter';
+    static hasFreshCounterAttempt(target = {}) {
+        const action = target.currentAction;
+        const tags = new Set(Array.isArray(action?.tags) ? action.tags : []);
+        const authoredWindow = [
+            'iai', 'perfect-guard', 'hammer-offset', 'lance-counter',
+            'lance-power-guard', 'charge-blade-guard',
+            'switch-axe-sword-counter', 'hbg-wyverncounter', 'tackle'
+        ].some(tag => tags.has(tag));
+        return authoredWindow || HuntMonsterTurnExecutor.longSwordCanForesight(target);
+    }
+
+    static hunterImpactImmunityReason(target = {}, options = {}) {
+        const resolvingFreshCounter = options.resolveCounterAttempt === true
+            && HuntMonsterTurnExecutor.hasFreshCounterAttempt(target);
+        if (Number(target.counterInvulnerabilityTicks || 0) > 0 && !resolvingFreshCounter) {
+            return 'counter';
+        }
         if (Number(target.rollDuration || 0) > 0) return 'evade';
         // Once a damaging reaction owns the hunter, its recovery window wins
         // over any stale interference flag. This prevents later hits in the
@@ -178,6 +193,28 @@ class HuntMonsterTurnExecutor {
         );
         target.counterInvulnerabilityStartedThisTick = true;
         return target.counterInvulnerabilityTicks;
+    }
+
+    static clearCounterInvulnerability(target) {
+        if (!target) return;
+        target.counterInvulnerabilityTicks = 0;
+        target.counterInvulnerabilityStartedThisTick = false;
+    }
+
+    static consumeFailedCounterAttempt(target, actionMachine = null) {
+        HuntMonsterTurnExecutor.clearCounterInvulnerability(target);
+        [
+            'hbgCounterWaiting', 'hbgCounterReady',
+            'switchCounterWaiting', 'switchCounterReady',
+            'hammerOffsetWaiting', 'hammerOffsetFollowupReady',
+            'snsPerfectGuardReady', 'snsCounterReady',
+            'cbGuardWaiting', 'cbGuardReady',
+            'lanceCounterWaiting', 'lanceCounterReady',
+            'powerGuardWaiting', 'powerGuardReady'
+        ].forEach(key => {
+            if (key in target) target[key] = false;
+        });
+        actionMachine?.cancel?.(target, 'idle');
     }
 
     static isHunterDefenseLocked(target = {}) {
@@ -357,6 +394,8 @@ class HuntMonsterTurnExecutor {
         const iaiCounterProb = Number(ctx.iaiCounterProb ?? 0.58);
         const foresightProb = Number(ctx.foresightProb ?? 0.70);
         const isStunned = Boolean(ctx.isStunned);
+        const counterAttempted = !isStunned
+            && HuntMonsterTurnExecutor.hasFreshCounterAttempt(target);
         let damage = incomingDamage;
         let handled = false;
         let isGuard = false, isDodge = false, isForesightSlash = false, isIaiCounter = false;
@@ -527,10 +566,16 @@ class HuntMonsterTurnExecutor {
                 counterProtected = foresight.success;
             }
         }
+        const counterSucceeded = counterAttempted
+            && Boolean(counterProtected || isGuard || isDodge);
+        if (counterAttempted && !counterSucceeded) {
+            handled = true;
+            HuntMonsterTurnExecutor.consumeFailedCounterAttempt(target, actionMachine);
+        }
         return {
             handled, damage, isGuard, isDodge, isForesightSlash, isIaiCounter,
             isPerfectGuard, isHammerOffset, isLanceCounter, isChargeBladeGuardPoint,
-            isSwitchAxeCounter, counterProtected
+            isSwitchAxeCounter, counterProtected, counterAttempted, counterSucceeded
         };
     }
 
@@ -1370,7 +1415,9 @@ class HuntMonsterTurnExecutor {
             }
             // The monster may keep its chosen target, but a hunter already tumbling
             // through hit recovery silently ignores every follow-up hit.
-            const immunityReason = HuntMonsterTurnExecutor.hunterImpactImmunityReason(target);
+            const immunityReason = HuntMonsterTurnExecutor.hunterImpactImmunityReason(target, {
+                resolveCounterAttempt: true
+            });
             if (immunityReason) {
                 if (immunityReason === 'counter') {
                     // Counter protection used to discard the impact silently,
@@ -1567,7 +1614,9 @@ class HuntMonsterTurnExecutor {
                 ({ damage, isGuard, isDodge, isForesightSlash, isIaiCounter,
                     isPerfectGuard, isHammerOffset, isLanceCounter,
                     isChargeBladeGuardPoint, isSwitchAxeCounter } = counter);
-                if (counter.counterProtected) {
+                if (counter.counterAttempted && !counter.counterSucceeded) {
+                    HuntMonsterTurnExecutor.clearCounterInvulnerability(target);
+                } else if (counter.counterProtected) {
                     HuntMonsterTurnExecutor.grantCounterInvulnerability(target);
                 }
             } else if (hasShield && (guaranteedLanceGuard || defendRoll < guardProb)) {
@@ -1639,6 +1688,8 @@ class HuntMonsterTurnExecutor {
                         // A real hit owns the reaction state. Stop ear-covering,
                         // tremor wobble, or wind-pressure before knockback starts.
                         engine.clearHunterInterference?.(target, 'hit');
+                        engine.cancelHunterBeatAction?.(target, 'hit');
+                        engine.callbacks?.onInterruptWeaponVisual?.(target.index);
                         if (actionMachine) actionMachine.cancel(target, 'hitstun');
                         if (engine.weaponMechanics) engine.weaponMechanics.onHit(target);
                         target.atb = 0;

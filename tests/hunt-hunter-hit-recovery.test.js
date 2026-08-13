@@ -171,6 +171,52 @@ assert.strictEqual(
         'a successful counter must ignore every follow-up judgment for one second');
     assert.strictEqual(hunter.counterInvulnerabilityStartedThisTick, true);
 }
+{
+    const protectedIai = {
+        id: 'long_sword', status: 'alive', spiritGauge: 50,
+        counterInvulnerabilityTicks: 10,
+        currentAction: { phase: 'active', tags: ['counter', 'iai'] }
+    };
+    assert.strictEqual(HuntMonsterTurnExecutor.hunterImpactImmunityReason(protectedIai), 'counter');
+    assert.strictEqual(HuntMonsterTurnExecutor.hunterImpactImmunityReason(protectedIai, {
+        resolveCounterAttempt: true
+    }), null, 'a new counter attempt must resolve before protection from an earlier success');
+}
+for (const fixture of [
+    { id: 'heavy_bowgun', tags: ['counter', 'hbg-wyverncounter'], fields: { hbgCounterWaiting: true } },
+    { id: 'switch_axe', tags: ['counter', 'switch-axe-sword-counter'], fields: { switchCounterWaiting: true } },
+    { id: 'hammer', tags: ['counter', 'hammer-offset'], fields: { hammerOffsetWaiting: true } },
+    { id: 'sword_shield', tags: ['counter', 'perfect-guard'], fields: { snsPerfectGuardReady: true } }
+]) {
+    const hunter = {
+        index: 0, name: fixture.id, id: fixture.id, status: 'alive',
+        counterInvulnerabilityTicks: 10,
+        currentAction: { phase: 'active', tags: fixture.tags },
+        ...fixture.fields
+    };
+    const engine = {
+        random: () => .99,
+        monsterHp: 1000,
+        monsterStunAccum: 0,
+        actionStateMachine: {
+            cancel(target, state) {
+                target.currentAction = null;
+                target.actionState = state;
+            }
+        },
+        addLog() {}, showSkillBubble() {}, shakeWeapon() {},
+        updateMonsterHpUI() {}, presentHunterImpact() {}
+    };
+    const result = HuntMonsterTurnExecutor.resolveHunterCounter(engine, hunter, 40, {
+        defendRoll: .99, actionAllowsEvade: false, isStunned: false
+    });
+    assert.strictEqual(result.counterAttempted, true, `${fixture.id} must register its active counter window`);
+    assert.strictEqual(result.counterSucceeded, false, `${fixture.id} must preserve a failed counter result`);
+    assert.strictEqual(result.handled, true, `${fixture.id} failure must not fall through to guard or evade`);
+    assert.strictEqual(result.damage, 40, `${fixture.id} failure must retain the incoming damage`);
+    assert.strictEqual(hunter.counterInvulnerabilityTicks, 0,
+        `${fixture.id} failure must clear prior counter protection`);
+}
 assert.strictEqual(
     HuntMonsterTurnExecutor.isHunterHitRecovering({ status: 'stunned', hitDuration: 15 }),
     false,
@@ -340,7 +386,7 @@ assert.match(turnSource,
     /hunterImpactImmunityReason\(target[\s\S]*?isHunterHitRecovering\(target\)[\s\S]*?return 'hit-recovery'/,
     'repeat hits must retain one typed recovery-immunity owner');
 assert.match(turnSource,
-    /const immunityReason = HuntMonsterTurnExecutor\.hunterImpactImmunityReason\(target\)[\s\S]*?immunityReason === 'counter'[\s\S]*?presentHunterImpact\?\.\(target\.index, 'counter'\)[\s\S]*?result: immunityReason === 'evade'/,
+    /const immunityReason = HuntMonsterTurnExecutor\.hunterImpactImmunityReason\(target, \{[\s\S]*?resolveCounterAttempt: true[\s\S]*?immunityReason === 'counter'[\s\S]*?presentHunterImpact\?\.\(target\.index, 'counter'\)[\s\S]*?result: immunityReason === 'evade'/,
     'the shared impact gate must classify recovery, roll, and visibly explained counter protection');
 assert.match(turnSource,
     /if \(isGreatSwordTackling\)[\s\S]*?grantCounterInvulnerability\(target\)/,

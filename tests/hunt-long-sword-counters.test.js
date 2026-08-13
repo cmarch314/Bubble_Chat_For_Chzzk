@@ -9,9 +9,13 @@ const HuntWeaponMechanics = require('../js/effects/hunt/HuntWeaponMechanics.js')
 const HuntAtbConfig = require('../js/effects/hunt/HuntAtbConfig.js');
 const HuntMonsterActionPolicy = require('../js/effects/hunt/HuntMonsterActionPolicy.js');
 const HuntPersonalityProfiles = require('../js/effects/hunt/HuntPersonalityProfiles.js');
+const HuntHunterTurnExecutor = require('../js/effects/hunt/HuntHunterTurnExecutor.js');
 
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterTurnExecutor.js');
-const context = vm.createContext({ console, HuntAtbConfig, HuntMonsterActionPolicy, HuntPersonalityProfiles });
+const context = vm.createContext({
+    console, HuntAtbConfig, HuntMonsterActionPolicy,
+    HuntPersonalityProfiles, HuntHunterTurnExecutor
+});
 vm.runInContext(
     `${fs.readFileSync(sourcePath, 'utf8')}\nglobalThis.HuntMonsterTurnExecutor = HuntMonsterTurnExecutor;`,
     context,
@@ -19,7 +23,7 @@ vm.runInContext(
 );
 
 function createScenario(randomValue, action) {
-    const calls = { bubbles: [], animations: [], logs: [] };
+    const calls = { bubbles: [], animations: [], logs: [], cancels: [] };
     const hunter = {
         index: 0,
         id: 'long_sword',
@@ -53,7 +57,7 @@ function createScenario(randomValue, action) {
         monsterStunAccum: 0,
         monsterStunThreshold: 9999,
         monsterStunDuration: 0,
-        callbacks: {},
+        callbacks: { onInterruptWeaponVisual: index => calls.cancels.push(['visual', index]) },
         teamTactic: 'balanced',
         actionStateMachine: new HuntActionStateMachine(),
         weaponMechanics: new HuntWeaponMechanics(() => randomValue),
@@ -67,6 +71,7 @@ function createScenario(randomValue, action) {
         updateHpUI: noop,
         updateWeaponAtbUI: noop,
         triggerHunterCart: noop,
+        cancelHunterBeatAction: (target, reason) => calls.cancels.push([reason, target.index]),
         shakeMonster: noop,
         triggerHitAnimation: noop,
         restoreBorder: noop,
@@ -95,8 +100,14 @@ const iaiAction = {
 
 {
     const { engine, hunter, calls } = createScenario(0.99, { ...iaiAction });
+    hunter.counterInvulnerabilityTicks = 10;
+    hunter.counterInvulnerabilityStartedThisTick = true;
     context.HuntMonsterTurnExecutor.execute(engine);
     assert.strictEqual(hunter.hp, 80, 'a failed Iai counter must take the monster hit');
+    assert.strictEqual(hunter.counterInvulnerabilityTicks, 0,
+        'a fresh failed Iai counter must clear protection left by an earlier success');
+    assert.deepStrictEqual(calls.cancels, [['hit', 0], ['visual', 0]],
+        'a failed Iai counter must cancel its weapon BEAT before hit-stun presentation');
     assert.strictEqual(hunter.spiritLevel, 1, 'a failed Iai counter must consume exactly one spirit level');
     assert.strictEqual(engine.monsterHp, 1000);
     assert.ok(calls.bubbles.includes('거합베기 · 실패!'));

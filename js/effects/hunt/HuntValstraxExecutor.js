@@ -70,7 +70,9 @@ class HuntValstraxExecutor {
         const attackResults = [];
 
         targets.forEach(target => {
-            if (HuntMonsterTurnExecutor.isHunterImpactImmune(target)) {
+            if (HuntMonsterTurnExecutor.isHunterImpactImmune(target, {
+                resolveCounterAttempt: true
+            })) {
                 attackResults.push({ index: target.index, result: 'invulnerable' });
                 return;
             }
@@ -106,7 +108,9 @@ class HuntValstraxExecutor {
             });
             if (counter.handled) {
                 ({ damage, isGuard, isDodge, isForesightSlash, isIaiCounter } = counter);
-                if (counter.counterProtected) {
+                if (counter.counterAttempted && !counter.counterSucceeded) {
+                    HuntMonsterTurnExecutor.clearCounterInvulnerability(target);
+                } else if (counter.counterProtected) {
                     HuntMonsterTurnExecutor.grantCounterInvulnerability(target);
                 }
             } else if (hasShield && defendRoll < guardProb) {
