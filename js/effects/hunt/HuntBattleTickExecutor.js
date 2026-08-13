@@ -728,7 +728,11 @@ class HuntBattleTickExecutor {
             );
             if (engine.activeTrapControl && !engine.activeTrapControl.releasing) {
                 const TrapConfig = typeof HuntTrapConfig !== 'undefined' ? HuntTrapConfig : null;
-                const escapeTicks = Number(TrapConfig?.ESCAPE_TICKS || 8);
+                const escapeTicks = Math.max(1, Number(
+                    engine.activeTrapControl.releaseTicks
+                    || TrapConfig?.ESCAPE_TICKS
+                    || 8
+                ));
                 if (engine.monsterKnockdownDuration <= escapeTicks) {
                     engine.activeTrapControl.releasing = true;
                     engine.playSFX?.('monster_trap', null, {
@@ -755,8 +759,11 @@ class HuntBattleTickExecutor {
                 engine.triggerEnvironmentEffect?.('trap-release', null, {
                     kind: engine.activeTrapControl.kind,
                     useCount: engine.activeTrapControl.useCount,
-                    releaseTicks: Number((typeof HuntTrapConfig !== 'undefined'
-                        ? HuntTrapConfig.ESCAPE_TICKS : 8) || 8)
+                    releaseTicks: Math.max(1, Number(
+                        engine.activeTrapControl.releaseTicks
+                        || (typeof HuntTrapConfig !== 'undefined' ? HuntTrapConfig.ESCAPE_TICKS : 8)
+                        || 8
+                    ))
                 });
                 }
                 if (engine.activeTrapControl) {

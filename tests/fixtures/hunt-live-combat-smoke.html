@@ -15,6 +15,7 @@
 <body>
   <div id="controls">
     <button id="start" type="button">디아브로스 실수렵 시작</button>
+    <button id="pitfall" type="button" disabled>구멍함정 실수렵 발동</button>
     <span id="status" role="status">대기 중</span>
   </div>
   <iframe id="overlay" src="/index.html" title="BubbleChat 실제 OBS 오버레이"></iframe>
@@ -48,11 +49,24 @@
         await waitFor(() => frame.contentDocument.querySelector('#fight-monster-img'), 20000);
         status.dataset.state = 'ready';
         status.textContent = '실수렵 진행 중';
+        document.getElementById('pitfall').disabled = false;
       } catch (error) {
         status.dataset.state = 'error';
         status.textContent = error.message;
         console.error('[hunt-live-smoke]', error);
       }
+    });
+    document.getElementById('pitfall').addEventListener('click', () => {
+      for (let index = 0; index < 9; index++) {
+        send({
+          message: '!지원', nickname: `PitfallSupport${index + 1}`,
+          uid: `pitfall-support-${index + 1}`, type: 'chat'
+        });
+      }
+      send({
+        message: '!함정', nickname: 'PitfallTrigger',
+        uid: 'pitfall-trigger', type: 'chat'
+      });
     });
   </script>
 </body>

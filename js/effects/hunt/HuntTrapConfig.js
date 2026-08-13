@@ -36,6 +36,33 @@ class HuntTrapConfig {
             + this.ESCAPE_TICKS;
     }
 
+    static lifecycleFromMotion(motion = [], useCount = 1) {
+        const beats = Array.isArray(motion) ? motion : [];
+        const ticksOf = beat => Math.max(1, Math.floor(Number(beat?.ticks) || 1));
+        const entry = beats.find(beat => beat?.beat === 'reaction');
+        const held = beats.filter(beat => /^held-\d+$/.test(String(beat?.beat || '')));
+        const release = beats.find(beat => beat?.beat === 'release');
+        const entryTicks = entry ? ticksOf(entry) : this.ENTRY_TICKS;
+        const releaseTicks = release ? ticksOf(release) : this.ESCAPE_TICKS;
+        const struggleTicks = held.map(ticksOf);
+        const expectedCount = this.struggleCount(useCount);
+        while (struggleTicks.length < expectedCount) struggleTicks.push(this.STRUGGLE_TICKS);
+        const activeStruggles = struggleTicks.slice(0, expectedCount);
+        let elapsed = entryTicks;
+        const struggleSchedule = activeStruggles.map(ticks => {
+            const start = elapsed;
+            elapsed += ticks;
+            return start;
+        });
+        return {
+            entryTicks,
+            releaseTicks,
+            struggleTicks: activeStruggles,
+            struggleSchedule,
+            durationTicks: entryTicks + activeStruggles.reduce((sum, ticks) => sum + ticks, 0) + releaseTicks
+        };
+    }
+
     static struggleSchedule(durationTicks, useCount = 1) {
         const count = this.struggleCount(useCount);
         if (count <= 0) return [];

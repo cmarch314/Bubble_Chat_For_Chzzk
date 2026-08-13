@@ -2,7 +2,7 @@
 
 ## 1. Product North Star
 
-BubbleChat is an OBS entertainment overlay. Its highest purpose is to increase viewer chat participation, make the stream fun to watch, and minimize streamer intervention so the streamer can approach a “거저먹는 방송” (a stream that practically runs itself).
+BubbleChat is an OBS overlay to increase viewer chat participation and minimize streamer intervention for a “거저먹는 방송”.
 
 Evaluate work in this order:
 
@@ -16,10 +16,10 @@ Reject an elegant change if it adds routine streamer work or harms silent-viewer
 ## 2. Working Method and Token Discipline
 
 - Define acceptance criteria, inspect `git status`, and preserve unrelated/user changes.
-- Search/batch reads first; record expensive IDs, paths, formats, provenance, and verification in code or manifests.
+- Batch reads first; record expensive IDs, paths, formats, provenance, and verification in code or manifests.
 - Work dependency-first: inventory → evidence/mapping → selective conversion → runtime → UI → tests. Prefer resumable manifests and never decode archives just to inventory them.
 - Reuse an owner/helper, native feature, or installed dependency; otherwise make the smallest coherent change.
-- Run focused tests, then proportional regression before handoff.
+- Run focused tests, then proportional regression.
 - Keep reports concise: preserve outcomes, evidence, paths, failures, risks, and required next steps; omit filler and repeated logs.
 - When reporting in Korean, default to compact 음슴체 for progress updates and handoffs. Keep questions, approval or safety prompts, and ambiguity-sensitive explanations in natural polite Korean; brevity must not remove evidence, risks, or required next steps.
 
@@ -69,7 +69,7 @@ Update this section in the same patch when ownership changes.
 - `HuntMonsterArchetypeCatalog` owns phases/skeletons, `HuntMonsterActionPolicy` movement/targets/impacts, and `HuntMonsterTraitRuntime` cross-action state/hazards. Data supplies values; executors never branch on monster IDs.
 - Typed data and isolated image transforms drive movement/facing/returns. Shared owners handle ATB, telegraphs, interruptions, landings, parts, recovery, targets, and trap immunity. Control visuals use the same release ticks and remove DOM only after their fade completes.
 - Preview-authored damage judgments own hit timing, target, damage, and reaction size: `weak` means butt-stumble, `strong` means launch. Legacy `butt-stumble` inputs normalize to `weak`. `HuntHunterTurnExecutor` alone owns recovery/invulnerability duration; recovery tests pin ownership/idempotency.
-- `HuntMonsterReactionCatalog` owns shared small/large/tail part-break BEAT motion and per-part reaction selection; `HuntCombatAnimator` layers the independent material-split visual over that motion.
+- `HuntMonsterReactionCatalog` owns shared part-break and pitfall BEAT motion; `HuntCombatAnimator` layers material-split visuals. `HuntTrapConfig` derives pitfall entry, struggles, release lock, and fade from resolved BEAT; live control keeps no second escape duration.
 - Monster motion has one graph contract: authored `beat` or extracted `keyframe-beat`. `judgments[]` alone owns timing and targets; multi-target beats encode left/right in each judgment, never only outer targeting metadata. Never revive CSS capture, `hitOffsetTicks`, `judgmentOffsets`, or phase-slot audio ownership.
 - Full-turn monster actions preserve their accumulated rotation while translating home; the motion owner removes the transform only after completion, so no recovery segment may interpolate backward to `rotate(0)`.
 - Preview/editor and live hunts compile the same current pattern, targets, and BEAT clock. Judgments own per-hit damage/defense/immunity/presentation; runtime recovery clears its visual lock, so DOM timers/action-wide dedupe cannot suppress later hits. Never mix edited motion with saved `beatV2`/impact data or invent Preview-only hits/audio; catalog parity tests enforce this.

@@ -12,9 +12,31 @@ assert.deepStrictEqual(HuntTrapConfig.struggleSchedule(40, 1), [6, 18, 30, 42, 5
     'the first pitfall must run six non-overlapping escape attempts after entry');
 assert.deepStrictEqual(HuntTrapConfig.struggleSchedule(14, 4), [],
     'the fourth pitfall must retain entry and escape without a struggle pulse');
+const authoredPitfallMotion = [
+    { beat: 'reaction', ticks: 6 },
+    ...Array.from({ length: 6 }, (_, index) => ({ beat: `held-${index + 1}`, ticks: 12 })),
+    { beat: 'release', ticks: 12 }
+];
+assert.deepStrictEqual(HuntTrapConfig.lifecycleFromMotion(authoredPitfallMotion, 1), {
+    entryTicks: 6,
+    releaseTicks: 12,
+    struggleTicks: [12, 12, 12, 12, 12, 12],
+    struggleSchedule: [6, 18, 30, 42, 54, 66],
+    durationTicks: 90
+}, 'live pitfall timing must be derived from the same authored BEAT graph as Preview');
 
 const sourcePath = path.resolve(__dirname, '../js/effects/hunt/HuntEngine.js');
 const context = vm.createContext({ console, window: {}, setTimeout, HuntTrapConfig });
+context.HuntMonsterReactionCatalog = {
+    resolvePitfall(monsterId, struggleCount) {
+        return {
+            motion: authoredPitfallMotion.filter(beat => {
+                const match = /^held-(\d+)$/.exec(beat.beat);
+                return !match || Number(match[1]) <= struggleCount;
+            })
+        };
+    }
+};
 const atbConfigPath = path.resolve(__dirname, '../js/effects/hunt/HuntAtbConfig.js');
 const rulesPath = path.resolve(__dirname, '../js/effects/hunt/HuntMonsterRules.js');
 const actionStatePath = path.resolve(__dirname, '../js/effects/hunt/HuntActionStateMachine.js');
@@ -172,8 +194,12 @@ assert.deepStrictEqual([
 engine.monsterTrapUseCount = 0;
 engine.monsterAtb = -80;
 const firstTrap = engine.beginMonsterTrapControl('trap', 40);
-assert.strictEqual(firstTrap.durationTicks, 86,
-    'the first pitfall must reserve six complete 1.2 second struggles plus entry and escape');
+assert.strictEqual(firstTrap.durationTicks, 90,
+    'the first pitfall must reserve the complete authored entry, six struggles, and 1.2 second escape');
+assert.strictEqual(firstTrap.releaseTicks, 12,
+    'the live release and trap fade must use the Preview-authored release duration');
+assert.deepStrictEqual(Array.from(engine.activeTrapControl.struggleSchedule), [6, 18, 30, 42, 54, 66],
+    'the live struggle events must begin at the authored BEAT boundaries');
 assert.strictEqual(engine.activeTrapControl.kind, 'pitfall',
     'the generic live-hunt trap item must deploy the default pitfall without save-key churn');
 assert.strictEqual(HuntTrapConfig.normalizeKind('shocktrap'), 'shocktrap',
@@ -182,6 +208,14 @@ assert.strictEqual(engine.monsterAtb, 50,
     'first trap entry must replace action debt with a fixed half gauge');
 assert.strictEqual(engine.activeTrapControl.retainedAtb, 50,
     'trap visuals and ATB recovery must share one lifecycle record');
+const authoredRepeatedDurations = [firstTrap.durationTicks];
+for (let use = 2; use <= 4; use++) {
+    engine.activeTrapControl = null;
+    engine.monsterKnockdownDuration = 0;
+    authoredRepeatedDurations.push(engine.beginMonsterTrapControl('pitfall', 40).durationTicks);
+}
+assert.deepStrictEqual(authoredRepeatedDurations, [90, 54, 30, 18],
+    'resistance may remove struggles, but every live use must preserve the authored entry and release');
 engine.activeTrapControl = null;
 engine.monsterTrapUseCount = 0;
 assert.match(fs.readFileSync(hunterTurnPath, 'utf8'), /action: 'weapon_preparation'/,

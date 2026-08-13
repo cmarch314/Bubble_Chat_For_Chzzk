@@ -956,14 +956,17 @@ class HuntEngine {
         if (this.callbacks.onUpdateTailSeverUI) this.callbacks.onUpdateTailSeverUI(visible, carved, this.severedTail?.displayName || `${this.selectedMonster.nameKO} 꼬리`);
     }
 
-    consumeTrapEffect(baseTicks) {
+    consumeTrapEffect(baseTicks, options = {}) {
         const multipliers = [1, .7, .45, .25];
         const multiplier = multipliers[Math.min(this.monsterTrapUseCount, multipliers.length - 1)];
         this.monsterTrapUseCount++;
         const TrapConfig = typeof HuntTrapConfig !== 'undefined'
             ? HuntTrapConfig
             : (typeof require === 'function' ? require('./HuntTrapConfig.js') : null);
-        const minimumTicks = TrapConfig?.minimumDurationTicks?.(this.monsterTrapUseCount) || 14;
+        const minimumTicks = Math.max(
+            TrapConfig?.minimumDurationTicks?.(this.monsterTrapUseCount) || 14,
+            Number(options.minimumDurationTicks || 0)
+        );
         const durationTicks = Math.max(minimumTicks, Math.round(Number(baseTicks || 0) * multiplier));
         const atbConfig = typeof HuntAtbConfig !== 'undefined'
             ? HuntAtbConfig
@@ -990,13 +993,42 @@ class HuntEngine {
             ? TrapConfig.normalizeKind(kind)
             : (!kind || kind === 'trap' ? 'pitfall' : kind);
         this.interruptMonsterMovement?.(`trap:${runtimeKind}`);
-        const trapEffect = this.consumeTrapEffect(baseTicks);
+        const nextUseCount = Number(this.monsterTrapUseCount || 0) + 1;
+        const struggleCount = TrapConfig?.struggleCount?.(nextUseCount) || 0;
+        const baseTrapReaction = typeof HuntMonsterReactionCatalog !== 'undefined'
+            ? HuntMonsterReactionCatalog.resolvePitfall?.(
+                this.selectedMonster?.id,
+                struggleCount,
+                0
+            )
+            : null;
+        const baseLifecycle = TrapConfig?.lifecycleFromMotion?.(
+            baseTrapReaction?.motion,
+            nextUseCount
+        );
+        const trapEffect = this.consumeTrapEffect(baseTicks, {
+            minimumDurationTicks: baseLifecycle?.durationTicks
+        });
         const atbConfig = typeof HuntAtbConfig !== 'undefined'
             ? HuntAtbConfig
             : require('./HuntAtbConfig.js');
         this.monsterState = 'knocked_down';
         this.monsterKnockdownDuration = trapEffect.durationTicks;
         atbConfig.applyMonsterTrapAtb(this, trapEffect.multiplier);
+        const trapReaction = typeof HuntMonsterReactionCatalog !== 'undefined'
+            ? HuntMonsterReactionCatalog.resolvePitfall?.(
+                this.selectedMonster?.id,
+                struggleCount,
+                trapEffect.durationTicks
+            )
+            : null;
+        const lifecycle = TrapConfig?.lifecycleFromMotion?.(
+            trapReaction?.motion,
+            trapEffect.useCount
+        );
+        trapEffect.motion = trapReaction?.motion || [];
+        trapEffect.entryTicks = lifecycle?.entryTicks || TrapConfig?.ENTRY_TICKS || 6;
+        trapEffect.releaseTicks = lifecycle?.releaseTicks || TrapConfig?.ESCAPE_TICKS || 8;
         this.activeTrapControl = {
             kind: runtimeKind,
             durationTicks: trapEffect.durationTicks,
@@ -1004,21 +1036,13 @@ class HuntEngine {
             retainedAtb: trapEffect.retainedAtb,
             useCount: trapEffect.useCount,
             elapsedTicks: 0,
-            struggleSchedule: TrapConfig?.struggleSchedule?.(
-                trapEffect.durationTicks,
-                trapEffect.useCount
-            ) || [],
+            struggleSchedule: lifecycle?.struggleSchedule
+                || TrapConfig?.struggleSchedule?.(trapEffect.durationTicks, trapEffect.useCount)
+                || [],
+            releaseTicks: trapEffect.releaseTicks,
             nextStruggleIndex: 0,
             releasing: false
         };
-        const trapReaction = typeof HuntMonsterReactionCatalog !== 'undefined'
-            ? HuntMonsterReactionCatalog.resolvePitfall?.(
-                this.selectedMonster?.id,
-                TrapConfig?.struggleCount?.(trapEffect.useCount) || 0,
-                trapEffect.durationTicks
-            )
-            : null;
-        trapEffect.motion = trapReaction?.motion || [];
         this.playSFX?.('monster_trap', null, {
             monsterId: this.selectedMonster.id,
             trapKind: runtimeKind,

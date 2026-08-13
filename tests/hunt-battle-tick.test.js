@@ -718,15 +718,16 @@ function createEngine(overrides = {}) {
     const { engine } = createEngine({
         monsterAtb: 75,
         monsterState: 'knocked_down',
-        monsterKnockdownDuration: 10,
+        monsterKnockdownDuration: 14,
         activeTrapControl: {
             kind: 'shocktrap',
-            durationTicks: 10,
+            durationTicks: 14,
             recoveryPerTick: 2.5,
             retainedAtb: 75,
             useCount: 3,
             elapsedTicks: 0,
             struggleSchedule: [],
+            releaseTicks: 12,
             nextStruggleIndex: 0,
             releasing: false
         },
@@ -740,13 +741,13 @@ function createEngine(overrides = {}) {
     context.HuntBattleTickExecutor.execute(engine);
     assert.strictEqual(engine.monsterAtb, 80);
     assert.strictEqual(engine.activeTrapControl.releasing, true,
-        'escape must begin at the start of its reserved eight-tick timeline segment');
+        'escape must begin at the start of its Preview-authored timeline segment');
     assert.strictEqual(JSON.stringify(effects),
-        JSON.stringify([['trap-release', null, { kind: 'shocktrap', useCount: 3, releaseTicks: 8 }]]),
+        JSON.stringify([['trap-release', null, { kind: 'shocktrap', useCount: 3, releaseTicks: 12 }]]),
         'the trap visual must release exactly once at the authored escape beat');
     assert.strictEqual(monsterTurns, 0,
         'trap release and the next monster pattern must never share a frame');
-    for (let tick = 0; tick < 8; tick++) {
+    for (let tick = 0; tick < 12; tick++) {
         context.HuntBattleTickExecutor.execute(engine);
         assert.strictEqual(monsterTurns, 0,
             'the monster must stay locked until the authored escape animation completes');
