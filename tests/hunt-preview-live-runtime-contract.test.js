@@ -17,6 +17,10 @@ const generatedMotion = require('../js/effects/hunt/data/MonsterPatternMotionOve
 
 assert.deepStrictEqual(generatedMotion, sourceMotion,
     'the OBS runtime artifact must be an exact serialization of the editor source of truth');
+assert.match(reviewApp, /data-field="hitReactionKind"/,
+    'Preview judgments must author the live hit reaction instead of relying on profile tags');
+assert.match(reviewApp, /data-field="hitRecoveryTicks"/,
+    'Preview judgments must author the live invulnerability/recovery window');
 
 assert.match(fixture, /pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern\(pattern\)/,
     'Preview must compile its current draft through the same catalog normalizer as live hunts');

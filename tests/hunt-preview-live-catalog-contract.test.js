@@ -44,5 +44,15 @@ for (const [monsterId, patterns] of Object.entries(catalog)) {
     }
 }
 
+for (const pattern of catalog.diablos || []) {
+    for (const impact of pattern.impactTimeline || []) {
+        if (!(Number(impact.damageScale) > 0)) continue;
+        assert.ok(['strong', 'butt-stumble', 'weak'].includes(impact.hitReactionKind),
+            `diablos/${pattern.id}: approved damage judgment lost its Preview-authored reaction`);
+        assert.ok(Number(impact.hitRecoveryTicks) >= 1,
+            `diablos/${pattern.id}: approved damage judgment lost its Preview-authored recovery`);
+    }
+}
+
 assert.ok(checked > 100, 'catalog audit must cover the full roster rather than a single monster');
 console.log(`[test] Preview/live catalog contract passed (${checked} patterns).`);

@@ -804,7 +804,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "primary",
               "offsetTicks": 5,
-              "damagePercent": 50
+              "damagePercent": 50,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ]
         },
@@ -890,7 +892,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "primary",
               "offsetTicks": 2,
-              "damagePercent": 60
+              "damagePercent": 60,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             },
             {
               "id": "burrow-tremor",
@@ -969,7 +973,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "primary",
               "offsetTicks": 0,
-              "damagePercent": 45
+              "damagePercent": 45,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ],
           "fxAdditional": [
@@ -1043,7 +1049,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "primary",
               "offsetTicks": 0,
-              "damagePercent": 45
+              "damagePercent": 45,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ],
           "fxAdditional": [
@@ -1095,7 +1103,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "primary",
               "offsetTicks": 0,
-              "damagePercent": 45
+              "damagePercent": 45,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ],
           "fxAdditional": [
@@ -1153,7 +1163,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "primary",
               "offsetTicks": 0,
-              "damagePercent": 30
+              "damagePercent": 30,
+              "hitReactionKind": "butt-stumble",
+              "hitRecoveryTicks": 15
             }
           ]
         },
@@ -1207,7 +1219,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "primary",
               "offsetTicks": 0,
-              "damagePercent": 65
+              "damagePercent": 65,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ]
         },
@@ -1252,7 +1266,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "pair",
               "offsetTicks": 7,
-              "damagePercent": 60
+              "damagePercent": 60,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ],
           "hit": false
@@ -1298,7 +1314,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "pair",
               "offsetTicks": 7,
-              "damagePercent": 60
+              "damagePercent": 60,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ]
         },
@@ -1352,7 +1370,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "pair-left",
               "offsetTicks": 0,
-              "damagePercent": 30
+              "damagePercent": 30,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ]
         },
@@ -1409,7 +1429,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "pair-right",
               "offsetTicks": 0,
-              "damagePercent": 30
+              "damagePercent": 30,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ]
         },
@@ -1503,7 +1525,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "kind": "damage",
               "target": "primary-adjacent",
               "offsetTicks": 6,
-              "damagePercent": 40
+              "damagePercent": 40,
+              "hitReactionKind": "strong",
+              "hitRecoveryTicks": 50
             }
           ]
         },

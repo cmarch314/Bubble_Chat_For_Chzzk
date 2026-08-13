@@ -491,8 +491,12 @@ assert.ok(profiles.black_diablos.every(pattern =>
     const bite = profiles.diablos.find(pattern => pattern.id.endsWith('.bite'));
     assert.strictEqual(bite.motion.find(beat => beat.beat === 'approach').aimBodyAt, 'target',
         'Diablos bite approach must rotate its body axis toward the selected hunter, not only mirror horizontally');
-    assert.ok(bite.tags.includes('butt-stumble'),
-        'Diablos bite must preserve its authored butt-stumble reaction through the common impact runtime');
+    assert.ok(!bite.tags.includes('butt-stumble'),
+        'approved Diablos reactions must not be duplicated in legacy profile tags');
+    assert.strictEqual(bite.impactTimeline[0].hitReactionKind, 'butt-stumble',
+        'Diablos bite must preserve its Preview-authored reaction through the runtime catalog');
+    assert.strictEqual(bite.impactTimeline[0].hitRecoveryTicks, 15,
+        'Diablos bite must preserve its Preview-authored recovery through the runtime catalog');
     const sideTackle = profiles.diablos.find(pattern => pattern.id.endsWith('.side_tackle'));
     assert.strictEqual(sideTackle.motion.find(beat => beat.beat === 'side-hop').to,
         'pair-flank:targets 150',
