@@ -153,8 +153,12 @@ class HuntMonsterTurnExecutor {
     }
 
     static isHunterImpactImmune(target = {}) {
-        return HuntMonsterTurnExecutor.isHunterHitRecovering(target)
-            || Number(target.counterInvulnerabilityTicks || 0) > 0;
+        if (Number(target.counterInvulnerabilityTicks || 0) > 0) return true;
+        // Visible roar/tremor/wind reactions are vulnerable locks. A stale
+        // hitDuration from an earlier reaction must never make a hunter who is
+        // visibly covering their ears ignore the next attack.
+        if (HuntMonsterTurnExecutor.isHunterDefenseLocked(target)) return false;
+        return HuntMonsterTurnExecutor.isHunterHitRecovering(target);
     }
 
     static grantCounterInvulnerability(target, ticks = 10) {

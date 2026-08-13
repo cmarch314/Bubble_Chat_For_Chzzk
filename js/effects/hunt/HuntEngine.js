@@ -628,6 +628,10 @@ class HuntEngine {
 
     applyHunterInterference(hunter, kind, size = 'small') {
         if (!hunter || hunter.status !== 'alive') return false;
+        // A hunter already tumbling is invulnerable to follow-up judgments and
+        // keeps that presentation until returning. Do not cover the tumble with
+        // an earplug/tremor/wind badge while leaving its hidden immunity alive.
+        if (Number(hunter.hitDuration || 0) > 0) return false;
         // Damage and control judgments share the same post-counter immunity.
         // A delayed tremor must not bypass the counter that answered the
         // preceding direct impact.

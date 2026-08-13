@@ -121,6 +121,29 @@ assert.strictEqual(
     false,
     'stun must remain vulnerable even when an overlapping tumble timer is present'
 );
+assert.strictEqual(
+    HuntMonsterTurnExecutor.isHunterImpactImmune({
+        status: 'alive', hitDuration: 15,
+        interference: { kind: 'roar', size: 'large' }, roarStunned: true
+    }),
+    false,
+    'a visibly ear-covering hunter must remain vulnerable even if stale hit recovery overlaps it'
+);
+for (const kind of ['roar', 'tremor', 'wind']) {
+    const hunter = {
+        index: 0, id: 'hammer', name: 'Tester', status: 'alive', atb: 85,
+        hitDuration: 12, hitRecoveryTotalTicks: 12
+    };
+    const visuals = [];
+    const engine = {
+        applyHunterInterference: HuntEngine.prototype.applyHunterInterference,
+        callbacks: { onTriggerHunterInterference: (...args) => visuals.push(args) }
+    };
+    assert.strictEqual(engine.applyHunterInterference(hunter, kind, 'large'), false,
+        `${kind} must not cover an active tumble with a misleading vulnerable-reaction badge`);
+    assert.strictEqual(hunter.interference, undefined);
+    assert.strictEqual(visuals.length, 0);
+}
 assert.deepStrictEqual(
     HuntMonsterTurnExecutor.resolveImpactEventTargetIndices({
         selectedWeapons: [
