@@ -1360,6 +1360,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "skewX": -6,
           "damageScale": 0.45,
           "fxDurationTicks": 5,
+          "flipFacing": true,
           "hit": false,
           "judgments": [
             {
@@ -1418,6 +1419,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
           "skewX": 6,
           "damageScale": 0.45,
           "fxDurationTicks": 5,
+          "flipFacing": true,
           "hit": false,
           "judgments": [
             {

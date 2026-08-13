@@ -52,6 +52,8 @@ assert.match(html, /const targets=\[\];/,
     'Preview must preserve target geometry without creating hunter impact recipients');
 assert.match(html, /runtimePreviewMotionOnly:true/,
     'Preview motion must be explicitly marked as editor-only');
+assert.match(html, /runtimeResolvedImpactTimeline:Array\.isArray\(pattern\.runtimeResolvedImpactTimeline\)/,
+    'Preview must retain authored judgment timing for visual markers');
 assert.match(html, /dataset\.previewHunterResolution='disabled'/,
     'Preview must not resolve hunter damage/reactions while editing monster motion');
 assert.doesNotMatch(html, /playPreviewMotionOnly\(pattern,selection\)[\s\S]{0,500}previewRuntime\.executeMonsterPattern/,

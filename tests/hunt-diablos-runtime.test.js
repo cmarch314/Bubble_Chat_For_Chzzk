@@ -26,6 +26,10 @@ assert.match(animatorSource,
 assert.match(animatorSource,
     /resolvedImpactTargets\.length \? resolvedImpactTargets : fallbackTargetIndices/,
     'target impact dust must cover every hunter struck by a shared impact tick');
+assert.match(animatorSource, /schedulePreviewJudgmentMarkers\(pattern\)/,
+    'motion-only Preview must display authored judgment markers without resolving hunter reactions');
+assert.match(animatorSource, /damage: 'HIT',[\s\S]*roar: '귀마개',[\s\S]*tremor: '지진',[\s\S]*wind: '풍압'/,
+    'Preview judgment markers must distinguish damage, roar, tremor and wind judgments');
 assert.doesNotMatch(animatorSource, /owner\.playSFX\?\.\('monster_attack'/,
     'the renderer must not silently call the engine-only playSFX API');
 assert.match(animatorSource,
@@ -390,7 +394,13 @@ assert.deepStrictEqual(
     assert.deepStrictEqual(
         rageCharge.motion.filter(beat => beat.flipFacing).map(beat => beat.beat),
         ['tail-wind-right', 'return'],
-        'the second X swing must mirror from its windup through recovery, then restore while returning home'
+        'the authored base profile keeps its recovery mirror; review motion overrides own the X-swing flips'
+    );
+    const rageChargeOverride = motionOverrides.diablos['diablos.rage_charge'].beats;
+    assert.deepStrictEqual(
+        ['tail-cross-one', 'tail-cross-two'].map(id => rageChargeOverride[id].flipFacing),
+        [true, true],
+        'the reviewed X-tail override must mirror both strike images'
     );
     assert.ok(rageCharge.motion.filter(beat => beat.beat.startsWith('tail-'))
         .every(beat => beat.origin === 'part:torso'),

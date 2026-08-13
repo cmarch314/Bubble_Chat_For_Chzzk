@@ -650,6 +650,30 @@
     font-size: 28px;
     animation-duration: .52s;
 }
+.hunt-preview-judgment-marker {
+    position: absolute;
+    z-index: 31;
+    left: 50%;
+    top: 68%;
+    translate: -50% -50%;
+    padding: .08em .28em;
+    border: 2px solid #ffd166;
+    border-radius: .25em;
+    background: rgb(24 18 5 / 92%);
+    color: #ffe08a;
+    font: 900 22px/1 system-ui, sans-serif;
+    letter-spacing: .02em;
+    text-shadow: 0 0 6px currentColor, 1px 1px 0 #241600;
+    box-shadow: 0 0 12px rgb(255 209 102 / 72%);
+    pointer-events: none;
+    animation: hunt-preview-judgment-marker .76s ease-out both;
+}
+@keyframes hunt-preview-judgment-marker {
+    0% { opacity: 0; scale: .72; translate: -50% -35%; }
+    20% { opacity: 1; scale: 1.06; translate: -50% -50%; }
+    70% { opacity: 1; scale: 1; translate: -50% -50%; }
+    100% { opacity: 0; scale: .92; translate: -50% -68%; }
+}
 @keyframes hunt-preview-impact-badge {
     0% { opacity: 0; scale: .55; }
     18% { opacity: 1; scale: 1.18; }

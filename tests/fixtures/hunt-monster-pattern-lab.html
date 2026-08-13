@@ -184,6 +184,7 @@
       // owns the visible motion. Never leave a combat-runtime session alive
       // to process hunter damage/reactions behind the editor preview.
       animator.cancelBeatMotionPreview?.();
+      animator.clearPreviewJudgmentMarkers?.();
       previewRuntimePattern=null;
       previewRuntimeSelection=null;
     }
@@ -202,15 +203,20 @@
       const motionPattern={
         ...pattern,
         runtimePreviewMotionOnly:true,
-        runtimeResolvedImpactTimeline:[],
+        runtimeResolvedImpactTimeline:Array.isArray(pattern.runtimeResolvedImpactTimeline)
+          ? pattern.runtimeResolvedImpactTimeline.map(event=>({ ...event })) : [],
         impactFx:null,
         motion:Array.isArray(pattern.motion)
-          ? pattern.motion.map(beat=>({
-            ...beat,
-            cues:Array.isArray(beat?.cues)
-              ? beat.cues.filter(cue=>!['target-impact-dust','part-swing-arc'].includes(cue?.fx))
-              : beat?.cues
-          }))
+          ? pattern.motion.map(beat=>{
+            const clean={...beat};
+            if(['target-impact-dust','part-swing-arc'].includes(clean.fx)) delete clean.fx;
+            if(['target-impact-dust','part-swing-arc'].includes(clean.fxSecondary)) delete clean.fxSecondary;
+            if(Array.isArray(clean.fxAdditional))
+              clean.fxAdditional=clean.fxAdditional.filter(cue=>!['target-impact-dust','part-swing-arc'].includes(cue?.fx));
+            if(Array.isArray(clean.cues))
+              clean.cues=clean.cues.filter(cue=>!['target-impact-dust','part-swing-arc'].includes(cue?.fx));
+            return clean;
+          })
           : pattern.motion
       };
       document.documentElement.dataset.previewExecution='monster-beat-only';

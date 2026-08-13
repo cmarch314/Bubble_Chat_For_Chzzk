@@ -1095,6 +1095,11 @@ class HuntMonsterAttackAnimator {
             }
         }
 
+        if (pattern?.runtimePreviewMotionOnly && !pattern?.runtimePreviewScrub) {
+            // The editor shows judgment ownership without invoking the live
+            // hunter reaction path. Markers share the authored impact ticks.
+            this.schedulePreviewJudgmentMarkers(pattern);
+        }
         return Object.freeze({
             id: profileId || pattern.id || 'beat-motion',
             duration: built.durationMs,
@@ -1963,6 +1968,54 @@ class HuntMonsterAttackAnimator {
                 Math.max(0, Math.round(firstTick * 1000 / ticksPerSecond)));
         }
         this.schedulePreviewInterferenceReactions(pattern, targets, ticksPerSecond);
+    }
+
+    clearPreviewJudgmentMarkers() {
+        this.card?.querySelectorAll?.('.hunt-preview-judgment-marker')?.forEach(marker => marker.remove());
+    }
+
+    schedulePreviewJudgmentMarkers(pattern) {
+        const timeline = Array.isArray(pattern?.runtimeResolvedImpactTimeline)
+            ? pattern.runtimeResolvedImpactTimeline : [];
+        if (!timeline.length || !this.card) return;
+        this.clearPreviewJudgmentMarkers();
+        const ticksPerSecond = typeof HuntAtbConfig !== 'undefined'
+            ? Math.max(1, Number(HuntAtbConfig.TICKS_PER_SECOND || 10)) : 10;
+        const allCards = [...this.card.querySelectorAll('[id^="fight-card-"]')];
+        const generation = this.motionGeneration;
+        const labelFor = kind => ({
+            damage: 'HIT',
+            roar: '귀마개',
+            tremor: '지진',
+            wind: '풍압'
+        }[kind] || String(kind || '').toUpperCase());
+        timeline.forEach((event, eventIndex) => {
+            const interference = event?.secondaryInterference || null;
+            const kinds = [];
+            if (Number(event?.damageScale ?? 0) > 0) kinds.push('damage');
+            if (interference?.kind) kinds.push(String(interference.kind).replace(/-(?:small|large)$/, ''));
+            if (!kinds.length) return;
+            const targetIndices = Array.isArray(event?.targetIndices)
+                ? event.targetIndices.filter(Number.isInteger)
+                : [];
+            const cards = interference?.scope === 'all'
+                ? allCards
+                : targetIndices.map(index => this.card.querySelector(`#fight-card-${index}`)).filter(Boolean);
+            const atTicks = Math.max(0, Number(event?.atTicks || 0));
+            this.animationTimers.timeout(() => {
+                if (this.motionGeneration !== generation) return;
+                for (const card of cards) {
+                    const marker = document.createElement('span');
+                    marker.className = 'hunt-preview-judgment-marker';
+                    marker.dataset.atTicks = String(atTicks);
+                    marker.dataset.eventIndex = String(eventIndex);
+                    marker.textContent = kinds.map(labelFor).join(' · ');
+                    marker.setAttribute('aria-label', `${marker.textContent} ${atTicks}틱`);
+                    card.appendChild(marker);
+                    this.animationTimers.timeout(() => marker.remove(), 760);
+                }
+            }, Math.round(atTicks * 1000 / ticksPerSecond));
+        });
     }
 
     schedulePreviewInterferenceReactions(pattern, targets = [], ticksPerSecond = 10) {
