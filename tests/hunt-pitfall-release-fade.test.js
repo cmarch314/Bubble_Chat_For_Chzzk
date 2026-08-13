@@ -16,5 +16,11 @@ assert.match(css,
 assert.match(animator,
     /PITFALL_RELEASE_FADE_MS = 1400[\s\S]*?effects\.forEach\(effect => effect\.classList\.add\('is-releasing'\)\)[\s\S]*?effects\.forEach\(effect => effect\.remove\(\)\)[\s\S]*?HuntCombatAnimator\.PITFALL_RELEASE_FADE_MS\);/,
     'live and preview trap release must share a visible post-escape fade before DOM cleanup');
+assert.match(animator,
+    /effects\.forEach\(effect => effect\.style\.setProperty[\s\S]*?monsterImg\?\.classList\?\.add\('monster-pitfall-releasing'\)/,
+    'BEAT-owned pitfall release must retain the renderer lifecycle guard until the fade completes');
+assert.doesNotMatch(animator,
+    /pitfallBeatOwned !== 'true'[\s\S]{0,120}monster-pitfall-releasing/,
+    'BEAT motion ownership must not suppress trap DOM persistence');
 
 console.log('[test] Pitfall release fade lifecycle passed.');

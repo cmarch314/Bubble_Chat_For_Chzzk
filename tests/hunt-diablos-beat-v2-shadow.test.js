@@ -53,6 +53,10 @@ for (const pattern of profiles.diablos) {
         'the authored large tremor must cover the locked target lane and only its live neighbours');
 
     const source = profiles.diablos.find(pattern => pattern.id === 'diablos.burrow_enter');
+    assert.strictEqual(source.movement?.untargetable, true,
+        'Diablos must be unhittable for the complete sink-through-emergence traversal');
+    assert.strictEqual(source.movement?.kind, 'diablos-burrow-complete',
+        'burrow invulnerability must be typed data rather than a monster-id runtime branch');
     const motion = source.motion.map(beat => ({ ...beat, ...(burrow[beat.beat] || {}) }));
     const rect = (left, top, width, height) => ({ left, top, width, height });
     const compileForTarget = primaryTarget => HuntMotionCompiler.compile(motion, {

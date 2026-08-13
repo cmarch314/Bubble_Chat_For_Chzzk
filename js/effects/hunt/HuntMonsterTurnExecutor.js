@@ -125,7 +125,7 @@ class HuntMonsterTurnExecutor {
             kind,
             durationTicks: Number.isFinite(Number(pattern.runtimeImpactHitRecoveryTicks))
                 ? Math.max(1, Number(pattern.runtimeImpactHitRecoveryTicks))
-                : kind === 'weak' ? 15 : 40,
+                : kind === 'weak' ? 15 : 50,
             knockbackDirection: direction < 0 ? -1 : 1
         };
     }
@@ -154,10 +154,9 @@ class HuntMonsterTurnExecutor {
 
     static isHunterImpactImmune(target = {}) {
         if (Number(target.counterInvulnerabilityTicks || 0) > 0) return true;
-        // Visible roar/tremor/wind reactions are vulnerable locks. A stale
-        // hitDuration from an earlier reaction must never make a hunter who is
-        // visibly covering their ears ignore the next attack.
-        if (HuntMonsterTurnExecutor.isHunterDefenseLocked(target)) return false;
+        // Once a damaging reaction owns the hunter, its recovery window wins
+        // over any stale interference flag. This prevents later hits in the
+        // same combo from reopening an already translucent/tumbling hunter.
         return HuntMonsterTurnExecutor.isHunterHitRecovering(target);
     }
 

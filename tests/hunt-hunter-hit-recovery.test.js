@@ -27,13 +27,13 @@ assert.ok(leftDownKnockback.x < 0 && leftDownKnockback.y > 0,
 
 {
     const frames = HuntCombatAnimator.strongHitKeyframes({ x: 240, y: 170, direction: -1 });
-    assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .0375, .075, .1125, .15, .90, 1],
-        'a strong hit must tumble for 0.6 seconds, stay down for 3 seconds, then return for 0.4 seconds');
-    assert.match(frames[4].transform, /translate\(240px, 170px\) rotate\(-720deg\)/,
-        'the knockback must complete exactly two turns in the collision direction');
+    assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .06, .12, .18, .24, .76, .82, .87, .92, .97, 1],
+        'a strong hit must visibly tumble, remain prone, then walk back in planted steps');
+    assert.match(frames[4].transform, /translate\(240px, 170px\) rotate\(-540deg\) skewX\(-12deg\)/,
+        'the knockback must finish one and a half turns in a visibly prone pose');
     assert.strictEqual(frames[5].transform, frames[4].transform,
         'the fallen pose and position must remain unchanged for the complete three-second hold');
-    assert.match(frames[6].transform, /translate\(0, 0\) rotate\(-720deg\)/,
+    assert.match(frames[10].transform, /translate\(0, 0\) rotate\(-720deg\)/,
         'recovery must preserve the equivalent final rotation instead of rewinding to zero');
 }
 
@@ -100,7 +100,7 @@ assert.deepStrictEqual(
 );
 assert.deepStrictEqual(
     HuntMonsterTurnExecutor.hitReactionForPattern({}, { index: 3 }),
-    { kind: 'strong', durationTicks: 40, knockbackDirection: 1 },
+    { kind: 'strong', durationTicks: 50, knockbackDirection: 1 },
     'untagged attacks must conservatively use the strong reaction'
 );
 assert.strictEqual(
@@ -126,8 +126,8 @@ assert.strictEqual(
         status: 'alive', hitDuration: 15,
         interference: { kind: 'roar', size: 'large' }, roarStunned: true
     }),
-    false,
-    'a visibly ear-covering hunter must remain vulnerable even if stale hit recovery overlaps it'
+    true,
+    'an active damaging recovery must remain invulnerable even if stale interference flags overlap it'
 );
 for (const kind of ['roar', 'tremor', 'wind']) {
     const hunter = {

@@ -919,6 +919,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.d
     ['diablos.burrow_enter', '지중 잠행·급습', 'charge', 0.46, {
         sourceMoveNameJA: '地中潜行→地中急襲', maxTargets: 1, windup: 5, recovery: 1, cooldown: 56,
         tags: ['charge', 'burrow', 'burrow-combo', 'locked-target', 'horn', 'strong', 'tremor-large'], monsterAtbCost: 0.75,
+        // The complete authored graph is one traversal. Hunters cannot damage,
+        // stagger, break, or stun Diablos between sinking and emergence.
+        movement: { kind: 'diablos-burrow-complete', ticks: 69, untargetable: true },
         // Tremor [L] occupies the eruption lane and its immediate neighbours,
         // including the directly struck lane. Adjacency is clipped naturally
         // at the left/right edge.
