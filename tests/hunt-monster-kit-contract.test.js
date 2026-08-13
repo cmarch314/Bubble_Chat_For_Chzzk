@@ -72,6 +72,12 @@ assert.doesNotThrow(() => Compiler.assertActionManifestMatchesProfile(
     diablosKit,
     require('../js/effects/hunt/HuntMonsterProfiles.js').diablos
 ));
+const diablosGoldenTrace = Compiler.readGoldenTrace(diablosKit);
+assert.ok(diablosGoldenTrace, 'the golden Diablos kit must pin an approved BEAT trace');
+assert.doesNotThrow(() => Compiler.assertGoldenTraceMatchesProfile(
+    diablosKit,
+    Compiler.buildCompiledProfiles().diablos
+));
 
 const invalid = structuredClone(kits[0]);
 invalid.release.gates.audio = false;

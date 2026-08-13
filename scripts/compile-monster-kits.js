@@ -64,6 +64,53 @@ function assertActionManifestMatchesProfile(kit, patterns = []) {
     return source;
 }
 
+function readGoldenTrace(kit) {
+    const ref = String(kit?.runtime?.goldenTrace || '').trim();
+    if (!ref) return null;
+    const sourcePath = path.join(ROOT, ref);
+    if (!fs.existsSync(sourcePath)) throw new Error(`${kit.id} missing golden trace: ${ref}`);
+    const trace = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+    if (trace.schemaVersion !== 1 || trace.monsterId !== kit.id || !trace.actions
+        || typeof trace.actions !== 'object' || Array.isArray(trace.actions)) {
+        throw new Error(`${kit.id} has an invalid golden trace: ${ref}`);
+    }
+    return { ref, trace };
+}
+
+function assertGoldenTraceMatchesProfile(kit, patterns = []) {
+    const source = readGoldenTrace(kit);
+    if (!source) return null;
+    const approved = (patterns || []).filter(pattern => pattern.reviewStatus === 'approved'
+        || pattern.beatV2Approved === true);
+    const expectedIds = Object.keys(source.trace.actions).sort();
+    const actualIds = approved.map(pattern => pattern.id).sort();
+    if (JSON.stringify(actualIds) !== JSON.stringify(expectedIds)) {
+        throw new Error(`${kit.id} golden trace must cover every approved action exactly once`);
+    }
+    approved.forEach(pattern => {
+        const expected = source.trace.actions[pattern.id];
+        const compiled = pattern.beatV2;
+        if (!compiled || Number(compiled.totalTicks) !== Number(expected.totalTicks)) {
+            throw new Error(`${kit.id}.${pattern.id} golden trace duration differs from compiled BEAT`);
+        }
+        const events = compiled.events.map(event => [event.kind, event.beatId, event.atTicks]);
+        if (JSON.stringify(events) !== JSON.stringify(expected.events)) {
+            throw new Error(`${kit.id}.${pattern.id} golden trace events differ from compiled BEAT`);
+        }
+    });
+    return source;
+}
+
+function buildCompiledProfiles() {
+    global.HuntBeatV2Contract = require(path.join(ROOT, 'js', 'effects', 'hunt', 'HuntBeatV2Contract.js')).HuntBeatV2Contract;
+    global.HuntBeatV2Adapter = require(path.join(ROOT, 'js', 'effects', 'hunt', 'HuntBeatV2Adapter.js'));
+    global.HUNT_MONSTER_PATTERN_OVERRIDES = require(path.join(ROOT, 'js', 'effects', 'hunt', 'HuntMonsterProfiles.js'));
+    global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = require(path.join(
+        ROOT, 'js', 'effects', 'hunt', 'data', 'MonsterPatternMotionOverrides.generated.js'));
+    const PatternCatalog = require(path.join(ROOT, 'js', 'effects', 'hunt', 'HuntMonsterPatternCatalog.js'));
+    return PatternCatalog.build({});
+}
+
 function compile(kits) {
     const ids = new Set();
     const orders = new Set();
@@ -152,6 +199,7 @@ function runtimeIndexText(index) {
 function main(args = process.argv.slice(2)) {
     const kits = readKits();
     const profiles = require(path.join(ROOT, 'js', 'effects', 'hunt', 'HuntMonsterProfiles.js'));
+    const compiledProfiles = buildCompiledProfiles();
     kits.forEach(kit => {
         const patterns = profiles[kit.id] || [];
         // Variants may deliberately inherit body-plan mechanics from the base
@@ -163,7 +211,8 @@ function main(args = process.argv.slice(2)) {
             ? [...patterns, ...(profiles[kit.variantOf] || [])]
             : patterns;
         HuntMonsterMechanicRegistry.assertKit(kit, mechanicPatterns);
-        assertActionManifestMatchesProfile(kit, patterns);
+        assertActionManifestMatchesProfile(kit, compiledProfiles[kit.id] || patterns);
+        assertGoldenTraceMatchesProfile(kit, compiledProfiles[kit.id] || patterns);
     });
     const manifest = compile(kits);
     const runtimeIndex = compileRuntimeIndex(manifest);
@@ -207,6 +256,9 @@ module.exports = {
     readKits,
     readActionManifest,
     assertActionManifestMatchesProfile,
+    readGoldenTrace,
+    assertGoldenTraceMatchesProfile,
+    buildCompiledProfiles,
     compile,
     compileRuntimeIndex,
     jsonText,

@@ -14,7 +14,8 @@
   "runtime": {
     "profileId": "diablos",
     "mechanicModules": ["common", "burrow", "charge-chain", "tremor"],
-    "actionManifest": "data/hunt/monster-kits/actions/diablos.json"
+    "actionManifest": "data/hunt/monster-kits/actions/diablos.json",
+    "goldenTrace": "data/hunt/monster-kits/golden/diablos-beat-events.json"
   },
   "evidenceRefs": [
     { "kind": "review-standard", "path": "data/hunt/monster-implementation-standard.md" },
