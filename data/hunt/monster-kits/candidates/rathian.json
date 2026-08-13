@@ -23,6 +23,28 @@
           { "id": "settle", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "scaleY": 1 } }] }, "events": [{ "kind": "audio", "slot": "settle", "offsetTicks": 1 }] }
         ]
       }
+    },
+    {
+      "id": "rathian.charge",
+      "name": "돌진 · clean BEAT 후보",
+      "type": "charge",
+      "tags": ["charge", "physical"],
+      "damageRatio": 0.30,
+      "minTargets": 1,
+      "maxTargets": 1,
+      "atbCost": 31,
+      "graph": {
+        "schemaVersion": 2,
+        "backend": "beat-v2",
+        "reviewStatus": "draft",
+        "atb": { "cost": 31, "recovery": "during-action", "gateUntil": "complete" },
+        "beats": [
+          { "id": "brace", "ticks": 4, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "face": "target", "scaleY": 0.94 } }] }, "events": [{ "kind": "audio", "slot": "brace", "offsetTicks": 2 }] },
+          { "id": "launch", "ticks": 2, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 15%", "face": "target", "pose": "stretch-strong", "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "charge-launch", "offsetTicks": 0 }] },
+          { "id": "charge-through", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "through-current:target 165%", "face": "target", "pose": "stretch-strong", "moveEasing": "linear", "strideFlipTicks": 3 } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 5 }, { "kind": "audio", "slot": "charge-impact", "offsetTicks": 5 }] },
+          { "id": "recover", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "pose": "idle", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "recover", "offsetTicks": 1 }] }
+        ]
+      }
     }
   ]
 }
