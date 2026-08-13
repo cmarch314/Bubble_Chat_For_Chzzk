@@ -41,6 +41,7 @@
         routeLastRandomLayer: new Map(),
         revisions: { audio: '', motion: '', anatomy: '' }, playbackState: 'stopped',
         playbackStartedAt: 0, playbackElapsedMs: 0, playbackDurationMs: 0, playbackDurationTicks: 0,
+        playbackFrame: 0, playbackTimeline: null, playbackBeatId: '',
         simulationMode: false, simulationState: 'pattern', simulationPollTimer: null
     };
     const audio = $('#audio');
@@ -515,34 +516,57 @@
     }
 
     function stopPlaybackProgress({ preserveState = false } = {}) {
-        if (app.playbackTimer) clearInterval(app.playbackTimer);
-        app.playbackTimer = 0; app.playbackToken = 0;
+        if (app.playbackFrame) cancelAnimationFrame(app.playbackFrame);
+        app.playbackFrame = 0; app.playbackToken = 0;
         if (!preserveState) app.playbackState = 'stopped';
         updateTransportControls();
     }
 
+    function updatePlaybackCursor(tick, durationTicks) {
+        const boundedTick = Math.max(0, Math.min(durationTicks, Number(tick) || 0));
+        const percentage = boundedTick / Math.max(1, durationTicks) * 100;
+        const cursor = $('.scrub-cursor'), readout = $('.scrub-readout'), slider = $('.timeline-slider');
+        if (cursor) cursor.style.left = `${percentage}%`;
+        if (readout) {
+            readout.style.left = `${percentage}%`;
+            readout.textContent = `${Math.floor(boundedTick)} / ${durationTicks}틱`;
+        }
+        if (slider) { slider.max = String(durationTicks); slider.value = String(boundedTick); }
+    }
+
     function runPlaybackProgress() {
         if (app.playbackState !== 'playing' || !app.playbackDurationMs) return;
-        if (app.playbackTimer) clearInterval(app.playbackTimer);
+        if (app.playbackFrame) cancelAnimationFrame(app.playbackFrame);
+        const timeline = app.playbackTimeline || app.session.snapshot().timeline;
         const frame = () => {
             if (app.playbackState !== 'playing') return;
             app.playbackElapsedMs = performance.now() - app.playbackStartedAt;
             emitPreviewAudioThrough(app.playbackElapsedMs);
             const ratio = Math.max(0, Math.min(1, app.playbackElapsedMs / app.playbackDurationMs));
-            const before = app.session.snapshot().selection.beatId;
-            app.session.seek(app.playbackDurationTicks * ratio); updateTimelineCursor();
-            renderSelectionOnly({ inspector: before !== app.session.snapshot().selection.beatId });
-            if (ratio >= 1) { stopPreviewAudio(); stopPlaybackProgress(); }
+            const tick = app.playbackDurationTicks * ratio;
+            updatePlaybackCursor(tick, app.playbackDurationTicks);
+            const beat = timeline.beats.find(item => tick >= item.startTicks && tick < item.endTicks)
+                || timeline.beats.at(-1);
+            if (beat && beat.id !== app.playbackBeatId) {
+                app.playbackBeatId = beat.id;
+                app.session.seek(Math.min(tick, Math.max(0, app.playbackDurationTicks - 1)));
+                renderSelectionOnly();
+            }
+            if (ratio >= 1) {
+                stopPreviewAudio(); stopPlaybackProgress();
+                return;
+            }
+            app.playbackFrame = requestAnimationFrame(frame);
         };
-        frame(); app.playbackTimer = setInterval(frame, 33);
+        app.playbackFrame = requestAnimationFrame(frame);
     }
 
     function pauseCurrentPreview() {
         if (app.playbackState !== 'playing') return;
         app.playbackElapsedMs = performance.now() - app.playbackStartedAt;
         app.playbackState = 'paused';
-        if (app.playbackTimer) clearInterval(app.playbackTimer);
-        app.playbackTimer = 0;
+        if (app.playbackFrame) cancelAnimationFrame(app.playbackFrame);
+        app.playbackFrame = 0;
         app.previewAudios.forEach(clip => clip.pause());
         bridge.send('bubblechat:pattern-preview-transport', { action: 'pause' });
         updateTransportControls();
@@ -572,6 +596,7 @@
         app.playbackStartedAt = performance.now();
         app.playbackDurationTicks = snapshot.timeline.durationTicks;
         app.playbackDurationMs = Math.max(100, Number(durationMs) || app.playbackDurationTicks * 100);
+        app.playbackTimeline = snapshot.timeline; app.playbackBeatId = '';
         runPlaybackProgress(); updateTransportControls();
     }
 

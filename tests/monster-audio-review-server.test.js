@@ -48,6 +48,14 @@ assert.match(reviewUi, /className = 'timeline-slider'/,
     'the timeline must expose a native draggable scrubber in addition to beat clicks');
 assert.match(reviewUi, /function startPlaybackProgress/,
     'real preview playback must drive the shared timeline cursor');
+assert.match(reviewUi, /function updatePlaybackCursor\(tick, durationTicks\)/,
+    'playback must update its cursor without rebuilding editor state every animation frame');
+assert.match(reviewUi, /app\.playbackFrame = requestAnimationFrame\(frame\)/,
+    'preview progress must follow the browser paint clock instead of a competing interval');
+assert.doesNotMatch(reviewUi, /app\.session\.seek\(app\.playbackDurationTicks \* ratio\)/,
+    'autonomous playback must not deep-project the complete editor session on every frame');
+assert.match(reviewUi, /beat\.id !== app\.playbackBeatId[\s\S]*app\.session\.seek/,
+    'editor selection may synchronize only when playback crosses a BEAT boundary');
 assert.match(reviewUi, /MonsterAudioReviewState\.buildPreviewMotion/,
     'the editor must preserve legacy CSS motion instead of compiling ticks-only no-op motion');
 assert.match(reviewUi, /refreshSourceSelection\(\)/,
