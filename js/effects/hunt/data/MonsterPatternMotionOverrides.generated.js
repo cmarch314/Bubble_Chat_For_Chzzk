@@ -1159,7 +1159,7 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
               "target": "primary",
               "offsetTicks": 0,
               "damagePercent": 30,
-              "hitReactionKind": "butt-stumble"
+              "hitReactionKind": "weak"
             }
           ]
         },

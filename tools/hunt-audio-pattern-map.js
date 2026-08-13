@@ -1049,7 +1049,8 @@ function savePatternMotion({ huntId, patternId, beats = null, reset = false }, o
                             result.damageScale = Math.max(0, Math.min(10, Number(item.damageScale)));
                         } else result.damagePercent = 0;
                         if (['strong', 'butt-stumble', 'weak'].includes(item?.hitReactionKind)) {
-                            result.hitReactionKind = item.hitReactionKind;
+                            result.hitReactionKind = item.hitReactionKind === 'butt-stumble'
+                                ? 'weak' : item.hitReactionKind;
                         }
                     }
                     else result.size = item?.size === 'small' ? 'small' : 'large';

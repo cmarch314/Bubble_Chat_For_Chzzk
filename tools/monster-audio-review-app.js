@@ -938,7 +938,7 @@
         }
         host.innerHTML = `<header><div><b>판정 관리</b><small>같은 그룹은 한 시점의 피해·포효·지진·풍압으로 실행됨</small></div><button type="button" class="add-judgment">+ 판정 추가</button></header><div class="judgment-list"></div>`;
         const kindLabels = { damage: '💥 피해', roar: '🗣️ 포효', tremor: '🌋 지진', wind: '💨 풍압' };
-        const reactionLabels = { weak: '피격 [소]', strong: '피격 [대]', 'butt-stumble': '엉덩방아' };
+        const reactionLabels = { weak: '피격 [소] · 엉덩방아', strong: '피격 [대] · 날려버리기' };
         const targetLabels = { primary: '주 헌터', left: '주 헌터 좌측', right: '주 헌터 우측',
             pair: '2인 동시', 'pair-left': '2인 좌', 'pair-right': '2인 우',
             'primary-adjacent': '주 헌터+좌우', all: '전체' };

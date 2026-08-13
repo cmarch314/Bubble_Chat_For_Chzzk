@@ -113,7 +113,8 @@ class HuntMonsterPatternCatalog {
                     ? (Number(damage.damagePercent) / 100) / Math.max(.0001, runtimeDamageRatio)
                     : Number(damage.damageScale ?? 1)) : 0,
                 ...(damage && ['strong', 'butt-stumble', 'weak'].includes(damage.hitReactionKind)
-                    ? { hitReactionKind: damage.hitReactionKind } : {}),
+                    ? { hitReactionKind: damage.hitReactionKind === 'butt-stumble'
+                        ? 'weak' : damage.hitReactionKind } : {}),
                 ...(effect ? { secondaryInterference: { kind: effect.kind,
                     size: effect.size === 'small' ? 'small' : 'large',
                     scope: effect.target === 'all' ? 'all' : effect.target === 'primary-adjacent' ? 'adjacent' : 'primary',

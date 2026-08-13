@@ -213,8 +213,8 @@ assert.strictEqual(unifiedMotionSave.beats.charge.hit, false,
     'the save boundary must reject dual legacy/new HIT ownership');
 assert.strictEqual(unifiedMotionSave.beats.charge.hitOffsetTicks, undefined);
 assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].offsetTicks, 2);
-assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].hitReactionKind, 'butt-stumble',
-    'the editor save boundary must preserve authored hit reaction identity');
+assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].hitReactionKind, 'weak',
+    'the editor save boundary must normalize legacy butt-stumble into small-hit identity');
 assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].hitRecoveryTicks, undefined,
     'the editor save boundary must reject monster-authored hunter recovery timing');
 const duplicateJudgmentSave = savePatternMotion({

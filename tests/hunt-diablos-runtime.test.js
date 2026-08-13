@@ -493,8 +493,8 @@ assert.ok(profiles.black_diablos.every(pattern =>
         'Diablos bite approach must rotate its body axis toward the selected hunter, not only mirror horizontally');
     assert.ok(!bite.tags.includes('butt-stumble'),
         'approved Diablos reactions must not be duplicated in legacy profile tags');
-    assert.strictEqual(bite.impactTimeline[0].hitReactionKind, 'butt-stumble',
-        'Diablos bite must preserve its Preview-authored reaction through the runtime catalog');
+    assert.strictEqual(bite.impactTimeline[0].hitReactionKind, 'weak',
+        'Diablos bite must preserve its Preview-authored small/butt-stumble reaction');
     assert.strictEqual(bite.impactTimeline[0].hitRecoveryTicks, undefined,
         'Diablos impacts must not own hunter recovery timing');
     const sideTackle = profiles.diablos.find(pattern => pattern.id.endsWith('.side_tackle'));

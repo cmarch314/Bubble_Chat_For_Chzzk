@@ -65,6 +65,9 @@
                     size: String(pattern.interference?.size || pattern.secondaryInterference?.size || 'large') });
             }
             const judgments = Array.isArray(source.judgments) ? clone(source.judgments).map(item => {
+                if (item.kind === 'damage' && item.hitReactionKind === 'butt-stumble') {
+                    item.hitReactionKind = 'weak';
+                }
                 if (item.kind !== 'damage' || Number.isFinite(Number(item.damagePercent))) return item;
                 const next = { ...item, damagePercent: Math.max(0, Number(pattern.damageRatio || 0) * 100
                     * Number(item.damageScale ?? 1)) };
@@ -356,8 +359,8 @@
                 target: String(input.target || 'primary'), offsetTicks: Math.max(0, Number(input.offsetTicks) || 0),
                 ...(kind === 'damage' ? { damagePercent: Math.max(0, Math.min(1000,
                     Number(input.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100))),
-                    hitReactionKind: ['strong', 'butt-stumble', 'weak'].includes(input.hitReactionKind)
-                        ? input.hitReactionKind : 'strong' }
+                    hitReactionKind: input.hitReactionKind === 'butt-stumble' ? 'weak'
+                        : ['strong', 'weak'].includes(input.hitReactionKind) ? input.hitReactionKind : 'strong' }
                     : { size: input.size || 'large' }) });
             this.draft[beatId] = { ...this.draft[beatId], judgments: list };
             return this.emit('add-judgment', { beatId, id });
@@ -376,8 +379,8 @@
                         delete next.damageScale;
                         next.damagePercent = Math.max(0, Math.min(1000,
                             Number(next.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100)));
-                        next.hitReactionKind = ['strong', 'butt-stumble', 'weak'].includes(next.hitReactionKind)
-                            ? next.hitReactionKind : 'strong';
+                        next.hitReactionKind = next.hitReactionKind === 'butt-stumble' ? 'weak'
+                            : ['strong', 'weak'].includes(next.hitReactionKind) ? next.hitReactionKind : 'strong';
                     } else {
                         delete next.damageScale;
                         delete next.damagePercent;

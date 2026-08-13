@@ -138,8 +138,8 @@ assert.deepStrictEqual(
 );
 assert.deepStrictEqual(
     HuntMonsterTurnExecutor.hitReactionForPattern({ tags: ['butt-stumble'] }, { index: 3 }),
-    { kind: 'butt-stumble', durationTicks: 15, knockbackDirection: 1 },
-    'butt-stumble impacts must retain their authored reaction identity through presentation'
+    { kind: 'weak', durationTicks: 15, knockbackDirection: 1 },
+    'legacy butt-stumble tags must normalize to the canonical small-hit reaction'
 );
 assert.deepStrictEqual(
     HuntMonsterTurnExecutor.hitReactionForPattern({}, { index: 3 }),
