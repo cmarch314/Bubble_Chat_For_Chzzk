@@ -1024,6 +1024,26 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 4363090,
     "mtimeMs": 1785168299067
   },
+  "AI CMC/더워.mp4": {
+    "category": "visual",
+    "inputLufs": -11.92,
+    "truePeakDb": -0.68,
+    "gainDb": -6.08,
+    "measurement": "loudnorm",
+    "duration": 2.52,
+    "bytes": 6538833,
+    "mtimeMs": 1786474455619
+  },
+  "AI CMC/더워죽.mp4": {
+    "category": "visual",
+    "inputLufs": -13.34,
+    "truePeakDb": -2.07,
+    "gainDb": -4.66,
+    "measurement": "loudnorm",
+    "duration": 3.86,
+    "bytes": 9918938,
+    "mtimeMs": 1786474508300
+  },
   "AI CMC/도망쳐.mp4": {
     "category": "visual",
     "inputLufs": -11.06,
@@ -1150,6 +1170,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.07,
     "bytes": 2925218,
     "mtimeMs": 1784846544417
+  },
+  "AI CMC/뜨거워.mp4": {
+    "category": "visual",
+    "inputLufs": -10.46,
+    "truePeakDb": 0.02,
+    "gainDb": -7.54,
+    "measurement": "loudnorm",
+    "duration": 3.18,
+    "bytes": 8148778,
+    "mtimeMs": 1786474482180
   },
   "AI CMC/럭셔리하다.mp4": {
     "category": "visual",
@@ -1565,6 +1595,56 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 0.87,
     "bytes": 2377792,
     "mtimeMs": 1784873312324
+  },
+  "AI CMC/박수1.mp4": {
+    "category": "visual",
+    "inputLufs": -12.79,
+    "truePeakDb": -0.63,
+    "gainDb": -5.21,
+    "measurement": "loudnorm",
+    "duration": 2.18,
+    "bytes": 5951740,
+    "mtimeMs": 1786441669119
+  },
+  "AI CMC/박수2.mp4": {
+    "category": "visual",
+    "inputLufs": -13.61,
+    "truePeakDb": -1.97,
+    "gainDb": -4.39,
+    "measurement": "loudnorm",
+    "duration": 2.47,
+    "bytes": 6364131,
+    "mtimeMs": 1786441682627
+  },
+  "AI CMC/박수3.mp4": {
+    "category": "visual",
+    "inputLufs": -10.92,
+    "truePeakDb": 0.06,
+    "gainDb": -7.08,
+    "measurement": "loudnorm",
+    "duration": 1.56,
+    "bytes": 4225248,
+    "mtimeMs": 1786441704770
+  },
+  "AI CMC/박수4.mp4": {
+    "category": "visual",
+    "inputLufs": -12.91,
+    "truePeakDb": -1.5,
+    "gainDb": -5.09,
+    "measurement": "loudnorm",
+    "duration": 1.64,
+    "bytes": 4630102,
+    "mtimeMs": 1786441719709
+  },
+  "AI CMC/박수5.mp4": {
+    "category": "visual",
+    "inputLufs": -13.82,
+    "truePeakDb": -0.51,
+    "gainDb": -4.18,
+    "measurement": "loudnorm",
+    "duration": 1.94,
+    "bytes": 5074939,
+    "mtimeMs": 1786441737102
   },
   "AI CMC/박진감.mp4": {
     "category": "visual",
@@ -3456,6 +3536,16 @@ window.HIVE_AUDIO_LEVELS = {
     "duration": 1.19,
     "bytes": 2911047,
     "mtimeMs": 1781045986231
+  },
+  "AI CMC/ㅋㅋㅋ.mp4": {
+    "category": "visual",
+    "inputLufs": -19.2,
+    "truePeakDb": -0.06,
+    "gainDb": -0.94,
+    "measurement": "loudnorm",
+    "duration": 2.56,
+    "bytes": 6740866,
+    "mtimeMs": 1785886744938
   },
   "AI CMC/카나시.mp4": {
     "category": "visual",

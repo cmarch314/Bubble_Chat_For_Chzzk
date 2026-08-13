@@ -84,6 +84,8 @@ const monsterPatternCatalogCode = fs.readFileSync(path.join(__dirname, '../js/ef
 eval(monsterPatternCatalogCode + "; globalThis.HuntMonsterPatternCatalog = HuntMonsterPatternCatalog;");
 
 globalThis.HuntSupportItemPolicy = require('../js/effects/hunt/HuntSupportItemPolicy.js');
+globalThis.HuntPersonalityProfiles = require('../js/effects/hunt/HuntPersonalityProfiles.js');
+globalThis.HuntIssuedSupplyRuntime = require('../js/effects/hunt/HuntIssuedSupplyRuntime.js');
 
 const huntInitializerCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntInitializer.js'), 'utf8');
 eval(huntInitializerCode + "; globalThis.HuntInitializer = HuntInitializer;");

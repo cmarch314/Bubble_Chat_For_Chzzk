@@ -70,6 +70,10 @@ eval(monsterPatternCatalogCode + "; globalThis.HuntMonsterPatternCatalog = HuntM
 
 const huntSupportItemPolicyCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntSupportItemPolicy.js'), 'utf8');
 eval(huntSupportItemPolicyCode + "; globalThis.HuntSupportItemPolicy = HuntSupportItemPolicy;");
+const huntPersonalityProfilesCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntPersonalityProfiles.js'), 'utf8');
+eval(huntPersonalityProfilesCode + "; globalThis.HuntPersonalityProfiles = HuntPersonalityProfiles;");
+const huntIssuedSupplyRuntimeCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntIssuedSupplyRuntime.js'), 'utf8');
+eval(huntIssuedSupplyRuntimeCode + "; globalThis.HuntIssuedSupplyRuntime = HuntIssuedSupplyRuntime;");
 
 const huntInitializerCode = fs.readFileSync(path.join(__dirname, '../js/effects/hunt/HuntInitializer.js'), 'utf8');
 eval(huntInitializerCode + "; globalThis.HuntInitializer = HuntInitializer;");

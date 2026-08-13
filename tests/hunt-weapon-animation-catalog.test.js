@@ -14,13 +14,20 @@ const rightChargeFrames = HuntWeaponAnimationCatalog.keyframes(
     HuntWeaponAnimationCatalog.resolve('great_sword', { id: 'great_sword.charge_2' }),
     3
 );
-assert.match(leftChargeFrames[0].transform, /rotate\(-104deg\)/);
+assert.match(leftChargeFrames[0].transform, /rotate\(45deg\)/,
+    'slots 1/2 must hold the vertical Great Sword toward the upper-left before release');
 assert.match(leftChargeFrames[0].transform, /scaleX\(1\)/,
     'Left-side Great Sword slots must retain the authored left blade edge');
-assert.match(rightChargeFrames[0].transform, /rotate\(104deg\)/,
+assert.match(rightChargeFrames[0].transform, /rotate\(-45deg\)/,
     'slots 3/4 must mirror the Great Sword charge angle used by slots 1/2');
 assert.match(rightChargeFrames[0].transform, /scaleX\(-1\)/,
     'slots 3/4 must mirror the complete Great Sword stance toward the monster');
+const measuredLeft = HuntWeaponAnimationCatalog.keyframes(
+    HuntWeaponAnimationCatalog.resolve('great_sword', { id: 'great_sword.charged_slash' }),
+    1, { x: -400, y: -200 }
+);
+assert.match(measuredLeft[0].transform, /rotate\(45deg\).*scaleX\(1\)/,
+    'live target coordinates must adjust reach without reversing the slot 1/2 blade stance');
 
 const weaponIds = [
     'great_sword', 'long_sword', 'sword_shield', 'dual_blades', 'hammer', 'hunting_horn', 'lance',
@@ -151,18 +158,18 @@ for (const actionId of [
         `${actionId} must travel to the currently rendered monster position`
     );
 }
-assert.match(HuntWeaponAnimationCatalog.keyframes(greatSwordHold, 0)[0].transform, /rotate\(-104deg\)/, 'later charge ticks must begin from the raised ready pose');
-assert.match(HuntWeaponAnimationCatalog.keyframes(greatSwordRelease, 0)[0].transform, /rotate\(-104deg\)/, 'the charged slash must begin from the held overhead pose');
+assert.match(HuntWeaponAnimationCatalog.keyframes(greatSwordHold, 0)[0].transform, /rotate\(45deg\)/, 'later charge ticks must begin from the raised upper-left ready pose');
+assert.match(HuntWeaponAnimationCatalog.keyframes(greatSwordRelease, 0)[0].transform, /rotate\(45deg\)/, 'the charged slash must begin from the held upper-left pose');
 const greatSwordReleaseFrames = HuntWeaponAnimationCatalog.keyframes(greatSwordRelease, 0);
 assert.ok(greatSwordReleaseFrames.every(frame => frame.transformOrigin === '50% 88%'),
     'Great Sword must rotate from its bottom grip instead of the image center');
-assert.ok(greatSwordReleaseFrames.some(frame => /rotate\(110deg\)/.test(frame.transform)),
+assert.ok(greatSwordReleaseFrames.some(frame => /rotate\(180deg\)/.test(frame.transform)),
     'slots 1/2 must swing down from the upper-left charge pose instead of rising from the lower right');
 const trueGreatSwordFrames = HuntWeaponAnimationCatalog.keyframes(
     HuntWeaponAnimationCatalog.PROFILES['great_sword.true_charged_slash'], 0
 );
-assert.ok(trueGreatSwordFrames.some(frame => frame.transform.includes('rotate(616deg)')),
-    'true charged slash must complete two blade-leading rotations before contact');
+assert.ok(trueGreatSwordFrames.some(frame => frame.transform.includes('rotate(540deg)')),
+    'true charged slash must plant downward, then continue into its rebound rotation');
 assert.ok(
     HuntWeaponAnimationCatalog.keyframes(greatSwordRelease, 0, { x: 420, y: -310 })
         .some(frame => frame.transform.includes('translate(420px, -310px)')),
@@ -170,14 +177,13 @@ assert.ok(
 );
 const greatSwordLeftTarget = HuntWeaponAnimationCatalog.keyframes(greatSwordRelease, 0, { x: -420, y: -310 });
 const greatSwordRightTarget = HuntWeaponAnimationCatalog.keyframes(greatSwordRelease, 0, { x: 420, y: -310 });
-assert.ok(greatSwordLeftTarget.some(frame => /rotate\(2deg\)/.test(frame.transform)),
-    'a target on the left must use the mirrored descending Great Sword arc');
-assert.ok(greatSwordRightTarget.some(frame => /rotate\(-2deg\)/.test(frame.transform)),
-    'a target on the right must use the descending Great Sword arc');
-assert.ok(greatSwordLeftTarget.every(frame => frame.transform.includes('scaleX(-1)')),
-    'the complete target-left stance must mirror the target-right stance');
-assert.ok(greatSwordRightTarget.every(frame => frame.transform.includes('scaleX(1)')),
-    'the target-right stance must retain the source bitmap orientation');
+assert.deepStrictEqual(
+    greatSwordLeftTarget.map(frame => frame.transform.match(/rotate\((-?\d+)deg\)/)?.[1]),
+    greatSwordRightTarget.map(frame => frame.transform.match(/rotate\((-?\d+)deg\)/)?.[1]),
+    'slot formation, not transient DOM target position, must own Great Sword swing direction');
+assert.ok([...greatSwordLeftTarget, ...greatSwordRightTarget]
+    .every(frame => frame.transform.includes('scaleX(1)')),
+    'slot 1 must retain its source bitmap orientation for either measured reach vector');
 
 const greatSwordSlotFrames = [0, 1, 2, 3]
     .map(slot => HuntWeaponAnimationCatalog.keyframes(greatSwordRelease, slot));

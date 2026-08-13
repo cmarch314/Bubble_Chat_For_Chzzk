@@ -254,16 +254,16 @@ class HuntWeaponAnimationCatalog {
         const end = [1, 0, 0, 0, 1, 0, 0];
         const motions = {
             charge: [idle, [.3, 0, 0, -12, .92, -10, 10], [.7, 0, 0, -7, 1.12, -5, 5], end],
-            great_sword_charge_raise: [idle, [.42, 0, 0, -68, .98, -16, 2], [.76, 0, 0, -102, 1.04, -25, -10], [1, 0, 0, -104, 1.06, -27, -12]],
-            great_sword_charge_hold: [[0, 0, 0, -104, 1.06, -27, -12], [.42, 0, 0, -108, 1.1, -29, -14], [.72, 0, 0, -101, 1.04, -25, -10], [1, 0, 0, -104, 1.07, -27, -12]],
+            great_sword_charge_raise: [idle, [.42, 0, 0, 24, .98, -28, -22], [.76, 0, 0, 42, 1.04, -45, -48], [1, 0, 0, 45, 1.06, -50, -55]],
+            great_sword_charge_hold: [[0, 0, 0, 45, 1.06, -50, -55], [.42, 0, 0, 49, 1.1, -54, -59], [.72, 0, 0, 42, 1.04, -46, -51], [1, 0, 0, 45, 1.07, -50, -55]],
             // The source stands vertically: blade edge left, grip at the bottom.
-            // Pull slightly farther back, then rotate clockwise through the
-            // target. The source is vertical with its grip at the bottom, so
-            // this sign produces a top-to-bottom chop instead of an uppercut.
-            great_sword_charged_release: [[0, 0, 0, -104, 1.07, -27, -12], [.2, 0, 0, -128, 1.1, -35, -18], [.46, .82, .82, -206, 1.13, -4, -118], [.72, 1, 1, -318, 1.2, 0, 0], [.86, .88, .86, -344, 1.12, 0, 5], [1, 0, 0, -360, 1, 0, 0]],
-            // True Charged Slash completes two continuous clockwise turns
-            // before contact: -104deg + 720deg = 616deg.
-            great_sword_true_release: [[0, 0, 0, -104, 1.1, -31, -15], [.1, 0, 0, -152, 1.14, -42, -24], [.24, .38, .34, -304, 1.16, -8, -112], [.38, .46, .42, -464, 1.24, 0, 4], [.5, .48, .44, -464, 1.12, 0, 16], [.58, .5, .46, -508, 1.2, -5, -18], [.72, .84, .82, -642, 1.24, 0, -116], [.86, 1, 1, -824, 1.34, 0, 0], [.93, .88, .86, -842, 1.18, 0, 6], [1, 0, 0, -824, 1, 0, 0]],
+            // Grip-bottom source: +45deg points the blade toward the upper-left
+            // for slots 1/2. Positive rotation then chops downward through the
+            // target; slots 3/4 receive the exact mirrored path.
+            great_sword_charged_release: [[0, 0, 0, 45, 1.07, -50, -55], [.2, 0, 0, 30, 1.1, -60, -68], [.46, .72, .75, 95, 1.13, -12, -88], [.72, 1, 1, 180, 1.2, 0, 0], [.86, .9, .9, 195, 1.12, 0, 7], [1, 0, 0, 180, 1, 0, 0]],
+            // First downward swing plants the blade, then the rebound continues
+            // in the same direction for the heavy second contact.
+            great_sword_true_release: [[0, 0, 0, 45, 1.1, -54, -60], [.1, 0, 0, 28, 1.14, -65, -74], [.24, .52, .56, 92, 1.16, -12, -102], [.38, 1, 1, 180, 1.24, 0, 0], [.5, 1, 1, 180, 1.12, 0, 18], [.58, .48, .5, 265, 1.2, -8, -26], [.72, .78, .82, 420, 1.24, 0, -108], [.86, 1, 1, 540, 1.34, 0, 0], [.93, .9, .9, 555, 1.18, 0, 8], [1, 0, 0, 540, 1, 0, 0]],
             heavy_overhead: [idle, [.3, 0, 0, -92, 1.04, -26, 18], [.52, .18, .18, -42, 1.08, 0, 0], [.76, 1, 1, 38, 1.15, 0, 0], end],
             true_charged_slash: [idle, [.24, 0, 0, -115, 1.08, -34, 22], [.48, .14, .12, -78, 1.14, 0, 0], [.68, 1, 1, 48, 1.28, 0, 0], [.82, .88, .84, 56, 1.18, 0, 0], end],
             shoulder_tackle: [idle, [.25, 0, 0, -8, .96, -18, 5], [.62, .65, .58, 9, 1.13, 0, 0], end],
@@ -422,24 +422,21 @@ class HuntWeaponAnimationCatalog {
         ];
         const fallbackVector = vectors[Math.max(0, Math.min(3, Number(hunterIndex) || 0))];
         const hasMeasuredTarget = Number.isFinite(targetVector?.x) && Number.isFinite(targetVector?.y);
-        const v = hasMeasuredTarget
-            ? { x: Number(targetVector.x), y: Number(targetVector.y), side: Number(targetVector.x) < 0 ? -1 : 1 }
-            : fallbackVector;
-        const spec = this.MOTIONS[profile?.motion] || this.MOTIONS.horizontal_slash;
         const directionalBladeWeapons = new Set([
             'great_sword', 'long_sword', 'sword_shield', 'dual_blades',
             'switch_axe', 'charge_blade', 'insect_glaive'
         ]);
         const directionalBlade = directionalBladeWeapons.has(String(profile?.weaponId || ''));
-        const greatSwordRelease = ['great_sword_charged_release', 'great_sword_true_release']
-            .includes(String(profile?.motion || ''));
-        const authoredStartRotation = Number(spec[0]?.[3] || 0);
-        const rotationFor = rotation => greatSwordRelease
-            // Keep the raised stance at the side-specific upper corner, then
-            // reverse only the swing delta so the blade comes down through the
-            // monster instead of rising from the lower outside corner.
-            ? authoredStartRotation * v.side + (rotation - authoredStartRotation) * -v.side
-            : rotation * v.side;
+        const v = hasMeasuredTarget
+            ? { x: Number(targetVector.x), y: Number(targetVector.y),
+                // Directional blades obey the stable combat formation: slots
+                // 1/2 share a stance and slots 3/4 are its mirror. Live DOM
+                // jitter may change distance, never the cutting-edge side.
+                side: directionalBlade ? fallbackVector.side
+                    : (Number(targetVector.x) < 0 ? -1 : 1) }
+            : fallbackVector;
+        const spec = this.MOTIONS[profile?.motion] || this.MOTIONS.horizontal_slash;
+        const rotationFor = rotation => rotation * v.side;
         // Slots 1/2 share one stance; slots 3/4 are its true visual mirror.
         // Mirroring the whole weapon is intentional here: the cutting edge must
         // face inward after the hunter crosses to the other side of the monster.

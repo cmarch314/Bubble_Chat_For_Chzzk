@@ -49,12 +49,14 @@ assert.strictEqual(runtime.has('hunter:0'), false, 'cart/hit interruption must r
 
 const WeaponAnimationCatalog = require('../js/effects/hunt/HuntWeaponAnimationCatalog.js');
 const chargedFrames = WeaponAnimationCatalog.MOTIONS.great_sword_charged_release;
-assert.ok(chargedFrames[2][6] < -100 && chargedFrames[3][6] === 0,
-    'charged slashes must approach above the target and descend onto contact');
+assert.ok(chargedFrames[0][3] > 0 && chargedFrames[3][3] >= 180,
+    'charged slashes must raise toward the upper-left and rotate downward onto contact');
 const trueFrames = WeaponAnimationCatalog.MOTIONS.great_sword_true_release;
-assert.strictEqual(trueFrames.at(-1)[3] - trueFrames[0][3], -720,
-    'True Charged Slash must preserve exactly two blade-leading turns before contact');
-assert.ok(trueFrames[2][6] < -100 && trueFrames[6][6] < -100,
-    'both True Charged Slash hits must begin above their contact point');
+assert.strictEqual(trueFrames[3][3], 180,
+    'the first True Charged Slash swing must plant downward rather than uppercut');
+assert.strictEqual(trueFrames[7][3], 540,
+    'the rebound must continue the same rotation for the second downward hit');
+assert.ok(trueFrames[2][6] < -90 && trueFrames[6][6] < -90,
+    'both True Charged Slash hits must approach from above their contact point');
 
 console.log('[test] Great Sword BEAT V2 compilation and runtime passed');
