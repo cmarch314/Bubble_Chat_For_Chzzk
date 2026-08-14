@@ -106,9 +106,11 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(app.includes('data-rotation-direction="counterclockwise"')
             && app.includes('class="rotation-degrees"')
             && app.includes('class="rotation-final"')
-            && app.includes('class="keep-rotation"')
+            && app.includes('select data-key="rotationResetMode"')
             && app.includes('function rotationEditorModel('),
-        'the BEAT inspector must make turn direction, degrees, final angle, and angle retention explicit');
+        'the BEAT inspector must make turn direction, degrees, final angle, and return behavior explicit');
+        assert.ok(app.includes("'rotationEasing', 'rotationResetMode'"),
+        'return rotation must use the same persisted transform-field path as every other editor control');
         assert.ok(app.includes("label: '📣 포효'") && app.includes("label: '〰️ 지진'")
             && app.includes("label: '🌪️ 풍압'"),
             'timeline judgments must distinguish roar, tremor and wind pressure with emoji labels');

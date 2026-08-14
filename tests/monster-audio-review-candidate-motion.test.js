@@ -8,6 +8,8 @@ const {
     candidateKitRecordFor,
     saveCandidatePatternMotion
 } = require('../tools/monster-audio-review-server.js');
+const { loadHuntPatternAudioMap } = require('../tools/hunt-audio-pattern-map.js');
+const ReviewState = require('../tools/monster-audio-review-state.js');
 
 const source = path.join(__dirname, '..', 'data', 'hunt', 'monster-kits', 'candidates', 'rathian.json');
 const temporaryDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bubblechat-candidate-motion-'));
@@ -42,6 +44,26 @@ try {
     assert.equal(visual.keepRotation, true);
     assert.equal(edited.events.find(event => event.id === 'review-roar')?.kind, 'roar',
         'candidate judgments must persist as native BEAT events');
+
+    const tailRecord = candidateKitRecordFor({ candidate: 'rathian' }, 'rathian', temporaryDir);
+    const candidateMap = loadHuntPatternAudioMap('rathian', { candidateKit: tailRecord.kit });
+    const tailPattern = candidateMap.patterns.find(item => item.id === 'rathian.tail_sweep');
+    const tailDraft = ReviewState.createMotionDraft(tailPattern, tailPattern.timeline);
+    tailDraft.return.rotationResetMode = 'snap-end';
+    const tailSave = saveCandidatePatternMotion({
+        huntId: 'rathian', patternId: 'rathian.tail_sweep', candidate: 'rathian',
+        candidateRecord: tailRecord, beats: tailDraft
+    });
+    assert.equal(tailSave.beats.return.rotationResetMode, 'snap-end',
+        'candidate save response must retain the authored return-rotation mode');
+    const reloadedKit = JSON.parse(fs.readFileSync(candidateFile, 'utf8'));
+    const reloadedMap = loadHuntPatternAudioMap('rathian', { candidateKit: reloadedKit });
+    const reloadedTail = reloadedMap.patterns.find(item => item.id === 'rathian.tail_sweep');
+    const reloadedDraft = ReviewState.createMotionDraft(reloadedTail, reloadedTail.timeline);
+    assert.equal(reloadedDraft.return.rotationResetMode, 'snap-end',
+        'the editor reload projection must read the saved return-rotation mode from native BEAT');
+    assert.equal(ReviewState.compareMotionValues(tailDraft, reloadedDraft).equal, true,
+        'return-rotation edits must survive the same reload verification used by the editor');
 } finally {
     fs.rmSync(temporaryDir, { recursive: true, force: true });
 }
