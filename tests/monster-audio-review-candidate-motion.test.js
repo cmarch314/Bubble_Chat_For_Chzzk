@@ -18,6 +18,22 @@ const candidateFile = path.join(temporaryDir, 'rathian.json');
 try {
     fs.copyFileSync(source, candidateFile);
     const record = candidateKitRecordFor({ candidate: 'rathian' }, 'rathian', temporaryDir);
+    const fireball = record.kit.actions.find(item => item.id === 'rathian.fireball');
+    assert.deepEqual(fireball.graph.beats.map(beat => beat.id), ['look', 'inhale', 'spit', 'recover'],
+        'Rathian fireball must expose one canonical four-beat breathing timeline');
+    const fireballBeat = id => fireball.graph.beats.find(beat => beat.id === id);
+    const fireballVisual = id => fireballBeat(id).tracks.visual.at(-1).value;
+    assert.ok(fireballVisual('inhale').scaleX > 1 && fireballVisual('inhale').scaleY > 1,
+        'inhale must visibly expand the monster image');
+    assert.ok(fireballVisual('spit').scaleX < 1 && fireballVisual('spit').scaleY < 1,
+        'spit must visibly contract the monster image');
+    assert.equal(fireballVisual('recover').scaleX, 1);
+    assert.equal(fireballVisual('recover').scaleY, 1);
+    assert.equal(fireball.graph.beats.filter(beat => beat.events?.some(event => event.kind === 'damage')).length, 1,
+        'fireball launch judgment must have exactly one BEAT owner');
+    assert.ok(fireballBeat('spit').events.some(event => event.kind === 'damage'),
+        'the fireball projectile must launch from spit');
+
     const action = record.kit.actions.find(item => item.id === 'rathian.roar');
     const beats = Object.fromEntries(action.graph.beats.map((beat, index) => [beat.id, {
         ticks: beat.ticks + (index === 0 ? 1 : 0),

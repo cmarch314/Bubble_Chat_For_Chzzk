@@ -85,6 +85,19 @@ const HUNT_MONSTER_PATTERN_AUDIO_ROUTES = {
         "migratedFrom": [
           "impact"
         ]
+      },
+      "beat:spit": {
+        "label": null,
+        "layers": [
+          [
+            "local_assets/monster_hunter/world/monster/em001/em001_se_nbnk_155_561006149.mp3",
+            0.7,
+            0
+          ]
+        ],
+        "migratedFrom": [
+          "launch"
+        ]
       }
     },
     "rathian.triple_fireball": {
