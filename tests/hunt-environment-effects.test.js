@@ -187,6 +187,10 @@ assert.match(css, /@keyframes monster-pitfall-release[\s\S]*?55%[\s\S]*?translat
     'the monster must climb out throughout the escape beat instead of teleporting home at its start');
 assert.match(css, /\.environment-pitfall\.is-releasing \.pitfall-net\s*\{[^}]*animation:none !important;[^}]*transform:translateX\(-50%\) scale\(1\) rotate\(0\);/,
     'the net must stay fully spread while the complete trap layer fades during escape');
+assert.match(animator, /querySelectorAll\?\.\('\.pitfall-front'\)[\s\S]*?mask\.animate\?\./,
+    'the foreground lower-body mask must receive an explicit compositor-safe release fade');
+assert.match(css, /\.environment-pitfall\.is-releasing \.pitfall-front\.is-releasing\s*\{[^}]*pitfall-release-fade/,
+    'the foreground lower-body mask must retain a CSS fade fallback during escape');
 assert.doesNotMatch(css, /pitfall-close/,
     'the trap must not shrink toward its center during escape');
 assert.match(css, /\.pitfall-rear\s*\{[^}]*z-index:5[\s\S]*?\.pitfall-front\s*\{[^}]*z-index:15/,

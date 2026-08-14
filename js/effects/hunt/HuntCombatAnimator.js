@@ -1394,6 +1394,20 @@ class HuntCombatAnimator {
                     [{ opacity: 1 }, { opacity: 0 }],
                     { duration: releaseFadeMs, easing: 'ease-in', fill: 'forwards' }
                 ) || null;
+                // The foreground rim is also the visual lower-body mask.  It
+                // must receive its own fade because its z-index can put it in
+                // a separate compositing layer from the enclosing trap in OBS.
+                // Without this, the hole fades but the mask can appear to pop
+                // off while the monster is climbing out.
+                effect.querySelectorAll?.('.pitfall-front').forEach(mask => {
+                    mask.classList.add('is-releasing');
+                    mask.style.setProperty('--pitfall-release-fade-ms', `${releaseFadeMs}ms`);
+                    mask._pitfallReleaseAnimation?.cancel?.();
+                    mask._pitfallReleaseAnimation = mask.animate?.(
+                        [{ opacity: 1 }, { opacity: 0 }],
+                        { duration: releaseFadeMs, easing: 'ease-in', fill: 'forwards' }
+                    ) || null;
+                });
             });
             monsterImg?.classList?.remove('monster-pitfall-struggle-pulse');
             // Renderer uses this lifecycle guard to keep the trap mounted until

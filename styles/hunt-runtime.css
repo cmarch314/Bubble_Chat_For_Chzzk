@@ -3366,6 +3366,9 @@
     opacity:.9;
     transform:translateX(-50%) scale(1) rotate(0);
 }
+.environment-pitfall.is-releasing .pitfall-front.is-releasing {
+    animation:pitfall-release-fade var(--pitfall-release-fade-ms,.8s) ease-in both;
+}
 .environment-pitfall.is-atb-bound .pitfall-hole { animation:pitfall-open-held .46s ease-out both; }
 .environment-pitfall.is-atb-bound .pitfall-net { animation:pitfall-net-held .52s ease-out both; }
 .environment-pitfall.is-atb-bound::after {
