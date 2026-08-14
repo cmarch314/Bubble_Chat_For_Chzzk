@@ -247,22 +247,6 @@
             return this.emit('load');
         }
 
-        projectileMinimumTickForJudgment(judgmentId) {
-            const launch = (this.pattern?.beatV2?.events || []).find(event =>
-                event?.kind === 'projectile-launch'
-                && String(event.outcomeEventId || '') === String(judgmentId || ''));
-            if (!launch) return null;
-            const projected = projectTimeline(this.timeline, this.draft);
-            const beat = projected.beats.find(item => item.id === launch.beatId);
-            if (!beat) return null;
-            // A projectile may never contact on its launch tick.  Keep this
-            // constraint in the editor as well as the save contract, so a
-            // dragged HIT marker cannot create an invalid graph in the first
-            // place.
-            return Math.min(projected.durationTicks - 1,
-                beat.startTicks + Math.min(beat.ticks - 1, Math.max(0, Number(launch.offsetTicks) || 0)) + 1);
-        }
-
         checkpoint() {
             this.history.undo.push(clone(this.draft));
             if (this.history.undo.length > 100) this.history.undo.shift();
@@ -442,8 +426,7 @@
 
         moveJudgmentById(id, requestedTick) {
             const projected = projectTimeline(this.timeline, this.draft);
-            const minimumTick = this.projectileMinimumTickForJudgment(id);
-            const tick = Math.max(minimumTick ?? 0, Math.min(Math.max(0, projected.durationTicks - 1),
+            const tick = Math.max(0, Math.min(Math.max(0, projected.durationTicks - 1),
                 Math.round(Number(requestedTick) || 0)));
             const target = projected.beats.find(beat => tick >= beat.startTicks && tick < beat.endTicks) || projected.beats.at(-1);
             let value = null;

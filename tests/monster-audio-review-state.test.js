@@ -215,8 +215,8 @@ projectileSession.load({ id: 'test.projectile',
         offsetTicks: 2, projectileId: 'fireball', outcomeEventId: 'contact' }] }
 });
 projectileSession.moveJudgmentById('contact', 2);
-assert.strictEqual(projectileSession.serialize().spit.judgments[0].offsetTicks, 3,
-    'dragging a projectile HIT onto its launch tick must clamp to one tick of flight');
+assert.strictEqual(projectileSession.serialize().spit.judgments[0].offsetTicks, 2,
+    'a projectile HIT marker must remain independently draggable; save relocates its linked lifecycle');
 
 judgmentSession.removeJudgment('j1');
 assert.deepStrictEqual(judgmentSession.serialize().impact.judgments, [],

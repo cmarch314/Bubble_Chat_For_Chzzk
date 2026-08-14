@@ -150,7 +150,7 @@
             if (Array.isArray(item)) return item.map(normalize);
             if (!item || typeof item !== 'object') return item;
             return Object.fromEntries(Object.keys(item).sort()
-                .filter(key => !(key === 'directHitSupersedes' && item[key] === false))
+                .filter(key => !((key === 'directHitSupersedes' || key === 'hit') && item[key] === false))
                 .map(key => [key, normalize(item[key])]));
         };
         return JSON.stringify(normalize(value));

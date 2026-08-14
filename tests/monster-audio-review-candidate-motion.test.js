@@ -79,7 +79,13 @@ try {
         .find(pattern => pattern.id === 'rathian.fireball');
     const fireballDraft = ReviewState.createMotionDraft(fireballPattern, fireballPattern.timeline);
     fireballDraft.spit.ticks += 1;
-    fireballDraft.spit.judgments.find(item => item.id === 'fireball-1:contact').offsetTicks = 2;
+    const movedFireballHit = fireballDraft.spit.judgments.find(item => item.id === 'fireball-1:contact');
+    fireballDraft.spit.judgments = fireballDraft.spit.judgments.filter(item => item !== movedFireballHit);
+    fireballDraft.spit.hit = false;
+    delete fireballDraft.spit.hitOffsetTicks;
+    fireballDraft.inhale.judgments = [...(fireballDraft.inhale.judgments || []), {
+        ...movedFireballHit, offsetTicks: 10
+    }];
     const fireballSave = saveCandidatePatternMotion({
         huntId: 'rathian', patternId: 'rathian.fireball', candidate: 'rathian',
         candidateRecord: fireballRecord, beats: fireballDraft
@@ -88,12 +94,16 @@ try {
         'a projectile action with legacy-missing outcome linkage must save successfully');
     const fireballPersisted = JSON.parse(fs.readFileSync(candidateFile, 'utf8'))
         .actions.find(action => action.id === 'rathian.fireball');
-    assert.equal(fireballPersisted.graph.beats.find(beat => beat.id === 'spit').events
-        .find(event => event.id === 'fireball-1:contact')?.projectileId, 'fireball-1',
+    const persistedFireballContact = fireballPersisted.graph.beats.flatMap(beat => beat.events || [])
+        .find(event => event.id === 'fireball-1:contact');
+    assert.equal(persistedFireballContact?.projectileId, 'fireball-1',
     'candidate save must repair and persist projectile outcome linkage');
-    assert.equal(fireballPersisted.graph.beats.find(beat => beat.id === 'spit').events
-        .find(event => event.id === 'fireball-1:contact')?.offsetTicks, 3,
-    'candidate save must leave one authored tick between projectile launch and contact');
+    assert.equal(fireballPersisted.graph.beats.find(beat => beat.id === 'inhale').events
+        .find(event => event.id === 'fireball-1:contact')?.offsetTicks, 10,
+    'candidate save must retain a projectile HIT moved into an earlier beat');
+    const persistedInhale = fireballPersisted.graph.beats.find(beat => beat.id === 'inhale');
+    assert.ok(persistedInhale.events.find(event => event.id === 'fireball-1:launch')?.offsetTicks < 10,
+        'moving a projectile HIT must relocate its launch ahead of the moved contact');
 
     // A projectile damage event carries runtime linkage (projectileId) that
     // is intentionally not an editable motion field.  Saving an unchanged
