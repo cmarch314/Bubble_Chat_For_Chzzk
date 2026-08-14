@@ -368,7 +368,9 @@
                 ...(kind === 'damage' ? { damagePercent: Math.max(0, Math.min(1000,
                     Number(input.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100))),
                     hitReactionKind: input.hitReactionKind === 'butt-stumble' ? 'weak'
-                        : ['strong', 'weak'].includes(input.hitReactionKind) ? input.hitReactionKind : 'strong' }
+                        : ['strong', 'weak'].includes(input.hitReactionKind) ? input.hitReactionKind : 'strong',
+                    ...(['fire', 'water', 'thunder', 'ice', 'dragon', 'paralysis', 'sleep', 'blast']
+                        .includes(input.element) ? { element: input.element } : {}) }
                     : { size: input.size || 'large' }) });
             this.draft[beatId] = { ...this.draft[beatId], judgments: list };
             return this.emit('add-judgment', { beatId, id });
@@ -389,10 +391,13 @@
                             Number(next.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100)));
                         next.hitReactionKind = next.hitReactionKind === 'butt-stumble' ? 'weak'
                             : ['strong', 'weak'].includes(next.hitReactionKind) ? next.hitReactionKind : 'strong';
+                        if (!['fire', 'water', 'thunder', 'ice', 'dragon', 'paralysis', 'sleep', 'blast']
+                            .includes(next.element)) delete next.element;
                     } else {
                         delete next.damageScale;
                         delete next.damagePercent;
                         delete next.hitReactionKind;
+                        delete next.element;
                         next.size = next.size === 'small' ? 'small' : 'large';
                     }
                     next.target = ['primary', 'left', 'right', 'pair', 'pair-left', 'pair-right',

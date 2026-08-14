@@ -19,7 +19,7 @@ const source = {
         rotationDirection: 'clockwise', rotationResetMode: 'snap-end', fx: 'dust', fxAnchor: 'target', fxSecondary: 'arc',
         fxSecondaryAnchor: 'head', fxSecondaryAngleMode: 'travel',
         judgments: [{ id: 'windup-hit', group: 'impact', kind: 'damage', target: 'pair',
-            offsetTicks: 4, damagePercent: 28, hitReactionKind: 'strong', directHitSupersedes: false }],
+            offsetTicks: 4, damagePercent: 28, hitReactionKind: 'strong', element: 'fire', directHitSupersedes: false }],
         fxAdditional: [{ fx: 'spark', anchor: 'head', durationTicks: 3, angleMode: 'travel' }],
         ignoredImplementationField: 'must-not-persist'
     }
@@ -37,6 +37,10 @@ assert.equal(normalized.windup.rotateBy, undefined);
 assert.equal(normalized.windup.rotateByFacing, undefined);
 assert.equal(normalized.windup.ignoredImplementationField, undefined);
 assert.equal(normalized.windup.judgments[0].hitReactionKind, 'strong');
+assert.equal(normalized.windup.judgments[0].element, 'fire',
+    'damage elements must round-trip through the shared authored judgment contract');
+assert.equal(Contract.normalizeBeat({ ticks: 2, judgments: [{ kind: 'damage', element: 'inferred' }] })
+    .judgments[0].element, undefined, 'unknown inferred element values must not enter authored BEAT data');
 assert.equal(normalized.windup.hit, false);
 assert.equal(normalized.windup.hitOffsetTicks, undefined,
     'explicit judgments must exclusively own impact timing');

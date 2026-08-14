@@ -1217,6 +1217,8 @@
         host.innerHTML = `<header><div><b>판정 관리</b><small>같은 그룹은 한 시점의 피해·포효·지진·풍압으로 실행됨</small></div><button type="button" class="add-judgment">+ 판정 추가</button></header><div class="judgment-list"></div>`;
         const kindLabels = { damage: '💥 피해', roar: '🗣️ 포효', tremor: '🌋 지진', wind: '💨 풍압' };
         const reactionLabels = { weak: '피격 [소] · 엉덩방아', strong: '피격 [대] · 날려버리기' };
+        const elementLabels = { none: '무속', fire: '화', water: '수', thunder: '뢰', ice: '빙', dragon: '용',
+            paralysis: '마비', sleep: '수면', blast: '폭파' };
         const targetLabels = { primary: '주 헌터', left: '주 헌터 좌측', right: '주 헌터 우측',
             pair: '2인 동시', 'pair-left': '2인 좌', 'pair-right': '2인 우',
             'primary-adjacent': '주 헌터+좌우', all: '전체' };
@@ -1239,7 +1241,7 @@
                 <label>${judgment.kind === 'damage' ? '데미지 (%)' : '강도'}${judgment.kind === 'damage'
                     ? `<input data-field="damagePercent" type="number" min="0" max="1000" step="1" value="${judgment.damagePercent ?? Math.round(Number(pattern.damageRatio || 0) * 100)}">`
                     : `<select data-field="size"><option value="small"${judgment.size === 'small' ? ' selected' : ''}>소</option><option value="large"${judgment.size !== 'small' ? ' selected' : ''}>대</option></select>`}</label>
-                ${judgment.kind === 'damage' ? `<label>피격 종류<select data-field="hitReactionKind">${Object.entries(reactionLabels).map(([value, label]) => `<option value="${value}"${(judgment.hitReactionKind || 'strong') === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}
+                ${judgment.kind === 'damage' ? `<label>피격 종류<select data-field="hitReactionKind">${Object.entries(reactionLabels).map(([value, label]) => `<option value="${value}"${(judgment.hitReactionKind || 'strong') === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label><label>속성<select data-field="element">${Object.entries(elementLabels).map(([value, label]) => `<option value="${value}"${(judgment.element || 'none') === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}
                 <span>${esc(beat.label || beat.id)} · ${beat.startTicks + Number(judgment.offsetTicks || 0)}틱</span>
                 <button type="button" class="judgment-audio-route${audioFiles.length ? ' assigned' : ''}"${audioSlot ? '' : ' disabled'} title="판정 사운드 배정 열기"><b>🎵 판정 음원</b><small>${esc(whenLabel)} · ${esc(audioName)}</small></button><button type="button" class="remove-judgment">×</button>`;
             row.querySelector('.select-judgment').onclick = () => {

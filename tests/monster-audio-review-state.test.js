@@ -181,9 +181,11 @@ judgmentSession.updateJudgment('j1', { kind: 'tremor', target: 'all' });
 assert.deepStrictEqual(judgmentSession.serialize().impact.judgments[0], {
     id: 'j1', group: 'g1', kind: 'tremor', target: 'all', size: 'large', offsetTicks: 2
 }, 'changing judgment kind must remove incompatible damage fields before save verification');
-judgmentSession.updateJudgment('j1', { kind: 'damage', target: 'pair-left', damagePercent: 30 });
+judgmentSession.updateJudgment('j1', { kind: 'damage', target: 'pair-left', damagePercent: 30, element: 'thunder' });
 assert.strictEqual(judgmentSession.serialize().impact.judgments[0].target, 'pair-left',
     'the editor must preserve reusable two-hunter simultaneous/left/right target presets');
+assert.strictEqual(judgmentSession.serialize().impact.judgments[0].element, 'thunder',
+    'damage-element authoring must persist through the editor state session');
 assert.strictEqual(judgmentSession.serialize().impact.fxSecondary, 'target-impact-dust',
     'secondary visual effects must remain in the canonical editable motion payload');
 

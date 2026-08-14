@@ -26,6 +26,10 @@
         ...NUMBER_FIELDS.filter(key => key !== 'hitOffsetTicks'),
         ...BOOLEAN_FIELDS.filter(key => key !== 'hit'), 'fxAdditional']);
     const JUDGMENT_KINDS = Object.freeze(['damage', 'roar', 'tremor', 'wind']);
+    // Damage elements are authored per judgment, rather than inferred from an
+    // action name, so multi-element attacks and status delivery remain explicit.
+    const DAMAGE_ELEMENTS = Object.freeze(['fire', 'water', 'thunder', 'ice', 'dragon',
+        'paralysis', 'sleep', 'blast']);
     const ROTATION_RESET_MODES = Object.freeze(['auto', 'preserve', 'snap-end', 'animate']);
     const JUDGMENT_TARGETS = Object.freeze(['primary', 'left', 'right', 'pair', 'pair-left',
         'pair-right', 'primary-adjacent', 'all']);
@@ -57,6 +61,7 @@
             if (['strong', 'butt-stumble', 'weak'].includes(item.hitReactionKind)) {
                 result.hitReactionKind = item.hitReactionKind === 'butt-stumble' ? 'weak' : item.hitReactionKind;
             }
+            if (DAMAGE_ELEMENTS.includes(item.element)) result.element = item.element;
         } else result.size = item.size === 'small' ? 'small' : 'large';
         if (typeof item.directHitSupersedes === 'boolean') {
             result.directHitSupersedes = item.directHitSupersedes;
