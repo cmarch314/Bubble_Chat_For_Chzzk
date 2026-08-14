@@ -153,6 +153,17 @@ function readCandidateKits() {
     return kits;
 }
 
+function candidateKitFor(input, huntId) {
+    const candidateId = String(input?.candidate || '').trim().toLowerCase();
+    if (!candidateId) return null;
+    const kit = readCandidateKits()[candidateId] || null;
+    if (!kit) throw new Error(`존재하지 않는 후보 키트입니다: ${candidateId}`);
+    if (String(kit.monsterId || '').toLowerCase() !== huntId) {
+        throw new Error(`후보 키트와 몬스터가 다릅니다: ${candidateId} / ${huntId}`);
+    }
+    return kit;
+}
+
 function evidenceScope(bank) {
     const normalized = String(bank || '').toLowerCase();
     if (/_vo(?:_|$)/.test(normalized)) {
@@ -564,7 +575,8 @@ function validatePatternRouteInput(input) {
     const huntId = String(input?.huntId || '').toLowerCase();
     const patternId = String(input?.patternId || '');
     const slot = String(input?.slot || '');
-    const pattern = loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
+    const candidateKit = candidateKitFor(input, huntId);
+    const pattern = loadHuntPatternAudioMap(huntId, { candidateKit }).patterns.find(item => item.id === patternId);
     if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
     if (!slot.startsWith('beat:')) throw new Error(`구형 사운드 슬롯 저장은 차단되었습니다: ${slot}`);
     if (!pattern.slots.some(item => item.slot === slot)) throw new Error(`현재 모션에 존재하지 않는 사운드 순간입니다: ${slot}`);
@@ -574,6 +586,8 @@ function validatePatternRouteInput(input) {
 function validatePatternMotionInput(input) {
     const huntId = String(input?.huntId || '').toLowerCase();
     const patternId = String(input?.patternId || '');
+    const candidateKit = candidateKitFor(input, huntId);
+    if (candidateKit) throw new Error('후보 모션 저장은 후보 키트 승인 절차에서만 가능합니다. 사운드 맵핑은 즉시 저장됩니다.');
     const pattern = loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
     if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
     if (input?.reset) return { ...input, huntId, patternId };
@@ -803,7 +817,8 @@ function createServer(options = {}) {
             if (request.method === 'GET' && url.pathname === '/api/hunt-patterns') {
                 const huntId = String(url.searchParams.get('monster') || '').toLowerCase();
                 if (!/^[a-z0-9_]+$/i.test(huntId)) throw new Error('잘못된 몬스터 ID입니다.');
-                sendJson(response, 200, { ...loadHuntPatternAudioMap(huntId), revisions: {
+                const candidateKit = candidateKitFor({ candidate: url.searchParams.get('candidate') }, huntId);
+                sendJson(response, 200, { ...loadHuntPatternAudioMap(huntId, { candidateKit }), revisions: {
                     audio: fileRevision(PATTERN_AUDIO_OVERRIDES_PATH),
                     motion: fileRevision(PATTERN_MOTION_OVERRIDES_PATH),
                     anatomy: fileRevision(ANATOMY_OVERRIDES_PATH)

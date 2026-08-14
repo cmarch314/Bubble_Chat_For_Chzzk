@@ -153,6 +153,16 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.strictEqual(burrow.secondaryInterference, null,
             'Diablos digging dust must not survive as a legacy wind-pressure route');
 
+        const rathianCandidate = await fetch(`${origin}/api/hunt-patterns?monster=rathian&candidate=rathian`)
+            .then(response => response.json());
+        assert.strictEqual(rathianCandidate.patterns.filter(pattern => !pattern.id.startsWith('__')).length, 13,
+            'candidate editing must expose the same complete native BEAT kit used by its preview');
+        const candidateFireball = rathianCandidate.patterns.find(pattern => pattern.id === 'rathian.fireball');
+        assert.ok(candidateFireball.slots.find(slot => slot.slot === 'beat:look')?.assigned,
+            'a rebuilt candidate must inherit the prior reviewed fireball windup route');
+        assert.ok(candidateFireball.slots.find(slot => slot.slot === 'beat:spit')?.assigned,
+            'a rebuilt candidate must inherit the prior reviewed fireball contact route');
+
         const preview = await fetch(`${origin}/preview/?embed=1`).then(response => response.text());
         assert.ok(preview.includes('hunt-monster-pattern-lab-audio.js'));
         assert.ok(preview.includes('function playRuntimeReaction(pattern)')

@@ -29,7 +29,7 @@
         return;
     }
     const app = {
-        monster: '', huntId: '', monsters: [], categories: [], groups: [], commonGroups: [], presets: {}, patterns: [],
+        monster: '', huntId: '', candidateId: '', monsters: [], categories: [], groups: [], commonGroups: [], presets: {}, patterns: [],
         partReactions: [], systemAudioPattern: null,
         selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', anatomy: true, sourceQueue: [], previewTimers: [],
         previewAudios: [], previewAudioSchedule: [], capabilities: [], buildId: '', session: MonsterAudioReviewState.createEditorSession(),
@@ -1235,10 +1235,13 @@
         button.disabled = true; button.textContent = '검증 중…';
         try {
             const result = await api('/api/hunt-pattern-motion', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, beats,
+                body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id,
+                    candidate: app.candidateId === app.monster ? app.candidateId : '', beats,
                     expectedRevision: app.revisions.motion }) });
             assertGeneratedMotion(result);
-            const reloaded = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}`);
+            const candidateQuery = app.candidateId && app.candidateId === app.monster
+                ? `&candidate=${encodeURIComponent(app.candidateId)}` : '';
+            const reloaded = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}${candidateQuery}`);
             const persisted = reloaded.patterns.find(item => item.id === pattern.id);
             const verify = MonsterAudioReviewState.createMotionDraft(persisted, persisted.timeline);
             if (!MonsterAudioReviewState.motionValuesEqual(beats, verify)) throw new Error('저장 후 재로드 검증 실패');
@@ -1278,7 +1281,9 @@
     }
 
     async function loadPatterns(keepPattern = '', keepSlot = '') {
-        const result = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}`);
+        const candidateQuery = app.candidateId && app.candidateId === app.monster
+            ? `&candidate=${encodeURIComponent(app.candidateId)}` : '';
+        const result = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}${candidateQuery}`);
         app.huntId = result.huntId;
         const commonBreakRoute = globalThis.HUNT_MONSTER_PATTERN_AUDIO_ROUTES
             ?.common?.['__visual.part-break']?.['beat:se'] || null;
@@ -1298,7 +1303,7 @@
     }
 
     async function saveRoute(payload) {
-        const result = await api('/api/hunt-pattern-route', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, expectedRevision: app.revisions.audio }) });
+        const result = await api('/api/hunt-pattern-route', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, candidate: app.candidateId === app.monster ? app.candidateId : '', expectedRevision: app.revisions.audio }) });
         assertGeneratedAudioRoute(result);
         app.revisions.audio = result.sourceRevision || app.revisions.audio;
         const pattern = app.patterns.find(item => item.id === payload.patternId);
@@ -1369,7 +1374,7 @@
         row.ondrop = async event => {
             event.preventDefault(); let payload; try { payload = JSON.parse(event.dataTransfer.getData('application/json')); } catch { return; }
             if (!payload || payload.fromSlot === slot.slot) return;
-            await api('/api/hunt-pattern-route-move', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, fromSlot: payload.fromSlot, toSlot: slot.slot, file: payload.file, expectedRevision: app.revisions.audio }) });
+            await api('/api/hunt-pattern-route-move', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, candidate: app.candidateId === app.monster ? app.candidateId : '', fromSlot: payload.fromSlot, toSlot: slot.slot, file: payload.file, expectedRevision: app.revisions.audio }) });
             await loadPatterns(pattern.id, slot.slot);
             renderPatternList(); renderPatternDesk(); refreshSourceSelection();
         };
@@ -1713,7 +1718,8 @@
         app.capabilities = metadata.capabilities || []; app.buildId = metadata.buildId; app.presets = metadata.presets || {}; app.monsters = metadata.monsters || []; app.categories = metadata.categories || [];
         installPairPreviewTargets();
         const reviewQuery = new URLSearchParams(location.search);
-        const candidate = String(reviewQuery.get('candidate') || '').trim();
+        const candidate = String(reviewQuery.get('candidate') || '').trim().toLowerCase();
+        app.candidateId = candidate;
         const requestedPreviewMonster = String(reviewQuery.get('monster') || '').trim();
         const previewPath = metadata.previewPath || '/preview/?embed=1';
         const previewQuery = new URLSearchParams(previewPath.includes('?')

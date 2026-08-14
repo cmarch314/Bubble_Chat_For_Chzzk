@@ -428,7 +428,12 @@ function buildMonsterPatternAudioMap({
             const binding = bindAudioSlotsToTimeline(rawSlots, patternReviewTimeline(pattern, rawSlots));
             const canonicalSlots = binding.slots.map(slot => {
                 const catalogRoute = currentCatalogRoute(catalog, huntId, slot.slot, pattern);
-                const override = (monsterOverrides[audioPatternId] || {})[slot.slot] || null;
+                // Earlier review sessions already stored the same semantic
+                // route under beat:<phase>.  A native rebuild must inherit
+                // that reviewed route instead of presenting every newly split
+                // BEAT as silent and forcing a second audition pass.
+                const override = (monsterOverrides[audioPatternId] || {})[slot.slot]
+                    || (monsterOverrides[audioPatternId] || {})[`beat:${slot.slot}`] || null;
                 const muted = override?.disabled === true;
                 const effective = muted ? null : (override || (catalogRoute && {
                     label: catalogRoute.label,
@@ -707,7 +712,38 @@ function resolveHuntId(idOrGraphId, bankMapPath = BANK_MAP_PATH) {
     return id;
 }
 
-function loadHuntPatternAudioMap(idOrGraphId, { overridesPath = OVERRIDES_PATH, bankMapPath = BANK_MAP_PATH } = {}) {
+function candidatePatternForAudioReview(action = {}) {
+    const graph = action.beatV2 || {};
+    const damageByBeat = new Map();
+    for (const event of graph.events || []) {
+        if (event.kind === 'damage') damageByBeat.set(event.beatId, event);
+    }
+    return {
+        ...action,
+        // Candidate BEAT remains the single timeline.  This projection only
+        // lets the audio review tool bind old phase routes to its new beats.
+        motion: (graph.beats || []).map(beat => {
+            const visual = (beat.tracks?.visual || []).at(-1)?.value || {};
+            const hit = damageByBeat.get(beat.id) || null;
+            return {
+                beat: beat.id,
+                label: beat.id,
+                ticks: beat.ticks,
+                ...visual,
+                hit: Boolean(hit),
+                hitOffsetTicks: hit?.offsetTicks || 0
+            };
+        }),
+        impactTimeline: (graph.events || []).filter(event => event.kind === 'damage')
+            .map(event => ({ atTicks: event.atTicks, audioCue: event.audioCue || null }))
+    };
+}
+
+function loadHuntPatternAudioMap(idOrGraphId, {
+    overridesPath = OVERRIDES_PATH,
+    bankMapPath = BANK_MAP_PATH,
+    candidateKit = null
+} = {}) {
     const { patternsFor, routes } = loadHuntCatalogs();
     const huntId = resolveHuntId(idOrGraphId, bankMapPath);
     const monster = (global.MONSTER_DATA || []).find(entry => entry.id === huntId) || {};
@@ -836,9 +872,16 @@ function loadHuntPatternAudioMap(idOrGraphId, { overridesPath = OVERRIDES_PATH, 
             })
         };
     });
+    const CandidateCatalog = candidateKit
+        ? require('../js/effects/hunt/HuntMonsterCandidateCatalog.js') : null;
+    const candidateActions = candidateKit
+        ? CandidateCatalog.compileKit(candidateKit).actions.map(candidatePatternForAudioReview) : null;
+    if (candidateActions && String(candidateKit.monsterId) !== huntId) {
+        throw new Error(`candidate monster mismatch: ${candidateKit.monsterId} != ${huntId}`);
+    }
     const result = buildMonsterPatternAudioMap({
         huntId,
-        patterns: [...patternsFor(huntId), ...reviewedReactions],
+        patterns: [...(candidateActions || patternsFor(huntId)), ...reviewedReactions],
         catalog: routes,
         overridesPath,
         bankMapPath
