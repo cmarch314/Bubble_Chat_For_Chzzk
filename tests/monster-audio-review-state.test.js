@@ -206,6 +206,18 @@ assert.strictEqual(mixedSchemaSession.serialize()['new-impact'].judgments[0].off
 assert.strictEqual(mixedSchemaSession.snapshot().timeline.beats[0].hit, false,
     'the projected editor timeline must have only one HIT authority');
 
+const projectileSession = createEditorSession();
+projectileSession.load({ id: 'test.projectile',
+    timeline: { beats: [{ id: 'spit', ticks: 7 }, { id: 'recover', ticks: 5 }] },
+    motion: [{ beat: 'spit', ticks: 7, judgments: [{ id: 'contact', group: 'contact', kind: 'damage',
+        target: 'primary', damagePercent: 30, offsetTicks: 4 }] }, { beat: 'recover', ticks: 5 }],
+    beatV2: { events: [{ id: 'launch', kind: 'projectile-launch', beatId: 'spit',
+        offsetTicks: 2, projectileId: 'fireball', outcomeEventId: 'contact' }] }
+});
+projectileSession.moveJudgmentById('contact', 2);
+assert.strictEqual(projectileSession.serialize().spit.judgments[0].offsetTicks, 3,
+    'dragging a projectile HIT onto its launch tick must clamp to one tick of flight');
+
 judgmentSession.removeJudgment('j1');
 assert.deepStrictEqual(judgmentSession.serialize().impact.judgments, [],
     'deleting the final judgment must retain an empty-array tombstone for inherited motion');

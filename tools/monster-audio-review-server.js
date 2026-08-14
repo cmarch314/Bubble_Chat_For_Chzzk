@@ -681,6 +681,7 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
             beat.tracks.visual = frames;
             if (draft.label) beat.label = draft.label;
         }
+        enforceCandidateProjectileOutcomeOrder(action.graph, normalizedBeats);
         // Persist the canonical projectile lifecycle rather than merely
         // accepting it during compilation.  A judgment editor can move a HIT
         // without owning the launch/outcome linkage; this hydrates the linked
@@ -713,6 +714,49 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
         fs.writeFileSync(rollback, previousText, 'utf8');
         fs.renameSync(rollback, sourcePath);
         throw new Error(`후보 모션 저장 롤백: ${error.message}`);
+    }
+}
+
+function enforceCandidateProjectileOutcomeOrder(graph, normalizedBeats) {
+    let elapsed = 0;
+    const beats = (graph?.beats || []).map(beat => {
+        const ticks = Math.max(1, Number(beat?.ticks) || 1);
+        const record = { beat, id: String(beat?.id || beat?.beat || ''), ticks,
+            startTicks: elapsed, endTicks: elapsed + ticks };
+        elapsed += ticks;
+        return record;
+    });
+    const events = new Map();
+    beats.forEach(record => (record.beat.events || []).forEach(event => {
+        if (event?.id) events.set(String(event.id), { event, record });
+    }));
+    for (const { event: launch, record: launchRecord } of events.values()) {
+        if (launch.kind !== 'projectile-launch') continue;
+        const outcome = events.get(String(launch.outcomeEventId || ''));
+        if (!outcome || outcome.event.kind !== 'damage') continue;
+        const launchAt = launchRecord.startTicks + Math.min(launchRecord.ticks - 1,
+            Math.max(0, Number(launch.offsetTicks) || 0));
+        const outcomeAt = outcome.record.startTicks + Math.min(outcome.record.ticks - 1,
+            Math.max(0, Number(outcome.event.offsetTicks) || 0));
+        if (outcomeAt > launchAt) continue;
+        const destinationTick = launchAt + 1;
+        const destination = beats.find(record => destinationTick >= record.startTicks
+            && destinationTick < record.endTicks);
+        if (!destination) {
+            throw new Error(`${launch.id}: projectile outcome needs at least one tick after launch`);
+        }
+        const moved = { ...outcome.event, offsetTicks: destinationTick - destination.startTicks };
+        outcome.record.beat.events = (outcome.record.beat.events || []).filter(event => event !== outcome.event);
+        destination.beat.events = [...(destination.beat.events || []), moved];
+        for (const value of Object.values(normalizedBeats)) {
+            if (Array.isArray(value?.judgments)) value.judgments = value.judgments
+                .filter(judgment => String(judgment?.id || '') !== String(moved.id));
+        }
+        const destinationDraft = normalizedBeats[destination.id] || { ticks: destination.ticks };
+        destinationDraft.judgments = [...(destinationDraft.judgments || []), {
+            ...moved, offsetTicks: moved.offsetTicks
+        }];
+        normalizedBeats[destination.id] = destinationDraft;
     }
 }
 

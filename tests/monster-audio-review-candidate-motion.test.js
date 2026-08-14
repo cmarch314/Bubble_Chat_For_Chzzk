@@ -79,6 +79,7 @@ try {
         .find(pattern => pattern.id === 'rathian.fireball');
     const fireballDraft = ReviewState.createMotionDraft(fireballPattern, fireballPattern.timeline);
     fireballDraft.spit.ticks += 1;
+    fireballDraft.spit.judgments.find(item => item.id === 'fireball-1:contact').offsetTicks = 2;
     const fireballSave = saveCandidatePatternMotion({
         huntId: 'rathian', patternId: 'rathian.fireball', candidate: 'rathian',
         candidateRecord: fireballRecord, beats: fireballDraft
@@ -90,6 +91,9 @@ try {
     assert.equal(fireballPersisted.graph.beats.find(beat => beat.id === 'spit').events
         .find(event => event.id === 'fireball-1:contact')?.projectileId, 'fireball-1',
     'candidate save must repair and persist projectile outcome linkage');
+    assert.equal(fireballPersisted.graph.beats.find(beat => beat.id === 'spit').events
+        .find(event => event.id === 'fireball-1:contact')?.offsetTicks, 3,
+    'candidate save must leave one authored tick between projectile launch and contact');
 
     // A projectile damage event carries runtime linkage (projectileId) that
     // is intentionally not an editable motion field.  Saving an unchanged
