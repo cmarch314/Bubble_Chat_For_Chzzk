@@ -1360,6 +1360,7 @@
             "skewX": -6,
             "damageScale": 0.45,
             "fxDurationTicks": 5,
+            "flipFacing": false,
             "hit": false,
             "judgments": [
               {
@@ -1418,6 +1419,7 @@
             "skewX": 6,
             "damageScale": 0.45,
             "fxDurationTicks": 5,
+            "flipFacing": false,
             "hit": false,
             "judgments": [
               {

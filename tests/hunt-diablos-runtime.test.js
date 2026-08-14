@@ -399,8 +399,8 @@ assert.deepStrictEqual(
     const rageChargeOverride = motionOverrides.diablos['diablos.rage_charge'].beats;
     assert.deepStrictEqual(
         ['tail-cross-one', 'tail-cross-two'].map(id => rageChargeOverride[id].flipFacing),
-        [true, true],
-        'the reviewed X-tail override must mirror both strike images'
+        [false, false],
+        'the reviewed X-tail override must preserve each prepared tail direction through both strike images'
     );
     assert.ok(rageCharge.motion.filter(beat => beat.beat.startsWith('tail-'))
         .every(beat => beat.origin === 'part:torso'),
