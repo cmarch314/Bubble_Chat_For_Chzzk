@@ -770,7 +770,7 @@
 
     function renderTimeline(pattern) {
         const snapshot = app.session.snapshot(), host = $('#patternDesk');
-        host.innerHTML = `<section class="beat-card timeline-docked"><div class="section-kicker"><b>모션 타임라인</b><span class="beat-source">단일 실행기 · ${snapshot.timeline.durationTicks}틱</span></div><div class="beat-track"></div></section><div class="section-kicker"><b>사운드 순간 선택</b><span>타임라인과 항상 동기화</span></div><section id="slotFlow" class="slot-flow"></section><section class="motion-editor"></section><section class="part-reaction-editor"></section>`;
+        host.innerHTML = `<section class="beat-card timeline-docked"><div class="section-kicker"><b>모션 · 판정 타임라인</b><span class="beat-source">단일 실행기 · ${snapshot.timeline.durationTicks}틱</span></div><div class="beat-track"></div><section class="judgment-manager timeline-judgment-manager"></section></section><div class="section-kicker"><b>사운드 순간 선택</b><span>선택 판정과 항상 동기화</span></div><section id="slotFlow" class="slot-flow"></section><section class="motion-editor"></section><section class="part-reaction-editor"></section>`;
         const transport = document.createElement('div');
         transport.className = 'timeline-transport';
         transport.setAttribute('role', 'group');
@@ -791,7 +791,12 @@
             node.className = `beat${displaysImpact ? ' hit' : ''}${beat.id === snapshot.selection.beatId ? ' scrub-active' : ''}`;
             node.dataset.beat = beat.id; node.style.setProperty('--ticks', beat.ticks);
             node.innerHTML = `<strong>${esc(beat.label || beat.id)}</strong><small>${beat.startTicks}–${beat.endTicks}틱 · ${(beat.ticks / 10).toFixed(1)}초</small>${displaysImpact ? '<em>HIT</em>' : ''}`;
-            node.onclick = event => { if (!event.target.closest('.beat-handle')) selectPart({ beatId: beat.id }); };
+            node.onclick = event => {
+                if (event.target.closest('.beat-handle')) return;
+                const firstJudgment = (beat.judgments || [])[0];
+                if (firstJudgment) selectJudgmentEntry(beat, firstJudgment);
+                else selectPart({ beatId: beat.id });
+            };
             if (index < snapshot.timeline.beats.length - 1) installBoundaryHandle(node, beat, snapshot.timeline.beats[index + 1], track);
             track.appendChild(node);
         }
@@ -839,7 +844,7 @@
             marker.dataset.beat = beat.id; marker.dataset.judgmentId = judgment.id;
             marker.style.left = `${markerTick / Math.max(1, snapshot.timeline.durationTicks) * 100}%`;
             marker.innerHTML = `<b>${meta.label}</b><small>${markerTick}틱</small>`;
-            marker.onclick = event => { event.stopPropagation(); app.selectedJudgmentId = judgment.id; renderPatternDesk(); };
+            marker.onclick = event => { event.stopPropagation(); selectJudgmentEntry(beat, judgment); };
             installUnifiedJudgmentDrag(marker, beat, judgment, track);
             track.appendChild(marker);
         }
@@ -851,6 +856,7 @@
         track.appendChild(slider);
         installScrubber(track);
         renderSlotFlow(pattern);
+        renderJudgmentManager();
         renderMotionEditor(pattern);
         renderPartReactionEditor();
         updateTimelineCursor(); updateTransportControls();
@@ -1157,7 +1163,26 @@
     }
 
     function selectPart(request) {
+        app.selectedJudgmentId = '';
         app.session.select(request); updateTimelineCursor(); renderSelectionOnly(); seekPreview(app.session.scrub.tick);
+    }
+
+    function selectJudgmentEntry(beat, judgment, { scrollAudio = false } = {}) {
+        if (!beat || !judgment) return;
+        const pattern = selectedPattern();
+        const group = String(judgment.group || judgment.id || 'impact');
+        const slot = pattern?.slots.find(item => item.judgmentGroup === group) || null;
+        const tick = beat.startTicks + Number(judgment.offsetTicks || 0);
+        app.selectedJudgmentId = judgment.id;
+        // One authored judgment owns the visible selection: its exact timeline
+        // tick, mapped sound moment, source rail and marker always move together.
+        app.session.seek(tick);
+        app.session.select({ beatId: beat.id, ...(slot ? { slotId: slot.slot } : {}) }, { seek: false });
+        renderPatternDesk();
+        seekPreview(tick);
+        if (scrollAudio && slot) requestAnimationFrame(() => document
+            .querySelector(`.slot-card[data-slot="${CSS.escape(slot.slot)}"]`)
+            ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
     }
 
     const EDITABLE_MOTION_FIELDS = MonsterAudioReviewState.EDITABLE_MOTION_FIELDS;
@@ -1199,10 +1224,6 @@
             inputs.appendChild(field);
         }
         renderInspector(pattern);
-        const judgmentHost = document.createElement('section');
-        judgmentHost.className = 'judgment-manager';
-        host.appendChild(judgmentHost);
-        renderJudgmentManager();
         updateHistoryButtons();
     }
 
@@ -1245,16 +1266,11 @@
                 <span>${esc(beat.label || beat.id)} · ${beat.startTicks + Number(judgment.offsetTicks || 0)}틱</span>
                 <button type="button" class="judgment-audio-route${audioFiles.length ? ' assigned' : ''}"${audioSlot ? '' : ' disabled'} title="판정 사운드 배정 열기"><b>🎵 판정 음원</b><small>${esc(whenLabel)} · ${esc(audioName)}</small></button><button type="button" class="remove-judgment">×</button>`;
             row.querySelector('.select-judgment').onclick = () => {
-                app.selectedJudgmentId = judgment.id;
-                app.session.seek(beat.startTicks + Number(judgment.offsetTicks || 0));
-                renderPatternDesk();
+                selectJudgmentEntry(beat, judgment);
             };
             row.querySelector('.judgment-audio-route').onclick = () => {
                 if (!audioSlot) return;
-                app.selectedJudgmentId = judgment.id;
-                selectPart({ beatId: beat.id, slotId: audioSlot.slot });
-                requestAnimationFrame(() => document.querySelector(`.slot-card[data-slot="${CSS.escape(audioSlot.slot)}"]`)
-                    ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+                selectJudgmentEntry(beat, judgment, { scrollAudio: true });
             };
             row.querySelector('.remove-judgment').onclick = () => {
                 app.session.removeJudgment(judgment.id); app.selectedJudgmentId = ''; renderPatternDesk();
