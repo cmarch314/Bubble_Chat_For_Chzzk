@@ -77,6 +77,15 @@ const zeroAngles = explicitZeroRotation.pose.map(frame => Number(frame.transform
 assert.ok(zeroAngles.every(angle => angle === 0),
     'an editor-authored 0° must suppress stale legacy rotation deltas');
 
+const completedTurnHold = HuntMotionCompiler.compile([
+    { beat: 'turn', ticks: 5, pose: 'stretch-strong', rotation: 360 },
+    { beat: 'return', ticks: 5, pose: 'idle', rotation: 0 }
+], { anchors });
+const completedTurnAngles = completedTurnHold.pose.map(frame => Number(frame.transform
+    .match(/rotate\((-?[\d.]+)deg\)/)[1]));
+assert.ok(completedTurnAngles.slice(-2).every(angle => angle === 360),
+    '0° after a completed turn must retain the equivalent 360° angle instead of reverse-rotating');
+
 const reviewedCutwingAmbush = HuntMotionCompiler.compile([
     { beat: 'windup', ticks: 5, pose: 'crouch' },
     { beat: 'leap-out', ticks: 4, to: 'offscreen:left', offsetY: -280, pose: 'stretch', opacity: 0 },

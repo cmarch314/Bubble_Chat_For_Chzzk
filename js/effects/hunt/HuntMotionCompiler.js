@@ -63,6 +63,19 @@ class HuntMotionCompiler {
         return this.EASING_PRESETS[name] || this.EASING_PRESETS.smooth;
     }
 
+    static equivalentRotation(angle, previous = 0) {
+        const target = Number(angle) || 0;
+        const current = Number(previous) || 0;
+        // A non-zero authored angle is deliberately unwrapped: 360° means
+        // "make one full turn", not the visually equivalent 0°.  Only a
+        // normalized 0° is ambiguous, so carry it to the nearest completed
+        // turn. CSS otherwise interpolates 360° → 0° backwards.
+        if (target === 0 && current !== 0) {
+            return 360 * Math.round(current / 360);
+        }
+        return target;
+    }
+
     // beats: 비트 배열
     // options: { anchors, rig, poses, ticksPerSecond }
     // align: 'part:tail' — 몸 중심이 아니라 그 부위가 목적지에 오도록 놓는다.
@@ -311,7 +324,9 @@ class HuntMotionCompiler {
             // value; legacy deltas must never turn it into a visible spin.
             if (beat.origin) state.origin = beat.origin;
             const hasExplicitRotation = beat.rotation !== undefined;
-            if (hasExplicitRotation) state.rotation = Number(beat.rotation) || 0;
+            if (hasExplicitRotation) state.rotation = this.equivalentRotation(
+                beat.rotation, previous.rotation
+            );
             if (!hasExplicitRotation && beat.rotationToward !== undefined) {
                 const degrees = Number(beat.rotationToward) || 0;
                 const travelX = state.point.x - previous.point.x;

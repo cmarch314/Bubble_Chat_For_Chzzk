@@ -1202,11 +1202,14 @@
                 previous += Number(authored.rotateBy) || 0;
             }
         }
-        const final = Number(value.rotation);
-        const delta = Number.isFinite(final) ? final - previous : Number(value.rotateBy) || 0;
+        const rawFinal = Number(value.rotation);
+        const final = Number.isFinite(rawFinal)
+            ? rawFinal + 360 * Math.round((previous - rawFinal) / 360)
+            : previous + (Number(value.rotateBy) || 0);
+        const delta = final - previous;
         const direction = value.rotationDirection === 'counterclockwise' || delta < 0
             ? 'counterclockwise' : 'clockwise';
-        return { previous, final: Number.isFinite(final) ? final : previous + delta,
+        return { previous, final,
             degrees: Math.abs(Number(value.rotationDegrees) || delta || 0), direction,
             keepRotation: value.keepRotation !== false };
     }
@@ -1281,7 +1284,8 @@
         };
         host.querySelector('.rotation-final').onchange = event => {
             const current = rotationEditorModel(app.session.snapshot(), beatId, app.session.snapshot().draft[beatId]);
-            const final = Number(event.target.value) || 0;
+            const rawFinal = Number(event.target.value) || 0;
+            const final = rawFinal + 360 * Math.round((current.previous - rawFinal) / 360);
             const delta = final - current.previous;
             app.session.updateBeat(beatId, {
                 rotation: final, rotationDegrees: Math.abs(delta),
