@@ -2746,7 +2746,7 @@ class HuntMonsterAttackAnimator {
         const impacts = timeline.filter(event => Number(event?.damageScale ?? 1) > 0);
         const firstImpactTicks = Number(impacts[0]?.atTicks ?? pattern.runtimeImpactDelayTicks ?? 0);
         const generation = this.motionGeneration;
-        const launch = (impactTicks, event = null) => {
+        const launch = (impactTicks, event = null, eventIndex = 0) => {
             const delayMs = HuntMonsterAttackAnimator.projectileLaunchDelayMs(
                 pattern, impactTicks, firstImpactTicks, ticksPerSecond, 720);
             this.animationTimers.timeout(() => {
@@ -2758,19 +2758,42 @@ class HuntMonsterAttackAnimator {
                     ? event.targetIndices.find(Number.isInteger) : null;
                 const visualTargetIndex = Number.isInteger(eventTargetIndex)
                     ? eventTargetIndex : Number(targetIndex);
+                const hasEmptyAuthoredLane = pattern?.targeting?.mode === 'center-left-right'
+                    && Array.isArray(event?.targetIndices) && event.targetIndices.length === 0;
                 const liveTarget = this.card.querySelector(`#fight-card-${visualTargetIndex}`);
                 const liveMonster = this.card.querySelector('.hunt-small-monster.is-attacking')
                     || this.card.querySelector('#fight-monster-img');
-                if (!liveTarget || !liveMonster) return;
+                if ((!liveTarget && !hasEmptyAuthoredLane) || !liveMonster) return;
+                const anchor = liveTarget?.querySelector?.('.game-hunt-weapon-img-container') || liveTarget || targetCard;
+                const anchorRect = anchor?.getBoundingClientRect?.();
+                const boardRect = this.card.getBoundingClientRect();
+                const side = String(event?.targetMode || '').includes('left') || eventIndex === 1 ? -1 : 1;
+                // The missing flank is still a real third spit. Give it an
+                // off-board phantom destination so H1 produces H1 → 0 → H2
+                // (and H4 mirrors it) without fabricating a hunter hit.
+                const phantomTarget = hasEmptyAuthoredLane && anchorRect ? {
+                    querySelector: () => null,
+                    getBoundingClientRect: () => ({
+                        left: side < 0 ? boardRect.left - anchorRect.width * 1.2
+                            : boardRect.right + anchorRect.width * .2,
+                        top: anchorRect.top,
+                        width: anchorRect.width,
+                        height: anchorRect.height
+                    })
+                } : null;
+                const visualTarget = phantomTarget || liveTarget;
+                if (!visualTarget) return;
                 this.createElementalAttack(
-                    this.resolveLiveElementalOrigin(liveMonster, liveTarget, pattern, fallbackOrigin),
-                    this.card.getBoundingClientRect(), liveTarget,
-                    { index: visualTargetIndex, result: 'effect' }, attackName, emoji, 0, pattern
+                    this.resolveLiveElementalOrigin(liveMonster, visualTarget, pattern, fallbackOrigin),
+                    boardRect, visualTarget,
+                    { index: hasEmptyAuthoredLane ? -1 : visualTargetIndex,
+                        result: hasEmptyAuthoredLane ? 'miss' : 'effect' }, attackName, emoji, 0, pattern
                 );
             }, delayMs);
         };
         (impacts.length ? impacts : [{ atTicks: firstImpactTicks }])
-            .forEach(event => launch(Number(event.atTicks ?? firstImpactTicks), event));
+            .forEach((event, eventIndex) => launch(
+                Number(event.atTicks ?? firstImpactTicks), event, eventIndex));
         return true;
     }
 
