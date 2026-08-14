@@ -42,4 +42,17 @@ assert.deepStrictEqual(live.targetIndices, [2],
     'an unresolved live impact must retain its prepared target instead of cancelling the turn');
 assert.strictEqual(live.impactTimeline[0].targetIndices, null);
 
+const pairAnchoredArea = { motion: [{ beat: 'approach', ticks: 6, to: 'pair:center' }],
+    impactTimeline: [{ atTicks: 5, targetMode: 'judgment-all' }] };
+const leftPair = Policy.resolveTargetScenario({ pattern: pairAnchoredArea, targetable: hunters,
+    defaultTargets: hunters, count: 4, random: () => 0 });
+const rightPair = Policy.resolveTargetScenario({ pattern: pairAnchoredArea, targetable: hunters,
+    defaultTargets: hunters, count: 4, random: () => .999 });
+assert.deepStrictEqual(leftPair.runtime.runtimePairTargets, [0, 1],
+    'a pair placement anchor must be able to use the H1-H2 lane');
+assert.deepStrictEqual(rightPair.runtime.runtimePairTargets, [2, 3],
+    'a pair placement anchor must be able to use the H3-H4 lane instead of always H2-H3');
+assert.deepStrictEqual(leftPair.impactTimeline[0].targetIndices, [0, 1, 2, 3],
+    'a pair movement anchor must not replace an area action\'s authored recipients');
+
 console.log('[test] shared monster target scenario contract passed');

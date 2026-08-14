@@ -34,6 +34,27 @@ class HuntMonsterActionPolicy {
         return [...targetable].sort((a, b) => Number(a.index) - Number(b.index));
     }
 
+    // `pair:*` is a placement vocabulary as well as a judgment vocabulary.
+    // A visual-only pair anchor must still receive one authored adjacent lane;
+    // otherwise the anchor falls back to the union of every hit recipient and
+    // silently becomes the fixed middle (H2-H3) point.
+    static usesPairAnchor(pattern = {}) {
+        const beats = Array.isArray(pattern.motionGraph?.beats)
+            ? pattern.motionGraph.beats : (Array.isArray(pattern.motion) ? pattern.motion : []);
+        return beats.some(beat => ['to', 'at', 'face', 'align'].some(key =>
+            /(?:^|[.:])pair(?::|\b)/.test(String(beat?.[key] || ''))
+        ));
+    }
+
+    static randomAdjacentPair(targetable = [], random = Math.random) {
+        const ordered = this.orderedTargets(targetable);
+        const pairs = ordered.slice(0, -1).map((target, index) => [target, ordered[index + 1]])
+            .filter(([left, right]) => Number(right.index) - Number(left.index) === 1);
+        if (!pairs.length) return ordered.slice(0, 2);
+        return pairs[Math.min(pairs.length - 1, Math.floor(Math.max(0, Math.min(.999999,
+            Number(random()) || 0)) * pairs.length))];
+    }
+
     static judgmentTargetMode(target = '') {
         return ({
             primary: 'judgment-primary',
@@ -662,6 +683,14 @@ class HuntMonsterActionPolicy {
             defaultTargets, primaryIndex, distinctPasses });
         const targets = forced ? forced.map(index => byIndex.get(index)).filter(Boolean) : resolved.targets;
         const runtime = { ...resolved.runtime };
+        // Placement-only two-hunter presets select their own lane once per
+        // action. Keep that lane separate from damage recipients: an area
+        // action can still hit all hunters while moving through 1-2, 2-3, or
+        // 3-4 instead of always anchoring at the all-target midpoint.
+        if (!Array.isArray(runtime.runtimePairTargets) && this.usesPairAnchor(pattern)) {
+            runtime.runtimePairTargets = this.randomAdjacentPair(targetable, random)
+                .map(target => target.index).filter(Number.isInteger);
+        }
         const forcedByImpact = new Map((forcedImpactTargets || [])
             .filter(item => Number.isInteger(item?.impactIndex))
             .map(item => [item.impactIndex,

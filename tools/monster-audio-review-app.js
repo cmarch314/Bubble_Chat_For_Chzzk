@@ -34,6 +34,7 @@
         selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', anatomy: true, sourceQueue: [], previewTimers: [],
         previewAudios: [], previewAudioSchedule: [], capabilities: [], buildId: '', session: MonsterAudioReviewState.createEditorSession(),
         pickerCategory: '', pickerStatus: 'all', previewReady: false, previewSequence: 0,
+        previewRandomPairTarget: '',
         sourceRowsByPath: new Map(), sourceGroupViews: [], sourceRenderLimit: 80,
         hiddenSourcePaths: new Set(), temporarilyRevealedSources: new Set(),
         hiddenSourceGroups: new Set(), favoriteSourceGroups: new Set(), autoFavoriteSourceGroups: new Set(),
@@ -46,6 +47,18 @@
     };
     const audio = $('#audio');
     const selectedPattern = () => app.patterns.find(pattern => pattern.id === app.selectedPatternId) || null;
+    const adjacentPreviewTargets = Object.freeze(['pair:0,1', 'pair:1,2', 'pair:2,3']);
+    function previewTargetMode({ newAction = false } = {}) {
+        const selected = String($('#previewTarget')?.value || 'auto');
+        if (selected !== 'pair:random-adjacent') {
+            app.previewRandomPairTarget = '';
+            return selected;
+        }
+        if (newAction || !adjacentPreviewTargets.includes(app.previewRandomPairTarget)) {
+            app.previewRandomPairTarget = adjacentPreviewTargets[Math.floor(Math.random() * adjacentPreviewTargets.length)];
+        }
+        return app.previewRandomPairTarget;
+    }
     const selectedSlot = () => selectedPattern()?.slots.find(slot => slot.slot === app.selectedSlot) || null;
     const routeFiles = route => (route?.layers || []).map(layer => Array.isArray(layer) ? layer[0] : layer).filter(Boolean);
     const fileName = file => String(file || '').split('/').pop();
@@ -277,7 +290,7 @@
         bridge.send('bubblechat:pattern-preview', {
             monsterId: app.huntId,
             monster: { id: app.huntId, nameKO: monster?.name || app.huntId, filename: `${app.huntId}.png` },
-            target: $('#previewTarget').value,
+            target: previewTargetMode({ newAction: play }),
             state: snapshot.scenario.monsterState,
             scenario: { ...snapshot.scenario, selectedBeatId: snapshot.selection.beatId,
                 editBeat: { ...(snapshot.draft[snapshot.selection.beatId] || {}) } },
@@ -293,7 +306,7 @@
         if (app.simulationMode) return;
         const snapshot = app.session.snapshot();
         bridge.send('bubblechat:pattern-preview-settings', {
-            target: $('#previewTarget').value,
+            target: previewTargetMode(),
             state: snapshot.scenario.monsterState,
             scenario: { ...snapshot.scenario, selectedBeatId: snapshot.selection.beatId,
                 editBeat: { ...(snapshot.draft[snapshot.selection.beatId] || {}) } }
@@ -1771,7 +1784,7 @@
         panel.querySelector('.primary-options').onclick = event => { const button = event.target.closest('button'); if (!button) return; app.session.setScenario({ primaryTargetIndex: Number(button.dataset.index) }); render(); syncPreviewSettings(); };
         panel.querySelector('.forced-options').onclick = event => { const button = event.target.closest('button'); if (!button) return; const values = new Set(app.session.scenario.forcedTargetIndices); values.has(Number(button.dataset.index)) ? values.delete(Number(button.dataset.index)) : values.add(Number(button.dataset.index)); app.session.setScenario({ forcedTargetIndices: [...values] }); render(); syncPreviewSettings(); };
         panel.querySelector('.impact-options').onclick = event => { const button = event.target.closest('button'), row = event.target.closest('.impact-option'); if (!button || !row) return; const impactIndex = Number(row.dataset.impact), target = Number(button.dataset.index), entries = app.session.scenario.forcedImpactTargets.map(entry => ({ ...entry, targetIndices: [...entry.targetIndices] })), entry = entries.find(item => item.impactIndex === impactIndex) || { impactIndex, targetIndices: [] }, values = new Set(entry.targetIndices); values.has(target) ? values.delete(target) : values.add(target); entry.targetIndices = [...values]; app.session.setScenario({ forcedImpactTargets: [...entries.filter(item => item.impactIndex !== impactIndex), entry] }); render(); syncPreviewSettings(); };
-        $('#previewTarget').onchange = syncPreviewSettings;
+        $('#previewTarget').onchange = () => { app.previewRandomPairTarget = ''; syncPreviewSettings(); };
         $('#previewState').onchange = () => { app.session.setScenario({ monsterState: $('#previewState').value }); syncPreviewSettings(); };
         $('#anatomyToggle').classList.toggle('active', app.anatomy);
         $('#anatomyToggle').onclick = () => { app.anatomy = !app.anatomy; $('#anatomyToggle').classList.toggle('active', app.anatomy); bridge.send('bubblechat:pattern-anatomy', { enabled: app.anatomy }); };

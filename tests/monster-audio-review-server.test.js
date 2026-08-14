@@ -362,6 +362,8 @@ assert.match(reviewUi, /async function pasteRouteLayer[\s\S]*?saveRoute\(/,
         'review playback must have one audio owner instead of layering iframe legacy and BEAT cues');
     assert.ok(html.includes('실수렵 모션 미리보기'));
     assert.ok(html.includes('bubblechat:pattern-preview'));
+    assert.ok(html.includes('previewTargetMode({ newAction: play })'),
+        'random adjacent preview targeting must choose a fresh pair only when a new action begins');
     assert.ok(html.includes('id="patternTitleHost"'),
         'the pattern title must render outside the stable preview and timeline roots');
     assert.ok(html.indexOf('id="patternTitleHost"') < html.indexOf('id="patternPreviewFrame"')
