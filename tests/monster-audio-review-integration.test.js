@@ -78,6 +78,13 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(app.includes('hiddenSourceGroups: new Set()')
             && app.includes('favoriteSourceGroups: new Set()'),
             'group hide and favorite preferences must be first-class persisted editor state');
+        assert.ok(app.includes('AUTO_FAVORITE_MAPPED_MONSTERS')
+            && app.includes("'rathian', 'rathalos', 'bazelgeuse', 'tigrex', 'barioth', 'legiana'")
+            && app.includes('기존 맵핑 자동 즐겨찾기'),
+        'previously reviewed Rathian, Rathalos, Bazelgeuse, Tigrex, Barioth, and Legiana routes must surface as automatic source favorites');
+        assert.ok(app.includes('sourceGroupIsFavorite(groupKey)')
+            && app.includes('app.autoFavoriteSourceGroups = AUTO_FAVORITE_MAPPED_MONSTERS.has(app.huntId)'),
+        'automatic mapped favorites must sort with manual favorites without overwriting local reviewer preferences');
         assert.ok(app.includes('toggleSourceGroupHidden(groupKey)')
             && app.includes('toggleSourceGroupFavorite(groupKey)'),
             'every source group header must expose hide and favorite controls');

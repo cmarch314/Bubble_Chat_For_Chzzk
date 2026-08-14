@@ -36,7 +36,7 @@
         pickerCategory: '', pickerStatus: 'all', previewReady: false, previewSequence: 0,
         sourceRowsByPath: new Map(), sourceGroupViews: [], sourceRenderLimit: 80,
         hiddenSourcePaths: new Set(), temporarilyRevealedSources: new Set(),
-        hiddenSourceGroups: new Set(), favoriteSourceGroups: new Set(),
+        hiddenSourceGroups: new Set(), favoriteSourceGroups: new Set(), autoFavoriteSourceGroups: new Set(),
         showHiddenSources: false, linkedSourcesFirst: false, sourceFocusPath: '', routeClipboard: null,
         routeLastRandomLayer: new Map(),
         revisions: { audio: '', motion: '', anatomy: '' }, playbackState: 'stopped',
@@ -67,6 +67,11 @@
     const previewOrigin = () => location.origin;
     const sourcePreferenceKey = monster => `bubblechat.monsterAudioReview.sources.${monster}`;
     const sourceGroupKey = group => `${group.bank}\u0000${group.eventId}`;
+    // These six were reviewed before the BEAT rebuild.  Their routes are the
+    // useful evidence while their actions are being rebuilt, so surface every
+    // still-linked source group without mutating a reviewer's own favorites.
+    const AUTO_FAVORITE_MAPPED_MONSTERS = new Set(['rathian', 'rathalos', 'bazelgeuse', 'tigrex', 'barioth', 'legiana']);
+    const sourceGroupIsFavorite = groupKey => app.favoriteSourceGroups.has(groupKey) || app.autoFavoriteSourceGroups.has(groupKey);
 
     function loadSourcePreferences() {
         let stored = {};
@@ -1517,9 +1522,12 @@
         let matchedGroups = 0, renderedGroups = 0;
         const commonFilter = filter === 'common' || filter === 'common-part-break' || filter === 'common-items';
         const sourcePool = commonFilter ? app.commonGroups : app.groups;
+        app.autoFavoriteSourceGroups = AUTO_FAVORITE_MAPPED_MONSTERS.has(app.huntId)
+            ? new Set(sourcePool.filter(group => group.sources.some(source => linkedPaths.has(source.path))).map(sourceGroupKey))
+            : new Set();
         const orderedGroups = sourcePool.map((group, order) => ({ group, order })).sort((left, right) => {
-            const favoriteDelta = Number(app.favoriteSourceGroups.has(sourceGroupKey(right.group)))
-                - Number(app.favoriteSourceGroups.has(sourceGroupKey(left.group)));
+            const favoriteDelta = Number(sourceGroupIsFavorite(sourceGroupKey(right.group)))
+                - Number(sourceGroupIsFavorite(sourceGroupKey(left.group)));
             if (favoriteDelta) return favoriteDelta;
             if (!app.linkedSourcesFirst) return left.order - right.order;
             const leftLinked = left.group.sources.some(source => linkedPaths.has(source.path));
@@ -1546,9 +1554,11 @@
             const details = document.createElement('details'); details.className = 'event-group';
             details.dataset.groupKey = groupKey;
             details.classList.toggle('hidden-source-group', groupHidden);
-            details.classList.toggle('favorite-source-group', app.favoriteSourceGroups.has(groupKey));
+            const autoFavorite = app.autoFavoriteSourceGroups.has(groupKey);
+            const favorite = sourceGroupIsFavorite(groupKey);
+            details.classList.toggle('favorite-source-group', favorite);
             details.open = containsFocus || openGroups.has(details.dataset.groupKey);
-            details.innerHTML = `<summary><span class="group-audio-actions"><button class="play-group" title="그룹 재생">▶</button><button class="hide-group" title="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}" aria-label="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}">${groupHidden ? '🙈' : '👁'}</button><button class="favorite-group${app.favoriteSourceGroups.has(groupKey) ? ' active' : ''}" title="즐겨찾기" aria-label="즐겨찾기" aria-pressed="${app.favoriteSourceGroups.has(groupKey)}">★</button></span><span class="event-title"><strong>${esc(group.bank)} · EVENT ${esc(group.eventId)}</strong><small>${group.sources.length} SOURCES${group.groupTags.length ? ` · ${esc(group.groupTags.join(', '))}` : ''}</small></span><span class="event-badges"><span class="badge">${esc(group.categoryLabel || group.sourceLayer || '')}</span></span></summary><div class="event-classify"><button data-preset="smallFlinch">소경직</button><button data-preset="knockdown">대경직</button><button data-preset="death">죽음</button><input placeholder="직접 태그"><button data-preset="custom">저장</button><button data-preset="clear">지우기</button><span class="save-state"></span></div><div class="sources"></div>`;
+            details.innerHTML = `<summary><span class="group-audio-actions"><button class="play-group" title="그룹 재생">▶</button><button class="hide-group" title="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}" aria-label="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}">${groupHidden ? '🙈' : '👁'}</button><button class="favorite-group${favorite ? ' active' : ''}" title="${autoFavorite ? '기존 맵핑 자동 즐겨찾기' : '즐겨찾기'}" aria-label="${autoFavorite ? '기존 맵핑 자동 즐겨찾기' : '즐겨찾기'}" aria-pressed="${favorite}">★</button></span><span class="event-title"><strong>${esc(group.bank)} · EVENT ${esc(group.eventId)}</strong><small>${group.sources.length} SOURCES${group.groupTags.length ? ` · ${esc(group.groupTags.join(', '))}` : ''}</small></span><span class="event-badges"><span class="badge">${esc(group.categoryLabel || group.sourceLayer || '')}</span></span></summary><div class="event-classify"><button data-preset="smallFlinch">소경직</button><button data-preset="knockdown">대경직</button><button data-preset="death">죽음</button><input placeholder="직접 태그"><button data-preset="custom">저장</button><button data-preset="clear">지우기</button><span class="save-state"></span></div><div class="sources"></div>`;
             details.querySelector('.play-group').onclick = event => { event.preventDefault(); const available = group.sources.filter(source => source.path); if (available.length) playSource(available[0], event.currentTarget); };
             details.querySelector('.hide-group').onclick = event => { event.preventDefault(); event.stopPropagation(); toggleSourceGroupHidden(groupKey); };
             details.querySelector('.favorite-group').onclick = event => { event.preventDefault(); event.stopPropagation(); toggleSourceGroupFavorite(groupKey); };
