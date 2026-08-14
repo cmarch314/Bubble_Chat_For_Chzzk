@@ -258,16 +258,24 @@ const mirroredRotation = HuntMotionCompiler.compile([
 const unmirroredRotation = HuntMotionCompiler.compile([
     { beat: 'turn-to-left', ticks: 4, face: 'left', pose: 'stretch', rotation: 45 }
 ], { anchors, baseFacing: 'left' });
-assert.match(mirroredRotation.pose.at(-1).transform, /rotate\(45\.00deg\)/,
-    'a horizontally mirrored sprite must keep local rotation so the outer mirror reverses its visible path');
+assert.match(mirroredRotation.pose.at(-1).transform, /rotate\(-45\.00deg\)/,
+    'a horizontally mirrored sprite must reverse its authored inner rotation');
 assert.match(unmirroredRotation.pose.at(-1).transform, /rotate\(45\.00deg\)/,
     'the native sprite direction must retain the authored rotation sign');
 const mirroredDirectedRotation = HuntMotionCompiler.compile([{
     beat: 'mirrored-counterclockwise', ticks: 4, face: 'right',
     rotationDirection: 'counterclockwise', rotationDegrees: 15
 }], { anchors, baseFacing: 'left' });
-assert.match(mirroredDirectedRotation.pose.at(-1).transform, /rotate\(-15\.00deg\)/,
-    'a mirrored sprite keeps image-local direction and lets the facing layer reverse it on screen');
+assert.match(mirroredDirectedRotation.pose.at(-1).transform, /rotate\(15\.00deg\)/,
+    'a mirrored sprite must reverse directed rotation through the shared facing state');
+const flipDuringTurns = HuntMotionCompiler.compile([
+    { beat: 'native-turn', ticks: 4, face: 'left', rotationDirection: 'clockwise', rotationDegrees: 20 },
+    { beat: 'mirrored-turn', ticks: 4, face: 'right', rotationDirection: 'clockwise', rotationDegrees: 20 }
+], { anchors, baseFacing: 'left' });
+assert.match(flipDuringTurns.pose.filter(frame => frame.offset === .5).at(-1)?.transform || '', /rotate\(-20\.00deg\)/,
+    'the facing boundary must immediately adopt the mirrored rotation sign');
+assert.match(flipDuringTurns.pose.at(-1).transform, /rotate\(-40\.00deg\)/,
+    'every later turn in the mirrored interval must keep the opposite sign');
 const clockwiseHalfTurn = HuntMotionCompiler.compile([{
     beat: 'clockwise-half', ticks: 4, rotation: -180,
     rotationDirection: 'clockwise', rotationDegrees: 180, rotateByFacing: -72

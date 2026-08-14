@@ -137,10 +137,10 @@ class HuntMotionCompiler {
             return sum + ticks;
         }, 0);
 
-        // Rotation is authored in the sprite's local image space. The outer
-        // facing layer mirrors that image and therefore naturally reverses the
-        // visible rotation path. Inverting the inner rotation here as well
-        // cancels that mirror and makes both direction buttons look identical.
+        // Authored rotation describes the monster's native-image motion. A
+        // horizontally mirrored sprite must execute the opposite inner turn;
+        // keeping one sign made asymmetric anatomy (head/tail/wings) sweep in
+        // the wrong direction after a facing change.
         const baseDirection = baseFacing === 'left' ? -1 : baseFacing === 'right' ? 1 : 1;
         const state = {
             point: { x: 0, y: 0 },
@@ -278,7 +278,7 @@ class HuntMotionCompiler {
             if (state.facing !== previous.facing || (!wasFacingActive && facingActive)) {
                 facing.push({ offset: startAt, direction: state.facing });
             }
-            state.rotationSign = 1;
+            state.rotationSign = state.facing === baseDirection ? 1 : -1;
             const strideFlipTicks = Math.max(0, Math.floor(Number(beat.strideFlipTicks) || 0));
             if (strideFlipTicks > 0) strideWindows.push({ startTicks, endTicks, intervalTicks: strideFlipTicks });
 
@@ -424,7 +424,13 @@ class HuntMotionCompiler {
                 ...this.#poseFrame(beat.instantPose
                     || snapRotationAtStart
                     ? state
-                    : { ...previous, origin: beat.origin || previous.origin }),
+                    : { ...previous,
+                        // Facing changes are stepwise at this same boundary.
+                        // Apply the matching rotation sign immediately so the
+                        // pose track cannot spend a beat using the old mirror.
+                        facing: state.facing,
+                        rotationSign: state.rotationSign,
+                        origin: beat.origin || previous.origin }),
                 easing: this.easing(beat.rotationEasing)
             });
             if (snapRotationAtEnd) {
