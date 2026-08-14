@@ -40,11 +40,15 @@ assert.deepStrictEqual(rathian.actions.find(action => action.id === 'rathian.roa
     [10, 2, 33]);
 const somersault = rathian.actions.find(action => action.id === 'rathian.somersault');
 assert.ok(somersault, 'Rathian candidate includes the tail-scoop somersault');
+assert.strictEqual(rathian.actions.length, 13,
+    'Rathian candidate must expose every reviewed World action for side-by-side feedback before release');
 assert.strictEqual(somersault.flightTransition, 'takeoff');
 assert.deepStrictEqual(somersault.motion.map(beat => beat.beat),
     ['approach', 'tail-load', 'tail-scoop', 'air-rise', 'airborne-settle']);
-assert.deepStrictEqual(somersault.motion.slice(1, 4).map(beat => beat.rotation), [-45, 315, 360],
+assert.deepStrictEqual(somersault.motion.slice(1, 4).map(beat => beat.rotation), [-35, 315, 360],
     'Rathian must load its curled J tail counterclockwise then scoop clockwise into flight');
+assert.deepStrictEqual(somersault.motion.slice(1, 3).map(beat => beat.origin), ['part:tail', 'part:tail'],
+    'the J-shaped tail, not the torso center, must remain the authored somersault scoop pivot');
 assert.deepStrictEqual(somersault.motion.slice(3).map(beat => beat.partFx?.[0]?.part),
     ['left-wing', 'left-wing'],
     'the flight-only wing flutter must remain in the native BEAT projection, never in a detached CSS timeline');
