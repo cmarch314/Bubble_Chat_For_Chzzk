@@ -40,6 +40,10 @@
         hiddenSourcePaths: new Set(), temporarilyRevealedSources: new Set(),
         hiddenSourceGroups: new Set(), favoriteSourceGroups: new Set(), autoFavoriteSourceGroups: new Set(),
         showHiddenSources: false, linkedSourcesFirst: false, sourceFocusPath: '', routeClipboard: null,
+        // Some embedded Chromium builds drop custom DataTransfer MIME values
+        // between panels. Keep the active payload locally as the authoritative
+        // fallback so native drag-and-drop remains usable in the review app.
+        dragPayload: null,
         routeLastRandomLayer: new Map(),
         revisions: { audio: '', motion: '', anatomy: '' }, playbackState: 'stopped',
         playbackStartedAt: 0, playbackElapsedMs: 0, playbackDurationMs: 0, playbackDurationTicks: 0,
@@ -63,6 +67,27 @@
     const selectedSlot = () => selectedPattern()?.slots.find(slot => slot.slot === app.selectedSlot) || null;
     const routeFiles = route => (route?.layers || []).map(layer => Array.isArray(layer) ? layer[0] : layer).filter(Boolean);
     const fileName = file => String(file || '').split('/').pop();
+    const beginRouteDrag = (event, payload, effect = 'copy') => {
+        app.dragPayload = payload;
+        const encoded = JSON.stringify(payload);
+        const transfer = event.dataTransfer;
+        if (!transfer) return;
+        transfer.effectAllowed = effect;
+        // text/plain is deliberately retained for WebView hosts which reject
+        // application/json on drops across independently rendered panels.
+        transfer.setData('application/json', encoded);
+        transfer.setData('text/plain', encoded);
+    };
+    const droppedRoutePayload = event => {
+        const transfer = event.dataTransfer;
+        for (const type of ['application/json', 'text/plain']) {
+            const raw = transfer?.getData(type);
+            if (!raw) continue;
+            try { return JSON.parse(raw); } catch { /* use the local fallback */ }
+        }
+        return app.dragPayload;
+    };
+    const finishRouteDrag = () => { app.dragPayload = null; };
     const allSlots = () => app.patterns.flatMap(pattern => pattern.slots || []);
     const syncInheritedReactionAudio = () => {
         const source = app.patterns.find(pattern => pattern.id === '__reaction.knockdown');
@@ -1554,15 +1579,15 @@
     }
 
     function installRouteDrag(row, pattern, slot) {
-        row.querySelectorAll('[data-route-file]').forEach(file => file.ondragstart = event => {
-            const payload = JSON.stringify({ kind: 'route-file', patternId: pattern.id, fromSlot: slot.slot, file: file.dataset.routeFile });
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('application/json', payload);
-            event.dataTransfer.setData('text/plain', payload);
+        row.querySelectorAll('[data-route-file]').forEach(file => {
+            file.ondragstart = event => beginRouteDrag(event, {
+                kind: 'route-file', patternId: pattern.id, fromSlot: slot.slot, file: file.dataset.routeFile
+            }, 'move');
+            file.ondragend = finishRouteDrag;
         });
         row.ondragover = event => {
             event.preventDefault();
-            event.dataTransfer.dropEffect = 'copy';
+            if (event.dataTransfer) event.dataTransfer.dropEffect = app.dragPayload?.kind === 'route-file' ? 'move' : 'copy';
             row.classList.add('drag-over');
         };
         row.ondragleave = event => {
@@ -1570,15 +1595,22 @@
         };
         row.ondrop = async event => {
             event.preventDefault(); row.classList.remove('drag-over');
-            let payload; try { payload = JSON.parse(event.dataTransfer.getData('application/json') || event.dataTransfer.getData('text/plain')); } catch { return; }
-            if (payload?.kind === 'source') {
-                await assignSourceToSlot({ path: payload.path }, pattern.id, slot.slot);
-                return;
+            const payload = droppedRoutePayload(event);
+            try {
+                if (payload?.kind === 'source') {
+                    await assignSourceToSlot({ path: payload.path }, pattern.id, slot.slot);
+                    return;
+                }
+                if (!payload || payload.kind !== 'route-file' || payload.fromSlot === slot.slot) return;
+                if (payload.patternId !== pattern.id) throw new Error('다른 패턴의 배정 음원은 복사 버튼으로 복사한 뒤 대상 순간에 배정해주세요.');
+                await api('/api/hunt-pattern-route-move', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, candidate: app.candidateId === app.monster ? app.candidateId : '', fromSlot: payload.fromSlot, toSlot: slot.slot, file: payload.file, expectedRevision: app.revisions.audio }) });
+                await loadPatterns(pattern.id, slot.slot);
+                renderPatternList(); renderPatternDesk(); refreshSourceSelection();
+            } catch (error) {
+                alert(error.message || '음원 드래그 배정에 실패했습니다.');
+            } finally {
+                finishRouteDrag();
             }
-            if (!payload || payload.fromSlot === slot.slot) return;
-            await api('/api/hunt-pattern-route-move', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, candidate: app.candidateId === app.monster ? app.candidateId : '', fromSlot: payload.fromSlot, toSlot: slot.slot, file: payload.file, expectedRevision: app.revisions.audio }) });
-            await loadPatterns(pattern.id, slot.slot);
-            renderPatternList(); renderPatternDesk(); refreshSourceSelection();
         };
     }
 
@@ -1784,13 +1816,10 @@
                 row.innerHTML = `<button class="source-eye"${source.path ? '' : ' disabled'} title="${hidden ? '숨김 해제' : '이 음원 숨기기'}" aria-label="${hidden ? '숨김 해제' : '이 음원 숨기기'}">${hidden ? '🙈' : '👁'}</button><button class="play"${source.path ? '' : ' disabled'}>▶</button><span class="source-meta"><strong>ID ${esc(source.sourceId)}${source.stream != null ? ` · STREAM ${esc(source.stream)}` : ''}</strong><small>${esc(source.path ? fileName(source.path) : '디코딩 파일 없음')}</small></span><span class="source-row-actions"><span class="source-map-links"></span><button class="slot-pick"${source.path && slot ? '' : ' disabled'}>${current.has(source.path) ? '현재' : '배정'}</button></span>`;
                 row.ondragstart = event => {
                     if (!source.path || event.target.closest('button')) { event.preventDefault(); return; }
-                    const payload = JSON.stringify({ kind: 'source', path: source.path });
-                    event.dataTransfer.effectAllowed = 'copy';
-                    event.dataTransfer.setData('application/json', payload);
-                    event.dataTransfer.setData('text/plain', payload);
+                    beginRouteDrag(event, { kind: 'source', path: source.path }, 'copy');
                     row.classList.add('dragging-source');
                 };
-                row.ondragend = () => row.classList.remove('dragging-source');
+                row.ondragend = () => { row.classList.remove('dragging-source'); finishRouteDrag(); };
                 row.querySelector('.source-eye').onclick = () => toggleSourceHidden(source.path);
                 row.querySelector('.play').onclick = event => playSource(source, event.currentTarget);
                 renderSourceMappingButtons(row.querySelector('.source-map-links'), mappings);
