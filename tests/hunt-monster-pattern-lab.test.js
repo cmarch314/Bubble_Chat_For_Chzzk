@@ -174,6 +174,10 @@ assert.match(html, /if\(!selection\.targets\.length\)/,
     'every preview pattern must receive a safe visual target even when combat targeting resolves empty');
 assert.match(html, /schedulePreviewProjectile\?\.\(motionPattern,selection\.primary/,
     'motion-only Preview must still schedule an authored detached projectile on the shared BEAT clock');
+assert.match(html, /pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern\(pattern\)/,
+    'native candidate preview must compile its judgment timeline before target resolution');
+assert.doesNotMatch(html, /if\(!pattern\.nativeBeatCandidate\)pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern/,
+    'native candidates must not bypass the same BEAT compiler used by live hunts');
 assert.match(html, /bubblechat:pattern-anatomy/,
     'the editor must be able to toggle the monster anatomy position/direction guide');
 assert.match(html, /monster-anatomy-guide/);

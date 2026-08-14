@@ -716,6 +716,7 @@ class HuntMonsterAttackAnimator {
 
     clearMonsterMotion(reason = 'dispose') {
         this.motionGeneration++;
+        this.cancelPreviewProjectiles(reason);
         // A BEAT preview owns WAAPI/CSS tracks outside activeMonsterMotion.
         // Dropping only the controller reference leaves those filled tracks on
         // screen, so selecting another pattern can inherit its predecessor's
@@ -747,6 +748,18 @@ class HuntMonsterAttackAnimator {
             }
         });
         return cleared || clearedBeatPreview;
+    }
+
+    cancelPreviewProjectiles(reason = 'preview-replaced') {
+        // Preview projectile DOM is deliberately detached from hunter combat.
+        // Cancel it with the BEAT session so a replaced/scrubbed action cannot
+        // leave an old fireball on screen or let a second scheduler stack one.
+        for (const pending of this.pendingElementalProjectiles.values()) {
+            try { pending?.fx?.remove?.(); } catch (_) { /* detached */ }
+        }
+        this.pendingElementalProjectiles.clear();
+        this.previewProjectileScheduleKey = null;
+        this.previewProjectileScheduleReason = reason;
     }
 
     triggerMonsterRoar(pattern = null) {
@@ -2639,7 +2652,7 @@ class HuntMonsterAttackAnimator {
             }
         }
 
-        if (!minimalFx) {
+        if (!minimalFx && delivery !== 'projectile') {
             const head = document.createElement('div');
             head.className = 'monster-element-head';
             head.textContent = theme.emoji || fallbackEmoji;
@@ -2731,6 +2744,13 @@ class HuntMonsterAttackAnimator {
             || this.card.querySelector('#fight-monster-img');
         const targetCard = this.card.querySelector(`#fight-card-${Number(targetIndex)}`);
         if (!monsterImg || !targetCard) return false;
+        const scheduleKey = `${this.motionGeneration}:${String(pattern.id || '')}`;
+        // A BEAT action owns its complete projectile schedule. The review
+        // bridge can resend its latest payload while the iframe is mounting;
+        // accepting that second message used to append a second fireball for
+        // every authored spit. One generation + pattern may schedule once.
+        if (this.previewProjectileScheduleKey === scheduleKey) return true;
+        this.previewProjectileScheduleKey = scheduleKey;
 
         const containerRect = this.card.getBoundingClientRect();
         const monsterRect = monsterImg.getBoundingClientRect();

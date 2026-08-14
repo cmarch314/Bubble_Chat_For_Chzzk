@@ -90,6 +90,10 @@ assert.match(animatorSource, /schedulePreviewProjectile[\s\S]*?event\?\.targetIn
     'motion-only Preview must use each resolved judgment recipient for multi-spit projectile destinations');
 assert.match(animatorSource, /schedulePreviewProjectile[\s\S]*?deferOutcome:\s*true[\s\S]*?resolveElementalProjectileOutcome/,
     'Preview projectiles must defer their hunter impact until the projectile has visually arrived');
+assert.match(animatorSource, /previewProjectileScheduleKey === scheduleKey/,
+    'one BEAT preview action must schedule its projectile timeline exactly once');
+assert.match(animatorSource, /!minimalFx && delivery !== 'projectile'/,
+    'a detached projectile must not also render the legacy travelling element head');
 assert.match(animatorSource, /hasEmptyAuthoredLane[\s\S]*?off-board phantom destination[\s\S]*?result: hasEmptyAuthoredLane \? 'miss'/,
     'an edge-side triple fireball must preserve its empty flank as an off-board miss instead of retargeting a hunter');
 assert.strictEqual(context.Animator.usesElementalDelivery('', { type: 'projectile' }), true,

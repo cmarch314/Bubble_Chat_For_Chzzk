@@ -194,6 +194,7 @@
       // owns the visible motion. Never leave a combat-runtime session alive
       // to process hunter damage/reactions behind the editor preview.
       animator.cancelBeatMotionPreview?.();
+      animator.cancelPreviewProjectiles?.(reason);
       animator.clearPreviewJudgmentMarkers?.();
       previewRuntimePattern=null;
       previewRuntimeSelection=null;
@@ -626,9 +627,11 @@
         targeting:previewPattern.targeting||authored?.targeting}:authored;
       if(!source)return {ok:false,reason:'pattern-not-found',durationMs:0};
       let pattern={...source,tags:[...(source.tags||[])],targeting:source.targeting?{...source.targeting}:null};
-      // Candidate graphs are authored directly against the Contract.  Their
-      // renderer projection must never be routed through the legacy adapter.
-      if(!pattern.nativeBeatCandidate)pattern=HuntMonsterPatternCatalog.synchronizeEditedPattern(pattern);
+      // Every graph, including a native candidate, goes through the same
+      // BEAT projection before target resolution.  Native only means the
+      // source has no legacy CSS adapter; it must not skip the compiler that
+      // derives one resolved judgment timeline for Preview and live hunts.
+      pattern=HuntMonsterPatternCatalog.synchronizeEditedPattern(pattern);
       const reactionPlayback=playRuntimeReaction(pattern);
       if(reactionPlayback)return reactionPlayback;
       const required=pattern.requiredState||(pattern.tags.includes('flight-only')?'airborne':null);
