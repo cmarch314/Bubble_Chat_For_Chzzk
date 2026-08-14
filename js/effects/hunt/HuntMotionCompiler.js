@@ -343,15 +343,12 @@ class HuntMotionCompiler {
                     state.rotation = (aimAngle - nativeAngle) * 180 / Math.PI;
                 }
             }
-            const hasAuthoredFinalRotation = beat.rotation !== undefined
-                || beat.rotationToward !== undefined || beat.alignRotationToTravel
-                || beat.aimBodyAt;
-            // Pose defaults are migration-era flourish only. They must never
-            // add a second turn on top of an authored BEAT final angle.
+            // Rotation is authored data, never a pose side effect. This keeps
+            // the editor's 0° truthful and makes Preview/live replayable from
+            // the same BEAT graph.
             const rotationDelta = beat.rotateByFacing !== undefined
                 ? Math.abs(Number(beat.rotateByFacing) || 0) * (state.facing || 1)
-                : beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0
-                    : hasAuthoredFinalRotation ? 0 : Number(definition.rotate) || 0;
+                : beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0 : 0;
             if (rotationDelta) {
                 const sign = Math.sign(rotationDelta);
                 const windup = Number(definition.windup) || 0;

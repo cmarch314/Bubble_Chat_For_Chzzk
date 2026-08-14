@@ -59,17 +59,17 @@ const HuntMotionPoses = {
     //   windup  22 = 회전 반대 방향으로 감았다가 푼다. 반동이다.
     ROTATION: Object.freeze({
         'spin-left': Object.freeze({
-            squash: 1.060, rotate: -375, pivot: 'part:foreleg.screen-left', windup: 18, recoil: 15
+            squash: 1.060, pivot: 'part:foreleg.screen-left'
         }),
         'spin-right': Object.freeze({
-            squash: 1.060, rotate: 375, pivot: 'part:foreleg.screen-right', windup: 18, recoil: 15
+            squash: 1.060, pivot: 'part:foreleg.screen-right'
         }),
         'tail-slam': Object.freeze({
-            squash: 0.724, rotate: 180, pivot: 'part:tail',
+            squash: 0.724, pivot: 'part:tail',
             filter: 'brightness(1.48) drop-shadow(0 14px 20px #000a)'
         }),
         'tail-whip': Object.freeze({
-            squash: 1.090, rotate: -175, pivot: 'part:torso', windup: 22, recoil: 15
+            squash: 1.090, pivot: 'part:torso'
         })
     }),
 

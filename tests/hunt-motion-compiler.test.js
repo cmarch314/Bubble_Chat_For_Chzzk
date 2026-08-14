@@ -375,17 +375,15 @@ assert.ok(settleFrames.length >= 2,
 // ---- 회전 자세: 반동 -> 오버슛 -> 되감기 ----
 
 const spin = HuntMotionCompiler.compile([
-    { beat: 'spin', ticks: 12, pose: 'spin-right' },
-    { beat: 'settle', ticks: 3, pose: 'idle' }
+    { beat: 'spin', ticks: 12, pose: 'spin-right', rotation: 360, origin: 'part:foreleg.screen-right' },
+    { beat: 'settle', ticks: 3, pose: 'idle', rotation: 360, keepRotation: true }
 ], { anchors });
 
 const angles = spin.pose.map(frame => Number(frame.transform.match(/rotate\((-?[\d.]+)deg\)/)[1]));
-const windup = Math.min(...angles);
 const peak = Math.max(...angles);
-assert.ok(windup < 0, '시계 회전은 먼저 반시계로 감았다가 푼다 (반동)');
-assert.strictEqual(peak, 375, '한 바퀴 + 15도까지 돈다 (관성 오버슛)');
-// 오버슛 뒤 되감김. 375에서 recoil 15만큼 돌아온다.
-assert.ok(angles.includes(360), '접촉 후 15도 되감겨야 한다');
+assert.strictEqual(Math.min(...angles), 0, 'pose must not inject a hidden windup rotation');
+assert.strictEqual(peak, 360, 'the visible final angle must be exactly the authored BEAT value');
+assert.ok(angles.includes(360), 'the authored full turn must remain held through recovery');
 
 // 회전 자세는 축을 함께 들고 있어야 한다. 축이 CSS에 흩어져 있으면 특이도
 // 사고(rig 기본 축이 모션별 축을 이기던 22개 규칙)가 다시 생긴다.
@@ -421,7 +419,7 @@ assert.ok(Math.abs(ratio(near.pose[near.pose.length - 1]) - ratio(far.pose[far.p
 // 풀리지 않는다. 대신 idle이 "똑바로 선다"를 뜻하고, 복귀 비트가 그걸로 끝난다.
 // 이게 없으면 몬스터가 뒤집힌 채 제자리에 돌아간다.
 const held = HuntMotionCompiler.compile([
-    { beat: 'slam', ticks: 3, pose: 'tail-slam' },
+    { beat: 'slam', ticks: 3, pose: 'tail-slam', rotation: 180, origin: 'part:tail' },
     { beat: 'brace', ticks: 20, pose: 'brace' },
     { beat: 'return', ticks: 4, pose: 'idle' }
 ], { anchors });
@@ -434,7 +432,7 @@ assert.strictEqual(angleAt(1), 0, '복귀는 똑바로 선 채로 끝나야 한�
 // 한 바퀴를 마친 회전은 복귀 중 0도로 보간하면 역회전해 보인다. 누적 각도를
 // 유지한 채 이동하고, 애니메이션 종료 시 owner가 transform을 제거해야 한다.
 const fullTurnReturn = HuntMotionCompiler.compile([
-    { beat: 'spin', ticks: 12, pose: 'spin-right' },
+    { beat: 'spin', ticks: 12, pose: 'spin-right', rotation: 360, origin: 'part:foreleg.screen-right' },
     { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
 ], { anchors });
 const returnStart = 12 / 16;
@@ -446,7 +444,7 @@ assert.ok(returnAngles.every(angle => angle === 360),
 
 // 반 바퀴 자세는 복귀 구간에 걸쳐 되감지 않고 경계에서 즉시 기본 자세가 된다.
 const halfTurnReturn = HuntMotionCompiler.compile([
-    { beat: 'slam', ticks: 3, pose: 'tail-slam' },
+    { beat: 'slam', ticks: 3, pose: 'tail-slam', rotation: 180, origin: 'part:tail' },
     { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
 ], { anchors });
 const halfReturnAngles = halfTurnReturn.pose

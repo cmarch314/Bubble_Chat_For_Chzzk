@@ -1691,7 +1691,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         // 전조/접근·휘두르기/접촉 유지/복귀가 편집한 폭 그대로 재생된다.
         motion: [
             { beat: 'telegraph', label: '전조', ticks: 5, pose: 'crouch', face: 'target' },
-            { beat: 'action-1', label: '접근·휘두르기', ticks: 10, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-whip', moveEasing: 'slow-fast-slow' },
+            { beat: 'action-1', label: '접근·휘두르기', ticks: 10, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-whip', rotation: -160, origin: 'part:torso', moveEasing: 'slow-fast-slow' },
             { beat: 'impact-1', label: '꼬리 접촉', ticks: 2, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'settle', hit: true, sfx: 'impact' },
             { beat: 'action-2', label: '회수·복귀', ticks: 8, to: 'home', pose: 'idle', moveEasing: 'decelerate', rotationEasing: 'decelerate' }
         ],
@@ -1749,7 +1749,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { beat: 'aim', ticks: 5, to: 'above:target 260', pose: 'stretch-soft', scaleX: .92, scaleY: 1.20 },
             // bounds 'reach' — 접합 보정이 채팅 안전선을 넘어야 한다. 여기서는 회전축이
             // 곧 접합 부위(꼬리)라, 180도 회전이 몸을 도로 위로 올린다.
-            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-slam', scaleX: .92, scaleY: 1.08, hit: true, sfx: 'impact' },
+            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-slam', rotation: 180, origin: 'part:tail', scaleX: .92, scaleY: 1.08, hit: true, sfx: 'impact' },
             // 꼬리가 박힌 채 버틴다. 회전은 유지되고 idle이 풀어준다.
             { beat: 'brace', ticks: 26, pose: 'brace' },
             { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
@@ -2131,8 +2131,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
         motion: [
             { beat: 'step-back', ticks: 5, to: 'toward:target -32%', pose: 'brace', face: 'target', moveEasing: 'decelerate' },
             { beat: 'coil', ticks: 4, pose: 'crouch' },
-            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
-            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotateBy: 26, origin: 'part:torso', hit: true, damageScale: .5 },
+            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', rotation: -160, origin: 'part:torso', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
+            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotation: -134, origin: 'part:torso', hit: true, damageScale: .5 },
             { beat: 'unwind', ticks: 4, pose: 'brace', moveEasing: 'decelerate' },
             { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
         ],
@@ -2159,10 +2159,10 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
             { beat: 'coil', ticks: 4, pose: 'crouch' },
             // 꼬리를 표적 상단에 얹는다. 표적 중심에 얹으면 벨리오로스 꼬리 앵커가
             // 이미지 위쪽(y .15)이라 몸이 133px 아래로 밀려 채팅 안전선을 넘는다.
-            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
+            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', rotation: -160, origin: 'part:torso', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
             // 몸이 멈춘 뒤에도 꼬리 끝이 계속 돌아 나온다. 몸통을 축으로 조금 더
             // 돌려 그 지연을 만든다.
-            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotateBy: 26, origin: 'part:torso', hit: true, damageScale: .5 },
+            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotation: -134, origin: 'part:torso', hit: true, damageScale: .5 },
             { beat: 'unwind', ticks: 4, pose: 'brace', moveEasing: 'decelerate' },
             { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
         ],
