@@ -92,9 +92,9 @@
         "reviewStatus": "draft",
         "atb": { "cost": 32, "recovery": "during-action", "gateUntil": "complete" },
         "beats": [
-          { "id": "approach", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "target", "face": "toward-target", "aimBodyAt": "target", "pose": "stretch-soft", "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "approach", "offsetTicks": 1 }] },
-          { "id": "bite", "ticks": 3, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 106%", "pose": "stretch-strong", "moveEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 18, "hitReactionKind": "weak", "offsetTicks": 0 }, { "kind": "audio", "slot": "impact", "offsetTicks": 0 }] },
-          { "id": "recoil", "ticks": 3, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 90%", "pose": "land" } }] }, "events": [{ "kind": "audio", "slot": "recoil", "offsetTicks": 1 }] },
+          { "id": "approach", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "target", "align": "part:head", "origin": "part:head", "pose": "stretch-soft", "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "approach", "offsetTicks": 1 }] },
+          { "id": "bite", "ticks": 3, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 106%", "align": "part:head", "origin": "part:head", "pose": "stretch-strong", "moveEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 18, "hitReactionKind": "weak", "offsetTicks": 0 }, { "kind": "audio", "slot": "impact", "offsetTicks": 0 }] },
+          { "id": "recoil", "ticks": 3, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 90%", "origin": "part:head", "pose": "land" } }] }, "events": [{ "kind": "audio", "slot": "recoil", "offsetTicks": 1 }] },
           { "id": "return", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "pose": "idle" } }] }, "events": [{ "kind": "audio", "slot": "return", "offsetTicks": 1 }] }
         ]
       }

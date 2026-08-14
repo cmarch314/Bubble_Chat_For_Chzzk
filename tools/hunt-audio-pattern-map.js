@@ -713,7 +713,7 @@ function resolveHuntId(idOrGraphId, bankMapPath = BANK_MAP_PATH) {
     return id;
 }
 
-function candidatePatternForAudioReview(action = {}, motionOverride = null) {
+function candidatePatternForAudioReview(action = {}) {
     const graph = action.beatV2 || {};
     const judgmentsByBeat = new Map();
     for (const event of graph.events || []) {
@@ -729,17 +729,12 @@ function candidatePatternForAudioReview(action = {}, motionOverride = null) {
         motion: (graph.beats || []).map(beat => {
             const visual = (beat.tracks?.visual || []).at(-1)?.value || {};
             const judgments = judgmentsByBeat.get(beat.id) || [];
-            const saved = motionOverride?.beats?.[beat.id];
-            const patch = typeof saved === 'object' && saved ? saved : {};
             return {
                 beat: beat.id,
                 label: beat.label || beat.id,
-                ticks: Math.max(1, Number(typeof saved === 'object' ? saved?.ticks : saved)
-                    || Number(beat.ticks) || 1),
+                ticks: Math.max(1, Number(beat.ticks) || 1),
                 ...visual,
-                judgments,
-                ...patch,
-                beat: beat.id
+                judgments
             };
         }),
         impactTimeline: (graph.events || []).filter(event => event.kind === 'damage')
@@ -880,17 +875,14 @@ function loadHuntPatternAudioMap(idOrGraphId, {
             })
         };
     });
-    // Candidate kits have native BEAT graphs, but review saves are still
-    // authored in the shared motion override document. Project that same
-    // persisted source before returning the candidate timeline; otherwise a
-    // server restart silently falls back to the kit's untouched defaults.
+    // Candidate kits own their native BEAT graphs directly. They must not
+    // inherit shared overrides, whose beat ids can describe an older action
+    // shape and silently replace the candidate's authored timeline.
     const motionDocument = readJson(MOTION_OVERRIDES_PATH, { overrides: {} });
-    const motionOverrides = motionDocument.overrides?.[huntId] || {};
     const CandidateCatalog = candidateKit
         ? require('../js/effects/hunt/HuntMonsterCandidateCatalog.js') : null;
     const candidateActions = candidateKit
-        ? CandidateCatalog.compileKit(candidateKit).actions
-            .map(action => candidatePatternForAudioReview(action, motionOverrides[action.id])) : null;
+        ? CandidateCatalog.compileKit(candidateKit).actions.map(candidatePatternForAudioReview) : null;
     if (candidateActions && String(candidateKit.monsterId) !== huntId) {
         throw new Error(`candidate monster mismatch: ${candidateKit.monsterId} != ${huntId}`);
     }
