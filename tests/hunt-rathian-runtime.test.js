@@ -110,9 +110,14 @@ assert.strictEqual(biteSomersault.impactTimeline[0].ignoreBrokenPartDamage, true
 assert.strictEqual(somersaultGlide.impactTimeline[1].secondaryInterference.scope, 'adjacent');
 assert.strictEqual(byId('rathian.bite').maxConsecutiveUses, 1);
 assert.ok(byId('rathian.bite').tags.includes('weak'), 'Rathian bite must use the weak-hit contract');
-assert.deepStrictEqual(byId('rathian.tail_sweep').impactTimeline.map(event => event.atTicks), [24, 34]);
-assert.strictEqual(byId('rathian.tail_sweep').animationDurationMs, 4200);
+assert.deepStrictEqual(byId('rathian.tail_sweep').impactTimeline.map(event => event.atTicks), [24, 38]);
+assert.strictEqual(byId('rathian.tail_sweep').animationDurationMs, 4600);
 assert.strictEqual(byId('rathian.tail_sweep').animationProfile, 'rathian-tail-sweep-double');
+assert.deepStrictEqual(
+    byId('rathian.tail_sweep').motion.map(beat => beat.beat),
+    ['center', 'wind', 'left-half', 'rest', 'right-half', 'return'],
+    'the double tail sweep must keep an authored rest beat between two contacts'
+);
 assert.strictEqual(byId('rathian.tail_sweep').targeting.mode, 'left-right-halves');
 assert.strictEqual(byId('rathian.tail_sweep').maxTargets, 4);
 assert.deepStrictEqual(byId('rathian.tail_sweep').animationGeometry, {

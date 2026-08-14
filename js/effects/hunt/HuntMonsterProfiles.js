@@ -636,16 +636,18 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
     ['rathian.tail_sweep', '이단 꼬리 회전', 'area', 0.27, {
         sourceMoveNameJA: '尻尾回転', minTargets: 4, maxTargets: 4, recovery: 1,
         tags: ['area', 'tail', 'ground-only', 'target-contact'], monsterAtbCost: 0.58,
-        movement: { ticks: 42 }, targeting: { mode: 'left-right-halves' },
+        movement: { ticks: 46 }, targeting: { mode: 'left-right-halves' },
         impactTimeline: [
             { atTicks: 24, damageScale: 1 },
-            { atTicks: 34, damageScale: 1 }
+            { atTicks: 38, damageScale: 1 }
         ],
-        animationProfile: 'rathian-tail-sweep-double', animationDurationMs: 4200,
+        animationProfile: 'rathian-tail-sweep-double', animationDurationMs: 4600,
         motion: [
             { beat: 'center', label: '중앙 진입', ticks: 12, to: 'arena:center-lower .56', face: 'target', pose: 'brace' },
             { beat: 'wind', label: '꼬리 준비', ticks: 12, rotateByFacing: -36, origin: '76% 72%', pose: 'crouch' },
             { beat: 'left-half', label: '좌측 반회전', ticks: 10, rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'rest', label: '회전 사이 숨 고르기', ticks: 4, rotation: 180,
+                origin: '76% 72%', pose: 'settle', keepRotation: true },
             { beat: 'right-half', label: '우측 반회전', ticks: 4, rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
             { beat: 'return', label: '복귀', ticks: 4, to: 'home', pose: 'idle', rotation: 0 }
         ],
