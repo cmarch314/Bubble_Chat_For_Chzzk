@@ -35,6 +35,11 @@ assert.doesNotMatch(fixture.slice(
     'Preview target resolution must be reproducible from its scenario seed');
 assert.match(fixture, /result:'effect'/,
     'an empty judgment set may retain a presentation anchor but must not invent a hit');
+assert.match(fixture, /const displayedTargets=\[\.\.\.selection\.indices\]\.sort/,
+    'the Preview must display adjacent pairs consistently as 1·2, 2·3, or 3·4 without changing hit order');
+assert.match(reviewApp, /if \(play\) app\.previewActionSeed = Math\.max/);
+assert.match(reviewApp, /scenario: \{ \.\.\.snapshot\.scenario, seed: app\.previewActionSeed/,
+    'each new Preview action must receive a fresh seed while scrub/settings retain the current action');
 
 const audioFunction = reviewApp.slice(
     reviewApp.indexOf('function playTimelineAudio'),

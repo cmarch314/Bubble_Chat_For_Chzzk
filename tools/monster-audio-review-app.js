@@ -35,6 +35,7 @@
         previewAudios: [], previewAudioSchedule: [], capabilities: [], buildId: '', session: MonsterAudioReviewState.createEditorSession(),
         pickerCategory: '', pickerStatus: 'all', previewReady: false, previewSequence: 0,
         previewRandomPairTarget: '',
+        previewActionSeed: 1,
         sourceRowsByPath: new Map(), sourceGroupViews: [], sourceRenderLimit: 80,
         hiddenSourcePaths: new Set(), temporarilyRevealedSources: new Set(),
         hiddenSourceGroups: new Set(), favoriteSourceGroups: new Set(), autoFavoriteSourceGroups: new Set(),
@@ -286,13 +287,16 @@
         if (!pattern) return;
         const snapshot = app.session.snapshot();
         const playbackToken = play ? ++app.previewSequence : 0;
+        if (play) app.previewActionSeed = Math.max(1,
+            Math.floor(Math.random() * 0xFFFFFFFF));
         if (!play) stopPlaybackProgress();
         bridge.send('bubblechat:pattern-preview', {
             monsterId: app.huntId,
             monster: { id: app.huntId, nameKO: monster?.name || app.huntId, filename: `${app.huntId}.png` },
             target: previewTargetMode({ newAction: play }),
             state: snapshot.scenario.monsterState,
-            scenario: { ...snapshot.scenario, selectedBeatId: snapshot.selection.beatId,
+            scenario: { ...snapshot.scenario, seed: app.previewActionSeed,
+                selectedBeatId: snapshot.selection.beatId,
                 editBeat: { ...(snapshot.draft[snapshot.selection.beatId] || {}) } },
             pattern: buildPreviewPattern({ scrub }),
             resetPreviewPose: Boolean(reset),

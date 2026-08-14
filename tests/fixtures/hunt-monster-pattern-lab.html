@@ -462,9 +462,7 @@
         &&pattern.targeting?.mode==='adjacent-pair-pivot'?selectedPair[1]:selectedPair?.[0];
       const primary=Number.isInteger(pairAwarePrimary)?pairAwarePrimary
         :targetMode==='auto'?Math.floor(seeded()*hunters.length):Number(targetMode);
-      const directedRandom=()=>selectedPair?.length===2&&primary>0&&selectedPair[1]>primary
-        ?.999:Math.min(.999,(primary+.25)/hunters.length);
-      const random=targetMode==='auto'?seeded:directedRandom;
+      const random=seeded;
       const count=HuntMonsterActionPolicy.rollTargetCount(
         pattern,hunters.length,random,hunters.length);
       // 프로덕션(HuntMonsterTurnExecutor)과 같은 순서로 패스 수를 정한다.
@@ -478,6 +476,7 @@
       const resolved=HuntMonsterActionPolicy.resolveTargetScenario({
         pattern,monsterState:owner.monsterState,targetable:hunters,count,passCount,random,
         mode:pattern.targeting?.mode||'',defaultTargets:laneFromPrimary(primary,count),
+        pairTargetIndices:selectedPair,
         distinctPasses:pattern.targeting?.distinctPasses===true,
         primaryIndex:previewScenario?.view==='design'&&Number.isInteger(previewScenario.primaryTargetIndex)
           ?previewScenario.primaryTargetIndex:primary,
@@ -485,10 +484,8 @@
         forcedImpactTargets:previewScenario?.view==='design'?previewScenario.forcedImpactTargets:null
       });
       Object.assign(pattern,resolved.runtime);
-      // `pair:center`, `pair:left`, and `pair:right` are movement vocabulary:
-      // keep them tied to the one adjacent pair selected at action start rather
-      // than to the union of later judgments.
-      if(selectedPair?.length===2)pattern.runtimePairTargets=[...selectedPair];
+      // The shared policy owns the selected pair. Preview must not overwrite it
+      // after resolution or movement and judgments can diverge again.
       const finalPrimary=resolved.primaryTargetIndex??primary;
       // Keep the authored primary target separate from the union of every
       // judgment target.  A primary hit plus an all-hunter tremor otherwise
@@ -638,7 +635,8 @@
         if(running)button.style.setProperty('--target',slotColors[selection.primary]);
       });
       document.documentElement.style.setProperty('--target',slotColors[selection.primary]);
-      document.getElementById('run-readout').textContent=`${pattern.name} · ${targetMode==='auto'?'자동 ':''}${selection.indices.map(index=>index+1).join('·')}번`;
+      const displayedTargets=[...selection.indices].sort((left,right)=>left-right);
+      document.getElementById('run-readout').textContent=`${pattern.name} · ${targetMode==='auto'?'자동 ':''}${displayedTargets.map(index=>index+1).join('·')}번`;
       // Preview is an editor, not a second combat simulation. The same
       // authored BEAT graph used by live hunts is played directly by the
       // shared monster animator. Hunter damage/reaction resolution stays in

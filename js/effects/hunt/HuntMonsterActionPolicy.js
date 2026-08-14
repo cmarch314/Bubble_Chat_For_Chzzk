@@ -228,7 +228,7 @@ class HuntMonsterActionPolicy {
         return Array.from({ length: passes }, (_, i) => pairs[(start + i) % pairs.length]);
     }
 
-    static adjacentPairSequentialPasses(targetable, random = Math.random, anchorIndex = null) {
+    static adjacentPairSequentialPasses(targetable, random = Math.random, pairTargetIndices = null) {
         const lanes = [...targetable].sort((a, b) => Number(a.index) - Number(b.index));
         if (!lanes.length) return [];
         if (lanes.length === 1) return [[lanes[0]], [lanes[0]]];
@@ -236,12 +236,14 @@ class HuntMonsterActionPolicy {
             .map((lane, index) => [lane, lanes[index + 1]])
             .filter(pair => Number(pair[1].index) - Number(pair[0].index) === 1);
         if (!pairs.length) return [[lanes[0]], [lanes[0]]];
-        const anchored = Number.isInteger(anchorIndex)
-            ? pairs.filter(pair => pair.some(lane => Number(lane.index) === Number(anchorIndex)))
-            : [];
-        const candidates = anchored.length ? anchored : pairs;
-        const pair = candidates[Math.min(candidates.length - 1,
-            Math.floor(random() * candidates.length))];
+        const forcedPair = Array.isArray(pairTargetIndices) && pairTargetIndices.length === 2
+            ? pairs.find(pair => pair.every((lane, index) =>
+                Number(lane.index) === Number(pairTargetIndices[index])))
+            : null;
+        // The pair is its own target choice. A separately rolled primary hunter
+        // must not narrow the pool (primary 4 used to force every action to 3-4).
+        const pair = forcedPair || pairs[Math.min(pairs.length - 1,
+            Math.floor(Math.max(0, Math.min(.999999, Number(random()) || 0)) * pairs.length))];
         return pair.map(target => [target]);
     }
 
@@ -318,6 +320,7 @@ class HuntMonsterActionPolicy {
         // 회전 축처럼 "지정한 헌터"가 결과를 좌우하는 모드용. defaultTargets[0]은
         // 호출부에 따라 중앙 정렬된 레인 창의 시작점일 수 있어 표적과 다르다.
         primaryIndex = null,
+        pairTargetIndices = null,
         // independent-passes에서 패스마다 다른 헌터를 뽑을지 여부.
         distinctPasses = false
     } = {}) {
@@ -463,8 +466,7 @@ class HuntMonsterActionPolicy {
         }
         if (mode === 'adjacent-pair-sequential') {
             const passes = this.adjacentPairSequentialPasses(
-                targetable, random,
-                Number.isInteger(primaryIndex) ? primaryIndex : defaultTargets[0]?.index);
+                targetable, random, pairTargetIndices);
             const pair = passes.map(pass => pass[0]).filter(Boolean);
             return {
                 targets: pair,
@@ -593,9 +595,58 @@ class HuntMonsterActionPolicy {
 
     static impactTimeline(pattern = {}, monsterState = 'normal') {
         const stateTimeline = pattern.impactTimelineByState?.[monsterState];
-        const authored = Array.isArray(stateTimeline)
+        let authored = Array.isArray(stateTimeline)
             ? stateTimeline
             : (Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : null);
+        // Native BEAT judgments are already the authored gameplay timeline.
+        // Falling through to one synthesized legacy impact discarded later
+        // hits (Rathian's two half-turns became one target), so derive the
+        // compatibility projection directly from those events when needed.
+        if (!authored?.length && Array.isArray(pattern.beatV2?.events)) {
+            const judgments = pattern.beatV2.events.filter(event =>
+                ['damage', 'roar', 'tremor', 'wind'].includes(String(event?.kind || '')));
+            const groups = new Map();
+            judgments.forEach((judgment, index) => {
+                const key = String(judgment.group || judgment.id ||
+                    `${judgment.atTicks || 0}:${judgment.kind}:${index}`);
+                const entry = groups.get(key) || {
+                    atTicks: Math.max(1, Math.round(Number(judgment.atTicks) || 1)),
+                    judgments: []
+                };
+                entry.atTicks = Math.min(entry.atTicks,
+                    Math.max(1, Math.round(Number(judgment.atTicks) || 1)));
+                entry.judgments.push(judgment);
+                groups.set(key, entry);
+            });
+            authored = [...groups.values()].map(group => {
+                const damage = group.judgments.find(item => item.kind === 'damage');
+                const effect = group.judgments.find(item =>
+                    ['roar', 'tremor', 'wind'].includes(String(item.kind || '')));
+                const authority = damage || effect || group.judgments[0];
+                const authoredDamageRatio = Math.max(.0001, Number(pattern.damageRatio) || 1);
+                const damageScale = damage
+                    ? (Number.isFinite(Number(damage.damagePercent))
+                        ? (Number(damage.damagePercent) / 100) / authoredDamageRatio
+                        : Number(damage.damageScale ?? 1))
+                    : 0;
+                return {
+                    atTicks: group.atTicks,
+                    targetMode: this.judgmentTargetMode(authority?.target),
+                    damageScale,
+                    judgmentGroup: String(authority?.group || authority?.id || ''),
+                    ...(damage && ['strong', 'butt-stumble', 'weak'].includes(damage.hitReactionKind)
+                        ? { hitReactionKind: damage.hitReactionKind === 'butt-stumble'
+                            ? 'weak' : damage.hitReactionKind } : {}),
+                    ...(effect ? { secondaryInterference: {
+                        kind: effect.kind,
+                        size: effect.size === 'small' ? 'small' : 'large',
+                        scope: effect.target === 'all' ? 'all'
+                            : effect.target === 'primary-adjacent' ? 'adjacent' : 'primary',
+                        directHitSupersedes: effect.directHitSupersedes === true
+                    } } : {})
+                };
+            }).sort((left, right) => left.atTicks - right.atTicks);
+        }
         if (authored?.length) {
             const compiledTicks = pattern.beatV2
                 && pattern.runtimeJudgmentGroups === true
@@ -670,7 +721,7 @@ class HuntMonsterActionPolicy {
         pattern = {}, monsterState = 'normal', targetable = [], count = 1,
         passCount = 2, random = Math.random, mode = '', defaultTargets = [],
         primaryIndex = null, distinctPasses = false, forcedTargetIndices = null,
-        forcedImpactTargets = null
+        forcedImpactTargets = null, pairTargetIndices = null
     } = {}) {
         const byIndex = new Map(targetable.filter(target => Number.isInteger(target?.index))
             .map(target => [target.index, target]));
@@ -680,7 +731,7 @@ class HuntMonsterActionPolicy {
         forced?.filter(index => !byIndex.has(index))
             .forEach(index => warnings.push(`target-unavailable:${index}`));
         const resolved = this.resolveTargeting({ targetable, count, passCount, random, mode,
-            defaultTargets, primaryIndex, distinctPasses });
+            defaultTargets, primaryIndex, distinctPasses, pairTargetIndices });
         const targets = forced ? forced.map(index => byIndex.get(index)).filter(Boolean) : resolved.targets;
         const runtime = { ...resolved.runtime };
         // Placement-only two-hunter presets select their own lane once per
