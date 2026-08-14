@@ -500,7 +500,8 @@ const angleAt = offset => Number(held.pose
     .filter(frame => frame.offset <= offset).pop()
     .transform.match(/rotate\((-?[\d.]+)deg\)/)[1]);
 assert.strictEqual(angleAt(.5), 180, '버티는 동안 회전이 유지돼야 한다');
-assert.strictEqual(angleAt(1), 0, '복귀는 똑바로 선 채로 끝나야 한다');
+assert.strictEqual(angleAt(1), 180,
+    '자세는 회전을 몰래 초기화하지 않으며 action owner가 완료 뒤 한 번만 정리해야 한다');
 
 // 한 바퀴를 마친 회전은 복귀 중 0도로 보간하면 역회전해 보인다. 누적 각도를
 // 유지한 채 이동하고, 애니메이션 종료 시 owner가 transform을 제거해야 한다.
@@ -531,7 +532,8 @@ assert.ok(halfReturnAngles.every(angle => angle === 180),
 // 버티는 구간으로 넘어가는 순간 몸이 튄다.
 const pivotAt = offset => held.pose.filter(frame => frame.offset <= offset).pop().pivot || null;
 assert.strictEqual(pivotAt(.5), 'part:tail', '버티는 동안 축이 유지돼야 한다');
-assert.strictEqual(pivotAt(1), null, '똑바로 서면 축도 기본으로 돌아간다');
+assert.strictEqual(pivotAt(1), 'part:tail',
+    '회전축도 자세가 몰래 초기화하지 않고 action owner가 완료 뒤 정리한다');
 
 // ---- align: 몸 중심이 아니라 그 부위를 목적지에 얹는다 ----
 //

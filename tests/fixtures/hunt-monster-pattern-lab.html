@@ -92,6 +92,7 @@
   <script src="../../js/effects/hunt/HuntWeaponMechanics.js"></script>
   <script src="../../js/effects/hunt/HuntWeaponActionSelector.js"></script>
   <script src="../../js/effects/hunt/HuntBeatV2Contract.js"></script>
+  <script src="../../js/effects/hunt/HuntRotationContract.js"></script>
   <script src="/candidate-kits.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterCandidateCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntBeatV2Adapter.js"></script>
@@ -118,7 +119,6 @@
        결과적으로 해당 패턴이 제자리에 멈춰 있는 것처럼 보인다. -->
   <script src="../../js/effects/hunt/HuntStageAnchors.js"></script>
   <script src="../../js/effects/hunt/HuntMotionPoses.js"></script>
-  <script src="../../js/effects/hunt/HuntRotationContract.js"></script>
   <script src="../../js/effects/hunt/HuntMotionCompiler.js"></script>
   <script src="../../js/effects/hunt/data/MonsterProfileKeyframes.generated.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterProfileMotionRuntime.js"></script>
@@ -606,10 +606,14 @@
     function playPattern(patternId, previewPattern=null){
       clearPendingFlightTransition();
       const authored=authoredPattern(patternId);
-      // The review shell can send a saved compatibility pattern for the same
-      // id.  A candidate URL must keep its native graph authoritative instead
-      // of silently replacing it with that legacy payload.
-      const source=authored?.nativeBeatCandidate?authored:previewPattern?{...(authored||{}),...previewPattern,
+      // The editor payload is the current projection of the same authored
+      // graph, including unsaved draft values. It must override the iframe's
+      // startup snapshot for candidates too; keeping the startup candidate
+      // authoritative made every direction/reset edit appear to do nothing.
+      // Preserve the native flag so this projection still bypasses every
+      // legacy adapter and runs directly through the shared BEAT animator.
+      const source=previewPattern?{...(authored||{}),...previewPattern,
+        nativeBeatCandidate:Boolean(authored?.nativeBeatCandidate),
         motion:previewPattern.motion||authored?.motion,
         targeting:previewPattern.targeting||authored?.targeting}:authored;
       if(!source)return {ok:false,reason:'pattern-not-found',durationMs:0};

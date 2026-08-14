@@ -324,22 +324,6 @@ class HuntMotionCompiler {
             if (rotationResetMode === 'preserve' || preserveHomeRotation) {
                 state.rotation = previous.rotation;
                 state.origin = previous.origin;
-            } else if (definition.resetRotation && beat.keepRotation !== true && previous.rotation) {
-                const turns = previous.rotation / 360;
-                const completedFullTurn = Math.abs(turns - Math.round(turns)) < 1e-6;
-                if (completedFullTurn && rotationResetMode === 'auto') {
-                    state.rotation = previous.rotation;
-                    state.origin = previous.origin;
-                } else {
-                    state.rotation = 0;
-                    state.origin = null;
-                    snapRotationAtStart = rotationResetMode === 'auto' && !hasExplicitRotation;
-                    snapRotationAtEnd = rotationResetMode === 'snap-end';
-                }
-            } else if (definition.resetRotation && beat.keepRotation !== true) {
-                state.rotation = 0;
-                state.origin = null;
-                snapRotationAtEnd = rotationResetMode === 'snap-end';
             }
 
             // A direct final angle is authoritative. `0` is a real authored

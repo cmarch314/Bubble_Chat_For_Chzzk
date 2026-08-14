@@ -7,6 +7,7 @@
 }(typeof globalThis === 'object' ? globalThis : this, () => {
     const RESET_MODES = Object.freeze(['auto', 'preserve', 'snap-end', 'animate']);
     const DIRECTIONS = Object.freeze(['clockwise', 'counterclockwise']);
+    const LEGACY_FIELDS = Object.freeze(['rotateBy', 'rotateByFacing', 'keepRotation']);
 
     function resetMode(beat = {}) {
         return RESET_MODES.includes(beat.rotationResetMode) ? beat.rotationResetMode : 'auto';
@@ -19,7 +20,36 @@
         return target;
     }
 
+    // One beat may author either an absolute terminal angle (`rotation`) or a
+    // directed turn (`rotationDirection` + `rotationDegrees`), never both.
+    // Keeping both values was the source of editor/runtime disagreement: one
+    // consumer trusted the signed direction while another replayed the stale
+    // absolute angle. Normalization removes that second owner at every save
+    // and EditorSession update boundary.
+    function canonicalize(beat = {}) {
+        const clean = { ...beat };
+        const direction = DIRECTIONS.includes(String(clean.rotationDirection || ''))
+            ? String(clean.rotationDirection) : null;
+        const degrees = Number(clean.rotationDegrees);
+        if (direction && clean.rotationDegrees !== undefined
+            && clean.rotationDegrees !== null && Number.isFinite(degrees)) {
+            clean.rotationDirection = direction;
+            clean.rotationDegrees = Math.abs(degrees);
+            delete clean.rotation;
+            delete clean.rotateBy;
+            delete clean.rotateByFacing;
+        } else {
+            delete clean.rotationDirection;
+            delete clean.rotationDegrees;
+        }
+        if (clean.rotationResetMode && !RESET_MODES.includes(clean.rotationResetMode)) {
+            delete clean.rotationResetMode;
+        }
+        return clean;
+    }
+
     function resolve(beat = {}, previous = 0) {
+        beat = canonicalize(beat);
         const start = Number(previous) || 0;
         const mode = resetMode(beat);
         const direction = DIRECTIONS.includes(String(beat.rotationDirection || ''))
@@ -53,5 +83,6 @@
         });
     }
 
-    return Object.freeze({ RESET_MODES, DIRECTIONS, resetMode, equivalent, resolve });
+    return Object.freeze({ RESET_MODES, DIRECTIONS, LEGACY_FIELDS,
+        resetMode, equivalent, canonicalize, resolve });
 }));

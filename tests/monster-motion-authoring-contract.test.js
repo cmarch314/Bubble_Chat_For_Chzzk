@@ -28,8 +28,13 @@ const source = {
 const normalized = Contract.normalizeBeats(source);
 assert.deepStrictEqual(Object.keys(normalized.windup).sort(),
     Contract.EDITABLE_FIELDS.filter(key => Object.prototype.hasOwnProperty.call(source.windup, key)
-        && key !== 'hitOffsetTicks').sort(),
+        && key !== 'hitOffsetTicks'
+        && !['rotation', 'rotateBy', 'rotateByFacing'].includes(key)).sort(),
     'every editor-owned field must be normalized by the one shared contract');
+assert.equal(normalized.windup.rotation, undefined,
+    'directed rotation must remove the competing absolute angle');
+assert.equal(normalized.windup.rotateBy, undefined);
+assert.equal(normalized.windup.rotateByFacing, undefined);
 assert.equal(normalized.windup.ignoredImplementationField, undefined);
 assert.equal(normalized.windup.judgments[0].hitReactionKind, 'strong');
 assert.equal(normalized.windup.hit, false);
@@ -44,10 +49,10 @@ const reordered = { windup: Object.fromEntries(Object.entries(normalized.windup)
 assert.equal(Contract.compareBeats(normalized, reordered).equal, true,
     'property ordering must never fail save verification');
 const changed = structuredClone(normalized);
-changed.windup.rotation = 46;
+changed.windup.rotationDegrees = 46;
 const comparison = Contract.compareBeats(normalized, changed);
 assert.equal(comparison.equal, false);
-assert.ok(comparison.differences.includes('windup.rotation'),
+assert.ok(comparison.differences.includes('windup.rotationDegrees'),
     'save verification must identify the exact mismatched field');
 
 const read = relative => fs.readFileSync(path.join(__dirname, '..', relative), 'utf8');

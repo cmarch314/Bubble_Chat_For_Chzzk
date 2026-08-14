@@ -1,20 +1,24 @@
 'use strict';
 
 (function exposeMonsterMotionAuthoringContract(root, factory) {
-    const api = factory();
+    const rotation = typeof module === 'object' && module.exports
+        ? require('../js/effects/hunt/HuntRotationContract.js')
+        : root?.HuntRotationContract;
+    const api = factory(rotation);
     if (typeof module === 'object' && module.exports) module.exports = api;
     if (root) root.MonsterMotionAuthoringContract = api;
-}(typeof globalThis === 'object' ? globalThis : this, () => {
+}(typeof globalThis === 'object' ? globalThis : this, rotation => {
+    if (!rotation) throw new Error('HuntRotationContract is unavailable');
     const TEXT_FIELDS = Object.freeze(['at', 'to', 'origin', 'moveEasing', 'rotationEasing', 'pose',
         'face', 'align', 'bounds', 'fade', 'sfx', 'label', 'aimBodyAt', 'targetMode',
         'fx', 'fxAnchor', 'fxSecondary', 'fxSecondaryAnchor', 'fxSecondaryAngleMode',
         'rotationDirection', 'rotationResetMode']);
     const NUMBER_FIELDS = Object.freeze(['offsetX', 'offsetY', 'depth', 'rotation', 'rotationToward',
-        'rotateBy', 'rotateByFacing', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity',
+        'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity',
         'damageScale', 'hitOffsetTicks', 'strideFlipTicks', 'stompSteps', 'fxDurationTicks',
         'fxSecondaryDurationTicks', 'rotationDegrees']);
     const BOOLEAN_FIELDS = Object.freeze(['hit', 'alignRotationToTravel', 'instantOpacity',
-        'instantPose', 'continueTravel', 'flipFacing', 'keepRotation']);
+        'instantPose', 'continueTravel', 'flipFacing']);
     const STRUCTURED_FIELDS = Object.freeze(['judgmentOffsets', 'judgments', 'fxAdditional']);
     const EDITABLE_FIELDS = Object.freeze(['ticks', ...TEXT_FIELDS, ...NUMBER_FIELDS,
         ...BOOLEAN_FIELDS, ...STRUCTURED_FIELDS]);
@@ -108,7 +112,7 @@
             })).filter(item => item.fx);
             if (!clean.fxAdditional.length) delete clean.fxAdditional;
         }
-        return clean;
+        return rotation.canonicalize(clean);
     }
 
     function normalizeBeats(beats = {}) {

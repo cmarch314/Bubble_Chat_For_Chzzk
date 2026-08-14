@@ -1307,7 +1307,7 @@
             const sign = direction === 'counterclockwise' ? -1 : 1;
             app.session.updateBeat(beatId, {
                 rotationDirection: direction, rotationDegrees: degrees,
-                rotation: current.previous + sign * degrees, rotateBy: null,
+                rotation: null, rotateBy: null,
                 rotateByFacing: null, keepRotation: null
             });
             // Direction is authored as a signed BEAT value.  Scrub the shared
@@ -1331,7 +1331,7 @@
                 : rawFinal;
             const delta = final - current.previous;
             app.session.updateBeat(beatId, {
-                rotation: final, rotationDegrees: Math.abs(delta),
+                rotation: null, rotationDegrees: Math.abs(delta),
                 rotationDirection: delta < 0 ? 'counterclockwise' : 'clockwise',
                 rotateBy: null, rotateByFacing: null, keepRotation: null
             });
@@ -1839,7 +1839,15 @@
             const beatId = message.beatId; if (!app.session.draft[beatId]) return;
             if (message.commit) { app.gizmoEditingBeat = ''; renderPatternDesk(); return; }
             const first = app.gizmoEditingBeat !== beatId; app.gizmoEditingBeat = beatId;
-            app.session.updateBeat(beatId, message.patch || {}, { record: first }); renderTimelineVisualOnly(); renderInspector(selectedPattern()); return;
+            const patch = { ...(message.patch || {}) };
+            // A freehand gizmo angle is an absolute terminal angle. Clear the
+            // directed representation so the same beat cannot have two
+            // competing rotation owners.
+            if (patch.rotation !== undefined) {
+                patch.rotationDirection = null;
+                patch.rotationDegrees = null;
+            }
+            app.session.updateBeat(beatId, patch, { record: first }); renderTimelineVisualOnly(); renderInspector(selectedPattern()); return;
         }
         if (message.type === 'bubblechat:monster-anatomy-edit') {
             const result = await api('/api/hunt-monster-anatomy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monsterId: app.huntId, geometry: message.geometry, expectedRevision: app.revisions.anatomy }) });

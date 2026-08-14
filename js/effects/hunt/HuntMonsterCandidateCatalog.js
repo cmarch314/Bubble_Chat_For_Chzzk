@@ -8,10 +8,15 @@ const CANDIDATE_CONTRACT = globalThis.HuntBeatV2Contract
     || (typeof module !== 'undefined' && module.exports
         ? require('./HuntBeatV2Contract.js').HuntBeatV2Contract
         : null);
+const ROTATION_CONTRACT = globalThis.HuntRotationContract
+    || (typeof module !== 'undefined' && module.exports
+        ? require('./HuntRotationContract.js')
+        : null);
 
 class HuntMonsterCandidateCatalog {
     static compileKit(rawKit = {}) {
         if (!CANDIDATE_CONTRACT) throw new Error('HuntBeatV2Contract is unavailable');
+        if (!ROTATION_CONTRACT) throw new Error('HuntRotationContract is unavailable');
         const monsterId = String(rawKit.monsterId || '').trim();
         if (!monsterId) throw new Error('candidate monsterId is required');
         if (rawKit.schemaVersion !== 1) throw new Error(`${monsterId}: unsupported candidate schemaVersion`);
@@ -28,8 +33,31 @@ class HuntMonsterCandidateCatalog {
             if (!rawAction?.graph || typeof rawAction.graph !== 'object') {
                 throw new Error(`${id}: native graph is required`);
             }
-            const graph = CANDIDATE_CONTRACT.compile({
+            for (const [beatIndex, beat] of rawAction.graph.beats.entries()) {
+                for (const [frameIndex, frame] of (beat.tracks?.visual || []).entries()) {
+                    const legacy = ROTATION_CONTRACT.LEGACY_FIELDS
+                        .filter(field => frame?.value?.[field] !== undefined);
+                    if (legacy.length) {
+                        throw new Error(`${id}.beats[${beatIndex}].tracks.visual[${frameIndex}]: `
+                            + `legacy rotation fields are forbidden: ${legacy.join(', ')}`);
+                    }
+                }
+            }
+            const graphSource = {
                 ...rawAction.graph,
+                beats: rawAction.graph.beats.map(rawBeat => ({
+                    ...rawBeat,
+                    tracks: Object.fromEntries(Object.entries(rawBeat.tracks || {}).map(([track, frames]) => [
+                        track,
+                        track === 'visual' && Array.isArray(frames)
+                            ? frames.map(frame => ({ ...frame,
+                                value: ROTATION_CONTRACT.canonicalize(frame?.value || {}) }))
+                            : frames
+                    ]))
+                }))
+            };
+            const graph = CANDIDATE_CONTRACT.compile({
+                ...graphSource,
                 id,
                 actor: 'monster',
                 source: { kind: 'monster-candidate', monsterId }

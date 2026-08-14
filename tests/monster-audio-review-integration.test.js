@@ -133,6 +133,10 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(app.includes('if (app.selectedPatternId === id && app.session.snapshot().timeline.beats.length)')
             && app.includes('if (autoplay) playCurrentPreview();'),
             'replaying the selected pattern must preserve and execute the current unsaved editor draft');
+        const preview = await fetch(`${origin}/preview/?embed=1&candidate=rathian`).then(response => response.text());
+        assert.ok(preview.includes('const source=previewPattern?')
+            && preview.includes('nativeBeatCandidate:Boolean(authored?.nativeBeatCandidate)'),
+            'candidate Preview must execute the current editor projection while retaining the native BEAT path');
         assert.ok(app.includes("label: '📣 포효'") && app.includes("label: '〰️ 지진'")
             && app.includes("label: '🌪️ 풍압'"),
             'timeline judgments must distinguish roar, tremor and wind pressure with emoji labels');
@@ -211,10 +215,10 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(candidateFireball.slots.find(slot => slot.slot === 'beat:spit')?.assigned,
             'a rebuilt candidate must inherit the prior reviewed fireball contact route');
 
-        const preview = await fetch(`${origin}/preview/?embed=1`).then(response => response.text());
-        assert.ok(preview.includes('hunt-monster-pattern-lab-audio.js'));
-        assert.ok(preview.includes('function playRuntimeReaction(pattern)')
-            && preview.includes('HuntMonsterAnatomyCatalog.breakReaction'),
+        const previewHtml = await fetch(`${origin}/preview/?embed=1`).then(response => response.text());
+        assert.ok(previewHtml.includes('hunt-monster-pattern-lab-audio.js'));
+        assert.ok(previewHtml.includes('function playRuntimeReaction(pattern)')
+            && previewHtml.includes('HuntMonsterAnatomyCatalog.breakReaction'),
             'reaction and part-break previews must call the same runtime owners as a live hunt');
         const runtimeScript = await fetch(`${origin}/js/effects/hunt/HuntMotionCompiler.js`);
         assert.strictEqual(runtimeScript.status, 200, 'preview must load the production compiler from the same server');

@@ -58,7 +58,7 @@
             const { id, beat: legacyBeat, tracks, events, ...flat } = beat || {};
             return [key, { ...flat, ...visual, ticks: ticks(beat?.ticks) }];
         }));
-        return Object.fromEntries((timeline.beats || []).map(beat => {
+        const draft = Object.fromEntries((timeline.beats || []).map(beat => {
             const source = { ...(authored.get(beat.id) || {}) };
             delete source.beat;
             const legacyJudgments = [];
@@ -90,6 +90,7 @@
             }
             return [beat.id, { ...source, ...(judgments.length ? { judgments } : {}), ticks: ticks(beat.ticks) }];
         }));
+        return contract.normalizeBeats(draft);
     }
 
     function buildPreviewMotion(pattern = {}, timeline = {}, draft = {}) {
@@ -286,7 +287,7 @@
             const next = { ...this.draft[beatId], ...filtered };
             next.ticks = ticks(next.ticks);
             for (const key of Object.keys(next)) if (next[key] === '' || next[key] == null) delete next[key];
-            this.draft[beatId] = next;
+            this.draft[beatId] = contract.normalizeBeat(next, { id: beatId });
             const tick = tickAtBeatProgress(this.timeline, this.draft,
                 this.scrub.beatId || beatId, this.scrub.beatProgress);
             const located = locateTick(this.timeline, this.draft, tick);
