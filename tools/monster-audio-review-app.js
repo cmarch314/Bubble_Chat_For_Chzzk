@@ -259,6 +259,9 @@
     function buildPreviewPattern({ scrub = false } = {}) {
         const pattern = selectedPattern(), snapshot = app.session.snapshot();
         if (!pattern) return null;
+        const scrubProgress = scrub
+            ? snapshot.scrub.tick / Math.max(1, snapshot.timeline.durationTicks)
+            : 0;
         const motionPayload = MonsterAudioReviewState.buildPreviewMotion(
             pattern, snapshot.timeline, app.session.draft);
         const preview = {
@@ -266,6 +269,11 @@
             animationDurationMs: snapshot.timeline.durationTicks * 100,
             movement: { ...(pattern.movement || {}), ticks: snapshot.timeline.durationTicks },
             runtimePreviewScrub: scrub,
+            // `HuntMonsterAttackAnimator.seekBeatMotion` consumes a 0..1
+            // progress value, never an absolute tick.  Keep this on the
+            // pattern too so the first frozen frame is correct even before
+            // the iframe handles its follow-up seek message.
+            runtimePreviewProgress: scrubProgress,
             runtimePreviewCardReactions: true,
             // The review shell owns its audible timeline so slot clocks, drag
             // assignments and playback all describe the same source.  Keep the
@@ -303,7 +311,9 @@
             // pattern itself so an inspector edit always opens on the exact
             // authored frame (including signed rotation direction).
             scenario: { ...snapshot.scenario, seed: app.previewActionSeed,
-                scrubTick: scrub ? snapshot.scrub.tick : 0,
+                scrubProgress: scrub
+                    ? snapshot.scrub.tick / Math.max(1, snapshot.timeline.durationTicks)
+                    : 0,
                 selectedBeatId: snapshot.selection.beatId,
                 editBeat: { ...(snapshot.draft[snapshot.selection.beatId] || {}) } },
             pattern: buildPreviewPattern({ scrub }),

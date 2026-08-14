@@ -41,6 +41,7 @@ const { createServer } = require('../tools/monster-audio-review-server');
             'simulation mode must mount the production BubbleChat application, not a duplicate fixture');
 
         const app = await fetch(`${origin}/review-app.js`).then(response => response.text());
+        const fixture = await fetch(`${origin}/preview/`).then(response => response.text());
         assert.ok(app.includes('MonsterAudioReviewState.createEditorSession()'));
         assert.ok(app.includes("previewFrame().src = `/index.html?huntSimulation=1")
             && app.includes('simulationWindow()?.processMessage')
@@ -86,8 +87,10 @@ const { createServer } = require('../tools/monster-audio-review-server');
             && !app.includes('function previewBeatRotation(beatId)')
             && app.includes('rotateByFacing: null'),
             'rotation-direction edits must scrub the shared BEAT renderer and clear legacy facing rotation');
-        assert.ok(app.includes('scrubTick: scrub ? snapshot.scrub.tick : 0'),
-            'the authored scrub tick must travel with a new preview pattern so iframe startup cannot lose it');
+        assert.ok(app.includes('runtimePreviewProgress: scrubProgress')
+            && app.includes('scrubProgress: scrub')
+            && fixture.includes('previewScenario?.scrubProgress||0'),
+            'the authored normalized scrub progress must travel with a new preview pattern so iframe startup cannot lose it');
         assert.ok(app.includes('hiddenSourceGroups: new Set()')
             && app.includes('favoriteSourceGroups: new Set()'),
             'group hide and favorite preferences must be first-class persisted editor state');

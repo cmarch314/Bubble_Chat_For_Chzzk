@@ -643,7 +643,7 @@
       // the real hunt only; the editor shows its judgments on the timeline.
       playPreviewMotionOnly(pattern,selection);
       if(pattern.runtimePreviewScrub)
-        animator.seekBeatMotion(Math.max(0,Math.min(1,Number(previewScenario?.scrubTick||0))));
+        animator.seekBeatMotion(Math.max(0,Math.min(1,Number(previewScenario?.scrubProgress||0))));
       if(pattern.flightTransition==='takeoff'){
         pendingFlightTransitionTimer=setTimeout(()=>{
           pendingFlightTransitionTimer=null;
