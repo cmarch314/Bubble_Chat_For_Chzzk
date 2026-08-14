@@ -17,7 +17,7 @@ for (const monsterId of ['rathian', 'rathalos']) {
     assert.strictEqual(action.nativeBeatCandidate, true);
     assert.strictEqual(action.reviewStatus, 'draft');
     assert.strictEqual(action.beatV2.source.kind, 'monster-candidate');
-    assert.strictEqual(action.beatV2.totalTicks, monsterId === 'rathian' ? 45 : 19);
+    assert.strictEqual(action.beatV2.totalTicks, monsterId === 'rathian' ? 45 : 42);
     assert.strictEqual(action.motion.reduce((sum, beat) => sum + beat.ticks, 0), action.beatV2.totalTicks);
     assert.ok(action.beatV2.events.some(event => event.kind === 'roar'));
 }
@@ -52,6 +52,19 @@ assert.deepStrictEqual(somersault.motion.slice(1, 3).map(beat => beat.origin), [
 assert.deepStrictEqual(somersault.motion.slice(3).map(beat => beat.partFx?.[0]?.part),
     ['left-wing', 'left-wing'],
     'the flight-only wing flutter must remain in the native BEAT projection, never in a detached CSS timeline');
+
+const rathalos = CandidateCatalog.compileKit(JSON.parse(fs.readFileSync(
+    path.join(root, 'data', 'hunt', 'monster-kits', 'candidates', 'rathalos.json'), 'utf8'
+)));
+assert.strictEqual(rathalos.actions.length, 13,
+    'Rathalos candidate must expose every reviewed World action for side-by-side feedback before release');
+const backstepFireball = rathalos.actions.find(action => action.id === 'rathalos.backstep_fireball');
+assert.strictEqual(backstepFireball.flightTransition, 'takeoff');
+assert.deepStrictEqual(backstepFireball.motion.map(beat => beat.beat),
+    ['look', 'backstep', 'back-breath', 'takeoff', 'airborne']);
+const clawDive = rathalos.actions.find(action => action.id === 'rathalos.claw_dive');
+assert.strictEqual(clawDive.flightTransition, 'land');
+assert.strictEqual(clawDive.beatV2.events.find(event => event.kind === 'damage').beatId, 'claw-dive');
 
 const source = fs.readFileSync(path.join(root, 'js', 'effects', 'hunt', 'HuntMonsterCandidateCatalog.js'), 'utf8');
 assert.ok(!source.includes('HuntBeatV2Adapter'), 'native candidates must not import the legacy adapter');

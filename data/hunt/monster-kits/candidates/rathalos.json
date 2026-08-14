@@ -4,25 +4,125 @@
   "status": "candidate",
   "actions": [
     {
-      "id": "rathalos.roar",
-      "name": "포효 · clean BEAT 후보",
-      "type": "roar",
-      "tags": ["roar"],
-      "damageRatio": 0,
-      "minTargets": 4,
-      "maxTargets": 4,
-      "atbCost": 18,
-      "graph": {
-        "schemaVersion": 2,
-        "backend": "beat-v2",
-        "reviewStatus": "draft",
-        "atb": { "cost": 18, "recovery": "during-action", "gateUntil": "complete" },
-        "beats": [
-          { "id": "brace", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "brace", "scaleY": 0.94 } }] }, "events": [{ "kind": "audio", "slot": "brace", "offsetTicks": 1 }] },
-          { "id": "roar", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "scaleY": 1.08 } }, { "offsetTicks": 8, "value": { "pose": "stretch-strong", "scaleY": 1.02 } }] }, "events": [{ "kind": "roar", "target": "all", "size": "large", "offsetTicks": 3 }, { "kind": "audio", "slot": "roar", "offsetTicks": 3 }] },
-          { "id": "settle", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "scaleY": 1 } }] }, "events": [{ "kind": "audio", "slot": "settle", "offsetTicks": 1 }] }
-        ]
-      }
+      "id": "rathalos.roar", "name": "포효 · clean BEAT 후보", "type": "roar", "tags": ["roar"], "damageRatio": 0, "minTargets": 4, "maxTargets": 4, "atbCost": 18,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 18, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "brace", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "origin": "part:head" } }] }, "events": [{ "kind": "audio", "slot": "brace", "offsetTicks": 2 }] },
+        { "id": "roar", "ticks": 4, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "origin": "part:head", "scaleY": 1.08 } }] }, "events": [{ "kind": "roar", "target": "all", "size": "large", "offsetTicks": 2 }, { "kind": "audio", "slot": "roar", "offsetTicks": 2 }] },
+        { "id": "settle", "ticks": 28, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "scaleY": 1 } }] }, "events": [{ "kind": "audio", "slot": "settle", "offsetTicks": 2 }] }
+      ] }
+    },
+    {
+      "id": "rathalos.bite", "name": "물어뜯기 · clean BEAT", "type": "physical", "tags": ["bite", "physical", "weak", "ground"], "damageRatio": 0.18, "minTargets": 1, "maxTargets": 1, "atbCost": 32,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 32, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "side-approach", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "target", "face": "toward-target", "aimBodyAt": "target", "pose": "stretch-soft", "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "approach", "offsetTicks": 1 }] },
+        { "id": "bite-through", "ticks": 3, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 106%", "pose": "stretch-strong", "origin": "part:head", "moveEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 18, "hitReactionKind": "weak", "offsetTicks": 0 }, { "kind": "audio", "slot": "impact", "offsetTicks": 0 }] },
+        { "id": "recoil", "ticks": 4, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 91%", "pose": "land", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "recoil", "offsetTicks": 1 }] },
+        { "id": "return", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "pose": "idle", "moveEasing": "decelerate" } }] }, "events": [] }
+      ] }
+    },
+    {
+      "id": "rathalos.rush", "name": "돌진 물어뜯기 · clean BEAT", "type": "charge", "tags": ["charge", "bite", "ground"], "damageRatio": 0.30, "minTargets": 1, "maxTargets": 2, "atbCost": 44,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 44, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "stomp", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "face": "target", "pose": "crouch", "stompSteps": 2 } }] }, "events": [{ "kind": "audio", "slot": "stomp", "offsetTicks": 2 }] },
+        { "id": "charge", "ticks": 9, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "target", "bounds": "reach", "pose": "stretch-strong", "moveEasing": "linear", "strideFlipTicks": 3 } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 6 }, { "kind": "audio", "slot": "charge-impact", "offsetTicks": 6 }] },
+        { "id": "follow-through", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "offscreen:bottom", "continueTravel": true, "fade": "out", "pose": "land", "moveEasing": "linear", "strideFlipTicks": 3 } }] }, "events": [] },
+        { "id": "return", "ticks": 12, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "at": "offscreen:top", "to": "home", "fade": "in", "pose": "idle", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "return", "offsetTicks": 2 }] }
+      ] }
+    },
+    {
+      "id": "rathalos.fireball", "name": "화염구 브레스 · clean BEAT", "type": "projectile", "tags": ["fire", "projectile", "ground"], "damageRatio": 0.34, "minTargets": 1, "maxTargets": 1, "atbCost": 30,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 30, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "turn-to-target", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "face": "target", "pose": "brace", "origin": "part:head" } }] }, "events": [{ "kind": "audio", "slot": "aim", "offsetTicks": 2 }] },
+        { "id": "charge", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "origin": "part:head", "scaleY": 0.92 } }] }, "events": [{ "kind": "audio", "slot": "charge", "offsetTicks": 2 }] },
+        { "id": "launch", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "origin": "part:head", "rotationToward": 8 } }] }, "events": [{ "kind": "audio", "slot": "projectile", "offsetTicks": 2 }, { "kind": "damage", "target": "primary", "damagePercent": 34, "hitReactionKind": "strong", "offsetTicks": 4 }] },
+        { "id": "recover", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "origin": "part:head", "rotation": 0 } }] }, "events": [{ "kind": "audio", "slot": "impact", "offsetTicks": 1 }] }
+      ] }
+    },
+    {
+      "id": "rathalos.aerial_fireball", "name": "공중 화염구 · clean BEAT", "type": "projectile", "tags": ["fire", "projectile", "flight"], "damageRatio": 0.36, "minTargets": 1, "maxTargets": 1, "atbCost": 34,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 34, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "hover-aim", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 150", "face": "target", "pose": "idle", "origin": "part:head" } }], "partFx": [{ "offsetTicks": 0, "value": [{ "part": "left-wing", "clip": "ellipse(31% 18% at 44% 20%)", "degrees": 8, "skewX": 3, "scaleY": 1.05, "cycles": 2, "opacity": 0.34 }] }] }, "events": [{ "kind": "audio", "slot": "hover", "offsetTicks": 1 }] },
+        { "id": "air-launch", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "origin": "part:head", "rotationToward": 8 } }] }, "events": [{ "kind": "audio", "slot": "projectile", "offsetTicks": 2 }, { "kind": "damage", "target": "primary", "damagePercent": 36, "hitReactionKind": "strong", "offsetTicks": 4 }] },
+        { "id": "hover-reset", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "origin": "part:head", "rotation": 0 } }], "partFx": [{ "offsetTicks": 0, "value": [{ "part": "left-wing", "clip": "ellipse(31% 18% at 44% 20%)", "degrees": 6, "skewX": 2, "scaleY": 1.03, "cycles": 2, "opacity": 0.28 }] }] }, "events": [{ "kind": "audio", "slot": "impact", "offsetTicks": 1 }] }
+      ] }
+    },
+    {
+      "id": "rathalos.aerial_triple_fireball", "name": "공중 삼연 화염구 · clean BEAT", "type": "projectile", "tags": ["fire", "projectile", "flight", "enraged", "multi-hit"], "damageRatio": 0.40, "minTargets": 3, "maxTargets": 3, "atbCost": 52,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 52, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "hover-aim", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 160", "face": "target", "pose": "brace", "origin": "part:head" } }] }, "events": [{ "kind": "audio", "slot": "aim", "offsetTicks": 2 }] },
+        { "id": "fire-center", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "origin": "part:head", "rotation": 0 } }] }, "events": [{ "kind": "audio", "slot": "shot-center", "offsetTicks": 2 }, { "kind": "damage", "target": "primary", "damagePercent": 40, "hitReactionKind": "strong", "offsetTicks": 4 }] },
+        { "id": "fire-left", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "origin": "part:head", "rotationToward": -15 } }] }, "events": [{ "kind": "audio", "slot": "shot-left", "offsetTicks": 2 }, { "kind": "damage", "target": "left", "damagePercent": 40, "hitReactionKind": "strong", "offsetTicks": 4 }] },
+        { "id": "fire-right", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "origin": "part:head", "rotationToward": 15 } }] }, "events": [{ "kind": "audio", "slot": "shot-right", "offsetTicks": 2 }, { "kind": "damage", "target": "right", "damagePercent": 40, "hitReactionKind": "strong", "offsetTicks": 4 }] },
+        { "id": "hover-reset", "ticks": 9, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle", "origin": "part:head", "rotation": 0 } }] }, "events": [{ "kind": "audio", "slot": "recover", "offsetTicks": 2 }] }
+      ] }
+    },
+    {
+      "id": "rathalos.backstep_fireball", "name": "백스텝 브레스 이륙 · clean BEAT", "type": "projectile", "tags": ["fire", "projectile", "flight", "enraged"], "damageRatio": 0.42, "minTargets": 1, "maxTargets": 1, "atbCost": 54, "flightTransition": "takeoff",
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 54, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "look", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "face": "target", "pose": "brace", "origin": "part:head" } }] }, "events": [{ "kind": "audio", "slot": "look", "offsetTicks": 1 }] },
+        { "id": "backstep", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target -20%", "pose": "crouch", "moveEasing": "snap" } }] }, "events": [{ "kind": "audio", "slot": "backstep", "offsetTicks": 1 }] },
+        { "id": "back-breath", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "stretch-strong", "origin": "part:head", "rotationToward": 9 } }] }, "events": [{ "kind": "audio", "slot": "projectile", "offsetTicks": 2 }, { "kind": "damage", "target": "primary", "damagePercent": 42, "hitReactionKind": "strong", "offsetTicks": 4 }] },
+        { "id": "takeoff", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 165", "pose": "stretch", "moveEasing": "accelerate" } }], "partFx": [{ "offsetTicks": 0, "value": [{ "part": "left-wing", "clip": "ellipse(31% 18% at 44% 20%)", "degrees": 10, "skewX": 4, "scaleY": 1.08, "cycles": 3, "opacity": 0.38 }] }] }, "events": [{ "kind": "audio", "slot": "takeoff", "offsetTicks": 2 }] },
+        { "id": "airborne", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "idle" } }] }, "events": [{ "kind": "audio", "slot": "airborne", "offsetTicks": 1 }] }
+      ] }
+    },
+    {
+      "id": "rathalos.claw_dive", "name": "독조 급강하 · clean BEAT", "type": "charge", "tags": ["claw", "poison", "flight", "dive"], "damageRatio": 0.48, "minTargets": 1, "maxTargets": 1, "atbCost": 58, "flightTransition": "land",
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 58, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "climb", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 200", "face": "target", "pose": "stretch", "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "climb", "offsetTicks": 1 }] },
+        { "id": "fold-claws", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:left-claw", "pose": "crouch", "rotationToward": 14 } }] }, "events": [{ "kind": "audio", "slot": "dive-ready", "offsetTicks": 2 }] },
+        { "id": "claw-dive", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 112%", "pose": "stretch-strong", "origin": "part:left-claw", "moveEasing": "slow-fast-slow" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 48, "hitReactionKind": "strong", "offsetTicks": 7 }, { "kind": "audio", "slot": "claw-impact", "offsetTicks": 7 }] },
+        { "id": "landing", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 122%", "pose": "land", "origin": "part:left-claw", "rotation": 0, "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "land", "offsetTicks": 2 }] },
+        { "id": "return", "ticks": 9, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "pose": "idle", "moveEasing": "decelerate" } }] }, "events": [] }
+      ] }
+    },
+    {
+      "id": "rathalos.tail_sweep", "name": "이단 꼬리 회전 · clean BEAT", "type": "area", "tags": ["tail", "area", "ground"], "damageRatio": 0.27, "minTargets": 4, "maxTargets": 4, "atbCost": 42,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 42, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "center", "ticks": 9, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "arena:center-lower .56", "face": "target", "pose": "brace" } }] }, "events": [{ "kind": "audio", "slot": "center", "offsetTicks": 1 }] },
+        { "id": "tail-cock", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": -30, "pose": "crouch", "scaleY": 0.92 } }] }, "events": [{ "kind": "audio", "slot": "tail-cock", "offsetTicks": 2 }] },
+        { "id": "left-half", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": 150, "pose": "tail-whip", "rotationEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "pair-left", "damagePercent": 27, "hitReactionKind": "strong", "offsetTicks": 4 }, { "kind": "audio", "slot": "left-impact", "offsetTicks": 4 }] },
+        { "id": "right-half", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": 330, "pose": "tail-whip", "rotationEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "pair-right", "damagePercent": 27, "hitReactionKind": "strong", "offsetTicks": 4 }, { "kind": "audio", "slot": "right-impact", "offsetTicks": 4 }] },
+        { "id": "return", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "origin": "part:tail", "rotation": 360, "pose": "idle", "moveEasing": "decelerate", "rotationEasing": "decelerate" } }] }, "events": [] }
+      ] }
+    },
+    {
+      "id": "rathalos.aerial_tail_sweep", "name": "공중 꼬리 휩쓸기 · clean BEAT", "type": "area", "tags": ["tail", "area", "flight"], "damageRatio": 0.30, "minTargets": 2, "maxTargets": 2, "atbCost": 48,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 48, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "hover-center", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:pair 150", "pose": "idle", "origin": "part:tail" } }] }, "events": [{ "kind": "audio", "slot": "hover", "offsetTicks": 1 }] },
+        { "id": "wind-tail", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": -38, "pose": "crouch" } }] }, "events": [{ "kind": "audio", "slot": "wind-tail", "offsetTicks": 2 }] },
+        { "id": "air-sweep-one", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": 145, "pose": "tail-whip", "moveEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 4 }, { "kind": "audio", "slot": "sweep-one", "offsetTicks": 4 }] },
+        { "id": "air-sweep-two", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": 325, "pose": "tail-whip", "moveEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "pass:2", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 4 }, { "kind": "audio", "slot": "sweep-two", "offsetTicks": 4 }] },
+        { "id": "hover-reset", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": 360, "pose": "idle", "rotationEasing": "decelerate" } }] }, "events": [] }
+      ] }
+    },
+    {
+      "id": "rathalos.hop_stomp", "name": "도약 발톱 내려찍기 · clean BEAT", "type": "physical", "tags": ["claw", "hop", "ground"], "damageRatio": 0.35, "minTargets": 1, "maxTargets": 1, "atbCost": 46,
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 46, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "spring", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 68%", "face": "target", "pose": "crouch", "scaleY": 0.85 } }] }, "events": [{ "kind": "audio", "slot": "spring", "offsetTicks": 2 }] },
+        { "id": "apex", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 135", "pose": "stretch", "origin": "part:left-claw", "scaleY": 1.08, "moveEasing": "accelerate" } }] }, "events": [{ "kind": "audio", "slot": "jump", "offsetTicks": 1 }] },
+        { "id": "claw-drop", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "target", "pose": "stretch-strong", "origin": "part:left-claw", "moveEasing": "slow-fast-slow" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 35, "hitReactionKind": "strong", "offsetTicks": 5 }, { "kind": "audio", "slot": "claw-impact", "offsetTicks": 5 }] },
+        { "id": "land", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "pose": "land", "scaleY": 1, "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "land", "offsetTicks": 1 }] }
+      ] }
+    },
+    {
+      "id": "rathalos.stomp", "name": "독조 내려찍기 · clean BEAT", "type": "physical", "tags": ["claw", "poison", "flight"], "damageRatio": 0.42, "minTargets": 1, "maxTargets": 1, "atbCost": 54, "flightTransition": "land",
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 54, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "hover", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 170", "face": "target", "pose": "idle", "origin": "part:left-claw" } }] }, "events": [{ "kind": "audio", "slot": "hover", "offsetTicks": 1 }] },
+        { "id": "claw-ready", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "origin": "part:left-claw", "rotationToward": 13 } }] }, "events": [{ "kind": "audio", "slot": "ready", "offsetTicks": 2 }] },
+        { "id": "stomp", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "target", "pose": "stretch-strong", "origin": "part:left-claw", "moveEasing": "slow-fast-slow" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 42, "hitReactionKind": "strong", "offsetTicks": 6 }, { "kind": "audio", "slot": "stomp-impact", "offsetTicks": 6 }] },
+        { "id": "landing", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "home", "pose": "land", "origin": "part:left-claw", "rotation": 0, "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "land", "offsetTicks": 1 }] }
+      ] }
+    },
+    {
+      "id": "rathalos.glide", "name": "저공 활공 돌진 · clean BEAT", "type": "charge", "tags": ["flight", "glide", "charge", "area"], "damageRatio": 0.30, "minTargets": 4, "maxTargets": 4, "atbCost": 60, "flightTransition": "land",
+      "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 60, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
+        { "id": "lift", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:pair 145", "face": "target", "pose": "stretch", "moveEasing": "accelerate" } }], "partFx": [{ "offsetTicks": 0, "value": [{ "part": "left-wing", "clip": "ellipse(31% 18% at 44% 20%)", "degrees": 10, "skewX": 4, "scaleY": 1.08, "cycles": 2, "opacity": 0.38 }] }] }, "events": [{ "kind": "audio", "slot": "lift", "offsetTicks": 1 }] },
+        { "id": "glide-pass-one", "ticks": 11, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "offscreen:right", "pose": "stretch-strong", "origin": "part:left-wing", "moveEasing": "slow-fast-slow" } }] }, "events": [{ "kind": "damage", "target": "pair-left", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 7 }, { "kind": "audio", "slot": "pass-one", "offsetTicks": 7 }] },
+        { "id": "turn-over", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "at": "offscreen:right", "to": "offscreen:right", "fade": "in", "face": "target", "pose": "brace" } }] }, "events": [{ "kind": "audio", "slot": "turn", "offsetTicks": 1 }] },
+        { "id": "glide-pass-two", "ticks": 11, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "offscreen:left", "pose": "stretch-strong", "origin": "part:left-wing", "moveEasing": "slow-fast-slow" } }] }, "events": [{ "kind": "damage", "target": "pair-right", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 7 }, { "kind": "audio", "slot": "pass-two", "offsetTicks": 7 }] },
+        { "id": "return", "ticks": 12, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "at": "offscreen:top", "to": "home", "fade": "in", "pose": "idle", "origin": "part:left-wing", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "return", "offsetTicks": 2 }] }
+      ] }
     }
   ]
 }
