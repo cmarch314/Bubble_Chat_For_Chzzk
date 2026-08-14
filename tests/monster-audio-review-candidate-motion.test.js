@@ -62,6 +62,27 @@ try {
     assert.equal(edited.events.find(event => event.id === 'review-roar')?.kind, 'roar',
         'candidate judgments must persist as native BEAT events');
 
+    // A projectile damage event carries runtime linkage (projectileId) that
+    // is intentionally not an editable motion field.  Saving an unchanged
+    // candidate draft used to strip it, fail the BEAT graph validator, and
+    // roll the user's timing edit back.
+    const projectileRecord = candidateKitRecordFor({ candidate: 'rathian' }, 'rathian', temporaryDir);
+    const projectilePattern = loadHuntPatternAudioMap('rathian', { candidateKit: projectileRecord.kit }).patterns
+        .find(pattern => pattern.id === 'rathian.triple_fireball');
+    const projectileDraft = ReviewState.createMotionDraft(projectilePattern, projectilePattern.timeline);
+    projectileDraft['spit-left'].ticks += 1;
+    const projectileSave = saveCandidatePatternMotion({
+        huntId: 'rathian', patternId: 'rathian.triple_fireball', candidate: 'rathian',
+        candidateRecord: projectileRecord, beats: projectileDraft
+    });
+    assert.equal(projectileSave.candidateSaved, true,
+        'candidate projectile timing edits must survive save/reload validation');
+    const projectilePersisted = JSON.parse(fs.readFileSync(candidateFile, 'utf8'))
+        .actions.find(action => action.id === 'rathian.triple_fireball');
+    assert.equal(projectilePersisted.graph.beats.find(beat => beat.id === 'spit-left').events
+        .find(event => event.id === 'fireball-1:contact')?.projectileId, 'fireball-1',
+    'candidate saving must retain non-editor projectile linkage metadata');
+
     for (const resetMode of ['auto', 'preserve', 'snap-end', 'animate']) {
         const tailRecord = candidateKitRecordFor({ candidate: 'rathian' }, 'rathian', temporaryDir);
         const candidateMap = loadHuntPatternAudioMap('rathian', { candidateKit: tailRecord.kit });

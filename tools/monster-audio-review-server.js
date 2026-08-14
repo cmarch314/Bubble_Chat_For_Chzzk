@@ -613,7 +613,14 @@ function validatePatternMotionInput(input) {
         : loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
     if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
     if (input?.reset) return { ...input, huntId, patternId, candidateRecord };
-    const expected = new Set(pattern.timeline.beats.map(beat => beat.id));
+    // Candidate save validation must compare against the candidate's native
+    // graph, not the audio-review projection.  The projection may add
+    // judgment/audio rows while a candidate beat is being split, which made a
+    // valid editor draft look like it had missing or foreign motion items.
+    const candidateAction = candidateRecord?.kit?.actions?.find(item => item?.id === patternId);
+    const expected = new Set(candidateAction?.graph?.beats?.map(beat =>
+        String(beat?.id || beat?.beat || ''))?.filter(Boolean)
+        || pattern.timeline.beats.map(beat => beat.id));
     const submitted = Object.keys(input?.beats || {});
     const unknown = submitted.filter(id => !expected.has(id));
     const missing = [...expected].filter(id => !submitted.includes(id));
@@ -645,8 +652,20 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
             beat.ticks = draft.ticks;
             const preservedEvents = (beat.events || []).filter(event =>
                 !MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind));
+            const authoredJudgments = new Map((beat.events || [])
+                .filter(event => MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind))
+                .map(event => [String(event.id || ''), event]));
             const judgmentEvents = Array.isArray(draft.judgments)
-                ? draft.judgments.map(judgment => ({ ...judgment })) : [];
+                ? draft.judgments.map(judgment => {
+                    // The editor owns timing, target, damage, and reaction.
+                    // It must preserve typed runtime links such as projectileId
+                    // and event-specific delivery metadata that are not motion
+                    // fields.  Replacing the full event stripped projectileId,
+                    // then the graph validator correctly rejected the save and
+                    // rolled back an otherwise valid tick edit.
+                    const authored = authoredJudgments.get(String(judgment?.id || '')) || {};
+                    return { ...authored, ...judgment };
+                }) : [];
             beat.events = [...preservedEvents, ...judgmentEvents].map(event => ({ ...event,
                 offsetTicks: Math.max(0, Math.min(beat.ticks - 1,
                     Math.round(Number(event.offsetTicks) || 0)))
