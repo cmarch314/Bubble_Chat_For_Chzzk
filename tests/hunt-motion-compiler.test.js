@@ -181,12 +181,13 @@ assert.strictEqual(continuousCharge.timeline[1].continueTravel, true);
 
 const directionalTilt = HuntMotionCompiler.compile([
     { beat: 'right-hit', ticks: 3, to: 'hunter:3', pose: 'brace', rotationToward: 28 },
-    { beat: 'recover', ticks: 5, to: 'home', pose: 'brace', rotation: 0 }
+    { beat: 'recover', ticks: 5, to: 'home', pose: 'brace', rotation: 0,
+        rotationResetMode: 'animate' }
 ], { anchors });
 assert.strictEqual(directionalTilt.timeline[0].rotation, 28,
     'rightward shoulder travel tilts the sprite upper edge to the right');
 assert.strictEqual(directionalTilt.timeline[1].rotation, 0,
-    'explicit recovery returns the sprite upright');
+    'explicit animated recovery returns the sprite upright');
 
 const travelAligned = HuntMotionCompiler.compile([
     { beat: 'left-flight', ticks: 4, to: 'hunter:0', face: 'hunter:0', pose: 'stretch', alignRotationToTravel: true },
@@ -240,10 +241,16 @@ const mirroredRotation = HuntMotionCompiler.compile([
 const unmirroredRotation = HuntMotionCompiler.compile([
     { beat: 'turn-to-left', ticks: 4, face: 'left', pose: 'stretch', rotation: 45 }
 ], { anchors, baseFacing: 'left' });
-assert.match(mirroredRotation.pose.at(-1).transform, /rotate\(-45\.00deg\)/,
-    'a horizontally mirrored sprite must receive the inverse inner rotation');
+assert.match(mirroredRotation.pose.at(-1).transform, /rotate\(45\.00deg\)/,
+    'a horizontally mirrored sprite must keep local rotation so the outer mirror reverses its visible path');
 assert.match(unmirroredRotation.pose.at(-1).transform, /rotate\(45\.00deg\)/,
     'the native sprite direction must retain the authored rotation sign');
+const mirroredDirectedRotation = HuntMotionCompiler.compile([{
+    beat: 'mirrored-counterclockwise', ticks: 4, face: 'right',
+    rotationDirection: 'counterclockwise', rotationDegrees: 15
+}], { anchors, baseFacing: 'left' });
+assert.match(mirroredDirectedRotation.pose.at(-1).transform, /rotate\(-15\.00deg\)/,
+    'a mirrored sprite keeps image-local direction and lets the facing layer reverse it on screen');
 const clockwiseHalfTurn = HuntMotionCompiler.compile([{
     beat: 'clockwise-half', ticks: 4, rotation: -180,
     rotationDirection: 'clockwise', rotationDegrees: 180, rotateByFacing: -72
@@ -508,7 +515,8 @@ const returnAngles = fullTurnReturn.pose
 assert.ok(returnAngles.every(angle => angle === 360),
     '한 바퀴 회전은 복귀 중 역회전하지 않고 360도를 유지해야 한다');
 
-// 반 바퀴 자세는 복귀 구간에 걸쳐 되감지 않고 경계에서 즉시 기본 자세가 된다.
+// 반 바퀴 자세도 복귀 구간에서는 현재각을 유지한다. 자세 초기화는 모션 owner가
+// 완료 후 한 번만 수행하며, BEAT 경계에서 별도의 회전을 만들지 않는다.
 const halfTurnReturn = HuntMotionCompiler.compile([
     { beat: 'slam', ticks: 3, pose: 'tail-slam', rotation: 180, origin: 'part:tail' },
     { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
@@ -516,8 +524,8 @@ const halfTurnReturn = HuntMotionCompiler.compile([
 const halfReturnAngles = halfTurnReturn.pose
     .filter(frame => frame.offset > 3 / 7)
     .map(frame => Number(frame.transform.match(/rotate\((-?[\d.]+)deg\)/)[1]));
-assert.ok(halfReturnAngles.every(angle => angle === 0),
-    '반 바퀴 자세도 복귀 중 되감지 말고 복귀 시작점에서 즉시 세워야 한다');
+assert.ok(halfReturnAngles.every(angle => angle === 180),
+    '반 바퀴 자세도 home 복귀 중 누적각을 유지해야 한다');
 
 // 축도 회전과 함께 유지돼야 한다. 회전이 남았는데 축만 기본값으로 돌아가면
 // 버티는 구간으로 넘어가는 순간 몸이 튄다.

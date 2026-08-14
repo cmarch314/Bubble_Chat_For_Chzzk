@@ -1231,44 +1231,9 @@
         for (const beat of beats) {
             if (beat.id === beatId) break;
             const authored = snapshot?.draft?.[beat.id] || {};
-            const resetMode = authored.rotationResetMode || 'auto';
-            if (resetMode === 'preserve') continue;
-            const authoredDirection = String(authored.rotationDirection || '');
-            const authoredDegrees = Number(authored.rotationDegrees);
-            if (['clockwise', 'counterclockwise'].includes(authoredDirection)
-                && authored.rotationDegrees !== undefined && authored.rotationDegrees !== null
-                && Number.isFinite(authoredDegrees)) {
-                previous += (authoredDirection === 'counterclockwise' ? -1 : 1)
-                    * Math.abs(authoredDegrees);
-            } else if (authored.rotation !== undefined && authored.rotation !== null) {
-                const raw = Number(authored.rotation) || 0;
-                previous = resetMode === 'auto'
-                    ? raw + 360 * Math.round((previous - raw) / 360)
-                    : raw;
-            } else if (authored.rotateBy !== undefined && authored.rotateBy !== null) {
-                previous += Number(authored.rotateBy) || 0;
-            }
+            previous = HuntRotationContract.resolve(authored, previous).final;
         }
-        const resetMode = value.rotationResetMode || 'auto';
-        const authoredDirection = String(value.rotationDirection || '');
-        const authoredDegrees = Number(value.rotationDegrees);
-        const rawFinal = Number(value.rotation);
-        const hasDirectedRotation = ['clockwise', 'counterclockwise'].includes(authoredDirection)
-            && value.rotationDegrees !== undefined && value.rotationDegrees !== null
-            && Number.isFinite(authoredDegrees);
-        const final = hasDirectedRotation
-            ? previous + (authoredDirection === 'counterclockwise' ? -1 : 1)
-                * Math.abs(authoredDegrees)
-            : Number.isFinite(rawFinal)
-            ? resetMode === 'auto'
-                ? rawFinal + 360 * Math.round((previous - rawFinal) / 360)
-                : resetMode === 'preserve' ? previous : rawFinal
-            : previous + (Number(value.rotateBy) || 0);
-        const delta = final - previous;
-        const direction = authoredDirection === 'counterclockwise' || (!hasDirectedRotation && delta < 0)
-            ? 'counterclockwise' : 'clockwise';
-        return { previous, final, resetMode,
-            degrees: Math.abs(hasDirectedRotation ? authoredDegrees : delta || 0), direction,
+        return { ...HuntRotationContract.resolve(value, previous),
             keepRotation: value.keepRotation !== false };
     }
 
@@ -1284,7 +1249,7 @@
             ['spin-left', '회전 포즈 · 좌'], ['spin-right', '회전 포즈 · 우']];
         host.innerHTML = `<div class="transform-head"><b>이동 · 회전 · 이미지 변형</b><select class="beat-select">${snapshot.timeline.beats.map(beat => `<option value="${esc(beat.id)}"${beat.id === beatId ? ' selected' : ''}>${esc(beat.label || beat.id)}</option>`).join('')}</select></div><div class="anchor-editor">${anchorEditor(value)}<section class="anchor-field face-field"><b>이미지 좌우 방향</b><div class="anchor-map face-map" data-anchor-key="face">${[['', '유지'], ['left', '←'], ['right', '→'], ['target', '대상 쪽 좌우']].map(([direction, label]) => `<button type="button" data-anchor="${direction}" class="${String(value.face || '').replace('toward-target', 'target') === direction ? 'active' : ''}">${label}</button>`).join('')}</div><label class="body-aim-toggle"><input type="checkbox"${value.aimBodyAt ? ' checked' : ''}>대상까지 몸체 각도 맞춤</label></section></div><div class="transform-grid">
             <label>포즈<select data-key="pose">${options(poseChoices, value.pose || 'idle')}</select></label><label>X 이동<input data-key="offsetX" type="number" value="${value.offsetX ?? 0}"></label><label>Y 이동<input data-key="offsetY" type="number" value="${value.offsetY ?? 0}"></label>
-            <label>투명도<input data-key="opacity" type="number" min="0" max="1" step=".05" value="${value.opacity ?? 1}"></label><section class="rotation-controls"><b>회전</b><div><button type="button" data-rotation-direction="counterclockwise" class="${rotationEditorModel(snapshot, beatId, value).direction === 'counterclockwise' ? 'active' : ''}">반시계</button><button type="button" data-rotation-direction="clockwise" class="${rotationEditorModel(snapshot, beatId, value).direction === 'clockwise' ? 'active' : ''}">시계</button></div><label>회전각°<input class="rotation-degrees" type="number" min="0" value="${rotationEditorModel(snapshot, beatId, value).degrees}"></label><label>최종각°<input class="rotation-final" type="number" value="${rotationEditorModel(snapshot, beatId, value).final}"></label><label class="rotation-reset-mode">복귀 회전<select data-key="rotationResetMode">${options([['auto','자동 · 동일 자세 유지'],['preserve','누적각 유지'],['snap-end','복귀 끝에 즉시 정상화'],['animate','회전하며 정상화']], rotationEditorModel(snapshot, beatId, value).resetMode)}</select></label></section>
+            <label>투명도<input data-key="opacity" type="number" min="0" max="1" step=".05" value="${value.opacity ?? 1}"></label><section class="rotation-controls"><b>회전</b><div><button type="button" data-rotation-direction="counterclockwise" class="${rotationEditorModel(snapshot, beatId, value).direction === 'counterclockwise' ? 'active' : ''}">반시계</button><button type="button" data-rotation-direction="clockwise" class="${rotationEditorModel(snapshot, beatId, value).direction === 'clockwise' ? 'active' : ''}">시계</button></div><label>회전각°<input class="rotation-degrees" type="number" min="0" value="${rotationEditorModel(snapshot, beatId, value).degrees}"></label><label>최종각°<input class="rotation-final" type="number" value="${rotationEditorModel(snapshot, beatId, value).final}"></label><label class="rotation-reset-mode">복귀 회전<select data-key="rotationResetMode">${options([['auto','자동 · 복귀는 현재각 유지'],['preserve','누적각 유지'],['snap-end','복귀 끝에 즉시 정상화'],['animate','회전하며 정상화']], rotationEditorModel(snapshot, beatId, value).resetMode)}</select></label></section>
             <label>가로 배율<input data-key="scaleX" type="number" min=".05" step=".05" value="${value.scaleX ?? 1}"></label>
             <label>세로 배율<input data-key="scaleY" type="number" min=".05" step=".05" value="${value.scaleY ?? 1}"></label><label>회전축<input data-key="origin" value="${esc(value.origin || 'part:torso')}"></label>
             <label>X 기울기°<input data-key="skewX" type="number" value="${value.skewX ?? 0}"></label><label>Y 기울기°<input data-key="skewY" type="number" value="${value.skewY ?? 0}"></label>
@@ -1438,6 +1403,13 @@
 
     function selectPattern(id, autoplay) {
         const pattern = app.patterns.find(item => item.id === id); if (!pattern) return;
+        // Playing the already-selected pattern must execute the live editor
+        // draft. Reloading here silently discarded unsaved transform changes,
+        // so both rotation buttons replayed the same persisted direction.
+        if (app.selectedPatternId === id && app.session.snapshot().timeline.beats.length) {
+            if (autoplay) playCurrentPreview();
+            return;
+        }
         app.selectedPatternId = id; app.session.load(pattern); app.selectedSlot = app.session.selection.slotId;
         renderPatternList(); renderPatternDesk(); refreshSourceSelection(); app.renderScenario?.();
         if (autoplay) playCurrentPreview();

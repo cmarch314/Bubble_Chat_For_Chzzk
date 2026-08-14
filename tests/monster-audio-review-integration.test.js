@@ -22,9 +22,14 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(shell.includes('<script src="/review-app.js"></script>'));
         assert.ok(shell.includes('<script src="/motion-authoring-contract.js"></script>'),
             'the browser editor must load the same motion contract as both save backends');
+        assert.ok(shell.includes('<script src="/js/effects/hunt/HuntRotationContract.js"></script>'),
+            'the editor must load the same rotation semantics as Preview and live hunts');
         const motionContract = await fetch(`${origin}/motion-authoring-contract.js`).then(response => response.text());
         assert.ok(motionContract.includes('normalizeBeats') && motionContract.includes('compareBeats'),
             'the versioned review server must serve the shared authoring contract');
+        const rotationContract = await fetch(`${origin}/js/effects/hunt/HuntRotationContract.js`).then(response => response.text());
+        assert.ok(rotationContract.includes('HuntRotationContract') && rotationContract.includes("beat.to === 'home'"),
+            'the review server must expose the canonical runtime rotation contract');
         assert.ok(shell.includes('value="common-part-break"') && shell.includes('value="common-items"'),
             'the source rail must split shared part-break and item/bomb Common groups');
         assert.ok(shell.includes('value="common">COMMON 범용 음향'),
@@ -122,6 +127,12 @@ const { createServer } = require('../tools/monster-audio-review-server');
         'the BEAT inspector must make turn direction, degrees, final angle, and return behavior explicit');
         assert.ok(app.includes("'rotationEasing', 'rotationResetMode'"),
         'return rotation must use the same persisted transform-field path as every other editor control');
+        assert.ok(app.includes('HuntRotationContract.resolve(authored, previous)')
+            && app.includes('HuntRotationContract.resolve(value, previous)'),
+            'the editor must not maintain a second rotation calculator');
+        assert.ok(app.includes('if (app.selectedPatternId === id && app.session.snapshot().timeline.beats.length)')
+            && app.includes('if (autoplay) playCurrentPreview();'),
+            'replaying the selected pattern must preserve and execute the current unsaved editor draft');
         assert.ok(app.includes("label: '📣 포효'") && app.includes("label: '〰️ 지진'")
             && app.includes("label: '🌪️ 풍압'"),
             'timeline judgments must distinguish roar, tremor and wind pressure with emoji labels');

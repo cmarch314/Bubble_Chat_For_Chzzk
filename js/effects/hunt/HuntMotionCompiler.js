@@ -1,5 +1,9 @@
 'use strict';
 
+const HuntRotation = typeof globalThis === 'object' && globalThis.HuntRotationContract
+    ? globalThis.HuntRotationContract
+    : (typeof require === 'function' ? require('./HuntRotationContract.js') : null);
+
 // 비트 목록을 Web Animations 키프레임으로 컴파일한다 (재설계안 원칙 3).
 //
 // 저작자는 이렇게 쓴다:
@@ -64,34 +68,15 @@ class HuntMotionCompiler {
     }
 
     static equivalentRotation(angle, previous = 0) {
-        const target = Number(angle) || 0;
-        const current = Number(previous) || 0;
-        // A non-zero authored angle is deliberately unwrapped: 360° means
-        // "make one full turn", not the visually equivalent 0°.  Only a
-        // normalized 0° is ambiguous, so carry it to the nearest completed
-        // turn. CSS otherwise interpolates 360° → 0° backwards.
-        if (target === 0 && current !== 0) {
-            return 360 * Math.round(current / 360);
-        }
-        return target;
+        return HuntRotation.equivalent(angle, previous);
     }
 
     static directedRotation(beat = {}, previous = 0) {
-        const direction = String(beat.rotationDirection || '');
-        const degrees = Number(beat.rotationDegrees);
-        if (['clockwise', 'counterclockwise'].includes(direction)
-            && beat.rotationDegrees !== undefined && beat.rotationDegrees !== null
-            && Number.isFinite(degrees)) {
-            return Number(previous || 0)
-                + (direction === 'counterclockwise' ? -1 : 1) * Math.abs(degrees);
-        }
-        return this.equivalentRotation(beat.rotation, previous);
+        return HuntRotation.resolve(beat, previous).final;
     }
 
     static rotationResetMode(beat = {}) {
-        return ['auto', 'preserve', 'snap-end', 'animate'].includes(beat.rotationResetMode)
-            ? beat.rotationResetMode
-            : 'auto';
+        return HuntRotation.resetMode(beat);
     }
 
     // beats: 비트 배열
@@ -152,15 +137,11 @@ class HuntMotionCompiler {
             return sum + ticks;
         }, 0);
 
-        // `facing` is a logical direction. A left/right sprite can be mirrored
-        // by the renderer's outer facing layer; that mirror reverses the
-        // visible sense of the inner pose rotation. Keep authored rotation in
-        // world/editor space and derive the inner transform sign per BEAT.
+        // Rotation is authored in the sprite's local image space. The outer
+        // facing layer mirrors that image and therefore naturally reverses the
+        // visible rotation path. Inverting the inner rotation here as well
+        // cancels that mirror and makes both direction buttons look identical.
         const baseDirection = baseFacing === 'left' ? -1 : baseFacing === 'right' ? 1 : 1;
-        const visualFlipFor = direction => {
-            if (baseFacing === 'left') return direction < 0 ? 1 : -1;
-            return direction > 0 ? 1 : -1;
-        };
         const state = {
             point: { x: 0, y: 0 },
             depth: 1,
@@ -297,7 +278,7 @@ class HuntMotionCompiler {
             if (state.facing !== previous.facing || (!wasFacingActive && facingActive)) {
                 facing.push({ offset: startAt, direction: state.facing });
             }
-            state.rotationSign = facingActive ? visualFlipFor(state.facing) : 1;
+            state.rotationSign = 1;
             const strideFlipTicks = Math.max(0, Math.floor(Number(beat.strideFlipTicks) || 0));
             if (strideFlipTicks > 0) strideWindows.push({ startTicks, endTicks, intervalTicks: strideFlipTicks });
 
@@ -331,6 +312,8 @@ class HuntMotionCompiler {
             // the pose first makes the renderer interpolate the shortest path
             // backwards (the old double tail-sweep failure).
             const rotationResetMode = this.rotationResetMode(beat);
+            const rotationResolution = HuntRotation.resolve(beat, previous.rotation);
+            const preserveHomeRotation = rotationResolution.preserve && beat.to === 'home';
             const hasDirectedRotation = ['clockwise', 'counterclockwise']
                 .includes(String(beat.rotationDirection || ''))
                 && beat.rotationDegrees !== undefined && beat.rotationDegrees !== null
@@ -338,7 +321,7 @@ class HuntMotionCompiler {
             const hasExplicitRotation = beat.rotation !== undefined || hasDirectedRotation;
             let snapRotationAtStart = false;
             let snapRotationAtEnd = false;
-            if (rotationResetMode === 'preserve') {
+            if (rotationResetMode === 'preserve' || preserveHomeRotation) {
                 state.rotation = previous.rotation;
                 state.origin = previous.origin;
             } else if (definition.resetRotation && beat.keepRotation !== true && previous.rotation) {
@@ -362,12 +345,8 @@ class HuntMotionCompiler {
             // A direct final angle is authoritative. `0` is a real authored
             // value; legacy deltas must never turn it into a visible spin.
             if (beat.origin) state.origin = beat.origin;
-            if (hasExplicitRotation && rotationResetMode !== 'preserve') {
-                state.rotation = rotationResetMode === 'auto'
-                    ? this.directedRotation(beat, previous.rotation)
-                    : hasDirectedRotation
-                        ? this.directedRotation(beat, previous.rotation)
-                        : Number(beat.rotation) || 0;
+            if (hasExplicitRotation && rotationResetMode !== 'preserve' && !preserveHomeRotation) {
+                state.rotation = rotationResolution.final;
                 snapRotationAtEnd = rotationResetMode === 'snap-end';
             }
             if (!hasExplicitRotation && beat.rotationToward !== undefined) {
