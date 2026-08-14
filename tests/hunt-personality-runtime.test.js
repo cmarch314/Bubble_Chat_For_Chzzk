@@ -10,11 +10,11 @@ const path = require('path');
 
 const expected = {
     offensive: { stats: [.90, .70, .75, .75, .60], items: [10, 0, 0, 1, 5] },
-    normal: { stats: [.85, .55, .75, .75, .55], items: [10, 1, 1, 1, 2] },
+    normal: { stats: [.85, .55, .75, .75, .55], items: [10, 1, 0, 1, 2] },
     defensive: { stats: [.85, .45, .85, .85, .70], items: [10, 3, 0, 0, 2] },
-    support: { stats: [.80, .40, .75, .75, .50], items: [10, 3, 2, 2, 4] },
-    veteran: { stats: [.90, .60, .80, .80, .60], items: [10, 2, 1, 2, 2] },
-    newbie: { stats: [.80, .40, .70, .70, .40], items: [10, 3, 2, 2, 2] }
+    support: { stats: [.80, .40, .75, .75, .50], items: [10, 3, 1, 2, 4] },
+    veteran: { stats: [.90, .60, .80, .80, .60], items: [10, 2, 0, 2, 2] },
+    newbie: { stats: [.80, .40, .70, .70, .40], items: [10, 3, 1, 2, 2] }
 };
 for (const [personality, values] of Object.entries(expected)) {
     const profile = Profiles.get(personality);
@@ -27,7 +27,7 @@ const perkHunter = { personality: 'normal', perkModifiers: { hitChance: .04, cou
 assert.strictEqual(Profiles.chance(perkHunter, 'hit'), .89);
 assert.strictEqual(Profiles.specialActionChance(perkHunter, .55), .63);
 assert.deepStrictEqual(Issued.packFor(perkHunter), {
-    potions: 12, lifepowders: 1, shockTraps: 2, flashPods: 1, bombs: 2
+    potions: 12, lifepowders: 1, shockTraps: 1, flashPods: 1, bombs: 2
 });
 
 const offensive = { personality: 'offensive' };

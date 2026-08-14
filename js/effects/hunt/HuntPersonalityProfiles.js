@@ -13,7 +13,7 @@ class HuntPersonalityProfiles {
         }),
         normal: Object.freeze({
             label: '밸런스', stats: { hit: .85, critical: .55, evade: .75, guard: .75, special: .55 },
-            issued: { potions: 10, lifepowders: 1, shockTraps: 1, flashPods: 1, bombs: 2 },
+            issued: { potions: 10, lifepowders: 1, shockTraps: 0, flashPods: 1, bombs: 2 },
             ai: { aggression: .58, support: .52, conservation: .52, coordination: .66,
                 risk: .52, gather: .35, variance: .12, flash: .50, trap: .48, powder: .48, bomb: .55 }
         }),
@@ -26,19 +26,19 @@ class HuntPersonalityProfiles {
         }),
         support: Object.freeze({
             label: '지원형', stats: { hit: .80, critical: .40, evade: .75, guard: .75, special: .50 },
-            issued: { potions: 10, lifepowders: 3, shockTraps: 2, flashPods: 2, bombs: 4 },
+            issued: { potions: 10, lifepowders: 3, shockTraps: 1, flashPods: 2, bombs: 4 },
             ai: { aggression: .30, support: .98, conservation: .42, coordination: .96,
                 risk: .28, gather: .88, variance: .06, flash: .90, trap: .92, powder: .96, bomb: .60 }
         }),
         veteran: Object.freeze({
             label: '배태랑', stats: { hit: .90, critical: .60, evade: .80, guard: .80, special: .60 },
-            issued: { potions: 10, lifepowders: 2, shockTraps: 1, flashPods: 2, bombs: 2 },
+            issued: { potions: 10, lifepowders: 2, shockTraps: 0, flashPods: 2, bombs: 2 },
             ai: { aggression: .65, support: .65, conservation: .92, coordination: 1,
                 risk: .38, gather: .32, variance: .02, flash: 1, trap: .68, powder: .76, bomb: .72 }
         }),
         newbie: Object.freeze({
             label: '몬린이', stats: { hit: .80, critical: .40, evade: .70, guard: .70, special: .40 },
-            issued: { potions: 10, lifepowders: 3, shockTraps: 2, flashPods: 2, bombs: 2 },
+            issued: { potions: 10, lifepowders: 3, shockTraps: 1, flashPods: 2, bombs: 2 },
             ai: { aggression: .44, support: .42, conservation: .58, coordination: .24,
                 risk: .62, gather: .92, variance: .38, flash: .15, trap: .18, powder: .20, bomb: .18 }
         })
