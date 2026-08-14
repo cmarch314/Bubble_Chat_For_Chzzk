@@ -1234,6 +1234,17 @@
             <label class="wide">이동 속도<select data-key="moveEasing">${options(easings, value.moveEasing || 'smooth')}</select></label><label class="wide">회전 속도<select data-key="rotationEasing">${options(easings, value.rotationEasing || 'smooth')}</select></label>
             <label class="wide stride-toggle"><span>씰룩씰룩 좌우 반전</span><input class="stride-toggle-input" type="checkbox"${Number(value.strideFlipTicks) > 0 ? ' checked' : ''}></label>
             <label class="stride-period">반전 주기 (틱)<input data-key="strideFlipTicks" type="number" min="1" max="60" value="${Number(value.strideFlipTicks) > 0 ? Number(value.strideFlipTicks) : 3}"${Number(value.strideFlipTicks) > 0 ? '' : ' disabled'}></label></div>`;
+        // The destination grid is intentionally collapsible: it contains every
+        // placement preset, but it should not bury the current BEAT's timing
+        // and audio controls during ordinary review work.
+        const anchorEditorNode = host.querySelector('.anchor-editor');
+        const anchorDisclosure = document.createElement('details');
+        anchorDisclosure.className = 'anchor-disclosure';
+        anchorDisclosure.open = app.anchorEditorExpanded === true;
+        anchorDisclosure.innerHTML = '<summary><b>배치 · 방향</b><span>도착 위치 · 대상 · 이미지 좌우</span></summary>';
+        anchorEditorNode.before(anchorDisclosure);
+        anchorDisclosure.append(anchorEditorNode);
+        anchorDisclosure.ontoggle = () => { app.anchorEditorExpanded = anchorDisclosure.open; };
         host.querySelector('.beat-select').onchange = event => selectPart({ beatId: event.target.value });
         host.querySelectorAll('.anchor-map button').forEach(button => button.onclick = () => {
             const key = button.closest('.anchor-map').dataset.anchorKey;
