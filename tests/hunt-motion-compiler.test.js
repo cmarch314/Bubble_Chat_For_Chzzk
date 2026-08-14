@@ -68,6 +68,15 @@ const authoredTailAngles = authoredDoubleTail.timeline.map(beat => Number(author
 assert.deepStrictEqual(authoredTailAngles, [-30, 150, 330, 360],
     'explicit BEAT final angles must not receive the legacy tail-whip pose rotation or reverse on return');
 
+const explicitZeroRotation = HuntMotionCompiler.compile([
+    { beat: 'wind', ticks: 5, pose: 'crouch', rotation: 0, rotateBy: 30, rotateByFacing: -36 },
+    { beat: 'hold', ticks: 3, pose: 'brace', rotation: 0 }
+], { anchors });
+const zeroAngles = explicitZeroRotation.pose.map(frame => Number(frame.transform
+    .match(/rotate\((-?[\d.]+)deg\)/)[1]));
+assert.ok(zeroAngles.every(angle => angle === 0),
+    'an editor-authored 0° must suppress stale legacy rotation deltas');
+
 const reviewedCutwingAmbush = HuntMotionCompiler.compile([
     { beat: 'windup', ticks: 5, pose: 'crouch' },
     { beat: 'leap-out', ticks: 4, to: 'offscreen:left', offsetY: -280, pose: 'stretch', opacity: 0 },

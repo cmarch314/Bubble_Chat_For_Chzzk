@@ -307,16 +307,18 @@ class HuntMotionCompiler {
                 state.origin = null;
             }
 
-            // 명시적 편집값은 포즈의 기본 리셋보다 우선한다.
+            // A direct final angle is authoritative. `0` is a real authored
+            // value; legacy deltas must never turn it into a visible spin.
             if (beat.origin) state.origin = beat.origin;
-            if (beat.rotation !== undefined) state.rotation = Number(beat.rotation) || 0;
-            if (beat.rotationToward !== undefined) {
+            const hasExplicitRotation = beat.rotation !== undefined;
+            if (hasExplicitRotation) state.rotation = Number(beat.rotation) || 0;
+            if (!hasExplicitRotation && beat.rotationToward !== undefined) {
                 const degrees = Number(beat.rotationToward) || 0;
                 const travelX = state.point.x - previous.point.x;
                 const direction = Math.sign(travelX) || state.facing || 1;
                 state.rotation = direction * degrees;
             }
-            if (beat.alignRotationToTravel) {
+            if (!hasExplicitRotation && beat.alignRotationToTravel) {
                 const travelX = state.point.x - previous.point.x;
                 const travelY = state.point.y - previous.point.y;
                 if (travelX || travelY) {
@@ -324,7 +326,7 @@ class HuntMotionCompiler {
                     state.rotation = direction * Math.atan2(travelY, Math.max(1e-6, Math.abs(travelX))) * 180 / Math.PI;
                 }
             }
-            if (beat.aimBodyAt) {
+            if (!hasExplicitRotation && beat.aimBodyAt) {
                 const aim = anchors.resolve(beat.aimBodyAt, { bounds: 'pivot' });
                 const torso = offsetOf('part:torso', state.facing);
                 const leftFoot = offsetOf('part:left-front-leg', state.facing);
@@ -346,7 +348,7 @@ class HuntMotionCompiler {
             // Rotation is authored data, never a pose side effect. This keeps
             // the editor's 0° truthful and makes Preview/live replayable from
             // the same BEAT graph.
-            const rotationDelta = beat.rotateByFacing !== undefined
+            const rotationDelta = hasExplicitRotation ? 0 : beat.rotateByFacing !== undefined
                 ? Math.abs(Number(beat.rotateByFacing) || 0) * (state.facing || 1)
                 : beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0 : 0;
             if (rotationDelta) {
