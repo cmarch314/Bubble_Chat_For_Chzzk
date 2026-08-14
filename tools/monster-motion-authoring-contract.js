@@ -8,7 +8,7 @@
     const TEXT_FIELDS = Object.freeze(['at', 'to', 'origin', 'moveEasing', 'rotationEasing', 'pose',
         'face', 'align', 'bounds', 'fade', 'sfx', 'label', 'aimBodyAt', 'targetMode',
         'fx', 'fxAnchor', 'fxSecondary', 'fxSecondaryAnchor', 'fxSecondaryAngleMode',
-        'rotationDirection']);
+        'rotationDirection', 'rotationResetMode']);
     const NUMBER_FIELDS = Object.freeze(['offsetX', 'offsetY', 'depth', 'rotation', 'rotationToward',
         'rotateBy', 'rotateByFacing', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity',
         'damageScale', 'hitOffsetTicks', 'strideFlipTicks', 'stompSteps', 'fxDurationTicks',
@@ -22,6 +22,7 @@
         ...NUMBER_FIELDS.filter(key => key !== 'hitOffsetTicks'),
         ...BOOLEAN_FIELDS.filter(key => key !== 'hit'), 'fxAdditional']);
     const JUDGMENT_KINDS = Object.freeze(['damage', 'roar', 'tremor', 'wind']);
+    const ROTATION_RESET_MODES = Object.freeze(['auto', 'preserve', 'snap-end', 'animate']);
     const JUDGMENT_TARGETS = Object.freeze(['primary', 'left', 'right', 'pair', 'pair-left',
         'pair-right', 'primary-adjacent', 'all']);
 
@@ -66,6 +67,9 @@
             if (value[key] != null && String(value[key]).trim()) {
                 clean[key] = String(value[key]).trim().slice(0, 120);
             }
+        }
+        if (clean.rotationResetMode && !ROTATION_RESET_MODES.includes(clean.rotationResetMode)) {
+            delete clean.rotationResetMode;
         }
         for (const key of NUMBER_FIELDS) {
             if (value[key] != null && Number.isFinite(Number(value[key]))) clean[key] = Number(value[key]);
@@ -157,7 +161,8 @@
     }
 
     return Object.freeze({ TEXT_FIELDS, NUMBER_FIELDS, BOOLEAN_FIELDS, STRUCTURED_FIELDS,
-        EDITABLE_FIELDS, VISUAL_FIELDS, JUDGMENT_KINDS, JUDGMENT_TARGETS, ticks,
+        EDITABLE_FIELDS, VISUAL_FIELDS, JUDGMENT_KINDS, JUDGMENT_TARGETS,
+        ROTATION_RESET_MODES, ticks,
         normalizeJudgment, normalizeBeat, normalizeBeats, compactBeats, visualValue,
         canonicalJson, compareBeats });
 }));

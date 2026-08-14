@@ -86,6 +86,26 @@ const completedTurnAngles = completedTurnHold.pose.map(frame => Number(frame.tra
 assert.ok(completedTurnAngles.slice(-2).every(angle => angle === 360),
     '0° after a completed turn must retain the equivalent 360° angle instead of reverse-rotating');
 
+const selectableRotationReturn = mode => HuntMotionCompiler.compile([
+    { beat: 'turn', ticks: 5, pose: 'stretch-strong', rotation: 360 },
+    { beat: 'return', ticks: 5, pose: 'idle', rotation: 0, rotationResetMode: mode }
+], { anchors }).pose.map(frame => ({
+    offset: frame.offset,
+    angle: Number(frame.transform.match(/rotate\((-?[\d.]+)deg\)/)[1])
+}));
+const preservedReturn = selectableRotationReturn('preserve');
+assert.ok(preservedReturn.slice(-2).every(frame => frame.angle === 360),
+    'preserve must carry the accumulated angle through recovery without a reverse spin');
+const snappedReturn = selectableRotationReturn('snap-end');
+assert.equal(snappedReturn.at(-2).angle, 360,
+    'snap-end must hold the accumulated angle until the recovery endpoint');
+assert.equal(snappedReturn.at(-1).angle, 0,
+    'snap-end must normalize only on the final frame');
+const animatedReturn = selectableRotationReturn('animate');
+assert.ok(animatedReturn.some(frame => frame.offset === .5 && frame.angle === 360)
+    && animatedReturn.at(-1).angle === 0,
+    'animate must deliberately interpolate from the accumulated angle to the exact final angle');
+
 const reviewedCutwingAmbush = HuntMotionCompiler.compile([
     { beat: 'windup', ticks: 5, pose: 'crouch' },
     { beat: 'leap-out', ticks: 4, to: 'offscreen:left', offsetY: -280, pose: 'stretch', opacity: 0 },

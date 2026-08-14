@@ -16,7 +16,7 @@ const source = {
         fxDurationTicks: 5, fxSecondaryDurationTicks: 6, rotationDegrees: 90,
         hit: false, alignRotationToTravel: true, instantOpacity: false, instantPose: true,
         continueTravel: true, flipFacing: false, keepRotation: true,
-        rotationDirection: 'clockwise', fx: 'dust', fxAnchor: 'target', fxSecondary: 'arc',
+        rotationDirection: 'clockwise', rotationResetMode: 'snap-end', fx: 'dust', fxAnchor: 'target', fxSecondary: 'arc',
         fxSecondaryAnchor: 'head', fxSecondaryAngleMode: 'travel',
         judgments: [{ id: 'windup-hit', group: 'impact', kind: 'damage', target: 'pair',
             offsetTicks: 4, damagePercent: 28, hitReactionKind: 'strong', directHitSupersedes: false }],
@@ -35,6 +35,10 @@ assert.equal(normalized.windup.judgments[0].hitReactionKind, 'strong');
 assert.equal(normalized.windup.hit, false);
 assert.equal(normalized.windup.hitOffsetTicks, undefined,
     'explicit judgments must exclusively own impact timing');
+assert.equal(normalized.windup.rotationResetMode, 'snap-end',
+    'the visible return-rotation option must round-trip through the shared contract');
+assert.equal(Contract.normalizeBeat({ ticks: 2, rotationResetMode: 'hidden-legacy-mode' }).rotationResetMode,
+    undefined, 'unknown hidden rotation modes must not enter authored BEAT data');
 
 const reordered = { windup: Object.fromEntries(Object.entries(normalized.windup).reverse()) };
 assert.equal(Contract.compareBeats(normalized, reordered).equal, true,
@@ -53,5 +57,9 @@ assert.doesNotMatch(read('tools/monster-audio-review-server.js'), /CANDIDATE_VIS
     'candidate motion saving must not maintain a private field allowlist');
 assert.match(read('tools/monster-audio-review-state.js'), /contract\.EDITABLE_FIELDS/,
     'the browser editor must consume the shared field contract');
+assert.match(read('tools/monster-audio-review-app.js'), /class="rotation-reset-mode"/,
+    'the editor must expose the authored return-rotation mode instead of hiding it');
+assert.doesNotMatch(read('tools/monster-audio-review-app.js'), /class="keep-rotation"/,
+    'the ambiguous legacy keep-rotation checkbox must not remain as a second UI owner');
 
 console.log('monster motion authoring contract tests passed');

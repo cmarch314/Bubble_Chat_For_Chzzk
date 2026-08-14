@@ -76,6 +76,12 @@ class HuntMotionCompiler {
         return target;
     }
 
+    static rotationResetMode(beat = {}) {
+        return ['auto', 'preserve', 'snap-end', 'animate'].includes(beat.rotationResetMode)
+            ? beat.rotationResetMode
+            : 'auto';
+    }
+
     // beats: 비트 배열
     // options: { anchors, rig, poses, ticksPerSecond }
     // align: 'part:tail' — 몸 중심이 아니라 그 부위가 목적지에 오도록 놓는다.
@@ -312,33 +318,40 @@ class HuntMotionCompiler {
             // idle/recovery pose. This is vital for full rotations: resetting
             // the pose first makes the renderer interpolate the shortest path
             // backwards (the old double tail-sweep failure).
-            if (definition.resetRotation && beat.keepRotation !== true && previous.rotation) {
+            const rotationResetMode = this.rotationResetMode(beat);
+            const hasExplicitRotation = beat.rotation !== undefined;
+            let snapRotationAtStart = false;
+            let snapRotationAtEnd = false;
+            if (rotationResetMode === 'preserve') {
+                state.rotation = previous.rotation;
+                state.origin = previous.origin;
+            } else if (definition.resetRotation && beat.keepRotation !== true && previous.rotation) {
                 const turns = previous.rotation / 360;
                 const completedFullTurn = Math.abs(turns - Math.round(turns)) < 1e-6;
-                if (completedFullTurn) {
+                if (completedFullTurn && rotationResetMode === 'auto') {
                     state.rotation = previous.rotation;
                     state.origin = previous.origin;
                 } else {
-                    pose.push({
-                        offset: Math.max(0, startAt - this.EPS),
-                        ...this.#poseFrame(previous)
-                    });
                     state.rotation = 0;
                     state.origin = null;
-                    pose.push({ offset: startAt, ...this.#poseFrame(state) });
+                    snapRotationAtStart = rotationResetMode === 'auto' && !hasExplicitRotation;
+                    snapRotationAtEnd = rotationResetMode === 'snap-end';
                 }
             } else if (definition.resetRotation && beat.keepRotation !== true) {
                 state.rotation = 0;
                 state.origin = null;
+                snapRotationAtEnd = rotationResetMode === 'snap-end';
             }
 
             // A direct final angle is authoritative. `0` is a real authored
             // value; legacy deltas must never turn it into a visible spin.
             if (beat.origin) state.origin = beat.origin;
-            const hasExplicitRotation = beat.rotation !== undefined;
-            if (hasExplicitRotation) state.rotation = this.equivalentRotation(
-                beat.rotation, previous.rotation
-            );
+            if (hasExplicitRotation && rotationResetMode !== 'preserve') {
+                state.rotation = rotationResetMode === 'auto'
+                    ? this.equivalentRotation(beat.rotation, previous.rotation)
+                    : Number(beat.rotation) || 0;
+                snapRotationAtEnd = rotationResetMode === 'snap-end';
+            }
             if (!hasExplicitRotation && beat.rotationToward !== undefined) {
                 const degrees = Number(beat.rotationToward) || 0;
                 const travelX = state.point.x - previous.point.x;
@@ -427,10 +440,21 @@ class HuntMotionCompiler {
             pose.push({
                 offset: startAt,
                 ...this.#poseFrame(beat.instantPose
+                    || snapRotationAtStart
                     ? state
                     : { ...previous, origin: beat.origin || previous.origin }),
                 easing: this.easing(beat.rotationEasing)
             });
+            if (snapRotationAtEnd) {
+                pose.push({
+                    offset: Math.max(startAt, endAt - this.EPS),
+                    ...this.#poseFrame({
+                        ...state,
+                        rotation: previous.rotation,
+                        origin: previous.origin
+                    })
+                });
+            }
             pose.push({ offset: endAt, ...this.#poseFrame(state) });
 
             // ---- 판정과 음향 ----
