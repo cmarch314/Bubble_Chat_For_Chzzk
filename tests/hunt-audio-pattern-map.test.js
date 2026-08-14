@@ -202,6 +202,14 @@ assert.deepStrictEqual(motionSave.beats, {
     telegraph: { ticks: 12, strideFlipTicks: 0 }, launch: 3,
     'impact:rock': { ticks: 2, hitOffsetTicks: 1, hit: true }, recovery: 18
 });
+const rotationMotionSave = savePatternMotion({
+    huntId: 'diablos', patternId: 'diablos.horn_charge',
+    beats: { wind: { ticks: 9, rotation: 180, rotationDirection: 'clockwise',
+        rotationDegrees: 180, keepRotation: true } }
+}, motionTmp);
+assert.deepStrictEqual(rotationMotionSave.beats.wind, {
+    ticks: 9, rotation: 180, rotationDirection: 'clockwise', rotationDegrees: 180, keepRotation: true
+}, 'rotation controls must round-trip through the same motion source used by reload verification');
 const unifiedMotionSave = savePatternMotion({
     huntId: 'diablos', patternId: 'diablos.rage_double_charge',
     beats: { charge: { ticks: 8, hit: true, hitOffsetTicks: 6,
@@ -237,6 +245,7 @@ assert.strictEqual(duplicateJudgmentSave.beats.first.judgments.length, 1);
 assert.deepStrictEqual(duplicateJudgmentSave.beats.old.judgments, [],
     'the save boundary must remove a judgment from its previous beat after a drag');
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', reset: true }, motionTmp);
+savePatternMotion({ huntId: 'diablos', patternId: 'diablos.horn_charge', reset: true }, motionTmp);
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.rage_double_charge', reset: true }, motionTmp);
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.rage_charge', reset: true }, motionTmp);
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.burrow_enter', reset: true }, motionTmp);

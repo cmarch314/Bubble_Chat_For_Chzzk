@@ -1050,13 +1050,14 @@ function savePatternMotion({ huntId, patternId, beats = null, reset = false }, o
     } else {
         const allowedText = ['at', 'to', 'origin', 'moveEasing', 'rotationEasing', 'pose',
             'face', 'align', 'bounds', 'fade', 'sfx', 'label', 'aimBodyAt', 'targetMode',
-            'fx', 'fxAnchor', 'fxSecondary', 'fxSecondaryAnchor', 'fxSecondaryAngleMode'];
+            'fx', 'fxAnchor', 'fxSecondary', 'fxSecondaryAnchor', 'fxSecondaryAngleMode',
+            'rotationDirection'];
         const allowedNumber = ['offsetX', 'offsetY', 'depth', 'rotation', 'rotationToward',
             'rotateBy', 'rotateByFacing', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity',
             'damageScale', 'hitOffsetTicks', 'strideFlipTicks', 'stompSteps', 'fxDurationTicks',
-            'fxSecondaryDurationTicks'];
+            'fxSecondaryDurationTicks', 'rotationDegrees'];
         const allowedBoolean = ['hit', 'alignRotationToTravel', 'instantOpacity', 'instantPose',
-            'continueTravel', 'flipFacing'];
+            'continueTravel', 'flipFacing', 'keepRotation'];
         const seenJudgmentIds = new Set();
         const cleanBeats = Object.fromEntries(Object.entries(beats || {}).map(([id, value]) => {
             if (!value || typeof value !== 'object') {
