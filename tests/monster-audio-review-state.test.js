@@ -100,6 +100,8 @@ assert.deepStrictEqual(normalizePreviewScenario({
 });
 
 const session = createEditorSession();
+assert.strictEqual(session.snapshot().scenario.view, 'design',
+    'editor sessions must expose target and impact authoring controls by default');
 session.load({ id: 'test.pattern', slots: pattern.slots, timeline: timed, motion: motionPattern.motion });
 session.select({ beatId: 'impact' });
 assert.strictEqual(session.snapshot().selection.beatId, 'impact');

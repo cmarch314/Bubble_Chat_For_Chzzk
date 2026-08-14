@@ -174,7 +174,10 @@
             targetIndices: uniqueHunters(entry?.targetIndices)
         })).filter(entry => entry.impactIndex >= 0);
         return Object.freeze({
-            view: value.view === 'design' ? 'design' : 'runtime',
+            // The review surface is an authoring tool.  Keep target and
+            // per-impact controls visible by default; runtime remains an
+            // explicit opt-in view for a clean unforced playback check.
+            view: value.view === 'runtime' ? 'runtime' : 'design',
             monsterState: ['normal', 'enraged', 'exhausted', 'airborne'].includes(value.monsterState)
                 ? value.monsterState : 'normal',
             primaryTargetIndex: clampHunter(value.primaryTargetIndex),

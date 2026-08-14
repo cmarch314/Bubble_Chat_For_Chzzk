@@ -1253,7 +1253,9 @@
         const anchorEditorNode = host.querySelector('.anchor-editor');
         const anchorDisclosure = document.createElement('details');
         anchorDisclosure.className = 'anchor-disclosure';
-        anchorDisclosure.open = app.anchorEditorExpanded === true;
+        // Placement, target and facing are first-class authored data.  They
+        // must not look like missing controls on an untouched editor session.
+        anchorDisclosure.open = app.anchorEditorExpanded !== false;
         anchorDisclosure.innerHTML = '<summary><b>배치 · 방향</b><span>도착 위치 · 대상 · 이미지 좌우</span></summary>';
         anchorEditorNode.before(anchorDisclosure);
         anchorDisclosure.append(anchorEditorNode);
