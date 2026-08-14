@@ -44,7 +44,8 @@
         revisions: { audio: '', motion: '', anatomy: '' }, playbackState: 'stopped',
         playbackStartedAt: 0, playbackElapsedMs: 0, playbackDurationMs: 0, playbackDurationTicks: 0,
         playbackFrame: 0, playbackTimeline: null, playbackBeatId: '',
-        simulationMode: false, simulationState: 'pattern', simulationPollTimer: null
+        simulationMode: false, simulationState: 'pattern', simulationPollTimer: null,
+        rotationPreviewTimer: 0
     };
     const audio = $('#audio');
     const selectedPattern = () => app.patterns.find(pattern => pattern.id === app.selectedPatternId) || null;
@@ -1207,6 +1208,28 @@
         renderSelectionOnly();
     }
 
+    // A half/full turn ends on the same silhouette in either direction.  A
+    // static end-frame scrub made the direction buttons appear inert even
+    // when the authored signed rotation was correct. Replay only the edited
+    // BEAT so its clockwise/counterclockwise path is visible, then pause at
+    // that BEAT's endpoint for editing.
+    function previewBeatRotation(beatId) {
+        const beat = app.session.snapshot().timeline.beats.find(item => item.id === beatId);
+        if (!beat || app.simulationMode) return;
+        const startTick = Math.max(0, Number(beat.startTicks) || 0);
+        const endTick = Math.max(startTick, Number(beat.endTicks) || startTick);
+        if (app.rotationPreviewTimer) clearTimeout(app.rotationPreviewTimer);
+        app.session.seek(startTick);
+        sendPreview({ scrub: true });
+        seekPreview(startTick);
+        bridge.send('bubblechat:pattern-preview-transport', { action: 'resume' });
+        app.rotationPreviewTimer = setTimeout(() => {
+            bridge.send('bubblechat:pattern-preview-transport', { action: 'pause' });
+            seekPreview(Math.max(startTick, endTick - 0.01));
+            app.rotationPreviewTimer = 0;
+        }, Math.max(80, (endTick - startTick) * 100 + 24));
+    }
+
     function rotationEditorModel(snapshot, beatId, value = {}) {
         const beats = snapshot?.timeline?.beats || [];
         let previous = 0;
@@ -1324,9 +1347,10 @@
             const sign = direction === 'counterclockwise' ? -1 : 1;
             app.session.updateBeat(beatId, {
                 rotationDirection: direction, rotationDegrees: degrees,
-                rotation: current.previous + sign * degrees, rotateBy: null, keepRotation: null
+                rotation: current.previous + sign * degrees, rotateBy: null,
+                rotateByFacing: null, keepRotation: null
             });
-            renderPatternDesk(); previewBeatDestination(beatId);
+            renderPatternDesk(); previewBeatRotation(beatId);
         };
         host.querySelectorAll('[data-rotation-direction]').forEach(button => button.onclick = () => {
             applyRotationDegrees(button.dataset.rotationDirection, host.querySelector('.rotation-degrees').value);
@@ -1345,7 +1369,7 @@
             app.session.updateBeat(beatId, {
                 rotation: final, rotationDegrees: Math.abs(delta),
                 rotationDirection: delta < 0 ? 'counterclockwise' : 'clockwise',
-                rotateBy: null, keepRotation: null
+                rotateBy: null, rotateByFacing: null, keepRotation: null
             });
             renderPatternDesk(); previewBeatDestination(beatId);
         };

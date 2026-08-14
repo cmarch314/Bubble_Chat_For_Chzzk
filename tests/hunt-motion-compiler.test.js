@@ -246,14 +246,14 @@ assert.match(unmirroredRotation.pose.at(-1).transform, /rotate\(45\.00deg\)/,
     'the native sprite direction must retain the authored rotation sign');
 const clockwiseHalfTurn = HuntMotionCompiler.compile([{
     beat: 'clockwise-half', ticks: 4, rotation: -180,
-    rotationDirection: 'clockwise', rotationDegrees: 180
+    rotationDirection: 'clockwise', rotationDegrees: 180, rotateByFacing: -72
 }], { anchors });
 const counterclockwiseHalfTurn = HuntMotionCompiler.compile([{
     beat: 'counterclockwise-half', ticks: 4, rotation: 180,
     rotationDirection: 'counterclockwise', rotationDegrees: 180
 }], { anchors });
 assert.strictEqual(clockwiseHalfTurn.timeline[0].rotation, 180,
-    'the authored clockwise direction must own the path even when a stale final angle disagrees');
+    'the authored clockwise direction must own the path even when stale final/facing rotations disagree');
 assert.strictEqual(counterclockwiseHalfTurn.timeline[0].rotation, -180,
     'the authored counterclockwise direction must own the path even when a stale final angle disagrees');
 const directedFullTurns = ['clockwise', 'counterclockwise'].map(rotationDirection =>
