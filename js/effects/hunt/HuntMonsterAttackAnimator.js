@@ -6,6 +6,10 @@ class HuntMonsterAttackAnimator {
         this.motionGeneration = 0;
         this.activeMonsterMotion = null;
         this.activeBeatMotionPreview = null;
+        // Detached elemental projectiles wait at their authored contact point
+        // until the BEAT judgment resolves.  The live outcome, never a preview
+        // guess, decides whether they burst or continue beyond the battlefield.
+        this.pendingElementalProjectiles = new Map();
         this.motionTrace = [];
         this.motionTraceLimit = 48;
     }
@@ -2537,7 +2541,22 @@ class HuntMonsterAttackAnimator {
             || ['projectile', 'beam', 'stream', 'gas', 'field'].includes(pattern?.delivery);
     }
 
-    createElementalAttack(monsterCenter, containerRect, targetCard, target, attackName, fallbackEmoji, order, pattern = null) {
+    elementalProjectileKey(pattern, atTicks, targetIndex) {
+        return `${String(pattern?.id || 'unknown')}:${Math.max(0, Number(atTicks || 0))}:${Number(targetIndex)}`;
+    }
+
+    createElementalImpact(fx, theme, fallbackEmoji) {
+        if (!fx || fx.querySelector('.monster-element-impact')) return null;
+        const impact = document.createElement('div');
+        impact.className = 'monster-element-impact';
+        impact.innerHTML = `<b>${theme.emoji || fallbackEmoji}</b><i></i><i></i><i></i>`;
+        fx.appendChild(impact);
+        void impact.offsetWidth;
+        impact.classList.add('is-resolved');
+        return impact;
+    }
+
+    createElementalAttack(monsterCenter, containerRect, targetCard, target, attackName, fallbackEmoji, order, pattern = null, options = {}) {
         const weaponTarget = targetCard.querySelector('.game-hunt-weapon-img-container') || targetCard;
         const targetRect = weaponTarget.getBoundingClientRect();
         const startX = monsterCenter.x - containerRect.left;
@@ -2550,8 +2569,9 @@ class HuntMonsterAttackAnimator {
         const angle = Math.atan2(dy, dx) * 180 / Math.PI;
         const theme = this.getElementalTheme(attackName, pattern);
         const delivery = this.getBreathDelivery(attackName, pattern);
-        const isDodge = pattern?.runtimePreviewCardReactions === true
-            && target.result === 'dodge';
+        const deferOutcome = options.deferOutcome === true;
+        const isDodge = !deferOutcome && target.result !== 'pending'
+            && ['dodge', 'miss', 'guard', 'counter', 'invulnerable', 'resist'].includes(target.result);
         const isBreath = /브레스|레이저|수류|분사|방출|화염구/.test(attackName);
         const isUltimate = /겁염|절대영도|대재앙|혜성|초폭|대폭발|에스카톤|황도|슈퍼노바|헬 플레어/.test(attackName);
         const travelScale = isDodge ? 1.32 : 1;
@@ -2626,12 +2646,7 @@ class HuntMonsterAttackAnimator {
             fx.appendChild(head);
         }
 
-        if (!isDodge && !minimalFx) {
-            const impact = document.createElement('div');
-            impact.className = 'monster-element-impact';
-            impact.innerHTML = `<b>${theme.emoji || fallbackEmoji}</b><i></i><i></i><i></i>`;
-            fx.appendChild(impact);
-        }
+        if (!deferOutcome && !isDodge && !minimalFx) this.createElementalImpact(fx, theme, fallbackEmoji);
 
         for (let i = 0; !minimalFx && i < (isUltimate ? 18 : 12); i++) {
             const particle = document.createElement('i');
@@ -2646,9 +2661,46 @@ class HuntMonsterAttackAnimator {
 
         this.card.appendChild(fx);
         void fx.offsetWidth;
+        if (deferOutcome) fx.classList.add('is-awaiting-outcome');
         fx.classList.add('is-playing');
-        this.animationTimers.timeout(() => fx.remove(), isUltimate ? 1800 : 1400);
+        const outcomeKey = String(options.outcomeKey || '');
+        if (deferOutcome && outcomeKey) {
+            this.pendingElementalProjectiles.set(outcomeKey, {
+                fx,
+                deliveryBody,
+                theme,
+                fallbackEmoji
+            });
+        }
+        this.animationTimers.timeout(() => {
+            if (outcomeKey) this.pendingElementalProjectiles.delete(outcomeKey);
+            fx.remove();
+        }, isUltimate ? 1800 : 1500);
 
+    }
+
+    resolveElementalProjectileOutcome(pattern, judgment = {}, results = []) {
+        const atTicks = Math.max(0, Number(judgment?.atTicks || 0));
+        const resolved = Array.isArray(results) ? results : [];
+        resolved.forEach(result => {
+            const key = this.elementalProjectileKey(pattern, atTicks, result?.index);
+            const pending = this.pendingElementalProjectiles.get(key);
+            if (!pending?.fx) return;
+            this.pendingElementalProjectiles.delete(key);
+            const hit = result?.result === 'hit';
+            pending.fx.classList.remove('is-awaiting-outcome');
+            if (hit) {
+                pending.fx.classList.add('is-projectile-hit');
+                this.createElementalImpact(pending.fx, pending.theme, pending.fallbackEmoji);
+                this.animationTimers.timeout(() => pending.fx.remove(), 480);
+                return;
+            }
+            // A miss keeps travelling along the same outgoing vector instead of
+            // pretending to burst at the hunter card.  It leaves the board with
+            // no impact layer or impact audio.
+            pending.fx.classList.add('is-projectile-miss');
+            this.animationTimers.timeout(() => pending.fx.remove(), 420);
+        });
     }
 
     resolveLiveElementalOrigin(monsterImg, targetCard, pattern, fallback) {
@@ -3025,7 +3077,12 @@ class HuntMonsterAttackAnimator {
                                 attackName,
                                 emoji,
                                 order,
-                                pattern
+                                pattern,
+                                {
+                                    deferOutcome: delivery === 'projectile',
+                                    outcomeKey: this.elementalProjectileKey(
+                                        pattern, impactTicks, pendingTarget.index)
+                                }
                             );
                         });
                     }, launchDelayMs);

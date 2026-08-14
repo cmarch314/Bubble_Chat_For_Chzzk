@@ -1921,6 +1921,22 @@ class HuntMonsterTurnExecutor {
             }
         }
 
+        if (isImpactCommit) {
+            const judgment = HuntMonsterTurnExecutor.judgment(pattern) || {};
+            engine.callbacks?.onResolveMonsterProjectileImpact?.(pattern, judgment, attackResults);
+            const impactAudioSlot = String(HuntMonsterTurnExecutor.judgmentField(
+                pattern, 'impactAudioSlot', 'runtimeImpactAudioSlot', ''));
+            if (impactAudioSlot && attackResults.some(result => result.result === 'hit')) {
+                engine.playSFX?.('monster_impact', null, {
+                    monsterId: engine.selectedMonster?.id,
+                    patternId: pattern.id,
+                    patternName: pattern.name,
+                    patternSlot: impactAudioSlot,
+                    overrideOnly: true
+                });
+            }
+        }
+
         // Trigger dynamic monster attack animation
         const { type: attackType, emoji } = engine.getMonsterAttackType(attackName, pattern);
         if (!isImpactCommit && engine.callbacks.onTriggerMonsterAttack) {

@@ -72,6 +72,14 @@ assert.match(executorSource, /runtimeImpactPending:\s*true[\s\S]*?runtimeImpactD
     'delayed projectile visuals need the authored impact time');
 assert.match(animatorSource, /runtimeImpactPending[\s\S]*?createElementalAttack/,
     'a pending delayed impact must launch its projectile before returning');
+assert.match(animatorSource, /is-awaiting-outcome[\s\S]*?is-projectile-miss/,
+    'a detached projectile must wait for the live judgment, then either impact or leave the board');
+assert.match(animatorSource, /resolveElementalProjectileOutcome[\s\S]*?result\?\.result === 'hit'/,
+    'only an actual hit may create a projectile impact');
+assert.match(css, /monster-element-projectile-arrive[\s\S]*?monster-element-projectile-miss/,
+    'a missed projectile must continue beyond its card destination before fading out');
+assert.match(executorSource, /impactAudioSlot[\s\S]*?attackResults\.some\(result => result\.result === 'hit'\)/,
+    'mapped projectile impact audio must play only after a confirmed hit');
 assert.match(animatorSource,
     /projectileLaunchDelayTicks[\s\S]*?resolveLiveElementalOrigin\([\s\S]*?createElementalAttack/,
     'Rath fireballs must wait for their turn and remeasure the live head before launch');

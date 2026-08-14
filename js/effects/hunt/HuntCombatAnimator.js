@@ -374,6 +374,10 @@ class HuntCombatAnimator {
         return this.monsterAttackAnimator.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
     }
 
+    resolveMonsterProjectileImpact(pattern, judgment, results) {
+        return this.monsterAttackAnimator.resolveElementalProjectileOutcome(pattern, judgment, results);
+    }
+
     triggerMonsterTelegraphFx(effect) {
         return this.monsterAttackAnimator.triggerMonsterTelegraphFx(effect);
     }

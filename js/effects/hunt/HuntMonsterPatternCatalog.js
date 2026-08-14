@@ -128,6 +128,7 @@ class HuntMonsterPatternCatalog {
                 ...(damage && ['strong', 'butt-stumble', 'weak'].includes(damage.hitReactionKind)
                     ? { hitReactionKind: damage.hitReactionKind === 'butt-stumble'
                         ? 'weak' : damage.hitReactionKind } : {}),
+                ...(damage?.impactAudioSlot ? { impactAudioSlot: String(damage.impactAudioSlot) } : {}),
                 ...(effect ? { secondaryInterference: { kind: effect.kind,
                     size: effect.size === 'small' ? 'small' : 'large',
                     scope: effect.target === 'all' ? 'all' : effect.target === 'primary-adjacent' ? 'adjacent' : 'primary',

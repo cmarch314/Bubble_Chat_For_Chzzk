@@ -64,6 +64,8 @@ class HuntCombatPresenter {
             },
             onTriggerMonsterCharge: () => renderer?.triggerMonsterCharge?.(),
             onTriggerMonsterAttack: (...args) => renderer?.triggerMonsterAttack?.(...args),
+            onResolveMonsterProjectileImpact: (...args) => renderer?.combatAnimator
+                ?.resolveMonsterProjectileImpact?.(...args),
             onTriggerMonsterTelegraphFx: effect => renderer?.triggerMonsterTelegraphFx?.(effect),
             onResolveMonsterImpactTimeline: (...args) => renderer?.resolveMonsterImpactTimeline?.(...args),
             onTriggerMonsterBurrowPhase: (...args) => renderer?.combatAnimator

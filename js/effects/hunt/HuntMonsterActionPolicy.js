@@ -637,6 +637,7 @@ class HuntMonsterActionPolicy {
                     ...(damage && ['strong', 'butt-stumble', 'weak'].includes(damage.hitReactionKind)
                         ? { hitReactionKind: damage.hitReactionKind === 'butt-stumble'
                             ? 'weak' : damage.hitReactionKind } : {}),
+                    ...(damage?.impactAudioSlot ? { impactAudioSlot: String(damage.impactAudioSlot) } : {}),
                     ...(effect ? { secondaryInterference: {
                         kind: effect.kind,
                         size: effect.size === 'small' ? 'small' : 'large',
@@ -668,6 +669,8 @@ class HuntMonsterActionPolicy {
                     targetMode: String(source.targetMode || ''),
                     targetShape: String(source.targetShape || ''),
                     damageScale: Number(source.damageScale ?? 1),
+                    hitReactionKind: source.hitReactionKind || null,
+                    impactAudioSlot: source.impactAudioSlot || null,
                     secondaryInterference: source.secondaryInterference || null,
                     audioCue: source.audioCue || null,
                     eventKind: source.eventKind || null,

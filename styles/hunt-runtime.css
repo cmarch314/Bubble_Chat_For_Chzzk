@@ -3050,6 +3050,12 @@
 .monster-element-fx.delivery-projectile.is-playing .monster-element-projectile {
     animation: monster-element-projectile .72s cubic-bezier(.18,.62,.2,1) calc(var(--fx-delay) + 90ms) both;
 }
+.monster-element-fx.delivery-projectile.is-awaiting-outcome .monster-element-projectile {
+    animation-name: monster-element-projectile-arrive;
+}
+.monster-element-fx.delivery-projectile.is-projectile-miss .monster-element-projectile {
+    animation: monster-element-projectile-miss .34s linear both;
+}
 /* 던지는 칼날(가시깃)은 빛나는 구체가 아니라 금속 날이다. 둥근 발광 대신
    길쭉한 남색 다이아로 잘라내 쿠나이처럼 보이게 한다.
    워시 · 총구 링 · 궤적 입자 · 착탄 링은 아예 만들지 않는다(themes의 minimalFx).
@@ -3178,6 +3184,9 @@
 
 .monster-element-fx.is-playing .monster-element-impact {
     animation: monster-element-impact .78s cubic-bezier(.08,.76,.2,1) calc(var(--fx-delay) + 390ms) both;
+}
+.monster-element-impact.is-resolved {
+    animation-delay: 0ms !important;
 }
 
 .monster-element-particle {
@@ -6444,6 +6453,16 @@ body.in-hunt #chat {
         opacity:1;
         transform:translate(calc(-50% + var(--tail-flight-x)),calc(-50% + var(--tail-flight-y))) rotate(1080deg) scale(1);
     }
+}
+@keyframes monster-element-projectile-arrive {
+    0% { left: var(--fx-x); top: var(--fx-y); opacity: 0; transform: translate(-50%,-50%) scale(.1); }
+    14% { opacity: 1; transform: translate(-50%,-50%) scale(.82); }
+    100% { opacity: 1; transform: translate(calc(var(--fx-dx) - 50%),calc(var(--fx-dy) - 50%)) scale(1) rotate(360deg); }
+}
+@keyframes monster-element-projectile-miss {
+    0% { opacity: 1; transform: translate(calc(var(--fx-dx) - 50%),calc(var(--fx-dy) - 50%)) scale(1) rotate(360deg); }
+    78% { opacity: .92; transform: translate(calc(var(--fx-dx) * 1.72 - 50%),calc(var(--fx-dy) * 1.72 - 50%)) scale(.9) rotate(510deg); }
+    100% { opacity: 0; transform: translate(calc(var(--fx-dx) * 1.96 - 50%),calc(var(--fx-dy) * 1.96 - 50%)) scale(.58) rotate(600deg); }
 }
 
 /* Great Sword impact accents are born on the BEAT damage event. The slash is
