@@ -1381,7 +1381,13 @@
             const reloaded = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}${candidateQuery}`);
             const persisted = reloaded.patterns.find(item => item.id === pattern.id);
             const verify = MonsterAudioReviewState.createMotionDraft(persisted, persisted.timeline);
-            const comparison = MonsterAudioReviewState.compareMotionValues(beats, verify);
+            // The server owns persistence normalization and returns the exact
+            // representation it atomically reloaded from disk. Compare that
+            // canonical value with the catalog reload; comparing the raw UI
+            // draft here produced false failures after canonical cleanup (for
+            // example when changing rotationResetMode).
+            const savedBeats = result.beats || beats;
+            const comparison = MonsterAudioReviewState.compareMotionValues(savedBeats, verify);
             if (!comparison.equal) {
                 throw new Error(`저장 후 재로드 검증 실패 · 불일치: ${comparison.differences.join(', ')}`);
             }

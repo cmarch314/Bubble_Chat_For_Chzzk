@@ -78,8 +78,9 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(!/renderMotionEditor\s*=\s*function/.test(app));
         assert.ok(!app.includes('markSaved(result.beats)'),
             'storage projection must not be compared with the fully merged effective motion');
-        assert.ok(app.includes('compareMotionValues(beats, verify)'),
-            'save verification must reload and compare the shared normalized motion contract');
+        assert.ok(app.includes('const savedBeats = result.beats || beats')
+            && app.includes('compareMotionValues(savedBeats, verify)'),
+            'save verification must compare the server-confirmed value with the reloaded motion');
         assert.ok(app.includes('hiddenSourceGroups: new Set()')
             && app.includes('favoriteSourceGroups: new Set()'),
             'group hide and favorite preferences must be first-class persisted editor state');

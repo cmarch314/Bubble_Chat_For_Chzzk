@@ -62,8 +62,8 @@ try {
     const reloadedDraft = ReviewState.createMotionDraft(reloadedTail, reloadedTail.timeline);
     assert.equal(reloadedDraft.return.rotationResetMode, 'snap-end',
         'the editor reload projection must read the saved return-rotation mode from native BEAT');
-    assert.equal(ReviewState.compareMotionValues(tailDraft, reloadedDraft).equal, true,
-        'return-rotation edits must survive the same reload verification used by the editor');
+    assert.equal(ReviewState.compareMotionValues(tailSave.beats, reloadedDraft).equal, true,
+        'the server-confirmed return-rotation value must survive editor reload verification');
 } finally {
     fs.rmSync(temporaryDir, { recursive: true, force: true });
 }
