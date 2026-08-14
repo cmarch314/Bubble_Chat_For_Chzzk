@@ -247,6 +247,18 @@ class HuntMonsterAttackAnimator {
         const Anchors = typeof HuntStageAnchors !== 'undefined'
             ? HuntStageAnchors
             : (typeof require === 'function' ? require('./HuntStageAnchors.js') : null);
+        // "발 중심"은 특정 한쪽 발이 아니라 좌·우 앞발의 중점이다. 화면 반전에도
+        // 같은 지면 접점에 남아 넘어짐/일어남의 회전축이 좌우로 튀지 않는다.
+        if (String(pivot).replace(/^part:/, '') === 'feet') {
+            const feet = ['part:left-front-leg', 'part:right-front-leg'].map(name => {
+                try { return Anchors.resolvePart(HuntMonsterAnatomyCatalog, this.owner?.selectedMonster, name, facing); }
+                catch (_) { return null; }
+            }).filter(Boolean);
+            if (feet.length) return {
+                xPercent: feet.reduce((total, point) => total + point.xPercent, 0) / feet.length,
+                yPercent: feet.reduce((total, point) => total + point.yPercent, 0) / feet.length
+            };
+        }
         return Anchors.resolvePart(
             HuntMonsterAnatomyCatalog, this.owner?.selectedMonster, pivot, facing);
     }

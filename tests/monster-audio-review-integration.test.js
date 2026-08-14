@@ -95,6 +95,9 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(app.includes("node('pair:center', '◎ 2인 사이'")
             && app.includes('1·2 / 2·3 / 3·4 중 한 쌍을 정하면'),
         'the anchor editor must expose pair:center as the shared midpoint for a randomly selected adjacent pair');
+        assert.ok(app.includes("['part:torso','몸통 중심']")
+            && app.includes("['part:feet','발 중심']"),
+        'the editor must expose explicit torso and foot-center transform pivots');
         assert.ok(app.includes('data-key="rotation" type="number" value="${value.rotation ?? 0}"')
             && app.includes('data-key="rotateBy" type="number" value="${value.rotateBy ?? 0}"'),
         'unset BEAT rotations must render as editable 0° values rather than ambiguous blank fields');

@@ -1198,8 +1198,9 @@
             <label>X 이동<input data-key="offsetX" type="number" value="${value.offsetX ?? 0}"></label><label>Y 이동<input data-key="offsetY" type="number" value="${value.offsetY ?? 0}"></label>
             <label>투명도<input data-key="opacity" type="number" min="0" max="1" step=".05" value="${value.opacity ?? 1}"></label><label>회전°<input data-key="rotation" type="number" value="${value.rotation ?? 0}"></label>
             <label>추가 회전°<input data-key="rotateBy" type="number" value="${value.rotateBy ?? 0}"></label><label>가로 배율<input data-key="scaleX" type="number" min=".05" step=".05" value="${value.scaleX ?? 1}"></label>
-            <label>세로 배율<input data-key="scaleY" type="number" min=".05" step=".05" value="${value.scaleY ?? 1}"></label><label>회전축<input data-key="origin" value="${esc(value.origin || '50% 50%')}"></label>
+            <label>세로 배율<input data-key="scaleY" type="number" min=".05" step=".05" value="${value.scaleY ?? 1}"></label><label>회전축<input data-key="origin" value="${esc(value.origin || 'part:torso')}"></label>
             <label>X 기울기°<input data-key="skewX" type="number" value="${value.skewX ?? 0}"></label><label>Y 기울기°<input data-key="skewY" type="number" value="${value.skewY ?? 0}"></label>
+            <section class="wide rotation-origin-picker"><b>회전 · 변형 축</b><div>${[['part:torso','몸통 중심'],['part:feet','발 중심'],['part:head','머리'],['part:tail','꼬리']].map(([origin,label]) => `<button type="button" data-origin="${origin}" class="${value.origin === origin || (!value.origin && origin === 'part:torso') ? 'active' : ''}">${label}</button>`).join('')}</div><small>회전·배율·기울기가 같은 부위 축을 공유함</small></section>
             <label class="wide">이동 속도<select data-key="moveEasing">${options(easings, value.moveEasing || 'smooth')}</select></label><label class="wide">회전 속도<select data-key="rotationEasing">${options(easings, value.rotationEasing || 'smooth')}</select></label>
             <label class="wide stride-toggle"><span>씰룩씰룩 좌우 반전</span><input class="stride-toggle-input" type="checkbox"${Number(value.strideFlipTicks) > 0 ? ' checked' : ''}></label>
             <label class="stride-period">반전 주기 (틱)<input data-key="strideFlipTicks" type="number" min="1" max="60" value="${Number(value.strideFlipTicks) > 0 ? Number(value.strideFlipTicks) : 3}"${Number(value.strideFlipTicks) > 0 ? '' : ' disabled'}></label></div>`;
@@ -1213,6 +1214,10 @@
             app.session.updateBeat(beatId, { aimBodyAt: event.target.checked ? 'target' : null });
             renderPatternDesk(); previewBeatDestination(beatId);
         };
+        host.querySelectorAll('[data-origin]').forEach(button => button.onclick = () => {
+            app.session.updateBeat(beatId, { origin: button.dataset.origin });
+            renderPatternDesk(); sendPreview({ scrub: true }); seekPreview(app.session.scrub.tick);
+        });
         const customAnchor = host.querySelector('[data-anchor-custom]');
         const applyCustomAnchor = () => {
             app.session.updateBeat(beatId, { [customAnchor.dataset.anchorCustom]: customAnchor.value || null });
