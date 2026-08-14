@@ -20,6 +20,11 @@ const { createServer } = require('../tools/monster-audio-review-server');
 
         const shell = await fetch(`${origin}/`).then(response => response.text());
         assert.ok(shell.includes('<script src="/review-app.js"></script>'));
+        assert.ok(shell.includes('<script src="/motion-authoring-contract.js"></script>'),
+            'the browser editor must load the same motion contract as both save backends');
+        const motionContract = await fetch(`${origin}/motion-authoring-contract.js`).then(response => response.text());
+        assert.ok(motionContract.includes('normalizeBeats') && motionContract.includes('compareBeats'),
+            'the versioned review server must serve the shared authoring contract');
         assert.ok(shell.includes('value="common-part-break"') && shell.includes('value="common-items"'),
             'the source rail must split shared part-break and item/bomb Common groups');
         assert.ok(shell.includes('value="common">COMMON 범용 음향'),
@@ -73,8 +78,8 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(!/renderMotionEditor\s*=\s*function/.test(app));
         assert.ok(!app.includes('markSaved(result.beats)'),
             'storage projection must not be compared with the fully merged effective motion');
-        assert.ok(app.includes('motionValuesEqual(beats, verify)'),
-            'save verification must reload and compare the final effective motion');
+        assert.ok(app.includes('compareMotionValues(beats, verify)'),
+            'save verification must reload and compare the shared normalized motion contract');
         assert.ok(app.includes('hiddenSourceGroups: new Set()')
             && app.includes('favoriteSourceGroups: new Set()'),
             'group hide and favorite preferences must be first-class persisted editor state');

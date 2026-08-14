@@ -21,7 +21,9 @@ try {
         ticks: beat.ticks + (index === 0 ? 1 : 0),
         pose: index === 0 ? 'brace' : undefined,
         rotation: index === 0 ? 45 : undefined,
-        keepRotation: index === 0
+        keepRotation: index === 0,
+        judgments: index === 0 ? [{ id: 'review-roar', group: 'review-roar', kind: 'roar',
+            target: 'all', size: 'large', offsetTicks: 2 }] : []
     }]));
 
     const result = saveCandidatePatternMotion({
@@ -38,6 +40,8 @@ try {
     const visual = edited.tracks.visual.at(-1).value;
     assert.equal(visual.rotation, 45);
     assert.equal(visual.keepRotation, true);
+    assert.equal(edited.events.find(event => event.id === 'review-roar')?.kind, 'roar',
+        'candidate judgments must persist as native BEAT events');
 } finally {
     fs.rmSync(temporaryDir, { recursive: true, force: true });
 }

@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const MotionAuthoringContract = require('./monster-motion-authoring-contract.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const BANK_MAP_PATH = path.join(ROOT, 'data', 'hunt', 'world-monster-audio-banks.json');
@@ -714,9 +715,12 @@ function resolveHuntId(idOrGraphId, bankMapPath = BANK_MAP_PATH) {
 
 function candidatePatternForAudioReview(action = {}) {
     const graph = action.beatV2 || {};
-    const damageByBeat = new Map();
+    const judgmentsByBeat = new Map();
     for (const event of graph.events || []) {
-        if (event.kind === 'damage') damageByBeat.set(event.beatId, event);
+        if (!MotionAuthoringContract.JUDGMENT_KINDS.includes(event.kind)) continue;
+        const { beatId, atTicks, audioCue, ...judgment } = event;
+        if (!judgmentsByBeat.has(beatId)) judgmentsByBeat.set(beatId, []);
+        judgmentsByBeat.get(beatId).push(judgment);
     }
     return {
         ...action,
@@ -724,14 +728,13 @@ function candidatePatternForAudioReview(action = {}) {
         // lets the audio review tool bind old phase routes to its new beats.
         motion: (graph.beats || []).map(beat => {
             const visual = (beat.tracks?.visual || []).at(-1)?.value || {};
-            const hit = damageByBeat.get(beat.id) || null;
+            const judgments = judgmentsByBeat.get(beat.id) || [];
             return {
                 beat: beat.id,
-                label: beat.id,
+                label: beat.label || beat.id,
                 ticks: beat.ticks,
                 ...visual,
-                hit: Boolean(hit),
-                hitOffsetTicks: hit?.offsetTicks || 0
+                judgments
             };
         }),
         impactTimeline: (graph.events || []).filter(event => event.kind === 'damage')
@@ -1048,90 +1051,7 @@ function savePatternMotion({ huntId, patternId, beats = null, reset = false }, o
         delete document.overrides[huntId]?.[patternId];
         if (document.overrides[huntId] && !Object.keys(document.overrides[huntId]).length) delete document.overrides[huntId];
     } else {
-        const allowedText = ['at', 'to', 'origin', 'moveEasing', 'rotationEasing', 'pose',
-            'face', 'align', 'bounds', 'fade', 'sfx', 'label', 'aimBodyAt', 'targetMode',
-            'fx', 'fxAnchor', 'fxSecondary', 'fxSecondaryAnchor', 'fxSecondaryAngleMode',
-            'rotationDirection'];
-        const allowedNumber = ['offsetX', 'offsetY', 'depth', 'rotation', 'rotationToward',
-            'rotateBy', 'rotateByFacing', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity',
-            'damageScale', 'hitOffsetTicks', 'strideFlipTicks', 'stompSteps', 'fxDurationTicks',
-            'fxSecondaryDurationTicks', 'rotationDegrees'];
-        const allowedBoolean = ['hit', 'alignRotationToTravel', 'instantOpacity', 'instantPose',
-            'continueTravel', 'flipFacing', 'keepRotation'];
-        const seenJudgmentIds = new Set();
-        const cleanBeats = Object.fromEntries(Object.entries(beats || {}).map(([id, value]) => {
-            if (!value || typeof value !== 'object') {
-                return [String(id), Math.max(1, Math.min(600, Math.round(Number(value) || 1)))];
-            }
-            const clean = { ticks: Math.max(1, Math.min(600, Math.round(Number(value.ticks) || 1))) };
-            for (const key of allowedText) if (value[key] != null && String(value[key]).trim()) clean[key] = String(value[key]).trim().slice(0, 120);
-            for (const key of allowedNumber) if (value[key] != null && Number.isFinite(Number(value[key]))) clean[key] = Number(value[key]);
-            for (const key of allowedBoolean) if (typeof value[key] === 'boolean') clean[key] = value[key];
-            if (value.judgmentOffsets && typeof value.judgmentOffsets === 'object') {
-                const judgmentOffsets = Object.fromEntries(['roar', 'tremor', 'wind']
-                    .filter(kind => Number.isFinite(Number(value.judgmentOffsets[kind])))
-                    .map(kind => [kind, Math.max(0, Math.min(clean.ticks - 1,
-                        Math.round(Number(value.judgmentOffsets[kind]))))]));
-                if (Object.keys(judgmentOffsets).length) clean.judgmentOffsets = judgmentOffsets;
-            }
-            if (Array.isArray(value.judgments)) {
-                clean.judgments = value.judgments.slice(0, 32).map((item, index) => {
-                    const kind = ['damage', 'roar', 'tremor', 'wind'].includes(item?.kind) ? item.kind : 'damage';
-                    const target = ['primary', 'left', 'right', 'pair', 'pair-left', 'pair-right',
-                        'primary-adjacent', 'all'].includes(item?.target)
-                        ? item.target : 'primary';
-                    const result = {
-                        id: String(item?.id || `${id}-judgment-${index + 1}`).slice(0, 80),
-                        group: String(item?.group || item?.id || `${id}-impact`).slice(0, 80),
-                        kind, target,
-                        offsetTicks: Math.max(0, Math.min(clean.ticks - 1, Math.round(Number(item?.offsetTicks) || 0)))
-                    };
-                    if (kind === 'damage') {
-                        if (Number.isFinite(Number(item?.damagePercent))) {
-                            result.damagePercent = Math.max(0, Math.min(1000, Number(item.damagePercent)));
-                        } else if (Number.isFinite(Number(item?.damageScale))) {
-                            result.damageScale = Math.max(0, Math.min(10, Number(item.damageScale)));
-                        } else result.damagePercent = 0;
-                        if (['strong', 'butt-stumble', 'weak'].includes(item?.hitReactionKind)) {
-                            result.hitReactionKind = item.hitReactionKind === 'butt-stumble'
-                                ? 'weak' : item.hitReactionKind;
-                        }
-                    }
-                    else result.size = item?.size === 'small' ? 'small' : 'large';
-                    // Preserve both explicit values. `false` is normally the
-                    // default, but the editor may load it from an authored
-                    // judgment. Dropping it here made a successful write look
-                    // different after reload and incorrectly reported a
-                    // validation failure.
-                    if (typeof item?.directHitSupersedes === 'boolean') {
-                        result.directHitSupersedes = item.directHitSupersedes;
-                    }
-                    return result;
-                }).filter(item => {
-                    const key = String(item.id || item.group || '');
-                    if (!key || seenJudgmentIds.has(key)) return false;
-                    seenJudgmentIds.add(key);
-                    return true;
-                });
-                // [] is a deliberate override that clears inherited judgments.
-                // Never collapse it to an omitted field or deleted judgments return on reload.
-            }
-            if (Array.isArray(clean.judgments) && clean.judgments.length) {
-                clean.hit = false;
-                delete clean.hitOffsetTicks;
-                delete clean.judgmentOffsets;
-            }
-            if (Array.isArray(value.fxAdditional)) {
-                clean.fxAdditional = value.fxAdditional.slice(0, 12).map(item => ({
-                    fx: String(item?.fx || '').trim().slice(0, 120),
-                    anchor: String(item?.anchor || '').trim().slice(0, 120),
-                    durationTicks: Math.max(0, Math.min(600, Math.round(Number(item?.durationTicks) || 0))),
-                    angleMode: String(item?.angleMode || '').trim().slice(0, 120)
-                })).filter(item => item.fx);
-                if (!clean.fxAdditional.length) delete clean.fxAdditional;
-            }
-            return [String(id), clean];
-        }));
+        const cleanBeats = MotionAuthoringContract.compactBeats(beats);
         if (!Object.keys(cleanBeats).length) throw new Error('저장할 모션 비트가 없습니다.');
         document.overrides[huntId] = document.overrides[huntId] || {};
         document.overrides[huntId][patternId] = { beats: cleanBeats };

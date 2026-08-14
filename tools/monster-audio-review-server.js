@@ -9,6 +9,7 @@ const { loadHuntPatternAudioMap, savePatternRoute, movePatternRouteFile, savePat
     savePartReactionMappings } = require('./hunt-audio-pattern-map');
 const { CATEGORY_CATALOG, categoryForMonster } = require('./hunt-monster-review-categories');
 const { HUNT_VERIFIED_LOCAL_ITEM_CUES, HUNT_LOCAL_ITEM_SURROGATE_CUES } = require('../js/effects/hunt/HuntAudioCatalog');
+const MotionAuthoringContract = require('./monster-motion-authoring-contract.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const GRAPH_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'audio_graph');
@@ -23,6 +24,7 @@ const PATTERN_MOTION_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-p
 const CANDIDATE_KITS_DIR = path.join(ROOT, 'data', 'hunt', 'monster-kits', 'candidates');
 const UI_PATH = path.join(__dirname, 'monster-audio-review.html');
 const APP_PATH = path.join(__dirname, 'monster-audio-review-app.js');
+const MOTION_AUTHORING_CONTRACT_PATH = path.join(__dirname, 'monster-motion-authoring-contract.js');
 const PREVIEW_PATH = path.join(ROOT, 'tests', 'fixtures', 'hunt-monster-pattern-lab.html');
 const HOST = '127.0.0.1';
 const DEFAULT_PORT = 17930;
@@ -614,33 +616,8 @@ function validatePatternMotionInput(input) {
     if (unknown.length || missing.length) {
         throw new Error(`모션 BEAT 불일치 · 누락:${missing.join(',') || '-'} · 알 수 없음:${unknown.join(',') || '-'}`);
     }
-    return { ...input, huntId, patternId, candidateRecord };
-}
-
-const CANDIDATE_VISUAL_TEXT_FIELDS = Object.freeze(['at', 'to', 'origin', 'moveEasing', 'rotationEasing',
-    'pose', 'face', 'align', 'bounds', 'fade', 'sfx', 'aimBodyAt', 'targetMode', 'rotationDirection',
-    'fx', 'fxAnchor', 'fxSecondary', 'fxSecondaryAnchor', 'fxSecondaryAngleMode']);
-const CANDIDATE_VISUAL_NUMBER_FIELDS = Object.freeze(['offsetX', 'offsetY', 'depth', 'rotation',
-    'rotationToward', 'rotateBy', 'rotateByFacing', 'rotationDegrees', 'scaleX', 'scaleY', 'skewX',
-    'skewY', 'opacity', 'damageScale', 'strideFlipTicks', 'stompSteps', 'fxDurationTicks',
-    'fxSecondaryDurationTicks']);
-const CANDIDATE_VISUAL_BOOLEAN_FIELDS = Object.freeze(['alignRotationToTravel', 'instantOpacity',
-    'instantPose', 'continueTravel', 'flipFacing', 'keepRotation']);
-const CANDIDATE_VISUAL_FIELDS = Object.freeze([...CANDIDATE_VISUAL_TEXT_FIELDS,
-    ...CANDIDATE_VISUAL_NUMBER_FIELDS, ...CANDIDATE_VISUAL_BOOLEAN_FIELDS]);
-
-function candidateVisualDraft(value = {}) {
-    const clean = {};
-    for (const key of CANDIDATE_VISUAL_TEXT_FIELDS) {
-        if (value[key] != null && String(value[key]).trim()) clean[key] = String(value[key]).trim().slice(0, 120);
-    }
-    for (const key of CANDIDATE_VISUAL_NUMBER_FIELDS) {
-        if (value[key] != null && Number.isFinite(Number(value[key]))) clean[key] = Number(value[key]);
-    }
-    for (const key of CANDIDATE_VISUAL_BOOLEAN_FIELDS) {
-        if (typeof value[key] === 'boolean') clean[key] = value[key];
-    }
-    return clean;
+    return { ...input, huntId, patternId, candidateRecord,
+        beats: MotionAuthoringContract.normalizeBeats(input?.beats || {}) };
 }
 
 function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_DIR } = {}) {
@@ -657,21 +634,29 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
     const missing = expected.filter(id => !Object.prototype.hasOwnProperty.call(submitted, id));
     if (unknown.length || missing.length) throw new Error(`후보 모션 BEAT 불일치 · 누락:${missing.join(',') || '-'} · 없음:${unknown.join(',') || '-'}`);
     try {
+        const normalizedBeats = MotionAuthoringContract.normalizeBeats(submitted);
         for (const beat of action.graph.beats) {
             const id = String(beat.id || beat.beat);
-            const draft = submitted[id] || {};
-            beat.ticks = Math.max(1, Math.min(600, Math.round(Number(draft.ticks) || Number(beat.ticks) || 1)));
-            beat.events = (beat.events || []).map(event => ({ ...event,
-                offsetTicks: Math.max(0, Math.min(beat.ticks - 1, Math.round(Number(event.offsetTicks) || 0)))
+            const draft = normalizedBeats[id] || { ticks: beat.ticks };
+            beat.ticks = draft.ticks;
+            const preservedEvents = (beat.events || []).filter(event =>
+                !MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind));
+            const judgmentEvents = Array.isArray(draft.judgments)
+                ? draft.judgments.map(judgment => ({ ...judgment })) : [];
+            beat.events = [...preservedEvents, ...judgmentEvents].map(event => ({ ...event,
+                offsetTicks: Math.max(0, Math.min(beat.ticks - 1,
+                    Math.round(Number(event.offsetTicks) || 0)))
             }));
             beat.tracks = beat.tracks || {};
             const frames = Array.isArray(beat.tracks.visual) ? beat.tracks.visual : [];
             if (!frames.length) frames.push({ offsetTicks: 0, value: {} });
             const frameIndex = frames.length - 1;
             const previous = { ...(frames[frameIndex].value || {}) };
-            for (const key of CANDIDATE_VISUAL_FIELDS) delete previous[key];
-            frames[frameIndex] = { ...frames[frameIndex], value: { ...previous, ...candidateVisualDraft(draft) } };
+            for (const key of MotionAuthoringContract.VISUAL_FIELDS) delete previous[key];
+            frames[frameIndex] = { ...frames[frameIndex],
+                value: { ...previous, ...MotionAuthoringContract.visualValue(draft) } };
             beat.tracks.visual = frames;
+            if (draft.label) beat.label = draft.label;
         }
         require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(kit);
         const temporary = `${sourcePath}.tmp`;
@@ -679,8 +664,20 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
         fs.renameSync(temporary, sourcePath);
         const persisted = readJson(sourcePath, null);
         require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(persisted);
+        const persistedAction = persisted.actions.find(item => item?.id === input.patternId);
+        const persistedBeats = Object.fromEntries(persistedAction.graph.beats.map(beat => {
+            const visual = (beat.tracks?.visual || []).at(-1)?.value || {};
+            const judgments = (beat.events || []).filter(event =>
+                MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind));
+            return [beat.id, { ticks: beat.ticks, ...(beat.label ? { label: beat.label } : {}),
+                ...visual, judgments }];
+        }));
+        const comparison = MotionAuthoringContract.compareBeats(normalizedBeats, persistedBeats);
+        if (!comparison.equal) {
+            throw new Error(`후보 모션 왕복 불일치: ${comparison.differences.join(', ')}`);
+        }
         return { huntId: input.huntId, patternId: input.patternId, candidateSaved: true,
-            revision: fileRevision(sourcePath), sourcePath };
+            beats: comparison.actual, revision: fileRevision(sourcePath), sourcePath };
     } catch (error) {
         const rollback = `${sourcePath}.rollback.tmp`;
         fs.writeFileSync(rollback, previousText, 'utf8');
@@ -866,6 +863,15 @@ function createServer(options = {}) {
                     'X-Content-Type-Options': 'nosniff'
                 });
                 response.end(fs.readFileSync(path.join(__dirname, 'monster-audio-review-state.js')));
+                return;
+            }
+            if (request.method === 'GET' && url.pathname === '/motion-authoring-contract.js') {
+                response.writeHead(200, {
+                    'Content-Type': 'application/javascript; charset=utf-8',
+                    'Cache-Control': 'no-store',
+                    'X-Content-Type-Options': 'nosniff'
+                });
+                response.end(fs.readFileSync(MOTION_AUTHORING_CONTRACT_PATH));
                 return;
             }
             if (request.method === 'GET' && url.pathname === '/api/monsters') {

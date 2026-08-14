@@ -1,19 +1,15 @@
 'use strict';
 
 (function exposeReviewState(root, factory) {
-    const api = factory();
+    const contract = typeof module === 'object' && module.exports
+        ? require('./monster-motion-authoring-contract.js')
+        : root?.MonsterMotionAuthoringContract;
+    const api = factory(contract);
     if (typeof module === 'object' && module.exports) module.exports = api;
     if (root) root.MonsterAudioReviewState = api;
-}(typeof globalThis === 'object' ? globalThis : this, () => {
-    const EDITABLE_MOTION_FIELDS = Object.freeze(['ticks', 'at', 'to', 'origin', 'moveEasing',
-        'rotationEasing', 'pose', 'face', 'align', 'bounds', 'fade', 'sfx', 'label', 'aimBodyAt',
-        'targetMode', 'offsetX', 'offsetY', 'depth', 'rotation', 'rotationToward', 'rotateBy',
-        'rotationDirection', 'rotationDegrees', 'keepRotation',
-        'rotateByFacing', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity', 'damageScale', 'hit', 'hitOffsetTicks',
-        'judgmentOffsets', 'judgments',
-        'alignRotationToTravel', 'instantOpacity', 'instantPose', 'continueTravel', 'flipFacing', 'strideFlipTicks',
-        'stompSteps', 'fx', 'fxAnchor', 'fxDurationTicks', 'fxSecondary', 'fxSecondaryAnchor',
-        'fxSecondaryDurationTicks', 'fxSecondaryAngleMode', 'fxAdditional']);
+}(typeof globalThis === 'object' ? globalThis : this, contract => {
+    if (!contract) throw new Error('MonsterMotionAuthoringContract is unavailable');
+    const EDITABLE_MOTION_FIELDS = contract.EDITABLE_FIELDS;
     function slotIdsForBeat(beat) {
         return Array.isArray(beat?.audioSlots) ? beat.audioSlots.filter(Boolean) : [];
     }
@@ -39,9 +35,7 @@
     }
 
     function ticks(value) {
-        return Math.max(1, Math.min(600, Math.round(Number(
-            typeof value === 'object' ? value?.ticks : value
-        ) || 1)));
+        return contract.ticks(value);
     }
 
     function createMotionDraft(pattern = {}, timeline = {}) {
@@ -192,22 +186,11 @@
     }
 
     function canonicalJson(value) {
-        const normalize = item => {
-            if (Array.isArray(item)) return item.map(normalize);
-            if (!item || typeof item !== 'object') return item;
-            return Object.fromEntries(Object.keys(item).sort()
-                // `false` is the runtime default for this opt-in flag. Older
-                // authored patterns may spell it out while the save boundary
-                // deliberately omits it, so it must not cause a false
-                // save/reload mismatch.
-                .filter(key => !(key === 'directHitSupersedes' && item[key] === false))
-                .map(key => [key, normalize(item[key])]));
-        };
-        return JSON.stringify(normalize(value));
+        return contract.canonicalJson(value);
     }
 
     function motionValuesEqual(left, right) {
-        return canonicalJson(left) === canonicalJson(right);
+        return contract.compareBeats(left, right).equal;
     }
 
     class EditorSession {
@@ -518,6 +501,7 @@
         normalizePreviewScenario,
         EDITABLE_MOTION_FIELDS,
         canonicalJson,
+        compareMotionValues: contract.compareBeats,
         motionValuesEqual,
         createEditorSession
     });

@@ -1353,7 +1353,10 @@
             const reloaded = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}${candidateQuery}`);
             const persisted = reloaded.patterns.find(item => item.id === pattern.id);
             const verify = MonsterAudioReviewState.createMotionDraft(persisted, persisted.timeline);
-            if (!MonsterAudioReviewState.motionValuesEqual(beats, verify)) throw new Error('저장 후 재로드 검증 실패');
+            const comparison = MonsterAudioReviewState.compareMotionValues(beats, verify);
+            if (!comparison.equal) {
+                throw new Error(`저장 후 재로드 검증 실패 · 불일치: ${comparison.differences.join(', ')}`);
+            }
             app.patterns = reloaded.patterns; app.revisions = reloaded.revisions || app.revisions;
             app.selectedPatternId = pattern.id; app.session.load(persisted);
             renderPatternList(); renderPatternDesk(); button.textContent = '저장';

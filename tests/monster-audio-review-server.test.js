@@ -78,8 +78,8 @@ assert.match(reviewUi, /MonsterAudioReviewState\.createEditorSession\(\)/,
     'one editor session must own timeline, selection, scrub, history and save state');
 assert.match(reviewUi, /animationDurationMs: snapshot\.timeline\.durationTicks \* 100/,
     'the preview animation and timeline must consume the same projected duration');
-assert.match(reviewUi, /motionValuesEqual\(beats, verify\)/,
-    'saving must compare every editable transform against a freshly reloaded runtime projection, not ticks alone');
+assert.match(reviewUi, /compareMotionValues\(beats, verify\)/,
+    'saving must compare the shared normalized contract against a freshly reloaded runtime projection');
 assert.match(reviewUi, /assertGeneratedAudioRoute\(result\)/,
     'audio assignments must fail visibly when their runtime route module was not generated');
 assert.match(reviewUi, /metadata\.apiVersion !== 3.*metadata\.buildId !== 'unified-editor-v3'/s,
