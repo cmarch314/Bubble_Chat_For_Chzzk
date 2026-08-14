@@ -46,9 +46,23 @@
     function createMotionDraft(pattern = {}, timeline = {}) {
         const graphBeats = Array.isArray(pattern.motionGraph?.beats)
             ? pattern.motionGraph.beats : (pattern.motion || []);
-        const authored = new Map(graphBeats.map((beat, index) => [
-            beat.beat || `beat-${index + 1}`, beat
-        ]));
+        // Native BEAT graphs keep appearance under tracks.visual[].value,
+        // whereas migration projections already expose it at the beat root.
+        // The editor must begin from the same flat visual data regardless of
+        // authoring form; otherwise scale/skew/origin silently became 1/0 for
+        // newly authored graphs even though the runtime graph contained them.
+        const authored = new Map(graphBeats.map((beat, index) => {
+            const visualFrames = Array.isArray(beat?.tracks?.visual) ? beat.tracks.visual : [];
+            const visual = visualFrames.length
+                ? clone([...visualFrames].sort((left, right) => Number(left?.offsetTicks || 0)
+                    - Number(right?.offsetTicks || 0)).at(-1)?.value || {}) : {};
+            const key = beat.id || beat.beat || `beat-${index + 1}`;
+            // Keep graph envelope/event metadata out of the editable draft.
+            // Saving those implementation fields back as motion values caused
+            // reload verification to compare two different representations.
+            const { id, beat: legacyBeat, tracks, events, ...flat } = beat || {};
+            return [key, { ...flat, ...visual, ticks: ticks(beat?.ticks) }];
+        }));
         return Object.fromEntries((timeline.beats || []).map(beat => {
             const source = { ...(authored.get(beat.id) || {}) };
             delete source.beat;

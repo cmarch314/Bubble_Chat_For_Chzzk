@@ -68,6 +68,23 @@ const adapterPreview = buildPreviewMotion({ motionGraph: { renderer: 'keyframe-b
 assert.strictEqual(adapterPreview.motion, null);
 assert.strictEqual(adapterPreview.runtimeTimingBeats[0].offsetX, 30,
     'profile-backed patterns must retain editor transforms without replacing their base animation');
+const nativeGraphDraft = createMotionDraft({ motionGraph: { renderer: 'beat', beats: [
+    { id: 'hop', ticks: 4, tracks: { visual: [{ offsetTicks: 0,
+        value: { scaleX: 1.18, scaleY: .78, skewX: -6, origin: 'part:feet' } }] } },
+    { id: 'impact', ticks: 2, tracks: { visual: [{ offsetTicks: 0, value: { pose: 'land' } }] } },
+    { id: 'return', ticks: 5, tracks: { visual: [{ offsetTicks: 0, value: { to: 'home' } }] } }
+] } }, timed);
+assert.deepStrictEqual(
+    { scaleX: nativeGraphDraft.hop.scaleX, scaleY: nativeGraphDraft.hop.scaleY,
+        skewX: nativeGraphDraft.hop.skewX, origin: nativeGraphDraft.hop.origin },
+    { scaleX: 1.18, scaleY: .78, skewX: -6, origin: 'part:feet' },
+    'native BEAT visual transforms must reach the editor draft intact');
+const nativeGraphPreview = buildPreviewMotion({ motionGraph: { renderer: 'beat' } }, timed, nativeGraphDraft);
+assert.deepStrictEqual(
+    { scaleX: nativeGraphPreview.motion[0].scaleX, scaleY: nativeGraphPreview.motion[0].scaleY,
+        skewX: nativeGraphPreview.motion[0].skewX, origin: nativeGraphPreview.motion[0].origin },
+    { scaleX: 1.18, scaleY: .78, skewX: -6, origin: 'part:feet' },
+    'native BEAT visual transforms must reach the compiled preview unchanged');
 const authoredPreview = buildPreviewMotion(motionPattern, timed, draft);
 assert.strictEqual(authoredPreview.useBeatMotion, true);
 assert.strictEqual(authoredPreview.motion[0].to, 'target');
