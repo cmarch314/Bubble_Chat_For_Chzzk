@@ -25,6 +25,18 @@ function canonicalAudioPatternId(patternId) {
     return patternId === '__reaction.stun' ? '__reaction.knockdown' : patternId;
 }
 
+// A judgment is an authored combat event, not a motion BEAT.  Keep its route
+// key separate from beat:<id> so changing a BEAT's duration/label can never
+// move or silently retarget an impact sound assignment.
+function judgmentAudioSlot(group) {
+    return `judgment:${encodeURIComponent(String(group || 'impact'))}:cue`;
+}
+
+function judgmentAudioCondition(value) {
+    return ['hit', 'contact', 'always', 'miss'].includes(String(value || '').toLowerCase())
+        ? String(value).toLowerCase() : 'hit';
+}
+
 function readJson(file, fallback) {
     try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; }
 }
@@ -547,6 +559,58 @@ function buildMonsterPatternAudioMap({
                     };
                 }));
             }
+
+            // Judgment sounds are conditional at resolution time.  They are
+            // projected beside their owning BEAT for editing, but their stable
+            // key is the authored judgment group: a two-target impact therefore
+            // receives one route and fires at most once.
+            const graphSource = Array.isArray(pattern.motion) && pattern.motion.length
+                ? normalizeMotionJudgments(pattern.motion, pattern)
+                : normalizeMotionJudgments(binding.timeline.beats.map(beat => ({
+                    beat: beat.id, ticks: beat.ticks, hit: beat.hit,
+                    hitOffsetTicks: beat.hitOffsetTicks
+                })), pattern);
+            const groups = new Map();
+            let elapsed = 0;
+            for (const beat of graphSource) {
+                const ticks = Math.max(1, Number(beat.ticks) || 1);
+                for (const judgment of beat.judgments || []) {
+                    if (judgment.kind !== 'damage') continue;
+                    const group = String(judgment.group || judgment.id || `${beat.beat}-impact`);
+                    if (groups.has(group)) continue;
+                    groups.set(group, {
+                        group,
+                        beatId: String(beat.beat || ''),
+                        atTicks: elapsed + Math.max(0, Number(judgment.offsetTicks) || 0)
+                    });
+                }
+                elapsed += ticks;
+            }
+            const judgmentSlots = [...groups.values()].map((entry, index) => {
+                const slotKey = judgmentAudioSlot(entry.group);
+                const direct = patternOverrides[slotKey] || null;
+                const muted = direct?.disabled === true;
+                return {
+                    slot: slotKey,
+                    phase: 'judgment',
+                    label: 'HIT 판정 사운드',
+                    note: '판정 그룹 단위 · 적중/접촉/항상/비적중 조건',
+                    order: 10000 + index,
+                    runtimeReady: true,
+                    atTicks: entry.atTicks,
+                    beatId: entry.beatId,
+                    judgmentGroup: entry.group,
+                    when: judgmentAudioCondition(direct?.when),
+                    current: null,
+                    assigned: muted ? null : direct,
+                    override: direct,
+                    effective: muted ? null : direct,
+                    muted
+                };
+            });
+            slots = [...slots, ...judgmentSlots].sort((left, right) =>
+                Number(left.atTicks || 0) - Number(right.atTicks || 0)
+                || Number(left.order || 0) - Number(right.order || 0));
             const beatSlots = new Map();
             slots.forEach(slot => {
                 if (!beatSlots.has(slot.beatId)) beatSlots.set(slot.beatId, []);
@@ -936,7 +1000,7 @@ function savePartReactionMappings({ huntId, mappings = {} }, overridesPath = MOT
 
 // Persist, suppress, or clear a single pattern-slot assignment. `disabled`
 // explicitly silences the slot, including its hand-authored catalog fallback.
-function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, delay = 0, label = null, mode = null, disabled = false }, overridesPath = OVERRIDES_PATH) {
+function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, delay = 0, label = null, mode = null, when, disabled = false }, overridesPath = OVERRIDES_PATH) {
     patternId = canonicalAudioPatternId(patternId);
     // The material crack belongs to the shared visual layer, never to a
     // monster identity. Saving it from any monster updates the common route.
@@ -951,14 +1015,26 @@ function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, del
     overrides.routes = overrides.routes || {};
     overrides.routes[huntId] = overrides.routes[huntId] || {};
     overrides.routes[huntId][patternId] = overrides.routes[huntId][patternId] || {};
+    const previousRoute = overrides.routes[huntId][patternId][slot] || null;
+    const conditionalRoute = String(slot).startsWith('judgment:');
+    const normalizedWhen = conditionalRoute
+        ? judgmentAudioCondition(when ?? previousRoute?.when)
+        : null;
     if (cleanFiles.length) {
         overrides.routes[huntId][patternId][slot] = {
             label,
             ...(mode === 'random' ? { mode: 'random' } : {}),
+            ...(normalizedWhen ? { when: normalizedWhen } : {}),
             layers: cleanFiles.map(file => [file, Number(gain) || 0.7, Number(delay) || 0])
         };
+    } else if (conditionalRoute && when != null && disabled !== true) {
+        // Preserve an explicitly chosen condition before a source is assigned.
+        overrides.routes[huntId][patternId][slot] = { when: normalizedWhen };
     } else if (disabled === true) {
-        overrides.routes[huntId][patternId][slot] = { disabled: true };
+        overrides.routes[huntId][patternId][slot] = {
+            disabled: true,
+            ...(normalizedWhen ? { when: normalizedWhen } : {})
+        };
     } else {
         delete overrides.routes[huntId][patternId][slot];
         if (!Object.keys(overrides.routes[huntId][patternId]).length) delete overrides.routes[huntId][patternId];
@@ -975,7 +1051,7 @@ function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, del
         let generated = null;
         if (overridesPath === OVERRIDES_PATH) generated = require('../scripts/generate-monster-pattern-audio-routes.js').generate();
         return { huntId, patternId, slot, files: cleanFiles, mode: mode === 'random' ? 'random' : null,
-            disabled: disabled === true, generated, revision: `${overrides.version}:${overrides.updatedAt}` };
+            when: normalizedWhen, disabled: disabled === true, generated, revision: `${overrides.version}:${overrides.updatedAt}` };
     } catch (error) {
         const rollback = `${overridesPath}.rollback.tmp`;
         if (previousText == null) fs.rmSync(overridesPath, { force: true });
@@ -1014,11 +1090,13 @@ function movePatternRouteFile({ huntId, patternId, fromSlot, toSlot, file }, ove
     overrides.routes[huntId][patternId][fromSlot] = remaining.length ? {
         label: sourceRoute?.label || null,
         ...(sourceRoute?.mode === 'random' ? { mode: 'random' } : {}),
+        ...(sourceRoute?.when ? { when: judgmentAudioCondition(sourceRoute.when) } : {}),
         layers: remaining
     } : { disabled: true };
     overrides.routes[huntId][patternId][toSlot] = {
         label: targetRoute?.label || null,
         ...(targetRoute?.mode === 'random' ? { mode: 'random' } : {}),
+        ...(targetRoute?.when ? { when: judgmentAudioCondition(targetRoute.when) } : {}),
         layers: targetLayers
     };
     overrides.updatedAt = new Date().toISOString();

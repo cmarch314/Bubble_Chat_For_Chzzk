@@ -709,8 +709,25 @@
             const row = document.createElement('div');
             row.className = `slot-card${slot.slot === app.selectedSlot ? ' selected' : ''}`;
             row.dataset.slot = slot.slot;
+            const judgmentCondition = slot.judgmentGroup ? (slot.when || slot.effective?.when || 'hit') : null;
             row.innerHTML = `<span class="slot-order">${esc(slot.phase || 'beat')}</span><span class="slot-name"><strong>${esc(slot.label)}</strong><small>${slot.atTicks ?? 0}틱 · ${esc(slot.phase || '')}</small></span><div class="slot-route">${routeHtml(slot)}</div><span class="slot-actions"><button type="button" class="icon-button paste-route" title="복사한 음원 붙여넣기" aria-label="복사한 음원 붙여넣기"${app.routeClipboard?.path ? '' : ' disabled'}>📥</button><button type="button" class="icon-button play-slot"${slot.effective ? '' : ' disabled'}>▶</button><button type="button" class="icon-button clear-slot"${slot.assigned ? '' : ' disabled'}>✕</button></span>`;
-            row.onclick = event => { if (!event.target.closest('.slot-actions')) selectPart({ slotId: slot.slot }); };
+            if (judgmentCondition) {
+                const control = document.createElement('label');
+                control.className = 'judgment-condition';
+                control.innerHTML = `판정 조건 <select><option value="hit">적중</option><option value="contact">접촉</option><option value="always">항상</option><option value="miss">비적중</option></select>`;
+                const select = control.querySelector('select');
+                select.value = judgmentCondition;
+                select.onchange = event => {
+                    event.stopPropagation();
+                    const files = routeFiles(slot.effective);
+                    saveRoute({ huntId: app.huntId, patternId: pattern.id, slot: slot.slot,
+                        files, gain: .7, delay: 0, label: slot.effective?.label || null,
+                        mode: slot.effective?.mode || null, when: select.value })
+                        .catch(error => alert(error.message));
+                };
+                row.querySelector('.slot-name')?.appendChild(control);
+            }
+            row.onclick = event => { if (!event.target.closest('.slot-actions, .judgment-condition')) selectPart({ slotId: slot.slot }); };
             row.querySelector('.play-slot').onclick = event => playRoute(slot.effective, `${pattern.name} · ${slot.label}`, event.currentTarget);
             row.querySelector('.clear-slot').onclick = () => clearSlot(pattern.id, slot.slot);
             row.querySelector('.paste-route').onclick = () => pasteRouteLayer(pattern.id, slot.slot)
@@ -1196,6 +1213,21 @@
                 app.session.seek(beat.startTicks + Number(judgment.offsetTicks || 0));
                 renderPatternDesk();
             };
+            if (judgment.kind === 'damage') {
+                const audioButton = document.createElement('button');
+                audioButton.type = 'button';
+                audioButton.className = 'select-judgment-audio';
+                audioButton.textContent = '🎵';
+                audioButton.title = '판정 사운드 선택';
+                audioButton.onclick = () => {
+                    const group = String(judgment.group || judgment.id || 'impact');
+                    const slot = pattern.slots.find(item => item.judgmentGroup === group);
+                    if (!slot) return;
+                    app.selectedJudgmentId = judgment.id;
+                    selectPart({ beatId: beat.id, slotId: slot.slot });
+                };
+                row.insertBefore(audioButton, row.querySelector('.remove-judgment'));
+            }
             row.querySelector('.remove-judgment').onclick = () => {
                 app.session.removeJudgment(judgment.id); app.selectedJudgmentId = ''; renderPatternDesk();
             };
@@ -1454,9 +1486,12 @@
             const assigned = files.length ? {
                 label: payload.label || null,
                 ...(result.mode === 'random' ? { mode: 'random' } : {}),
+                ...(result.when ? { when: result.when } : {}),
                 layers: files.map(file => [file, Number(payload.gain) || .7, Number(payload.delay) || 0])
-            } : (result.disabled ? { disabled: true } : null);
+            } : (result.disabled ? { disabled: true, ...(result.when ? { when: result.when } : {}) }
+                : (result.when ? { when: result.when } : null));
             slot.override = assigned;
+            if (result.when) slot.when = result.when;
             slot.muted = assigned?.disabled === true;
             slot.assigned = slot.muted ? null : (assigned || slot.current || null);
             slot.effective = slot.assigned;
@@ -1492,7 +1527,10 @@
 
     async function assignSourceToSlot(source, patternId, slotId) {
         if (!source?.path || !patternId || !slotId) return;
-        await saveRoute({ huntId: app.huntId, patternId, slot: slotId, files: [source.path] });
+        const slot = app.patterns.find(pattern => pattern.id === patternId)?.slots
+            .find(item => item.slot === slotId);
+        await saveRoute({ huntId: app.huntId, patternId, slot: slotId, files: [source.path],
+            ...(slot?.judgmentGroup ? { when: slot.when || slot.effective?.when || 'hit' } : {}) });
     }
 
     async function assignSourceGroup(group, sources) {
@@ -1510,6 +1548,7 @@
             slot: slot.slot,
             files: available.map(source => source.path),
             mode: available.length > 1 ? 'random' : null,
+            ...(slot.judgmentGroup ? { when: slot.when || slot.effective?.when || 'hit' } : {}),
             label: available.length > 1 ? `${group.bank} · EVENT ${group.eventId}` : null
         });
     }

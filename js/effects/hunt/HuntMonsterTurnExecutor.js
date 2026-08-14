@@ -1924,17 +1924,6 @@ class HuntMonsterTurnExecutor {
         if (isImpactCommit) {
             const judgment = HuntMonsterTurnExecutor.judgment(pattern) || {};
             engine.callbacks?.onResolveMonsterProjectileImpact?.(pattern, judgment, attackResults);
-            const impactAudioSlot = String(HuntMonsterTurnExecutor.judgmentField(
-                pattern, 'impactAudioSlot', 'runtimeImpactAudioSlot', ''));
-            if (impactAudioSlot && attackResults.some(result => result.result === 'hit')) {
-                engine.playSFX?.('monster_impact', null, {
-                    monsterId: engine.selectedMonster?.id,
-                    patternId: pattern.id,
-                    patternName: pattern.name,
-                    patternSlot: impactAudioSlot,
-                    overrideOnly: true
-                });
-            }
         }
 
         // Trigger dynamic monster attack animation
@@ -2028,6 +2017,10 @@ class HuntMonsterTurnExecutor {
         engine.monsterRecoveryDuration = 0;
         if (engine.monsterFlightRuntime) engine.monsterFlightRuntime.afterAction(engine, pattern);
         engine.monsterTraitRuntime?.afterAction?.(engine, pattern, attackResults);
+        if (isImpactCommit) {
+            return { patternId: pattern.id, judgment: HuntMonsterTurnExecutor.judgment(pattern) || {}, results: attackResults };
+        }
+        return true;
     }
 }
 

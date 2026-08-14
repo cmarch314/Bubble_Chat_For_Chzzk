@@ -11,8 +11,8 @@ const kit = JSON.parse(fs.readFileSync(path.resolve(
 const fireball = CandidateCatalog.compileKit(kit).actions.find(action => action.id === 'rathian.fireball');
 const timeline = ActionPolicy.impactTimeline(fireball);
 
-assert.deepStrictEqual(timeline.map(event => [event.atTicks, event.impactAudioSlot]), [[17, 'beat:impact']],
-    'Rathian fireball must expose one exact BEAT contact and its hit-only audio slot');
+assert.deepStrictEqual(timeline.map(event => [event.atTicks, event.judgmentGroup]), [[17, 'spit:damage:2']],
+    'Rathian fireball must expose one exact authored judgment group for its conditional impact sound');
 assert.strictEqual(fireball.beatV2.events.filter(event => event.kind === 'audio' && event.slot === 'impact').length, 0,
     'impact SE must not be an unconditional recovery audio event');
 

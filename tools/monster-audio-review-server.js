@@ -593,7 +593,11 @@ function validatePatternRouteInput(input) {
     const patternId = String(input?.patternId || '');
     const slot = String(input?.slot || '');
     const candidateKit = candidateKitFor(input, huntId);
+    const isJudgmentSlot = slot.startsWith('judgment:');
     const pattern = loadHuntPatternAudioMap(huntId, { candidateKit }).patterns.find(item => item.id === patternId);
+    if (isJudgmentSlot && pattern?.slots.some(item => item.slot === slot)) {
+        return { ...input, huntId, patternId, slot };
+    }
     if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
     if (!slot.startsWith('beat:')) throw new Error(`구형 사운드 슬롯 저장은 차단되었습니다: ${slot}`);
     if (!pattern.slots.some(item => item.slot === slot)) throw new Error(`현재 모션에 존재하지 않는 사운드 순간입니다: ${slot}`);

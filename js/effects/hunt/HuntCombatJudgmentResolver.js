@@ -48,7 +48,22 @@ class HuntCombatJudgmentResolver {
             command,
             command.timelineFinal === true
         );
-        return HuntCombatJudgmentResolver.monsterTurnExecutor()?.executeJudgment?.(engine, command) ?? false;
+        const resolution = HuntCombatJudgmentResolver.monsterTurnExecutor()?.executeJudgment?.(engine, command) ?? false;
+        // The combat judgment runtime consumes each command once.  Dispatch the
+        // conditional cue only after target defense/immunity has been resolved;
+        // this prevents Preview and live hunts from disagreeing about hit-only
+        // projectile sounds or replaying a multi-target group per hunter.
+        if (resolution && command.judgmentGroup) {
+            engine.playSFX?.('monster_impact', null, {
+                monsterId: engine.selectedMonster?.id,
+                patternId: command.pattern?.id,
+                patternName: command.pattern?.name,
+                patternSlot: `judgment:${encodeURIComponent(String(command.judgmentGroup))}:cue`,
+                judgmentResults: resolution.results || [],
+                overrideOnly: true
+            });
+        }
+        return resolution;
     }
 }
 

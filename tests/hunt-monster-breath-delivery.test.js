@@ -78,8 +78,9 @@ assert.match(animatorSource, /resolveElementalProjectileOutcome[\s\S]*?result\?\
     'only an actual hit may create a projectile impact');
 assert.match(css, /monster-element-projectile-arrive[\s\S]*?monster-element-projectile-miss/,
     'a missed projectile must continue beyond its card destination before fading out');
-assert.match(executorSource, /impactAudioSlot[\s\S]*?attackResults\.some\(result => result\.result === 'hit'\)/,
-    'mapped projectile impact audio must play only after a confirmed hit');
+const resolverSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntCombatJudgmentResolver.js'), 'utf8');
+assert.match(resolverSource, /judgment:\$\{encodeURIComponent\(String\(command\.judgmentGroup\)\)\}:cue[\s\S]*?judgmentResults/,
+    'mapped projectile impact audio must route through the authored judgment group after a live resolution');
 assert.match(animatorSource,
     /projectileLaunchDelayTicks[\s\S]*?resolveLiveElementalOrigin\([\s\S]*?createElementalAttack/,
     'Rath fireballs must wait for their turn and remeasure the live head before launch');
