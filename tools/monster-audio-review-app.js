@@ -1487,7 +1487,12 @@
 
     async function assignSource(source) {
         const pattern = selectedPattern(), slot = selectedSlot(); if (!pattern || !slot || !source.path) return;
-        await saveRoute({ huntId: app.huntId, patternId: pattern.id, slot: slot.slot, files: [source.path] });
+        await assignSourceToSlot(source, pattern.id, slot.slot);
+    }
+
+    async function assignSourceToSlot(source, patternId, slotId) {
+        if (!source?.path || !patternId || !slotId) return;
+        await saveRoute({ huntId: app.huntId, patternId, slot: slotId, files: [source.path] });
     }
 
     async function assignSourceGroup(group, sources) {
@@ -1510,10 +1515,27 @@
     }
 
     function installRouteDrag(row, pattern, slot) {
-        row.querySelectorAll('[data-route-file]').forEach(file => file.ondragstart = event => event.dataTransfer.setData('application/json', JSON.stringify({ patternId: pattern.id, fromSlot: slot.slot, file: file.dataset.routeFile })));
-        row.ondragover = event => event.preventDefault();
+        row.querySelectorAll('[data-route-file]').forEach(file => file.ondragstart = event => {
+            const payload = JSON.stringify({ kind: 'route-file', patternId: pattern.id, fromSlot: slot.slot, file: file.dataset.routeFile });
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('application/json', payload);
+            event.dataTransfer.setData('text/plain', payload);
+        });
+        row.ondragover = event => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+            row.classList.add('drag-over');
+        };
+        row.ondragleave = event => {
+            if (!row.contains(event.relatedTarget)) row.classList.remove('drag-over');
+        };
         row.ondrop = async event => {
-            event.preventDefault(); let payload; try { payload = JSON.parse(event.dataTransfer.getData('application/json')); } catch { return; }
+            event.preventDefault(); row.classList.remove('drag-over');
+            let payload; try { payload = JSON.parse(event.dataTransfer.getData('application/json') || event.dataTransfer.getData('text/plain')); } catch { return; }
+            if (payload?.kind === 'source') {
+                await assignSourceToSlot({ path: payload.path }, pattern.id, slot.slot);
+                return;
+            }
             if (!payload || payload.fromSlot === slot.slot) return;
             await api('/api/hunt-pattern-route-move', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, candidate: app.candidateId === app.monster ? app.candidateId : '', fromSlot: payload.fromSlot, toSlot: slot.slot, file: payload.file, expectedRevision: app.revisions.audio }) });
             await loadPatterns(pattern.id, slot.slot);
@@ -1719,7 +1741,17 @@
                 if (hidden && !app.showHiddenSources && !temporarilyVisible) continue;
                 const mappings = mappingIndex.get(source.path) || [];
                 const row = document.createElement('div'); row.className = `source${current.has(source.path) ? ' current-slot-source' : ''}${source.path ? '' : ' no-file'}${hidden ? ' hidden-source' : ''}`;
+                row.draggable = Boolean(source.path);
                 row.innerHTML = `<button class="source-eye"${source.path ? '' : ' disabled'} title="${hidden ? '숨김 해제' : '이 음원 숨기기'}" aria-label="${hidden ? '숨김 해제' : '이 음원 숨기기'}">${hidden ? '🙈' : '👁'}</button><button class="play"${source.path ? '' : ' disabled'}>▶</button><span class="source-meta"><strong>ID ${esc(source.sourceId)}${source.stream != null ? ` · STREAM ${esc(source.stream)}` : ''}</strong><small>${esc(source.path ? fileName(source.path) : '디코딩 파일 없음')}</small></span><span class="source-row-actions"><span class="source-map-links"></span><button class="slot-pick"${source.path && slot ? '' : ' disabled'}>${current.has(source.path) ? '현재' : '배정'}</button></span>`;
+                row.ondragstart = event => {
+                    if (!source.path || event.target.closest('button')) { event.preventDefault(); return; }
+                    const payload = JSON.stringify({ kind: 'source', path: source.path });
+                    event.dataTransfer.effectAllowed = 'copy';
+                    event.dataTransfer.setData('application/json', payload);
+                    event.dataTransfer.setData('text/plain', payload);
+                    row.classList.add('dragging-source');
+                };
+                row.ondragend = () => row.classList.remove('dragging-source');
                 row.querySelector('.source-eye').onclick = () => toggleSourceHidden(source.path);
                 row.querySelector('.play').onclick = event => playSource(source, event.currentTarget);
                 renderSourceMappingButtons(row.querySelector('.source-map-links'), mappings);
