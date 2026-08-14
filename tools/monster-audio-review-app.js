@@ -1190,14 +1190,35 @@
         renderSelectionOnly();
     }
 
+    function rotationEditorModel(snapshot, beatId, value = {}) {
+        const beats = snapshot?.timeline?.beats || [];
+        let previous = 0;
+        for (const beat of beats) {
+            if (beat.id === beatId) break;
+            const authored = snapshot?.draft?.[beat.id] || {};
+            if (authored.rotation !== undefined && authored.rotation !== null) {
+                previous = Number(authored.rotation) || 0;
+            } else if (authored.rotateBy !== undefined && authored.rotateBy !== null) {
+                previous += Number(authored.rotateBy) || 0;
+            }
+        }
+        const final = Number(value.rotation);
+        const delta = Number.isFinite(final) ? final - previous : Number(value.rotateBy) || 0;
+        const direction = value.rotationDirection === 'counterclockwise' || delta < 0
+            ? 'counterclockwise' : 'clockwise';
+        return { previous, final: Number.isFinite(final) ? final : previous + delta,
+            degrees: Math.abs(Number(value.rotationDegrees) || delta || 0), direction,
+            keepRotation: value.keepRotation !== false };
+    }
+
     function renderInspector(pattern) {
         const host = $('.transform-editor'); if (!host) return;
         const snapshot = app.session.snapshot(), beatId = snapshot.selection.beatId,
             value = snapshot.draft[beatId] || { ticks: 1 };
         host.innerHTML = `<div class="transform-head"><b>이동 · 회전 · 이미지 변형</b><select class="beat-select">${snapshot.timeline.beats.map(beat => `<option value="${esc(beat.id)}"${beat.id === beatId ? ' selected' : ''}>${esc(beat.label || beat.id)}</option>`).join('')}</select></div><div class="anchor-editor">${anchorEditor(value)}<section class="anchor-field face-field"><b>이미지 좌우 방향</b><div class="anchor-map face-map" data-anchor-key="face">${[['', '유지'], ['left', '←'], ['right', '→'], ['target', '대상 쪽 좌우']].map(([direction, label]) => `<button type="button" data-anchor="${direction}" class="${String(value.face || '').replace('toward-target', 'target') === direction ? 'active' : ''}">${label}</button>`).join('')}</div><label class="body-aim-toggle"><input type="checkbox"${value.aimBodyAt ? ' checked' : ''}>대상까지 몸체 각도 맞춤</label></section></div><div class="transform-grid">
             <label>X 이동<input data-key="offsetX" type="number" value="${value.offsetX ?? 0}"></label><label>Y 이동<input data-key="offsetY" type="number" value="${value.offsetY ?? 0}"></label>
-            <label>투명도<input data-key="opacity" type="number" min="0" max="1" step=".05" value="${value.opacity ?? 1}"></label><label>회전°<input data-key="rotation" type="number" value="${value.rotation ?? 0}"></label>
-            <label>추가 회전°<input data-key="rotateBy" type="number" value="${value.rotateBy ?? 0}"></label><label>가로 배율<input data-key="scaleX" type="number" min=".05" step=".05" value="${value.scaleX ?? 1}"></label>
+            <label>투명도<input data-key="opacity" type="number" min="0" max="1" step=".05" value="${value.opacity ?? 1}"></label><section class="rotation-controls"><b>회전</b><div><button type="button" data-rotation-direction="counterclockwise" class="${rotationEditorModel(snapshot, beatId, value).direction === 'counterclockwise' ? 'active' : ''}">좌회전</button><button type="button" data-rotation-direction="clockwise" class="${rotationEditorModel(snapshot, beatId, value).direction === 'clockwise' ? 'active' : ''}">우회전</button></div><label>회전각°<input class="rotation-degrees" type="number" min="0" value="${rotationEditorModel(snapshot, beatId, value).degrees}"></label><label>최종각°<input class="rotation-final" type="number" value="${rotationEditorModel(snapshot, beatId, value).final}"></label><label><input class="keep-rotation" type="checkbox"${rotationEditorModel(snapshot, beatId, value).keepRotation ? ' checked' : ''}>각도 유지</label></section>
+            <label>가로 배율<input data-key="scaleX" type="number" min=".05" step=".05" value="${value.scaleX ?? 1}"></label>
             <label>세로 배율<input data-key="scaleY" type="number" min=".05" step=".05" value="${value.scaleY ?? 1}"></label><label>회전축<input data-key="origin" value="${esc(value.origin || 'part:torso')}"></label>
             <label>X 기울기°<input data-key="skewX" type="number" value="${value.skewX ?? 0}"></label><label>Y 기울기°<input data-key="skewY" type="number" value="${value.skewY ?? 0}"></label>
             <section class="wide rotation-origin-picker"><b>회전 · 변형 축</b><div>${[['part:torso','몸통 중심'],['part:feet','발 중심'],['part:head','머리'],['part:tail','꼬리']].map(([origin,label]) => `<button type="button" data-origin="${origin}" class="${value.origin === origin || (!value.origin && origin === 'part:torso') ? 'active' : ''}">${label}</button>`).join('')}</div><small>회전·배율·기울기가 같은 부위 축을 공유함</small></section>
@@ -1234,6 +1255,38 @@
                 strideFlipTicks: event.target.checked ? Math.max(1, Number(period.value) || 3) : 0
             });
             renderPatternDesk(); sendPreview({ scrub: true }); seekPreview(app.session.scrub.tick);
+        };
+        const applyRotationDegrees = (direction, rawDegrees) => {
+            const current = rotationEditorModel(app.session.snapshot(), beatId, app.session.snapshot().draft[beatId]);
+            const degrees = Math.max(0, Number(rawDegrees) || 0);
+            const sign = direction === 'counterclockwise' ? -1 : 1;
+            app.session.updateBeat(beatId, {
+                rotationDirection: direction, rotationDegrees: degrees,
+                rotation: current.previous + sign * degrees, rotateBy: null, keepRotation: true
+            });
+            renderPatternDesk(); previewBeatDestination(beatId);
+        };
+        host.querySelectorAll('[data-rotation-direction]').forEach(button => button.onclick = () => {
+            applyRotationDegrees(button.dataset.rotationDirection, host.querySelector('.rotation-degrees').value);
+        });
+        host.querySelector('.rotation-degrees').onchange = event => {
+            const current = rotationEditorModel(app.session.snapshot(), beatId, app.session.snapshot().draft[beatId]);
+            applyRotationDegrees(current.direction, event.target.value);
+        };
+        host.querySelector('.rotation-final').onchange = event => {
+            const current = rotationEditorModel(app.session.snapshot(), beatId, app.session.snapshot().draft[beatId]);
+            const final = Number(event.target.value) || 0;
+            const delta = final - current.previous;
+            app.session.updateBeat(beatId, {
+                rotation: final, rotationDegrees: Math.abs(delta),
+                rotationDirection: delta < 0 ? 'counterclockwise' : 'clockwise',
+                rotateBy: null, keepRotation: true
+            });
+            renderPatternDesk(); previewBeatDestination(beatId);
+        };
+        host.querySelector('.keep-rotation').onchange = event => {
+            app.session.updateBeat(beatId, { keepRotation: event.target.checked });
+            renderPatternDesk(); previewBeatDestination(beatId);
         };
         host.querySelectorAll('[data-key]').forEach(input => input.onchange = () => {
             const key = input.dataset.key, textKeys = new Set(['at', 'to', 'origin', 'moveEasing', 'rotationEasing']);

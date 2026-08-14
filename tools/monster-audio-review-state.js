@@ -8,6 +8,7 @@
     const EDITABLE_MOTION_FIELDS = Object.freeze(['ticks', 'at', 'to', 'origin', 'moveEasing',
         'rotationEasing', 'pose', 'face', 'align', 'bounds', 'fade', 'sfx', 'label', 'aimBodyAt',
         'targetMode', 'offsetX', 'offsetY', 'depth', 'rotation', 'rotationToward', 'rotateBy',
+        'rotationDirection', 'rotationDegrees', 'keepRotation',
         'rotateByFacing', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity', 'damageScale', 'hit', 'hitOffsetTicks',
         'judgmentOffsets', 'judgments',
         'alignRotationToTravel', 'instantOpacity', 'instantPose', 'continueTravel', 'flipFacing', 'strideFlipTicks',

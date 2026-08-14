@@ -283,7 +283,11 @@ class HuntMotionCompiler {
             // 거꾸로 되감으며 집으로 간다. 한 바퀴 회전은 누적 각도를 끝까지
             // 유지하고 모션 owner가 animation.cancel()로만 초기화한다. 반 바퀴
             // 같은 비정규 자세는 복귀 시작점에서 즉시 세운 뒤 이동한다.
-            if (definition.resetRotation && previous.rotation) {
+            // A reviewed BEAT can explicitly carry its current angle through an
+            // idle/recovery pose. This is vital for full rotations: resetting
+            // the pose first makes the renderer interpolate the shortest path
+            // backwards (the old double tail-sweep failure).
+            if (definition.resetRotation && beat.keepRotation !== true && previous.rotation) {
                 const turns = previous.rotation / 360;
                 const completedFullTurn = Math.abs(turns - Math.round(turns)) < 1e-6;
                 if (completedFullTurn) {
@@ -298,7 +302,7 @@ class HuntMotionCompiler {
                     state.origin = null;
                     pose.push({ offset: startAt, ...this.#poseFrame(state) });
                 }
-            } else if (definition.resetRotation) {
+            } else if (definition.resetRotation && beat.keepRotation !== true) {
                 state.rotation = 0;
                 state.origin = null;
             }
@@ -339,9 +343,15 @@ class HuntMotionCompiler {
                     state.rotation = (aimAngle - nativeAngle) * 180 / Math.PI;
                 }
             }
+            const hasAuthoredFinalRotation = beat.rotation !== undefined
+                || beat.rotationToward !== undefined || beat.alignRotationToTravel
+                || beat.aimBodyAt;
+            // Pose defaults are migration-era flourish only. They must never
+            // add a second turn on top of an authored BEAT final angle.
             const rotationDelta = beat.rotateByFacing !== undefined
                 ? Math.abs(Number(beat.rotateByFacing) || 0) * (state.facing || 1)
-                : beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0 : Number(definition.rotate) || 0;
+                : beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0
+                    : hasAuthoredFinalRotation ? 0 : Number(definition.rotate) || 0;
             if (rotationDelta) {
                 const sign = Math.sign(rotationDelta);
                 const windup = Number(definition.windup) || 0;

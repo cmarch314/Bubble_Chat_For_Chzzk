@@ -98,9 +98,12 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(app.includes("['part:torso','몸통 중심']")
             && app.includes("['part:feet','발 중심']"),
         'the editor must expose explicit torso and foot-center transform pivots');
-        assert.ok(app.includes('data-key="rotation" type="number" value="${value.rotation ?? 0}"')
-            && app.includes('data-key="rotateBy" type="number" value="${value.rotateBy ?? 0}"'),
-        'unset BEAT rotations must render as editable 0° values rather than ambiguous blank fields');
+        assert.ok(app.includes('data-rotation-direction="counterclockwise"')
+            && app.includes('class="rotation-degrees"')
+            && app.includes('class="rotation-final"')
+            && app.includes('class="keep-rotation"')
+            && app.includes('function rotationEditorModel('),
+        'the BEAT inspector must make turn direction, degrees, final angle, and angle retention explicit');
         assert.ok(app.includes("label: '📣 포효'") && app.includes("label: '〰️ 지진'")
             && app.includes("label: '🌪️ 풍압'"),
             'timeline judgments must distinguish roar, tremor and wind pressure with emoji labels');

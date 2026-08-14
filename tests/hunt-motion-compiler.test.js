@@ -56,6 +56,18 @@ assert.ok(heldRotation.pose.some(frame => frame.offset === turnBoundary
     && frame.transform.includes('rotate(0.00deg)') && frame.pivot === 'part:torso'),
     'the authored pivot must be active from the first frame of the rotation interval');
 
+const authoredDoubleTail = HuntMotionCompiler.compile([
+    { beat: 'cock', ticks: 3, pose: 'crouch', rotation: -30, origin: 'part:tail' },
+    { beat: 'left-half', ticks: 3, pose: 'tail-whip', rotation: 150, origin: 'part:tail' },
+    { beat: 'right-half', ticks: 3, pose: 'tail-whip', rotation: 330, origin: 'part:tail' },
+    { beat: 'return', ticks: 3, pose: 'idle', rotation: 360, origin: 'part:tail', keepRotation: true }
+], { anchors });
+const authoredTailAngles = authoredDoubleTail.timeline.map(beat => Number(authoredDoubleTail.pose
+    .filter(frame => frame.offset <= beat.endTicks / 12).at(-1)
+    .transform.match(/rotate\((-?[\d.]+)deg\)/)[1]));
+assert.deepStrictEqual(authoredTailAngles, [-30, 150, 330, 360],
+    'explicit BEAT final angles must not receive the legacy tail-whip pose rotation or reverse on return');
+
 const reviewedCutwingAmbush = HuntMotionCompiler.compile([
     { beat: 'windup', ticks: 5, pose: 'crouch' },
     { beat: 'leap-out', ticks: 4, to: 'offscreen:left', offsetY: -280, pose: 'stretch', opacity: 0 },
