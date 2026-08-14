@@ -195,11 +195,15 @@ class HuntMonsterActionPolicy {
         });
     }
 
-    static centerLeftRightSequence(targetable, random = Math.random) {
+    static centerLeftRightSequence(targetable, random = Math.random, primaryIndex = null) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
-        const anchor = ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
         const byIndex = new Map(ordered.map(target => [Number(target.index), target]));
+        // The selected primary hunter is the centre shot.  Randomize only when
+        // no primary is authored so Preview and live hunts share 2 → 1 → 3
+        // rather than silently choosing a different centre for each surface.
+        const anchor = byIndex.get(Number(primaryIndex))
+            || ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
         return [
             [anchor],
             [byIndex.get(Number(anchor.index) - 1)].filter(Boolean),
@@ -403,7 +407,7 @@ class HuntMonsterActionPolicy {
             };
         }
         if (mode === 'center-left-right') {
-            const passes = this.centerLeftRightSequence(targetable, random);
+            const passes = this.centerLeftRightSequence(targetable, random, primaryIndex);
             return {
                 targets: passes.flat(),
                 runtime: {

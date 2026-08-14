@@ -76,6 +76,9 @@ const fourHunters = [0, 1, 2, 3].map(index => ({ index }));
 const centerSequence = ActionPolicy.centerLeftRightSequence(fourHunters, () => .01);
 assert.deepStrictEqual(centerSequence.map(pass => pass.map(target => target.index)), [[0], [], [1]],
     'a side shot outside the party must remain a visible whiff lane');
+const primarySecondSequence = ActionPolicy.centerLeftRightSequence(fourHunters, () => .99, 1);
+assert.deepStrictEqual(primarySecondSequence.map(pass => pass.map(target => target.index)), [[1], [0], [2]],
+    'an authored second hunter must fire primary → left → right as 2 → 1 → 3, without rerolling centre');
 const targetPlan = ActionPolicy.resolveTargeting({
     targetable: fourHunters,
     count: 1,

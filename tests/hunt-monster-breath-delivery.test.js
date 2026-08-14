@@ -86,6 +86,8 @@ assert.match(animatorSource,
     'Rath fireballs must wait for their turn and remeasure the live head before launch');
 assert.match(animatorSource, /runtimeResolvedImpactTimeline[\s\S]*?pattern\.impactTimeline[\s\S]*?createElementalAttack/,
     'detached elemental delivery must use the live resolved targets rather than a stale catalog timeline');
+assert.match(animatorSource, /schedulePreviewProjectile[\s\S]*?event\?\.targetIndices[\s\S]*?visualTargetIndex[\s\S]*?createElementalAttack/,
+    'motion-only Preview must use each resolved judgment recipient for multi-spit projectile destinations');
 assert.strictEqual(context.Animator.usesElementalDelivery('', { type: 'projectile' }), true,
     'authored projectile semantics must remain visible even when a localized move name is unknown');
 assert.match(engineSource, /const authoredElemental = tags\.has\('elemental'\)[\s\S]*?delivery/,

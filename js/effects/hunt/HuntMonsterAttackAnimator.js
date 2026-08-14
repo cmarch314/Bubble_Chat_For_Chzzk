@@ -2746,24 +2746,31 @@ class HuntMonsterAttackAnimator {
         const impacts = timeline.filter(event => Number(event?.damageScale ?? 1) > 0);
         const firstImpactTicks = Number(impacts[0]?.atTicks ?? pattern.runtimeImpactDelayTicks ?? 0);
         const generation = this.motionGeneration;
-        const launch = impactTicks => {
+        const launch = (impactTicks, event = null) => {
             const delayMs = HuntMonsterAttackAnimator.projectileLaunchDelayMs(
                 pattern, impactTicks, firstImpactTicks, ticksPerSecond, 720);
             this.animationTimers.timeout(() => {
                 if (this.motionGeneration !== generation || !this.card?.isConnected) return;
-                const liveTarget = this.card.querySelector(`#fight-card-${Number(targetIndex)}`);
+                // A multi-spit pattern must follow each resolved judgment's
+                // recipient (primary → left → right), not repeatedly aim every
+                // preview projectile at the motion anchor.
+                const eventTargetIndex = Array.isArray(event?.targetIndices)
+                    ? event.targetIndices.find(Number.isInteger) : null;
+                const visualTargetIndex = Number.isInteger(eventTargetIndex)
+                    ? eventTargetIndex : Number(targetIndex);
+                const liveTarget = this.card.querySelector(`#fight-card-${visualTargetIndex}`);
                 const liveMonster = this.card.querySelector('.hunt-small-monster.is-attacking')
                     || this.card.querySelector('#fight-monster-img');
                 if (!liveTarget || !liveMonster) return;
                 this.createElementalAttack(
                     this.resolveLiveElementalOrigin(liveMonster, liveTarget, pattern, fallbackOrigin),
                     this.card.getBoundingClientRect(), liveTarget,
-                    { index: Number(targetIndex), result: 'effect' }, attackName, emoji, 0, pattern
+                    { index: visualTargetIndex, result: 'effect' }, attackName, emoji, 0, pattern
                 );
             }, delayMs);
         };
         (impacts.length ? impacts : [{ atTicks: firstImpactTicks }])
-            .forEach(event => launch(Number(event.atTicks ?? firstImpactTicks)));
+            .forEach(event => launch(Number(event.atTicks ?? firstImpactTicks), event));
         return true;
     }
 
