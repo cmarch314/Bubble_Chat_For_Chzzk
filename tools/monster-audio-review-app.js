@@ -1222,6 +1222,14 @@
             'primary-adjacent': '주 헌터+좌우', all: '전체' };
         const list = host.querySelector('.judgment-list');
         for (const { beat, judgment } of entries) {
+            const group = String(judgment.group || judgment.id || 'impact');
+            const audioSlot = pattern.slots.find(item => item.judgmentGroup === group) || null;
+            const audioFiles = routeFiles(audioSlot?.effective);
+            const audioName = audioFiles.length
+                ? `${audioFiles.length > 1 ? `랜덤 ${audioFiles.length}개 · ` : ''}${fileName(audioFiles[0])}`
+                : '미배정 · 우측 음원을 여기로 드래그';
+            const audioWhen = audioSlot?.when || audioSlot?.effective?.when || 'hit';
+            const whenLabel = { hit: '적중 시', contact: '접촉 시', always: '항상', miss: '비적중 시' }[audioWhen] || '적중 시';
             const row = document.createElement('article');
             row.className = `judgment-row${judgment.id === app.selectedJudgmentId ? ' selected' : ''}`;
             row.innerHTML = `<button type="button" class="select-judgment">${kindLabels[judgment.kind]?.split(' ')[0] || '💥'}</button>
@@ -1232,27 +1240,20 @@
                     ? `<input data-field="damagePercent" type="number" min="0" max="1000" step="1" value="${judgment.damagePercent ?? Math.round(Number(pattern.damageRatio || 0) * 100)}">`
                     : `<select data-field="size"><option value="small"${judgment.size === 'small' ? ' selected' : ''}>소</option><option value="large"${judgment.size !== 'small' ? ' selected' : ''}>대</option></select>`}</label>
                 ${judgment.kind === 'damage' ? `<label>피격 종류<select data-field="hitReactionKind">${Object.entries(reactionLabels).map(([value, label]) => `<option value="${value}"${(judgment.hitReactionKind || 'strong') === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}
-                <span>${esc(beat.label || beat.id)} · ${beat.startTicks + Number(judgment.offsetTicks || 0)}틱</span><button type="button" class="remove-judgment">×</button>`;
+                <span>${esc(beat.label || beat.id)} · ${beat.startTicks + Number(judgment.offsetTicks || 0)}틱</span>
+                <button type="button" class="judgment-audio-route${audioFiles.length ? ' assigned' : ''}"${audioSlot ? '' : ' disabled'} title="판정 사운드 배정 열기"><b>🎵 판정 음원</b><small>${esc(whenLabel)} · ${esc(audioName)}</small></button><button type="button" class="remove-judgment">×</button>`;
             row.querySelector('.select-judgment').onclick = () => {
                 app.selectedJudgmentId = judgment.id;
                 app.session.seek(beat.startTicks + Number(judgment.offsetTicks || 0));
                 renderPatternDesk();
             };
-            if (judgment.kind === 'damage') {
-                const audioButton = document.createElement('button');
-                audioButton.type = 'button';
-                audioButton.className = 'select-judgment-audio';
-                audioButton.textContent = '🎵';
-                audioButton.title = '판정 사운드 선택';
-                audioButton.onclick = () => {
-                    const group = String(judgment.group || judgment.id || 'impact');
-                    const slot = pattern.slots.find(item => item.judgmentGroup === group);
-                    if (!slot) return;
-                    app.selectedJudgmentId = judgment.id;
-                    selectPart({ beatId: beat.id, slotId: slot.slot });
-                };
-                row.insertBefore(audioButton, row.querySelector('.remove-judgment'));
-            }
+            row.querySelector('.judgment-audio-route').onclick = () => {
+                if (!audioSlot) return;
+                app.selectedJudgmentId = judgment.id;
+                selectPart({ beatId: beat.id, slotId: audioSlot.slot });
+                requestAnimationFrame(() => document.querySelector(`.slot-card[data-slot="${CSS.escape(audioSlot.slot)}"]`)
+                    ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+            };
             row.querySelector('.remove-judgment').onclick = () => {
                 app.session.removeJudgment(judgment.id); app.selectedJudgmentId = ''; renderPatternDesk();
             };
