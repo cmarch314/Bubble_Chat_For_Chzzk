@@ -390,7 +390,8 @@ class HuntMotionCompiler {
                 });
                 state.rotation = swung - sign * recoil;
             } else if (definition.hold && ![
-                'rotation', 'rotationToward', 'rotateBy', 'rotateByFacing',
+                'rotation', 'rotationDirection', 'rotationDegrees', 'rotationToward',
+                'rotateBy', 'rotateByFacing',
                 'alignRotationToTravel', 'aimBodyAt', 'scaleX', 'scaleY',
                 'skewX', 'skewY'
             ].some(key => beat[key] !== undefined && beat[key] !== null && beat[key] !== false)) {

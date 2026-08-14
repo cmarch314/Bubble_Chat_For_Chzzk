@@ -56,6 +56,23 @@ assert.ok(heldRotation.pose.some(frame => frame.offset === turnBoundary
     && frame.transform.includes('rotate(0.00deg)') && frame.pivot === 'part:torso'),
     'the authored pivot must be active from the first frame of the rotation interval');
 
+const directedHeldRotation = HuntMotionCompiler.compile([
+    { beat: 'center', ticks: 7, pose: 'brace' },
+    { beat: 'wind', ticks: 13, pose: 'crouch',
+        rotationDirection: 'counterclockwise', rotationDegrees: 30 }
+], { anchors });
+const directedBoundary = 7 / 20;
+assert.ok(directedHeldRotation.pose.some(frame => frame.offset === directedBoundary
+    && frame.transform.includes('rotate(0.00deg)')),
+    'a directed turn must begin from the previous angle');
+assert.ok(!directedHeldRotation.pose.some(frame => frame.offset > directedBoundary
+    && frame.offset < directedBoundary + HuntMotionCompiler.EPS * 2
+    && frame.transform.includes('rotate(-30.00deg)')),
+    'hold poses must not inject the directed terminal angle at beat start');
+assert.ok(directedHeldRotation.pose.some(frame => frame.offset === 1
+    && frame.transform.includes('rotate(-30.00deg)')),
+    'a directed hold-pose turn must reach its terminal angle at beat end');
+
 const authoredDoubleTail = HuntMotionCompiler.compile([
     { beat: 'cock', ticks: 3, pose: 'crouch', rotation: -30, origin: 'part:tail' },
     { beat: 'left-half', ticks: 3, pose: 'tail-whip', rotation: 150, origin: 'part:tail' },
