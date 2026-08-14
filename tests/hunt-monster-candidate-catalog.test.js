@@ -6,6 +6,7 @@ const path = require('path');
 
 const root = path.resolve(__dirname, '..');
 const CandidateCatalog = require('../js/effects/hunt/HuntMonsterCandidateCatalog.js');
+const ActionPolicy = require('../js/effects/hunt/HuntMonsterActionPolicy.js');
 
 for (const monsterId of ['rathian', 'rathalos']) {
     const kit = JSON.parse(fs.readFileSync(path.join(root, 'data', 'hunt', 'monster-kits', 'candidates', `${monsterId}.json`), 'utf8'));
@@ -36,6 +37,26 @@ assert.ok(bite, 'Rathian candidate includes the shared-timing bite');
 assert.deepStrictEqual(bite.motion.map(beat => beat.ticks), [5, 3, 3, 5]);
 assert.deepStrictEqual(bite.beatV2.events.filter(event => event.kind === 'damage')
     .map(event => [event.beatId, event.atTicks, event.hitReactionKind]), [['bite', 5, 'weak']]);
+const tailSweep = rathian.actions.find(action => action.id === 'rathian.tail_sweep');
+assert.deepStrictEqual(tailSweep.targeting, { mode: 'left-right-halves' },
+    'the double tail sweep must resolve the first and second half-turns as 1·2 then 3·4');
+assert.strictEqual(tailSweep.motion[0].to, 'between:hunter:1,hunter:2',
+    'the sweep must enter the fixed space between hunters 2 and 3 before rotating');
+assert.deepStrictEqual(tailSweep.beatV2.events.filter(event => event.kind === 'damage')
+    .map(event => [event.beatId, event.target, event.atTicks]), [
+        ['left-sweep', 'pair-left', 19],
+        ['right-sweep', 'pair-right', 26]
+    ], 'each 180° sweep must retain its own left/right impact pass');
+assert.deepStrictEqual(ActionPolicy.resolveTargetScenario({
+    pattern: { impactTimeline: [
+        { targetMode: 'runtime-pair-left' },
+        { targetMode: 'runtime-pair-right' }
+    ] },
+    targetable: [0, 1, 2, 3].map(index => ({ index })),
+    count: 4,
+    mode: tailSweep.targeting.mode
+}).impactTimeline.map(impact => impact.targetIndices), [[0, 1], [2, 3]],
+'the candidate target resolver must apply the half-turns to 1·2, then 3·4 without reselecting a lone hunter');
 assert.deepStrictEqual(rathian.actions.find(action => action.id === 'rathian.roar').motion.map(beat => beat.ticks),
     [10, 2, 33]);
 const somersault = rathian.actions.find(action => action.id === 'rathian.somersault');

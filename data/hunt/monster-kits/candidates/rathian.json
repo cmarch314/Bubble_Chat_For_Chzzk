@@ -26,8 +26,9 @@
     },
     {
       "id": "rathian.tail_sweep", "name": "이단 꼬리 회전 · clean BEAT", "type": "area", "tags": ["tail", "area", "ground"], "damageRatio": 0.27, "minTargets": 4, "maxTargets": 4, "atbCost": 42,
+      "targeting": { "mode": "left-right-halves" },
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 42, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
-        { "id": "center", "ticks": 9, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "arena:center-lower .56", "pose": "brace", "face": "target" } }] }, "events": [{ "kind": "audio", "slot": "center", "offsetTicks": 1 }] },
+        { "id": "center", "ticks": 9, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "between:hunter:1,hunter:2", "pose": "brace", "face": "target-group", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "center", "offsetTicks": 1 }] },
         { "id": "tail-cock", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": -30, "pose": "crouch", "scaleY": 0.92, "rotationEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "tail-cock", "offsetTicks": 2 }] },
         { "id": "left-sweep", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": 150, "pose": "tail-whip", "rotationEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "pair-left", "damagePercent": 27, "hitReactionKind": "strong", "offsetTicks": 4 }, { "kind": "audio", "slot": "left-impact", "offsetTicks": 4 }] },
         { "id": "right-sweep", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "origin": "part:tail", "rotation": 330, "pose": "tail-whip", "rotationEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "pair-right", "damagePercent": 27, "hitReactionKind": "strong", "offsetTicks": 4 }, { "kind": "audio", "slot": "right-impact", "offsetTicks": 4 }] },
