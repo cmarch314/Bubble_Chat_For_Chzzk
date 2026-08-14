@@ -955,7 +955,11 @@ class HuntMonsterAttackAnimator {
         const built = Compiler.compile(pattern.motion, {
             anchors: this.resolveStageAnchors(monsterImg, primaryTarget, targetSequence, resolvedTargetGroup),
             rig,
-            partOffset
+            partOffset,
+            // The pose track sits inside this layer's scaleX mirror. Supplying
+            // its native direction lets the compiler reverse inner rotation
+            // signs only while the sprite is actually mirrored.
+            baseFacing: HuntMonsterAnatomyCatalog.baseFacing(this.owner?.selectedMonster)
         });
 
         // 자세 키프레임의 축은 부위 이름이다. 여기서 백분율로 푼다 — 반전은

@@ -112,7 +112,8 @@ class HuntMotionCompiler {
     }
 
     static compile(beats, {
-        anchors, rig = 'winged', poses = null, ticksPerSecond = null, partOffset = null
+        anchors, rig = 'winged', poses = null, ticksPerSecond = null, partOffset = null,
+        baseFacing = 'front'
     } = {}) {
         const offsetOf = partOffset || (() => ({ x: 0, y: 0 }));
         const Poses = poses || (typeof HuntMotionPoses !== 'undefined'
@@ -133,6 +134,15 @@ class HuntMotionCompiler {
             return sum + ticks;
         }, 0);
 
+        // `facing` is a logical direction. A left/right sprite can be mirrored
+        // by the renderer's outer facing layer; that mirror reverses the
+        // visible sense of the inner pose rotation. Keep authored rotation in
+        // world/editor space and derive the inner transform sign per BEAT.
+        const baseDirection = baseFacing === 'left' ? -1 : baseFacing === 'right' ? 1 : 1;
+        const visualFlipFor = direction => {
+            if (baseFacing === 'left') return direction < 0 ? 1 : -1;
+            return direction > 0 ? 1 : -1;
+        };
         const state = {
             point: { x: 0, y: 0 },
             depth: 1,
@@ -141,7 +151,8 @@ class HuntMotionCompiler {
             origin: null,
             opacity: 1,
             filter: null,
-            facing: 1,
+            facing: baseDirection,
+            rotationSign: 1,
             scaleX: 1,
             scaleY: 1,
             skewX: 0,
@@ -268,6 +279,7 @@ class HuntMotionCompiler {
             if (state.facing !== previous.facing || (!wasFacingActive && facingActive)) {
                 facing.push({ offset: startAt, direction: state.facing });
             }
+            state.rotationSign = facingActive ? visualFlipFor(state.facing) : 1;
             const strideFlipTicks = Math.max(0, Math.floor(Number(beat.strideFlipTicks) || 0));
             if (strideFlipTicks > 0) strideWindows.push({ startTicks, endTicks, intervalTicks: strideFlipTicks });
 
@@ -523,7 +535,7 @@ class HuntMotionCompiler {
         const root = Math.sqrt(state.squash > 0 ? state.squash : 1);
         const size = state.depth > 0 ? state.depth : 1;
         const frame = {
-            transform: `rotate(${state.rotation.toFixed(2)}deg) skew(${state.skewX.toFixed(2)}deg, ${state.skewY.toFixed(2)}deg) scale(${(size * root * state.scaleX).toFixed(4)}, ${(size / root * state.scaleY).toFixed(4)})`
+            transform: `rotate(${(state.rotation * (state.rotationSign || 1)).toFixed(2)}deg) skew(${state.skewX.toFixed(2)}deg, ${state.skewY.toFixed(2)}deg) scale(${(size * root * state.scaleX).toFixed(4)}, ${(size / root * state.scaleY).toFixed(4)})`
         };
         if (state.origin) {
             if (/%/.test(String(state.origin))) frame.origin = state.origin;

@@ -214,6 +214,16 @@ const temporaryMirror = HuntMotionCompiler.compile([
 assert.deepStrictEqual(temporaryMirror.facing.map(frame => [frame.offset, frame.direction]), [
     [4 / 12, -1], [8 / 12, 1]
 ], 'a temporary mirrored strike must flip only its authored BEAT and restore on settle');
+const mirroredRotation = HuntMotionCompiler.compile([
+    { beat: 'turn-to-right', ticks: 4, face: 'right', pose: 'stretch', rotation: 45 }
+], { anchors, baseFacing: 'left' });
+const unmirroredRotation = HuntMotionCompiler.compile([
+    { beat: 'turn-to-left', ticks: 4, face: 'left', pose: 'stretch', rotation: 45 }
+], { anchors, baseFacing: 'left' });
+assert.match(mirroredRotation.pose.at(-1).transform, /rotate\(-45\.00deg\)/,
+    'a horizontally mirrored sprite must receive the inverse inner rotation');
+assert.match(unmirroredRotation.pose.at(-1).transform, /rotate\(45\.00deg\)/,
+    'the native sprite direction must retain the authored rotation sign');
 const pairAnchors = primaryTarget => new HuntStageAnchors({
     monsterRect: anchors.monsterRect,
     cardRect: anchors.cardRect,
