@@ -53,6 +53,12 @@
                 Math.round(Number(item.offsetTicks) || 0)))
         };
         if (kind === 'damage') {
+            // Projectile identity is authored gameplay metadata.  It must
+            // survive timeline editing so a moved contact still resolves the
+            // launch owned by the same BEAT graph.
+            if (item.projectileId != null && String(item.projectileId).trim()) {
+                result.projectileId = String(item.projectileId).trim().slice(0, 120);
+            }
             if (Number.isFinite(Number(item.damagePercent))) {
                 result.damagePercent = Math.max(0, Math.min(1000, Number(item.damagePercent)));
             } else if (Number.isFinite(Number(item.damageScale))) {

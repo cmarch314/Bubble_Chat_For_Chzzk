@@ -12,6 +12,18 @@ class HuntBeatV2Adapter {
             throw new Error(`${pattern.id || 'monster-pattern'} has no authored motion beats`);
         }
         const hasJudgments = pattern.motion.some(beat => Array.isArray(beat?.judgments) && beat.judgments.length);
+        // An editor draft changes visual BEAT durations, then recompiles the
+        // graph.  Preserve authored non-judgment gameplay events while doing
+        // so: projectile launch/finish is not a damage judgment and used to
+        // disappear from that round trip, leaving a valid HIT with no visible
+        // fireball.  Ownership remains the original beat id; the current beat
+        // duration only clamps its local offset.
+        const sourceEventsByBeat = new Map();
+        for (const event of pattern?.beatV2?.events || []) {
+            if (!event?.beatId || ['audio', 'damage', 'judgment', 'roar', 'tremor', 'wind'].includes(event.kind)) continue;
+            const beatId = String(event.beatId);
+            sourceEventsByBeat.set(beatId, [...(sourceEventsByBeat.get(beatId) || []), event]);
+        }
         const impactEventsByBeat = hasJudgments ? new Map() : this.#legacyImpactsByBeat(pattern);
         const beats = pattern.motion.map((beat, beatIndex) => {
             const ticks = Math.max(1, Math.round(Number(beat?.ticks) || 1));
@@ -36,6 +48,14 @@ class HuntBeatV2Adapter {
                 });
             }
             for (const event of impactEventsByBeat.get(beatIndex) || []) events.push(event);
+            for (const sourceEvent of sourceEventsByBeat.get(String(beat.beat || `beat-${beatIndex + 1}`)) || []) {
+                if (events.some(event => String(event.id) === String(sourceEvent.id))) continue;
+                events.push({
+                    ...sourceEvent,
+                    offsetTicks: Math.max(0, Math.min(ticks - 1,
+                        Math.round(Number(sourceEvent.offsetTicks) || 0)))
+                });
+            }
             // Every authored beat is an assignable audio moment in the editor.
             // Emitting a silent-by-default event keeps preview and live routing
             // identical even when the original motion did not carry an `sfx`

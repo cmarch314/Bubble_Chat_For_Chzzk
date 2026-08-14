@@ -662,6 +662,21 @@ function buildMonsterPatternAudioMap({
                 interference: pattern.interference ? { ...pattern.interference } : null,
                 secondaryInterference: pattern.secondaryInterference
                     ? { ...pattern.secondaryInterference } : null,
+                // The editor must receive the complete authored graph, not
+                // just its visual projection.  BEAT event lifecycles such as
+                // projectile-launch -> damage -> projectile-finish are runtime
+                // data, and dropping them here made a reviewed fireball lose
+                // its launch when the preview recompiled a draft motion.
+                beatV2: pattern.beatV2 ? {
+                    ...pattern.beatV2,
+                    beats: (pattern.beatV2.beats || []).map(beat => ({
+                        ...beat,
+                        events: (beat.events || []).map(event => ({ ...event })),
+                        tracks: beat.tracks ? { ...beat.tracks } : beat.tracks
+                    })),
+                    events: (pattern.beatV2.events || []).map(event => ({ ...event }))
+                } : null,
+                nativeBeatCandidate: pattern.nativeBeatCandidate === true,
                 motion: authoredMotion,
                 motionGraph,
                 runtimeMotionBackend: pattern.runtimeMotionBackend || null,
@@ -943,8 +958,12 @@ function loadHuntPatternAudioMap(idOrGraphId, {
     // inherit shared overrides, whose beat ids can describe an older action
     // shape and silently replace the candidate's authored timeline.
     const motionDocument = readJson(MOTION_OVERRIDES_PATH, { overrides: {} });
+    // Candidate kits are edited in the review workflow.  Their compiler and
+    // BEAT contract must be reloaded together; otherwise the v3 server can
+    // serve newly saved JSON through an old compiler until a manual restart.
     const CandidateCatalog = candidateKit
-        ? require('../js/effects/hunt/HuntMonsterCandidateCatalog.js') : null;
+        ? (requireFresh('../js/effects/hunt/HuntBeatV2Contract.js'),
+            requireFresh('../js/effects/hunt/HuntMonsterCandidateCatalog.js')) : null;
     const candidateActions = candidateKit
         ? CandidateCatalog.compileKit(candidateKit).actions.map(candidatePatternForAudioReview) : null;
     if (candidateActions && String(candidateKit.monsterId) !== huntId) {
