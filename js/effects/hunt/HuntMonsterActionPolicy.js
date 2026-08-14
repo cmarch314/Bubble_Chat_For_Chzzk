@@ -688,8 +688,16 @@ class HuntMonsterActionPolicy {
         // action can still hit all hunters while moving through 1-2, 2-3, or
         // 3-4 instead of always anchoring at the all-target midpoint.
         if (!Array.isArray(runtime.runtimePairTargets) && this.usesPairAnchor(pattern)) {
-            runtime.runtimePairTargets = this.randomAdjacentPair(targetable, random)
-                .map(target => target.index).filter(Number.isInteger);
+            // A pivot pattern has already selected its exact adjacent lane for
+            // impact. Reuse that lane for pair anchors instead of rolling a
+            // second, unrelated one (which made the editor's “2인 위” anchor
+            // drift away from the two judgments).
+            const authoredPivot = Array.isArray(runtime.runtimePivotPairs)
+                ? runtime.runtimePivotPairs.find(pair => Array.isArray(pair) && pair.length)
+                : null;
+            runtime.runtimePairTargets = (authoredPivot || this.randomAdjacentPair(targetable, random))
+                .map(target => Number.isInteger(target?.index) ? target.index : target)
+                .filter(Number.isInteger);
         }
         const forcedByImpact = new Map((forcedImpactTargets || [])
             .filter(item => Number.isInteger(item?.impactIndex))

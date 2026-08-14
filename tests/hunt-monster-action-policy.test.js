@@ -184,6 +184,28 @@ const HuntMonsterAnimationCatalog = require('../js/effects/hunt/HuntMonsterAnima
 
 {
     const hunters = [0, 1, 2, 3].map(index => ({ index }));
+    const plan = HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern: {
+            motionGraph: { beats: [{ to: 'above:pair:center 180' }] },
+            impactTimeline: [
+                { atTicks: 12, targetMode: 'runtime-pair-left' },
+                { atTicks: 24, targetMode: 'runtime-pair-right' }
+            ]
+        },
+        targetable: hunters,
+        count: 2,
+        passCount: 2,
+        random: () => .99,
+        mode: 'adjacent-pair-pivot'
+    });
+    assert.deepStrictEqual(plan.runtime.runtimePairTargets, [2, 3],
+        'a pair placement anchor must reuse the action\'s selected 2인 lane');
+    assert.deepStrictEqual(plan.impactTimeline.map(event => event.targetIndices), [[2], [3]],
+        'pair-left/right impacts must stay bound to that same lane');
+}
+
+{
+    const hunters = [0, 1, 2, 3].map(index => ({ index }));
     const plan = HuntMonsterActionPolicy.resolveTargeting({
         targetable: hunters,
         count: 2,

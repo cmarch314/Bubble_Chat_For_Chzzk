@@ -118,8 +118,8 @@ assert.deepStrictEqual(
     ['center', 'wind', 'left-half', 'rest', 'right-half', 'return'],
     'the double tail sweep must keep an authored rest beat between two contacts'
 );
-assert.strictEqual(byId('rathian.tail_sweep').targeting.mode, 'left-right-halves');
-assert.strictEqual(byId('rathian.tail_sweep').maxTargets, 4);
+assert.strictEqual(byId('rathian.tail_sweep').targeting.mode, 'adjacent-pair-sequential');
+assert.strictEqual(byId('rathian.tail_sweep').maxTargets, 2);
 assert.deepStrictEqual(byId('rathian.tail_sweep').animationGeometry, {
     anchor: 'arena-center-lower', yRatio: 0.56, approachX: 1, approachY: 1
 });

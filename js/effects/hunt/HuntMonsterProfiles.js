@@ -634,9 +634,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         ]
     }],
     ['rathian.tail_sweep', '이단 꼬리 회전', 'area', 0.27, {
-        sourceMoveNameJA: '尻尾回転', minTargets: 4, maxTargets: 4, recovery: 1,
+        sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 2, recovery: 1,
         tags: ['area', 'tail', 'ground-only', 'target-contact'], monsterAtbCost: 0.58,
-        movement: { ticks: 46 }, targeting: { mode: 'left-right-halves' },
+        movement: { ticks: 46 }, targeting: { mode: 'adjacent-pair-sequential', passCount: 2 },
         impactTimeline: [
             { atTicks: 24, damageScale: 1 },
             { atTicks: 38, damageScale: 1 }
