@@ -17,6 +17,14 @@ const candidateFile = path.join(temporaryDir, 'rathian.json');
 
 try {
     fs.copyFileSync(source, candidateFile);
+    // Seed the exact legacy corruption that used to happen when an editor
+    // moved a projectile HIT: launch still knows the id, outcome does not.
+    const legacyKit = JSON.parse(fs.readFileSync(candidateFile, 'utf8'));
+    const legacyContact = legacyKit.actions.find(action => action.id === 'rathian.fireball')
+        .graph.beats.find(beat => beat.id === 'spit').events
+        .find(event => event.id === 'fireball-1:contact');
+    delete legacyContact.projectileId;
+    fs.writeFileSync(candidateFile, `${JSON.stringify(legacyKit, null, 2)}\n`, 'utf8');
     const record = candidateKitRecordFor({ candidate: 'rathian' }, 'rathian', temporaryDir);
     const fireball = record.kit.actions.find(item => item.id === 'rathian.fireball');
     assert.deepEqual(fireball.graph.beats.map(beat => beat.id), ['look', 'inhale', 'spit', 'recover'],
@@ -61,6 +69,27 @@ try {
     assert.equal(visual.rotationResetMode, 'preserve');
     assert.equal(edited.events.find(event => event.id === 'review-roar')?.kind, 'roar',
         'candidate judgments must persist as native BEAT events');
+
+    // A pre-existing candidate can already be missing the redundant outcome
+    // projectileId (for example, after an old editor saved a moved HIT).  A
+    // normal timing save must repair and persist that canonical linkage, not
+    // reject the entire action or leave the next reload broken.
+    const fireballRecord = candidateKitRecordFor({ candidate: 'rathian' }, 'rathian', temporaryDir);
+    const fireballPattern = loadHuntPatternAudioMap('rathian', { candidateKit: fireballRecord.kit }).patterns
+        .find(pattern => pattern.id === 'rathian.fireball');
+    const fireballDraft = ReviewState.createMotionDraft(fireballPattern, fireballPattern.timeline);
+    fireballDraft.spit.ticks += 1;
+    const fireballSave = saveCandidatePatternMotion({
+        huntId: 'rathian', patternId: 'rathian.fireball', candidate: 'rathian',
+        candidateRecord: fireballRecord, beats: fireballDraft
+    });
+    assert.equal(fireballSave.candidateSaved, true,
+        'a projectile action with legacy-missing outcome linkage must save successfully');
+    const fireballPersisted = JSON.parse(fs.readFileSync(candidateFile, 'utf8'))
+        .actions.find(action => action.id === 'rathian.fireball');
+    assert.equal(fireballPersisted.graph.beats.find(beat => beat.id === 'spit').events
+        .find(event => event.id === 'fireball-1:contact')?.projectileId, 'fireball-1',
+    'candidate save must repair and persist projectile outcome linkage');
 
     // A projectile damage event carries runtime linkage (projectileId) that
     // is intentionally not an editable motion field.  Saving an unchanged

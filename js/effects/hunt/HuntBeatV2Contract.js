@@ -15,10 +15,51 @@ class HuntBeatV2Contract {
     static REVIEW_STATUSES = new Set(['draft', 'migrated', 'approved']);
     static FORBIDDEN_APPROVED_FIELDS = Object.freeze([
         'impactTimeline', 'profileMotion', 'runtimeTimingBeats', 'runtimeSourceTimingBeats',
-        'animationClass', 'cssAnimation', 'hitOffsetTicks'
+        'animationClass', 'cssAnimation', 'hitOffsetTicks',
+        // Projectile timing must be authored as BEAT events.  These fields
+        // created a second renderer-owned clock and made Preview diverge from
+        // the live hunt.
+        'projectileLaunchDelayTicks', 'runtimeImpactPending', 'runtimeImpactDelayTicks'
     ]);
 
+    // Projectile lifecycle links are authored as a pair: launch points at its
+    // outcome event, and the outcome carries the same projectile id.  Motion
+    // editors deliberately expose only the judgment fields, so older saves
+    // could retain the launch reference while dropping the redundant outcome
+    // field.  Normalize that deterministic relationship at the graph boundary
+    // instead of making each editor/runtime repair it independently.
+    //
+    // This returns a copy and never overwrites an explicitly conflicting id;
+    // conflicts remain validation errors rather than silently changing combat
+    // meaning.
+    static hydrateProjectileLifecycle(source = {}) {
+        if (!source || typeof source !== 'object' || !Array.isArray(source.beats)) return source;
+        const beats = source.beats.map(rawBeat => ({
+            ...rawBeat,
+            events: Array.isArray(rawBeat?.events)
+                ? rawBeat.events.map(event => ({ ...event }))
+                : rawBeat?.events
+        }));
+        const eventsById = new Map();
+        beats.forEach(beat => (beat.events || []).forEach(event => {
+            const id = String(event?.id || '').trim();
+            if (id) eventsById.set(id, event);
+        }));
+        beats.forEach(beat => (beat.events || []).forEach(event => {
+            if (String(event?.kind || '') !== 'projectile-launch') return;
+            const projectileId = String(event.projectileId || '').trim();
+            const outcomeEventId = String(event.outcomeEventId || '').trim();
+            const outcome = eventsById.get(outcomeEventId);
+            if (!projectileId || !outcome || String(outcome.kind || '') !== 'damage') return;
+            if (outcome.projectileId == null || String(outcome.projectileId).trim() === '') {
+                outcome.projectileId = projectileId;
+            }
+        }));
+        return { ...source, beats };
+    }
+
     static compile(source = {}) {
+        source = this.hydrateProjectileLifecycle(source);
         const id = String(source.id || '').trim();
         if (!id) throw new HuntBeatV2ContractError('action id is required', 'id');
         const actor = String(source.actor || '').trim();
@@ -107,6 +148,7 @@ class HuntBeatV2Contract {
         });
 
         events.sort((left, right) => left.atTicks - right.atTicks || left.id.localeCompare(right.id));
+        this.#validateProjectileEvents(events, id);
         const atb = Object.freeze({
             cost: Math.max(0, Number(source.atb?.cost || 0)),
             recovery: String(source.atb?.recovery || 'during-action'),
@@ -124,6 +166,73 @@ class HuntBeatV2Contract {
             beats: timeline,
             events,
             eventIds: events.map(event => event.id)
+        });
+    }
+
+    static #validateProjectileEvents(events, actionId) {
+        const launches = events.filter(event => event.kind === 'projectile-launch');
+        const finishes = events.filter(event => event.kind === 'projectile-finish');
+        const byId = new Map(events.map(event => [event.id, event]));
+        const projectileIds = new Set();
+        const finishByProjectileId = new Map();
+        finishes.forEach(event => {
+            const projectileId = String(event.projectileId || '').trim();
+            if (!projectileId) {
+                throw new HuntBeatV2ContractError('projectile-finish requires projectileId', `${actionId}.${event.id}`);
+            }
+            if (finishByProjectileId.has(projectileId)) {
+                throw new HuntBeatV2ContractError(`duplicate projectile finish: ${projectileId}`, `${actionId}.${event.id}`);
+            }
+            finishByProjectileId.set(projectileId, event);
+        });
+        launches.forEach(event => {
+            const path = `${actionId}.${event.id}`;
+            const projectileId = String(event.projectileId || '').trim();
+            const outcomeEventId = String(event.outcomeEventId || '').trim();
+            if (!projectileId) throw new HuntBeatV2ContractError('projectile-launch requires projectileId', path);
+            if (projectileIds.has(projectileId)) {
+                throw new HuntBeatV2ContractError(`duplicate projectileId: ${projectileId}`, path);
+            }
+            projectileIds.add(projectileId);
+            if (!outcomeEventId || !byId.has(outcomeEventId)) {
+                throw new HuntBeatV2ContractError('projectile-launch requires an existing outcomeEventId', path);
+            }
+            const outcome = byId.get(outcomeEventId);
+            if (outcome.kind !== 'damage') {
+                throw new HuntBeatV2ContractError('projectile outcomeEventId must reference damage', path);
+            }
+            if (String(outcome.projectileId || '') !== projectileId) {
+                throw new HuntBeatV2ContractError('projectile outcome must share projectileId', path);
+            }
+            if (outcome.atTicks <= event.atTicks) {
+                throw new HuntBeatV2ContractError('projectile outcome must occur after launch', path);
+            }
+            if (String(outcome.target || '') !== String(event.target || '')) {
+                throw new HuntBeatV2ContractError('projectile launch/outcome target mismatch', path);
+            }
+            const finish = finishByProjectileId.get(projectileId);
+            if (!finish) {
+                throw new HuntBeatV2ContractError('projectile-launch requires one projectile-finish event', path);
+            }
+            if (finish.atTicks <= outcome.atTicks) {
+                throw new HuntBeatV2ContractError('projectile finish must occur after outcome', path);
+            }
+        });
+        events.filter(event => event.kind === 'damage' && event.projectileId).forEach(event => {
+            if (!projectileIds.has(String(event.projectileId))) {
+                throw new HuntBeatV2ContractError(
+                    `projectile damage has no launch: ${event.projectileId}`,
+                    `${actionId}.${event.id}`
+                );
+            }
+        });
+        finishes.forEach(event => {
+            if (!projectileIds.has(String(event.projectileId))) {
+                throw new HuntBeatV2ContractError(
+                    `projectile finish has no launch: ${event.projectileId}`,
+                    `${actionId}.${event.id}`
+                );
+            }
         });
     }
 

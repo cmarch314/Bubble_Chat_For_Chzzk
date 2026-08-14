@@ -681,6 +681,13 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
             beat.tracks.visual = frames;
             if (draft.label) beat.label = draft.label;
         }
+        // Persist the canonical projectile lifecycle rather than merely
+        // accepting it during compilation.  A judgment editor can move a HIT
+        // without owning the launch/outcome linkage; this hydrates the linked
+        // outcome before the atomic write so reload and live hunt read exactly
+        // the same valid graph.
+        const { HuntBeatV2Contract } = require('../js/effects/hunt/HuntBeatV2Contract.js');
+        action.graph = HuntBeatV2Contract.hydrateProjectileLifecycle(action.graph);
         require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(kit);
         const temporary = `${sourcePath}.tmp`;
         fs.writeFileSync(temporary, `${JSON.stringify(kit, null, 2)}\n`, 'utf8');
