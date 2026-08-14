@@ -19,7 +19,7 @@ hunter.hunterName = '선발자';
 hunter.hunterColor = '#123456';
 hunter.personality = 'support';
 initializer.syncLoadoutItems(hunter);
-assert.strictEqual(hunter.shockTraps, 1, 'support hunters must start with one trap');
+assert.strictEqual(hunter.shockTraps, 2, 'support hunters must start with two traps');
 hunter.perks = [{ id: 'fixed', name: '고정 퍽', modifiers: {} }];
 hunter.lockedPerkId = 'fixed';
 hunter.perkModifiers = { atbRate: 1.1 };
@@ -29,7 +29,7 @@ assert.strictEqual(initializer.replaceHunterWeapon(hunter, 'charge_blade'), true
 assert.strictEqual(hunter.id, 'charge_blade');
 assert.strictEqual(hunter.hunterName, '선발자');
 assert.strictEqual(hunter.personality, 'support');
-assert.strictEqual(hunter.shockTraps, 1, 'weapon changes must preserve the support loadout trap count');
+assert.strictEqual(hunter.shockTraps, 2, 'weapon changes must preserve the support loadout trap count');
 assert.strictEqual(hunter.perks[0].id, 'fixed');
 assert.strictEqual(hunter.lockedPerkId, 'fixed', 'weapon changes must preserve the perk lock until an explicit unlock command');
 assert.strictEqual(hunter.perkModifiers.atbRate, 1.1);
@@ -40,7 +40,7 @@ assert.strictEqual(hunter.personality, 'offensive');
 assert.strictEqual(hunter.perks[0].id, 'fixed');
 assert.strictEqual(initializer.rerollHunterPerks(hunter), true);
 
-for (const [personality, expected] of [['support', 1], ['veteran', 0], ['offensive', 0], ['defensive', 0], ['normal', 0], ['newbie', 1]]) {
+for (const [personality, expected] of [['support', 2], ['veteran', 0], ['offensive', 0], ['defensive', 0], ['normal', 0], ['newbie', 1]]) {
     assert.strictEqual(initializer.syncLoadoutItems({ personality }).shockTraps, expected, `${personality} initial trap count`);
 }
 for (const [personality, expected] of [['support', 2], ['veteran', 2], ['offensive', 1], ['defensive', 0], ['normal', 1], ['newbie', 2]]) {

@@ -26,7 +26,7 @@ class HuntPersonalityProfiles {
         }),
         support: Object.freeze({
             label: '지원형', stats: { hit: .80, critical: .40, evade: .75, guard: .75, special: .50 },
-            issued: { potions: 10, lifepowders: 3, shockTraps: 1, flashPods: 2, bombs: 4 },
+            issued: { potions: 10, lifepowders: 3, shockTraps: 2, flashPods: 2, bombs: 4 },
             ai: { aggression: .30, support: .98, conservation: .42, coordination: .96,
                 risk: .28, gather: .88, variance: .06, flash: .90, trap: .92, powder: .96, bomb: .60 }
         }),
