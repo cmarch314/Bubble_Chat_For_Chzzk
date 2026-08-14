@@ -1058,6 +1058,16 @@ class HuntEngine {
                     partBreakVisualProfile: reactionProfile === 'flinch' ? 'small' : 'large'
                 });
             }
+            // A pitfall owns one uninterrupted control graph through its
+            // release beat. A break that lands during it is presentation-only:
+            // changing ATB, starting a second reaction, or cancelling the
+            // trap graph leaves the trap lock alive without a clock and freezes
+            // the monster. The independent material split above remains fully
+            // visible and audible.
+            if (this.activeTrapControl) {
+                result.reaction = reaction;
+                return result;
+            }
             if (airborne && this.monsterFlightRuntime?.onPartBreak(
                 this,
                 result.part,
@@ -1146,6 +1156,40 @@ class HuntEngine {
 
     consumeTrapDuration(baseTicks) {
         return this.consumeTrapEffect(baseTicks).durationTicks;
+    }
+
+    continueTrapAfterStun() {
+        const trap = this.activeTrapControl;
+        if (!trap) return false;
+        const TrapConfig = typeof HuntTrapConfig !== 'undefined'
+            ? HuntTrapConfig
+            : (typeof require === 'function' ? require('./HuntTrapConfig.js') : null);
+        const struggleTicks = Math.max(1, Number(TrapConfig?.STRUGGLE_TICKS || 12));
+        const releaseTicks = Math.max(1, Number(
+            trap.releaseTicks || TrapConfig?.ESCAPE_TICKS || 8
+        ));
+        const elapsedTicks = Math.max(0, Number(trap.elapsedTicks || 0));
+        const struggleCount = 5;
+
+        // KO cannot replace a monster that is already physically pinned in a
+        // pitfall. Instead, it refreshes the rest of the same pitfall graph:
+        // five complete escape attempts followed by the existing release
+        // beat. This keeps the active trap clock, its renderer lifecycle, and
+        // its audio slots under one owner.
+        trap.stunContinuation = true;
+        trap.forcedStruggleCount = struggleCount;
+        trap.struggleSchedule = Array.from({ length: struggleCount }, (_, index) =>
+            elapsedTicks + struggleTicks * (index + 1));
+        trap.nextStruggleIndex = 0;
+        trap.releasing = false;
+        trap.releaseTicks = releaseTicks;
+
+        this.monsterStunDuration = 0;
+        this.monsterKnockdownDuration = struggleCount * struggleTicks + releaseTicks;
+        this.monsterState = 'knocked_down';
+        this.monsterControlStateKind = 'trap';
+        this.monsterControlEnteredAtTick = Number(this.battleTime || 0);
+        return true;
     }
 
     beginMonsterTrapControl(kind, baseTicks) {
@@ -1291,6 +1335,9 @@ class HuntEngine {
         };
         const config = states[kind];
         if (!config || this.monsterHp <= 0) return false;
+        if (kind === 'stun' && this.activeTrapControl) {
+            return this.continueTrapAfterStun();
+        }
         const stateBeforeControl = this.monsterState;
         let duration = Math.max(1, Number(durationTicks || 1));
         if (kind === 'sleep' && typeof HuntMonsterReactionCatalog !== 'undefined') {

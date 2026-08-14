@@ -113,6 +113,7 @@ function breakPart(part, weapon, monsterId = 'test', rawDamage = 10000, options 
         monsterState: 'normal',
         monsterFlightState: 'grounded',
         monsterKnockdownDuration: 0,
+        activeTrapControl: options.activeTrapControl || null,
         monsterActionLockTicks: 0,
         monsterAtb: 100,
         monsterActionPresentationTicks: Number(options.presentationTicks || 0),
@@ -152,6 +153,21 @@ assert.deepStrictEqual(headBreak.reactions[0], ['part_flinch', 30, 'head']);
 assert.strictEqual(headBreak.soundContexts.find(context => context.partBreakVisualProfile)
     ?.partBreakVisualProfile, 'small',
     'an ordinary break must route through the shared small-break visual group');
+
+const trappedHeadBreak = breakPart(
+    { id: 'test:trapped-head', kind: 'head', health: 10, breakable: true, severable: false },
+    { id: 'hammer' },
+    'test',
+    10000,
+    { activeTrapControl: { kind: 'pitfall', elapsedTicks: 12 } }
+);
+assert.strictEqual(trappedHeadBreak.result.newlyBroken, true);
+assert.strictEqual(trappedHeadBreak.engine.monsterAtb, 100,
+    'a part break during pitfall must not replace the trap-owned ATB value');
+assert.strictEqual(trappedHeadBreak.engine.monsterKnockdownDuration, 0,
+    'a part break during pitfall must not create a second body-control timer');
+assert.deepStrictEqual(trappedHeadBreak.reactions, [],
+    'a part break during pitfall must layer only its material split, never a second body reaction');
 
 const activePatternHeadBreak = breakPart(
     { id: 'test:deferred-head', kind: 'head', health: 10, breakable: true, severable: false },
