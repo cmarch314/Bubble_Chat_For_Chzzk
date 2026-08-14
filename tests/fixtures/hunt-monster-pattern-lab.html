@@ -418,13 +418,16 @@
         button.className='target-btn';button.dataset.target=String(hunter.index);button.textContent=`${hunter.index+1}번`;
         button.style.setProperty('--target-color',slotColors[hunter.index]);return button;
       });
+      const randomPair=document.createElement('button');
+      randomPair.className='target-btn pair-target-btn';randomPair.dataset.target='pair:random-adjacent';
+      randomPair.textContent='🎲 2인 인접 랜덤';
       const pairs=[[0,1],[1,2],[2,3]].map(indices=>{
         const button=document.createElement('button');
         button.className='target-btn pair-target-btn';button.dataset.target=`pair:${indices.join(',')}`;
         button.textContent=`${indices[0]+1}${indices[1]+1} 사이`;
         button.style.setProperty('--target-color',slotColors[indices[0]]);return button;
       });
-      targetButtons.replaceChildren(auto,...numbered,...pairs);updateTargetSelection([]);
+      targetButtons.replaceChildren(auto,...numbered,randomPair,...pairs);updateTargetSelection([]);
     }
     function updateTargetSelection(indices, primary=null){
       const selected=new Set(indices);
@@ -448,9 +451,16 @@
     }
     function resolvePreviewTargets(pattern){
       const seeded=HuntMonsterActionPolicy.seededRandom(previewScenario?.seed||1);
-      const selectedPair=targetMode.startsWith('pair:')
-        ?targetMode.slice(5).split(',').map(Number).filter(Number.isInteger):null;
-      const primary=selectedPair?.length===2?selectedPair[0]
+      const randomAdjacentPair=targetMode==='pair:random-adjacent';
+      const adjacentPairs=[[0,1],[1,2],[2,3]];
+      // Pick the adjacent preview pair once. Its movement anchor stays fixed
+      // for this action, even when a pattern has multiple authored judgments.
+      const selectedPair=randomAdjacentPair
+        ?adjacentPairs[Math.min(adjacentPairs.length-1,Math.floor(seeded()*adjacentPairs.length))]
+        :targetMode.startsWith('pair:')?targetMode.slice(5).split(',').map(Number).filter(Number.isInteger):null;
+      const pairAwarePrimary=selectedPair?.length===2
+        &&pattern.targeting?.mode==='adjacent-pair-pivot'?selectedPair[1]:selectedPair?.[0];
+      const primary=Number.isInteger(pairAwarePrimary)?pairAwarePrimary
         :targetMode==='auto'?Math.floor(seeded()*hunters.length):Number(targetMode);
       const directedRandom=()=>selectedPair?.length===2&&primary>0&&selectedPair[1]>primary
         ?.999:Math.min(.999,(primary+.25)/hunters.length);
@@ -475,6 +485,10 @@
         forcedImpactTargets:previewScenario?.view==='design'?previewScenario.forcedImpactTargets:null
       });
       Object.assign(pattern,resolved.runtime);
+      // `pair:center`, `pair:left`, and `pair:right` are movement vocabulary:
+      // keep them tied to the one adjacent pair selected at action start rather
+      // than to the union of later judgments.
+      if(selectedPair?.length===2)pattern.runtimePairTargets=[...selectedPair];
       const finalPrimary=resolved.primaryTargetIndex??primary;
       // Keep the authored primary target separate from the union of every
       // judgment target.  A primary hit plus an all-hunter tremor otherwise

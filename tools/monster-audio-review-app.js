@@ -456,8 +456,15 @@
 
     function installPairPreviewTargets() {
         const select = $('#previewTarget');
-        if (!select || select.querySelector('option[value^="pair:"]')) return;
+        if (!select) return;
+        if (!select.querySelector('option[value="pair:random-adjacent"]')) {
+            const randomOption = document.createElement('option');
+            randomOption.value = 'pair:random-adjacent';
+            randomOption.textContent = '🎲 2인 인접 랜덤 (1·2 / 2·3 / 3·4)';
+            select.appendChild(randomOption);
+        }
         [[0, 1], [1, 2], [2, 3]].forEach(([left, right]) => {
+            if (select.querySelector(`option[value="pair:${left},${right}"]`)) return;
             const option = document.createElement('option');
             option.value = `pair:${left},${right}`;
             option.textContent = `2인 ${left + 1}·${right + 1} 사이`;
@@ -1088,6 +1095,9 @@
         ${node('polar:target 315deg 180', '↖ 뒤·위')}${node('above:target 180', '↑ 위')}${node('polar:target 45deg 180', '↗ 앞·위')}
         ${node('left:target 180', '← 왼쪽')}${node('target', '◎ 헌터', 'target-core ')}${node('right:target 180', '오른쪽 →')}
         ${node('polar:target 225deg 180', '↙ 뒤·아래')}${node('below:target 180', '↓ 아래')}${node('polar:target 135deg 180', '앞·아래 ↘')}</div></section>
+        <section><h3>👥 2인 인접 타겟을 기준으로 찍기</h3><div class="target-compass pair-compass">
+        ${node('above:pair:center 180', '↑ 2인 위')}${node('pair:center', '◎ 2인 사이', 'target-core ')}${node('below:pair:center 180', '↓ 2인 아래')}
+        ${node('left:pair:center 180', '← 2인 좌측')}${node('pair:left', '◀ 왼쪽 헌터')}${node('pair:right', '오른쪽 헌터 ▶')}${node('right:pair:center 180', '2인 우측 →')}</div><small>패턴의 인접 2인 타겟 규칙이 1·2 / 2·3 / 3·4 중 한 쌍을 정하면, 이 프리셋도 같은 쌍을 따라감</small></section>
         <section><h3>🗺️ 전장 위의 위치를 직접 찍기</h3><div class="arena-anchor-grid">
         ${node('offscreen:top', '화면 밖 ↑', 'top-out ')}${node('offscreen:left', '밖 ←', 'left-out ')}${node('home', '🏠 본위치', 'home ')}${node('arena:center-lower', '● 중앙', 'arena-center ')}${node('', '이동 없음', 'previous ')}${node('offscreen:right', '밖 →', 'right-out ')}
         ${node('hunter:0', 'H1', 'h1 ')}${node('between:0,1', '사이', 'b12 ')}${node('hunter:1', 'H2', 'h2 ')}${node('between:1,2', '사이', 'b23 ')}${node('hunter:2', 'H3', 'h3 ')}${node('between:2,3', '사이', 'b34 ')}${node('hunter:3', 'H4', 'h4 ')}</div></section></div>

@@ -149,6 +149,12 @@ assert.match(html, /applyState\('normal',true\)/,
 assert.match(html, /--target-color/);
 assert.match(html, /classList\.toggle\('is-targeted'/,
     'random target selection must illuminate the matching hunter card');
+assert.match(html, /pair:random-adjacent/,
+    'the preview target selector must offer a random adjacent pair rather than only a primary hunter');
+assert.match(html, /const adjacentPairs=\[\[0,1\],\[1,2\],\[2,3\]\]/,
+    'random adjacent targeting must choose only the 1·2, 2·3, or 3·4 lanes');
+assert.match(html, /Its movement anchor stays fixed\s+\/\/ for this action/,
+    'a random pair must be picked once and retained for the whole preview action');
 assert.match(html, /자동→\$\{linked\+1\}/,
     'the automatic target button must reveal the selected slot');
 assert.match(html, /하단 15%/);
