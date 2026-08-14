@@ -70,6 +70,11 @@ class HuntMonsterCandidateCatalog {
                 name: String(rawAction.name || id),
                 type: String(rawAction.type || 'physical'),
                 tags: Object.freeze([...(rawAction.tags || [])]),
+                // Delivery is authored action semantics, not a renderer guess.
+                // Candidate projectile actions must retain it through the live
+                // BEAT executor so their detached body is actually spawned.
+                delivery: rawAction.delivery || (rawAction.type === 'projectile' ? 'projectile' : null),
+                originPart: rawAction.originPart || null,
                 damageRatio: Math.max(0, Number(rawAction.damageRatio || 0)),
                 minTargets: Math.max(0, Number(rawAction.minTargets ?? 1)),
                 maxTargets: Math.max(0, Number(rawAction.maxTargets ?? rawAction.minTargets ?? 1)),

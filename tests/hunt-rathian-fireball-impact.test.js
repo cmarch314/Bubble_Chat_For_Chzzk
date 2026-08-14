@@ -11,6 +11,8 @@ const kit = JSON.parse(fs.readFileSync(path.resolve(
 const fireball = CandidateCatalog.compileKit(kit).actions.find(action => action.id === 'rathian.fireball');
 const timeline = ActionPolicy.impactTimeline(fireball);
 
+assert.strictEqual(fireball.delivery, 'projectile',
+    'candidate projectile action must retain detached-delivery semantics into the live executor');
 assert.deepStrictEqual(timeline.map(event => [event.atTicks, event.judgmentGroup]), [[17, 'spit:damage:2']],
     'Rathian fireball must expose one exact authored judgment group for its conditional impact sound');
 assert.strictEqual(fireball.beatV2.events.filter(event => event.kind === 'audio' && event.slot === 'impact').length, 0,

@@ -3009,8 +3009,11 @@ class HuntMonsterAttackAnimator {
                     ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10)
                     : 10;
                 const visualTravelMs = delivery === 'projectile' ? 720 : 900;
-                const timeline = Array.isArray(pattern.impactTimeline) && pattern.impactTimeline.length
-                    ? pattern.impactTimeline.filter(event =>
+                const resolvedTimeline = Array.isArray(pattern.runtimeResolvedImpactTimeline)
+                    && pattern.runtimeResolvedImpactTimeline.length
+                    ? pattern.runtimeResolvedImpactTimeline : pattern.impactTimeline;
+                const timeline = Array.isArray(resolvedTimeline) && resolvedTimeline.length
+                    ? resolvedTimeline.filter(event =>
                         Number(event?.damageScale ?? 1) > 0
                         && event?.eventKind !== 'blast-scale-volley'
                     )
