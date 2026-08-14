@@ -2722,9 +2722,10 @@ class HuntMonsterAttackAnimator {
 
     schedulePreviewProjectile(pattern, targetIndex = 0, attackName = '', emoji = '🔥') {
         // The review iframe deliberately does not run combat resolution, but a
-        // projectile is authored monster motion, not hunter feedback.  Keep its
-        // launch on the exact same compiled judgment clock used live while
-        // rendering an effect-only impact at the selected visual target.
+        // projectile is authored monster motion, not hunter feedback. Launch
+        // before contact, then resolve its preview-only outcome only at arrival.
+        // Otherwise the elemental impact appears on a hunter the instant a
+        // fireball leaves the monster's mouth.
         if (!this.card || !pattern || this.getBreathDelivery(attackName, pattern) !== 'projectile') return false;
         const monsterImg = this.card.querySelector('.hunt-small-monster.is-attacking')
             || this.card.querySelector('#fight-monster-img');
@@ -2783,12 +2784,24 @@ class HuntMonsterAttackAnimator {
                 } : null;
                 const visualTarget = phantomTarget || liveTarget;
                 if (!visualTarget) return;
+                const projectileTargetIndex = hasEmptyAuthoredLane ? -1 : visualTargetIndex;
+                const outcomeKey = this.elementalProjectileKey(pattern, impactTicks, projectileTargetIndex);
                 this.createElementalAttack(
                     this.resolveLiveElementalOrigin(liveMonster, visualTarget, pattern, fallbackOrigin),
                     boardRect, visualTarget,
-                    { index: hasEmptyAuthoredLane ? -1 : visualTargetIndex,
-                        result: hasEmptyAuthoredLane ? 'miss' : 'effect' }, attackName, emoji, 0, pattern
+                    { index: projectileTargetIndex, result: 'pending' }, attackName, emoji, 0, pattern,
+                    { deferOutcome: true, outcomeKey }
                 );
+                // The preview has no combat resolver, so model its authored
+                // projectile contact locally. The effect still waits its full
+                // visual flight, exactly like the live pending projectile.
+                this.animationTimers.timeout(() => {
+                    if (this.motionGeneration !== generation) return;
+                    this.resolveElementalProjectileOutcome(pattern, { atTicks: impactTicks }, [{
+                        index: projectileTargetIndex,
+                        result: hasEmptyAuthoredLane ? 'miss' : 'hit'
+                    }]);
+                }, 720);
             }, delayMs);
         };
         (impacts.length ? impacts : [{ atTicks: firstImpactTicks }])

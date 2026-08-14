@@ -88,6 +88,8 @@ assert.match(animatorSource, /runtimeResolvedImpactTimeline[\s\S]*?pattern\.impa
     'detached elemental delivery must use the live resolved targets rather than a stale catalog timeline');
 assert.match(animatorSource, /schedulePreviewProjectile[\s\S]*?event\?\.targetIndices[\s\S]*?visualTargetIndex[\s\S]*?createElementalAttack/,
     'motion-only Preview must use each resolved judgment recipient for multi-spit projectile destinations');
+assert.match(animatorSource, /schedulePreviewProjectile[\s\S]*?deferOutcome:\s*true[\s\S]*?resolveElementalProjectileOutcome/,
+    'Preview projectiles must defer their hunter impact until the projectile has visually arrived');
 assert.match(animatorSource, /hasEmptyAuthoredLane[\s\S]*?off-board phantom destination[\s\S]*?result: hasEmptyAuthoredLane \? 'miss'/,
     'an edge-side triple fireball must preserve its empty flank as an off-board miss instead of retargeting a hunter');
 assert.strictEqual(context.Animator.usesElementalDelivery('', { type: 'projectile' }), true,
