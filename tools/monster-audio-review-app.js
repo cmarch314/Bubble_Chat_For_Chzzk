@@ -1440,7 +1440,7 @@
     }
 
     function assertGeneratedMotion(result) {
-        if (!result.generated) throw new Error('저장 검증 실패: 런타임 모션 모듈 미생성');
+        if (!result.generated && !result.candidateSaved) throw new Error('저장 검증 실패: 런타임 모션 모듈 미생성');
     }
 
     function assertGeneratedAudioRoute(result) {

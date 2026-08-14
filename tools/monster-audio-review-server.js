@@ -164,6 +164,21 @@ function candidateKitFor(input, huntId) {
     return kit;
 }
 
+function candidateKitRecordFor(input, huntId, candidateKitsDir = CANDIDATE_KITS_DIR) {
+    const candidateId = String(input?.candidate || '').trim().toLowerCase();
+    if (!candidateId) return null;
+    if (!fs.existsSync(candidateKitsDir)) throw new Error(`후보 키트 폴더를 찾을 수 없습니다: ${candidateKitsDir}`);
+    const entry = fs.readdirSync(candidateKitsDir, { withFileTypes: true })
+        .find(item => item.isFile() && item.name.endsWith('.json')
+            && String(readJson(path.join(candidateKitsDir, item.name), {})?.monsterId || '').toLowerCase() === candidateId);
+    if (!entry) throw new Error(`후보 키트 원본을 찾을 수 없습니다: ${candidateId}`);
+    const kit = readJson(path.join(candidateKitsDir, entry.name), null);
+    if (String(kit?.monsterId || '').toLowerCase() !== String(huntId || '').toLowerCase()) {
+        throw new Error(`후보 키트와 몬스터가 다릅니다: ${candidateId} / ${huntId}`);
+    }
+    return { id: candidateId, file: path.join(candidateKitsDir, entry.name), kit };
+}
+
 function evidenceScope(bank) {
     const normalized = String(bank || '').toLowerCase();
     if (/_vo(?:_|$)/.test(normalized)) {
@@ -586,11 +601,12 @@ function validatePatternRouteInput(input) {
 function validatePatternMotionInput(input) {
     const huntId = String(input?.huntId || '').toLowerCase();
     const patternId = String(input?.patternId || '');
-    const candidateKit = candidateKitFor(input, huntId);
-    if (candidateKit) throw new Error('후보 모션 저장은 후보 키트 승인 절차에서만 가능합니다. 사운드 맵핑은 즉시 저장됩니다.');
-    const pattern = loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
+    const candidateRecord = candidateKitRecordFor(input, huntId);
+    const pattern = candidateRecord
+        ? loadHuntPatternAudioMap(huntId, { candidateKit: candidateRecord.kit }).patterns.find(item => item.id === patternId)
+        : loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
     if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
-    if (input?.reset) return { ...input, huntId, patternId };
+    if (input?.reset) return { ...input, huntId, patternId, candidateRecord };
     const expected = new Set(pattern.timeline.beats.map(beat => beat.id));
     const submitted = Object.keys(input?.beats || {});
     const unknown = submitted.filter(id => !expected.has(id));
@@ -598,7 +614,79 @@ function validatePatternMotionInput(input) {
     if (unknown.length || missing.length) {
         throw new Error(`모션 BEAT 불일치 · 누락:${missing.join(',') || '-'} · 알 수 없음:${unknown.join(',') || '-'}`);
     }
-    return { ...input, huntId, patternId };
+    return { ...input, huntId, patternId, candidateRecord };
+}
+
+const CANDIDATE_VISUAL_TEXT_FIELDS = Object.freeze(['at', 'to', 'origin', 'moveEasing', 'rotationEasing',
+    'pose', 'face', 'align', 'bounds', 'fade', 'sfx', 'aimBodyAt', 'targetMode', 'rotationDirection',
+    'fx', 'fxAnchor', 'fxSecondary', 'fxSecondaryAnchor', 'fxSecondaryAngleMode']);
+const CANDIDATE_VISUAL_NUMBER_FIELDS = Object.freeze(['offsetX', 'offsetY', 'depth', 'rotation',
+    'rotationToward', 'rotateBy', 'rotateByFacing', 'rotationDegrees', 'scaleX', 'scaleY', 'skewX',
+    'skewY', 'opacity', 'damageScale', 'strideFlipTicks', 'stompSteps', 'fxDurationTicks',
+    'fxSecondaryDurationTicks']);
+const CANDIDATE_VISUAL_BOOLEAN_FIELDS = Object.freeze(['alignRotationToTravel', 'instantOpacity',
+    'instantPose', 'continueTravel', 'flipFacing', 'keepRotation']);
+const CANDIDATE_VISUAL_FIELDS = Object.freeze([...CANDIDATE_VISUAL_TEXT_FIELDS,
+    ...CANDIDATE_VISUAL_NUMBER_FIELDS, ...CANDIDATE_VISUAL_BOOLEAN_FIELDS]);
+
+function candidateVisualDraft(value = {}) {
+    const clean = {};
+    for (const key of CANDIDATE_VISUAL_TEXT_FIELDS) {
+        if (value[key] != null && String(value[key]).trim()) clean[key] = String(value[key]).trim().slice(0, 120);
+    }
+    for (const key of CANDIDATE_VISUAL_NUMBER_FIELDS) {
+        if (value[key] != null && Number.isFinite(Number(value[key]))) clean[key] = Number(value[key]);
+    }
+    for (const key of CANDIDATE_VISUAL_BOOLEAN_FIELDS) {
+        if (typeof value[key] === 'boolean') clean[key] = value[key];
+    }
+    return clean;
+}
+
+function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_DIR } = {}) {
+    const record = input?.candidateRecord || candidateKitRecordFor(input, input?.huntId, candidateKitsDir);
+    if (!record) throw new Error('후보 키트 저장에는 후보 ID가 필요합니다.');
+    const sourcePath = record.file;
+    const previousText = fs.readFileSync(sourcePath, 'utf8');
+    const kit = readJson(sourcePath, null);
+    const action = kit?.actions?.find(item => item?.id === input.patternId);
+    if (!action?.graph?.beats) throw new Error(`후보 패턴을 찾을 수 없습니다: ${input.patternId}`);
+    const submitted = input.beats || {};
+    const expected = action.graph.beats.map(beat => String(beat.id || beat.beat));
+    const unknown = Object.keys(submitted).filter(id => !expected.includes(id));
+    const missing = expected.filter(id => !Object.prototype.hasOwnProperty.call(submitted, id));
+    if (unknown.length || missing.length) throw new Error(`후보 모션 BEAT 불일치 · 누락:${missing.join(',') || '-'} · 없음:${unknown.join(',') || '-'}`);
+    try {
+        for (const beat of action.graph.beats) {
+            const id = String(beat.id || beat.beat);
+            const draft = submitted[id] || {};
+            beat.ticks = Math.max(1, Math.min(600, Math.round(Number(draft.ticks) || Number(beat.ticks) || 1)));
+            beat.events = (beat.events || []).map(event => ({ ...event,
+                offsetTicks: Math.max(0, Math.min(beat.ticks - 1, Math.round(Number(event.offsetTicks) || 0)))
+            }));
+            beat.tracks = beat.tracks || {};
+            const frames = Array.isArray(beat.tracks.visual) ? beat.tracks.visual : [];
+            if (!frames.length) frames.push({ offsetTicks: 0, value: {} });
+            const frameIndex = frames.length - 1;
+            const previous = { ...(frames[frameIndex].value || {}) };
+            for (const key of CANDIDATE_VISUAL_FIELDS) delete previous[key];
+            frames[frameIndex] = { ...frames[frameIndex], value: { ...previous, ...candidateVisualDraft(draft) } };
+            beat.tracks.visual = frames;
+        }
+        require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(kit);
+        const temporary = `${sourcePath}.tmp`;
+        fs.writeFileSync(temporary, `${JSON.stringify(kit, null, 2)}\n`, 'utf8');
+        fs.renameSync(temporary, sourcePath);
+        const persisted = readJson(sourcePath, null);
+        require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(persisted);
+        return { huntId: input.huntId, patternId: input.patternId, candidateSaved: true,
+            revision: fileRevision(sourcePath), sourcePath };
+    } catch (error) {
+        const rollback = `${sourcePath}.rollback.tmp`;
+        fs.writeFileSync(rollback, previousText, 'utf8');
+        fs.renameSync(rollback, sourcePath);
+        throw new Error(`후보 모션 저장 롤백: ${error.message}`);
+    }
 }
 
 function readBody(request) {
@@ -818,9 +906,10 @@ function createServer(options = {}) {
                 const huntId = String(url.searchParams.get('monster') || '').toLowerCase();
                 if (!/^[a-z0-9_]+$/i.test(huntId)) throw new Error('잘못된 몬스터 ID입니다.');
                 const candidateKit = candidateKitFor({ candidate: url.searchParams.get('candidate') }, huntId);
+                const candidateRecord = candidateKitRecordFor({ candidate: url.searchParams.get('candidate') }, huntId);
                 sendJson(response, 200, { ...loadHuntPatternAudioMap(huntId, { candidateKit }), revisions: {
                     audio: fileRevision(PATTERN_AUDIO_OVERRIDES_PATH),
-                    motion: fileRevision(PATTERN_MOTION_OVERRIDES_PATH),
+                    motion: candidateRecord ? fileRevision(candidateRecord.file) : fileRevision(PATTERN_MOTION_OVERRIDES_PATH),
                     anatomy: fileRevision(ANATOMY_OVERRIDES_PATH)
                 } });
                 return;
@@ -843,9 +932,10 @@ function createServer(options = {}) {
             }
             if (request.method === 'POST' && url.pathname === '/api/hunt-pattern-motion') {
                 const input = validatePatternMotionInput(await readBody(request));
-                assertExpectedRevision(input, PATTERN_MOTION_OVERRIDES_PATH, '모션 데이터');
-                const result = savePatternMotion(input);
-                sendJson(response, 200, { ok: true, ...result, sourceRevision: fileRevision(PATTERN_MOTION_OVERRIDES_PATH) });
+                const sourcePath = input.candidateRecord?.file || PATTERN_MOTION_OVERRIDES_PATH;
+                assertExpectedRevision(input, sourcePath, '모션 데이터');
+                const result = input.candidateRecord ? saveCandidatePatternMotion(input) : savePatternMotion(input);
+                sendJson(response, 200, { ok: true, ...result, sourceRevision: fileRevision(sourcePath) });
                 return;
             }
             if (request.method === 'POST' && url.pathname === '/api/hunt-part-reactions') {
@@ -927,6 +1017,8 @@ module.exports = {
     reviewStatusForGraphId,
     saveReviewCompletion,
     saveGroupReview,
+    candidateKitRecordFor,
+    saveCandidatePatternMotion,
     validatePatternRouteInput,
     validatePatternMotionInput
 };
