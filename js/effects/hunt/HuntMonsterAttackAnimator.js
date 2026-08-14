@@ -2720,6 +2720,53 @@ class HuntMonsterAttackAnimator {
             monsterRect, targetRect, partPoint, baseFacing);
     }
 
+    schedulePreviewProjectile(pattern, targetIndex = 0, attackName = '', emoji = '🔥') {
+        // The review iframe deliberately does not run combat resolution, but a
+        // projectile is authored monster motion, not hunter feedback.  Keep its
+        // launch on the exact same compiled judgment clock used live while
+        // rendering an effect-only impact at the selected visual target.
+        if (!this.card || !pattern || this.getBreathDelivery(attackName, pattern) !== 'projectile') return false;
+        const monsterImg = this.card.querySelector('.hunt-small-monster.is-attacking')
+            || this.card.querySelector('#fight-monster-img');
+        const targetCard = this.card.querySelector(`#fight-card-${Number(targetIndex)}`);
+        if (!monsterImg || !targetCard) return false;
+
+        const containerRect = this.card.getBoundingClientRect();
+        const monsterRect = monsterImg.getBoundingClientRect();
+        const fallbackOrigin = {
+            x: monsterRect.left + monsterRect.width / 2,
+            y: monsterRect.top + monsterRect.height / 2
+        };
+        const ticksPerSecond = typeof HuntAtbConfig !== 'undefined'
+            ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10) : 10;
+        const timeline = Array.isArray(pattern.runtimeResolvedImpactTimeline)
+            && pattern.runtimeResolvedImpactTimeline.length
+            ? pattern.runtimeResolvedImpactTimeline
+            : Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : [];
+        const impacts = timeline.filter(event => Number(event?.damageScale ?? 1) > 0);
+        const firstImpactTicks = Number(impacts[0]?.atTicks ?? pattern.runtimeImpactDelayTicks ?? 0);
+        const generation = this.motionGeneration;
+        const launch = impactTicks => {
+            const delayMs = HuntMonsterAttackAnimator.projectileLaunchDelayMs(
+                pattern, impactTicks, firstImpactTicks, ticksPerSecond, 720);
+            this.animationTimers.timeout(() => {
+                if (this.motionGeneration !== generation || !this.card?.isConnected) return;
+                const liveTarget = this.card.querySelector(`#fight-card-${Number(targetIndex)}`);
+                const liveMonster = this.card.querySelector('.hunt-small-monster.is-attacking')
+                    || this.card.querySelector('#fight-monster-img');
+                if (!liveTarget || !liveMonster) return;
+                this.createElementalAttack(
+                    this.resolveLiveElementalOrigin(liveMonster, liveTarget, pattern, fallbackOrigin),
+                    this.card.getBoundingClientRect(), liveTarget,
+                    { index: Number(targetIndex), result: 'effect' }, attackName, emoji, 0, pattern
+                );
+            }, delayMs);
+        };
+        (impacts.length ? impacts : [{ atTicks: firstImpactTicks }])
+            .forEach(event => launch(Number(event.atTicks ?? firstImpactTicks)));
+        return true;
+    }
+
     createUltimateSpectacle(monsterCenter, containerRect, attackName, emoji, pattern, elemental) {
         const theme = this.getElementalTheme(attackName, pattern);
         const fx = document.createElement('div');

@@ -134,8 +134,8 @@ assert.doesNotMatch(html, /class="hunt-monster-facing-layer">\s*<div class="hunt
     'flipping a travel wrapper mirrors its coordinates and teleports the monster across the board');
 assert.match(html, /HUNT_RELEASED_MONSTER_DATA/,
     'the lab must derive its monster dropdown from the reviewed release catalog');
-assert.match(html, /HUNT_MONSTER_PATTERN_OVERRIDES\[monster\.id\]/,
-    'pattern buttons must be generated from live authored monster data');
+assert.match(html, /const patternsForMonster=monsterId=>\{/,
+    'pattern buttons must be generated from the live authored candidate-or-release catalog');
 assert.match(html, /HuntMonsterActionPolicy\.resolveTargetScenario/,
     'automatic and manual targets must use the shared target policy');
 assert.match(html, /runtimeResolvedImpactTimeline/,
@@ -172,6 +172,8 @@ assert.match(html, /!pattern\.runtimePreviewMuteAudio/,
     'the embedded production renderer must stay silent when the review timeline owns preview audio');
 assert.match(html, /if\(!selection\.targets\.length\)/,
     'every preview pattern must receive a safe visual target even when combat targeting resolves empty');
+assert.match(html, /schedulePreviewProjectile\?\.\(motionPattern,selection\.primary/,
+    'motion-only Preview must still schedule an authored detached projectile on the shared BEAT clock');
 assert.match(html, /bubblechat:pattern-anatomy/,
     'the editor must be able to toggle the monster anatomy position/direction guide');
 assert.match(html, /monster-anatomy-guide/);

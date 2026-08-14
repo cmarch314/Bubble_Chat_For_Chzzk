@@ -235,6 +235,14 @@
       previewRuntimeSelection={primary:selection.primary,indices:[...selection.indices]};
       const accepted=animator.playBeatMotion(
         monsterImg,motionPattern,motionPattern.id,targetCard,targets);
+      // The editor intentionally skips hunter damage/reactions, but detached
+      // projectiles are authored monster presentation. Schedule them on the
+      // compiled judgment clock rather than hiding them with combat resolution.
+      if(!motionPattern.runtimePreviewScrub
+        &&(motionPattern.delivery==='projectile'||motionPattern.type==='projectile'
+          ||motionPattern.tags?.includes('projectile')))
+        animator.schedulePreviewProjectile?.(motionPattern,selection.primary,
+          motionPattern.name||'',motionPattern.emoji||'🔥');
       document.documentElement.dataset.previewActionAccepted=String(accepted!==false);
       document.documentElement.dataset.previewBeatActive=String(Boolean(accepted));
       return accepted!==false;
