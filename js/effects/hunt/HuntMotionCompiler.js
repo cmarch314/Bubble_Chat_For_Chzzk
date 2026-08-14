@@ -76,6 +76,18 @@ class HuntMotionCompiler {
         return target;
     }
 
+    static directedRotation(beat = {}, previous = 0) {
+        const direction = String(beat.rotationDirection || '');
+        const degrees = Number(beat.rotationDegrees);
+        if (['clockwise', 'counterclockwise'].includes(direction)
+            && beat.rotationDegrees !== undefined && beat.rotationDegrees !== null
+            && Number.isFinite(degrees)) {
+            return Number(previous || 0)
+                + (direction === 'counterclockwise' ? -1 : 1) * Math.abs(degrees);
+        }
+        return this.equivalentRotation(beat.rotation, previous);
+    }
+
     static rotationResetMode(beat = {}) {
         return ['auto', 'preserve', 'snap-end', 'animate'].includes(beat.rotationResetMode)
             ? beat.rotationResetMode
@@ -319,7 +331,11 @@ class HuntMotionCompiler {
             // the pose first makes the renderer interpolate the shortest path
             // backwards (the old double tail-sweep failure).
             const rotationResetMode = this.rotationResetMode(beat);
-            const hasExplicitRotation = beat.rotation !== undefined;
+            const hasDirectedRotation = ['clockwise', 'counterclockwise']
+                .includes(String(beat.rotationDirection || ''))
+                && beat.rotationDegrees !== undefined && beat.rotationDegrees !== null
+                && Number.isFinite(Number(beat.rotationDegrees));
+            const hasExplicitRotation = beat.rotation !== undefined || hasDirectedRotation;
             let snapRotationAtStart = false;
             let snapRotationAtEnd = false;
             if (rotationResetMode === 'preserve') {
@@ -348,8 +364,10 @@ class HuntMotionCompiler {
             if (beat.origin) state.origin = beat.origin;
             if (hasExplicitRotation && rotationResetMode !== 'preserve') {
                 state.rotation = rotationResetMode === 'auto'
-                    ? this.equivalentRotation(beat.rotation, previous.rotation)
-                    : Number(beat.rotation) || 0;
+                    ? this.directedRotation(beat, previous.rotation)
+                    : hasDirectedRotation
+                        ? this.directedRotation(beat, previous.rotation)
+                        : Number(beat.rotation) || 0;
                 snapRotationAtEnd = rotationResetMode === 'snap-end';
             }
             if (!hasExplicitRotation && beat.rotationToward !== undefined) {
@@ -517,6 +535,8 @@ class HuntMotionCompiler {
                 offsetX: Number(beat.offsetX) || 0,
                 offsetY: Number(beat.offsetY) || 0,
                 rotation: state.rotation,
+                rotationDirection: hasDirectedRotation ? beat.rotationDirection : null,
+                rotationDegrees: hasDirectedRotation ? Math.abs(Number(beat.rotationDegrees)) : null,
                 rotationToward: beat.rotationToward === undefined ? null : Number(beat.rotationToward) || 0,
                 alignRotationToTravel: Boolean(beat.alignRotationToTravel),
                 continueTravel: Boolean(beat.continueTravel),

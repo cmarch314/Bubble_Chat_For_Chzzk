@@ -1215,7 +1215,14 @@
             const authored = snapshot?.draft?.[beat.id] || {};
             const resetMode = authored.rotationResetMode || 'auto';
             if (resetMode === 'preserve') continue;
-            if (authored.rotation !== undefined && authored.rotation !== null) {
+            const authoredDirection = String(authored.rotationDirection || '');
+            const authoredDegrees = Number(authored.rotationDegrees);
+            if (['clockwise', 'counterclockwise'].includes(authoredDirection)
+                && authored.rotationDegrees !== undefined && authored.rotationDegrees !== null
+                && Number.isFinite(authoredDegrees)) {
+                previous += (authoredDirection === 'counterclockwise' ? -1 : 1)
+                    * Math.abs(authoredDegrees);
+            } else if (authored.rotation !== undefined && authored.rotation !== null) {
                 const raw = Number(authored.rotation) || 0;
                 previous = resetMode === 'auto'
                     ? raw + 360 * Math.round((previous - raw) / 360)
@@ -1225,17 +1232,25 @@
             }
         }
         const resetMode = value.rotationResetMode || 'auto';
+        const authoredDirection = String(value.rotationDirection || '');
+        const authoredDegrees = Number(value.rotationDegrees);
         const rawFinal = Number(value.rotation);
-        const final = Number.isFinite(rawFinal)
+        const hasDirectedRotation = ['clockwise', 'counterclockwise'].includes(authoredDirection)
+            && value.rotationDegrees !== undefined && value.rotationDegrees !== null
+            && Number.isFinite(authoredDegrees);
+        const final = hasDirectedRotation
+            ? previous + (authoredDirection === 'counterclockwise' ? -1 : 1)
+                * Math.abs(authoredDegrees)
+            : Number.isFinite(rawFinal)
             ? resetMode === 'auto'
                 ? rawFinal + 360 * Math.round((previous - rawFinal) / 360)
                 : resetMode === 'preserve' ? previous : rawFinal
             : previous + (Number(value.rotateBy) || 0);
         const delta = final - previous;
-        const direction = value.rotationDirection === 'counterclockwise' || delta < 0
+        const direction = authoredDirection === 'counterclockwise' || (!hasDirectedRotation && delta < 0)
             ? 'counterclockwise' : 'clockwise';
         return { previous, final, resetMode,
-            degrees: Math.abs(Number(value.rotationDegrees) || delta || 0), direction,
+            degrees: Math.abs(hasDirectedRotation ? authoredDegrees : delta || 0), direction,
             keepRotation: value.keepRotation !== false };
     }
 

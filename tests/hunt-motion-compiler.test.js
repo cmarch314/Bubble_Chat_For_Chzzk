@@ -244,6 +244,24 @@ assert.match(mirroredRotation.pose.at(-1).transform, /rotate\(-45\.00deg\)/,
     'a horizontally mirrored sprite must receive the inverse inner rotation');
 assert.match(unmirroredRotation.pose.at(-1).transform, /rotate\(45\.00deg\)/,
     'the native sprite direction must retain the authored rotation sign');
+const clockwiseHalfTurn = HuntMotionCompiler.compile([{
+    beat: 'clockwise-half', ticks: 4, rotation: -180,
+    rotationDirection: 'clockwise', rotationDegrees: 180
+}], { anchors });
+const counterclockwiseHalfTurn = HuntMotionCompiler.compile([{
+    beat: 'counterclockwise-half', ticks: 4, rotation: 180,
+    rotationDirection: 'counterclockwise', rotationDegrees: 180
+}], { anchors });
+assert.strictEqual(clockwiseHalfTurn.timeline[0].rotation, 180,
+    'the authored clockwise direction must own the path even when a stale final angle disagrees');
+assert.strictEqual(counterclockwiseHalfTurn.timeline[0].rotation, -180,
+    'the authored counterclockwise direction must own the path even when a stale final angle disagrees');
+const directedFullTurns = ['clockwise', 'counterclockwise'].map(rotationDirection =>
+    HuntMotionCompiler.compile([{
+        beat: rotationDirection, ticks: 4, rotation: 0, rotationDirection, rotationDegrees: 360
+    }], { anchors }).timeline[0].rotation);
+assert.deepStrictEqual(directedFullTurns, [360, -360],
+    'visually equivalent final angles must retain their explicitly authored full-turn direction');
 const pairAnchors = primaryTarget => new HuntStageAnchors({
     monsterRect: anchors.monsterRect,
     cardRect: anchors.cardRect,
