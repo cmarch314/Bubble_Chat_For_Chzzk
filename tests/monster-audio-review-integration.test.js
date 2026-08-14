@@ -92,6 +92,9 @@ const { createServer } = require('../tools/monster-audio-review-server');
             'group controls must remain compact beside the group playback button');
         assert.ok(app.includes('씰룩씰룩 좌우 반전') && app.includes('strideFlipTicks'),
             'the BEAT inspector must expose the runtime stride-flip option instead of requiring raw JSON edits');
+        assert.ok(app.includes('data-key="rotation" type="number" value="${value.rotation ?? 0}"')
+            && app.includes('data-key="rotateBy" type="number" value="${value.rotateBy ?? 0}"'),
+        'unset BEAT rotations must render as editable 0° values rather than ambiguous blank fields');
         assert.ok(app.includes("label: '📣 포효'") && app.includes("label: '〰️ 지진'")
             && app.includes("label: '🌪️ 풍압'"),
             'timeline judgments must distinguish roar, tremor and wind pressure with emoji labels');
