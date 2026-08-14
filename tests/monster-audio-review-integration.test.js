@@ -81,10 +81,13 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(app.includes('const savedBeats = result.beats || beats')
             && app.includes('compareMotionValues(savedBeats, verify)'),
             'save verification must compare the server-confirmed value with the reloaded motion');
-        assert.ok(app.includes('function previewBeatRotation(beatId)')
-            && app.includes('previewBeatRotation(beatId)')
+        assert.ok(app.includes('function previewBeatDestination(beatId)')
+            && app.includes('previewBeatDestination(beatId)')
+            && !app.includes('function previewBeatRotation(beatId)')
             && app.includes('rotateByFacing: null'),
-            'rotation-direction edits must replay their path and clear legacy facing rotation');
+            'rotation-direction edits must scrub the shared BEAT renderer and clear legacy facing rotation');
+        assert.ok(app.includes('scrubTick: scrub ? snapshot.scrub.tick : 0'),
+            'the authored scrub tick must travel with a new preview pattern so iframe startup cannot lose it');
         assert.ok(app.includes('hiddenSourceGroups: new Set()')
             && app.includes('favoriteSourceGroups: new Set()'),
             'group hide and favorite preferences must be first-class persisted editor state');

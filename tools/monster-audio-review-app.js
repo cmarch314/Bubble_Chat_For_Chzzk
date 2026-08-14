@@ -45,7 +45,6 @@
         playbackStartedAt: 0, playbackElapsedMs: 0, playbackDurationMs: 0, playbackDurationTicks: 0,
         playbackFrame: 0, playbackTimeline: null, playbackBeatId: '',
         simulationMode: false, simulationState: 'pattern', simulationPollTimer: null,
-        rotationPreviewTimer: 0
     };
     const audio = $('#audio');
     const selectedPattern = () => app.patterns.find(pattern => pattern.id === app.selectedPatternId) || null;
@@ -290,13 +289,21 @@
         const playbackToken = play ? ++app.previewSequence : 0;
         if (play) app.previewActionSeed = Math.max(1,
             Math.floor(Math.random() * 0xFFFFFFFF));
+        // A transform edit is a scrub only.  It must never leave an auxiliary
+        // beat-only playback timer alive: that timer could pause a subsequent
+        // full-pattern replay and make the visible rotation look fixed.
         if (!play) stopPlaybackProgress();
         bridge.send('bubblechat:pattern-preview', {
             monsterId: app.huntId,
             monster: { id: app.huntId, nameKO: monster?.name || app.huntId, filename: `${app.huntId}.png` },
             target: previewTargetMode({ newAction: play }),
             state: snapshot.scenario.monsterState,
+            // The iframe may receive a seek message before it has installed
+            // the new BEAT controller.  Carry the scrub position with the
+            // pattern itself so an inspector edit always opens on the exact
+            // authored frame (including signed rotation direction).
             scenario: { ...snapshot.scenario, seed: app.previewActionSeed,
+                scrubTick: scrub ? snapshot.scrub.tick : 0,
                 selectedBeatId: snapshot.selection.beatId,
                 editBeat: { ...(snapshot.draft[snapshot.selection.beatId] || {}) } },
             pattern: buildPreviewPattern({ scrub }),
@@ -1208,28 +1215,6 @@
         renderSelectionOnly();
     }
 
-    // A half/full turn ends on the same silhouette in either direction.  A
-    // static end-frame scrub made the direction buttons appear inert even
-    // when the authored signed rotation was correct. Replay only the edited
-    // BEAT so its clockwise/counterclockwise path is visible, then pause at
-    // that BEAT's endpoint for editing.
-    function previewBeatRotation(beatId) {
-        const beat = app.session.snapshot().timeline.beats.find(item => item.id === beatId);
-        if (!beat || app.simulationMode) return;
-        const startTick = Math.max(0, Number(beat.startTicks) || 0);
-        const endTick = Math.max(startTick, Number(beat.endTicks) || startTick);
-        if (app.rotationPreviewTimer) clearTimeout(app.rotationPreviewTimer);
-        app.session.seek(startTick);
-        sendPreview({ scrub: true });
-        seekPreview(startTick);
-        bridge.send('bubblechat:pattern-preview-transport', { action: 'resume' });
-        app.rotationPreviewTimer = setTimeout(() => {
-            bridge.send('bubblechat:pattern-preview-transport', { action: 'pause' });
-            seekPreview(Math.max(startTick, endTick - 0.01));
-            app.rotationPreviewTimer = 0;
-        }, Math.max(80, (endTick - startTick) * 100 + 24));
-    }
-
     function rotationEditorModel(snapshot, beatId, value = {}) {
         const beats = snapshot?.timeline?.beats || [];
         let previous = 0;
@@ -1350,7 +1335,11 @@
                 rotation: current.previous + sign * degrees, rotateBy: null,
                 rotateByFacing: null, keepRotation: null
             });
-            renderPatternDesk(); previewBeatRotation(beatId);
+            // Direction is authored as a signed BEAT value.  Scrub the shared
+            // renderer to this BEAT's terminal frame instead of starting a
+            // separate timer-driven preview; full playback then keeps the
+            // same clock and cannot be paused/replaced by this edit path.
+            renderPatternDesk(); previewBeatDestination(beatId);
         };
         host.querySelectorAll('[data-rotation-direction]').forEach(button => button.onclick = () => {
             applyRotationDegrees(button.dataset.rotationDirection, host.querySelector('.rotation-degrees').value);
