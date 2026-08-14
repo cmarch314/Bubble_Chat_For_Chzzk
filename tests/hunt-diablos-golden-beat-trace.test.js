@@ -91,6 +91,7 @@ for (const pattern of approved) {
 }
 
 const rageCharge = patterns.find(pattern => pattern.id === 'diablos.rage_charge');
+const HuntMonsterAttackAnimator = require('../js/effects/hunt/HuntMonsterAttackAnimator.js');
 const visual = beatId => rageCharge.beatV2.beats.find(beat => beat.id === beatId)?.tracks?.visual?.[0]?.value || {};
 for (const beatId of ['tail-wind-left', 'tail-wind-right']) {
     assert.strictEqual(visual(beatId).flipFacing, true,
@@ -100,5 +101,14 @@ for (const beatId of ['tail-cross-one', 'tail-cross-two']) {
     assert.notStrictEqual(visual(beatId).flipFacing, true,
         `${beatId} must preserve its windup direction through the actual swing`);
 }
+const liveRenderMotion = HuntMonsterAttackAnimator.motionFromCompiledBeat(rageCharge);
+assert.deepStrictEqual(
+    ['tail-wind-left', 'tail-cross-one', 'tail-wind-right', 'tail-cross-two'].map(beatId => [
+        liveRenderMotion.motion.find(beat => beat.beat === beatId)?.flipFacing,
+        visual(beatId).flipFacing
+    ]),
+    [[true, true], [false, false], [true, true], [false, false]],
+    'live X-tail rendering must consume the compiled Preview BEAT facing frames directly'
+);
 
 console.log('[test] Diablos approved BEAT golden traces passed.');

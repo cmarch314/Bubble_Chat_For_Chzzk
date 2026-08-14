@@ -836,6 +836,29 @@ class HuntMonsterAttackAnimator {
         });
     }
 
+    static motionFromCompiledBeat(pattern = {}) {
+        const graphBeats = pattern?.beatV2?.beats;
+        if (!((pattern?.beatV2Enabled === true || pattern?.beatV2Approved === true)
+            && Array.isArray(graphBeats) && graphBeats.length)) return pattern;
+        // Live rendering must observe the exact compiled BEAT graph that owns
+        // Preview scrubbing and combat judgments. Keeping a parallel raw
+        // `pattern.motion` path allowed an editor-approved facing change to be
+        // visible in Preview while an older profile copy rendered in the hunt.
+        const motion = graphBeats.map((beat, index) => {
+            const frames = Array.isArray(beat?.tracks?.visual) ? beat.tracks.visual : [];
+            const visual = frames.length
+                ? [...frames].sort((left, right) => Number(left?.offsetTicks || 0)
+                    - Number(right?.offsetTicks || 0))[0]?.value || {}
+                : {};
+            return {
+                ...visual,
+                beat: String(beat?.id || `beat-${index + 1}`),
+                ticks: Math.max(1, Number(beat?.ticks) || 1)
+            };
+        });
+        return { ...pattern, motion };
+    }
+
     playProfileGraphMotion(active, pattern, profile, frames, timing = {}) {
         if (!active?.element || !Array.isArray(frames) || !frames.length
             || typeof active.element.animate !== 'function') return false;
@@ -1263,8 +1286,11 @@ class HuntMonsterAttackAnimator {
     }
 
     playPatternMotion(monsterImg, targetCard, pattern, attackName, type, targets = []) {
-        if (Array.isArray(pattern?.motion) && pattern.motion.length) {
-            const beatProfile = this.playBeatMotion(monsterImg, pattern, pattern.id, targetCard, targets);
+        const renderedPattern = HuntMonsterAttackAnimator.motionFromCompiledBeat(pattern);
+        if (Array.isArray(renderedPattern?.motion) && renderedPattern.motion.length) {
+            const beatProfile = this.playBeatMotion(
+                monsterImg, renderedPattern, renderedPattern.id, targetCard, targets
+            );
             if (beatProfile) return beatProfile;
             // Authored BEAT motion is authoritative. Falling through to an old
             // CSS profile after a transient compile/DOM failure can execute a

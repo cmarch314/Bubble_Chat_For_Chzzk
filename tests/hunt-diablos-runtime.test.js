@@ -33,8 +33,8 @@ assert.match(animatorSource, /damage: 'HIT',[\s\S]*roar: '귀마개',[\s\S]*trem
 assert.doesNotMatch(animatorSource, /owner\.playSFX\?\.\('monster_attack'/,
     'the renderer must not silently call the engine-only playSFX API');
 assert.match(animatorSource,
-    /if \(Array\.isArray\(pattern\?\.motion\)[\s\S]*?reason: 'beat-motion-unavailable'[\s\S]*?return null;/,
-    'an authored BEAT pattern must fail closed instead of falling into a legacy CSS motion');
+    /motionFromCompiledBeat\(pattern\)[\s\S]*?if \(Array\.isArray\(renderedPattern\?\.motion\)[\s\S]*?reason: 'beat-motion-unavailable'[\s\S]*?return null;/,
+    'live rendering must observe the compiled BEAT graph and fail closed instead of falling into a legacy CSS motion');
 assert.match(huntEffectSource,
     /renderer\.onMonsterPatternAudio\s*=\s*\(fileName, fallbackKey, context\)[\s\S]*?audioManager\.playMHAsset\(fileName, fallbackKey, context\)/,
     'real hunts must connect reviewed BEAT audio cues to HuntAudioManager');
