@@ -5,7 +5,7 @@
   "actions": [
     {
       "id": "rathian.roar",
-      "name": "포효 · clean BEAT 후보",
+      "name": "포효",
       "type": "roar",
       "tags": ["roar"],
       "damageRatio": 0,
@@ -25,7 +25,7 @@
       }
     },
     {
-      "id": "rathian.tail_sweep", "name": "이단 꼬리 회전 · clean BEAT", "type": "area", "tags": ["tail", "area", "ground"], "damageRatio": 0.27, "minTargets": 4, "maxTargets": 4, "atbCost": 42,
+      "id": "rathian.tail_sweep", "name": "이단 꼬리 회전", "type": "area", "tags": ["tail", "area", "ground"], "damageRatio": 0.27, "minTargets": 4, "maxTargets": 4, "atbCost": 42,
       "targeting": { "mode": "left-right-halves" },
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 42, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "center", "ticks": 9, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "between:hunter:1,hunter:2", "pose": "brace", "face": "target-group", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "center", "offsetTicks": 1 }] },
@@ -36,7 +36,7 @@
       ] }
     },
     {
-      "id": "rathian.fireball", "name": "화염구 브레스 · clean BEAT", "type": "projectile", "tags": ["fire", "projectile", "ground"], "damageRatio": 0.34, "minTargets": 1, "maxTargets": 1, "atbCost": 30,
+      "id": "rathian.fireball", "name": "화염구 브레스", "type": "projectile", "tags": ["fire", "projectile", "ground"], "damageRatio": 0.34, "minTargets": 1, "maxTargets": 1, "atbCost": 30,
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 30, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "look", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "face": "target", "pose": "brace", "origin": "part:head" } }] }, "events": [{ "kind": "audio", "slot": "look", "offsetTicks": 1 }] },
         { "id": "backstep", "ticks": 5, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target -14%", "pose": "crouch", "origin": "part:head", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "charge", "offsetTicks": 2 }] },
@@ -45,7 +45,7 @@
       ] }
     },
     {
-      "id": "rathian.triple_fireball", "name": "삼연 화염구 · clean BEAT", "type": "projectile", "tags": ["fire", "projectile", "enraged", "multi-hit"], "damageRatio": 0.40, "minTargets": 3, "maxTargets": 3, "atbCost": 46,
+      "id": "rathian.triple_fireball", "name": "삼연 화염구", "type": "projectile", "tags": ["fire", "projectile", "enraged", "multi-hit"], "damageRatio": 0.40, "minTargets": 3, "maxTargets": 3, "atbCost": 46,
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 46, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "aim", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "face": "target", "pose": "brace", "origin": "part:head" } }] }, "events": [{ "kind": "audio", "slot": "aim", "offsetTicks": 1 }] },
         { "id": "charge", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "origin": "part:head" } }] }, "events": [{ "kind": "audio", "slot": "charge", "offsetTicks": 2 }] },
@@ -56,7 +56,7 @@
       ] }
     },
     {
-      "id": "rathian.fireball_fizzle", "name": "탈진 화염구 불발 · clean BEAT", "type": "physical", "tags": ["fire", "exhausted", "no-impact"], "damageRatio": 0, "minTargets": 0, "maxTargets": 0, "atbCost": 20,
+      "id": "rathian.fireball_fizzle", "name": "탈진 화염구 불발", "type": "physical", "tags": ["fire", "exhausted", "no-impact"], "damageRatio": 0, "minTargets": 0, "maxTargets": 0, "atbCost": 20,
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 20, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "aim", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "face": "target", "pose": "brace", "origin": "part:head" } }] }, "events": [{ "kind": "audio", "slot": "aim", "offsetTicks": 1 }] },
         { "id": "strain", "ticks": 6, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "pose": "crouch", "origin": "part:head", "scaleY": 0.88 } }] }, "events": [{ "kind": "audio", "slot": "strain", "offsetTicks": 2 }] },
@@ -65,7 +65,7 @@
       ] }
     },
     {
-      "id": "rathian.triple_charge", "name": "삼연속 돌진 · clean BEAT", "type": "charge", "tags": ["charge", "enraged", "multi-hit"], "damageRatio": 0.30, "minTargets": 3, "maxTargets": 3, "atbCost": 58,
+      "id": "rathian.triple_charge", "name": "삼연속 돌진", "type": "charge", "tags": ["charge", "enraged", "multi-hit"], "damageRatio": 0.30, "minTargets": 3, "maxTargets": 3, "atbCost": 58,
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 58, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "backstep", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target -14%", "face": "target", "pose": "crouch", "moveEasing": "decelerate" } }] }, "events": [{ "kind": "audio", "slot": "backstep", "offsetTicks": 2 }] },
         { "id": "pass-one", "ticks": 10, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "offscreen:bottom", "pose": "stretch-strong", "moveEasing": "linear", "strideFlipTicks": 3 } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 30, "hitReactionKind": "strong", "offsetTicks": 6 }, { "kind": "audio", "slot": "pass-one", "offsetTicks": 6 }] },
@@ -78,7 +78,7 @@
     },
     {
       "id": "rathian.bite",
-      "name": "물어뜯기 · clean BEAT 후보",
+      "name": "물어뜯기",
       "type": "physical",
       "tags": ["physical", "bite", "weak"],
       "damageRatio": 0.18,
@@ -100,7 +100,7 @@
     },
     {
       "id": "rathian.charge",
-      "name": "돌진 · clean BEAT 후보",
+      "name": "돌진",
       "type": "charge",
       "tags": ["charge", "physical"],
       "damageRatio": 0.30,
@@ -122,7 +122,7 @@
     },
     {
       "id": "rathian.somersault",
-      "name": "독가시 서머솔트 · clean BEAT 후보",
+      "name": "독가시 서머솔트",
       "type": "physical",
       "tags": ["physical", "tail", "poison", "aerial"],
       "damageRatio": 0.48,
@@ -145,7 +145,7 @@
       }
     },
     {
-      "id": "rathian.double_somersault", "name": "이단 독가시 서머솔트 · clean BEAT", "type": "physical", "tags": ["tail", "poison", "aerial", "enraged", "multi-hit"], "damageRatio": 0.48, "minTargets": 2, "maxTargets": 2, "atbCost": 62, "flightTransition": "takeoff",
+      "id": "rathian.double_somersault", "name": "이단 독가시 서머솔트", "type": "physical", "tags": ["tail", "poison", "aerial", "enraged", "multi-hit"], "damageRatio": 0.48, "minTargets": 2, "maxTargets": 2, "atbCost": 62, "flightTransition": "takeoff",
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 62, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "prime-one", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 80%", "face": "target", "pose": "crouch", "origin": "part:tail", "rotation": -34 } }] }, "events": [{ "kind": "audio", "slot": "prime-one", "offsetTicks": 2 }] },
         { "id": "scoop-one", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 106%", "pose": "stretch-strong", "origin": "part:tail", "rotation": 300, "moveEasing": "snap", "rotationEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 48, "hitReactionKind": "strong", "offsetTicks": 3 }, { "kind": "audio", "slot": "scoop-one", "offsetTicks": 3 }] },
@@ -155,7 +155,7 @@
       ] }
     },
     {
-      "id": "rathian.bite_somersault", "name": "공중 물어뜯기 연계 · clean BEAT", "type": "physical", "tags": ["bite", "tail", "poison", "aerial", "enraged", "multi-hit"], "damageRatio": 0.48, "minTargets": 1, "maxTargets": 1, "atbCost": 65, "flightTransition": "takeoff",
+      "id": "rathian.bite_somersault", "name": "공중 물어뜯기 연계", "type": "physical", "tags": ["bite", "tail", "poison", "aerial", "enraged", "multi-hit"], "damageRatio": 0.48, "minTargets": 1, "maxTargets": 1, "atbCost": 65, "flightTransition": "takeoff",
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 65, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "takeoff", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 130", "face": "target", "pose": "stretch", "moveEasing": "accelerate" } }], "partFx": [{ "offsetTicks": 0, "value": [{ "part": "left-wing", "clip": "ellipse(31% 17% at 42% 19%)", "degrees": 10, "skewX": 4, "scaleY": 1.08, "cycles": 2, "opacity": 0.38 }] }] }, "events": [{ "kind": "audio", "slot": "takeoff", "offsetTicks": 1 }] },
         { "id": "air-bite", "ticks": 8, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 104%", "pose": "stretch-strong", "origin": "part:head", "moveEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 24, "hitReactionKind": "weak", "offsetTicks": 4 }, { "kind": "audio", "slot": "bite-impact", "offsetTicks": 4 }] },
@@ -165,7 +165,7 @@
       ] }
     },
     {
-      "id": "rathian.somersault_glide", "name": "서머솔트 후 저공 활공 · clean BEAT", "type": "physical", "tags": ["tail", "poison", "aerial", "glide", "enraged", "multi-hit"], "damageRatio": 0.48, "minTargets": 2, "maxTargets": 2, "atbCost": 70, "flightTransition": "land",
+      "id": "rathian.somersault_glide", "name": "서머솔트 후 저공 활공", "type": "physical", "tags": ["tail", "poison", "aerial", "glide", "enraged", "multi-hit"], "damageRatio": 0.48, "minTargets": 2, "maxTargets": 2, "atbCost": 70, "flightTransition": "land",
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 70, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "tail-prime", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 78%", "face": "target", "pose": "crouch", "origin": "part:tail", "rotation": -35 } }] }, "events": [{ "kind": "audio", "slot": "tail-prime", "offsetTicks": 2 }] },
         { "id": "tail-scoop", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 106%", "pose": "stretch-strong", "origin": "part:tail", "rotation": 315, "moveEasing": "snap", "rotationEasing": "snap" } }] }, "events": [{ "kind": "damage", "target": "primary", "damagePercent": 48, "hitReactionKind": "strong", "offsetTicks": 3 }, { "kind": "audio", "slot": "tail-impact", "offsetTicks": 3 }] },
@@ -175,7 +175,7 @@
       ] }
     },
     {
-      "id": "rathian.glide", "name": "저공 활공 · clean BEAT", "type": "charge", "tags": ["aerial", "glide", "charge"], "damageRatio": 0.28, "minTargets": 2, "maxTargets": 2, "atbCost": 46, "flightTransition": "land",
+      "id": "rathian.glide", "name": "저공 활공", "type": "charge", "tags": ["aerial", "glide", "charge"], "damageRatio": 0.28, "minTargets": 2, "maxTargets": 2, "atbCost": 46, "flightTransition": "land",
       "graph": { "schemaVersion": 2, "backend": "beat-v2", "reviewStatus": "draft", "atb": { "cost": 46, "recovery": "during-action", "gateUntil": "complete" }, "beats": [
         { "id": "lift", "ticks": 7, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "above:target 130", "face": "target", "pose": "stretch", "moveEasing": "accelerate" } }], "partFx": [{ "offsetTicks": 0, "value": [{ "part": "left-wing", "clip": "ellipse(31% 17% at 42% 19%)", "degrees": 10, "skewX": 4, "scaleY": 1.08, "cycles": 2, "opacity": 0.38 }] }] }, "events": [{ "kind": "audio", "slot": "lift", "offsetTicks": 1 }] },
         { "id": "glide-line", "ticks": 13, "tracks": { "visual": [{ "offsetTicks": 0, "value": { "to": "toward:target 112%", "pose": "stretch-strong", "origin": "part:left-wing", "rotationToward": 10, "moveEasing": "slow-fast-slow" } }], "partFx": [{ "offsetTicks": 0, "value": [{ "part": "left-wing", "clip": "ellipse(31% 17% at 42% 19%)", "degrees": 5, "skewX": 2, "scaleY": 1.03, "cycles": 2, "opacity": 0.28 }] }] }, "events": [{ "kind": "damage", "target": "pair", "damagePercent": 28, "hitReactionKind": "strong", "offsetTicks": 9 }, { "kind": "audio", "slot": "glide-impact", "offsetTicks": 9 }] },
