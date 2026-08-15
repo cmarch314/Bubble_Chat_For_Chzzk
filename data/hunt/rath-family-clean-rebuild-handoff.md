@@ -1,5 +1,8 @@
 # 레이아·레우스 clean BEAT 재구축 작업서
 
+> 반복 결함의 원인, 현재 실제 완료 범위, 금지사항은 먼저
+> [`beat-rebuild-incident-handoff.md`](./beat-rebuild-incident-handoff.md)를 읽을 것.
+
 ## 결론
 
 확장 기반은 준비됐지만 두 몬스터의 현 패턴은 전부 `migrated`임. 기존 구현은 동작 의도와 실패 사례를 확인하는 읽기 전용 참고자료로만 사용하고, 신규 BEAT 그래프를 별도 후보에서 완성한 뒤 몬스터 단위로 원자 교체함.
