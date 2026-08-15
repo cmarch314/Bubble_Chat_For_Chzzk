@@ -357,7 +357,7 @@ assert.match(turnExecutorSource,
     /!isImpactCommit && pattern\.type !== 'roar' && !pattern\.suppressPrepareAudio/,
     'somersault vocals must not fire when the action merely starts');
 assert.match(turnExecutorSource,
-    /pattern\.type !== 'roar' && pattern\.runtimeImpactAudioCue !== 'somersault'/,
+    /pattern\.type !== 'roar'[\s\S]*judgmentField\(\s*pattern, 'audioCue', 'runtimeImpactAudioCue'\) !== 'somersault'/,
     'the authored somersault contact vocal must not be doubled by the default impact route');
 
 console.log('[test] Reviewed World Rathian runtime contract passed.');

@@ -7,7 +7,8 @@
  */
 class HuntMonsterNativeBeatCatalog {
     static apply(patterns = [], scope = typeof window !== 'undefined' ? window : globalThis) {
-        const graphs = scope.HUNT_NATIVE_BEAT_GRAPHS || {};
+        const graphs = scope.HUNT_NATIVE_BEAT_GRAPHS
+            || (typeof require === 'function' ? require('./data/NativeMonsterBeatGraphs.generated.js') : {});
         const Contract = scope.HuntBeatV2Contract
             || (typeof require === 'function' ? require('./HuntBeatV2Contract.js').HuntBeatV2Contract : null);
         if (!Contract) throw new Error('HuntBeatV2Contract is required for native monster graphs');

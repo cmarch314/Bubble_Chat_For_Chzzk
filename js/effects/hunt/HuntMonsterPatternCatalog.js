@@ -24,6 +24,11 @@ const HUNT_BEAT_V2_ADAPTER = huntPatternDependency(
     './HuntBeatV2Adapter.js',
     '../js/effects/hunt/HuntBeatV2Adapter.js'
 );
+const HUNT_NATIVE_BEAT_CATALOG = huntPatternDependency(
+    globalThis.HuntMonsterNativeBeatCatalog,
+    './HuntMonsterNativeBeatCatalog.js',
+    '../js/effects/hunt/HuntMonsterNativeBeatCatalog.js'
+);
 
 class HuntMonsterPatternCatalog {
     static reviewStatus(pattern = {}) {
@@ -489,9 +494,9 @@ class HuntMonsterPatternCatalog {
                 result[monsterId] = patterns.map(pattern => HuntMonsterFlightRuntime.decoratePattern(monsterId, pattern));
             });
         }
-        if (typeof HuntMonsterNativeBeatCatalog !== 'undefined') {
+        if (HUNT_NATIVE_BEAT_CATALOG) {
             Object.entries(result).forEach(([monsterId, patterns]) => {
-                result[monsterId] = HuntMonsterNativeBeatCatalog.apply(patterns, scope);
+                result[monsterId] = HUNT_NATIVE_BEAT_CATALOG.apply(patterns, scope);
             });
         }
         const timingOverrides = scope.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES || {};
