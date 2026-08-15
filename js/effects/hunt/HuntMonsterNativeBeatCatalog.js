@@ -18,7 +18,7 @@ class HuntMonsterNativeBeatCatalog {
             const graph = Contract.compile({ ...source, id: pattern.id, actor: 'monster' });
             const firstBeat = graph.beats[0];
             const lastBeat = graph.beats.at(-1);
-            return {
+            const promoted = {
                 ...pattern,
                 beatV2: graph,
                 beatV2Enabled: true,
@@ -31,8 +31,20 @@ class HuntMonsterNativeBeatCatalog {
                 movement: { ...(pattern.movement || {}), ticks: graph.totalTicks },
                 animationDurationMs: graph.totalTicks * 100,
                 windupTicks: firstBeat?.ticks || 1,
-                recoveryTicks: lastBeat?.ticks || 1
+                recoveryTicks: lastBeat?.ticks || 1,
+                // Compatibility projection for catalog/audit consumers. It
+                // is derived from the graph and never owns runtime timing.
+                impactTimeline: graph.events
+                    .filter(event => ['damage', 'judgment', 'roar', 'tremor', 'wind'].includes(event.kind))
+                    .map(event => ({ atTicks: event.atTicks, target: event.target,
+                        ...(event.damagePercent != null ? { damageScale: Number(event.damagePercent) / 100 } : {}) }))
             };
+            // Tombstone legacy timing owners that could still be consumed by
+            // a renderer. `impactTimeline` above is a derived audit
+            // projection only; the graph remains the sole runtime clock.
+            ['runtimeResolvedImpactTimeline', 'animationProfile', 'profileMotion']
+                .forEach(field => delete promoted[field]);
+            return promoted;
         });
     }
 }

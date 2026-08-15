@@ -135,6 +135,11 @@ const HUNT_NATIVE_BEAT_GRAPHS = {
                             "id": "fireball-1:finish",
                             "projectileId": "fireball-1",
                             "offsetTicks": 5
+                        },
+                        {
+                            "kind": "audio",
+                            "slot": "recover",
+                            "offsetTicks": 1
                         }
                     ],
                     "label": "recover"
@@ -380,6 +385,11 @@ const HUNT_NATIVE_BEAT_GRAPHS = {
                             "kind": "projectile-finish",
                             "id": "fireball-3:finish",
                             "projectileId": "fireball-3",
+                            "offsetTicks": 1
+                        },
+                        {
+                            "kind": "audio",
+                            "slot": "recover",
                             "offsetTicks": 1
                         }
                     ],
