@@ -489,9 +489,21 @@ class HuntMonsterPatternCatalog {
                 result[monsterId] = patterns.map(pattern => HuntMonsterFlightRuntime.decoratePattern(monsterId, pattern));
             });
         }
+        if (typeof HuntMonsterNativeBeatCatalog !== 'undefined') {
+            Object.entries(result).forEach(([monsterId, patterns]) => {
+                result[monsterId] = HuntMonsterNativeBeatCatalog.apply(patterns, scope);
+            });
+        }
         const timingOverrides = scope.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES || {};
         Object.entries(result).forEach(([monsterId, patterns]) => {
             result[monsterId] = patterns.map(pattern => {
+                // A promoted native graph already owns the complete motion
+                // timeline.  Do not project it back through legacy timing or
+                // generated keyframes, otherwise the pattern silently changes
+                // backend after promotion.
+                if (pattern?.beatV2Approved === true && pattern?.runtimeMotionBackend === 'beat-v2') {
+                    return pattern;
+                }
                 const inheritedMotion = pattern.motionOverrideSource;
                 const override = timingOverrides[monsterId]?.[pattern.id]
                     || (inheritedMotion?.monsterId && inheritedMotion?.patternId

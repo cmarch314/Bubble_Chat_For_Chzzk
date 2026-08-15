@@ -38,6 +38,8 @@ const HUNT_RUNTIME_SCRIPT_PATHS = Object.freeze([
     'js/effects/hunt/data/MonsterVisualGeometryOverrides.generated.js',
     'js/effects/hunt/data/MonsterPatternMotionOverrides.generated.js',
     'js/effects/hunt/HuntBeatV2Contract.js',
+    'js/effects/hunt/data/NativeMonsterBeatGraphs.generated.js',
+    'js/effects/hunt/HuntMonsterNativeBeatCatalog.js',
     'js/effects/hunt/HuntProjectileTimingResolver.js',
     'js/effects/hunt/HuntMonsterReactionCatalog.js',
     'js/effects/hunt/HuntMonsterAnatomyCatalog.js',
