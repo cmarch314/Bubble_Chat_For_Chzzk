@@ -111,6 +111,7 @@
   <script src="../../js/effects/hunt/HuntHunterTurnExecutor.js"></script>
   <script src="../../js/effects/hunt/HuntEngine.js"></script>
   <script src="../../js/effects/hunt/HuntCombatClock.js"></script>
+  <script src="../../js/effects/hunt/HuntActionSession.js"></script>
   <script src="../../js/effects/hunt/HuntCombatRuntime.js"></script>
   <script src="../../js/effects/hunt/HuntCombatPresenter.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterAnimationCatalog.js"></script>
@@ -183,8 +184,7 @@
     let pendingReactionBeatTimers=[];
     let previewRuntimePattern=null;
     let previewRuntimeSelection=null;
-    let previewBeatEventRuntime=null;
-    let previewBeatEventTimer=null;
+    let previewActionSession=null;
     const candidateMonsterId=String(new URLSearchParams(location.search).get('candidate')||'').trim();
     const candidateActions=monsterId=>candidateMonsterId===monsterId
       ?HuntMonsterCandidateCatalog.forMonster(monsterId):[];
@@ -199,9 +199,8 @@
       // to process hunter damage/reactions behind the editor preview.
       animator.cancelBeatMotionPreview?.();
       animator.cancelPreviewProjectiles?.(reason);
-      if(previewBeatEventTimer!==null){clearInterval(previewBeatEventTimer);previewBeatEventTimer=null;}
-      previewBeatEventRuntime?.cancel?.('preview-monster',reason);
-      previewBeatEventRuntime=null;
+      previewActionSession?.stop?.(reason);
+      previewActionSession=null;
       animator.clearPreviewJudgmentMarkers?.();
       previewRuntimePattern=null;
       previewRuntimeSelection=null;
@@ -257,7 +256,17 @@
         const judgments=(graph.events||[])
           .filter(event=>['damage','judgment','roar','tremor','wind'].includes(event.kind))
           .map(event=>({...event,targetIndices:[resolveTarget(event.target)]}));
-        previewBeatEventRuntime=new HuntBeatActionRuntime({
+        const timing=HuntProjectileTimingResolver.resolveSession(graph,{
+          pattern:motionPattern,targetIndex:Number(selection.primary||0),judgmentEvents:judgments,
+          actionSessionId:`preview:${graph.id}:${Date.now()}`
+        });
+        previewActionSession=new HuntActionSession({
+          action:timing.action,
+          actorKey:'preview-monster',
+          mode:'preview',
+          presentationOnly:true,
+          sessionId:timing.context.actionSessionId,
+          callbacks:{
           onEvent:(state,event)=>{
             animator.observeMonsterBeatEvent?.(state,event);
             // The editor intentionally does not run hunter combat/reaction
@@ -273,18 +282,10 @@
           },
           onComplete:state=>animator.completeMonsterBeatPresentation?.(state),
           onCancel:(state,why)=>animator.cancelMonsterBeatPresentation?.(state,why)
-        });
-        const timing=HuntProjectileTimingResolver.resolveSession(graph,{
-          pattern:motionPattern,targetIndex:Number(selection.primary||0),judgmentEvents:judgments,
-          actionSessionId:`preview:${graph.id}:${Date.now()}`
-        });
-        const runtimeState=previewBeatEventRuntime.begin('preview-monster',timing.action,timing.context);
-        animator.beginMonsterBeatPresentation?.(runtimeState);
-        previewBeatEventTimer=setInterval(()=>{
-          if(!previewBeatEventRuntime?.tick('preview-monster')){
-            clearInterval(previewBeatEventTimer);previewBeatEventTimer=null;
           }
-        },100);
+        });
+        const runtimeState=previewActionSession.start(timing.context);
+        animator.beginMonsterBeatPresentation?.(previewActionSession.state || runtimeState);
       }
       document.documentElement.dataset.previewActionAccepted=String(accepted!==false);
       document.documentElement.dataset.previewBeatActive=String(Boolean(accepted));
@@ -292,17 +293,22 @@
     }
 
     function pausePreviewRuntime(){
+      previewActionSession?.pause?.();
       const controller=animator.activeBeatMotionPreview;
       controller?.animations?.forEach(animation=>animation.pause());
     }
 
     function resumePreviewRuntime(){
+      previewActionSession?.resume?.();
       const controller=animator.activeBeatMotionPreview;
       controller?.animations?.forEach(animation=>animation.play());
     }
 
     function seekPreviewRuntime(progress){
       if(!previewRuntimePattern||!previewRuntimeSelection)return;
+      const totalTicks=Number(previewActionSession?.action?.totalTicks||0);
+      if(previewActionSession&&totalTicks>0)
+        previewActionSession.seek(Math.round(Math.max(0,Math.min(1,Number(progress||0)))*totalTicks));
       animator.seekBeatMotion(Math.max(0,Math.min(1,Number(progress||0))));
     }
 

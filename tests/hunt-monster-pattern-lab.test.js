@@ -172,8 +172,12 @@ assert.match(html, /!pattern\.runtimePreviewMuteAudio/,
     'the embedded production renderer must stay silent when the review timeline owns preview audio');
 assert.match(html, /if\(!selection\.targets\.length\)/,
     'every preview pattern must receive a safe visual target even when combat targeting resolves empty');
-assert.match(html, /schedulePreviewProjectile\?\.\(motionPattern,selection\.primary/,
-    'motion-only Preview must still schedule an authored detached projectile on the shared BEAT clock');
+assert.match(html, /new HuntActionSession\([\s\S]*?observeMonsterBeatEvent/,
+    'motion-only Preview must feed its compiled BEAT events through the shared action session');
+assert.doesNotMatch(html, /previewBeatEventTimer|setInterval\(\(\)=>\{[\s\S]*?previewActionSession/,
+    'motion-only Preview must not create a second event clock');
+assert.doesNotMatch(html, /schedulePreviewProjectile/,
+    'motion-only Preview must not create a renderer-owned projectile schedule');
 assert.match(html, /pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern\(pattern\)/,
     'native candidate preview must compile its judgment timeline before target resolution');
 assert.doesNotMatch(html, /if\(!pattern\.nativeBeatCandidate\)pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern/,
