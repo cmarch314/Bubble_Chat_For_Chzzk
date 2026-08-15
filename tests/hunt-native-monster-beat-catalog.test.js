@@ -8,6 +8,7 @@ const ProjectileTiming = require('../js/effects/hunt/HuntProjectileTimingResolve
 
 global.HUNT_NATIVE_BEAT_GRAPHS = graphs;
 global.HuntBeatV2Contract = HuntBeatV2Contract;
+global.HuntMonsterNativeBeatCatalog = NativeCatalog;
 
 const [pattern] = NativeCatalog.apply([{ id: 'rathian.fireball', type: 'projectile', damageRatio: .34 }], global);
 assert.strictEqual(pattern.beatV2Enabled, true);
@@ -28,5 +29,27 @@ const resolved = ProjectileTiming.resolveSession(pattern.beatV2, {
 const resolvedContact = resolved.action.events.find(event => event.id === contact.id);
 assert.ok(resolvedContact.atTicks > launch.atTicks, 'distance resolver must delay contact until projectile arrival');
 assert.strictEqual(resolved.context.judgmentEvents, undefined);
+
+const [triple] = NativeCatalog.apply([{ id: 'rathian.triple_fireball', type: 'projectile' }], global);
+assert.deepStrictEqual(triple.beatV2.events.filter(event => event.kind === 'projectile-launch')
+    .map(event => event.atTicks), [17, 24, 31],
+    'triple fireball must launch one projectile on each sequential spit beat');
+assert.strictEqual(new Set(triple.beatV2.events.filter(event => event.kind === 'projectile-launch')
+    .map(event => event.projectileId)).size, 3);
+
+global.window = global;
+global.HUNT_MONSTER_RELEASE_MANIFEST = { records: [] };
+global.HUNT_MONSTER_PATTERN_OVERRIDES = {
+    rathian: [{ id: 'rathian.fireball', name: 'fireball', type: 'projectile', evidence: 'installed-game-action-class' }]
+};
+global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {};
+global.HUNT_MONSTER_EDITION_RESOLVER = { resolve: () => null };
+global.HuntMonsterFlightRuntime = { decoratePattern: (_monsterId, value) => value };
+const PatternCatalog = require('../js/effects/hunt/HuntMonsterPatternCatalog.js');
+const [released] = PatternCatalog.build({}, [{ id: 'rathian' }]).rathian;
+assert.strictEqual(released.runtimeMotionBackend, 'beat-v2',
+    'native promotion must not be projected back into a legacy keyframe backend');
+assert.strictEqual(released.beatV2Approved, true);
+assert.strictEqual(released.beatV2.totalTicks, 41);
 
 console.log('[test] native monster BEAT promotion and projectile timing passed');
