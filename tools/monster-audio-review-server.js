@@ -639,7 +639,6 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
     const kit = readJson(sourcePath, null);
     const action = kit?.actions?.find(item => item?.id === input.patternId);
     if (!action?.graph?.beats) throw new Error(`후보 패턴을 찾을 수 없습니다: ${input.patternId}`);
-    const originalGraph = JSON.parse(JSON.stringify(action.graph));
     const submitted = input.beats || {};
     const expected = action.graph.beats.map(beat => String(beat.id || beat.beat));
     const unknown = Object.keys(submitted).filter(id => !expected.includes(id));
@@ -652,7 +651,8 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
             const draft = normalizedBeats[id] || { ticks: beat.ticks };
             beat.ticks = draft.ticks;
             const preservedEvents = (beat.events || []).filter(event =>
-                !MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind));
+                !MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind)
+                && !MotionAuthoringContract.PROJECTILE_EVENT_KINDS.includes(event?.kind));
             const authoredJudgments = new Map((beat.events || [])
                 .filter(event => MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind))
                 .map(event => [String(event.id || ''), event]));
@@ -667,7 +667,9 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
                     const authored = authoredJudgments.get(String(judgment?.id || '')) || {};
                     return { ...authored, ...judgment };
                 }) : [];
-            beat.events = [...preservedEvents, ...judgmentEvents].map(event => ({ ...event,
+            const projectileEvents = Array.isArray(draft.projectileEvents)
+                ? draft.projectileEvents.map(event => ({ ...event })) : [];
+            beat.events = [...preservedEvents, ...projectileEvents, ...judgmentEvents].map(event => ({ ...event,
                 offsetTicks: Math.max(0, Math.min(beat.ticks - 1,
                     Math.round(Number(event.offsetTicks) || 0)))
             }));
@@ -682,7 +684,6 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
             beat.tracks.visual = frames;
             if (draft.label) beat.label = draft.label;
         }
-        repositionCandidateProjectileLifecycle(action.graph, originalGraph, normalizedBeats);
         // Persist the canonical projectile lifecycle rather than merely
         // accepting it during compilation.  A judgment editor can move a HIT
         // without owning the launch/outcome linkage; this hydrates the linked
@@ -701,10 +702,16 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
             const visual = (beat.tracks?.visual || []).at(-1)?.value || {};
             const judgments = (beat.events || []).filter(event =>
                 MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind));
+            const projectileEvents = (beat.events || []).filter(event =>
+                MotionAuthoringContract.PROJECTILE_EVENT_KINDS.includes(event?.kind));
+            const expectedBeat = normalizedBeats[beat.id] || {};
             return [beat.id, { ticks: beat.ticks, ...(beat.label ? { label: beat.label } : {}),
-                ...visual, ...(judgments.length ? { judgments }
-                    : Array.isArray(normalizedBeats[beat.id]?.judgments) ? { judgments: [] }
-                        : normalizedBeats[beat.id]?.hit === false ? { hit: false } : {}) }];
+                ...visual,
+                ...(projectileEvents.length ? { projectileEvents }
+                    : Array.isArray(expectedBeat.projectileEvents) ? { projectileEvents: [] } : {}),
+                ...(judgments.length ? { judgments }
+                    : Array.isArray(expectedBeat.judgments) ? { judgments: [] } : {}),
+                ...(expectedBeat.hit === false ? { hit: false } : {}) }];
         }));
         const comparison = MotionAuthoringContract.compareBeats(normalizedBeats, persistedBeats);
         if (!comparison.equal) {
@@ -717,77 +724,6 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
         fs.writeFileSync(rollback, previousText, 'utf8');
         fs.renameSync(rollback, sourcePath);
         throw new Error(`후보 모션 저장 롤백: ${error.message}`);
-    }
-}
-
-function projectileGraphIndex(graph) {
-    let elapsed = 0;
-    const beats = (graph?.beats || []).map(beat => {
-        const ticks = Math.max(1, Number(beat?.ticks) || 1);
-        const record = { beat, id: String(beat?.id || beat?.beat || ''), ticks,
-            startTicks: elapsed, endTicks: elapsed + ticks };
-        elapsed += ticks;
-        return record;
-    });
-    const events = new Map();
-    beats.forEach(record => (record.beat.events || []).forEach(event => {
-        if (event?.id) events.set(String(event.id), { event, record });
-    }));
-    return { beats, events };
-}
-
-function eventAt(entry) {
-    return entry.record.startTicks + Math.min(entry.record.ticks - 1,
-        Math.max(0, Number(entry.event.offsetTicks) || 0));
-}
-
-function moveGraphEvent(index, entry, destinationTick) {
-    const destination = index.beats.find(record => destinationTick >= record.startTicks
-        && destinationTick < record.endTicks);
-    if (!destination) throw new Error(`${entry.event.id}: event moved outside its BEAT timeline`);
-    const moved = { ...entry.event, offsetTicks: destinationTick - destination.startTicks };
-    entry.record.beat.events = (entry.record.beat.events || []).filter(event => event !== entry.event);
-    destination.beat.events = [...(destination.beat.events || []), moved];
-    const result = { event: moved, record: destination };
-    index.events.set(String(moved.id), result);
-    return result;
-}
-
-function repositionCandidateProjectileLifecycle(graph, originalGraph, normalizedBeats) {
-    const original = projectileGraphIndex(originalGraph);
-    const current = projectileGraphIndex(graph);
-    for (const { event: originalLaunch } of original.events.values()) {
-        if (originalLaunch.kind !== 'projectile-launch') continue;
-        const launchId = String(originalLaunch.id);
-        const outcomeId = String(originalLaunch.outcomeEventId || '');
-        const launch = current.events.get(launchId);
-        const originalLaunchEntry = original.events.get(launchId);
-        const originalOutcome = original.events.get(outcomeId);
-        const outcome = current.events.get(outcomeId);
-        if (!launch || !originalLaunchEntry || !originalOutcome || !outcome || outcome.event.kind !== 'damage') continue;
-        const requestedOutcomeAt = eventAt(outcome);
-        const originalOutcomeAt = eventAt(originalOutcome);
-        if (requestedOutcomeAt === originalOutcomeAt) continue;
-        const flightTicks = Math.max(1, originalOutcomeAt - eventAt(originalLaunchEntry));
-        const shiftedLaunch = moveGraphEvent(current, launch, Math.max(0, requestedOutcomeAt - flightTicks));
-        // Launch SFX shares the authored launch tick and travels with it.
-        for (const entry of [...current.events.values()]) {
-            const originalEntry = original.events.get(String(entry.event.id));
-            if (entry.event.kind === 'audio' && originalEntry
-                && originalEntry.record.id === originalLaunchEntry.record.id
-                && eventAt(originalEntry) === eventAt(originalLaunchEntry)) {
-                moveGraphEvent(current, entry, eventAt(shiftedLaunch));
-            }
-        }
-        const finish = [...current.events.values()].find(entry => entry.event.kind === 'projectile-finish'
-            && String(entry.event.projectileId || '') === String(originalLaunch.projectileId || ''));
-        const originalFinish = [...original.events.values()].find(entry => entry.event.kind === 'projectile-finish'
-            && String(entry.event.projectileId || '') === String(originalLaunch.projectileId || ''));
-        if (finish && originalFinish) {
-            const finishGap = Math.max(1, eventAt(originalFinish) - originalOutcomeAt);
-            moveGraphEvent(current, finish, Math.min(current.beats.at(-1).endTicks - 1,
-                requestedOutcomeAt + finishGap));
-        }
     }
 }
 

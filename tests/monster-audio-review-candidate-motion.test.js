@@ -86,6 +86,11 @@ try {
     fireballDraft.inhale.judgments = [...(fireballDraft.inhale.judgments || []), {
         ...movedFireballHit, offsetTicks: 10
     }];
+    const movedLaunch = fireballDraft.spit.projectileEvents.find(item => item.id === 'fireball-1:launch');
+    fireballDraft.spit.projectileEvents = fireballDraft.spit.projectileEvents.filter(item => item !== movedLaunch);
+    fireballDraft.inhale.projectileEvents = [...(fireballDraft.inhale.projectileEvents || []), {
+        ...movedLaunch, offsetTicks: 9
+    }];
     const fireballSave = saveCandidatePatternMotion({
         huntId: 'rathian', patternId: 'rathian.fireball', candidate: 'rathian',
         candidateRecord: fireballRecord, beats: fireballDraft
@@ -102,8 +107,8 @@ try {
         .find(event => event.id === 'fireball-1:contact')?.offsetTicks, 10,
     'candidate save must retain a projectile HIT moved into an earlier beat');
     const persistedInhale = fireballPersisted.graph.beats.find(beat => beat.id === 'inhale');
-    assert.ok(persistedInhale.events.find(event => event.id === 'fireball-1:launch')?.offsetTicks < 10,
-        'moving a projectile HIT must relocate its launch ahead of the moved contact');
+    assert.equal(persistedInhale.events.find(event => event.id === 'fireball-1:launch')?.offsetTicks, 9,
+        'candidate save must persist the independently authored launch tick');
 
     // A projectile damage event carries runtime linkage (projectileId) that
     // is intentionally not an editable motion field.  Saving an unchanged
@@ -122,7 +127,7 @@ try {
         'candidate projectile timing edits must survive save/reload validation');
     const projectilePersisted = JSON.parse(fs.readFileSync(candidateFile, 'utf8'))
         .actions.find(action => action.id === 'rathian.triple_fireball');
-    assert.equal(projectilePersisted.graph.beats.find(beat => beat.id === 'spit-left').events
+    assert.equal(projectilePersisted.graph.beats.find(beat => beat.id === 'spit-primary').events
         .find(event => event.id === 'fireball-1:contact')?.projectileId, 'fireball-1',
     'candidate saving must retain non-editor projectile linkage metadata');
 

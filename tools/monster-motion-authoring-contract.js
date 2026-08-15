@@ -18,8 +18,8 @@
         'damageScale', 'hitOffsetTicks', 'strideFlipTicks', 'stompSteps', 'fxDurationTicks',
         'fxSecondaryDurationTicks', 'rotationDegrees']);
     const BOOLEAN_FIELDS = Object.freeze(['hit', 'alignRotationToTravel', 'instantOpacity',
-        'instantPose', 'continueTravel', 'flipFacing']);
-    const STRUCTURED_FIELDS = Object.freeze(['judgmentOffsets', 'judgments', 'fxAdditional']);
+        'instantPose', 'continueTravel', 'flipFacing', 'projectileRecoil']);
+    const STRUCTURED_FIELDS = Object.freeze(['judgmentOffsets', 'judgments', 'projectileEvents', 'fxAdditional']);
     const EDITABLE_FIELDS = Object.freeze(['ticks', ...TEXT_FIELDS, ...NUMBER_FIELDS,
         ...BOOLEAN_FIELDS, ...STRUCTURED_FIELDS]);
     const VISUAL_FIELDS = Object.freeze([...TEXT_FIELDS.filter(key => key !== 'label'),
@@ -33,6 +33,7 @@
     const ROTATION_RESET_MODES = Object.freeze(['auto', 'preserve', 'snap-end', 'animate']);
     const JUDGMENT_TARGETS = Object.freeze(['primary', 'left', 'right', 'pair', 'pair-left',
         'pair-right', 'primary-adjacent', 'all']);
+    const PROJECTILE_EVENT_KINDS = Object.freeze(['projectile-launch', 'projectile-finish']);
 
     function ticks(value) {
         return Math.max(1, Math.min(600, Math.round(Number(
@@ -75,6 +76,29 @@
         return result;
     }
 
+    function normalizeProjectileEvent(item = {}, { beatId = 'beat', index = 0, beatTicks = 1 } = {}) {
+        const kind = PROJECTILE_EVENT_KINDS.includes(item.kind) ? item.kind : '';
+        const projectileId = String(item.projectileId || '').trim().slice(0, 120);
+        if (!kind || !projectileId) return null;
+        const id = String(item.id || `${projectileId}:${kind === 'projectile-launch' ? 'launch' : 'finish'}-${index + 1}`)
+            .trim().slice(0, 120);
+        if (!id) return null;
+        const result = { id, kind, projectileId,
+            offsetTicks: Math.max(0, Math.min(beatTicks - 1,
+                Math.round(Number(item.offsetTicks) || 0))) };
+        if (kind === 'projectile-launch') {
+            result.target = JUDGMENT_TARGETS.includes(item.target) ? item.target : 'primary';
+            result.origin = String(item.origin || 'part:head').trim().slice(0, 120);
+            result.outcomeEventId = String(item.outcomeEventId || '').trim().slice(0, 120);
+            if (!result.outcomeEventId) return null;
+            if (item.flightMode === 'distance') result.flightMode = 'distance';
+            if (Number.isFinite(Number(item.speedPxPerTick))) {
+                result.speedPxPerTick = Math.max(1, Math.min(2000, Number(item.speedPxPerTick)));
+            }
+        }
+        return result;
+    }
+
     function normalizeBeat(value, { id = 'beat', seenJudgmentIds = new Set() } = {}) {
         if (!value || typeof value !== 'object') return { ticks: ticks(value) };
         const clean = { ticks: ticks(value) };
@@ -107,6 +131,12 @@
                     seenJudgmentIds.add(item.id);
                     return true;
                 });
+        }
+        if (Array.isArray(value.projectileEvents)) {
+            clean.projectileEvents = value.projectileEvents.slice(0, 64)
+                .map((item, index) => normalizeProjectileEvent(item,
+                    { beatId: id, index, beatTicks: clean.ticks }))
+                .filter(Boolean);
         }
         if (Array.isArray(clean.judgments) && clean.judgments.length) {
             clean.hit = false;
@@ -176,8 +206,8 @@
     }
 
     return Object.freeze({ TEXT_FIELDS, NUMBER_FIELDS, BOOLEAN_FIELDS, STRUCTURED_FIELDS,
-        EDITABLE_FIELDS, VISUAL_FIELDS, JUDGMENT_KINDS, JUDGMENT_TARGETS,
+        EDITABLE_FIELDS, VISUAL_FIELDS, JUDGMENT_KINDS, JUDGMENT_TARGETS, PROJECTILE_EVENT_KINDS,
         ROTATION_RESET_MODES, ticks,
-        normalizeJudgment, normalizeBeat, normalizeBeats, compactBeats, visualValue,
+        normalizeJudgment, normalizeProjectileEvent, normalizeBeat, normalizeBeats, compactBeats, visualValue,
         canonicalJson, compareBeats });
 }));

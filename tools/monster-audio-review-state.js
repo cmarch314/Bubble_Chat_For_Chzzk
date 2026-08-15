@@ -39,8 +39,12 @@
     }
 
     function createMotionDraft(pattern = {}, timeline = {}) {
-        const graphBeats = Array.isArray(pattern.motionGraph?.beats)
-            ? pattern.motionGraph.beats : (pattern.motion || []);
+        // The compiled BEAT graph is the only source that contains the full
+        // event lifecycle (launch/contact/finish). motionGraph is a visual
+        // projection and must never shadow those events in the editor.
+        const graphBeats = Array.isArray(pattern.beatV2?.beats)
+            ? pattern.beatV2.beats
+            : Array.isArray(pattern.motionGraph?.beats) ? pattern.motionGraph.beats : (pattern.motion || []);
         // Native BEAT graphs keep appearance under tracks.visual[].value,
         // whereas migration projections already expose it at the beat root.
         // The editor must begin from the same flat visual data regardless of
@@ -55,8 +59,16 @@
             // Keep graph envelope/event metadata out of the editable draft.
             // Saving those implementation fields back as motion values caused
             // reload verification to compare two different representations.
+            const projectileEvents = (Array.isArray(beat?.events) ? beat.events : [])
+                .filter(event => contract.PROJECTILE_EVENT_KINDS.includes(event?.kind))
+                .map(event => clone(event));
+            const judgments = (Array.isArray(beat?.events) ? beat.events : [])
+                .filter(event => contract.JUDGMENT_KINDS.includes(event?.kind))
+                .map(event => clone(event));
             const { id, beat: legacyBeat, tracks, events, ...flat } = beat || {};
-            return [key, { ...flat, ...visual, ticks: ticks(beat?.ticks) }];
+            return [key, { ...flat, ...visual,
+                ...(judgments.length ? { judgments } : {}),
+                ...(projectileEvents.length ? { projectileEvents } : {}), ticks: ticks(beat?.ticks) }];
         }));
         const draft = Object.fromEntries((timeline.beats || []).map(beat => {
             const source = { ...(authored.get(beat.id) || {}) };
@@ -93,6 +105,49 @@
         return contract.normalizeBeats(draft);
     }
 
+    function buildEditedBeatV2(pattern = {}, draft = {}) {
+        if (pattern.beatV2?.backend !== 'beat-v2' || !Array.isArray(pattern.beatV2.beats)) return null;
+        const graph = clone(pattern.beatV2);
+        let elapsed = 0;
+        const allEvents = [];
+        graph.beats = graph.beats.map(sourceBeat => {
+            const id = String(sourceBeat.id || sourceBeat.beat || '');
+            const authored = draft[id] || {};
+            const beat = clone(sourceBeat);
+            beat.ticks = ticks(authored.ticks ?? beat.ticks);
+            beat.startTicks = elapsed;
+            beat.endTicks = elapsed + beat.ticks;
+            beat.beat = id;
+            beat.id = id;
+            elapsed += beat.ticks;
+            const preserved = (beat.events || []).filter(event =>
+                !contract.JUDGMENT_KINDS.includes(event?.kind)
+                && !contract.PROJECTILE_EVENT_KINDS.includes(event?.kind));
+            const events = [
+                ...preserved,
+                ...(Array.isArray(authored.projectileEvents) ? authored.projectileEvents : []),
+                ...(Array.isArray(authored.judgments) ? authored.judgments : [])
+            ].map(event => ({ ...clone(event), beatId: id,
+                offsetTicks: Math.max(0, Math.min(beat.ticks - 1,
+                    Math.round(Number(event.offsetTicks) || 0))),
+                atTicks: beat.startTicks + Math.max(0, Math.min(beat.ticks - 1,
+                    Math.round(Number(event.offsetTicks) || 0))) }));
+            beat.events = events;
+            const frames = Array.isArray(beat.tracks?.visual) ? clone(beat.tracks.visual) : [];
+            if (!frames.length) frames.push({ offsetTicks: 0, value: {} });
+            const index = frames.length - 1;
+            frames[index] = { ...frames[index], value: contract.visualValue(authored) };
+            beat.tracks = { ...(beat.tracks || {}), visual: frames };
+            allEvents.push(...events);
+            return beat;
+        });
+        graph.totalTicks = elapsed;
+        graph.events = allEvents.sort((left, right) => left.atTicks - right.atTicks
+            || String(left.id || '').localeCompare(String(right.id || '')));
+        graph.eventIds = graph.events.map(event => event.id).filter(Boolean);
+        return graph;
+    }
+
     function buildPreviewMotion(pattern = {}, timeline = {}, draft = {}) {
         const motion = (timeline.beats || []).map(beat => ({ ...clone(draft[beat.id] || {}), beat: beat.id }));
         const graphRenderer = pattern.motionGraph?.renderer;
@@ -108,7 +163,8 @@
                     beat.hitOffsetTicks ?? timeline.beats?.[index]?.hitOffsetTicks
                 ) || 0))
             })),
-            renderer: useBeatMotion ? 'beat' : 'keyframe-beat'
+            renderer: useBeatMotion ? 'beat' : 'keyframe-beat',
+            beatV2: buildEditedBeatV2(pattern, draft)
         });
     }
 
@@ -124,7 +180,9 @@
                 : (authored.hit === undefined ? Boolean(beat.hit) : Boolean(authored.hit));
             const hitOffsetTicks = hit ? Math.max(0, Math.min(length - 1,
                 Math.round(Number(authored.hitOffsetTicks ?? beat.hitOffsetTicks) || 0))) : 0;
-            const projected = { ...beat, hit, hitOffsetTicks, judgments,
+            const projectileEvents = (Array.isArray(authored.projectileEvents)
+                ? authored.projectileEvents : []).map(item => clone(item));
+            const projected = { ...beat, hit, hitOffsetTicks, judgments, projectileEvents,
                 judgmentOffsets: clone(authored.judgmentOffsets || beat.judgmentOffsets || {}), ticks: length,
                 startTicks: elapsed, endTicks: elapsed + length };
             elapsed += length;
@@ -154,6 +212,27 @@
         if (!beat) return 0;
         return beat.startTicks + Math.round(beat.ticks
             * Math.max(0, Math.min(1, Number(beatProgress) || 0)));
+    }
+
+    function authoredEventTicks(projected = {}, draft = {}) {
+        const ticksById = new Map();
+        const projectileById = new Map();
+        for (const beat of projected.beats || []) {
+            for (const event of draft[beat.id]?.judgments || []) {
+                const atTicks = beat.startTicks + Number(event.offsetTicks || 0);
+                ticksById.set(event.id, atTicks);
+                if (event.projectileId) projectileById.set(event.projectileId,
+                    { ...(projectileById.get(event.projectileId) || {}), outcome: event, outcomeAt: atTicks });
+            }
+            for (const event of draft[beat.id]?.projectileEvents || []) {
+                const atTicks = beat.startTicks + Number(event.offsetTicks || 0);
+                ticksById.set(event.id, atTicks);
+                const key = event.kind === 'projectile-launch' ? 'launch' : 'finish';
+                projectileById.set(event.projectileId,
+                    { ...(projectileById.get(event.projectileId) || {}), [key]: event, [`${key}At`]: atTicks });
+            }
+        }
+        return { ticksById, projectileById };
     }
 
     function normalizePreviewScenario(value = {}) {
@@ -426,16 +505,23 @@
 
         moveJudgmentById(id, requestedTick) {
             const projected = projectTimeline(this.timeline, this.draft);
-            const tick = Math.max(0, Math.min(Math.max(0, projected.durationTicks - 1),
+            let tick = Math.max(0, Math.min(Math.max(0, projected.durationTicks - 1),
                 Math.round(Number(requestedTick) || 0)));
-            const target = projected.beats.find(beat => tick >= beat.startTicks && tick < beat.endTicks) || projected.beats.at(-1);
             let value = null;
             for (const beat of Object.values(this.draft)) {
                 if (!Array.isArray(beat.judgments)) continue;
                 const match = beat.judgments.find(item => item.id === id);
                 if (match) value = clone(match);
             }
-            if (!value || !target) throw new Error(`Unknown judgment: ${id}`);
+            if (!value) throw new Error(`Unknown judgment: ${id}`);
+            if (value.projectileId) {
+                const lifecycle = authoredEventTicks(projected, this.draft).projectileById.get(value.projectileId);
+                if (Number.isFinite(lifecycle?.launchAt)) tick = Math.max(tick, lifecycle.launchAt + 1);
+                if (Number.isFinite(lifecycle?.finishAt)) tick = Math.min(tick, lifecycle.finishAt - 1);
+            }
+            const target = projected.beats.find(beat => tick >= beat.startTicks && tick < beat.endTicks)
+                || projected.beats.at(-1);
+            if (!target) throw new Error(`Unknown judgment target tick: ${id}`);
             this.checkpoint();
             for (const beat of Object.values(this.draft)) if (Array.isArray(beat.judgments)) {
                 beat.judgments = beat.judgments.filter(item => item.id !== id);
@@ -445,6 +531,39 @@
             this.draft[target.id] = { ...this.draft[target.id], judgments: list };
             this.scrub = { tick, beatId: target.id, beatProgress: (tick - target.startTicks) / Math.max(1, target.ticks) };
             return this.emit('move-judgment-id', { id, targetId: target.id, tick });
+        }
+
+        moveProjectileEventById(id, requestedTick) {
+            const projected = projectTimeline(this.timeline, this.draft);
+            let tick = Math.max(0, Math.min(Math.max(0, projected.durationTicks - 1),
+                Math.round(Number(requestedTick) || 0)));
+            let value = null;
+            for (const beat of Object.values(this.draft)) {
+                const match = beat.projectileEvents?.find(item => item.id === id);
+                if (match) value = clone(match);
+            }
+            if (!value) throw new Error(`Unknown projectile event: ${id}`);
+            const lifecycle = authoredEventTicks(projected, this.draft).projectileById.get(value.projectileId);
+            if (value.kind === 'projectile-launch' && Number.isFinite(lifecycle?.outcomeAt)) {
+                tick = Math.min(tick, lifecycle.outcomeAt - 1);
+            }
+            if (value.kind === 'projectile-finish' && Number.isFinite(lifecycle?.outcomeAt)) {
+                tick = Math.max(tick, lifecycle.outcomeAt + 1);
+            }
+            const target = projected.beats.find(beat => tick >= beat.startTicks && tick < beat.endTicks)
+                || projected.beats.at(-1);
+            if (!target) throw new Error(`Unknown projectile event target tick: ${id}`);
+            this.checkpoint();
+            for (const beat of Object.values(this.draft)) if (Array.isArray(beat.projectileEvents)) {
+                beat.projectileEvents = beat.projectileEvents.filter(item => item.id !== id);
+            }
+            const list = Array.isArray(this.draft[target.id].projectileEvents)
+                ? this.draft[target.id].projectileEvents : [];
+            list.push({ ...value, offsetTicks: tick - target.startTicks });
+            this.draft[target.id] = { ...this.draft[target.id], projectileEvents: list };
+            this.scrub = { tick, beatId: target.id,
+                beatProgress: (tick - target.startTicks) / Math.max(1, target.ticks) };
+            return this.emit('move-projectile-event', { id, targetId: target.id, tick });
         }
 
         setScenario(patch = {}) {
@@ -501,7 +620,7 @@
         slotIdsForBeat,
         ticks,
         createMotionDraft,
-        buildPreviewMotion,
+        buildPreviewMotion, buildEditedBeatV2,
         projectTimeline,
         locateTick,
         tickAtBeatProgress,

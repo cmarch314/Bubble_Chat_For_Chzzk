@@ -15,7 +15,7 @@ const source = {
         damageScale: 1.4, hitOffsetTicks: 3, strideFlipTicks: 4, stompSteps: 2,
         fxDurationTicks: 5, fxSecondaryDurationTicks: 6, rotationDegrees: 90,
         hit: false, alignRotationToTravel: true, instantOpacity: false, instantPose: true,
-        continueTravel: true, flipFacing: false, keepRotation: true,
+        continueTravel: true, flipFacing: false, projectileRecoil: true, keepRotation: true,
         rotationDirection: 'clockwise', rotationResetMode: 'snap-end', fx: 'dust', fxAnchor: 'target', fxSecondary: 'arc',
         fxSecondaryAnchor: 'head', fxSecondaryAngleMode: 'travel',
         judgments: [{ id: 'windup-hit', group: 'impact', kind: 'damage', target: 'pair',
@@ -68,6 +68,8 @@ assert.match(read('tools/monster-audio-review-state.js'), /contract\.EDITABLE_FI
     'the browser editor must consume the shared field contract');
 assert.match(read('tools/monster-audio-review-app.js'), /class="rotation-reset-mode"/,
     'the editor must expose the authored return-rotation mode instead of hiding it');
+assert.match(read('tools/monster-audio-review-app.js'), /class="wide projectile-recoil-toggle"/,
+    'the editor must expose the BEAT-owned projectile recoil switch');
 assert.doesNotMatch(read('tools/monster-audio-review-app.js'), /class="keep-rotation"/,
     'the ambiguous legacy keep-rotation checkbox must not remain as a second UI owner');
 

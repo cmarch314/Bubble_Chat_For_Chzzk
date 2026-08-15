@@ -78,7 +78,7 @@ assert.match(reviewUi, /MonsterAudioReviewState\.createEditorSession\(\)/,
     'one editor session must own timeline, selection, scrub, history and save state');
 assert.match(reviewUi, /animationDurationMs: snapshot\.timeline\.durationTicks \* 100/,
     'the preview animation and timeline must consume the same projected duration');
-assert.match(reviewUi, /compareMotionValues\(beats, verify\)/,
+assert.match(reviewUi, /contract\.compareBeats\(left, right\)/,
     'saving must compare the shared normalized contract against a freshly reloaded runtime projection');
 assert.match(reviewUi, /assertGeneratedAudioRoute\(result\)/,
     'audio assignments must fail visibly when their runtime route module was not generated');

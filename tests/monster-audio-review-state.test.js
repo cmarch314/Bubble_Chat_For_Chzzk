@@ -211,12 +211,26 @@ projectileSession.load({ id: 'test.projectile',
     timeline: { beats: [{ id: 'spit', ticks: 7 }, { id: 'recover', ticks: 5 }] },
     motion: [{ beat: 'spit', ticks: 7, judgments: [{ id: 'contact', group: 'contact', kind: 'damage',
         target: 'primary', damagePercent: 30, offsetTicks: 4 }] }, { beat: 'recover', ticks: 5 }],
-    beatV2: { events: [{ id: 'launch', kind: 'projectile-launch', beatId: 'spit',
-        offsetTicks: 2, projectileId: 'fireball', outcomeEventId: 'contact' }] }
+    beatV2: { backend: 'beat-v2', beats: [
+        { id: 'spit', ticks: 7, tracks: { visual: [{ offsetTicks: 0, value: {} }] }, events: [
+            { id: 'launch', kind: 'projectile-launch', offsetTicks: 1, projectileId: 'fireball',
+                target: 'primary', origin: 'part:head', outcomeEventId: 'contact' },
+            { id: 'contact', group: 'contact', kind: 'damage', target: 'primary', projectileId: 'fireball',
+                damagePercent: 30, offsetTicks: 4 }
+        ] },
+        { id: 'recover', ticks: 5, tracks: { visual: [{ offsetTicks: 0, value: {} }] }, events: [
+            { id: 'finish', kind: 'projectile-finish', offsetTicks: 2, projectileId: 'fireball' }
+        ] }
+    ] }
 });
 projectileSession.moveJudgmentById('contact', 2);
 assert.strictEqual(projectileSession.serialize().spit.judgments[0].offsetTicks, 2,
-    'a projectile HIT marker must remain independently draggable; save relocates its linked lifecycle');
+    'a projectile HIT marker must remain independently draggable');
+assert.strictEqual(projectileSession.serialize().spit.projectileEvents[0].offsetTicks, 1,
+    'moving contact must not silently move launch');
+projectileSession.moveProjectileEventById('launch', 0);
+assert.strictEqual(projectileSession.serialize().spit.projectileEvents[0].offsetTicks, 0,
+    'launch must have its own independently draggable timeline marker');
 
 judgmentSession.removeJudgment('j1');
 assert.deepStrictEqual(judgmentSession.serialize().impact.judgments, [],

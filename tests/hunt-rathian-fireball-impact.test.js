@@ -9,6 +9,7 @@ const CandidateCatalog = require('../js/effects/hunt/HuntMonsterCandidateCatalog
 const ReviewState = require('../tools/monster-audio-review-state.js');
 const AudioPatternMap = require('../tools/hunt-audio-pattern-map.js');
 const PatternCatalog = require('../js/effects/hunt/HuntMonsterPatternCatalog.js');
+const HuntBeatActionRuntime = require('../js/effects/hunt/HuntBeatActionRuntime.js');
 
 const kit = JSON.parse(fs.readFileSync(path.resolve(
     __dirname, '../data/hunt/monster-kits/candidates/rathian.json'), 'utf8'));
@@ -30,6 +31,8 @@ assert.strictEqual(fireball.delivery, 'projectile');
 assert.strictEqual(fireball.originPart, 'head');
 const single = projectileTriples(fireball);
 assert.strictEqual(single.length, 1, 'single fireball has exactly one authored launch');
+assert.strictEqual(single[0].launch.atTicks, 19, 'single fireball launches on the first spit tick');
+assert.strictEqual(single[0].contact.atTicks, 24, 'single fireball contact follows its authored flight');
 assert.ok(single[0].launch.atTicks < single[0].contact.atTicks);
 assert.ok(single[0].contact.atTicks < single[0].finish.atTicks);
 assert.strictEqual(single[0].launch.target, single[0].contact.target);
@@ -48,6 +51,16 @@ triple.forEach(({ launch, contact, finish }) => {
         `${launch.projectileId} lifecycle is ordered by BEAT`);
     assert.strictEqual(launch.target, contact.target);
 });
+const emittedLaunchTicks = [];
+const tripleRuntime = new HuntBeatActionRuntime({
+    onEvent: (_state, event) => {
+        if (event.kind === 'projectile-launch') emittedLaunchTicks.push(event.atTicks);
+    }
+});
+tripleRuntime.begin('rathian', tripleFireball.beatV2, { pattern: tripleFireball });
+for (let tick = 0; tick < tripleFireball.beatV2.totalTicks; tick += 1) tripleRuntime.tick('rathian');
+assert.deepStrictEqual(emittedLaunchTicks, [17, 24, 31],
+    'the single BEAT runtime must emit every fireball on the first tick of its owning spit');
 
 // The review UI receives a visual draft, then recompiles it for the shared
 // Preview/live BEAT runtime. Projectile lifecycle metadata must survive that
@@ -63,7 +76,8 @@ const previewMotion = ReviewState.buildPreviewMotion(
 );
 const previewCompiled = PatternCatalog.synchronizeEditedPattern({
     ...reviewPattern,
-    motion: previewMotion.motion
+    motion: previewMotion.motion,
+    beatV2: previewMotion.beatV2
 });
 assert.ok(previewCompiled.beatV2.events.some(event => event.kind === 'projectile-launch'),
     'editor projection preserves an authored fireball launch');

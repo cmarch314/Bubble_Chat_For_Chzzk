@@ -419,6 +419,42 @@ class HuntMotionCompiler {
                     });
                 }
             }
+            // Projectile launch recoil stays inside the authored BEAT. It is
+            // therefore seekable and shares the exact launch tick in Preview
+            // and live combat instead of becoming a renderer-owned timer.
+            if (beat.projectileRecoil === true) {
+                const span = endAt - startAt;
+                const direction = state.facing || baseDirection || 1;
+                // A breath is not a firearm kick.  Keep the body orientation
+                // stable at the head anchor and sell the exhale through a deep
+                // chest squeeze, a brief neck-led stretch, then a settle.
+                // Do not put the squeeze on the first rendered frame: the
+                // projectile still launches on tick zero, while the torso
+                // reaches its exhale peak at the authored first-hit tick.
+                // This is authored pose data on the same BEAT clock.
+                pose.push({
+                    offset: startAt + span * .035,
+                    ...this.#poseFrame({ ...state,
+                        scaleX: state.scaleX * .96,
+                        scaleY: state.scaleY * 1.035,
+                        skewY: state.skewY - direction * .55 })
+                });
+                pose.push({
+                    offset: startAt + span * .15,
+                    ...this.#poseFrame({ ...state,
+                        scaleX: state.scaleX * .82,
+                        scaleY: state.scaleY * 1.12,
+                        skewY: state.skewY - direction * 1.45 })
+                });
+                pose.push({
+                    offset: startAt + span * .34,
+                    ...this.#poseFrame({ ...state,
+                        scaleX: state.scaleX * 1.025,
+                        scaleY: state.scaleY * .96,
+                        skewY: state.skewY + direction * .3 })
+                });
+                pose.push({ offset: startAt + span * .64, ...this.#poseFrame(state) });
+            }
             pose.push({
                 offset: startAt,
                 ...this.#poseFrame(beat.instantPose

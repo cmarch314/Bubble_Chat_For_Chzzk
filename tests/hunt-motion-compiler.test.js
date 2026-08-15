@@ -179,6 +179,19 @@ assert.ok(transformed.placement.some(frame => frame.easing === HuntMotionCompile
 assert.ok(transformed.pose.some(frame => frame.easing === HuntMotionCompiler.EASING_PRESETS['slow-fast-slow']));
 assert.ok(transformed.pose.some(frame => frame.transform.includes('skew(5.00deg, -3.00deg)')));
 assert.ok(transformed.pose.some(frame => frame.transform.includes('scale(1.2000, 0.8000)')));
+
+const projectileRecoil = HuntMotionCompiler.compile([
+    { beat: 'inhale', ticks: 6, pose: 'brace', scaleX: 1.08, scaleY: 1.12 },
+    { beat: 'spit', ticks: 7, pose: 'brace', scaleX: .9, scaleY: .84,
+        projectileRecoil: true, projectileRecoilDegrees: 11 }
+], { anchors });
+const recoilStart = 6 / 13;
+assert.ok(projectileRecoil.pose.some(frame => frame.offset > recoilStart
+    && frame.offset < recoilStart + .03
+    && frame.transform.includes('rotate(0.00deg)')
+    && frame.transform.includes('scale(')
+    && frame.transform.includes('skew(0.00deg, -0.55deg)')),
+    'a projectile recoil must visibly exhale from the head anchor without a firearm-like body rotation');
 assert.ok(transformed.pose.some(frame => frame.origin === '25% 75%'));
 
 const continuousCharge = HuntMotionCompiler.compile([

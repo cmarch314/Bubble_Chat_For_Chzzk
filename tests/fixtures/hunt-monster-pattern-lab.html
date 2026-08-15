@@ -98,6 +98,7 @@
   <script src="../../js/effects/hunt/HuntBeatV2Adapter.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterPatternCatalog.js"></script>
   <script src="../../js/effects/hunt/HuntBeatActionRuntime.js"></script>
+  <script src="../../js/effects/hunt/HuntProjectilePresentationRuntime.js"></script>
   <script src="../../js/effects/hunt/HuntCombatJudgmentRuntime.js"></script>
   <script src="../../js/effects/hunt/HuntCombatJudgmentResolver.js"></script>
   <script src="../../js/effects/hunt/HuntHunterBeatCatalog.js"></script>
@@ -181,6 +182,8 @@
     let pendingReactionBeatTimers=[];
     let previewRuntimePattern=null;
     let previewRuntimeSelection=null;
+    let previewBeatEventRuntime=null;
+    let previewBeatEventTimer=null;
     const candidateMonsterId=String(new URLSearchParams(location.search).get('candidate')||'').trim();
     const candidateActions=monsterId=>candidateMonsterId===monsterId
       ?HuntMonsterCandidateCatalog.forMonster(monsterId):[];
@@ -195,6 +198,9 @@
       // to process hunter damage/reactions behind the editor preview.
       animator.cancelBeatMotionPreview?.();
       animator.cancelPreviewProjectiles?.(reason);
+      if(previewBeatEventTimer!==null){clearInterval(previewBeatEventTimer);previewBeatEventTimer=null;}
+      previewBeatEventRuntime?.cancel?.('preview-monster',reason);
+      previewBeatEventRuntime=null;
       animator.clearPreviewJudgmentMarkers?.();
       previewRuntimePattern=null;
       previewRuntimeSelection=null;
@@ -236,14 +242,48 @@
       previewRuntimeSelection={primary:selection.primary,indices:[...selection.indices]};
       const accepted=animator.playBeatMotion(
         monsterImg,motionPattern,motionPattern.id,targetCard,targets);
-      // The editor intentionally skips hunter damage/reactions, but detached
-      // projectiles are authored monster presentation. Schedule them on the
-      // compiled judgment clock rather than hiding them with combat resolution.
-      if(!motionPattern.runtimePreviewScrub
-        &&(motionPattern.delivery==='projectile'||motionPattern.type==='projectile'
-          ||motionPattern.tags?.includes('projectile')))
-        animator.schedulePreviewProjectile?.(motionPattern,selection.primary,
-          motionPattern.name||'',motionPattern.emoji||'🔥');
+      // Motion-only Preview has no HuntEngine damage loop, but it still feeds
+      // the exact compiled BEAT events into the same projectile presenter as
+      // live combat. No renderer-owned launch delay is permitted.
+      const graph=motionPattern.beatV2;
+      if(!motionPattern.runtimePreviewScrub&&graph?.backend==='beat-v2'){
+        const resolveTarget=target=>{
+          const primary=Number(selection.primary||0);
+          if(target==='left')return primary-1;
+          if(target==='right')return primary+1;
+          return primary;
+        };
+        const judgments=(graph.events||[])
+          .filter(event=>['damage','judgment','roar','tremor','wind'].includes(event.kind))
+          .map(event=>({...event,targetIndices:[resolveTarget(event.target)]}));
+        previewBeatEventRuntime=new HuntBeatActionRuntime({
+          onEvent:(state,event)=>{
+            animator.observeMonsterBeatEvent?.(state,event);
+            // The editor intentionally does not run hunter combat/reaction
+            // logic, but projectile contact remains authored monster motion.
+            // Resolve that visual outcome at the same BEAT event—never from a
+            // second renderer timer or a guessed flight duration.
+            if(event.kind==='damage'&&event.projectileId){
+              const targetIndex=resolveTarget(event.target);
+              animator.resolveElementalProjectileOutcome?.(motionPattern,
+                {...event,sessionId:state.context.actionSessionId},
+                [{index:targetIndex,result:'hit'}]);
+            }
+          },
+          onComplete:state=>animator.completeMonsterBeatPresentation?.(state),
+          onCancel:(state,why)=>animator.cancelMonsterBeatPresentation?.(state,why)
+        });
+        const runtimeState=previewBeatEventRuntime.begin('preview-monster',graph,{
+          pattern:motionPattern,targetIndex:Number(selection.primary||0),judgmentEvents:judgments,
+          actionSessionId:`preview:${graph.id}:${Date.now()}`
+        });
+        animator.beginMonsterBeatPresentation?.(runtimeState);
+        previewBeatEventTimer=setInterval(()=>{
+          if(!previewBeatEventRuntime?.tick('preview-monster')){
+            clearInterval(previewBeatEventTimer);previewBeatEventTimer=null;
+          }
+        },100);
+      }
       document.documentElement.dataset.previewActionAccepted=String(accepted!==false);
       document.documentElement.dataset.previewBeatActive=String(Boolean(accepted));
       return accepted!==false;

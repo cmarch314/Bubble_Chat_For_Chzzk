@@ -31,7 +31,7 @@
     const app = {
         monster: '', huntId: '', candidateId: '', monsters: [], categories: [], groups: [], commonGroups: [], presets: {}, patterns: [],
         partReactions: [], systemAudioPattern: null,
-        selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', anatomy: true, sourceQueue: [], previewTimers: [],
+        selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', selectedProjectileEventId: '', anatomy: true, sourceQueue: [], previewTimers: [],
         previewAudios: [], previewAudioSchedule: [], capabilities: [], buildId: '', session: MonsterAudioReviewState.createEditorSession(),
         pickerCategory: '', pickerStatus: 'all', previewReady: false, previewSequence: 0,
         previewRandomPairTarget: '',
@@ -307,6 +307,7 @@
             runtimePreviewMuteAudio: true
         };
         if (motionPayload.useBeatMotion) preview.motion = motionPayload.motion;
+        if (motionPayload.beatV2) preview.beatV2 = motionPayload.beatV2;
         else {
             preview.motion = null;
             preview.runtimeTimingBeats = motionPayload.runtimeTimingBeats;
@@ -848,6 +849,28 @@
             installUnifiedJudgmentDrag(marker, beat, judgment, track);
             track.appendChild(marker);
         }
+        const projectileEvents = snapshot.timeline.beats.flatMap(beat =>
+            (beat.projectileEvents || []).map(projectileEvent => ({ beat, projectileEvent })));
+        for (const { beat, projectileEvent } of projectileEvents) {
+            const marker = document.createElement('span');
+            const markerTick = beat.startTicks + Number(projectileEvent.offsetTicks || 0);
+            const launch = projectileEvent.kind === 'projectile-launch';
+            marker.className = `hit-tick-marker projectile ${launch ? 'launch' : 'finish'}${
+                projectileEvent.id === app.selectedProjectileEventId ? ' selected' : ''}`;
+            marker.dataset.beat = beat.id;
+            marker.dataset.projectileEventId = projectileEvent.id;
+            marker.style.left = `${markerTick / Math.max(1, snapshot.timeline.durationTicks) * 100}%`;
+            marker.innerHTML = `<b>${launch ? 'LAUNCH' : 'FINISH'}</b><small>${markerTick}틱</small>`;
+            marker.title = `${projectileEvent.projectileId} ${launch ? '발사' : '소멸'} · 글자를 드래그해 독립 조절`;
+            marker.onclick = event => {
+                event.stopPropagation();
+                app.selectedProjectileEventId = projectileEvent.id;
+                app.selectedJudgmentId = '';
+                selectPart({ beatId: beat.id });
+            };
+            installProjectileEventDrag(marker, beat, projectileEvent, track);
+            track.appendChild(marker);
+        }
         const cursor = document.createElement('i'); cursor.className = 'scrub-cursor'; track.appendChild(cursor);
         const readout = document.createElement('output'); readout.className = 'scrub-readout'; track.appendChild(readout);
         const slider = document.createElement('input'); slider.className = 'timeline-slider'; slider.type = 'range';
@@ -913,6 +936,34 @@
             const finish = () => {
                 marker.onpointermove = null; marker.onpointerup = null; marker.onpointercancel = null;
                 if (moved) app.session.moveJudgmentById(judgment.id, latestTick);
+                renderPatternDesk(); sendPreview({ scrub: true });
+            };
+            marker.onpointerup = finish; marker.onpointercancel = finish;
+        };
+    }
+
+    function installProjectileEventDrag(marker, sourceBeat, projectileEvent, track) {
+        marker.onpointerdown = event => {
+            if (!event.target.closest('b')) return;
+            event.preventDefault(); event.stopPropagation(); marker.setPointerCapture(event.pointerId);
+            app.selectedProjectileEventId = projectileEvent.id;
+            app.selectedJudgmentId = '';
+            marker.classList.add('dragging');
+            const snapshot = app.session.snapshot(), total = snapshot.timeline.durationTicks,
+                width = track.getBoundingClientRect().width,
+                sourceTick = sourceBeat.startTicks + Number(projectileEvent.offsetTicks || 0),
+                startX = event.clientX;
+            let latestTick = sourceTick, moved = false;
+            marker.onpointermove = move => {
+                latestTick = Math.max(0, Math.min(total - 1,
+                    Math.round(sourceTick + (move.clientX - startX) / Math.max(1, width) * total)));
+                moved ||= latestTick !== sourceTick;
+                marker.style.left = `${latestTick / Math.max(1, total) * 100}%`;
+                marker.querySelector('small').textContent = `${latestTick}틱`;
+            };
+            const finish = () => {
+                marker.onpointermove = null; marker.onpointerup = null; marker.onpointercancel = null;
+                if (moved) app.session.moveProjectileEventById(projectileEvent.id, latestTick);
                 renderPatternDesk(); sendPreview({ scrub: true });
             };
             marker.onpointerup = finish; marker.onpointercancel = finish;
@@ -1110,6 +1161,14 @@
                 const judgment = beat.judgments?.find(item => item.id === node.dataset.judgmentId);
                 if (!judgment) return;
                 const markerTick = beat.startTicks + Number(judgment.offsetTicks || 0);
+                node.style.left = `${markerTick / Math.max(1, snapshot.timeline.durationTicks) * 100}%`;
+                const label = node.querySelector('small'); if (label) label.textContent = `${markerTick}틱`;
+                return;
+            }
+            if (node.dataset.projectileEventId) {
+                const projectileEvent = beat.projectileEvents?.find(item => item.id === node.dataset.projectileEventId);
+                if (!projectileEvent) return;
+                const markerTick = beat.startTicks + Number(projectileEvent.offsetTicks || 0);
                 node.style.left = `${markerTick / Math.max(1, snapshot.timeline.durationTicks) * 100}%`;
                 const label = node.querySelector('small'); if (label) label.textContent = `${markerTick}틱`;
                 return;
@@ -1332,7 +1391,8 @@
             <section class="wide rotation-origin-picker"><b>회전 · 변형 축</b><div>${[['part:torso','몸통 중심'],['part:feet','발 중심'],['part:head','머리'],['part:tail','꼬리']].map(([origin,label]) => `<button type="button" data-origin="${origin}" class="${value.origin === origin || (!value.origin && origin === 'part:torso') ? 'active' : ''}">${label}</button>`).join('')}</div><small>회전·배율·기울기가 같은 부위 축을 공유함</small></section>
             <label class="wide">이동 속도<select data-key="moveEasing">${options(easings, value.moveEasing || 'smooth')}</select></label><label class="wide">회전 속도<select data-key="rotationEasing">${options(easings, value.rotationEasing || 'smooth')}</select></label>
             <label class="wide stride-toggle"><span>씰룩씰룩 좌우 반전</span><input class="stride-toggle-input" type="checkbox"${Number(value.strideFlipTicks) > 0 ? ' checked' : ''}></label>
-            <label class="stride-period">반전 주기 (틱)<input data-key="strideFlipTicks" type="number" min="1" max="60" value="${Number(value.strideFlipTicks) > 0 ? Number(value.strideFlipTicks) : 3}"${Number(value.strideFlipTicks) > 0 ? '' : ' disabled'}></label></div>`;
+            <label class="stride-period">반전 주기 (틱)<input data-key="strideFlipTicks" type="number" min="1" max="60" value="${Number(value.strideFlipTicks) > 0 ? Number(value.strideFlipTicks) : 3}"${Number(value.strideFlipTicks) > 0 ? '' : ' disabled'}></label>
+            <label class="wide projectile-recoil-toggle"><span>발사 반동</span><input type="checkbox"${value.projectileRecoil ? ' checked' : ''}></label></div>`;
         // The destination grid is intentionally collapsible: it contains every
         // placement preset, but it should not bury the current BEAT's timing
         // and audio controls during ordinary review work.
@@ -1375,6 +1435,10 @@
                 // authored value reappear after reload and fail round-trip verification.
                 strideFlipTicks: event.target.checked ? Math.max(1, Number(period.value) || 3) : 0
             });
+            renderPatternDesk(); sendPreview({ scrub: true }); seekPreview(app.session.scrub.tick);
+        };
+        host.querySelector('.projectile-recoil-toggle input').onchange = event => {
+            app.session.updateBeat(beatId, { projectileRecoil: event.target.checked });
             renderPatternDesk(); sendPreview({ scrub: true }); seekPreview(app.session.scrub.tick);
         };
         const applyRotationDegrees = (direction, rawDegrees) => {

@@ -6,10 +6,21 @@ class HuntMonsterAttackAnimator {
         this.motionGeneration = 0;
         this.activeMonsterMotion = null;
         this.activeBeatMotionPreview = null;
-        // Detached elemental projectiles wait at their authored contact point
-        // until the BEAT judgment resolves.  The live outcome, never a preview
-        // guess, decides whether they burst or continue beyond the battlefield.
+        // Legacy pending map is retained only for non-BEAT reference profiles.
+        // Approved graphs route every projectile through the BEAT-owned session
+        // runtime below; it has no timer and cannot infer a launch from impact.
         this.pendingElementalProjectiles = new Map();
+        this.beatProjectileFx = new Map();
+        const ProjectileRuntime = typeof HuntProjectilePresentationRuntime !== 'undefined'
+            ? HuntProjectilePresentationRuntime
+            : (typeof require === 'function' ? require('./HuntProjectilePresentationRuntime.js') : null);
+        this.projectilePresentationRuntime = ProjectileRuntime ? new ProjectileRuntime({
+            onLaunch: (projectile, state, event) => this.launchBeatProjectile(projectile, state, event),
+            onOutcome: (projectile, judgment, results) => this.resolveBeatProjectileOutcome(projectile, judgment, results),
+            onFinish: projectile => this.finishBeatProjectile(projectile),
+            onCancel: session => this.cancelBeatProjectileSession(session),
+            onAnomaly: (kind, details) => this.traceMonsterMotion(`projectile-${kind}`, details, true)
+        }) : null;
         this.motionTrace = [];
         this.motionTraceLimit = 48;
     }
@@ -29,32 +40,52 @@ class HuntMonsterAttackAnimator {
         };
     }
 
-    static targetFacingOrigin(monsterRect, targetRect, partPoint = null, baseFacing = 'front') {
-        const monsterCenterX = monsterRect.left + monsterRect.width / 2;
-        const targetCenterX = targetRect.left + targetRect.width / 2;
+    // A projectile lane is authored independently from a damage recipient.
+    // When an adjacent lane falls beyond the four hunters (for example
+    // 1 -> 0 or 4 -> 5), keep the visual flight alive and send it out of the
+    // arena instead of treating the missing card as a failed launch.
+    static outboundProjectileTarget(containerRect, target = '') {
+        const lane = String(target || '').trim().toLowerCase();
+        const direction = lane === 'left' ? -1 : lane === 'right' ? 1 : 0;
+        if (!direction || !containerRect) return null;
+        const width = Math.max(1, Number(containerRect.width || 0));
+        const height = Math.max(1, Number(containerRect.height || 0));
+        const left = Number(containerRect.left || 0);
+        const top = Number(containerRect.top || 0);
+        const rect = {
+            left: left + (direction < 0 ? -width * .18 : width * 1.18),
+            top: top + height * .58,
+            width: 2,
+            height: 2
+        };
+        return {
+            querySelector: () => null,
+            getBoundingClientRect: () => rect
+        };
+    }
+
+    static targetFacingOrigin(monsterRect, _targetRect, partPoint = null, _baseFacing = 'front', facingFlip = 1) {
         const authoredX = Number(partPoint?.x ?? .5);
-        let resolvedX = authoredX;
-        if (baseFacing === 'left') {
-            resolvedX = targetCenterX >= monsterCenterX ? 1 - authoredX : authoredX;
-        } else if (baseFacing === 'right') {
-            resolvedX = targetCenterX >= monsterCenterX ? authoredX : 1 - authoredX;
-        }
+        // Origin follows the sprite that is currently on screen, never the
+        // side of a selected hunter.  Target-driven mirroring made an
+        // unflipped left-facing Rathian breathe from its tail whenever a
+        // right-hand lane was selected.
+        const resolvedX = Number(facingFlip) < 0 ? 1 - authoredX : authoredX;
         return {
             x: monsterRect.left + monsterRect.width * resolvedX,
             y: monsterRect.top + monsterRect.height * Number(partPoint?.y ?? .5)
         };
     }
 
-    static projectileLaunchDelayMs(pattern, impactTicks, firstImpactTicks, ticksPerSecond, visualTravelMs) {
-        const tickMs = 1000 / Math.max(1, Number(ticksPerSecond || 10));
-        const authoredTicks = Number(pattern?.projectileLaunchDelayTicks || 0);
-        if (authoredTicks > 0) {
-            return Math.max(0, Math.round(
-                authoredTicks * tickMs
-                + Math.max(0, Number(impactTicks || 0) - Number(firstImpactTicks || 0)) * tickMs
-            ));
-        }
-        return Math.max(0, Math.round(Number(impactTicks || 0) * tickMs - visualTravelMs));
+    static renderedFacingFlip(monsterImg) {
+        const layer = monsterImg?.closest?.('.hunt-monster-facing-layer');
+        const transform = typeof getComputedStyle === 'function' && layer
+            ? String(getComputedStyle(layer).transform || '') : String(layer?.style?.transform || '');
+        const matrix = transform.match(/^matrix\(([^,]+)/);
+        if (matrix && Number(matrix[1]) < 0) return -1;
+        const inline = Number(monsterImg?.style?.getPropertyValue?.('--monster-facing-flip')
+            || layer?.style?.getPropertyValue?.('--monster-facing-flip') || 1);
+        return inline < 0 ? -1 : 1;
     }
 
     static previewReactionForAttackResult(result) {
@@ -477,11 +508,7 @@ class HuntMonsterAttackAnimator {
                 authoredDirection,
                 attackX,
                 secondX,
-                monsterState: this.owner?.monsterState,
-                ticksPerSecond: typeof HuntAtbConfig !== 'undefined'
-                    ? Number(HuntAtbConfig.TICKS_PER_SECOND || 10)
-                    : 10,
-                projectileLaunchDelayMs: HuntMonsterAttackAnimator.projectileLaunchDelayMs
+                monsterState: this.owner?.monsterState
             });
         }
 
@@ -717,6 +744,7 @@ class HuntMonsterAttackAnimator {
     clearMonsterMotion(reason = 'dispose') {
         this.motionGeneration++;
         this.cancelPreviewProjectiles(reason);
+        this.projectilePresentationRuntime?.clear?.(`motion-clear:${reason}`);
         // A BEAT preview owns WAAPI/CSS tracks outside activeMonsterMotion.
         // Dropping only the controller reference leaves those filled tracks on
         // screen, so selecting another pattern can inherit its predecessor's
@@ -861,17 +889,33 @@ class HuntMonsterAttackAnimator {
         // Preview scrubbing and combat judgments. Keeping a parallel raw
         // `pattern.motion` path allowed an editor-approved facing change to be
         // visible in Preview while an older profile copy rendered in the hunt.
-        const motion = graphBeats.map((beat, index) => {
-            const frames = Array.isArray(beat?.tracks?.visual) ? beat.tracks.visual : [];
-            const visual = frames.length
-                ? [...frames].sort((left, right) => Number(left?.offsetTicks || 0)
-                    - Number(right?.offsetTicks || 0))[0]?.value || {}
-                : {};
-            return {
-                ...visual,
-                beat: String(beat?.id || `beat-${index + 1}`),
-                ticks: Math.max(1, Number(beat?.ticks) || 1)
-            };
+        const motion = graphBeats.flatMap((beat, index) => {
+            const beatId = String(beat?.id || `beat-${index + 1}`);
+            const beatTicks = Math.max(1, Number(beat?.ticks) || 1);
+            const authoredFrames = Array.isArray(beat?.tracks?.visual) ? beat.tracks.visual : [];
+            // A graph BEAT can contain several authored visual frames.  Keep
+            // those sub-beat boundaries when compiling the renderer motion;
+            // selecting only frame zero made recoil, rebounds, and other
+            // within-BEAT action impossible even though the editor saved them.
+            const framesByOffset = new Map();
+            authoredFrames.forEach(frame => {
+                const offset = Math.max(0, Math.min(beatTicks - 1,
+                    Math.round(Number(frame?.offsetTicks) || 0)));
+                framesByOffset.set(offset, frame?.value || {});
+            });
+            if (!framesByOffset.size) framesByOffset.set(0, {});
+            if (!framesByOffset.has(0)) framesByOffset.set(0, {});
+            const frames = [...framesByOffset.entries()]
+                .sort(([left], [right]) => left - right)
+                .map(([offsetTicks, value]) => ({ offsetTicks, value }));
+            return frames.map((frame, frameIndex) => {
+                const nextOffset = frames[frameIndex + 1]?.offsetTicks ?? beatTicks;
+                return {
+                    ...frame.value,
+                    beat: frameIndex === 0 ? beatId : `${beatId}@${frame.offsetTicks}`,
+                    ticks: Math.max(1, nextOffset - frame.offsetTicks)
+                };
+            });
         });
         return { ...pattern, motion };
     }
@@ -2675,6 +2719,11 @@ class HuntMonsterAttackAnimator {
         this.card.appendChild(fx);
         void fx.offsetWidth;
         if (deferOutcome) fx.classList.add('is-awaiting-outcome');
+        if (options.beatManaged === true) {
+            fx.classList.add('is-beat-projectile');
+            fx.style.setProperty('--fx-duration', `${Math.max(1, Number(options.travelTicks || 1)) * 100}ms`);
+            fx.style.setProperty('--fx-exit-duration', `${Math.max(1, Number(options.exitTicks || 1)) * 100}ms`);
+        }
         fx.classList.add('is-playing');
         const outcomeKey = String(options.outcomeKey || '');
         if (deferOutcome && outcomeKey) {
@@ -2685,14 +2734,130 @@ class HuntMonsterAttackAnimator {
                 fallbackEmoji
             });
         }
-        this.animationTimers.timeout(() => {
-            if (outcomeKey) this.pendingElementalProjectiles.delete(outcomeKey);
-            fx.remove();
-        }, isUltimate ? 1800 : 1500);
+        if (options.beatManaged !== true) {
+            this.animationTimers.timeout(() => {
+                if (outcomeKey) this.pendingElementalProjectiles.delete(outcomeKey);
+                fx.remove();
+            }, isUltimate ? 1800 : 1500);
+        }
+
+        return { fx, deliveryBody, theme, fallbackEmoji };
 
     }
 
+    beatProjectileKey(sessionKey, projectileId) {
+        return `${String(sessionKey || '')}:${String(projectileId || '')}`;
+    }
+
+    observeMonsterBeatEvent(state, event) {
+        return this.projectilePresentationRuntime?.observeEvent(state, event) || false;
+    }
+
+    beginMonsterBeatPresentation(state) {
+        return this.projectilePresentationRuntime?.begin(state) || null;
+    }
+
+    completeMonsterBeatPresentation(state) {
+        return this.projectilePresentationRuntime?.complete(state) || false;
+    }
+
+    cancelMonsterBeatPresentation(state, reason = 'cancelled') {
+        return this.projectilePresentationRuntime?.cancel(state, reason) || false;
+    }
+
+    launchBeatProjectile(projectile, state, event) {
+        const pattern = state?.context?.pattern || state?.action || {};
+        const outcome = (state?.context?.judgmentEvents || []).find(candidate =>
+            String(candidate?.id || candidate?.eventId || '') === String(event?.outcomeEventId || '')) || null;
+        const targetIndex = Array.isArray(outcome?.targetIndices)
+            ? outcome.targetIndices.find(Number.isInteger) : state?.context?.targetIndex;
+        const monsterImg = this.card?.querySelector?.('#fight-monster-img');
+        const liveTargetCard = Number.isInteger(targetIndex)
+            ? this.card?.querySelector?.(`#fight-card-${targetIndex}`) : null;
+        const containerRect = this.card?.getBoundingClientRect?.();
+        const targetCard = liveTargetCard || HuntMonsterAttackAnimator.outboundProjectileTarget(
+            containerRect,
+            event?.target || outcome?.target
+        );
+        if (!monsterImg || !targetCard || !containerRect) {
+            this.traceMonsterMotion('projectile-launch-target-unavailable', { projectile, state, event }, true);
+            return false;
+        }
+        const attackName = String(pattern?.name || pattern?.id || '투사체');
+        const { emoji = '🔥' } = this.owner?.getMonsterAttackType?.(attackName, pattern) || {};
+        const origin = this.resolveLiveElementalOrigin(
+            monsterImg,
+            targetCard,
+            pattern,
+            { x: 0, y: 0 }
+        );
+        const contactTicks = Math.max(Number(event.atTicks || 0) + 1,
+            Number(outcome?.atTicks || event.atTicks || 0));
+        const key = this.beatProjectileKey(projectile.sessionKey, projectile.id);
+        const rendered = this.createElementalAttack(
+            origin,
+            containerRect,
+            targetCard,
+            { index: Number.isInteger(targetIndex) ? targetIndex : -1, result: 'pending' },
+            attackName,
+            emoji,
+            0,
+            pattern,
+            {
+                deferOutcome: true,
+                beatManaged: true,
+                travelTicks: contactTicks - Number(event.atTicks || 0),
+                outcomeKey: key
+            }
+        );
+        if (!rendered?.fx) return false;
+        this.beatProjectileFx.set(key, rendered);
+        this.owner?.onMonsterProjectileLaunchAudio?.(this.owner.selectedMonster, pattern);
+        return true;
+    }
+
+    resolveBeatProjectileOutcome(projectile, _judgment, results = []) {
+        const key = this.beatProjectileKey(projectile.sessionKey, projectile.id);
+        const pending = this.beatProjectileFx.get(key);
+        if (!pending?.fx) return false;
+        const hit = results.some(result => result?.result === 'hit');
+        // Keep is-awaiting-outcome installed. Removing it falls back to the
+        // default flight keyframe and visibly launches the same projectile a
+        // second time from the monster mouth.
+        if (hit) {
+            pending.fx.classList.add('is-projectile-hit');
+            this.createElementalImpact(pending.fx, pending.theme, pending.fallbackEmoji);
+        } else {
+            pending.fx.classList.add('is-projectile-miss');
+        }
+        return true;
+    }
+
+    finishBeatProjectile(projectile) {
+        const key = this.beatProjectileKey(projectile.sessionKey, projectile.id);
+        const pending = this.beatProjectileFx.get(key);
+        if (!pending?.fx) return false;
+        this.beatProjectileFx.delete(key);
+        pending.fx.remove();
+        return true;
+    }
+
+    cancelBeatProjectileSession(session) {
+        const prefix = `${String(session?.key || '')}:`;
+        for (const [key, pending] of this.beatProjectileFx) {
+            if (!key.startsWith(prefix)) continue;
+            pending?.fx?.remove?.();
+            this.beatProjectileFx.delete(key);
+        }
+    }
+
     resolveElementalProjectileOutcome(pattern, judgment = {}, results = []) {
+        // New BEAT sessions are identified by actionSessionId + projectileId.
+        // Resolve them before the legacy key map so an impact can never restart
+        // a flight by toggling its animation class.
+        if (judgment?.projectileId && judgment?.sessionId) {
+            return this.projectilePresentationRuntime?.resolveOutcome(judgment, results) || false;
+        }
         const atTicks = Math.max(0, Number(judgment?.atTicks || 0));
         const resolved = Array.isArray(results) ? results : [];
         resolved.forEach(result => {
@@ -2730,7 +2895,8 @@ class HuntMonsterAttackAnimator {
         const partPoint = anatomy?.visualPoint?.(this.owner?.selectedMonster, originPart, 0);
         const baseFacing = anatomy?.baseFacing?.(this.owner?.selectedMonster) || 'front';
         return HuntMonsterAttackAnimator.targetFacingOrigin(
-            monsterRect, targetRect, partPoint, baseFacing);
+            monsterRect, targetRect, partPoint, baseFacing,
+            HuntMonsterAttackAnimator.renderedFacingFlip(monsterImg));
     }
 
     schedulePreviewProjectile(pattern, targetIndex = 0, attackName = '', emoji = '🔥') {
@@ -2768,8 +2934,9 @@ class HuntMonsterAttackAnimator {
         const firstImpactTicks = Number(impacts[0]?.atTicks ?? pattern.runtimeImpactDelayTicks ?? 0);
         const generation = this.motionGeneration;
         const launch = (impactTicks, event = null, eventIndex = 0) => {
-            const delayMs = HuntMonsterAttackAnimator.projectileLaunchDelayMs(
-                pattern, impactTicks, firstImpactTicks, ticksPerSecond, 720);
+            // Deprecated preview helper retained only for unopened legacy
+            // captures. Current preview routes through HuntBeatActionRuntime.
+            const delayMs = Math.max(0, impactTicks * 1000 / Math.max(1, ticksPerSecond) - 720);
             this.animationTimers.timeout(() => {
                 if (this.motionGeneration !== generation || !this.card?.isConnected) return;
                 // A multi-spit pattern must follow each resolved judgment's
@@ -3135,13 +3302,11 @@ class HuntMonsterAttackAnimator {
                     timeline[0]?.atTicks ?? pattern.runtimeImpactDelayTicks ?? 0);
                 timeline.forEach((event, eventIndex) => {
                     const impactTicks = Number(event.atTicks ?? pattern.runtimeImpactDelayTicks ?? 0);
-                    const launchDelayMs = HuntMonsterAttackAnimator.projectileLaunchDelayMs(
-                        pattern,
-                        impactTicks,
-                        firstImpactTicks,
-                        ticksPerSecond,
-                        visualTravelMs
-                    );
+                    // Legacy-only fallback. Approved BEAT actions never enter
+                    // runtimeImpactPending and therefore never infer launch
+                    // time from a future contact event.
+                    const launchDelayMs = Math.max(0,
+                        impactTicks * 1000 / Math.max(1, ticksPerSecond) - visualTravelMs);
                     this.animationTimers.timeout(() => {
                         if (!isPlaybackCurrent()) return;
                         if (!this.card) return;
