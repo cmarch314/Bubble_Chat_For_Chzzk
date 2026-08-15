@@ -240,15 +240,22 @@ class HuntEngine {
 
     beginMonsterBeatAction(compiledAction, context = {}) {
         if (!compiledAction || compiledAction.backend !== 'beat-v2' || !this.monsterBeatRuntime) return null;
+        const timing = typeof HuntProjectileTimingResolver !== 'undefined'
+            ? HuntProjectileTimingResolver.resolveSession(compiledAction, context)
+            : { action: compiledAction, context };
+        compiledAction = timing.action;
+        context = timing.context;
         this.monsterBeatRuntimeEvents.length = 0;
         this.monsterBeatRuntime.cancel?.('monster', 'replaced');
         const judgmentSession = Array.isArray(context.judgmentEvents)
             ? this.combatJudgmentRuntime?.begin?.('monster', compiledAction, context)
             : null;
-        return this.monsterBeatRuntime.begin('monster', compiledAction, {
+        const state = this.monsterBeatRuntime.begin('monster', compiledAction, {
             ...context,
             actionSessionId: judgmentSession?.sessionId || null
         });
+        this.callbacks?.onMonsterBeatActionBegin?.(state);
+        return state;
     }
 
     isMonsterActionSessionActive() {
@@ -265,6 +272,9 @@ class HuntEngine {
     }
 
     dispatchMonsterBeatEvent(state, event) {
+        // Presentation observes the same emitted BEAT event in Preview and in
+        // live combat. It must not create an inferred renderer timer.
+        this.callbacks?.onMonsterBeatEvent?.(state, event);
         if (['damage', 'judgment', 'roar', 'tremor', 'wind'].includes(event?.kind)) {
             this.combatJudgmentRuntime?.observeBeatEvent?.(state.actorKey, event);
             return true;

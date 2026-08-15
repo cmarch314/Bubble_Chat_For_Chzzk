@@ -4,7 +4,7 @@
   "records": [
     { "id": "bazelgeuse", "count": 8, "sha256": "ffc860394569e54208f61c684e7034cc51321fb1f5996a8c5641eccf10417f5b" },
     { "id": "chameleos", "count": 7, "sha256": "8a3f011c7e710aeedefcfed2d8780a2596bae0f623f83610a6f2772b844f4f13" },
-    { "id": "rathian", "count": 13, "sha256": "112aab3e68385e6458a9b3f43e6cd0c7fb2d535a0875fefd3c24fdf93dbc717a" },
+    { "id": "rathian", "count": 13, "sha256": "ae36365a016fe8e3b408aa17b81edd7ecff2fee45f26f1b2ef4a7766c4a45082" },
     { "id": "rathalos", "count": 13, "sha256": "91c3502c5c4a6dd3dbf420710343641eb1cfe60afa0cdaa97dc1526027353c68" },
     { "id": "diablos", "count": 9, "sha256": "1efe32674738675b6969c8565b6f967a149b589d2734e37f883675f5fd3cdb0f" },
     { "id": "black_diablos", "count": 9, "sha256": "23d8344bb4fc0ba8388414e944f704a9a877c3f09ea9c7dc58ea9a5ace0d8055" },

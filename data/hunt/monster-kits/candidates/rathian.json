@@ -392,6 +392,8 @@
                 "target": "primary",
                 "origin": "part:head",
                 "outcomeEventId": "fireball-1:contact",
+                "flightMode": "distance",
+                "speedPxPerTick": 120,
                 "offsetTicks": 0
               },
               {
@@ -556,7 +558,9 @@
                 "target": "primary",
                 "offsetTicks": 0,
                 "origin": "part:head",
-                "outcomeEventId": "fireball-1:contact"
+                "outcomeEventId": "fireball-1:contact",
+                "flightMode": "distance",
+                "speedPxPerTick": 120
               }
             ],
             "label": "spit-primary"
@@ -608,7 +612,9 @@
                 "target": "left",
                 "offsetTicks": 0,
                 "origin": "part:head",
-                "outcomeEventId": "fireball-2:contact"
+                "outcomeEventId": "fireball-2:contact",
+                "flightMode": "distance",
+                "speedPxPerTick": 120
               }
             ],
             "label": "spit-left"
@@ -660,7 +666,9 @@
                 "target": "right",
                 "offsetTicks": 0,
                 "origin": "part:head",
-                "outcomeEventId": "fireball-3:contact"
+                "outcomeEventId": "fireball-3:contact",
+                "flightMode": "distance",
+                "speedPxPerTick": 120
               }
             ],
             "label": "spit-right"

@@ -92,6 +92,7 @@
   <script src="../../js/effects/hunt/HuntWeaponMechanics.js"></script>
   <script src="../../js/effects/hunt/HuntWeaponActionSelector.js"></script>
   <script src="../../js/effects/hunt/HuntBeatV2Contract.js"></script>
+  <script src="../../js/effects/hunt/HuntProjectileTimingResolver.js"></script>
   <script src="../../js/effects/hunt/HuntRotationContract.js"></script>
   <script src="/candidate-kits.js"></script>
   <script src="../../js/effects/hunt/HuntMonsterCandidateCatalog.js"></script>
@@ -273,10 +274,11 @@
           onComplete:state=>animator.completeMonsterBeatPresentation?.(state),
           onCancel:(state,why)=>animator.cancelMonsterBeatPresentation?.(state,why)
         });
-        const runtimeState=previewBeatEventRuntime.begin('preview-monster',graph,{
+        const timing=HuntProjectileTimingResolver.resolveSession(graph,{
           pattern:motionPattern,targetIndex:Number(selection.primary||0),judgmentEvents:judgments,
           actionSessionId:`preview:${graph.id}:${Date.now()}`
         });
+        const runtimeState=previewBeatEventRuntime.begin('preview-monster',timing.action,timing.context);
         animator.beginMonsterBeatPresentation?.(runtimeState);
         previewBeatEventTimer=setInterval(()=>{
           if(!previewBeatEventRuntime?.tick('preview-monster')){
