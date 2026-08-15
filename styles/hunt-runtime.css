@@ -3643,7 +3643,7 @@
     100% { transform: translate(calc(var(--p-x) - 50%), calc(var(--p-dy) + var(--p-y) - 50%)) rotate(260deg) scale(.2); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .monster-element-fx.delivery-projectile.is-playing .monster-element-projectile {
+    .monster-element-fx.delivery-projectile.is-playing:not(.is-beat-projectile) .monster-element-projectile {
         animation: monster-element-projectile-reduced .48s ease-out calc(var(--fx-delay) + 60ms) both !important;
     }
     .monster-element-fx.is-playing .monster-element-beam,
