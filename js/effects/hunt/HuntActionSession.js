@@ -29,6 +29,7 @@ class HuntActionSession {
         this.generation = 0;
         this.status = 'idle';
         this.state = null;
+        this.context = Object.freeze({});
 
         this.runtime = options.runtime || new BeatRuntime({
             onBegin: state => this.#onBegin(state),
@@ -52,12 +53,14 @@ class HuntActionSession {
         if (this.status === 'running') return false;
         if (this.status === 'completed' || this.status === 'cancelled') this.reset();
         this.generation += 1;
+        const nextContext = Object.keys(context || {}).length ? context : this.context;
         const runtimeContext = {
-            ...context,
+            ...nextContext,
             actionSessionId: this.sessionId,
             mode: this.mode,
             presentationOnly: this.presentationOnly
         };
+        this.context = Object.freeze({ ...runtimeContext });
         this.state = this.runtime.begin(this.actorKey, this.action, runtimeContext);
         this.status = 'running';
         this.clock.start();
@@ -113,7 +116,7 @@ class HuntActionSession {
         const target = Math.max(0, Math.min(this.action.totalTicks, Math.floor(Number(tick) || 0)));
         this.reset();
         this.#seeking = true;
-        this.start();
+        this.start(this.context);
         this.clock.pause();
         for (let index = 0; index < target; index += 1) this.runtime.tick(this.actorKey);
         this.clock.reset(target);
