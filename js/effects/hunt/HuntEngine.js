@@ -25,6 +25,9 @@ class HuntEngine {
         const BeatActionRuntime = typeof HuntBeatActionRuntime !== 'undefined'
             ? HuntBeatActionRuntime
             : (typeof require === 'function' ? require('./HuntBeatActionRuntime.js') : null);
+        const ActionSession = typeof HuntActionSession !== 'undefined'
+            ? HuntActionSession
+            : (typeof require === 'function' ? require('./HuntActionSession.js') : null);
         const CombatJudgmentRuntime = typeof HuntCombatJudgmentRuntime !== 'undefined'
             ? HuntCombatJudgmentRuntime
             : (typeof require === 'function' ? require('./HuntCombatJudgmentRuntime.js') : null);
@@ -33,6 +36,8 @@ class HuntEngine {
             : (typeof require === 'function' ? require('./HuntCombatJudgmentResolver.js') : null);
         this.monsterBeatRuntimeEvents = [];
         this.reactionBeatRuntimeEvents = [];
+        this.monsterActionSession = null;
+        this.actionSessionClass = ActionSession;
         this.combatJudgmentRuntime = config.combatJudgmentRuntime
             || (CombatJudgmentRuntime ? new CombatJudgmentRuntime() : null);
         this.combatJudgmentResolver = config.combatJudgmentResolver
@@ -239,28 +244,58 @@ class HuntEngine {
     }
 
     beginMonsterBeatAction(compiledAction, context = {}) {
-        if (!compiledAction || compiledAction.backend !== 'beat-v2' || !this.monsterBeatRuntime) return null;
+        const ActionSession = this.actionSessionClass
+            || (typeof HuntActionSession !== 'undefined' ? HuntActionSession : null)
+            || (typeof require === 'function' ? require('./HuntActionSession.js') : null);
+        if (!compiledAction || compiledAction.backend !== 'beat-v2' || !ActionSession) return null;
         const timing = typeof HuntProjectileTimingResolver !== 'undefined'
             ? HuntProjectileTimingResolver.resolveSession(compiledAction, context)
             : { action: compiledAction, context };
         compiledAction = timing.action;
         context = timing.context;
         this.monsterBeatRuntimeEvents.length = 0;
-        this.monsterBeatRuntime.cancel?.('monster', 'replaced');
+        this.monsterActionSession?.stop?.('replaced');
         const judgmentSession = Array.isArray(context.judgmentEvents)
             ? this.combatJudgmentRuntime?.begin?.('monster', compiledAction, context)
             : null;
-        const state = this.monsterBeatRuntime.begin('monster', compiledAction, {
-            ...context,
-            actionSessionId: judgmentSession?.sessionId || null
+        const session = new ActionSession({
+            action: compiledAction,
+            actorKey: 'monster',
+            mode: 'live',
+            presentationOnly: false,
+            clockMode: 'manual',
+            sessionId: judgmentSession?.sessionId || undefined,
+            callbacks: {
+                onBegin: state => this.callbacks?.onMonsterBeatActionBegin?.(state),
+                onEvent: (state, event) => {
+                    this.monsterBeatRuntimeEvents.push(event);
+                    if (this.monsterBeatRuntimeEvents.length > 64) this.monsterBeatRuntimeEvents.shift();
+                    this.dispatchMonsterBeatEvent(state, event);
+                },
+                onComplete: state => {
+                    this.combatJudgmentRuntime?.complete?.('monster');
+                    this.callbacks?.onMonsterBeatActionComplete?.(state.action, state.context);
+                    if (this.monsterActionSession === session) this.monsterActionSession = null;
+                },
+                onCancel: (state, reason) => {
+                    this.combatJudgmentRuntime?.cancel?.('monster', reason);
+                    this.callbacks?.onMonsterBeatActionCancel?.(state.action, reason, state.context);
+                    if (this.monsterActionSession === session) this.monsterActionSession = null;
+                }
+            }
         });
-        this.callbacks?.onMonsterBeatActionBegin?.(state);
-        return state;
+        this.monsterActionSession = session;
+        session.start({
+            ...context,
+            actionSessionId: judgmentSession?.sessionId || session.sessionId
+        });
+        return session.state;
     }
 
     isMonsterActionSessionActive() {
         return Boolean(
-            this.monsterBeatRuntime?.has?.('monster')
+            this.monsterActionSession?.status === 'running'
+            || this.monsterActionSession?.status === 'paused'
             || Number(this.monsterActionPresentationTicks || 0) > 0
             || this.pendingMonsterAction
             || this.pendingMonsterImpact
@@ -297,7 +332,7 @@ class HuntEngine {
     }
 
     tickMonsterBeatAction() {
-        const monster = this.monsterBeatRuntime?.tick?.('monster') || null;
+        const monster = this.monsterActionSession?.step?.(1) || null;
         const reaction = this.monsterBeatRuntime?.tick?.('reaction:monster') || null;
         return monster || reaction;
     }
@@ -353,7 +388,7 @@ class HuntEngine {
     cancelMonsterBeatAction(reason = 'interrupted') {
         this.monsterBeatRuntimeEvents.length = 0;
         this.combatJudgmentRuntime?.cancel?.('monster', reason);
-        return this.monsterBeatRuntime?.cancel?.('monster', reason) || false;
+        return this.monsterActionSession?.stop?.(reason) || false;
     }
 
     beginHunterBeatAction(hunter, action) {
@@ -379,7 +414,8 @@ class HuntEngine {
         const previous = this.monsterTraversalState;
         this.monsterTraversalState = null;
         this.monsterTraversalGeneration++;
-        const parentBeatActive = Boolean(this.monsterBeatRuntime?.has?.('monster'));
+        const parentBeatActive = Boolean(this.monsterActionSession
+            && ['running', 'paused'].includes(this.monsterActionSession.status));
         // Traversal is only one track inside an approved BEAT action. Its
         // natural end must not erase recovery/return tracks that are still
         // owned by the parent action session. Explicit cancellation clears the
@@ -980,7 +1016,8 @@ class HuntEngine {
     }
 
     isMonsterActionPresenting() {
-        return Boolean(this.monsterBeatRuntime?.has?.('monster'))
+        return Boolean(this.monsterActionSession
+            && ['running', 'paused'].includes(this.monsterActionSession.status))
             || Number(this.monsterActionPresentationTicks || 0) > 0
             || Boolean(this.pendingMonsterAction)
             || Boolean(this.pendingMonsterImpact)
