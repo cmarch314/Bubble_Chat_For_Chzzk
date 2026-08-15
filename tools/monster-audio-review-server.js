@@ -10,6 +10,7 @@ const { loadHuntPatternAudioMap, savePatternRoute, movePatternRouteFile, savePat
 const { CATEGORY_CATALOG, categoryForMonster } = require('./hunt-monster-review-categories');
 const { HUNT_VERIFIED_LOCAL_ITEM_CUES, HUNT_LOCAL_ITEM_SURROGATE_CUES } = require('../js/effects/hunt/HuntAudioCatalog');
 const MotionAuthoringContract = require('./monster-motion-authoring-contract.js');
+const { HuntBeatV2Contract } = require('../js/effects/hunt/HuntBeatV2Contract.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const GRAPH_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'audio_graph');
@@ -639,6 +640,10 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
     const kit = readJson(sourcePath, null);
     const action = kit?.actions?.find(item => item?.id === input.patternId);
     if (!action?.graph?.beats) throw new Error(`후보 패턴을 찾을 수 없습니다: ${input.patternId}`);
+    const currentGraphHash = HuntBeatV2Contract.fingerprint(action.graph);
+    if (input.graphHash && String(input.graphHash) !== currentGraphHash) {
+        throw new Error('candidate graph is stale; reload before saving');
+    }
     const submitted = input.beats || {};
     const expected = action.graph.beats.map(beat => String(beat.id || beat.beat));
     const unknown = Object.keys(submitted).filter(id => !expected.includes(id));
@@ -689,7 +694,6 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
         // without owning the launch/outcome linkage; this hydrates the linked
         // outcome before the atomic write so reload and live hunt read exactly
         // the same valid graph.
-        const { HuntBeatV2Contract } = require('../js/effects/hunt/HuntBeatV2Contract.js');
         action.graph = HuntBeatV2Contract.hydrateProjectileLifecycle(action.graph);
         require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(kit);
         const temporary = `${sourcePath}.tmp`;
@@ -698,6 +702,7 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
         const persisted = readJson(sourcePath, null);
         require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(persisted);
         const persistedAction = persisted.actions.find(item => item?.id === input.patternId);
+        const persistedGraphHash = HuntBeatV2Contract.fingerprint(persistedAction.graph);
         const persistedBeats = Object.fromEntries(persistedAction.graph.beats.map(beat => {
             const visual = (beat.tracks?.visual || []).at(-1)?.value || {};
             const judgments = (beat.events || []).filter(event =>
@@ -718,7 +723,8 @@ function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_D
             throw new Error(`후보 모션 왕복 불일치: ${comparison.differences.join(', ')}`);
         }
         return { huntId: input.huntId, patternId: input.patternId, candidateSaved: true,
-            beats: comparison.actual, revision: fileRevision(sourcePath), sourcePath };
+            beats: comparison.actual, graphHash: persistedGraphHash,
+            revision: fileRevision(sourcePath), sourcePath };
     } catch (error) {
         const rollback = `${sourcePath}.rollback.tmp`;
         fs.writeFileSync(rollback, previousText, 'utf8');
@@ -954,7 +960,16 @@ function createServer(options = {}) {
                 if (!/^[a-z0-9_]+$/i.test(huntId)) throw new Error('잘못된 몬스터 ID입니다.');
                 const candidateKit = candidateKitFor({ candidate: url.searchParams.get('candidate') }, huntId);
                 const candidateRecord = candidateKitRecordFor({ candidate: url.searchParams.get('candidate') }, huntId);
-                sendJson(response, 200, { ...loadHuntPatternAudioMap(huntId, { candidateKit }), revisions: {
+                const patternCatalog = loadHuntPatternAudioMap(huntId, { candidateKit });
+                const candidateHashes = new Map((candidateRecord?.kit?.actions || [])
+                    .filter(action => action?.id && action?.graph)
+                    .map(action => [String(action.id), HuntBeatV2Contract.fingerprint(action.graph)]));
+                const patterns = (patternCatalog.patterns || []).map(pattern => ({
+                    ...pattern,
+                    beatGraphHash: candidateHashes.get(String(pattern.id))
+                        || (pattern.beatV2 ? HuntBeatV2Contract.fingerprint(pattern.beatV2) : null)
+                }));
+                sendJson(response, 200, { ...patternCatalog, patterns, revisions: {
                     audio: fileRevision(PATTERN_AUDIO_OVERRIDES_PATH),
                     motion: candidateRecord ? fileRevision(candidateRecord.file) : fileRevision(PATTERN_MOTION_OVERRIDES_PATH),
                     anatomy: fileRevision(ANATOMY_OVERRIDES_PATH)

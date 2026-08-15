@@ -169,6 +169,51 @@ class HuntBeatV2Contract {
         });
     }
 
+    /**
+     * Return the authored portion of a graph in a deterministic form.
+     * Compiled fields such as startTicks/atTicks are deliberately excluded;
+     * they are derived from the authored beats and must not make a save look
+     * different after reload.
+     */
+    static canonicalSource(source = {}) {
+        const action = source && typeof source === 'object' ? source : {};
+        const beats = Array.isArray(action.beats) ? action.beats : [];
+        return this.#canonicalize({
+            id: String(action.id || ''),
+            actor: String(action.actor || ''),
+            backend: String(action.backend || ''),
+            schemaVersion: Number(action.schemaVersion || 0),
+            reviewStatus: String(action.reviewStatus || 'migrated'),
+            atb: action.atb || {},
+            beats: beats.map((beat, index) => ({
+                id: String(beat?.id || beat?.beat || `beat-${index + 1}`),
+                ticks: Number(beat?.ticks || 0),
+                tracks: beat?.tracks || {},
+                events: (Array.isArray(beat?.events) ? beat.events : [])
+                    .map(event => this.#authoredEvent(event))
+                    .sort((left, right) => String(left.id).localeCompare(String(right.id)))
+            }))
+        });
+    }
+
+    /**
+     * Stable, non-cryptographic identity for optimistic editor persistence.
+     * It detects source drift; it is not an authentication primitive.
+     */
+    static fingerprint(source = {}) {
+        const text = JSON.stringify(this.canonicalSource(source));
+        let first = 0x811c9dc5;
+        let second = 0x9e3779b9;
+        for (let index = 0; index < text.length; index += 1) {
+            const code = text.charCodeAt(index);
+            first ^= code;
+            first = Math.imul(first, 0x01000193);
+            second ^= code + index;
+            second = Math.imul(second, 0x85ebca6b);
+        }
+        return `beat-v2:${(first >>> 0).toString(16).padStart(8, '0')}${(second >>> 0).toString(16).padStart(8, '0')}`;
+    }
+
     static #validateProjectileEvents(events, actionId) {
         const launches = events.filter(event => event.kind === 'projectile-launch');
         const finishes = events.filter(event => event.kind === 'projectile-finish');
@@ -266,6 +311,21 @@ class HuntBeatV2Contract {
             }));
         }
         return Object.freeze(tracks);
+    }
+
+    static #authoredEvent(event = {}) {
+        const result = {};
+        for (const [key, value] of Object.entries(event || {})) {
+            if (['beatId', 'atTicks', 'startTicks', 'endTicks'].includes(key)) continue;
+            result[key] = value;
+        }
+        return result;
+    }
+
+    static #canonicalize(value) {
+        if (Array.isArray(value)) return value.map(item => this.#canonicalize(item));
+        if (!value || typeof value !== 'object') return value;
+        return Object.fromEntries(Object.keys(value).sort().map(key => [key, this.#canonicalize(value[key])]));
     }
 
     static #deepFreeze(value) {

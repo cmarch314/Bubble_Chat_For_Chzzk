@@ -31,6 +31,26 @@ assert.deepStrictEqual(action.events.map(event => [event.id, event.atTicks]), [
     ['charge-hit', 5], ['charge-se', 5]
 ]);
 assert(Object.isFrozen(action) && Object.isFrozen(action.beats[0].tracks.body));
+const sourceVariant = {
+    ...action,
+    beats: action.beats.map(beat => ({
+        ...beat,
+        startTicks: 999,
+        endTicks: 1000,
+        events: beat.events.map(event => ({ ...event, atTicks: 999, beatId: 'derived' }))
+    }))
+};
+assert.strictEqual(
+    HuntBeatV2Contract.fingerprint(action),
+    HuntBeatV2Contract.fingerprint(sourceVariant),
+    'derived compile fields must not change the authored graph fingerprint'
+);
+assert.notStrictEqual(
+    HuntBeatV2Contract.fingerprint(action),
+    HuntBeatV2Contract.fingerprint({ ...action, beats: action.beats.map((beat, index) => index === 0
+        ? { ...beat, ticks: beat.ticks + 1 } : beat) }),
+    'an authored tick edit must change the graph fingerprint'
+);
 
 assert.throws(() => HuntBeatV2Contract.compile({
     schemaVersion: 2, backend: 'beat-v2', reviewStatus: 'approved',

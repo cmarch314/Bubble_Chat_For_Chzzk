@@ -1502,6 +1502,7 @@
             const result = await api('/api/hunt-pattern-motion', { method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id,
                     candidate: app.candidateId === app.monster ? app.candidateId : '', beats,
+                    graphHash: pattern.beatGraphHash || '',
                     expectedRevision: app.revisions.motion }) });
             assertGeneratedMotion(result);
             const candidateQuery = app.candidateId && app.candidateId === app.monster
@@ -1514,10 +1515,16 @@
             // canonical value with the catalog reload; comparing the raw UI
             // draft here produced false failures after canonical cleanup (for
             // example when changing rotationResetMode).
-            const savedBeats = result.beats || beats;
-            const comparison = MonsterAudioReviewState.compareMotionValues(savedBeats, verify);
-            if (!comparison.equal) {
+            if (result.graphHash && persisted?.beatGraphHash) {
+                if (String(result.graphHash) !== String(persisted.beatGraphHash)) {
+                    throw new Error('저장 후 재로드 검증 실패 · graph hash 불일치');
+                }
+            } else {
+                const savedBeats = result.beats || beats;
+                const comparison = MonsterAudioReviewState.compareMotionValues(savedBeats, verify);
+                if (!comparison.equal) {
                 throw new Error(`저장 후 재로드 검증 실패 · 불일치: ${comparison.differences.join(', ')}`);
+                }
             }
             app.patterns = reloaded.patterns; app.revisions = reloaded.revisions || app.revisions;
             app.selectedPatternId = pattern.id; app.session.load(persisted);
