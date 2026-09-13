@@ -1,4 +1,6 @@
 class ChatMediaBubbleController {
+    static CMC_VIDEO_VOLUME = 0.85;
+
     constructor(owner) {
         this.owner = owner;
     }
@@ -67,7 +69,9 @@ class ChatMediaBubbleController {
 
             // Native media stays compatible with OBS file:// sources while using
             // the measured per-file loudness profile.
-            this.audioManager?.connectMediaElement(video, 'visual');
+            this.audioManager?.connectMediaElement(video, 'visual', {
+                baseVolume: ChatMediaBubbleController.CMC_VIDEO_VOLUME
+            });
 
             // Clear standard text timeout
 
@@ -133,7 +137,11 @@ class ChatMediaBubbleController {
                         : [item.name || item.command];
                     const filename = candidates[Math.floor(Math.random() * candidates.length)];
                     video.src = `AI CMC/${encodeURIComponent(filename)}.mp4`;
-                    this.audioManager?.applyNativeVolume(video, { type: 'visual', path: video.src });
+                    this.audioManager?.applyNativeVolume(video, {
+                        type: 'visual',
+                        path: video.src,
+                        baseVolume: ChatMediaBubbleController.CMC_VIDEO_VOLUME
+                    });
                     video.play().catch(e => {
                         console.error("CMC video play failed, skipping:", e);
                         if (!hasTriggeredNext) {

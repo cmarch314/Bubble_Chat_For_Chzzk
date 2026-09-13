@@ -44,7 +44,7 @@ const owner = {
     boxPos: 20,
     audioManager: {
         getSFXSequence: () => [],
-        connectMediaElement(video, type) { this.connected = [video, type]; },
+        connectMediaElement(video, type, options) { this.connected = [video, type, options]; },
         releaseMediaElement(video, options) { this.released = [video, options]; },
         applyNativeVolume(video, options) { this.applied = [video, options]; }
     },
@@ -73,7 +73,12 @@ assert.strictEqual(windowObject._activeVideoCount, 1);
 assert.strictEqual(createdVideos.length, 1);
 assert.strictEqual(elements.messageEle.child, createdVideos[0]);
 assert.strictEqual(createdVideos[0].src, `AI CMC/${encodeURIComponent('테스트2')}.mp4`);
-assert.deepStrictEqual(owner.audioManager.connected, [createdVideos[0], 'visual']);
+assert.strictEqual(owner.audioManager.connected[0], createdVideos[0]);
+assert.strictEqual(owner.audioManager.connected[1], 'visual');
+assert.strictEqual(owner.audioManager.connected[2].baseVolume, 0.85,
+    'hashtag CMC videos must register at 15% below normal visual-media volume');
+assert.strictEqual(owner.audioManager.applied[1].baseVolume, 0.85,
+    'hashtag CMC videos must play 15% below the normal visual-media volume');
 assert.strictEqual(scheduled[0].delay, 30000);
 scheduled[0].callback();
 if (scheduled[1]) scheduled[1].callback();
