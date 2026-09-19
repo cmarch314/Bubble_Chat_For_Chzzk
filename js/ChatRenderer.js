@@ -81,26 +81,7 @@ class ChatRenderer {
         if (specialBubble?.kind === 'clown') {
             chatLineInner.classList.add('chat-line-inner--clown');
             messageEle.classList.add('message--clown');
-            messageEle.textContent = specialBubble.text;
-
-            const textLen = specialBubble.text.length;
-            let fontSize = 3.2;
-            if (textLen <= 4) {
-                fontSize = 3.6;
-            } else if (textLen <= 8) {
-                fontSize = 3.0;
-            } else if (textLen <= 14) {
-                fontSize = 2.4;
-            } else if (textLen <= 22) {
-                fontSize = 2.0;
-            } else if (textLen <= 35) {
-                fontSize = 1.7;
-            } else if (textLen <= 50) {
-                fontSize = 1.4;
-            } else {
-                fontSize = 1.2;
-            }
-            messageEle.style.fontSize = `${fontSize}em`;
+            messageEle.textContent = this._normalizeClownText(specialBubble.text);
             timeout = 10000;
         } else if (videoQueue.length > 0) {
             const mediaResult = this.mediaBubbleController.mount(originalMessage, elements, videoQueue);
@@ -110,7 +91,9 @@ class ChatRenderer {
             this._applyTextFilters(originalMessage, elements, userColor);
 
             // 이모티콘 처리 및 메시지 삽입
-            messageEle.innerHTML = renderMessageWithEmotesHTML(displayMessage, emotes);
+            const isSingleEmote = this._isSingleEmoteMessage(displayMessage, emotes);
+            messageEle.innerHTML = renderMessageWithEmotesHTML(displayMessage, emotes, isSingleEmote ? 0.75 : 1);
+            if (isSingleEmote) messageEle.classList.add('message--single-emote');
 
             // Ensure Twemoji is applied
             if (window.twemoji) {
@@ -118,7 +101,7 @@ class ChatRenderer {
             }
 
             // 메시지 길이 기반 스타일 조정
-            if (displayMessage.length <= 5) {
+            if (!isSingleEmote && displayMessage.length <= 5) {
                 messageEle.style.fontSize = (2.6 - displayMessage.length / 3) + "em";
                 messageEle.style.textAlign = "center";
             }
@@ -147,7 +130,15 @@ class ChatRenderer {
 
         this.container.appendChild(chatBox);
 
-        requestAnimationFrame(() => chatBox.classList.add('visible'));
+        requestAnimationFrame(() => {
+            if (specialBubble?.kind === 'clown') this._fitClownCaption(messageEle);
+            chatBox.classList.add('visible');
+        });
+        if (specialBubble?.kind === 'clown' && document.fonts?.ready) {
+            document.fonts.ready.then(() => {
+                if (messageEle.isConnected) this._fitClownCaption(messageEle);
+            }).catch(() => {});
+        }
 
         // 타임아웃 제거
         if (timeout) {
@@ -178,6 +169,46 @@ class ChatRenderer {
         chatLineInner.appendChild(chatLineTail);
 
         return { chatBox, chatLine, chatLineBg, chatLineInner, chatUser, nameBox, nameEle, badgeEle, messageEle };
+    }
+
+    _isSingleEmoteMessage(message, emotes) {
+        const match = String(message ?? '').trim().match(/^\{([^}]+)\}$/);
+        if (!match) return false;
+        const emoteId = match[1].replace(/:/g, '').trim();
+        const descriptor = emotes?.[emoteId];
+        const rawUrl = typeof descriptor === 'string'
+            ? descriptor
+            : descriptor?.imageUrl || descriptor?.url;
+        return Boolean(SafeContent.remoteImageUrl(rawUrl));
+    }
+
+    _normalizeClownText(text) {
+        return String(text ?? '').replace(/\s+/gu, ' ').trim() || '...';
+    }
+
+    _fitClownCaption(element) {
+        if (!element) return;
+        const minPx = 14;
+        const maxPx = 42;
+        const maxHeight = 116;
+        let low = minPx;
+        let high = maxPx;
+        let best = minPx;
+
+        element.style.fontSize = `${minPx}px`;
+        for (let step = 0; step < 8; step++) {
+            const candidate = (low + high) / 2;
+            element.style.fontSize = `${candidate}px`;
+            const fitsWidth = element.scrollWidth <= element.clientWidth + 1;
+            const fitsHeight = element.scrollHeight <= maxHeight + 1;
+            if (fitsWidth && fitsHeight) {
+                best = candidate;
+                low = candidate;
+            } else {
+                high = candidate;
+            }
+        }
+        element.style.fontSize = `${Math.floor(best * 10) / 10}px`;
     }
 
     _claimBubbleSlots(chatBox, requestedSpan = 1) {

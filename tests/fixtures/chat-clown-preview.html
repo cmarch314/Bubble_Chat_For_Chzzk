@@ -21,15 +21,27 @@
     <div class="chat-box visible" style="left:20%">
       <div class="chat-line visible"><div class="chat-line-bg"><div class="chat-line-inner chat-line-inner--clown">
         <div class="name-box"><span class="user-name">광대헌터</span></div>
-        <span class="message message--clown" style="font-size:2.4em">사람이 죽는다구!</span>
+        <span class="message message--clown">아니 이러다 모두 죽어!!!</span>
       </div></div></div>
     </div>
     <div class="chat-box visible" style="left:40%">
+      <div class="chat-line visible"><div class="chat-line-bg"><div class="chat-line-inner chat-line-inner--clown">
+        <div class="name-box"><span class="user-name">긴문장헌터</span></div>
+        <span class="message message--clown">정말 이대로 가면 우리 모두 아무것도 못 하고 끝나는 거 아니냐고!!!</span>
+      </div></div></div>
+    </div>
+    <div class="chat-box visible" style="left:60%">
       <div class="chat-line visible"><div class="chat-line-bg"><div class="chat-line-inner">
         <div class="name-box"><span class="user-name">옆자리</span></div>
         <span class="message">서로 겹치지 않음</span>
       </div></div></div>
     </div>
   </div>
+  <script src="../../js/ChatRenderer.js"></script>
+  <script>
+    const fitter = Object.create(ChatRenderer.prototype);
+    document.querySelectorAll('.message--clown').forEach(element => fitter._fitClownCaption(element));
+    document.documentElement.dataset.previewReady = 'true';
+  </script>
 </body>
 </html>

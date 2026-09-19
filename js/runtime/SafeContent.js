@@ -48,7 +48,7 @@ class SafeContent {
             const safeUrl = this.remoteImageUrl(rawUrl);
 
             if (safeUrl) {
-                const height = singleToken ? 10 : 3 * safeScale;
+                const height = (singleToken ? 10 : 3) * safeScale;
                 html += `<img src="${this.escapeHTML(safeUrl)}" class="emote_chzzk_inline" style="height:${height}em;width:auto;vertical-align:middle;display:inline-block;" alt="${this.escapeHTML(emoteId)}">`;
             } else {
                 html += this.escapeHTML(match[0]);

@@ -19,8 +19,9 @@ assert.strictEqual(ChatSpecialBubbleCommand.parse('오늘 !광대 사람이 죽�
 assert.strictEqual(ChatSpecialBubbleCommand.parse('!광대놀자'), null);
 
 const rendererSource = fs.readFileSync(path.resolve(__dirname, '../js/ChatRenderer.js'), 'utf8');
-const rendererContext = vm.createContext({ console });
-vm.runInContext(`${rendererSource}\nglobalThis.ChatRenderer = ChatRenderer;`, rendererContext);
+const rendererContext = vm.createContext({ console, URL });
+const safeContentSource = fs.readFileSync(path.resolve(__dirname, '../js/runtime/SafeContent.js'), 'utf8');
+vm.runInContext(`${safeContentSource}\n${rendererSource}\nglobalThis.ChatRenderer = ChatRenderer;`, rendererContext);
 const allocator = Object.create(rendererContext.ChatRenderer.prototype);
 allocator.boxPos = 0;
 allocator.activeBubbles = [];
@@ -52,11 +53,28 @@ assert.match(cssSource, /chat-line-inner--clown\s*\{[\s\S]*?width:\s*min\(372px,
     'clown bubbles must leave a stable gap between ordinary chat slots');
 assert.match(cssSource, /\.message\.message--clown\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?bottom:\s*14px;[\s\S]*?max-height:\s*116px;/,
     'clown copy must stay inside the lower caption-safe area');
+assert.match(cssSource, /\.message\.message--clown\s*\{[\s\S]*?word-break:\s*keep-all;[\s\S]*?overflow-wrap:\s*normal;[\s\S]*?text-wrap:\s*balance;/,
+    'clown copy must wrap on word boundaries and balance its lines');
 assert.match(cssSource, /chat-line-inner--clown \.name-box\s*\{[\s\S]*?top:\s*10px;[\s\S]*?right:\s*10px;/,
     'clown author label must stay over the right hair area instead of the face');
-assert.match(rendererSource, /specialBubble\?\.kind === 'clown'[\s\S]*?fontSize = 3\.6;[\s\S]*?messageEle\.style\.fontSize =/);
+assert.match(rendererSource, /specialBubble\?\.kind === 'clown'[\s\S]*?_normalizeClownText\(specialBubble\.text\)/);
+assert.match(rendererSource, /_fitClownCaption\(element\)[\s\S]*?element\.scrollWidth <= element\.clientWidth[\s\S]*?element\.scrollHeight <= maxHeight/,
+    'clown font sizing must measure the rendered caption instead of using character-count buckets');
+assert.match(rendererSource, /document\.fonts\?\.ready[\s\S]*?_fitClownCaption\(messageEle\)/,
+    'clown caption must be refitted after the web font becomes ready');
 const clownBranch = rendererSource.match(/if \(specialBubble\?\.kind === 'clown'\)[\s\S]*?else if/)?.[0] || '';
 assert.doesNotMatch(clownBranch, /slotSpan\s*=\s*2|chat-box--clown/,
     'clown bubbles must claim one ordinary chat slot');
+
+const renderer = Object.create(rendererContext.ChatRenderer.prototype);
+assert.strictEqual(renderer._normalizeClownText('아니  이러다\n모두 죽어!!!'), '아니 이러다 모두 죽어!!!');
+assert.strictEqual(renderer._isSingleEmoteMessage(
+    '{good}',
+    { good: { imageUrl: 'https://example.com/emote.png' } }
+), true);
+assert.strictEqual(renderer._isSingleEmoteMessage(
+    '말 {good}',
+    { good: { imageUrl: 'https://example.com/emote.png' } }
+), false);
 
 console.log('[test] Special clown chat bubble command passed.');

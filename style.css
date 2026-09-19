@@ -199,7 +199,9 @@ body {
   display: block;
   line-height: 1.02;
   word-break: keep-all;
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
+  text-wrap: balance;
+  white-space: normal;
   background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.42) 12%, rgba(0, 0, 0, 0.42) 88%, transparent);
 }
 
