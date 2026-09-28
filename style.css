@@ -174,14 +174,6 @@ body {
   height: auto;
 }
 
-.chat-line-inner--clown::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent 48%, rgba(0, 0, 0, 0.8) 100%);
-}
-
 .chat-line .chat-line-inner.chat-line-inner--clown .name-box {
   position: absolute;
   top: 10px;
@@ -218,7 +210,7 @@ body {
   overflow-wrap: normal;
   text-wrap: balance;
   white-space: normal;
-  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.42) 12%, rgba(0, 0, 0, 0.42) 88%, transparent);
+  background: transparent;
 }
 
 .chat-line-inner--clown .name-box .user-name {
