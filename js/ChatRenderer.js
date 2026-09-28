@@ -111,6 +111,7 @@ class ChatRenderer {
             const isSingleEmote = this._isSingleEmoteMessage(displayMessage, emotes);
             messageEle.innerHTML = renderMessageWithEmotesHTML(displayMessage, emotes, isSingleEmote ? 0.75 : 1);
             if (isSingleEmote) messageEle.classList.add('message--single-emote');
+            else messageEle.classList.add('message--text');
 
             // Ensure Twemoji is applied
             if (window.twemoji) {
@@ -119,7 +120,7 @@ class ChatRenderer {
 
             // 메시지 길이 기반 스타일 조정
             if (!isSingleEmote && displayMessage.length <= 5) {
-                messageEle.style.fontSize = (2.6 - displayMessage.length / 3) + "em";
+                messageEle.style.fontSize = `max(var(--chat-message-min-font-size), ${2.6 - displayMessage.length / 3}em)`;
                 messageEle.style.textAlign = "center";
             }
 

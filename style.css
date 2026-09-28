@@ -42,6 +42,8 @@
   --chat-text-border-color: black;
   --chat-text-color: #444;
   --chat-user-name-color: #191232;
+  /* Ordinary message floor: previous 1.1em increased by 15%. */
+  --chat-message-min-font-size: 1.265em;
 
   --chat-border-radius-outer: 28px;
   --chat-border-radius-inner: 24px;
@@ -306,6 +308,10 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0.01em 0.8em;
+}
+
+.message.message--text {
+  font-size: var(--chat-message-min-font-size);
 }
 
 .message img {
