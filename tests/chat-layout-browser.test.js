@@ -57,7 +57,9 @@ const { chromium } = require('playwright');
                 }));
             });
             for (const bubble of measurements[columns]) {
-                assert.ok(Math.abs(bubble.box.x - bubble.slot * 1920 / columns) < 1);
+                assert.ok(Math.abs(bubble.box.x + bubble.box.width / 2 - (bubble.slot + 0.5) * 1920 / columns) < 1,
+                    'short and wide bubbles must share the center of their assigned slot');
+                assert.ok(bubble.box.x >= bubble.slot * 1920 / columns - 1, 'content must not cross the slot left edge');
                 assert.ok(bubble.box.right <= (bubble.slot + 1) * 1920 / columns + 1, 'content must fit its slot');
                 assert.ok(bubble.content.bottom <= 1080, 'visible content must remain above the screen edge');
                 if (bubble.clownArt) {

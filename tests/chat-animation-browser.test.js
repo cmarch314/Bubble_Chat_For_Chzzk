@@ -123,7 +123,8 @@ const cases = [
                             }
                         } else {
                             assert.strictEqual(Number(result.allocatedSlot), slot);
-                            assert.ok(Math.abs(result.base[0].x - slot * 1920 / columns) < 1, `${id}: slot origin drift`);
+                            assert.ok(Math.abs(result.base[0].x + result.base[0].width / 2 - (slot + 0.5) * 1920 / columns) < 1,
+                                `${id}: slot center drift`);
                         }
                     }
                     results.push({ id, columns, slot, travel, ...result });

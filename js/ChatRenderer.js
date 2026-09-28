@@ -265,6 +265,7 @@ class ChatRenderer {
         chatBox.dataset.chatSlotStart = String(start);
         chatBox.dataset.chatSlotSpan = String(span);
         chatBox.style.left = `${start * 100 / slotCount}%`;
+        chatBox.style.right = `${(slotCount - start - span) * 100 / slotCount}%`;
         this.nextSlot = (start + span) % slotCount;
         this.activeBubbles.push(chatBox);
         return { start, span };

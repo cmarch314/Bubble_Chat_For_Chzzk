@@ -27,6 +27,7 @@ for (const columns of [5, 6, 7, 8, 12]) {
     bubbles.forEach((item, index) => {
         assert.strictEqual(renderer._claimBubbleSlots(item).start, index);
         assert.ok(Math.abs(parseFloat(item.style.left) - index * 100 / columns) < 1e-8);
+        assert.ok(Math.abs(parseFloat(item.style.right) - (columns - index - 1) * 100 / columns) < 1e-8);
     });
     assert.ok(bubbles.every(item => item.parentElement), 'full capacity must retain every bubble');
     const replacement = bubble();

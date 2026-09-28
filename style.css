@@ -145,6 +145,14 @@ body {
   animation-iteration-count: 0;
 }
 
+/* Center the natural bubble width inside its assigned slot without using the
+   transform property owned by animations. Screen-travel bubbles have no slot. */
+.chat-box[data-chat-slot-start] {
+  width: max-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Scale the content's layout, including fixed-pixel media and inline emote sizes.
    Keep the animated .chat-box outside this zoom so its transforms remain independent. */
 .chat-box > .chat-line {
