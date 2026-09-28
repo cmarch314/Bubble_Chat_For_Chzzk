@@ -31,7 +31,8 @@ const { chromium } = require('playwright');
         for (const columns of [5, 6, 7, 8]) {
             await page.goto(`${previewUrl}?columns=${columns}`);
             await page.waitForFunction(() => document.documentElement.dataset.previewReady === 'true'
-                && document.querySelector('video')?.readyState >= 2);
+                && document.querySelector('video')?.readyState >= 2
+                && [...document.querySelectorAll('.chat-clown-art')].every(image => image.complete && image.naturalWidth > 0));
             assert.strictEqual(await page.locator('.chat-box').count(), columns);
             if (columns >= 6) {
                 assert.notStrictEqual(await page.locator('.chat-box').nth(5).evaluate(box => getComputedStyle(box).animationName), 'none',
@@ -49,13 +50,22 @@ const { chromium } = require('playwright');
                     slot: Number(box.dataset.chatSlotStart), box: rect(box),
                     content: rect(box.querySelector('.chat-line')), name: rect(box.querySelector('.user-name')),
                     message: rect(box.querySelector('.message')), badge: rect(box.querySelector('.badges img')),
-                    emote: rect(box.querySelector('.emote_chzzk_inline')), video: rect(box.querySelector('video'))
+                    emote: rect(box.querySelector('.emote_chzzk_inline')), video: rect(box.querySelector('video')),
+                    clownArt: rect(box.querySelector('.chat-clown-art')),
+                    borderHeight: 2 * parseFloat(getComputedStyle(box.querySelector('.chat-line-inner')).borderTopWidth)
+                        * Number(getComputedStyle(box.querySelector('.chat-line')).zoom)
                 }));
             });
             for (const bubble of measurements[columns]) {
                 assert.ok(Math.abs(bubble.box.x - bubble.slot * 1920 / columns) < 1);
                 assert.ok(bubble.box.right <= (bubble.slot + 1) * 1920 / columns + 1, 'content must fit its slot');
                 assert.ok(bubble.content.bottom <= 1080, 'visible content must remain above the screen edge');
+                if (bubble.clownArt) {
+                    assert.ok(Math.abs(bubble.clownArt.height / bubble.clownArt.width - 340 / 588) < 0.002,
+                        'clown art must retain its natural aspect ratio');
+                    assert.ok(Math.abs(bubble.content.height - bubble.clownArt.height - bubble.borderHeight) < 0.1,
+                        'clown card must fit the image plus its border without a blank footer');
+                }
             }
             if (columns > 5) {
                 for (let index = 0; index < 5; index++) {

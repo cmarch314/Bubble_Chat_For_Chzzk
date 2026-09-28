@@ -29,7 +29,7 @@ class ChatRenderer {
 
     static resolveColumns(value) {
         const columns = Number(value);
-        return Number.isInteger(columns) && columns >= 5 && columns <= 12 ? columns : 6;
+        return Number.isInteger(columns) && columns >= 5 && columns <= 12 ? columns : 7;
     }
 
     dispose() {
@@ -89,6 +89,13 @@ class ChatRenderer {
         if (specialBubble?.kind === 'clown') {
             chatLineInner.classList.add('chat-line-inner--clown');
             messageEle.classList.add('message--clown');
+            const artwork = document.createElement('img');
+            artwork.className = 'chat-clown-art';
+            artwork.src = 'img/광대.jpg';
+            artwork.alt = '';
+            artwork.width = 588;
+            artwork.height = 340;
+            chatLineInner.appendChild(artwork);
             messageEle.textContent = this._normalizeClownText(specialBubble.text);
             timeout = 10000;
         } else if (videoQueue.length > 0) {
@@ -197,8 +204,8 @@ class ChatRenderer {
     _fitClownCaption(element) {
         if (!element) return;
         const minPx = 14;
-        const maxPx = 42;
-        const maxHeight = 116;
+        const maxPx = 32;
+        const maxHeight = 84;
         let low = minPx;
         let high = maxPx;
         let best = minPx;

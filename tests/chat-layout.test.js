@@ -44,13 +44,13 @@ for (const columns of [5, 6, 7, 8, 12]) {
     assert.ok(renderer.activeBubbles.every(item => Number(item.dataset.chatSlotStart) < columns));
 }
 for (const columns of [undefined, null, NaN, Infinity, -1, 0, 4, 6.5, 13, 'oops']) {
-    assert.strictEqual(new Renderer(null, null, { columns }).columns, 6, `invalid columns: ${columns}`);
+    assert.strictEqual(new Renderer(null, null, { columns }).columns, 7, `invalid columns: ${columns}`);
 }
 assert.strictEqual(new Renderer(null, null, { columns: '8' }).columns, 8);
 
 // Config survives loading/encapsulation and settings-page export.
 vm.runInContext(`${source('config.js')}\n${source('js/ConfigManager.js')}\nglobalThis.Manager = ConfigManager;`, context);
-assert.strictEqual(context.window.HIVE_CHAT_LAYOUT.columns, 6);
+assert.strictEqual(context.window.HIVE_CHAT_LAYOUT.columns, 7);
 context.window.HIVE_CHAT_LAYOUT = { columns: 8 };
 const manager = Object.create(context.Manager.prototype);
 manager._loadAllConfigs();

@@ -6,7 +6,7 @@ window.BUBBLECHAT_COMPANION_ORIGIN = ""; // Optional localhost override; blank f
 
 // Chat columns (5–12): 6 = 83%, 7 = 71%, 8 = 62.5% of the original bubble size.
 // Scales all bubble content, including names, badges, emotes, !광대 and #CMC videos.
-window.HIVE_CHAT_LAYOUT = { columns: 6 };
+window.HIVE_CHAT_LAYOUT = { columns: 7 };
 
 window.HIVE_VOLUME_CONFIG = {
     "master": 1.35,

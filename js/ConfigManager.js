@@ -18,7 +18,7 @@ class ConfigManager {
         this._randomNames = [];
         this._normalizerConfig = { enabled: true, visual: true, sfx: true };
         this._huntConfig = { hunterSpeedMultiplier: 1.15 };
-        this._chatLayout = { columns: 6 };
+        this._chatLayout = { columns: 7 };
 
         this._initBroadcastChannel();
         this._loadAllConfigs(); // [NEW] 통합 로더
