@@ -26,6 +26,7 @@ const allocator = Object.create(rendererContext.ChatRenderer.prototype);
 allocator.nextSlot = 0;
 allocator.columns = 6;
 allocator.activeBubbles = [];
+allocator.liveBubbles = new Set();
 allocator.bubbleDisposers = new WeakMap();
 const bubble = () => ({
     dataset: {},

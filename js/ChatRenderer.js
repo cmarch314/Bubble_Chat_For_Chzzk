@@ -13,6 +13,7 @@ class ChatRenderer {
         this.columns = ChatRenderer.resolveColumns(layout?.columns);
         this.container.style.setProperty('--chat-scale', String(5 / this.columns));
         this.activeBubbles = [];
+        this.liveBubbles = new Set();
         this.bubbleDisposers = new WeakMap();
         this.mediaBubbleController = new ChatMediaBubbleController(this);
 
@@ -35,7 +36,7 @@ class ChatRenderer {
     dispose() {
         this.timers.clearAll();
         this.scope.dispose();
-        for (const bubble of [...this.activeBubbles]) this._removeBubble(bubble);
+        for (const bubble of [...this.liveBubbles]) this._removeBubble(bubble);
         this.activeBubbles = [];
     }
 
@@ -145,6 +146,7 @@ class ChatRenderer {
         elements.chatLineBg.appendChild(chatLineInner);
 
         this.container.appendChild(chatBox);
+        this.liveBubbles.add(chatBox);
 
         requestAnimationFrame(() => {
             if (specialBubble?.kind === 'clown') this._fitClownCaption(messageEle);
@@ -270,6 +272,7 @@ class ChatRenderer {
 
     _releaseBubbleSlots(chatBox) {
         this.activeBubbles = this.activeBubbles.filter(bubble => bubble !== chatBox && bubble?.parentElement);
+        if (!chatBox.parentElement) this.liveBubbles.delete(chatBox);
     }
 
     _removeBubble(chatBox) {
@@ -342,6 +345,7 @@ class ChatRenderer {
             chatBox.style.width = "auto"; messageEle.style.whiteSpace = "nowrap";
             chatBox.style.left = "0"; chatBox.style.top = "0"; chatBox.style.bottom = "auto";
             chatBox.style.transform = "none";
+            chatBox.style.transformOrigin = "top left";
             chatBox.style.animation = "chat-hvn-slideDiagonal 3s linear forwards";
             messageEle.style.fontSize = "2.5em";
             timeout = 3500;
@@ -416,23 +420,26 @@ class ChatRenderer {
         } else if (["지나갑니다", "실례합니다", "수레"].includes(message) || this._includesAny(["가즈아", "드가자"], message) || message.endsWith("ㅏㅏ")) {
             usesSlot = false;
             const fromLeft = Math.random() >= 0.5;
-            chatBox.style.left = fromLeft ? "-350px" : "auto"; chatBox.style.right = fromLeft ? "auto" : "-350px";
+            chatBox.style.left = fromLeft ? "0" : "auto"; chatBox.style.right = fromLeft ? "auto" : "0";
             chatBox.style.animation = `${fromLeft ? 'chat-hvn-passThroughLtoR' : 'chat-hvn-passThroughRtoL'} 3.5s ease-in forwards`;
-            timeout = 3000;
+            timeout = 3500;
         } else if (["나락", "떡락"].includes(message) || normOriginal.startsWith("!나락") || normOriginal.startsWith("!떡락")) {
             usesSlot = false;
             chatBox.style.width = "auto"; messageEle.style.whiteSpace = "nowrap";
-            chatBox.style.left = Math.random() * 90 + "%"; chatBox.style.bottom = "1300px";
+            chatBox.style.left = `calc((100% - 380px * var(--chat-scale, 1)) * ${Math.random()})`;
+            chatBox.style.top = "0"; chatBox.style.bottom = "auto";
             chatBox.style.animation = "chat-hvn-passThrough2 3s cubic-bezier(0.31, 0.44, 0.445, 1.65) forwards";
             messageEle.style.fontSize = "2.5em"; timeout = 3500;
         } else if (["극락", "떡상", "🦇"].includes(message) || normOriginal.startsWith("!극락") || normOriginal.startsWith("!떡상")) {
             usesSlot = false;
             chatBox.style.width = "auto"; messageEle.style.whiteSpace = "nowrap";
-            chatBox.style.left = Math.random() * 90 + "%"; chatBox.style.bottom = "-500px";
+            chatBox.style.left = `calc((100% - 380px * var(--chat-scale, 1)) * ${Math.random()})`;
+            chatBox.style.top = "auto"; chatBox.style.bottom = "0";
             chatBox.style.animation = "chat-hvn-passThrough3 3s cubic-bezier(0.31, 0.44, 0.445, 1.65) forwards";
             messageEle.style.fontSize = "2.5em"; timeout = 3500;
         }
 
+        if (!usesSlot) chatBox.classList.add('chat-box--travel');
         return { usesSlot, timeout };
     }
 
