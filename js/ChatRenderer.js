@@ -2,15 +2,18 @@
 // [Class 4] Chat Renderer (DOM & Animation)
 // ==========================================
 class ChatRenderer {
-    constructor(eventBus, audioManager = null) {
+    constructor(eventBus, audioManager = null, layout = {}) {
         this.eventBus = eventBus;
         this.audioManager = audioManager;
         this.scope = new DisposableScope();
         this.timers = new ManagedTimers();
         this.scope.add(() => this.timers.clearAll());
         this.container = document.getElementById('chat');
-        this.boxPos = 0;
+        this.nextSlot = 0;
+        this.columns = ChatRenderer.resolveColumns(layout?.columns);
+        this.container.style.setProperty('--chat-scale', String(5 / this.columns));
         this.activeBubbles = [];
+        this.bubbleDisposers = new WeakMap();
         this.mediaBubbleController = new ChatMediaBubbleController(this);
 
         if (this.eventBus) {
@@ -24,10 +27,15 @@ class ChatRenderer {
         }
     }
 
+    static resolveColumns(value) {
+        const columns = Number(value);
+        return Number.isInteger(columns) && columns >= 5 && columns <= 12 ? columns : 6;
+    }
+
     dispose() {
         this.timers.clearAll();
         this.scope.dispose();
-        for (const bubble of this.activeBubbles) bubble?.remove?.();
+        for (const bubble of [...this.activeBubbles]) this._removeBubble(bubble);
         this.activeBubbles = [];
     }
 
@@ -86,6 +94,7 @@ class ChatRenderer {
         } else if (videoQueue.length > 0) {
             const mediaResult = this.mediaBubbleController.mount(originalMessage, elements, videoQueue);
             timeout = mediaResult.timeout;
+            this.bubbleDisposers.set(chatBox, mediaResult.dispose);
         } else {
             // 특수 효과 필터 (채팅 내용 기반)
             this._applyTextFilters(originalMessage, elements, userColor);
@@ -146,8 +155,7 @@ class ChatRenderer {
                 if (chatBox.parentElement) {
                     chatBox.classList.remove('visible');
                     this.timers.timeout(() => {
-                        chatBox.remove();
-                        this._releaseBubbleSlots(chatBox);
+                        this._removeBubble(chatBox);
                     }, 1000);
                 }
             }, timeout);
@@ -212,8 +220,8 @@ class ChatRenderer {
     }
 
     _claimBubbleSlots(chatBox, requestedSpan = 1) {
-        const slotCount = 5;
-        const span = Math.max(1, Math.min(slotCount, Number(requestedSpan) || 1));
+        const slotCount = this.columns;
+        const span = Math.max(1, Math.min(slotCount, Math.floor(Number(requestedSpan)) || 1));
         this.activeBubbles = this.activeBubbles.filter(bubble => bubble && bubble.parentElement);
 
         const findAvailableStart = () => {
@@ -224,7 +232,7 @@ class ChatRenderer {
                 if (!Number.isFinite(start)) return;
                 for (let slot = start; slot < start + bubbleSpan; slot++) occupied.add(slot);
             });
-            const cursor = Math.floor((this.boxPos % 100) / 20);
+            const cursor = this.nextSlot;
             for (let offset = 0; offset < slotCount; offset++) {
                 const start = (cursor + offset) % slotCount;
                 if (start + span > slotCount) continue;
@@ -240,21 +248,29 @@ class ChatRenderer {
         let start = findAvailableStart();
         while (start === null && this.activeBubbles.length) {
             const oldest = this.activeBubbles.shift();
-            oldest?.remove?.();
+            this._removeBubble(oldest);
             start = findAvailableStart();
         }
         if (start === null) start = 0;
 
         chatBox.dataset.chatSlotStart = String(start);
         chatBox.dataset.chatSlotSpan = String(span);
-        chatBox.style.left = `${start * 20}%`;
-        this.boxPos = ((start + span) % slotCount) * 20;
+        chatBox.style.left = `${start * 100 / slotCount}%`;
+        this.nextSlot = (start + span) % slotCount;
         this.activeBubbles.push(chatBox);
         return { start, span };
     }
 
     _releaseBubbleSlots(chatBox) {
         this.activeBubbles = this.activeBubbles.filter(bubble => bubble !== chatBox && bubble?.parentElement);
+    }
+
+    _removeBubble(chatBox) {
+        const dispose = this.bubbleDisposers.get(chatBox);
+        this.bubbleDisposers.delete(chatBox);
+        dispose?.();
+        chatBox.remove();
+        this._releaseBubbleSlots(chatBox);
     }
 
     _resolveColor(color, uid) {

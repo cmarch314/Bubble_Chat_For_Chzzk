@@ -11,10 +11,6 @@ class ChatMediaBubbleController {
 
     get timers() { return this.owner.timers; }
 
-    get boxPos() { return this.owner.boxPos; }
-
-    set boxPos(value) { this.owner.boxPos = value; }
-
     mount(originalMessage, elements, videoQueue) {
         const { chatBox, chatLineInner, messageEle } = elements;
             // Build the unified queue of video commands and SFX keywords in the exact order they appear
@@ -76,8 +72,23 @@ class ChatMediaBubbleController {
             // Clear standard text timeout
 
             let hasCleanedUp = false;
-            const cleanupVideoBubble = () => {
-                if (hasCleanedUp) return;
+            let hasReleased = false;
+            const doRelease = () => {
+                if (hasReleased) return;
+                hasReleased = true;
+                this.audioManager?.releaseMediaElement?.(video, { pause: true, unload: true });
+                // The renderer may be used without an AudioManager (e.g. previews).
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
+                chatBox.remove?.();
+                this.owner._releaseBubbleSlots?.(chatBox);
+            };
+            const cleanupVideoBubble = (immediate = false) => {
+                if (hasCleanedUp) {
+                    if (immediate) doRelease();
+                    return;
+                }
                 hasCleanedUp = true;
                 this.timers.clear(safetyTimeout);
 
@@ -91,14 +102,7 @@ class ChatMediaBubbleController {
                     }
                 }
 
-                const doRelease = () => {
-                    this.audioManager?.releaseMediaElement?.(video, { pause: true, unload: true });
-                    if (chatBox.parentElement) {
-                        chatBox.remove?.();
-                    }
-                };
-
-                if (chatBox.parentElement) {
+                if (!immediate && chatBox.parentElement) {
                     chatBox.classList.remove('visible');
                     this.timers.timeout(doRelease, 300);
                 } else {
@@ -114,6 +118,7 @@ class ChatMediaBubbleController {
             let hasTriggeredNext = false;
             let currentIdx = 0;
             const playNext = async () => {
+                if (hasCleanedUp) return;
                 if (currentIdx >= unifiedQueue.length) {
                     cleanupVideoBubble();
                     return;
@@ -189,10 +194,6 @@ class ChatMediaBubbleController {
             messageEle.appendChild(video);
             playNext();
 
-            // Set left positioning
-            this.boxPos = this.boxPos % 100;
-            chatBox.style.left = this.boxPos + "%";
-
-        return { timeout: null };
+        return { timeout: null, dispose: () => cleanupVideoBubble(true) };
     }
 }

@@ -18,6 +18,7 @@ class ConfigManager {
         this._randomNames = [];
         this._normalizerConfig = { enabled: true, visual: true, sfx: true };
         this._huntConfig = { hunterSpeedMultiplier: 1.15 };
+        this._chatLayout = { columns: 6 };
 
         this._initBroadcastChannel();
         this._loadAllConfigs(); // [NEW] 통합 로더
@@ -142,6 +143,7 @@ class ConfigManager {
         if (window.RANDOM_NAMES) this._randomNames = [...window.RANDOM_NAMES];
         if (window.NORMALIZER_CONFIG) this._normalizerConfig = { ...this._normalizerConfig, ...window.NORMALIZER_CONFIG };
         if (window.HIVE_HUNT_CONFIG) this._huntConfig = { ...this._huntConfig, ...window.HIVE_HUNT_CONFIG };
+        if (window.HIVE_CHAT_LAYOUT) this._chatLayout = { ...this._chatLayout, ...window.HIVE_CHAT_LAYOUT };
 
         this._excludedSfx = Array.isArray(window.HIVE_EXCLUDED_SFX) ? [...window.HIVE_EXCLUDED_SFX] : [];
         this._sfxRenames = (typeof window.HIVE_SFX_RENAMES === 'object' && window.HIVE_SFX_RENAMES !== null) ? { ...window.HIVE_SFX_RENAMES } : {};
@@ -160,6 +162,7 @@ class ConfigManager {
             delete window.RANDOM_NAMES;
             delete window.NORMALIZER_CONFIG;
             delete window.HIVE_HUNT_CONFIG;
+            delete window.HIVE_CHAT_LAYOUT;
             delete window.HIVE_EXCLUDED_SFX;
             delete window.HIVE_SFX_RENAMES;
         } catch (e) {
@@ -173,6 +176,7 @@ class ConfigManager {
     // [Getter Methods] - 내부 설정을 안전하게 제공
     // ==========================================
     getSoundConfig() { return this._soundConfig; }
+    getChatLayout() { return { ...this._chatLayout }; }
     getVisualConfig() { return this._visualConfig; }
     getVolumeConfig() { return this._volumeConfig; }
     getWelcomeMessages() { return this._welcomeMessages; }

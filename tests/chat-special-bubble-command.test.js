@@ -23,8 +23,10 @@ const rendererContext = vm.createContext({ console, URL });
 const safeContentSource = fs.readFileSync(path.resolve(__dirname, '../js/runtime/SafeContent.js'), 'utf8');
 vm.runInContext(`${safeContentSource}\n${rendererSource}\nglobalThis.ChatRenderer = ChatRenderer;`, rendererContext);
 const allocator = Object.create(rendererContext.ChatRenderer.prototype);
-allocator.boxPos = 0;
+allocator.nextSlot = 0;
+allocator.columns = 6;
 allocator.activeBubbles = [];
+allocator.bubbleDisposers = new WeakMap();
 const bubble = () => ({
     dataset: {},
     style: {},
@@ -49,8 +51,8 @@ const cssSource = fs.readFileSync(path.resolve(__dirname, '../style.css'), 'utf8
 assert.match(cssSource, /광대\.jpg'\) right 14px top \/ 112% auto no-repeat/);
 assert.doesNotMatch(cssSource, /\.chat-box\.chat-box--clown|chat-line-inner--clown\s*\{[\s\S]*?width:\s*600px;/,
     'clown bubbles must retain the ordinary chat width');
-assert.match(cssSource, /chat-line-inner--clown\s*\{[\s\S]*?width:\s*min\(372px, calc\(20vw - 12px\)\);/,
-    'clown bubbles must leave a stable gap between ordinary chat slots');
+assert.match(cssSource, /chat-line-inner--clown\s*\{[\s\S]*?width:\s*372px;\s*max-width:\s*100%;/,
+    'clown bubbles must use design-space width inside the shared chat scale');
 assert.match(cssSource, /\.message\.message--clown\s*\{[\s\S]*?position:\s*absolute;[\s\S]*?bottom:\s*14px;[\s\S]*?max-height:\s*116px;/,
     'clown copy must stay inside the lower caption-safe area');
 assert.match(cssSource, /\.message\.message--clown\s*\{[\s\S]*?word-break:\s*keep-all;[\s\S]*?overflow-wrap:\s*normal;[\s\S]*?text-wrap:\s*balance;/,

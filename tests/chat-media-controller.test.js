@@ -87,6 +87,23 @@ assert.strictEqual(owner.audioManager.released[0], createdVideos[0],
 assert.strictEqual(owner.audioManager.released[1].pause, true);
 assert.strictEqual(owner.audioManager.released[1].unload, true);
 assert.strictEqual(windowObject._activeVideoCount, 0);
+result.dispose();
+assert.strictEqual(windowObject._activeVideoCount, 0, 'disposal after completion is idempotent');
+
+const nextResult = controller.mount('#테스트 #테스트', elements, [
+    { type: 'video', command: '테스트', files: ['테스트'], startIndex: 0, length: 4 },
+    { type: 'video', command: '테스트', files: ['테스트2'], startIndex: 5, length: 4 }
+]);
+const evictedVideo = createdVideos[1];
+assert.strictEqual(windowObject._activeVideoCount, 1);
+nextResult.dispose();
+assert.strictEqual(windowObject._activeVideoCount, 0, 'slot eviction must release the active-video count');
+assert.strictEqual(owner.audioManager.released[0], evictedVideo);
+const evictedSource = evictedVideo.src;
+evictedVideo.listeners.ended();
+assert.strictEqual(evictedVideo.src, evictedSource, 'retired video events must not start the next queued clip');
+nextResult.dispose();
+assert.strictEqual(windowObject._activeVideoCount, 0);
 
 const rendererSource = fs.readFileSync(rendererPath, 'utf8');
 const controllerSource = fs.readFileSync(controllerPath, 'utf8');
@@ -97,3 +114,4 @@ assert.match(controllerSource, /unifiedQueue\.sort\(\(a, b\) => a\.startIndex - 
 
 console.log('[test] Chat media bubble ownership and startup contract passed.');
 require('./chat-special-bubble-command.test.js');
+require('./chat-layout.test.js');
