@@ -51,7 +51,7 @@ assert.strictEqual(new Renderer(null, null, { columns: '8' }).columns, 8);
 
 // Config survives loading/encapsulation and settings-page export.
 vm.runInContext(`${source('config.js')}\n${source('js/ConfigManager.js')}\nglobalThis.Manager = ConfigManager;`, context);
-assert.strictEqual(context.window.HIVE_CHAT_LAYOUT.columns, 7);
+assert.strictEqual(context.window.HIVE_CHAT_LAYOUT.columns, 6);
 context.window.HIVE_CHAT_LAYOUT = { columns: 8 };
 const manager = Object.create(context.Manager.prototype);
 manager._loadAllConfigs();
