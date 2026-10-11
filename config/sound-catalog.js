@@ -1624,10 +1624,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
     },
     "스트레스": [
         {
-            "src": "Chzzk_Signatures/스트레스많이받.mp3",
-            "volume": 0.7
-        },
-        {
             "src": "Chzzk_Signatures/스트레스받.mp3",
             "volume": 0.7
         },
@@ -1636,6 +1632,10 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
             "volume": 0.7
         }
     ],
+    "스트레스필요": {
+        "src": "Chzzk_Signatures/StressNeeds.mp3",
+        "volume": 0.7
+    },
     "스트레스풀": {
         "src": "Chzzk_Signatures/스트레스풀.mp3",
         "volume": 0.7
