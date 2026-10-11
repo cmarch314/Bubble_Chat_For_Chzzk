@@ -342,7 +342,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
             "volume": 0.7
         }
     ],
-    "결제": {
+    "결제!": {
         "src": "Chzzk_Signatures/applepay.mp3",
         "volume": 0.7
     },
@@ -954,7 +954,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/드루와.mp3",
         "volume": 0.7
     },
-    "디코": {
+    "디코!": {
         "src": "Chzzk_Signatures/discord.mp3",
         "volume": 0.7
     },
@@ -2028,7 +2028,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/알겠습니다.mp3",
         "volume": 0.7
     },
-    "알림": {
+    "알림!": {
         "src": "Chzzk_Signatures/Alarm.mp3",
         "volume": 0.7
     },
