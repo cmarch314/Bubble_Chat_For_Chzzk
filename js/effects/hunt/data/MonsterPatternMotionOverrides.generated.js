@@ -2630,6 +2630,9 @@ const HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = {
         },
         "action-3": {
           "ticks": 7
+        },
+        "rest": {
+          "origin": "50% 50%"
         }
       }
     },
