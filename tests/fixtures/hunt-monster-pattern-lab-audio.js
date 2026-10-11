@@ -161,6 +161,11 @@ class HuntMonsterPatternLabAudio {
         return this.audioManager.playMonsterAction(monster, 'telegraph', context);
     }
 
+    playEngineAsset(fileName, fallbackKey, context = {}) {
+        if (!this.enabled) return false;
+        return this.audioManager.playMHAsset(fileName, fallbackKey, context);
+    }
+
     playState(state) {
         if (!this.enabled) return;
         const monster = this.monsterProvider();

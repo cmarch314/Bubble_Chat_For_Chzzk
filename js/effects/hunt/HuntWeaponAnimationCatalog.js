@@ -27,6 +27,7 @@ class HuntWeaponAnimationCatalog {
                     transformOrigin: options.transformOrigin || (weaponId === 'long_sword'
                         ? '82% 18%'
                         : (weaponId === 'great_sword' ? '50% 88%' : '50% 50%')),
+                    impactAccent: options.impactAccent || null,
                     kinsect: options.kinsect || 'none',
                     source: 'capcom-controls+wilds-action-class'
                 });
@@ -45,13 +46,18 @@ class HuntWeaponAnimationCatalog {
         add('great_sword', ['strong_charged_slash'], 'great_sword_charged_release', 1020, 'sever', {
             releaseChargePose: true, trackTarget: true
         });
-        add('great_sword', ['true_charged_slash'], 'great_sword_true_release', 1220, 'sever', {
+        // 참모아는 21틱 BEAT 전체를 사용한다. 시각 모션을 더 짧게 끝내면
+        // 첫 HIT가 이미 다음 회전에 들어간 뒤 발생해 "때리고 허공에서 돈다".
+        add('great_sword', ['true_charged_slash'], 'great_sword_true_release', 2100, 'sever', {
             releaseChargePose: true, trackTarget: true
         });
         add('great_sword', ['tackle'], 'shoulder_tackle', 480, 'counter');
-        add('great_sword', ['wide_slash'], 'horizontal_slash', 620, 'sever');
-        add('great_sword', ['side_blow'], 'quick_chop', 430, 'blunt');
-        add('great_sword', ['kick'], 'shoulder_tackle', 390, 'blunt');
+        add('great_sword', ['wide_slash'], 'great_sword_wide_slash', 900, 'sever', {
+            trackTarget: true, impactAccent: 'wide-slash'
+        });
+        add('great_sword', ['kick'], 'great_sword_kick', 500, 'blunt', {
+            animateWeapon: false, impactAccent: 'kick'
+        });
 
         add('long_sword', ['overhead_slash'], 'ls_overhead_slash', 560);
         add('long_sword', ['thrust'], 'ls_thrust', 430);
@@ -254,19 +260,33 @@ class HuntWeaponAnimationCatalog {
         const end = [1, 0, 0, 0, 1, 0, 0];
         const motions = {
             charge: [idle, [.3, 0, 0, -12, .92, -10, 10], [.7, 0, 0, -7, 1.12, -5, 5], end],
-            great_sword_charge_raise: [idle, [.42, 0, 0, 24, .98, -28, -22], [.76, 0, 0, 42, 1.04, -45, -48], [1, 0, 0, 45, 1.06, -50, -55]],
-            great_sword_charge_hold: [[0, 0, 0, 45, 1.06, -50, -55], [.42, 0, 0, 49, 1.1, -54, -59], [.72, 0, 0, 42, 1.04, -46, -51], [1, 0, 0, 45, 1.07, -50, -55]],
+            great_sword_charge_raise: [idle, [.42, 0, 0, 74, .98, -28, -22], [.76, 0, 0, 120, 1.04, -45, -48], [1, 0, 0, 135, 1.06, -50, -55]],
+            great_sword_charge_hold: [[0, 0, 0, 135, 1.06, -50, -55], [.42, 0, 0, 139, 1.1, -54, -59], [.72, 0, 0, 132, 1.04, -46, -51], [1, 0, 0, 135, 1.07, -50, -55]],
             // The source stands vertically: blade edge left, grip at the bottom.
-            // Grip-bottom source: +45deg points the blade toward the upper-left
-            // for slots 1/2. Positive rotation then chops downward through the
-            // target; slots 3/4 receive the exact mirrored path.
-            great_sword_charged_release: [[0, 0, 0, 45, 1.07, -50, -55], [.2, 0, 0, 30, 1.1, -60, -68], [.46, .72, .75, 95, 1.13, -12, -88], [.72, 1, 1, 180, 1.2, 0, 0], [.86, .9, .9, 195, 1.12, 0, 7], [1, 0, 0, 180, 1, 0, 0]],
-            // First downward swing plants the blade, then the rebound continues
-            // in the same direction for the heavy second contact.
-            great_sword_true_release: [[0, 0, 0, 45, 1.1, -54, -60], [.1, 0, 0, 28, 1.14, -65, -74], [.24, .52, .56, 92, 1.16, -12, -102], [.38, 1, 1, 180, 1.24, 0, 0], [.5, 1, 1, 180, 1.12, 0, 18], [.58, .48, .5, 265, 1.2, -8, -26], [.72, .78, .82, 420, 1.24, 0, -108], [.86, 1, 1, 540, 1.34, 0, 0], [.93, .9, .9, 555, 1.18, 0, 8], [1, 0, 0, 540, 1, 0, 0]],
+            // Great Sword receives its bitmap-axis correction in keyframes();
+            // these authored rotations describe the swing relative to that base.
+            // Positive rotation carries the edge down through the target;
+            // slots 3/4 receive the exact mirrored path.
+            great_sword_charged_release: [[0, 0, 0, 135, 1.07, -50, -55], [.2, 0, 0, 120, 1.1, -60, -68], [.46, .72, .75, 185, 1.13, -12, -88], [.72, 1, 1, 270, 1.2, 0, 0], [.86, .9, .9, 285, 1.12, 0, 7], [1, 0, 0, 270, 1, 0, 0]],
+            // The first complete turn is planted at the hunter's origin. Only
+            // after the blade braces against the ground may the rebound carry
+            // the hunter toward the monster for the two cutting contacts. The
+            // grip/pivot must stop short of the target so the blade reaches it;
+            // after the heavy contact the same-direction follow-through keeps
+            // cutting instead of stopping on the handle and rewinding.
+            great_sword_true_release: [[0, 0, 0, 135, 1.1, -54, -60], [.1, 0, 0, 210, 1.14, -65, -76], [.22, 0, 0, 330, 1.17, -42, -94], [8 / 21, 0, 0, 495, 1.22, -12, -78], [.48, 0, 0, 510, 1.12, -8, 24], [.57, .2, .22, 585, 1.19, -10, -42], [14 / 21, .84, .86, 675, 1.24, 0, 0], [.75, .8, .82, 735, 1.24, 0, -104], [18 / 21, .84, .86, 855, 1.34, 0, 0], [.93, .72, .76, 915, 1.18, 0, 8], [1, 0, 0, 945, 1, 0, 0]],
+            // Draw the blade out beside the hunter, carry its edge laterally
+            // through the live target, then settle after the follow-through.
+            // This is a compact horizontal cut, not a shortened charged slash.
+            great_sword_wide_slash: [[0, 0, 0, -18, 1.02, -12, 5], [.22, 0, 0, -52, 1.08, -46, 2], [.4, .25, .2, -22, 1.12, -18, -4], [.56, 1, 1, 58, 1.18, 0, 0], [.76, .9, .9, 88, 1.1, 8, 5], [1, 0, 0, 90, 1, 0, 0]],
+            // The weapon stays planted for a kick; the foot emoji owns the
+            // visible strike at the authored impact tick.
+            great_sword_kick: [idle, end],
             heavy_overhead: [idle, [.3, 0, 0, -92, 1.04, -26, 18], [.52, .18, .18, -42, 1.08, 0, 0], [.76, 1, 1, 38, 1.15, 0, 0], end],
             true_charged_slash: [idle, [.24, 0, 0, -115, 1.08, -34, 22], [.48, .14, .12, -78, 1.14, 0, 0], [.68, 1, 1, 48, 1.28, 0, 0], [.82, .88, .84, 56, 1.18, 0, 0], end],
-            shoulder_tackle: [idle, [.25, 0, 0, -8, .96, -18, 5], [.62, .65, .58, 9, 1.13, 0, 0], end],
+            // A compact shoulder check: brace, bump a short distance toward the
+            // monster, recoil past the starting line, then plant at home.
+            shoulder_tackle: [idle, [.18, 0, 0, -7, .97, -12, 5], [.42, .24, .18, 8, 1.08, 0, 0], [.58, .1, .08, -4, 1.01, -10, 2], [.76, -.04, -.03, -2, .98, -6, 3], end],
             overhead_slash: [idle, [.3, 0, 0, -76, 1.02, -18, 12], [.7, 1, 1, 34, 1.08, 0, 0], end],
             quick_chop: [idle, [.25, 0, 0, -48, .98, -12, 7], [.65, .82, .82, 28, 1.06, 0, 0], end],
             horizontal_slash: [idle, [.28, 0, 0, -58, 1, -28, -2], [.68, 1, 1, 76, 1.08, 0, 0], end],
@@ -436,11 +456,23 @@ class HuntWeaponAnimationCatalog {
                     : (Number(targetVector.x) < 0 ? -1 : 1) }
             : fallbackVector;
         const spec = this.MOTIONS[profile?.motion] || this.MOTIONS.horizontal_slash;
-        const rotationFor = rotation => rotation * v.side;
+        // The Great Sword bitmap's visible clock axis is +90deg from the
+        // catalog's generic vertical-weapon axis. Mirroring its cutting edge
+        // without correcting this axis produced a 9→6 o'clock slash in slots
+        // 1/2. Apply the asset correction once, centrally: 12→9 for slots 1/2
+        // and the exact mirror for slots 3/4.
+        const assetRotationOffset = profile?.weaponId === 'great_sword' ? 90 : 0;
+        const rotationFor = rotation => (rotation + assetRotationOffset) * v.side;
         // Slots 1/2 share one stance; slots 3/4 are its true visual mirror.
         // Mirroring the whole weapon is intentional here: the cutting edge must
         // face inward after the hunter crosses to the other side of the monster.
-        const bladeMirror = directionalBlade ? v.side : 1;
+        // Great Sword's bitmap has its cutting edge on the opposite local side
+        // from the other directional weapon assets. Flip its source first so
+        // the charged stance presents the edge toward the swing, then mirror
+        // the complete stance between the left and right hunter pairs.
+        const bladeMirror = profile?.weaponId === 'great_sword'
+            ? -v.side
+            : (directionalBlade ? v.side : 1);
         return spec.map(([offset, xRatio, yRatio, rotation, scale, xNudge, yNudge]) => ({
             offset,
             transformOrigin: profile?.transformOrigin || '50% 50%',

@@ -185,6 +185,7 @@ assert.strictEqual(unavailablePartyEngine.monsterActionGateDiagnostics.at(-1).re
 const hunterTurnSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntHunterTurnExecutor.js'), 'utf8');
 const battleTickSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntBattleTickExecutor.js'), 'utf8');
 const huntEffectSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/HuntEffect.js'), 'utf8');
+const combatPresenterSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntCombatPresenter.js'), 'utf8');
 const valstraxSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntValstraxExecutor.js'), 'utf8');
 const monsterAnimatorSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntMonsterAttackAnimator.js'), 'utf8');
 assert.match(monsterAnimatorSource, /isUltimate && !isValstraxAmbush/,
@@ -206,8 +207,8 @@ assert.ok(
 );
 assert.doesNotMatch(huntEffectSource, /director\.trigger\(['"]valstrax['"]\)/,
     'Valstrax ambush must never enter the global visual queue');
-assert.match(huntEffectSource, /renderer\.triggerValstraxAmbushWarning\(\)/,
-    'the ambush warning must use a hunt-owned visual layer');
+assert.match(combatPresenterSource, /renderer\?\.triggerValstraxAmbushWarning\?\.\(\)/,
+    'the ambush warning must use the hunt-owned renderer through the combat presenter');
 assert.match(valstraxSource, /onTriggerMonsterAttack\('physical',[\s\S]*?붉은 혜성 강습[\s\S]*?type:\s*'ultimate'/,
     'Crimson Comet Ambush must be a physical whole-party ultimate, not an elemental laser');
 

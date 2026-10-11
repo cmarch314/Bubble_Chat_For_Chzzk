@@ -27,6 +27,10 @@ assert.strictEqual(machine.canEvade(hunter), true, 'sharpening may be cancelled 
 assert.strictEqual(machine.canGuard(hunter), false, 'sharpening must not guard an incoming attack');
 hunter.pendingSharpnessRestore = false;
 hunter.itemDuration = 0;
+hunter.rollDuration = 6;
+assert.strictEqual(machine.canEvade(hunter), false,
+    'an active visible roll must not reroll defense against every combo hit');
+hunter.rollDuration = 0;
 
 machine.begin(hunter, {
     id: 'long_sword.foresight_slash',

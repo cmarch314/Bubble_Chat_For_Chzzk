@@ -31,6 +31,14 @@ assert.ok(rendered.includes('{bad}'));
 assert.ok(!rendered.includes('javascript:'));
 assert.ok(!rendered.includes('<b>'));
 
+const reducedSingleEmote = SafeContent.renderEmotesHTML(
+    '{good}',
+    { good: { imageUrl: 'https://example.com/emote.png' } },
+    0.75
+);
+assert.match(reducedSingleEmote, /height:7\.5em;/,
+    'single-emote scaling must honor the requested 25% reduction');
+
 assert.strictEqual(SafeContent.remoteImageUrl('http://example.com/a.png'), null);
 assert.strictEqual(SafeContent.remoteImageUrl('data:text/html,x'), null);
 assert.strictEqual(SafeContent.cssColor('#12aBcD'), '#12aBcD');

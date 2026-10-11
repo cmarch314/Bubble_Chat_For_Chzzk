@@ -42,6 +42,8 @@
   --chat-text-border-color: black;
   --chat-text-color: #444;
   --chat-user-name-color: #191232;
+  /* Ordinary message floor: previous 1.1em increased by 15%. */
+  --chat-message-min-font-size: 1.265em;
 
   --chat-border-radius-outer: 28px;
   --chat-border-radius-inner: 24px;
@@ -126,15 +128,17 @@ body {
   display: flex;
   position: absolute;
   bottom: 0px;
-  width: 100%;
+  left: 0;
+  right: 0;
   z-index: var(--z-chat);
 }
 
 .chat-box {
+  --chat-motion-scale: var(--chat-scale, 1);
   position: absolute;
-  bottom: -7px;
+  bottom: calc(-7px * var(--chat-scale, 1));
   width: auto;
-  max-width: 380px;
+  max-width: calc(380px * var(--chat-scale, 1));
   background: transparent;
   overflow: hidden;
   max-height: 0px;
@@ -143,27 +147,48 @@ body {
   animation-iteration-count: 0;
 }
 
+/* Center the natural bubble width inside its assigned slot without using the
+   transform property owned by animations. Screen-travel bubbles have no slot. */
+.chat-box[data-chat-slot-start] {
+  width: max-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Scale the content's layout, including fixed-pixel media and inline emote sizes.
+   Keep the animated .chat-box outside this zoom so its transforms remain independent. */
+.chat-box > .chat-line {
+  zoom: var(--chat-scale, 1);
+  /* Descendant motion already scales with zoom; only outer motion needs a factor. */
+  --chat-motion-scale: 1;
+}
+
+.chat-box--travel {
+  position: fixed;
+}
+
 .chat-box.visible {
   margin-top: 0px;
-  max-height: 350px;
+  max-height: calc(350px * var(--chat-scale, 1));
   transition: opacity 0.2s, max-height .8ms, margin-top 30ms;
 }
 
 .chat-line .chat-line-inner.chat-line-inner--clown {
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.10) 58%, rgba(0, 0, 0, 0.88) 82%, #000 100%),
-    url('img/광대.jpg') right 14px top / 112% auto no-repeat !important;
-  width: min(372px, calc(20vw - 12px));
-  height: 330px;
-  min-height: 330px;
+  background: #000 !important;
+  width: 372px;
+  max-width: 100%;
   box-sizing: border-box;
   border: 4px solid #000;
   color: #ffffff;
   position: relative;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: block;
+}
+
+.chat-line-inner--clown > .chat-clown-art {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .chat-line .chat-line-inner.chat-line-inner--clown .name-box {
@@ -188,19 +213,25 @@ body {
   text-align: center;
   position: absolute;
   right: 14px;
-  bottom: 14px;
+  bottom: 4px;
   left: 14px;
   z-index: 1;
   width: auto;
-  max-height: 116px;
+  max-height: 84px;
   margin: 0;
   padding: 7px 10px 9px;
   box-sizing: border-box;
   display: block;
   line-height: 1.02;
   word-break: keep-all;
-  overflow-wrap: break-word;
-  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.42) 12%, rgba(0, 0, 0, 0.42) 88%, transparent);
+  overflow-wrap: normal;
+  text-wrap: balance;
+  white-space: normal;
+  background: transparent;
+}
+
+.chat-line-inner--clown .name-box .user-name {
+  color: #fff;
 }
 
 .chat-line.visible {
@@ -277,6 +308,10 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 0.01em 0.8em;
+}
+
+.message.message--text {
+  font-size: var(--chat-message-min-font-size);
 }
 
 .message img {
@@ -492,7 +527,7 @@ body {
   }
 
   100% {
-    transform: translate(0px, 200px) rotate(90deg);
+    transform: translate(0px, calc(200px * var(--chat-motion-scale, 1))) rotate(90deg);
   }
 }
 
@@ -504,17 +539,17 @@ body {
 
   100% {
     opacity: 0;
-    transform: translate(0px, -30px);
+    transform: translate(0px, calc(-30px * var(--chat-motion-scale, 1)));
   }
 }
 
 @keyframes chat-hvn-fall {
   0% {
-    transform: translate(0px, -20px) rotate(0deg);
+    transform: translate(0px, calc(-20px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   100% {
-    transform: translate(0px, 50px) rotate(0deg);
+    transform: translate(0px, calc(50px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 }
 
@@ -546,57 +581,63 @@ body {
 
 @keyframes chat-hvn-shake2 {
   0% {
-    transform: translate(1px, 1px) rotate(0deg);
+    transform: translate(calc(1px * var(--chat-motion-scale, 1)), calc(1px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   20% {
-    transform: translate(-1px, -2px) rotate(-10deg);
+    transform: translate(calc(-1px * var(--chat-motion-scale, 1)), calc(-2px * var(--chat-motion-scale, 1))) rotate(-10deg);
   }
 
   40% {
-    transform: translate(-3px, 0px) rotate(10deg);
+    transform: translate(calc(-3px * var(--chat-motion-scale, 1)), 0px) rotate(10deg);
   }
 
   60% {
-    transform: translate(3px, 2px) rotate(0deg);
+    transform: translate(calc(3px * var(--chat-motion-scale, 1)), calc(2px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   80% {
-    transform: translate(1px, -1px) rotate(10deg);
+    transform: translate(calc(1px * var(--chat-motion-scale, 1)), calc(-1px * var(--chat-motion-scale, 1))) rotate(10deg);
   }
 
   100% {
-    transform: translate(-1px, 2px) rotate(-10deg);
+    transform: translate(calc(-1px * var(--chat-motion-scale, 1)), calc(2px * var(--chat-motion-scale, 1))) rotate(-10deg);
   }
 }
 
 
 @keyframes chat-hvn-passThroughRtoL {
+  0% {
+    transform: translateX(100%);
+  }
   100% {
-    transform: translate(-2500px, 0px);
+    transform: translateX(-100vw);
   }
 }
 
 @keyframes chat-hvn-passThroughLtoR {
+  0% {
+    transform: translateX(-100%);
+  }
   100% {
-    transform: translate(2500px, 0px);
+    transform: translateX(100vw);
   }
 }
 
 @keyframes chat-hvn-passThrough2 {
   0% {
-    transform: translate(-5px, -400px);
+    transform: translateY(-100%);
   }
 
   100% {
-    transform: translate(-5px, 1700px);
+    transform: translateY(100vh);
   }
 }
 
 @keyframes chat-hvn-slideDiagonal {
   0% {
     /* 왼쪽 상단 구석 위쪽에서 대기 */
-    transform: translate(-1100px, -1800px) scale(0.1) rotate(0deg);
+    transform: translate(-100%, -100%) scale(0.1) rotate(0deg);
     opacity: 0;
   }
 
@@ -606,27 +647,27 @@ body {
 
   100% {
     /* 오른쪽 하단 너머로 시원하게 퇴장 */
-    transform: translate(3000px, 200px) scale(1.5) rotate(0deg);
+    transform: translate(100vw, 100vh) scale(1.5) rotate(0deg);
   }
 }
 
 @keyframes chat-hvn-passThrough3 {
-  100% {
-    transform: translate(-5px, 400px);
+  0% {
+    transform: translateY(100%);
   }
 
   100% {
-    transform: translate(-5px, -1700px);
+    transform: translateY(-100vh);
   }
 }
 
 @keyframes chat-hvn-shake3 {
   0% {
-    transform: translate(0px, 5px) rotate(0deg);
+    transform: translate(0px, calc(5px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   20% {
-    transform: translate(0px, -5px) rotate(0deg);
+    transform: translate(0px, calc(-5px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   40% {
@@ -634,11 +675,11 @@ body {
   }
 
   60% {
-    transform: translate(0px, 5px) rotate(0deg);
+    transform: translate(0px, calc(5px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   80% {
-    transform: translate(0px, -5px) rotate(0deg);
+    transform: translate(0px, calc(-5px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   100% {
@@ -652,7 +693,7 @@ body {
   }
 
   50% {
-    transform: translate(15px, -15px) rotate(20deg);
+    transform: translate(calc(15px * var(--chat-motion-scale, 1)), calc(-15px * var(--chat-motion-scale, 1))) rotate(20deg);
   }
 
   100% {
@@ -662,19 +703,19 @@ body {
 
 @keyframes chat-hvn-upDown {
   0% {
-    transform: translate(0px, -5px);
+    transform: translate(0px, calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   25% {
-    transform: translate(0px, -10px);
+    transform: translate(0px, calc(-10px * var(--chat-motion-scale, 1)));
   }
 
   50% {
-    transform: translate(0px, -15px);
+    transform: translate(0px, calc(-15px * var(--chat-motion-scale, 1)));
   }
 
   75% {
-    transform: translate(0px, -20px);
+    transform: translate(0px, calc(-20px * var(--chat-motion-scale, 1)));
   }
 
   100% {
@@ -688,15 +729,15 @@ body {
   }
 
   25% {
-    transform: translate(0px, -10px);
+    transform: translate(0px, calc(-10px * var(--chat-motion-scale, 1)));
   }
 
   50% {
-    transform: translate(0px, -15px);
+    transform: translate(0px, calc(-15px * var(--chat-motion-scale, 1)));
   }
 
   75% {
-    transform: translate(0px, -10px);
+    transform: translate(0px, calc(-10px * var(--chat-motion-scale, 1)));
   }
 
   100% {
@@ -710,7 +751,7 @@ body {
   }
 
   20% {
-    transform: translate(0px, -7px) rotate(5deg);
+    transform: translate(0px, calc(-7px * var(--chat-motion-scale, 1))) rotate(5deg);
   }
 
   50% {
@@ -718,7 +759,7 @@ body {
   }
 
   70% {
-    transform: translate(0px, -7px)rotate(-5deg);
+    transform: translate(0px, calc(-7px * var(--chat-motion-scale, 1)))rotate(-5deg);
   }
 
   100% {
@@ -732,7 +773,7 @@ body {
   }
 
   50% {
-    transform: translate(0px, 10px);
+    transform: translate(0px, calc(10px * var(--chat-motion-scale, 1)));
   }
 
   100% {
@@ -742,49 +783,49 @@ body {
 
 @keyframes chat-hvn-fear {
   0% {
-    transform: translate(5px, 0px) rotate(0deg);
+    transform: translate(calc(5px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 
   20% {
-    transform: translate(-5px, 0px) rotate(0deg);
+    transform: translate(calc(-5px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 
   40% {
-    transform: translate(5px, 0px) rotate(0deg);
+    transform: translate(calc(5px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 
   60% {
-    transform: translate(-5px, 0px) rotate(0deg);
+    transform: translate(calc(-5px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 
   80% {
-    transform: translate(5px, 0px) rotate(0deg);
+    transform: translate(calc(5px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 
   100% {
-    transform: translate(-5px, 0px) rotate(0deg);
+    transform: translate(calc(-5px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 }
 
 @keyframes chat-hvn-nope {
   0% {
-    transform: translate(8px, 0px) rotate(0deg);
+    transform: translate(calc(8px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 
   25% {
-    transform: translate(-8px, 0px) rotate(0deg);
+    transform: translate(calc(-8px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 
   50% {
-    transform: translate(8px, -1px) rotate(0deg);
+    transform: translate(calc(8px * var(--chat-motion-scale, 1)), calc(-1px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   75% {
-    transform: translate(-8px, 0px) rotate(0deg);
+    transform: translate(calc(-8px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 
   100% {
-    transform: translate(8px, 0px) rotate(0deg);
+    transform: translate(calc(8px * var(--chat-motion-scale, 1)), 0px) rotate(0deg);
   }
 }
 
@@ -794,23 +835,23 @@ body {
   }
 
   20% {
-    transform: translate(0px, -10px) rotate(5deg);
+    transform: translate(0px, calc(-10px * var(--chat-motion-scale, 1))) rotate(5deg);
   }
 
   40% {
-    transform: translate(0px, -10px) rotate(0deg);
+    transform: translate(0px, calc(-10px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   60% {
-    transform: translate(0px, 10px) rotate(-5deg);
+    transform: translate(0px, calc(10px * var(--chat-motion-scale, 1))) rotate(-5deg);
   }
 
   80% {
-    transform: translate(0px, 10px) rotate(0deg);
+    transform: translate(0px, calc(10px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   95% {
-    transform: translate(0px, 5px) rotate(5deg);
+    transform: translate(0px, calc(5px * var(--chat-motion-scale, 1))) rotate(5deg);
   }
 
   100% {
@@ -840,59 +881,59 @@ body {
 
 @keyframes chat-hvn-scout {
   0% {
-    transform: translate(0px, 150px) rotate(0deg);
+    transform: translate(0px, calc(150px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   22% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   28% {
-    transform: translate(0px, 95px) rotate(0deg);
+    transform: translate(0px, calc(95px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   30% {
-    transform: translate(0px, 135px) rotate(0deg);
+    transform: translate(0px, calc(135px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   68% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   70% {
-    transform: translate(0px, 90px) rotate(0deg);
+    transform: translate(0px, calc(90px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   72% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   74% {
-    transform: translate(0px, 90px) rotate(0deg);
+    transform: translate(0px, calc(90px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   76% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   78% {
-    transform: translate(0px, 90px) rotate(0deg);
+    transform: translate(0px, calc(90px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   80% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   82% {
-    transform: translate(0px, 90px) rotate(0deg);
+    transform: translate(0px, calc(90px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   85% {
-    transform: translate(0px, 135px) rotate(0deg);
+    transform: translate(0px, calc(135px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   98% {
-    transform: translate(0px, 135px) rotate(0deg);
+    transform: translate(0px, calc(135px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   100% {
@@ -921,19 +962,19 @@ body {
   }
 
   12.5% {
-    transform: translate(23px, -5px);
+    transform: translate(calc(23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   25% {
-    transform: translate(20px, 0px);
+    transform: translate(calc(20px * var(--chat-motion-scale, 1)), 0px);
   }
 
   37.5% {
-    transform: translate(23px, -5px);
+    transform: translate(calc(23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   50% {
-    transform: translate(20px, 0px);
+    transform: translate(calc(20px * var(--chat-motion-scale, 1)), 0px);
   }
 
   51% {
@@ -941,19 +982,19 @@ body {
   }
 
   62.5% {
-    transform: scaleX(-1) translate(23px, -5px);
+    transform: scaleX(-1) translate(calc(23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   75% {
-    transform: scaleX(-1) translate(20px, 0px);
+    transform: scaleX(-1) translate(calc(20px * var(--chat-motion-scale, 1)), 0px);
   }
 
   87.5% {
-    transform: scaleX(-1) translate(23px, -5px);
+    transform: scaleX(-1) translate(calc(23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   100% {
-    transform: scaleX(-1) translate(20px, 0px);
+    transform: scaleX(-1) translate(calc(20px * var(--chat-motion-scale, 1)), 0px);
   }
 }
 
@@ -963,19 +1004,19 @@ body {
   }
 
   12.5% {
-    transform: translate(-23px, -5px) scaleX(-1);
+    transform: translate(calc(-23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1))) scaleX(-1);
   }
 
   25% {
-    transform: translate(-20px, 0px) scaleX(-1);
+    transform: translate(calc(-20px * var(--chat-motion-scale, 1)), 0px) scaleX(-1);
   }
 
   37.5% {
-    transform: translate(-23px, -5px) scaleX(-1);
+    transform: translate(calc(-23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1))) scaleX(-1);
   }
 
   50% {
-    transform: translate(-20px, 0px) scaleX(-1);
+    transform: translate(calc(-20px * var(--chat-motion-scale, 1)), 0px) scaleX(-1);
   }
 
   51% {
@@ -983,46 +1024,46 @@ body {
   }
 
   62.5% {
-    transform: scaleX(1) translate(-23px, -5px);
+    transform: scaleX(1) translate(calc(-23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   75% {
-    transform: scaleX(1) translate(-20px, 0px);
+    transform: scaleX(1) translate(calc(-20px * var(--chat-motion-scale, 1)), 0px);
   }
 
   87.5% {
-    transform: scaleX(1) translate(-23px, -5px);
+    transform: scaleX(1) translate(calc(-23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   100% {
-    transform: scaleX(1) translate(-20px, 0px);
+    transform: scaleX(1) translate(calc(-20px * var(--chat-motion-scale, 1)), 0px);
   }
 }
 
 @keyframes chat-hvn-vibrate-laugh {
 
   0% {
-    transform: translate(1px, 1px);
+    transform: translate(calc(1px * var(--chat-motion-scale, 1)), calc(1px * var(--chat-motion-scale, 1)));
   }
 
   20% {
-    transform: translate(-1px, -1px);
+    transform: translate(calc(-1px * var(--chat-motion-scale, 1)), calc(-1px * var(--chat-motion-scale, 1)));
   }
 
   40% {
-    transform: translate(-1px, 0px);
+    transform: translate(calc(-1px * var(--chat-motion-scale, 1)), 0px);
   }
 
   60% {
-    transform: translate(1px, 1px);
+    transform: translate(calc(1px * var(--chat-motion-scale, 1)), calc(1px * var(--chat-motion-scale, 1)));
   }
 
   80% {
-    transform: translate(1px, -1px);
+    transform: translate(calc(1px * var(--chat-motion-scale, 1)), calc(-1px * var(--chat-motion-scale, 1)));
   }
 
   100% {
-    transform: translate(-1px, 1px);
+    transform: translate(calc(-1px * var(--chat-motion-scale, 1)), calc(1px * var(--chat-motion-scale, 1)));
   }
 }
 
@@ -1038,11 +1079,11 @@ body {
 
 @keyframes chat-hvn-growY {
   0% {
-    transform: translate(0px, 8px) scaleY(1);
+    transform: translate(0px, calc(8px * var(--chat-motion-scale, 1))) scaleY(1);
   }
 
   100% {
-    transform: translate(0px, -20px) scaleY(4);
+    transform: translate(0px, calc(-20px * var(--chat-motion-scale, 1))) scaleY(4);
   }
 }
 
@@ -1050,11 +1091,11 @@ body {
   0% {}
 
   95% {
-    transform: translate(10px, 20px) rotate(10deg);
+    transform: translate(calc(10px * var(--chat-motion-scale, 1)), calc(20px * var(--chat-motion-scale, 1))) rotate(10deg);
   }
 
   100% {
-    transform: translate(0px, 400px) rotate(90deg);
+    transform: translate(0px, calc(400px * var(--chat-motion-scale, 1))) rotate(90deg);
   }
 
 }
@@ -1075,39 +1116,39 @@ body {
 
 @keyframes chat-hvn-balls {
   0% {
-    transform: translate(0, -18px) scaleY(0.7);
+    transform: translate(0, calc(-18px * var(--chat-motion-scale, 1))) scaleY(0.7);
   }
 
   20% {
-    transform: translate(0, 12px) scaleY(1.2);
+    transform: translate(0, calc(12px * var(--chat-motion-scale, 1))) scaleY(1.2);
   }
 
   30% {
-    transform: translate(0, -12px) scaleY(0.8);
+    transform: translate(0, calc(-12px * var(--chat-motion-scale, 1))) scaleY(0.8);
   }
 
   40% {
-    transform: translate(0, 6px) scaleY(1.1);
+    transform: translate(0, calc(6px * var(--chat-motion-scale, 1))) scaleY(1.1);
   }
 
   50% {
-    transform: translate(0, -6px) scaleY(0.9);
+    transform: translate(0, calc(-6px * var(--chat-motion-scale, 1))) scaleY(0.9);
   }
 
   60% {
-    transform: translate(0, 6px) scaleY(1.1);
+    transform: translate(0, calc(6px * var(--chat-motion-scale, 1))) scaleY(1.1);
   }
 
   70% {
-    transform: translate(0, -6px) scaleY(0.9);
+    transform: translate(0, calc(-6px * var(--chat-motion-scale, 1))) scaleY(0.9);
   }
 
   80% {
-    transform: translate(0, 6px) scaleY(1.1);
+    transform: translate(0, calc(6px * var(--chat-motion-scale, 1))) scaleY(1.1);
   }
 
   90% {
-    transform: translate(0, -6px) scaleY(0.9);
+    transform: translate(0, calc(-6px * var(--chat-motion-scale, 1))) scaleY(0.9);
   }
 
   100% {
@@ -1433,59 +1474,59 @@ body {
 
 @keyframes chat-hvn-scout {
   0% {
-    transform: translate(0px, 150px) rotate(0deg);
+    transform: translate(0px, calc(150px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   22% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   28% {
-    transform: translate(0px, 95px) rotate(0deg);
+    transform: translate(0px, calc(95px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   30% {
-    transform: translate(0px, 135px) rotate(0deg);
+    transform: translate(0px, calc(135px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   68% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   70% {
-    transform: translate(0px, 90px) rotate(0deg);
+    transform: translate(0px, calc(90px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   72% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   74% {
-    transform: translate(0px, 90px) rotate(0deg);
+    transform: translate(0px, calc(90px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   76% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   78% {
-    transform: translate(0px, 90px) rotate(0deg);
+    transform: translate(0px, calc(90px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   80% {
-    transform: translate(0px, 100px) rotate(0deg);
+    transform: translate(0px, calc(100px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   82% {
-    transform: translate(0px, 90px) rotate(0deg);
+    transform: translate(0px, calc(90px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   85% {
-    transform: translate(0px, 135px) rotate(0deg);
+    transform: translate(0px, calc(135px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   98% {
-    transform: translate(0px, 135px) rotate(0deg);
+    transform: translate(0px, calc(135px * var(--chat-motion-scale, 1))) rotate(0deg);
   }
 
   100% {
@@ -1514,19 +1555,19 @@ body {
   }
 
   12.5% {
-    transform: translate(23px, -5px);
+    transform: translate(calc(23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   25% {
-    transform: translate(20px, 0px);
+    transform: translate(calc(20px * var(--chat-motion-scale, 1)), 0px);
   }
 
   37.5% {
-    transform: translate(23px, -5px);
+    transform: translate(calc(23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   50% {
-    transform: translate(20px, 0px);
+    transform: translate(calc(20px * var(--chat-motion-scale, 1)), 0px);
   }
 
   51% {
@@ -1534,19 +1575,19 @@ body {
   }
 
   62.5% {
-    transform: scaleX(-1) translate(23px, -5px);
+    transform: scaleX(-1) translate(calc(23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   75% {
-    transform: scaleX(-1) translate(20px, 0px);
+    transform: scaleX(-1) translate(calc(20px * var(--chat-motion-scale, 1)), 0px);
   }
 
   87.5% {
-    transform: scaleX(-1) translate(23px, -5px);
+    transform: scaleX(-1) translate(calc(23px * var(--chat-motion-scale, 1)), calc(-5px * var(--chat-motion-scale, 1)));
   }
 
   100% {
-    transform: scaleX(-1) translate(20px, 0px);
+    transform: scaleX(-1) translate(calc(20px * var(--chat-motion-scale, 1)), 0px);
   }
 }
 
@@ -1563,11 +1604,11 @@ body {
 
 @keyframes chat-hvn-growY {
   0% {
-    transform: translate(0px, 8px) scaleY(1);
+    transform: translate(0px, calc(8px * var(--chat-motion-scale, 1))) scaleY(1);
   }
 
   100% {
-    transform: translate(0px, -20px) scaleY(4);
+    transform: translate(0px, calc(-20px * var(--chat-motion-scale, 1))) scaleY(4);
   }
 }
 
@@ -1575,11 +1616,11 @@ body {
   0% {}
 
   95% {
-    transform: translate(10px, 20px) rotate(10deg);
+    transform: translate(calc(10px * var(--chat-motion-scale, 1)), calc(20px * var(--chat-motion-scale, 1))) rotate(10deg);
   }
 
   100% {
-    transform: translate(0px, 400px) rotate(90deg);
+    transform: translate(0px, calc(400px * var(--chat-motion-scale, 1))) rotate(90deg);
   }
 
 }
@@ -1600,39 +1641,39 @@ body {
 
 @keyframes chat-hvn-balls {
   0% {
-    transform: translate(0, -18px) scaleY(0.7);
+    transform: translate(0, calc(-18px * var(--chat-motion-scale, 1))) scaleY(0.7);
   }
 
   20% {
-    transform: translate(0, 12px) scaleY(1.2);
+    transform: translate(0, calc(12px * var(--chat-motion-scale, 1))) scaleY(1.2);
   }
 
   30% {
-    transform: translate(0, -12px) scaleY(0.8);
+    transform: translate(0, calc(-12px * var(--chat-motion-scale, 1))) scaleY(0.8);
   }
 
   40% {
-    transform: translate(0, 6px) scaleY(1.1);
+    transform: translate(0, calc(6px * var(--chat-motion-scale, 1))) scaleY(1.1);
   }
 
   50% {
-    transform: translate(0, -6px) scaleY(0.9);
+    transform: translate(0, calc(-6px * var(--chat-motion-scale, 1))) scaleY(0.9);
   }
 
   60% {
-    transform: translate(0, 6px) scaleY(1.1);
+    transform: translate(0, calc(6px * var(--chat-motion-scale, 1))) scaleY(1.1);
   }
 
   70% {
-    transform: translate(0, -6px) scaleY(0.9);
+    transform: translate(0, calc(-6px * var(--chat-motion-scale, 1))) scaleY(0.9);
   }
 
   80% {
-    transform: translate(0, 6px) scaleY(1.1);
+    transform: translate(0, calc(6px * var(--chat-motion-scale, 1))) scaleY(1.1);
   }
 
   90% {
-    transform: translate(0, -6px) scaleY(0.9);
+    transform: translate(0, calc(-6px * var(--chat-motion-scale, 1))) scaleY(0.9);
   }
 
   100% {
@@ -1656,7 +1697,7 @@ body {
 
 .chat-box.visible {
   margin-top: 0px;
-  max-height: 350px;
+  max-height: calc(350px * var(--chat-scale, 1));
   transition: opacity 1s, max-height .8ms, margin-top 30ms;
 }
 

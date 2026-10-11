@@ -24,8 +24,26 @@ const HUNT_BEAT_V2_ADAPTER = huntPatternDependency(
     './HuntBeatV2Adapter.js',
     '../js/effects/hunt/HuntBeatV2Adapter.js'
 );
+const HUNT_NATIVE_BEAT_CATALOG = huntPatternDependency(
+    globalThis.HuntMonsterNativeBeatCatalog,
+    './HuntMonsterNativeBeatCatalog.js',
+    '../js/effects/hunt/HuntMonsterNativeBeatCatalog.js'
+);
 
 class HuntMonsterPatternCatalog {
+    static reviewStatus(pattern = {}) {
+        const explicit = String(pattern?.reviewStatus || '').trim().toLowerCase();
+        if (['draft', 'migrated', 'approved'].includes(explicit)) return explicit;
+        // Compatibility only for pre-status authored sources. A normalizer must
+        // never invent approval; only a source that already carried the old
+        // explicit approval flag is grandfathered into the approved state.
+        return pattern?.beatV2Approved === true ? 'approved' : 'migrated';
+    }
+
+    static isBeatEnabled(pattern = {}) {
+        return pattern?.beatV2Enabled === true || pattern?.beatV2Approved === true;
+    }
+
     static legacyTimingBeats(pattern = {}) {
         const animationTicks = Math.max(1, Math.round(Number(pattern.animationDurationMs || 0) / 100));
         const impacts = (Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : [])
@@ -112,6 +130,12 @@ class HuntMonsterPatternCatalog {
                 damageScale: damage ? (Number.isFinite(Number(damage.damagePercent))
                     ? (Number(damage.damagePercent) / 100) / Math.max(.0001, runtimeDamageRatio)
                     : Number(damage.damageScale ?? 1)) : 0,
+                judgmentGroup: String(authority?.group || authority?.id || `${index + 1}-impact`),
+                ...(damage && ['strong', 'butt-stumble', 'weak'].includes(damage.hitReactionKind)
+                    ? { hitReactionKind: damage.hitReactionKind === 'butt-stumble'
+                        ? 'weak' : damage.hitReactionKind } : {}),
+                ...(damage && ['fire', 'water', 'thunder', 'ice', 'dragon', 'paralysis', 'sleep', 'blast']
+                    .includes(damage.element) ? { element: damage.element } : {}),
                 ...(effect ? { secondaryInterference: { kind: effect.kind,
                     size: effect.size === 'small' ? 'small' : 'large',
                     scope: effect.target === 'all' ? 'all' : effect.target === 'primary-adjacent' ? 'adjacent' : 'primary',
@@ -134,9 +158,12 @@ class HuntMonsterPatternCatalog {
             delete normalized.judgmentOffsets;
             return normalized;
         }) : motion;
+        const reviewStatus = this.reviewStatus(pattern);
         const synchronized = {
             ...pattern,
-            beatV2Approved: true,
+            reviewStatus,
+            beatV2Enabled: true,
+            beatV2Approved: reviewStatus === 'approved',
             ...(judgmentTimeline.length && damagePercents.length ? { damageRatio: runtimeDamageRatio } : {}),
             motion: authoritativeMotion,
             movement: { ...(pattern.movement || {}), ticks: elapsed },
@@ -147,7 +174,7 @@ class HuntMonsterPatternCatalog {
         if (HUNT_BEAT_V2_ADAPTER && Array.isArray(synchronized.motion) && synchronized.motion.length) {
             synchronized.beatV2 = HUNT_BEAT_V2_ADAPTER.fromMonsterPattern(synchronized, {
                 monsterId: String(synchronized.id || '').split('.')[0] || null,
-                reviewStatus: 'approved'
+                reviewStatus
             });
         }
         return synchronized;
@@ -176,9 +203,12 @@ class HuntMonsterPatternCatalog {
         }
         const sourceTicks = source.reduce((sum, beat) => sum + beat.ticks, 0);
         const sourceDurationMs = Math.max(1, Number(pattern.animationDurationMs) || sourceTicks * 100);
+        const reviewStatus = this.reviewStatus(pattern);
         const synchronized = {
             ...pattern,
-            beatV2Approved: true,
+            reviewStatus,
+            beatV2Enabled: true,
+            beatV2Approved: reviewStatus === 'approved',
             runtimeMotionBackend: 'keyframe-beat',
             runtimeSourceTimingBeats: source,
             runtimeTimingBeats: target,
@@ -191,7 +221,7 @@ class HuntMonsterPatternCatalog {
             motion: target
         }, {
             monsterId: String(synchronized.id || '').split('.')[0] || null,
-            reviewStatus: 'approved'
+            reviewStatus
         }) || null;
         return synchronized;
     }
@@ -205,9 +235,12 @@ class HuntMonsterPatternCatalog {
         }));
         if (!beats.length) return pattern;
         const totalTicks = beats.reduce((sum, beat) => sum + beat.ticks, 0);
+        const reviewStatus = this.reviewStatus(pattern);
         const synchronized = {
             ...pattern,
-            beatV2Approved: true,
+            reviewStatus,
+            beatV2Enabled: true,
+            beatV2Approved: reviewStatus === 'approved',
             runtimeMotionBackend: 'keyframe-beat',
             runtimeSourceTimingBeats: beats.map(beat => ({ ...beat })),
             runtimeTimingBeats: beats.map(beat => ({ ...beat })),
@@ -219,7 +252,7 @@ class HuntMonsterPatternCatalog {
             motion: beats
         }, {
             monsterId: String(synchronized.id || '').split('.')[0] || null,
-            reviewStatus: 'approved'
+            reviewStatus
         }) || null;
         return synchronized;
     }
@@ -461,9 +494,21 @@ class HuntMonsterPatternCatalog {
                 result[monsterId] = patterns.map(pattern => HuntMonsterFlightRuntime.decoratePattern(monsterId, pattern));
             });
         }
+        if (HUNT_NATIVE_BEAT_CATALOG) {
+            Object.entries(result).forEach(([monsterId, patterns]) => {
+                result[monsterId] = HUNT_NATIVE_BEAT_CATALOG.apply(patterns, scope);
+            });
+        }
         const timingOverrides = scope.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES || {};
         Object.entries(result).forEach(([monsterId, patterns]) => {
             result[monsterId] = patterns.map(pattern => {
+                // A promoted native graph already owns the complete motion
+                // timeline.  Do not project it back through legacy timing or
+                // generated keyframes, otherwise the pattern silently changes
+                // backend after promotion.
+                if (pattern?.beatV2Approved === true && pattern?.runtimeMotionBackend === 'beat-v2') {
+                    return pattern;
+                }
                 const inheritedMotion = pattern.motionOverrideSource;
                 const override = timingOverrides[monsterId]?.[pattern.id]
                     || (inheritedMotion?.monsterId && inheritedMotion?.patternId

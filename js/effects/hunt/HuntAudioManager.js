@@ -807,6 +807,19 @@ class HuntAudioManager {
         return null;
     }
 
+    static shouldPlayJudgmentRoute(route, options = {}) {
+        if (!String(options.patternSlot || '').startsWith('judgment:')) return true;
+        const when = ['hit', 'contact', 'always', 'miss'].includes(String(route?.when || '').toLowerCase())
+            ? String(route.when).toLowerCase() : 'hit';
+        const results = Array.isArray(options.judgmentResults) ? options.judgmentResults : [];
+        const states = results.map(result => String(result?.result || result || '').toLowerCase());
+        const hit = states.includes('hit');
+        const contact = states.some(state => ['hit', 'guard', 'tackle', 'counter'].includes(state));
+        const miss = states.length > 0 && !contact;
+        return when === 'always' || (when === 'hit' && hit)
+            || (when === 'contact' && contact) || (when === 'miss' && miss);
+    }
+
     playPatternAudioRoute(route, routeKey = '') {
         if (!route || !Array.isArray(route.layers) || !route.layers.length) return false;
         if ((route.mode === 'random' || route.random === true) && route.layers.length > 1) {
@@ -926,8 +939,11 @@ class HuntAudioManager {
         if (options.patternId && overrideSlot) {
             const route = this.patternAudioRoute(monsterId, options.patternId, overrideSlot);
             if (route?.disabled === true) return false;
-            if (route) return this.playPatternAudioRoute(route,
-                `${monsterId}:${options.patternId}:${overrideSlot}`);
+            if (route) {
+                if (!HuntAudioManager.shouldPlayJudgmentRoute(route, options)) return false;
+                return this.playPatternAudioRoute(route,
+                    `${monsterId}:${options.patternId}:${overrideSlot}`);
+            }
             if (options.overrideOnly) return false;
         }
         // Beat-native reviewed patterns own their whole audio timeline. Do not

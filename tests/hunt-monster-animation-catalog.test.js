@@ -389,7 +389,8 @@ assert(css.includes('--tail-rock-mid-x'),
     'Diablos rocks must preserve their authored arc while travelling toward each hunter slot');
 assert(css.includes('var(--monster-charge-second-x)'), 'return charge needs a separately locked second target lane');
 assert(css.includes('var(--monster-charge-cross-y)'), 'wide aerial charges need a hunter-row crossing route');
-assert(css.includes('.monster-uppercut-launched'), 'uppercut launch reactions must be reusable across monsters');
+assert(!css.includes('.monster-uppercut-launched'),
+    'monster motion CSS must not own hunter uppercut reactions');
 assert(!css.includes('.diablos-horn-launched'), 'shared launch reactions must not retain monster-specific selectors');
 for (const legacyDiablosMotion of [
     'tail-slam-rock', 'side-tackle-contact', 'horn-sweep-contact',

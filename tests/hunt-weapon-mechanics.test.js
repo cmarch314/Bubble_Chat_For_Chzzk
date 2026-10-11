@@ -18,7 +18,7 @@ const selector = new HuntWeaponActionSelector(() => 0, mechanics);
 
 const greatSwordActions = HuntWeaponMechanics.actionsFor('great_sword');
 assert.ok(greatSwordActions.some(action => action.id === 'great_sword.wide_slash'), 'Great Sword must retain a non-charge severing route');
-assert.ok(greatSwordActions.some(action => action.id === 'great_sword.side_blow'), 'Great Sword must retain a quick blunt route');
+assert.ok(!greatSwordActions.some(action => action.id === 'great_sword.side_blow'), 'removed Side Blow must not remain selectable');
 const greatSword = { id: 'great_sword', hunterName: 'GS', hp: 100, maxHp: 100 };
 mechanics.initialize(greatSword);
 const normalGreatSword = { id: 'great_sword', hunterName: 'GS NORMAL', hp: 100, maxHp: 100 };
@@ -27,7 +27,7 @@ const firstNormal = selector.select(normalGreatSword, greatSwordActions, { monst
 assert.strictEqual(firstNormal.id, 'great_sword.wide_slash', 'an ordinary opening must allow a non-charge Great Sword attack');
 mechanics.applyAction(engine, normalGreatSword, firstNormal);
 normalGreatSword.lastActionId = firstNormal.id;
-assert.strictEqual(selector.select(normalGreatSword, greatSwordActions, { monsterDowned: false, monsterAtb: 20 }).action.id, 'great_sword.side_blow', 'normal Great Sword attacks must form a readable short combo');
+assert.strictEqual(selector.select(normalGreatSword, greatSwordActions, { monsterDowned: false, monsterAtb: 20 }).action.id, 'great_sword.kick', 'Wide Slash must link directly into the retained emoji Kick');
 const orthodoxGreatSwordTrace = [
     'great_sword.charge_1', 'great_sword.charge_2', 'great_sword.charge_3', 'great_sword.charged_slash',
     'great_sword.strong_charge_1', 'great_sword.strong_charge_2', 'great_sword.strong_charge_3', 'great_sword.strong_charged_slash',
@@ -47,9 +47,8 @@ assert.deepStrictEqual([greatSword.greatSwordChain, greatSword.greatSwordCharge]
 const pressuredGreatSword = { id: 'great_sword', hunterName: 'GS PRESSURE', hp: 100, maxHp: 100, greatSwordChain: 0, greatSwordCharge: 1 };
 mechanics.initialize(pressuredGreatSword);
 const tackle = selector.select(pressuredGreatSword, greatSwordActions, { monsterAtb: 95, monsterState: 'enraged' }).action;
-assert.strictEqual(tackle.id, 'great_sword.tackle', 'an imminent monster action must open a randomized tackle response between charge stages');
-mechanics.applyAction(engine, pressuredGreatSword, tackle);
-assert.deepStrictEqual([pressuredGreatSword.greatSwordChain, pressuredGreatSword.greatSwordCharge], [1, 0], 'a successful tackle must advance the orthodox chain without keeping a stale charge level');
+assert.strictEqual(tackle.id, 'great_sword.charged_slash',
+    'high monster ATB alone must release the stored charge instead of manufacturing a tackle');
 pressuredGreatSword.greatSwordCharge = 1;
 assert.strictEqual(mechanics.damageMultiplier(pressuredGreatSword, greatSwordActions.find(row => row.id === 'great_sword.strong_charged_slash')), 0.55);
 pressuredGreatSword.greatSwordCharge = 3;
@@ -60,9 +59,28 @@ const imminentGreatSword = { id: 'great_sword', hunterName: 'GS IMMINENT', hp: 1
 cautiousRandomMechanics.initialize(imminentGreatSword);
 assert.strictEqual(
     cautiousSelector.select(imminentGreatSword, greatSwordActions, { monsterAtb: 94, monsterPressure: true }).action.id,
-    'great_sword.tackle',
-    'an imminent attack must permit charge tackle even when the random roll would otherwise extend charge'
+    'great_sword.charged_slash',
+    'monster pressure metadata must not bypass the impact-time reactive tackle owner'
 );
+
+const finalTierPressure = {
+    id: 'great_sword', hunterName: 'GS LOOP GUARD', hp: 100, maxHp: 100,
+    greatSwordChain: 2, greatSwordCharge: 0
+};
+cautiousRandomMechanics.initialize(finalTierPressure);
+const pressureTrace = [];
+for (let turn = 0; turn < 6; turn++) {
+    const selected = cautiousSelector.select(finalTierPressure, greatSwordActions, {
+        monsterAtb: 99, monsterPressure: true, monsterState: 'enraged'
+    }).action;
+    pressureTrace.push(selected.id);
+    cautiousRandomMechanics.applyAction(engine, finalTierPressure, selected);
+    finalTierPressure.lastActionId = selected.id;
+}
+assert.ok(!pressureTrace.includes('great_sword.tackle'),
+    'ordinary turns must never produce the old charge/tackle feedback loop');
+assert.ok(pressureTrace.includes('great_sword.true_charged_slash'),
+    'the final charge tier must cash out into True Charged Slash under sustained pressure');
 
 const switchActions = HuntWeaponMechanics.actionsFor('switch_axe');
 const switchAxe = { id: 'switch_axe', hunterName: 'SA' };

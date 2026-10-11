@@ -37,6 +37,9 @@ async function main() {
     assert.ok(HUNT_RUNTIME_SCRIPT_PATHS.includes(
         'js/effects/hunt/data/ReleasedMonsterRuntimeIndex.generated.js'
     ), 'production hunts must load only the reviewed monster roster');
+    assert.ok(HUNT_RUNTIME_SCRIPT_PATHS.includes(
+        'js/effects/hunt/HuntMonsterStaminaRuntime.js'
+    ), 'live browser hunts must load the monster stamina owner before HuntEngine');
     [
         'js/effects/MonsterData.js',
         'WildsMonsterBehavior.generated.js',

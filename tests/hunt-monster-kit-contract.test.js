@@ -60,6 +60,25 @@ assert.ok(runtimeIndex.monsters.every(monster => monster.filename || monster.ima
 assert.ok(runtimeIndex.monsters.every(monster =>
     monster.canonicalEdition && monster.releaseReview && monster.mechanicModules.length));
 
+const diablosKit = kits.find(kit => kit.id === 'diablos');
+const diablosActions = Compiler.readActionManifest(diablosKit);
+assert.ok(diablosActions, 'the golden Diablos kit must own an explicit action approval manifest');
+assert.deepStrictEqual(
+    diablosActions.manifest.actions.map(action => action.reviewStatus),
+    Array(diablosActions.manifest.actions.length).fill('approved'),
+    'every Diablos golden action must carry explicit approval rather than inherit it from a normalizer'
+);
+assert.doesNotThrow(() => Compiler.assertActionManifestMatchesProfile(
+    diablosKit,
+    require('../js/effects/hunt/HuntMonsterProfiles.js').diablos
+));
+const diablosGoldenTrace = Compiler.readGoldenTrace(diablosKit);
+assert.ok(diablosGoldenTrace, 'the golden Diablos kit must pin an approved BEAT trace');
+assert.doesNotThrow(() => Compiler.assertGoldenTraceMatchesProfile(
+    diablosKit,
+    Compiler.buildCompiledProfiles().diablos
+));
+
 const invalid = structuredClone(kits[0]);
 invalid.release.gates.audio = false;
 assert.ok(Contract.validate(invalid).some(error => error.startsWith('release.gates.audio:')));

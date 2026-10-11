@@ -1,7 +1,7 @@
 'use strict';
 const HUNT_MONSTER_RELEASE_MANIFEST = Object.freeze({
     schemaVersion: 1,
-    sourceDigest: 'bff4c3f6807766d4658f5d8f408bb7f03d3b3805b817dfd5f296f275cd9b63f6',
+    sourceDigest: '14b578c1229af3319f99f9c2e4715fc7781dde287e9630f1af55a6ab122e1cea',
     records: Object.freeze([
     {
         "id": "bazelgeuse",

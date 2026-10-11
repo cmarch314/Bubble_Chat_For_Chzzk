@@ -28,7 +28,9 @@ const HuntMotionPoses = {
         // resetRotation은 "똑바로 선다"를 뜻한다. 회전은 비트를 넘어 유지되므로
         // (꼬리가 박힌 채 버티는 구간이 회전을 물고 있어야 한다), 이걸 풀어주는
         // 자세가 없으면 몬스터가 뒤집힌 채로 제자리에 돌아간다.
-        idle: Object.freeze({ squash: 1.000, resetRotation: true }),
+        // Pose owns shape only. Rotation persists until the authored BEAT
+        // changes it or the action owner clears the completed animation.
+        idle: Object.freeze({ squash: 1.000 }),
 
         // 스프링을 압축하는 순간. 이 자세가 빠지면 도약이 "튀어오르는" 대신
         // "미끄러지는" 것으로 보인다. 3연 급습 2·3타가 어색했던 원인이다.
@@ -59,17 +61,17 @@ const HuntMotionPoses = {
     //   windup  22 = 회전 반대 방향으로 감았다가 푼다. 반동이다.
     ROTATION: Object.freeze({
         'spin-left': Object.freeze({
-            squash: 1.060, rotate: -375, pivot: 'part:foreleg.screen-left', windup: 18, recoil: 15
+            squash: 1.060, pivot: 'part:foreleg.screen-left'
         }),
         'spin-right': Object.freeze({
-            squash: 1.060, rotate: 375, pivot: 'part:foreleg.screen-right', windup: 18, recoil: 15
+            squash: 1.060, pivot: 'part:foreleg.screen-right'
         }),
         'tail-slam': Object.freeze({
-            squash: 0.724, rotate: 180, pivot: 'part:tail',
+            squash: 0.724, pivot: 'part:tail',
             filter: 'brightness(1.48) drop-shadow(0 14px 20px #000a)'
         }),
         'tail-whip': Object.freeze({
-            squash: 1.090, rotate: -175, pivot: 'part:torso', windup: 22, recoil: 15
+            squash: 1.090, pivot: 'part:torso'
         })
     }),
 

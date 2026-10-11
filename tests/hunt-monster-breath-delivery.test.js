@@ -72,9 +72,30 @@ assert.match(executorSource, /runtimeImpactPending:\s*true[\s\S]*?runtimeImpactD
     'delayed projectile visuals need the authored impact time');
 assert.match(animatorSource, /runtimeImpactPending[\s\S]*?createElementalAttack/,
     'a pending delayed impact must launch its projectile before returning');
+assert.match(animatorSource, /is-awaiting-outcome[\s\S]*?is-projectile-miss/,
+    'a detached projectile must wait for the live judgment, then either impact or leave the board');
+assert.match(animatorSource, /resolveElementalProjectileOutcome[\s\S]*?result\?\.result === 'hit'/,
+    'only an actual hit may create a projectile impact');
+assert.match(css, /monster-element-projectile-arrive[\s\S]*?monster-element-projectile-miss/,
+    'a missed projectile must continue beyond its card destination before fading out');
+const resolverSource = fs.readFileSync(path.resolve(__dirname, '../js/effects/hunt/HuntCombatJudgmentResolver.js'), 'utf8');
+assert.match(resolverSource, /judgment:\$\{encodeURIComponent\(String\(command\.judgmentGroup\)\)\}:cue[\s\S]*?judgmentResults/,
+    'mapped projectile impact audio must route through the authored judgment group after a live resolution');
 assert.match(animatorSource,
     /projectileLaunchDelayTicks[\s\S]*?resolveLiveElementalOrigin\([\s\S]*?createElementalAttack/,
     'Rath fireballs must wait for their turn and remeasure the live head before launch');
+assert.match(animatorSource, /runtimeResolvedImpactTimeline[\s\S]*?pattern\.impactTimeline[\s\S]*?createElementalAttack/,
+    'detached elemental delivery must use the live resolved targets rather than a stale catalog timeline');
+assert.match(animatorSource, /schedulePreviewProjectile[\s\S]*?event\?\.targetIndices[\s\S]*?visualTargetIndex[\s\S]*?createElementalAttack/,
+    'motion-only Preview must use each resolved judgment recipient for multi-spit projectile destinations');
+assert.match(animatorSource, /schedulePreviewProjectile[\s\S]*?deferOutcome:\s*true[\s\S]*?resolveElementalProjectileOutcome/,
+    'Preview projectiles must defer their hunter impact until the projectile has visually arrived');
+assert.match(animatorSource, /previewProjectileScheduleKey === scheduleKey/,
+    'one BEAT preview action must schedule its projectile timeline exactly once');
+assert.match(animatorSource, /!minimalFx && delivery !== 'projectile'/,
+    'a detached projectile must not also render the legacy travelling element head');
+assert.match(animatorSource, /hasEmptyAuthoredLane[\s\S]*?off-board phantom destination[\s\S]*?result: hasEmptyAuthoredLane \? 'miss'/,
+    'an edge-side triple fireball must preserve its empty flank as an off-board miss instead of retargeting a hunter');
 assert.strictEqual(context.Animator.usesElementalDelivery('', { type: 'projectile' }), true,
     'authored projectile semantics must remain visible even when a localized move name is unknown');
 assert.match(engineSource, /const authoredElemental = tags\.has\('elemental'\)[\s\S]*?delivery/,

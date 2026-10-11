@@ -12,6 +12,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const MotionAuthoringContract = require('./monster-motion-authoring-contract.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const BANK_MAP_PATH = path.join(ROOT, 'data', 'hunt', 'world-monster-audio-banks.json');
@@ -22,6 +23,18 @@ function canonicalAudioPatternId(patternId) {
     // Stun is the same fall/struggle/rise reaction as knockdown. One route
     // prevents the two sound mappings from drifting after later edits.
     return patternId === '__reaction.stun' ? '__reaction.knockdown' : patternId;
+}
+
+// A judgment is an authored combat event, not a motion BEAT.  Keep its route
+// key separate from beat:<id> so changing a BEAT's duration/label can never
+// move or silently retarget an impact sound assignment.
+function judgmentAudioSlot(group) {
+    return `judgment:${encodeURIComponent(String(group || 'impact'))}:cue`;
+}
+
+function judgmentAudioCondition(value) {
+    return ['hit', 'contact', 'always', 'miss'].includes(String(value || '').toLowerCase())
+        ? String(value).toLowerCase() : 'hit';
 }
 
 function readJson(file, fallback) {
@@ -428,7 +441,12 @@ function buildMonsterPatternAudioMap({
             const binding = bindAudioSlotsToTimeline(rawSlots, patternReviewTimeline(pattern, rawSlots));
             const canonicalSlots = binding.slots.map(slot => {
                 const catalogRoute = currentCatalogRoute(catalog, huntId, slot.slot, pattern);
-                const override = (monsterOverrides[audioPatternId] || {})[slot.slot] || null;
+                // Earlier review sessions already stored the same semantic
+                // route under beat:<phase>.  A native rebuild must inherit
+                // that reviewed route instead of presenting every newly split
+                // BEAT as silent and forcing a second audition pass.
+                const override = (monsterOverrides[audioPatternId] || {})[slot.slot]
+                    || (monsterOverrides[audioPatternId] || {})[`beat:${slot.slot}`] || null;
                 const muted = override?.disabled === true;
                 const effective = muted ? null : (override || (catalogRoute && {
                     label: catalogRoute.label,
@@ -541,6 +559,58 @@ function buildMonsterPatternAudioMap({
                     };
                 }));
             }
+
+            // Judgment sounds are conditional at resolution time.  They are
+            // projected beside their owning BEAT for editing, but their stable
+            // key is the authored judgment group: a two-target impact therefore
+            // receives one route and fires at most once.
+            const graphSource = Array.isArray(pattern.motion) && pattern.motion.length
+                ? normalizeMotionJudgments(pattern.motion, pattern)
+                : normalizeMotionJudgments(binding.timeline.beats.map(beat => ({
+                    beat: beat.id, ticks: beat.ticks, hit: beat.hit,
+                    hitOffsetTicks: beat.hitOffsetTicks
+                })), pattern);
+            const groups = new Map();
+            let elapsed = 0;
+            for (const beat of graphSource) {
+                const ticks = Math.max(1, Number(beat.ticks) || 1);
+                for (const judgment of beat.judgments || []) {
+                    if (judgment.kind !== 'damage') continue;
+                    const group = String(judgment.group || judgment.id || `${beat.beat}-impact`);
+                    if (groups.has(group)) continue;
+                    groups.set(group, {
+                        group,
+                        beatId: String(beat.beat || ''),
+                        atTicks: elapsed + Math.max(0, Number(judgment.offsetTicks) || 0)
+                    });
+                }
+                elapsed += ticks;
+            }
+            const judgmentSlots = [...groups.values()].map((entry, index) => {
+                const slotKey = judgmentAudioSlot(entry.group);
+                const direct = patternOverrides[slotKey] || null;
+                const muted = direct?.disabled === true;
+                return {
+                    slot: slotKey,
+                    phase: 'judgment',
+                    label: 'HIT 판정 사운드',
+                    note: '판정 그룹 단위 · 적중/접촉/항상/비적중 조건',
+                    order: 10000 + index,
+                    runtimeReady: true,
+                    atTicks: entry.atTicks,
+                    beatId: entry.beatId,
+                    judgmentGroup: entry.group,
+                    when: judgmentAudioCondition(direct?.when),
+                    current: null,
+                    assigned: muted ? null : direct,
+                    override: direct,
+                    effective: muted ? null : direct,
+                    muted
+                };
+            });
+            slots = [...slots, ...judgmentSlots].sort((left, right) =>
+                Number(left.atTicks || 0) - Number(right.atTicks || 0)
+                || Number(left.order || 0) - Number(right.order || 0));
             const beatSlots = new Map();
             slots.forEach(slot => {
                 if (!beatSlots.has(slot.beatId)) beatSlots.set(slot.beatId, []);
@@ -592,6 +662,21 @@ function buildMonsterPatternAudioMap({
                 interference: pattern.interference ? { ...pattern.interference } : null,
                 secondaryInterference: pattern.secondaryInterference
                     ? { ...pattern.secondaryInterference } : null,
+                // The editor must receive the complete authored graph, not
+                // just its visual projection.  BEAT event lifecycles such as
+                // projectile-launch -> damage -> projectile-finish are runtime
+                // data, and dropping them here made a reviewed fireball lose
+                // its launch when the preview recompiled a draft motion.
+                beatV2: pattern.beatV2 ? {
+                    ...pattern.beatV2,
+                    beats: (pattern.beatV2.beats || []).map(beat => ({
+                        ...beat,
+                        events: (beat.events || []).map(event => ({ ...event })),
+                        tracks: beat.tracks ? { ...beat.tracks } : beat.tracks
+                    })),
+                    events: (pattern.beatV2.events || []).map(event => ({ ...event }))
+                } : null,
+                nativeBeatCandidate: pattern.nativeBeatCandidate === true,
                 motion: authoredMotion,
                 motionGraph,
                 runtimeMotionBackend: pattern.runtimeMotionBackend || null,
@@ -707,7 +792,40 @@ function resolveHuntId(idOrGraphId, bankMapPath = BANK_MAP_PATH) {
     return id;
 }
 
-function loadHuntPatternAudioMap(idOrGraphId, { overridesPath = OVERRIDES_PATH, bankMapPath = BANK_MAP_PATH } = {}) {
+function candidatePatternForAudioReview(action = {}) {
+    const graph = action.beatV2 || {};
+    const judgmentsByBeat = new Map();
+    for (const event of graph.events || []) {
+        if (!MotionAuthoringContract.JUDGMENT_KINDS.includes(event.kind)) continue;
+        const { beatId, atTicks, audioCue, ...judgment } = event;
+        if (!judgmentsByBeat.has(beatId)) judgmentsByBeat.set(beatId, []);
+        judgmentsByBeat.get(beatId).push(judgment);
+    }
+    return {
+        ...action,
+        // Candidate BEAT remains the single timeline.  This projection only
+        // lets the audio review tool bind old phase routes to its new beats.
+        motion: (graph.beats || []).map(beat => {
+            const visual = (beat.tracks?.visual || []).at(-1)?.value || {};
+            const judgments = judgmentsByBeat.get(beat.id) || [];
+            return {
+                beat: beat.id,
+                label: beat.label || beat.id,
+                ticks: Math.max(1, Number(beat.ticks) || 1),
+                ...visual,
+                judgments
+            };
+        }),
+        impactTimeline: (graph.events || []).filter(event => event.kind === 'damage')
+            .map(event => ({ atTicks: event.atTicks, audioCue: event.audioCue || null }))
+    };
+}
+
+function loadHuntPatternAudioMap(idOrGraphId, {
+    overridesPath = OVERRIDES_PATH,
+    bankMapPath = BANK_MAP_PATH,
+    candidateKit = null
+} = {}) {
     const { patternsFor, routes } = loadHuntCatalogs();
     const huntId = resolveHuntId(idOrGraphId, bankMapPath);
     const monster = (global.MONSTER_DATA || []).find(entry => entry.id === huntId) || {};
@@ -836,14 +954,28 @@ function loadHuntPatternAudioMap(idOrGraphId, { overridesPath = OVERRIDES_PATH, 
             })
         };
     });
+    // Candidate kits own their native BEAT graphs directly. They must not
+    // inherit shared overrides, whose beat ids can describe an older action
+    // shape and silently replace the candidate's authored timeline.
+    const motionDocument = readJson(MOTION_OVERRIDES_PATH, { overrides: {} });
+    // Candidate kits are edited in the review workflow.  Their compiler and
+    // BEAT contract must be reloaded together; otherwise the v3 server can
+    // serve newly saved JSON through an old compiler until a manual restart.
+    const CandidateCatalog = candidateKit
+        ? (requireFresh('../js/effects/hunt/HuntBeatV2Contract.js'),
+            requireFresh('../js/effects/hunt/HuntMonsterCandidateCatalog.js')) : null;
+    const candidateActions = candidateKit
+        ? CandidateCatalog.compileKit(candidateKit).actions.map(candidatePatternForAudioReview) : null;
+    if (candidateActions && String(candidateKit.monsterId) !== huntId) {
+        throw new Error(`candidate monster mismatch: ${candidateKit.monsterId} != ${huntId}`);
+    }
     const result = buildMonsterPatternAudioMap({
         huntId,
-        patterns: [...patternsFor(huntId), ...reviewedReactions],
+        patterns: [...(candidateActions || patternsFor(huntId)), ...reviewedReactions],
         catalog: routes,
         overridesPath,
         bankMapPath
     });
-    const motionDocument = readJson(MOTION_OVERRIDES_PATH, { overrides: {} });
     const authored = motionDocument.overrides?.[huntId]?.__partReactions || {};
     const ReactionCatalog = require('../js/effects/hunt/HuntMonsterReactionCatalog.js');
     const reviewed = require('../js/effects/hunt/data/ReviewedMonsterAnatomy.js');
@@ -887,7 +1019,7 @@ function savePartReactionMappings({ huntId, mappings = {} }, overridesPath = MOT
 
 // Persist, suppress, or clear a single pattern-slot assignment. `disabled`
 // explicitly silences the slot, including its hand-authored catalog fallback.
-function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, delay = 0, label = null, mode = null, disabled = false }, overridesPath = OVERRIDES_PATH) {
+function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, delay = 0, label = null, mode = null, when, disabled = false }, overridesPath = OVERRIDES_PATH) {
     patternId = canonicalAudioPatternId(patternId);
     // The material crack belongs to the shared visual layer, never to a
     // monster identity. Saving it from any monster updates the common route.
@@ -902,14 +1034,26 @@ function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, del
     overrides.routes = overrides.routes || {};
     overrides.routes[huntId] = overrides.routes[huntId] || {};
     overrides.routes[huntId][patternId] = overrides.routes[huntId][patternId] || {};
+    const previousRoute = overrides.routes[huntId][patternId][slot] || null;
+    const conditionalRoute = String(slot).startsWith('judgment:');
+    const normalizedWhen = conditionalRoute
+        ? judgmentAudioCondition(when ?? previousRoute?.when)
+        : null;
     if (cleanFiles.length) {
         overrides.routes[huntId][patternId][slot] = {
             label,
             ...(mode === 'random' ? { mode: 'random' } : {}),
+            ...(normalizedWhen ? { when: normalizedWhen } : {}),
             layers: cleanFiles.map(file => [file, Number(gain) || 0.7, Number(delay) || 0])
         };
+    } else if (conditionalRoute && when != null && disabled !== true) {
+        // Preserve an explicitly chosen condition before a source is assigned.
+        overrides.routes[huntId][patternId][slot] = { when: normalizedWhen };
     } else if (disabled === true) {
-        overrides.routes[huntId][patternId][slot] = { disabled: true };
+        overrides.routes[huntId][patternId][slot] = {
+            disabled: true,
+            ...(normalizedWhen ? { when: normalizedWhen } : {})
+        };
     } else {
         delete overrides.routes[huntId][patternId][slot];
         if (!Object.keys(overrides.routes[huntId][patternId]).length) delete overrides.routes[huntId][patternId];
@@ -926,7 +1070,7 @@ function savePatternRoute({ huntId, patternId, slot, files = [], gain = 0.7, del
         let generated = null;
         if (overridesPath === OVERRIDES_PATH) generated = require('../scripts/generate-monster-pattern-audio-routes.js').generate();
         return { huntId, patternId, slot, files: cleanFiles, mode: mode === 'random' ? 'random' : null,
-            disabled: disabled === true, generated, revision: `${overrides.version}:${overrides.updatedAt}` };
+            when: normalizedWhen, disabled: disabled === true, generated, revision: `${overrides.version}:${overrides.updatedAt}` };
     } catch (error) {
         const rollback = `${overridesPath}.rollback.tmp`;
         if (previousText == null) fs.rmSync(overridesPath, { force: true });
@@ -965,11 +1109,13 @@ function movePatternRouteFile({ huntId, patternId, fromSlot, toSlot, file }, ove
     overrides.routes[huntId][patternId][fromSlot] = remaining.length ? {
         label: sourceRoute?.label || null,
         ...(sourceRoute?.mode === 'random' ? { mode: 'random' } : {}),
+        ...(sourceRoute?.when ? { when: judgmentAudioCondition(sourceRoute.when) } : {}),
         layers: remaining
     } : { disabled: true };
     overrides.routes[huntId][patternId][toSlot] = {
         label: targetRoute?.label || null,
         ...(targetRoute?.mode === 'random' ? { mode: 'random' } : {}),
+        ...(targetRoute?.when ? { when: judgmentAudioCondition(targetRoute.when) } : {}),
         layers: targetLayers
     };
     overrides.updatedAt = new Date().toISOString();
@@ -1005,78 +1151,7 @@ function savePatternMotion({ huntId, patternId, beats = null, reset = false }, o
         delete document.overrides[huntId]?.[patternId];
         if (document.overrides[huntId] && !Object.keys(document.overrides[huntId]).length) delete document.overrides[huntId];
     } else {
-        const allowedText = ['at', 'to', 'origin', 'moveEasing', 'rotationEasing', 'pose',
-            'face', 'align', 'bounds', 'fade', 'sfx', 'label', 'aimBodyAt', 'targetMode',
-            'fx', 'fxAnchor', 'fxSecondary', 'fxSecondaryAnchor', 'fxSecondaryAngleMode'];
-        const allowedNumber = ['offsetX', 'offsetY', 'depth', 'rotation', 'rotationToward',
-            'rotateBy', 'rotateByFacing', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity',
-            'damageScale', 'hitOffsetTicks', 'strideFlipTicks', 'stompSteps', 'fxDurationTicks',
-            'fxSecondaryDurationTicks'];
-        const allowedBoolean = ['hit', 'alignRotationToTravel', 'instantOpacity', 'instantPose',
-            'continueTravel', 'flipFacing'];
-        const seenJudgmentIds = new Set();
-        const cleanBeats = Object.fromEntries(Object.entries(beats || {}).map(([id, value]) => {
-            if (!value || typeof value !== 'object') {
-                return [String(id), Math.max(1, Math.min(600, Math.round(Number(value) || 1)))];
-            }
-            const clean = { ticks: Math.max(1, Math.min(600, Math.round(Number(value.ticks) || 1))) };
-            for (const key of allowedText) if (value[key] != null && String(value[key]).trim()) clean[key] = String(value[key]).trim().slice(0, 120);
-            for (const key of allowedNumber) if (value[key] != null && Number.isFinite(Number(value[key]))) clean[key] = Number(value[key]);
-            for (const key of allowedBoolean) if (typeof value[key] === 'boolean') clean[key] = value[key];
-            if (value.judgmentOffsets && typeof value.judgmentOffsets === 'object') {
-                const judgmentOffsets = Object.fromEntries(['roar', 'tremor', 'wind']
-                    .filter(kind => Number.isFinite(Number(value.judgmentOffsets[kind])))
-                    .map(kind => [kind, Math.max(0, Math.min(clean.ticks - 1,
-                        Math.round(Number(value.judgmentOffsets[kind]))))]));
-                if (Object.keys(judgmentOffsets).length) clean.judgmentOffsets = judgmentOffsets;
-            }
-            if (Array.isArray(value.judgments)) {
-                clean.judgments = value.judgments.slice(0, 32).map((item, index) => {
-                    const kind = ['damage', 'roar', 'tremor', 'wind'].includes(item?.kind) ? item.kind : 'damage';
-                    const target = ['primary', 'left', 'right', 'pair', 'pair-left', 'pair-right',
-                        'primary-adjacent', 'all'].includes(item?.target)
-                        ? item.target : 'primary';
-                    const result = {
-                        id: String(item?.id || `${id}-judgment-${index + 1}`).slice(0, 80),
-                        group: String(item?.group || item?.id || `${id}-impact`).slice(0, 80),
-                        kind, target,
-                        offsetTicks: Math.max(0, Math.min(clean.ticks - 1, Math.round(Number(item?.offsetTicks) || 0)))
-                    };
-                    if (kind === 'damage') {
-                        if (Number.isFinite(Number(item?.damagePercent))) {
-                            result.damagePercent = Math.max(0, Math.min(1000, Number(item.damagePercent)));
-                        } else if (Number.isFinite(Number(item?.damageScale))) {
-                            result.damageScale = Math.max(0, Math.min(10, Number(item.damageScale)));
-                        } else result.damagePercent = 0;
-                    }
-                    else result.size = item?.size === 'small' ? 'small' : 'large';
-                    if (item?.directHitSupersedes === true) result.directHitSupersedes = true;
-                    return result;
-                }).filter(item => {
-                    const key = String(item.id || item.group || '');
-                    if (!key || seenJudgmentIds.has(key)) return false;
-                    seenJudgmentIds.add(key);
-                    return true;
-                });
-                // [] is a deliberate override that clears inherited judgments.
-                // Never collapse it to an omitted field or deleted judgments return on reload.
-            }
-            if (Array.isArray(clean.judgments) && clean.judgments.length) {
-                clean.hit = false;
-                delete clean.hitOffsetTicks;
-                delete clean.judgmentOffsets;
-            }
-            if (Array.isArray(value.fxAdditional)) {
-                clean.fxAdditional = value.fxAdditional.slice(0, 12).map(item => ({
-                    fx: String(item?.fx || '').trim().slice(0, 120),
-                    anchor: String(item?.anchor || '').trim().slice(0, 120),
-                    durationTicks: Math.max(0, Math.min(600, Math.round(Number(item?.durationTicks) || 0))),
-                    angleMode: String(item?.angleMode || '').trim().slice(0, 120)
-                })).filter(item => item.fx);
-                if (!clean.fxAdditional.length) delete clean.fxAdditional;
-            }
-            return [String(id), clean];
-        }));
+        const cleanBeats = MotionAuthoringContract.compactBeats(beats);
         if (!Object.keys(cleanBeats).length) throw new Error('저장할 모션 비트가 없습니다.');
         document.overrides[huntId] = document.overrides[huntId] || {};
         document.overrides[huntId][patternId] = { beats: cleanBeats };

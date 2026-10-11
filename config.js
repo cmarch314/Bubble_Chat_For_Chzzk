@@ -4,8 +4,12 @@
 window.CHZZK_CHANNEL_ID = "057a9a03fea9b368eb0c76b9e95e1ae5"; // [Optional] Set your Channel ID here to skip lookup
 window.BUBBLECHAT_COMPANION_ORIGIN = ""; // Optional localhost override; blank follows the current local server or port 17890.
 
+// Chat columns (5–12): 6 = 83%, 7 = 71%, 8 = 62.5% of the original bubble size.
+// Scales all bubble content, including names, badges, emotes, !광대 and #CMC videos.
+window.HIVE_CHAT_LAYOUT = { columns: 6 };
+
 window.HIVE_VOLUME_CONFIG = {
-    "master": 1.5,
+    "master": 1.35,
     "visual": 1,
     "sfx": 1
 };

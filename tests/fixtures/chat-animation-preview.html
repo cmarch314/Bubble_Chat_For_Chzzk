@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>채팅 애니메이션 검수</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html, body { margin: 0; width: 100%; height: 100%; }
+    body { background: #1c293b; }
+    #audit-label { position: fixed; top: 24px; left: 24px; color: #fff; font: 22px sans-serif; }
+  </style>
+</head>
+<body>
+  <div id="audit-label"></div><div id="chat"></div>
+  <script src="../../js/runtime/SafeContent.js"></script>
+  <script src="../../js/runtime/DisposableScope.js"></script>
+  <script src="../../js/runtime/ManagedTimers.js"></script>
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/chat/ChatMessageNormalizer.js"></script>
+  <script src="../../js/chat/ChatMediaBubbleController.js"></script>
+  <script src="../../js/chat/ChatSpecialBubbleCommand.js"></script>
+  <script src="../../js/ChatRenderer.js"></script>
+  <script>
+    window.showAnimation = async ({ message, columns = 7, slot = 0, random = 0.5 }) => {
+      window.auditRenderer?.dispose();
+      document.querySelector('#chat').replaceChildren();
+      const renderer = window.auditRenderer = new ChatRenderer(null, null, { columns });
+      renderer.nextSlot = slot;
+      window.auditTimeouts = [];
+      const timeout = renderer.timers.timeout.bind(renderer.timers);
+      renderer.timers.timeout = (callback, delay) => {
+        auditTimeouts.push(delay);
+        return timeout(callback, delay);
+      };
+      const originalRandom = Math.random;
+      try {
+        Math.random = () => random;
+        renderer.render({ uid: 'audit', nickname: '애니메이션 검수', color: '#8cd0bd', message });
+      } finally { Math.random = originalRandom; }
+      document.querySelector('#audit-label').textContent = `${columns}분할 · ${slot + 1}번째 칸 · ${message}`;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    };
+    const params = new URLSearchParams(location.search);
+    document.fonts.ready.then(async () => {
+      await showAnimation({ message: params.get('message') || '갔냐?', columns: Number(params.get('columns')) || 7,
+        slot: Number(params.get('slot')) || 0 });
+      document.documentElement.dataset.previewReady = 'true';
+    });
+  </script>
+</body>
+</html>

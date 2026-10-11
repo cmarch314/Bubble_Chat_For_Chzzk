@@ -48,6 +48,14 @@ assert.match(reviewUi, /className = 'timeline-slider'/,
     'the timeline must expose a native draggable scrubber in addition to beat clicks');
 assert.match(reviewUi, /function startPlaybackProgress/,
     'real preview playback must drive the shared timeline cursor');
+assert.match(reviewUi, /function updatePlaybackCursor\(tick, durationTicks\)/,
+    'playback must update its cursor without rebuilding editor state every animation frame');
+assert.match(reviewUi, /app\.playbackFrame = requestAnimationFrame\(frame\)/,
+    'preview progress must follow the browser paint clock instead of a competing interval');
+assert.doesNotMatch(reviewUi, /app\.session\.seek\(app\.playbackDurationTicks \* ratio\)/,
+    'autonomous playback must not deep-project the complete editor session on every frame');
+assert.match(reviewUi, /beat\.id !== app\.playbackBeatId[\s\S]*app\.session\.seek/,
+    'editor selection may synchronize only when playback crosses a BEAT boundary');
 assert.match(reviewUi, /MonsterAudioReviewState\.buildPreviewMotion/,
     'the editor must preserve legacy CSS motion instead of compiling ticks-only no-op motion');
 assert.match(reviewUi, /refreshSourceSelection\(\)/,
@@ -70,8 +78,8 @@ assert.match(reviewUi, /MonsterAudioReviewState\.createEditorSession\(\)/,
     'one editor session must own timeline, selection, scrub, history and save state');
 assert.match(reviewUi, /animationDurationMs: snapshot\.timeline\.durationTicks \* 100/,
     'the preview animation and timeline must consume the same projected duration');
-assert.match(reviewUi, /motionValuesEqual\(beats, verify\)/,
-    'saving must compare every editable transform against a freshly reloaded runtime projection, not ticks alone');
+assert.match(reviewUi, /contract\.compareBeats\(left, right\)/,
+    'saving must compare the shared normalized contract against a freshly reloaded runtime projection');
 assert.match(reviewUi, /assertGeneratedAudioRoute\(result\)/,
     'audio assignments must fail visibly when their runtime route module was not generated');
 assert.match(reviewUi, /metadata\.apiVersion !== 3.*metadata\.buildId !== 'unified-editor-v3'/s,
@@ -354,6 +362,8 @@ assert.match(reviewUi, /async function pasteRouteLayer[\s\S]*?saveRoute\(/,
         'review playback must have one audio owner instead of layering iframe legacy and BEAT cues');
     assert.ok(html.includes('실수렵 모션 미리보기'));
     assert.ok(html.includes('bubblechat:pattern-preview'));
+    assert.ok(html.includes('previewTargetMode({ newAction: play })'),
+        'random adjacent preview targeting must choose a fresh pair only when a new action begins');
     assert.ok(html.includes('id="patternTitleHost"'),
         'the pattern title must render outside the stable preview and timeline roots');
     assert.ok(html.indexOf('id="patternTitleHost"') < html.indexOf('id="patternPreviewFrame"')

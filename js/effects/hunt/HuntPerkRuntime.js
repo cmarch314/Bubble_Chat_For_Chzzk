@@ -425,7 +425,7 @@ class HuntPerkRuntime {
         if (names.has('임기응변') && this.engine.pendingMonsterAction) value *= 1.12;
         const weaponAffinity = Math.max(0, Number(hunter.weaponInstance?.affinity ?? hunter.affinity ?? 0)) / 100;
         const personalityAffinity = HuntPerkRuntime.personalityProfiles()?.chance(hunter, 'critical')
-            ?? Number(hunter.perkModifiers?.critChance || (names.has('💩') ? .6 : 0));
+            ?? Number(hunter.perkModifiers?.critChance || (names.has('💩') ? .1 : 0));
         const affinity = Math.min(.95, weaponAffinity + personalityAffinity
             + (names.has('간파') ? .18 : 0)
             + this._buffValue(hunter, 'critical', 0));
@@ -587,7 +587,7 @@ class HuntPerkRuntime {
     sharpnessCost(hunter, cost) {
         const names = HuntPerkRuntime.names(hunter);
         if (names.has('명검') || names.has('명검의 가르침')) return this.engine.random() < .35 ? 0 : cost;
-        if (names.has('💩')) return this.engine.random() < .6 ? 0 : cost;
+        if (names.has('💩')) return this.engine.random() < .1 ? 0 : cost;
         if (this.expansionEffects(hunter, 'sharpness-save').some(effect => this.engine.random() < Number(effect.chance || 0))) return 0;
         if (names.has('칼날 연마')) return Math.ceil(cost * .65);
         return cost;
@@ -596,7 +596,7 @@ class HuntPerkRuntime {
     ammoCost(hunter, cost) {
         const names = HuntPerkRuntime.names(hunter);
         if (names.has('탄환 절약') || names.has('명검의 가르침')) return this.engine.random() < .3 ? 0 : cost;
-        if (names.has('💩')) return this.engine.random() < .6 ? 0 : cost;
+        if (names.has('💩')) return this.engine.random() < .1 ? 0 : cost;
         if (this.expansionEffects(hunter, 'ammo-save').some(effect => this.engine.random() < Number(effect.chance || 0))) return 0;
         return cost;
     }
@@ -633,7 +633,7 @@ class HuntPerkRuntime {
 
     shouldConsumeItem(hunter, item = null) {
         const names = HuntPerkRuntime.names(hunter);
-        if (names.has('💩')) return this.engine.random() >= .6;
+        if (names.has('💩')) return this.engine.random() >= .1;
         const canonicalItem = { shockTraps: 'traps', flashPods: 'flashes' }[item] || item;
         if (this.expansionEffects(hunter, 'item-save').some(effect => (!effect.item || effect.item === canonicalItem)
             && this.engine.random() < Number(effect.chance || 0))) return false;

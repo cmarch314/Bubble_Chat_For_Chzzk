@@ -104,7 +104,7 @@ assert.strictEqual(expandedHunter.revengeReady, false);
 const dungHunter = {
     id: 'hammer', hp: 100, maxHp: 100, potions: 10, lifepowders: 1, bombs: 1, shockTraps: 0,
     perks: [{ name: '💩' }],
-    perkModifiers: { critChance: .6 }
+    perkModifiers: { critChance: .1 }
 };
 engine.random = () => 0;
 assert.ok(HuntPerkRuntime.names({ perks: [{ name: '똥' }] }).has('💩'),
@@ -120,6 +120,14 @@ assert.strictEqual(runtime.healAmount(dungHunter, 40), 40, 'Dung must not provid
 assert.strictEqual(runtime.outgoingDamage(dungHunter, {}, 100), 125, 'Dung critical chance must affect the real critical roll');
 assert.strictEqual(runtime.sharpnessCost(dungHunter, 4), 0);
 assert.strictEqual(runtime.ammoCost(dungHunter, 1), 0);
+assert.strictEqual(runtime.shouldConsumeItem(dungHunter, 'potions'), false);
+engine.random = () => .1;
+assert.strictEqual(runtime.sharpnessCost(dungHunter, 4), 4,
+    'Dung sharpness saving must stop at the ten-percent boundary');
+assert.strictEqual(runtime.ammoCost(dungHunter, 1), 1,
+    'Dung ammo saving must stop at the ten-percent boundary');
+assert.strictEqual(runtime.shouldConsumeItem(dungHunter, 'potions'), true,
+    'Dung item saving must stop at the ten-percent boundary');
 assert.strictEqual(runtime.cartRecoveryTicks(dungHunter, 50), 50, 'Dung must not accelerate cart recovery');
 
 const reactive = {

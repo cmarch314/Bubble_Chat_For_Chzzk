@@ -1,4 +1,6 @@
 class ChatMediaBubbleController {
+    static CMC_VIDEO_VOLUME = 0.85;
+
     constructor(owner) {
         this.owner = owner;
     }
@@ -8,10 +10,6 @@ class ChatMediaBubbleController {
     get eventBus() { return this.owner.eventBus; }
 
     get timers() { return this.owner.timers; }
-
-    get boxPos() { return this.owner.boxPos; }
-
-    set boxPos(value) { this.owner.boxPos = value; }
 
     mount(originalMessage, elements, videoQueue) {
         const { chatBox, chatLineInner, messageEle } = elements;
@@ -67,13 +65,30 @@ class ChatMediaBubbleController {
 
             // Native media stays compatible with OBS file:// sources while using
             // the measured per-file loudness profile.
-            this.audioManager?.connectMediaElement(video, 'visual');
+            this.audioManager?.connectMediaElement(video, 'visual', {
+                baseVolume: ChatMediaBubbleController.CMC_VIDEO_VOLUME
+            });
 
             // Clear standard text timeout
 
             let hasCleanedUp = false;
-            const cleanupVideoBubble = () => {
-                if (hasCleanedUp) return;
+            let hasReleased = false;
+            const doRelease = () => {
+                if (hasReleased) return;
+                hasReleased = true;
+                this.audioManager?.releaseMediaElement?.(video, { pause: true, unload: true });
+                // The renderer may be used without an AudioManager (e.g. previews).
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
+                chatBox.remove?.();
+                this.owner._releaseBubbleSlots?.(chatBox);
+            };
+            const cleanupVideoBubble = (immediate = false) => {
+                if (hasCleanedUp) {
+                    if (immediate) doRelease();
+                    return;
+                }
                 hasCleanedUp = true;
                 this.timers.clear(safetyTimeout);
 
@@ -87,14 +102,7 @@ class ChatMediaBubbleController {
                     }
                 }
 
-                const doRelease = () => {
-                    this.audioManager?.releaseMediaElement?.(video, { pause: true, unload: true });
-                    if (chatBox.parentElement) {
-                        chatBox.remove?.();
-                    }
-                };
-
-                if (chatBox.parentElement) {
+                if (!immediate && chatBox.parentElement) {
                     chatBox.classList.remove('visible');
                     this.timers.timeout(doRelease, 300);
                 } else {
@@ -110,6 +118,7 @@ class ChatMediaBubbleController {
             let hasTriggeredNext = false;
             let currentIdx = 0;
             const playNext = async () => {
+                if (hasCleanedUp) return;
                 if (currentIdx >= unifiedQueue.length) {
                     cleanupVideoBubble();
                     return;
@@ -133,7 +142,11 @@ class ChatMediaBubbleController {
                         : [item.name || item.command];
                     const filename = candidates[Math.floor(Math.random() * candidates.length)];
                     video.src = `AI CMC/${encodeURIComponent(filename)}.mp4`;
-                    this.audioManager?.applyNativeVolume(video, { type: 'visual', path: video.src });
+                    this.audioManager?.applyNativeVolume(video, {
+                        type: 'visual',
+                        path: video.src,
+                        baseVolume: ChatMediaBubbleController.CMC_VIDEO_VOLUME
+                    });
                     video.play().catch(e => {
                         console.error("CMC video play failed, skipping:", e);
                         if (!hasTriggeredNext) {
@@ -181,10 +194,6 @@ class ChatMediaBubbleController {
             messageEle.appendChild(video);
             playNext();
 
-            // Set left positioning
-            this.boxPos = this.boxPos % 100;
-            chatBox.style.left = this.boxPos + "%";
-
-        return { timeout: null };
+        return { timeout: null, dispose: () => cleanupVideoBubble(true) };
     }
 }

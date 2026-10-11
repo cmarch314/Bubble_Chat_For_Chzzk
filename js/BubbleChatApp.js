@@ -21,7 +21,7 @@ class BubbleChatApp {
         this.config = new Types.ConfigManager(this.eventBus);
         this.audio = new Types.AudioManager(this.config, this.eventBus);
         this.preloader = new Types.AssetPreloader(this.config, this.audio);
-        this.chatRenderer = new Types.ChatRenderer(this.eventBus, this.audio);
+        this.chatRenderer = new Types.ChatRenderer(this.eventBus, this.audio, this.config.getChatLayout?.());
         this.visuals = new Types.VisualDirector(this.config, this.eventBus, this.audio);
         this.systemController = new Types.SystemController(this.eventBus);
         this.debugController = new Types.DebugController(this.config, this.eventBus);
@@ -49,6 +49,14 @@ class BubbleChatApp {
         this.scope.add(() => {
             if (window.processMessage === processMessage) delete window.processMessage;
         });
+
+        const simulationMode = /(?:^|[?&])huntSimulation=1(?:&|$)/
+            .test(String(window.location?.search || ''));
+        if (simulationMode) {
+            document.body.dataset.huntSimulation = 'true';
+            document.getElementById('loading-screen')?.remove();
+            return this;
+        }
 
         const connectedHandler = () => this._handleConnected();
         window.addEventListener('chzzk_connected', connectedHandler, { once: true });

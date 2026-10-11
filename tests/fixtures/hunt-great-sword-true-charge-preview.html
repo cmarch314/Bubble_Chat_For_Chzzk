@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,initial-scale=1">
+  <title>참 모아베기 궤적 미리보기</title>
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:#0b0806;color:#fff;font-family:sans-serif}
+    main{position:relative;width:1848px;height:880px;margin:24px 36px;border:3px solid #876a3b;border-radius:18px;background:radial-gradient(circle at 50% 40%,#473526,#17110d 68%);overflow:hidden}
+    h1{margin:28px 36px;color:#f3d89b;font-size:34px}
+    #stage{position:absolute;inset:100px 120px 70px;overflow:visible}
+    #target{position:absolute;left:50%;top:35%;width:520px;height:390px;transform:translate(-50%,-50%);border-radius:48% 55% 45% 52%;background:radial-gradient(ellipse at 42% 38%,#9d7749,#49351f 55%,#17100b 78%);filter:drop-shadow(0 28px 16px #000c)}
+    #weapon{position:absolute;left:410px;top:555px;width:150px;height:150px;object-fit:contain;z-index:4;filter:drop-shadow(0 8px 5px #000b)}
+    .origin{position:absolute;left:485px;top:630px;width:18px;height:18px;border:3px solid #62e7bd;border-radius:50%;transform:translate(-50%,-50%)}
+    footer{position:fixed;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa88;background:#000b;display:grid;place-items:center;color:#77d8b5;font-size:22px;font-weight:900}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>참 모아베기 · 제자리 1회전 → 지면 지지 → 전진 베기</h1>
+    <section id="stage">
+      <div id="target" aria-label="몬스터 표적"></div>
+      <i class="origin" aria-hidden="true"></i>
+      <img id="weapon" src="../../img/weapons/great_sword.svg" alt="대검">
+    </section>
+  </main>
+  <footer>OBS 채팅 안전영역 · 하단 15%</footer>
+  <script src="../../js/effects/hunt/HuntAtbConfig.js"></script>
+  <script src="../../js/effects/hunt/HuntWeaponAnimationCatalog.js"></script>
+  <script>
+    const weapon = document.getElementById('weapon');
+    const profile = HuntWeaponAnimationCatalog.resolve('great_sword', {
+      id: 'great_sword.true_charged_slash'
+    });
+    const motion = weapon.animate(
+      HuntWeaponAnimationCatalog.keyframes(profile, 0, { x: 320, y: -385 }),
+      { duration: profile.durationMs, easing: 'linear', fill: 'forwards' }
+    );
+    motion.pause();
+    window.setTrueChargeFrame = milliseconds => {
+      motion.currentTime = Math.max(0, Math.min(profile.durationMs, Number(milliseconds) || 0));
+    };
+    window.setTrueChargeFrame(new URLSearchParams(location.search).get('frame') || 620);
+  </script>
+</body>
+</html>

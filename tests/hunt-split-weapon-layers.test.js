@@ -16,9 +16,9 @@ assert.match(animator, /triggerRollAnimation[\s\S]*?\.game-hunt-weapon-img, #fig
     'evasion must move both visual layers without moving the hunter card');
 assert.match(animator, /interruptWeaponVisual[\s\S]*?cancelWeaponAnimation\(shieldImg\)/,
     'interruptions must clear a shield pose alongside the weapon pose');
-assert.match(animator, /triggerGuardImpact\(idx\)[\s\S]*?\.hunt-split-shield[\s\S]*?hunt-guard-impact/,
+assert.match(animator, /triggerGuardImpact\(idx, outcome = 'guard'\)[\s\S]*?\.hunt-split-shield[\s\S]*?hunt-guard-impact/,
     'successful guards must anchor their translucent impact emoji to the split shield layer');
-assert.match(css, /\.hunt-guard-impact\.is-split-shield\s*\{[^}]*left:\s*73%[^}]*top:\s*54%/s,
+assert.match(css, /\.hunt-guard-impact\.is-split-shield,\s*\.hunt-tackle-impact\.is-split-shield\s*\{[^}]*left:\s*73%[^}]*top:\s*54%/s,
     'the guard impact must sit over the visible half of split shield art');
 assert.match(css, /@keyframes hunt-guard-impact-shake\s*\{[\s\S]*?rotate\(-9deg\)[\s\S]*?rotate\(8deg\)[\s\S]*?rotate\(-6deg\)/,
     'the guard emoji needs a compact shield shake instead of moving the hunter card');

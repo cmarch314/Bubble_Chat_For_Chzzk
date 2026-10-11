@@ -17,6 +17,10 @@ const generatedMotion = require('../js/effects/hunt/data/MonsterPatternMotionOve
 
 assert.deepStrictEqual(generatedMotion, sourceMotion,
     'the OBS runtime artifact must be an exact serialization of the editor source of truth');
+assert.match(reviewApp, /data-field="hitReactionKind"/,
+    'Preview judgments must author the live hit reaction instead of relying on profile tags');
+assert.doesNotMatch(reviewApp, /data-field="hitRecoveryTicks"/,
+    'Preview monster judgments must not expose hunter-owned invulnerability timing');
 
 assert.match(fixture, /pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern\(pattern\)/,
     'Preview must compile its current draft through the same catalog normalizer as live hunts');
@@ -31,6 +35,11 @@ assert.doesNotMatch(fixture.slice(
     'Preview target resolution must be reproducible from its scenario seed');
 assert.match(fixture, /result:'effect'/,
     'an empty judgment set may retain a presentation anchor but must not invent a hit');
+assert.match(fixture, /const displayedTargets=\[\.\.\.selection\.indices\]\.sort/,
+    'the Preview must display adjacent pairs consistently as 1·2, 2·3, or 3·4 without changing hit order');
+assert.match(reviewApp, /if \(play\) app\.previewActionSeed = Math\.max/);
+assert.match(reviewApp, /scenario: \{ \.\.\.snapshot\.scenario, seed: app\.previewActionSeed/,
+    'each new Preview action must receive a fresh seed while scrub/settings retain the current action');
 
 const audioFunction = reviewApp.slice(
     reviewApp.indexOf('function playTimelineAudio'),

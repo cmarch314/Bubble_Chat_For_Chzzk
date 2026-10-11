@@ -342,7 +342,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
             "volume": 0.7
         }
     ],
-    "결제": {
+    "결제!": {
         "src": "Chzzk_Signatures/applepay.mp3",
         "volume": 0.7
     },
@@ -954,7 +954,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/드루와.mp3",
         "volume": 0.7
     },
-    "디코": {
+    "디코!": {
         "src": "Chzzk_Signatures/discord.mp3",
         "volume": 0.7
     },
@@ -1624,10 +1624,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
     },
     "스트레스": [
         {
-            "src": "Chzzk_Signatures/스트레스많이받.mp3",
-            "volume": 0.7
-        },
-        {
             "src": "Chzzk_Signatures/스트레스받.mp3",
             "volume": 0.7
         },
@@ -1636,6 +1632,10 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
             "volume": 0.7
         }
     ],
+    "스트레스필요": {
+        "src": "Chzzk_Signatures/StressNeeds.mp3",
+        "volume": 0.7
+    },
     "스트레스풀": {
         "src": "Chzzk_Signatures/스트레스풀.mp3",
         "volume": 0.7
@@ -1808,10 +1808,10 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
             "volume": 0.7
         }
     ],
-    "아스아!": {
-        "src": "Chzzk_Signatures/Huk.mp3",
-        "volume": 0.7
-    },
+    "아스아!": [
+        { "src": "Chzzk_Signatures/아스아.mp3", "volume": 0.7 },
+        { "src": "Chzzk_Signatures/아스아2.mp3", "volume": 0.7 }
+    ],
     "아시벌개꿀잼": {
         "src": "Chzzk_Signatures/아시벌개꿀잼.mp3",
         "volume": 0.7
@@ -1834,10 +1834,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
     },
     "아앙": {
         "src": "Chzzk_Signatures/aang.mp3",
-        "volume": 0.7
-    },
-    "아야!": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
         "volume": 0.7
     },
     "아예~": {
@@ -2032,7 +2028,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/알겠습니다.mp3",
         "volume": 0.7
     },
-    "알림": {
+    "알림!": {
         "src": "Chzzk_Signatures/Alarm.mp3",
         "volume": 0.7
     },
@@ -2664,82 +2660,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/Half-falling.mp3",
         "volume": 0.7
     },
-    "으악!": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
-        "volume": 0.7
-    },
-    "으에": [
-        {
-            "src": "Chzzk_Signatures/에에.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에2.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에3.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에4.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에5.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에6.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에7.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에8.mp3",
-            "volume": 0.7
-        }
-    ],
-    "으에!": [
-        {
-            "src": "Chzzk_Signatures/에에.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에2.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에3.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에4.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에5.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에6.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에7.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에8.mp3",
-            "volume": 0.7
-        }
-    ],
-    "윽!": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
-        "volume": 0.7
-    },
     "음?": {
         "src": "Chzzk_Signatures/Huh.mp3",
         "volume": 0.7
@@ -3112,7 +3032,7 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/전세계는목격.mp3",
         "volume": 0.7
     },
-    "전화": {
+    "전화!": {
         "src": "Chzzk_Signatures/Call.mp3",
         "volume": 0.7
     },
@@ -3204,10 +3124,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
     },
     "조룡!": {
         "src": "Chzzk_Signatures/조룡!.mp3",
-        "volume": 0.7
-    },
-    "조심해": {
-        "src": "Chzzk_Signatures/키요츠케테.mp3",
         "volume": 0.7
     },
     "존나몬창": {
@@ -3398,18 +3314,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
     },
     "키엔반죠": {
         "src": "Chzzk_Signatures/키엔반죠.mp3",
-        "volume": 0.7
-    },
-    "타격음_무겁": {
-        "src": "MonsterHunter_Hunters/mh_heavy_hit.mp3",
-        "volume": 0.7
-    },
-    "타격음_베기": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
-        "volume": 0.7
-    },
-    "타격음_타격": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
         "volume": 0.7
     },
     "타티": {

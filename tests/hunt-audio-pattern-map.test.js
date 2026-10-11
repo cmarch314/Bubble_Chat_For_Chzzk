@@ -202,16 +202,37 @@ assert.deepStrictEqual(motionSave.beats, {
     telegraph: { ticks: 12, strideFlipTicks: 0 }, launch: 3,
     'impact:rock': { ticks: 2, hitOffsetTicks: 1, hit: true }, recovery: 18
 });
+const rotationMotionSave = savePatternMotion({
+    huntId: 'diablos', patternId: 'diablos.horn_charge',
+    beats: { wind: { ticks: 9, rotation: 180, rotationDirection: 'clockwise',
+        rotationDegrees: 180, keepRotation: true } }
+}, motionTmp);
+assert.deepStrictEqual(rotationMotionSave.beats.wind, {
+    ticks: 9, rotation: 180, rotationDirection: 'clockwise', rotationDegrees: 180, keepRotation: true
+}, 'rotation controls must round-trip through the same motion source used by reload verification');
 const unifiedMotionSave = savePatternMotion({
     huntId: 'diablos', patternId: 'diablos.rage_double_charge',
     beats: { charge: { ticks: 8, hit: true, hitOffsetTicks: 6,
         judgments: [{ id: 'charge-hit', group: 'charge-1', kind: 'damage',
-            target: 'primary', offsetTicks: 2, damagePercent: 50 }] } }
+            target: 'primary', offsetTicks: 2, damagePercent: 50,
+            hitReactionKind: 'butt-stumble', hitRecoveryTicks: 99 }] } }
 }, motionTmp);
 assert.strictEqual(unifiedMotionSave.beats.charge.hit, false,
     'the save boundary must reject dual legacy/new HIT ownership');
 assert.strictEqual(unifiedMotionSave.beats.charge.hitOffsetTicks, undefined);
 assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].offsetTicks, 2);
+assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].hitReactionKind, 'weak',
+    'the editor save boundary must normalize legacy butt-stumble into small-hit identity');
+assert.strictEqual(unifiedMotionSave.beats.charge.judgments[0].hitRecoveryTicks, undefined,
+    'the editor save boundary must reject monster-authored hunter recovery timing');
+const explicitFalseJudgmentSave = savePatternMotion({
+    huntId: 'diablos', patternId: 'diablos.burrow_enter', beats: {
+        eruption: { ticks: 5, judgments: [{ id: 'tremor', group: 'eruption', kind: 'tremor',
+            target: 'primary-adjacent', offsetTicks: 2, size: 'large', directHitSupersedes: false }] }
+    }
+}, motionTmp);
+assert.strictEqual(explicitFalseJudgmentSave.beats.eruption.judgments[0].directHitSupersedes, false,
+    'save/reload must retain an explicitly authored false judgment flag instead of producing a false mismatch');
 const duplicateJudgmentSave = savePatternMotion({
     huntId: 'diablos', patternId: 'diablos.rage_charge', beats: {
         first: { ticks: 5, judgments: [{ id: 'same-hit', group: 'same-group', kind: 'damage',
@@ -224,8 +245,10 @@ assert.strictEqual(duplicateJudgmentSave.beats.first.judgments.length, 1);
 assert.deepStrictEqual(duplicateJudgmentSave.beats.old.judgments, [],
     'the save boundary must remove a judgment from its previous beat after a drag');
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.tail_slam_rock', reset: true }, motionTmp);
+savePatternMotion({ huntId: 'diablos', patternId: 'diablos.horn_charge', reset: true }, motionTmp);
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.rage_double_charge', reset: true }, motionTmp);
 savePatternMotion({ huntId: 'diablos', patternId: 'diablos.rage_charge', reset: true }, motionTmp);
+savePatternMotion({ huntId: 'diablos', patternId: 'diablos.burrow_enter', reset: true }, motionTmp);
 assert.strictEqual(JSON.parse(fs.readFileSync(motionTmp, 'utf8')).overrides.diablos, undefined);
 
 // the real reviewed catalog resolves diablos without throwing.

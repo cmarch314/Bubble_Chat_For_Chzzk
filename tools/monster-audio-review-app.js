@@ -29,24 +29,65 @@
         return;
     }
     const app = {
-        monster: '', huntId: '', monsters: [], categories: [], groups: [], commonGroups: [], presets: {}, patterns: [],
+        monster: '', huntId: '', candidateId: '', monsters: [], categories: [], groups: [], commonGroups: [], presets: {}, patterns: [],
         partReactions: [], systemAudioPattern: null,
-        selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', anatomy: false, sourceQueue: [], previewTimers: [],
+        selectedPatternId: '', selectedSlot: '', selectedJudgmentId: '', selectedProjectileEventId: '', anatomy: true, sourceQueue: [], previewTimers: [],
         previewAudios: [], previewAudioSchedule: [], capabilities: [], buildId: '', session: MonsterAudioReviewState.createEditorSession(),
         pickerCategory: '', pickerStatus: 'all', previewReady: false, previewSequence: 0,
+        previewRandomPairTarget: '',
+        previewActionSeed: 1,
         sourceRowsByPath: new Map(), sourceGroupViews: [], sourceRenderLimit: 80,
         hiddenSourcePaths: new Set(), temporarilyRevealedSources: new Set(),
-        hiddenSourceGroups: new Set(), favoriteSourceGroups: new Set(),
+        hiddenSourceGroups: new Set(), favoriteSourceGroups: new Set(), autoFavoriteSourceGroups: new Set(),
         showHiddenSources: false, linkedSourcesFirst: false, sourceFocusPath: '', routeClipboard: null,
+        // Some embedded Chromium builds drop custom DataTransfer MIME values
+        // between panels. Keep the active payload locally as the authoritative
+        // fallback so native drag-and-drop remains usable in the review app.
+        dragPayload: null,
         routeLastRandomLayer: new Map(),
         revisions: { audio: '', motion: '', anatomy: '' }, playbackState: 'stopped',
-        playbackStartedAt: 0, playbackElapsedMs: 0, playbackDurationMs: 0, playbackDurationTicks: 0
+        playbackStartedAt: 0, playbackElapsedMs: 0, playbackDurationMs: 0, playbackDurationTicks: 0,
+        playbackFrame: 0, playbackTimeline: null, playbackBeatId: '',
+        simulationMode: false, simulationState: 'pattern', simulationPollTimer: null,
     };
     const audio = $('#audio');
     const selectedPattern = () => app.patterns.find(pattern => pattern.id === app.selectedPatternId) || null;
+    const adjacentPreviewTargets = Object.freeze(['pair:0,1', 'pair:1,2', 'pair:2,3']);
+    function previewTargetMode({ newAction = false } = {}) {
+        const selected = String($('#previewTarget')?.value || 'auto');
+        if (selected !== 'pair:random-adjacent') {
+            app.previewRandomPairTarget = '';
+            return selected;
+        }
+        if (newAction || !adjacentPreviewTargets.includes(app.previewRandomPairTarget)) {
+            app.previewRandomPairTarget = adjacentPreviewTargets[Math.floor(Math.random() * adjacentPreviewTargets.length)];
+        }
+        return app.previewRandomPairTarget;
+    }
     const selectedSlot = () => selectedPattern()?.slots.find(slot => slot.slot === app.selectedSlot) || null;
     const routeFiles = route => (route?.layers || []).map(layer => Array.isArray(layer) ? layer[0] : layer).filter(Boolean);
     const fileName = file => String(file || '').split('/').pop();
+    const beginRouteDrag = (event, payload, effect = 'copy') => {
+        app.dragPayload = payload;
+        const encoded = JSON.stringify(payload);
+        const transfer = event.dataTransfer;
+        if (!transfer) return;
+        transfer.effectAllowed = effect;
+        // text/plain is deliberately retained for WebView hosts which reject
+        // application/json on drops across independently rendered panels.
+        transfer.setData('application/json', encoded);
+        transfer.setData('text/plain', encoded);
+    };
+    const droppedRoutePayload = event => {
+        const transfer = event.dataTransfer;
+        for (const type of ['application/json', 'text/plain']) {
+            const raw = transfer?.getData(type);
+            if (!raw) continue;
+            try { return JSON.parse(raw); } catch { /* use the local fallback */ }
+        }
+        return app.dragPayload;
+    };
+    const finishRouteDrag = () => { app.dragPayload = null; };
     const allSlots = () => app.patterns.flatMap(pattern => pattern.slots || []);
     const syncInheritedReactionAudio = () => {
         const source = app.patterns.find(pattern => pattern.id === '__reaction.knockdown');
@@ -65,6 +106,11 @@
     const previewOrigin = () => location.origin;
     const sourcePreferenceKey = monster => `bubblechat.monsterAudioReview.sources.${monster}`;
     const sourceGroupKey = group => `${group.bank}\u0000${group.eventId}`;
+    // These six were reviewed before the BEAT rebuild.  Their routes are the
+    // useful evidence while their actions are being rebuilt, so surface every
+    // still-linked source group without mutating a reviewer's own favorites.
+    const AUTO_FAVORITE_MAPPED_MONSTERS = new Set(['rathian', 'rathalos', 'bazelgeuse', 'tigrex', 'barioth', 'legiana']);
+    const sourceGroupIsFavorite = groupKey => app.favoriteSourceGroups.has(groupKey) || app.autoFavoriteSourceGroups.has(groupKey);
 
     function loadSourcePreferences() {
         let stored = {};
@@ -179,6 +225,10 @@
             this.ready = true;
             if (this.pending) { const pending = this.pending; this.pending = null; this.send(pending.type, pending); }
         }
+        reset() {
+            this.ready = false;
+            this.pending = null;
+        }
     }
     const bridge = new PreviewBridge(previewFrame());
 
@@ -234,6 +284,9 @@
     function buildPreviewPattern({ scrub = false } = {}) {
         const pattern = selectedPattern(), snapshot = app.session.snapshot();
         if (!pattern) return null;
+        const scrubProgress = scrub
+            ? snapshot.scrub.tick / Math.max(1, snapshot.timeline.durationTicks)
+            : 0;
         const motionPayload = MonsterAudioReviewState.buildPreviewMotion(
             pattern, snapshot.timeline, app.session.draft);
         const preview = {
@@ -241,6 +294,11 @@
             animationDurationMs: snapshot.timeline.durationTicks * 100,
             movement: { ...(pattern.movement || {}), ticks: snapshot.timeline.durationTicks },
             runtimePreviewScrub: scrub,
+            // `HuntMonsterAttackAnimator.seekBeatMotion` consumes a 0..1
+            // progress value, never an absolute tick.  Keep this on the
+            // pattern too so the first frozen frame is correct even before
+            // the iframe handles its follow-up seek message.
+            runtimePreviewProgress: scrubProgress,
             runtimePreviewCardReactions: true,
             // The review shell owns its audible timeline so slot clocks, drag
             // assignments and playback all describe the same source.  Keep the
@@ -249,6 +307,7 @@
             runtimePreviewMuteAudio: true
         };
         if (motionPayload.useBeatMotion) preview.motion = motionPayload.motion;
+        if (motionPayload.beatV2) preview.beatV2 = motionPayload.beatV2;
         else {
             preview.motion = null;
             preview.runtimeTimingBeats = motionPayload.runtimeTimingBeats;
@@ -257,17 +316,31 @@
     }
 
     function sendPreview({ scrub = false, play = false, reset = false, resetOnly = false } = {}) {
+        if (app.simulationMode) return;
         const pattern = selectedPattern(), monster = app.monsters.find(item => item.id === app.monster);
         if (!pattern) return;
         const snapshot = app.session.snapshot();
         const playbackToken = play ? ++app.previewSequence : 0;
+        if (play) app.previewActionSeed = Math.max(1,
+            Math.floor(Math.random() * 0xFFFFFFFF));
+        // A transform edit is a scrub only.  It must never leave an auxiliary
+        // beat-only playback timer alive: that timer could pause a subsequent
+        // full-pattern replay and make the visible rotation look fixed.
         if (!play) stopPlaybackProgress();
         bridge.send('bubblechat:pattern-preview', {
             monsterId: app.huntId,
             monster: { id: app.huntId, nameKO: monster?.name || app.huntId, filename: `${app.huntId}.png` },
-            target: $('#previewTarget').value,
+            target: previewTargetMode({ newAction: play }),
             state: snapshot.scenario.monsterState,
-            scenario: { ...snapshot.scenario, selectedBeatId: snapshot.selection.beatId,
+            // The iframe may receive a seek message before it has installed
+            // the new BEAT controller.  Carry the scrub position with the
+            // pattern itself so an inspector edit always opens on the exact
+            // authored frame (including signed rotation direction).
+            scenario: { ...snapshot.scenario, seed: app.previewActionSeed,
+                scrubProgress: scrub
+                    ? snapshot.scrub.tick / Math.max(1, snapshot.timeline.durationTicks)
+                    : 0,
+                selectedBeatId: snapshot.selection.beatId,
                 editBeat: { ...(snapshot.draft[snapshot.selection.beatId] || {}) } },
             pattern: buildPreviewPattern({ scrub }),
             resetPreviewPose: Boolean(reset),
@@ -278,19 +351,181 @@
     }
 
     function syncPreviewSettings() {
+        if (app.simulationMode) return;
         const snapshot = app.session.snapshot();
         bridge.send('bubblechat:pattern-preview-settings', {
-            target: $('#previewTarget').value,
+            target: previewTargetMode(),
             state: snapshot.scenario.monsterState,
             scenario: { ...snapshot.scenario, selectedBeatId: snapshot.selection.beatId,
                 editBeat: { ...(snapshot.draft[snapshot.selection.beatId] || {}) } }
         });
     }
 
+    function simulationWindow() {
+        return previewFrame()?.contentWindow || null;
+    }
+
+    function simulationApp() {
+        return simulationWindow()?.__bubbleChatSimulationApp || null;
+    }
+
+    function simulationGame() {
+        return simulationApp()?.visuals?.activeGame || null;
+    }
+
+    function simulationRuntime() {
+        const game = simulationGame();
+        return game?.combatRuntime || game?.instance?.combatRuntime || null;
+    }
+
+    function setSimulationUi(state, message = '') {
+        app.simulationState = state;
+        const active = app.simulationMode;
+        $('.combat-preview')?.classList.toggle('simulation-active', active);
+        const start = $('#simulationStart'), pause = $('#simulationPause');
+        const speed = $('#simulationSpeed'), reset = $('#simulationReset'), status = $('#simulationStatus');
+        if (start) {
+            start.classList.toggle('active', active);
+            start.textContent = active ? '패턴 편집으로' : '⚔ 실전 시작';
+            start.disabled = state === 'loading';
+        }
+        if (pause) {
+            pause.disabled = state !== 'running' && state !== 'paused';
+            pause.textContent = state === 'paused' ? '▶' : 'Ⅱ';
+            pause.title = state === 'paused' ? '계속' : '일시정지';
+        }
+        if (speed) speed.disabled = state !== 'running' && state !== 'paused';
+        if (reset) reset.disabled = !active || state === 'loading';
+        if (status) {
+            status.className = `simulation-status ${state}`;
+            status.textContent = message || ({ pattern: '패턴 모드', loading: '전투 준비…', running: '실전 진행', paused: '일시정지', ended: '전투 종료' }[state] || state);
+        }
+    }
+
+    function stopSimulationMonitor() {
+        if (app.simulationPollTimer) clearInterval(app.simulationPollTimer);
+        app.simulationPollTimer = null;
+    }
+
+    function startSimulationMonitor() {
+        stopSimulationMonitor();
+        app.simulationPollTimer = setInterval(() => {
+            if (!app.simulationMode || app.simulationState === 'paused') return;
+            const game = simulationGame(), engine = simulationRuntime()?.engine;
+            if (!game) {
+                if (app.simulationState === 'running') setSimulationUi('ended', '전투 종료');
+                return;
+            }
+            if (!engine) return;
+            const hp = Math.max(0, Math.round(Number(engine.monsterHp || 0)));
+            const maxHp = Math.max(hp, Math.round(Number(engine.monsterMaxHp || engine.maxMonsterHp || 0)));
+            const time = Math.max(0, Math.round(Number(engine.battleTime || 0) / 10));
+            setSimulationUi('running', maxHp ? `HP ${hp}/${maxHp} · ${time}초` : `전투 ${time}초`);
+        }, 500);
+    }
+
+    function waitForSimulation(predicate, description, timeoutMs = 25000) {
+        const startedAt = performance.now();
+        return new Promise((resolve, reject) => {
+            const poll = () => {
+                let value = null;
+                try { value = predicate(); } catch { value = null; }
+                if (value) return resolve(value);
+                if (performance.now() - startedAt >= timeoutMs) return reject(new Error(`실전 시뮬레이션 준비 실패: ${description}`));
+                setTimeout(poll, 100);
+            };
+            poll();
+        });
+    }
+
+    function sendSimulationChat(message, index = 0, isStreamer = false) {
+        const receiver = simulationWindow()?.processMessage;
+        if (typeof receiver !== 'function') throw new Error('실제 채팅 라우터를 찾을 수 없습니다.');
+        receiver({
+            message,
+            nickname: isStreamer ? 'Simulation Host' : `Preview Hunter ${index + 1}`,
+            uid: isStreamer ? 'preview-simulation-host' : `preview-simulation-hunter-${index + 1}`,
+            userIdHash: isStreamer ? 'preview-simulation-host' : `preview-simulation-hunter-${index + 1}`,
+            color: ['#64d8ff', '#ff8ca8', '#9be56b', '#ffd166'][index % 4],
+            isStreamer,
+            isSubscriber: true,
+            emojis: []
+        });
+    }
+
+    async function stopCombatSimulation({ restorePatternPreview = true } = {}) {
+        stopSimulationMonitor();
+        const game = simulationGame();
+        try { game?.forceStopGame?.(); } catch (error) { console.warn('Simulation cleanup failed', error); }
+        app.simulationMode = false;
+        bridge.reset();
+        if (restorePatternPreview) {
+            previewFrame().src = '/preview/?embed=1';
+            setSimulationUi('pattern');
+        }
+    }
+
+    async function startCombatSimulation() {
+        if (app.simulationMode) {
+            await stopCombatSimulation();
+            return;
+        }
+        const monster = app.monsters.find(item => item.id === app.monster);
+        if (!monster) throw new Error('선택한 몬스터를 찾을 수 없습니다.');
+        stopPreviewAudio();
+        stopPlaybackProgress();
+        bridge.reset();
+        app.simulationMode = true;
+        setSimulationUi('loading', '실제 수렵 로딩…');
+        previewFrame().src = `/index.html?huntSimulation=1&monster=${encodeURIComponent(app.huntId || app.monster)}`;
+
+        await waitForSimulation(() => simulationApp() && typeof simulationWindow()?.processMessage === 'function', '실제 수렵 앱');
+        sendSimulationChat(`!수렵 ${monster.name || app.huntId || app.monster}`, 0, true);
+        await waitForSimulation(() => simulationWindow()?.document?.querySelector('.hunt-quest-board'), '퀘스트 보드');
+        for (let index = 0; index < 4; index++) sendSimulationChat('!참가', index);
+        await waitForSimulation(() => simulationWindow()?.document?.querySelector('.hunt-loadout-board'), '장비 선택');
+        for (let index = 0; index < 4; index++) sendSimulationChat('!준비', index);
+        await waitForSimulation(() => simulationWindow()?.document?.querySelector('#fight-monster-img') && simulationRuntime(), '전투 시작');
+        simulationRuntime().clock?.setRate?.(Number($('#simulationSpeed').value || 1));
+        setSimulationUi('running', `${monster.name || app.huntId} 실전`);
+        startSimulationMonitor();
+    }
+
+    function installCombatSimulationControls() {
+        setSimulationUi('pattern');
+        $('#simulationStart').onclick = () => startCombatSimulation().catch(error => {
+            console.error(error);
+            setSimulationUi('ended', error.message);
+        });
+        $('#simulationPause').onclick = () => {
+            const runtime = simulationRuntime();
+            if (!runtime) return;
+            if (app.simulationState === 'paused') {
+                runtime.resume();
+                setSimulationUi('running');
+            } else {
+                runtime.pause();
+                setSimulationUi('paused');
+            }
+        };
+        $('#simulationSpeed').onchange = () => simulationRuntime()?.clock?.setRate?.(Number($('#simulationSpeed').value || 1));
+        $('#simulationReset').onclick = async () => {
+            await stopCombatSimulation({ restorePatternPreview: false });
+            await startCombatSimulation();
+        };
+    }
+
     function installPairPreviewTargets() {
         const select = $('#previewTarget');
-        if (!select || select.querySelector('option[value^="pair:"]')) return;
+        if (!select) return;
+        if (!select.querySelector('option[value="pair:random-adjacent"]')) {
+            const randomOption = document.createElement('option');
+            randomOption.value = 'pair:random-adjacent';
+            randomOption.textContent = '🎲 2인 인접 랜덤 (1·2 / 2·3 / 3·4)';
+            select.appendChild(randomOption);
+        }
         [[0, 1], [1, 2], [2, 3]].forEach(([left, right]) => {
+            if (select.querySelector(`option[value="pair:${left},${right}"]`)) return;
             const option = document.createElement('option');
             option.value = `pair:${left},${right}`;
             option.textContent = `2인 ${left + 1}·${right + 1} 사이`;
@@ -354,34 +589,57 @@
     }
 
     function stopPlaybackProgress({ preserveState = false } = {}) {
-        if (app.playbackTimer) clearInterval(app.playbackTimer);
-        app.playbackTimer = 0; app.playbackToken = 0;
+        if (app.playbackFrame) cancelAnimationFrame(app.playbackFrame);
+        app.playbackFrame = 0; app.playbackToken = 0;
         if (!preserveState) app.playbackState = 'stopped';
         updateTransportControls();
     }
 
+    function updatePlaybackCursor(tick, durationTicks) {
+        const boundedTick = Math.max(0, Math.min(durationTicks, Number(tick) || 0));
+        const percentage = boundedTick / Math.max(1, durationTicks) * 100;
+        const cursor = $('.scrub-cursor'), readout = $('.scrub-readout'), slider = $('.timeline-slider');
+        if (cursor) cursor.style.left = `${percentage}%`;
+        if (readout) {
+            readout.style.left = `${percentage}%`;
+            readout.textContent = `${Math.floor(boundedTick)} / ${durationTicks}틱`;
+        }
+        if (slider) { slider.max = String(durationTicks); slider.value = String(boundedTick); }
+    }
+
     function runPlaybackProgress() {
         if (app.playbackState !== 'playing' || !app.playbackDurationMs) return;
-        if (app.playbackTimer) clearInterval(app.playbackTimer);
+        if (app.playbackFrame) cancelAnimationFrame(app.playbackFrame);
+        const timeline = app.playbackTimeline || app.session.snapshot().timeline;
         const frame = () => {
             if (app.playbackState !== 'playing') return;
             app.playbackElapsedMs = performance.now() - app.playbackStartedAt;
             emitPreviewAudioThrough(app.playbackElapsedMs);
             const ratio = Math.max(0, Math.min(1, app.playbackElapsedMs / app.playbackDurationMs));
-            const before = app.session.snapshot().selection.beatId;
-            app.session.seek(app.playbackDurationTicks * ratio); updateTimelineCursor();
-            renderSelectionOnly({ inspector: before !== app.session.snapshot().selection.beatId });
-            if (ratio >= 1) { stopPreviewAudio(); stopPlaybackProgress(); }
+            const tick = app.playbackDurationTicks * ratio;
+            updatePlaybackCursor(tick, app.playbackDurationTicks);
+            const beat = timeline.beats.find(item => tick >= item.startTicks && tick < item.endTicks)
+                || timeline.beats.at(-1);
+            if (beat && beat.id !== app.playbackBeatId) {
+                app.playbackBeatId = beat.id;
+                app.session.seek(Math.min(tick, Math.max(0, app.playbackDurationTicks - 1)));
+                renderSelectionOnly();
+            }
+            if (ratio >= 1) {
+                stopPreviewAudio(); stopPlaybackProgress();
+                return;
+            }
+            app.playbackFrame = requestAnimationFrame(frame);
         };
-        frame(); app.playbackTimer = setInterval(frame, 33);
+        app.playbackFrame = requestAnimationFrame(frame);
     }
 
     function pauseCurrentPreview() {
         if (app.playbackState !== 'playing') return;
         app.playbackElapsedMs = performance.now() - app.playbackStartedAt;
         app.playbackState = 'paused';
-        if (app.playbackTimer) clearInterval(app.playbackTimer);
-        app.playbackTimer = 0;
+        if (app.playbackFrame) cancelAnimationFrame(app.playbackFrame);
+        app.playbackFrame = 0;
         app.previewAudios.forEach(clip => clip.pause());
         bridge.send('bubblechat:pattern-preview-transport', { action: 'pause' });
         updateTransportControls();
@@ -411,6 +669,7 @@
         app.playbackStartedAt = performance.now();
         app.playbackDurationTicks = snapshot.timeline.durationTicks;
         app.playbackDurationMs = Math.max(100, Number(durationMs) || app.playbackDurationTicks * 100);
+        app.playbackTimeline = snapshot.timeline; app.playbackBeatId = '';
         runPlaybackProgress(); updateTransportControls();
     }
 
@@ -476,8 +735,25 @@
             const row = document.createElement('div');
             row.className = `slot-card${slot.slot === app.selectedSlot ? ' selected' : ''}`;
             row.dataset.slot = slot.slot;
+            const judgmentCondition = slot.judgmentGroup ? (slot.when || slot.effective?.when || 'hit') : null;
             row.innerHTML = `<span class="slot-order">${esc(slot.phase || 'beat')}</span><span class="slot-name"><strong>${esc(slot.label)}</strong><small>${slot.atTicks ?? 0}틱 · ${esc(slot.phase || '')}</small></span><div class="slot-route">${routeHtml(slot)}</div><span class="slot-actions"><button type="button" class="icon-button paste-route" title="복사한 음원 붙여넣기" aria-label="복사한 음원 붙여넣기"${app.routeClipboard?.path ? '' : ' disabled'}>📥</button><button type="button" class="icon-button play-slot"${slot.effective ? '' : ' disabled'}>▶</button><button type="button" class="icon-button clear-slot"${slot.assigned ? '' : ' disabled'}>✕</button></span>`;
-            row.onclick = event => { if (!event.target.closest('.slot-actions')) selectPart({ slotId: slot.slot }); };
+            if (judgmentCondition) {
+                const control = document.createElement('label');
+                control.className = 'judgment-condition';
+                control.innerHTML = `판정 조건 <select><option value="hit">적중</option><option value="contact">접촉</option><option value="always">항상</option><option value="miss">비적중</option></select>`;
+                const select = control.querySelector('select');
+                select.value = judgmentCondition;
+                select.onchange = event => {
+                    event.stopPropagation();
+                    const files = routeFiles(slot.effective);
+                    saveRoute({ huntId: app.huntId, patternId: pattern.id, slot: slot.slot,
+                        files, gain: .7, delay: 0, label: slot.effective?.label || null,
+                        mode: slot.effective?.mode || null, when: select.value })
+                        .catch(error => alert(error.message));
+                };
+                row.querySelector('.slot-name')?.appendChild(control);
+            }
+            row.onclick = event => { if (!event.target.closest('.slot-actions, .judgment-condition')) selectPart({ slotId: slot.slot }); };
             row.querySelector('.play-slot').onclick = event => playRoute(slot.effective, `${pattern.name} · ${slot.label}`, event.currentTarget);
             row.querySelector('.clear-slot').onclick = () => clearSlot(pattern.id, slot.slot);
             row.querySelector('.paste-route').onclick = () => pasteRouteLayer(pattern.id, slot.slot)
@@ -495,7 +771,7 @@
 
     function renderTimeline(pattern) {
         const snapshot = app.session.snapshot(), host = $('#patternDesk');
-        host.innerHTML = `<section class="beat-card timeline-docked"><div class="section-kicker"><b>모션 타임라인</b><span class="beat-source">단일 실행기 · ${snapshot.timeline.durationTicks}틱</span></div><div class="beat-track"></div></section><div class="section-kicker"><b>사운드 순간 선택</b><span>타임라인과 항상 동기화</span></div><section id="slotFlow" class="slot-flow"></section><section class="motion-editor"></section><section class="part-reaction-editor"></section>`;
+        host.innerHTML = `<section class="beat-card timeline-docked"><div class="section-kicker"><b>모션 · 판정 타임라인</b><span class="beat-source">단일 실행기 · ${snapshot.timeline.durationTicks}틱</span></div><div class="beat-track"></div><section class="judgment-manager timeline-judgment-manager"></section></section><div class="section-kicker"><b>사운드 순간 선택</b><span>선택 판정과 항상 동기화</span></div><section id="slotFlow" class="slot-flow"></section><section class="motion-editor"></section><section class="part-reaction-editor"></section>`;
         const transport = document.createElement('div');
         transport.className = 'timeline-transport';
         transport.setAttribute('role', 'group');
@@ -516,7 +792,12 @@
             node.className = `beat${displaysImpact ? ' hit' : ''}${beat.id === snapshot.selection.beatId ? ' scrub-active' : ''}`;
             node.dataset.beat = beat.id; node.style.setProperty('--ticks', beat.ticks);
             node.innerHTML = `<strong>${esc(beat.label || beat.id)}</strong><small>${beat.startTicks}–${beat.endTicks}틱 · ${(beat.ticks / 10).toFixed(1)}초</small>${displaysImpact ? '<em>HIT</em>' : ''}`;
-            node.onclick = event => { if (!event.target.closest('.beat-handle')) selectPart({ beatId: beat.id }); };
+            node.onclick = event => {
+                if (event.target.closest('.beat-handle')) return;
+                const firstJudgment = (beat.judgments || [])[0];
+                if (firstJudgment) selectJudgmentEntry(beat, firstJudgment);
+                else selectPart({ beatId: beat.id });
+            };
             if (index < snapshot.timeline.beats.length - 1) installBoundaryHandle(node, beat, snapshot.timeline.beats[index + 1], track);
             track.appendChild(node);
         }
@@ -564,8 +845,30 @@
             marker.dataset.beat = beat.id; marker.dataset.judgmentId = judgment.id;
             marker.style.left = `${markerTick / Math.max(1, snapshot.timeline.durationTicks) * 100}%`;
             marker.innerHTML = `<b>${meta.label}</b><small>${markerTick}틱</small>`;
-            marker.onclick = event => { event.stopPropagation(); app.selectedJudgmentId = judgment.id; renderPatternDesk(); };
+            marker.onclick = event => { event.stopPropagation(); selectJudgmentEntry(beat, judgment); };
             installUnifiedJudgmentDrag(marker, beat, judgment, track);
+            track.appendChild(marker);
+        }
+        const projectileEvents = snapshot.timeline.beats.flatMap(beat =>
+            (beat.projectileEvents || []).map(projectileEvent => ({ beat, projectileEvent })));
+        for (const { beat, projectileEvent } of projectileEvents) {
+            const marker = document.createElement('span');
+            const markerTick = beat.startTicks + Number(projectileEvent.offsetTicks || 0);
+            const launch = projectileEvent.kind === 'projectile-launch';
+            marker.className = `hit-tick-marker projectile ${launch ? 'launch' : 'finish'}${
+                projectileEvent.id === app.selectedProjectileEventId ? ' selected' : ''}`;
+            marker.dataset.beat = beat.id;
+            marker.dataset.projectileEventId = projectileEvent.id;
+            marker.style.left = `${markerTick / Math.max(1, snapshot.timeline.durationTicks) * 100}%`;
+            marker.innerHTML = `<b>${launch ? 'LAUNCH' : 'FINISH'}</b><small>${markerTick}틱</small>`;
+            marker.title = `${projectileEvent.projectileId} ${launch ? '발사' : '소멸'} · 글자를 드래그해 독립 조절`;
+            marker.onclick = event => {
+                event.stopPropagation();
+                app.selectedProjectileEventId = projectileEvent.id;
+                app.selectedJudgmentId = '';
+                selectPart({ beatId: beat.id });
+            };
+            installProjectileEventDrag(marker, beat, projectileEvent, track);
             track.appendChild(marker);
         }
         const cursor = document.createElement('i'); cursor.className = 'scrub-cursor'; track.appendChild(cursor);
@@ -576,6 +879,7 @@
         track.appendChild(slider);
         installScrubber(track);
         renderSlotFlow(pattern);
+        renderJudgmentManager();
         renderMotionEditor(pattern);
         renderPartReactionEditor();
         updateTimelineCursor(); updateTransportControls();
@@ -632,6 +936,34 @@
             const finish = () => {
                 marker.onpointermove = null; marker.onpointerup = null; marker.onpointercancel = null;
                 if (moved) app.session.moveJudgmentById(judgment.id, latestTick);
+                renderPatternDesk(); sendPreview({ scrub: true });
+            };
+            marker.onpointerup = finish; marker.onpointercancel = finish;
+        };
+    }
+
+    function installProjectileEventDrag(marker, sourceBeat, projectileEvent, track) {
+        marker.onpointerdown = event => {
+            if (!event.target.closest('b')) return;
+            event.preventDefault(); event.stopPropagation(); marker.setPointerCapture(event.pointerId);
+            app.selectedProjectileEventId = projectileEvent.id;
+            app.selectedJudgmentId = '';
+            marker.classList.add('dragging');
+            const snapshot = app.session.snapshot(), total = snapshot.timeline.durationTicks,
+                width = track.getBoundingClientRect().width,
+                sourceTick = sourceBeat.startTicks + Number(projectileEvent.offsetTicks || 0),
+                startX = event.clientX;
+            let latestTick = sourceTick, moved = false;
+            marker.onpointermove = move => {
+                latestTick = Math.max(0, Math.min(total - 1,
+                    Math.round(sourceTick + (move.clientX - startX) / Math.max(1, width) * total)));
+                moved ||= latestTick !== sourceTick;
+                marker.style.left = `${latestTick / Math.max(1, total) * 100}%`;
+                marker.querySelector('small').textContent = `${latestTick}틱`;
+            };
+            const finish = () => {
+                marker.onpointermove = null; marker.onpointerup = null; marker.onpointercancel = null;
+                if (moved) app.session.moveProjectileEventById(projectileEvent.id, latestTick);
                 renderPatternDesk(); sendPreview({ scrub: true });
             };
             marker.onpointerup = finish; marker.onpointercancel = finish;
@@ -833,6 +1165,14 @@
                 const label = node.querySelector('small'); if (label) label.textContent = `${markerTick}틱`;
                 return;
             }
+            if (node.dataset.projectileEventId) {
+                const projectileEvent = beat.projectileEvents?.find(item => item.id === node.dataset.projectileEventId);
+                if (!projectileEvent) return;
+                const markerTick = beat.startTicks + Number(projectileEvent.offsetTicks || 0);
+                node.style.left = `${markerTick / Math.max(1, snapshot.timeline.durationTicks) * 100}%`;
+                const label = node.querySelector('small'); if (label) label.textContent = `${markerTick}틱`;
+                return;
+            }
             const judgmentKind = String(node.dataset.judgment || '').split(' ')[0];
             const markerTick = beat.startTicks + (beat.hit && !judgmentKind
                 ? Number(beat.hitOffsetTicks || 0)
@@ -882,7 +1222,26 @@
     }
 
     function selectPart(request) {
+        app.selectedJudgmentId = '';
         app.session.select(request); updateTimelineCursor(); renderSelectionOnly(); seekPreview(app.session.scrub.tick);
+    }
+
+    function selectJudgmentEntry(beat, judgment, { scrollAudio = false } = {}) {
+        if (!beat || !judgment) return;
+        const pattern = selectedPattern();
+        const group = String(judgment.group || judgment.id || 'impact');
+        const slot = pattern?.slots.find(item => item.judgmentGroup === group) || null;
+        const tick = beat.startTicks + Number(judgment.offsetTicks || 0);
+        app.selectedJudgmentId = judgment.id;
+        // One authored judgment owns the visible selection: its exact timeline
+        // tick, mapped sound moment, source rail and marker always move together.
+        app.session.seek(tick);
+        app.session.select({ beatId: beat.id, ...(slot ? { slotId: slot.slot } : {}) }, { seek: false });
+        renderPatternDesk();
+        seekPreview(tick);
+        if (scrollAudio && slot) requestAnimationFrame(() => document
+            .querySelector(`.slot-card[data-slot="${CSS.escape(slot.slot)}"]`)
+            ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
     }
 
     const EDITABLE_MOTION_FIELDS = MonsterAudioReviewState.EDITABLE_MOTION_FIELDS;
@@ -897,6 +1256,9 @@
         ${node('polar:target 315deg 180', '↖ 뒤·위')}${node('above:target 180', '↑ 위')}${node('polar:target 45deg 180', '↗ 앞·위')}
         ${node('left:target 180', '← 왼쪽')}${node('target', '◎ 헌터', 'target-core ')}${node('right:target 180', '오른쪽 →')}
         ${node('polar:target 225deg 180', '↙ 뒤·아래')}${node('below:target 180', '↓ 아래')}${node('polar:target 135deg 180', '앞·아래 ↘')}</div></section>
+        <section><h3>👥 2인 인접 타겟을 기준으로 찍기</h3><div class="target-compass pair-compass">
+        ${node('above:pair:center 180', '↑ 2인 위')}${node('pair:center', '◎ 2인 사이', 'target-core ')}${node('below:pair:center 180', '↓ 2인 아래')}
+        ${node('left:pair:center 180', '← 2인 좌측')}${node('pair:left', '◀ 왼쪽 헌터')}${node('pair:right', '오른쪽 헌터 ▶')}${node('right:pair:center 180', '2인 우측 →')}</div><small>패턴의 인접 2인 타겟 규칙이 1·2 / 2·3 / 3·4 중 한 쌍을 정하면, 이 프리셋도 같은 쌍을 따라감</small></section>
         <section><h3>🗺️ 전장 위의 위치를 직접 찍기</h3><div class="arena-anchor-grid">
         ${node('offscreen:top', '화면 밖 ↑', 'top-out ')}${node('offscreen:left', '밖 ←', 'left-out ')}${node('home', '🏠 본위치', 'home ')}${node('arena:center-lower', '● 중앙', 'arena-center ')}${node('', '이동 없음', 'previous ')}${node('offscreen:right', '밖 →', 'right-out ')}
         ${node('hunter:0', 'H1', 'h1 ')}${node('between:0,1', '사이', 'b12 ')}${node('hunter:1', 'H2', 'h2 ')}${node('between:1,2', '사이', 'b23 ')}${node('hunter:2', 'H3', 'h3 ')}${node('between:2,3', '사이', 'b34 ')}${node('hunter:3', 'H4', 'h4 ')}</div></section></div>
@@ -921,10 +1283,6 @@
             inputs.appendChild(field);
         }
         renderInspector(pattern);
-        const judgmentHost = document.createElement('section');
-        judgmentHost.className = 'judgment-manager';
-        host.appendChild(judgmentHost);
-        renderJudgmentManager();
         updateHistoryButtons();
     }
 
@@ -938,11 +1296,22 @@
         }
         host.innerHTML = `<header><div><b>판정 관리</b><small>같은 그룹은 한 시점의 피해·포효·지진·풍압으로 실행됨</small></div><button type="button" class="add-judgment">+ 판정 추가</button></header><div class="judgment-list"></div>`;
         const kindLabels = { damage: '💥 피해', roar: '🗣️ 포효', tremor: '🌋 지진', wind: '💨 풍압' };
+        const reactionLabels = { weak: '피격 [소] · 엉덩방아', strong: '피격 [대] · 날려버리기' };
+        const elementLabels = { none: '무속', fire: '화', water: '수', thunder: '뢰', ice: '빙', dragon: '용',
+            paralysis: '마비', sleep: '수면', blast: '폭파' };
         const targetLabels = { primary: '주 헌터', left: '주 헌터 좌측', right: '주 헌터 우측',
             pair: '2인 동시', 'pair-left': '2인 좌', 'pair-right': '2인 우',
             'primary-adjacent': '주 헌터+좌우', all: '전체' };
         const list = host.querySelector('.judgment-list');
         for (const { beat, judgment } of entries) {
+            const group = String(judgment.group || judgment.id || 'impact');
+            const audioSlot = pattern.slots.find(item => item.judgmentGroup === group) || null;
+            const audioFiles = routeFiles(audioSlot?.effective);
+            const audioName = audioFiles.length
+                ? `${audioFiles.length > 1 ? `랜덤 ${audioFiles.length}개 · ` : ''}${fileName(audioFiles[0])}`
+                : '미배정 · 우측 음원을 여기로 드래그';
+            const audioWhen = audioSlot?.when || audioSlot?.effective?.when || 'hit';
+            const whenLabel = { hit: '적중 시', contact: '접촉 시', always: '항상', miss: '비적중 시' }[audioWhen] || '적중 시';
             const row = document.createElement('article');
             row.className = `judgment-row${judgment.id === app.selectedJudgmentId ? ' selected' : ''}`;
             row.innerHTML = `<button type="button" class="select-judgment">${kindLabels[judgment.kind]?.split(' ')[0] || '💥'}</button>
@@ -952,11 +1321,15 @@
                 <label>${judgment.kind === 'damage' ? '데미지 (%)' : '강도'}${judgment.kind === 'damage'
                     ? `<input data-field="damagePercent" type="number" min="0" max="1000" step="1" value="${judgment.damagePercent ?? Math.round(Number(pattern.damageRatio || 0) * 100)}">`
                     : `<select data-field="size"><option value="small"${judgment.size === 'small' ? ' selected' : ''}>소</option><option value="large"${judgment.size !== 'small' ? ' selected' : ''}>대</option></select>`}</label>
-                <span>${esc(beat.label || beat.id)} · ${beat.startTicks + Number(judgment.offsetTicks || 0)}틱</span><button type="button" class="remove-judgment">×</button>`;
+                ${judgment.kind === 'damage' ? `<label>피격 종류<select data-field="hitReactionKind">${Object.entries(reactionLabels).map(([value, label]) => `<option value="${value}"${(judgment.hitReactionKind || 'strong') === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label><label>속성<select data-field="element">${Object.entries(elementLabels).map(([value, label]) => `<option value="${value}"${(judgment.element || 'none') === value ? ' selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}
+                <span>${esc(beat.label || beat.id)} · ${beat.startTicks + Number(judgment.offsetTicks || 0)}틱</span>
+                <button type="button" class="judgment-audio-route${audioFiles.length ? ' assigned' : ''}"${audioSlot ? '' : ' disabled'} title="판정 사운드 배정 열기"><b>🎵 판정 음원</b><small>${esc(whenLabel)} · ${esc(audioName)}</small></button><button type="button" class="remove-judgment">×</button>`;
             row.querySelector('.select-judgment').onclick = () => {
-                app.selectedJudgmentId = judgment.id;
-                app.session.seek(beat.startTicks + Number(judgment.offsetTicks || 0));
-                renderPatternDesk();
+                selectJudgmentEntry(beat, judgment);
+            };
+            row.querySelector('.judgment-audio-route').onclick = () => {
+                if (!audioSlot) return;
+                selectJudgmentEntry(beat, judgment, { scrollAudio: true });
             };
             row.querySelector('.remove-judgment').onclick = () => {
                 app.session.removeJudgment(judgment.id); app.selectedJudgmentId = ''; renderPatternDesk();
@@ -987,19 +1360,52 @@
         renderSelectionOnly();
     }
 
+    function rotationEditorModel(snapshot, beatId, value = {}) {
+        const beats = snapshot?.timeline?.beats || [];
+        let previous = 0;
+        for (const beat of beats) {
+            if (beat.id === beatId) break;
+            const authored = snapshot?.draft?.[beat.id] || {};
+            previous = HuntRotationContract.resolve(authored, previous).final;
+        }
+        return { ...HuntRotationContract.resolve(value, previous),
+            keepRotation: value.keepRotation !== false };
+    }
+
     function renderInspector(pattern) {
         const host = $('.transform-editor'); if (!host) return;
         const snapshot = app.session.snapshot(), beatId = snapshot.selection.beatId,
             value = snapshot.draft[beatId] || { ticks: 1 };
+        const poseChoices = [['idle', '기본 · 변형 없음'], ['brace', '버팀 · 세로 압축'],
+            ['crouch', '준비 · 세로 압축 / 아래 이동'], ['stretch', '늘림 · 세로 확장'],
+            ['stretch-soft', '약한 늘림 · 세로 확장'], ['stretch-strong', '강한 늘림 · 세로 확장'],
+            ['land', '착지 · 세로 압축'], ['settle', '반동 회수 · 세로 압축'],
+            ['tail-whip', '꼬리 휘두름'], ['tail-slam', '꼬리 내려찍기'],
+            ['spin-left', '회전 포즈 · 좌'], ['spin-right', '회전 포즈 · 우']];
         host.innerHTML = `<div class="transform-head"><b>이동 · 회전 · 이미지 변형</b><select class="beat-select">${snapshot.timeline.beats.map(beat => `<option value="${esc(beat.id)}"${beat.id === beatId ? ' selected' : ''}>${esc(beat.label || beat.id)}</option>`).join('')}</select></div><div class="anchor-editor">${anchorEditor(value)}<section class="anchor-field face-field"><b>이미지 좌우 방향</b><div class="anchor-map face-map" data-anchor-key="face">${[['', '유지'], ['left', '←'], ['right', '→'], ['target', '대상 쪽 좌우']].map(([direction, label]) => `<button type="button" data-anchor="${direction}" class="${String(value.face || '').replace('toward-target', 'target') === direction ? 'active' : ''}">${label}</button>`).join('')}</div><label class="body-aim-toggle"><input type="checkbox"${value.aimBodyAt ? ' checked' : ''}>대상까지 몸체 각도 맞춤</label></section></div><div class="transform-grid">
-            <label>X 이동<input data-key="offsetX" type="number" value="${value.offsetX ?? 0}"></label><label>Y 이동<input data-key="offsetY" type="number" value="${value.offsetY ?? 0}"></label>
-            <label>투명도<input data-key="opacity" type="number" min="0" max="1" step=".05" value="${value.opacity ?? 1}"></label><label>회전°<input data-key="rotation" type="number" value="${value.rotation ?? ''}"></label>
-            <label>추가 회전°<input data-key="rotateBy" type="number" value="${value.rotateBy ?? ''}"></label><label>가로 배율<input data-key="scaleX" type="number" min=".05" step=".05" value="${value.scaleX ?? 1}"></label>
-            <label>세로 배율<input data-key="scaleY" type="number" min=".05" step=".05" value="${value.scaleY ?? 1}"></label><label>회전축<input data-key="origin" value="${esc(value.origin || '50% 50%')}"></label>
+            <label>포즈<select data-key="pose">${options(poseChoices, value.pose || 'idle')}</select></label><label>X 이동<input data-key="offsetX" type="number" value="${value.offsetX ?? 0}"></label><label>Y 이동<input data-key="offsetY" type="number" value="${value.offsetY ?? 0}"></label>
+            <label>투명도<input data-key="opacity" type="number" min="0" max="1" step=".05" value="${value.opacity ?? 1}"></label><section class="rotation-controls"><b>회전</b><div><button type="button" data-rotation-direction="counterclockwise" class="${rotationEditorModel(snapshot, beatId, value).direction === 'counterclockwise' ? 'active' : ''}">반시계</button><button type="button" data-rotation-direction="clockwise" class="${rotationEditorModel(snapshot, beatId, value).direction === 'clockwise' ? 'active' : ''}">시계</button></div><label>회전각°<input class="rotation-degrees" type="number" min="0" value="${rotationEditorModel(snapshot, beatId, value).degrees}"></label><label>최종각°<input class="rotation-final" type="number" value="${rotationEditorModel(snapshot, beatId, value).final}"></label><label class="rotation-reset-mode">복귀 회전<select data-key="rotationResetMode">${options([['auto','자동 · 복귀는 현재각 유지'],['preserve','누적각 유지'],['snap-end','복귀 끝에 즉시 정상화'],['animate','회전하며 정상화']], rotationEditorModel(snapshot, beatId, value).resetMode)}</select></label></section>
+            <label>가로 배율<input data-key="scaleX" type="number" min=".05" step=".05" value="${value.scaleX ?? 1}"></label>
+            <label>세로 배율<input data-key="scaleY" type="number" min=".05" step=".05" value="${value.scaleY ?? 1}"></label><label>회전축<input data-key="origin" value="${esc(value.origin || 'part:torso')}"></label>
             <label>X 기울기°<input data-key="skewX" type="number" value="${value.skewX ?? 0}"></label><label>Y 기울기°<input data-key="skewY" type="number" value="${value.skewY ?? 0}"></label>
+            <section class="wide rotation-origin-picker"><b>회전 · 변형 축</b><div>${[['part:torso','몸통 중심'],['part:feet','발 중심'],['part:head','머리'],['part:tail','꼬리']].map(([origin,label]) => `<button type="button" data-origin="${origin}" class="${value.origin === origin || (!value.origin && origin === 'part:torso') ? 'active' : ''}">${label}</button>`).join('')}</div><small>회전·배율·기울기가 같은 부위 축을 공유함</small></section>
             <label class="wide">이동 속도<select data-key="moveEasing">${options(easings, value.moveEasing || 'smooth')}</select></label><label class="wide">회전 속도<select data-key="rotationEasing">${options(easings, value.rotationEasing || 'smooth')}</select></label>
             <label class="wide stride-toggle"><span>씰룩씰룩 좌우 반전</span><input class="stride-toggle-input" type="checkbox"${Number(value.strideFlipTicks) > 0 ? ' checked' : ''}></label>
-            <label class="stride-period">반전 주기 (틱)<input data-key="strideFlipTicks" type="number" min="1" max="60" value="${Number(value.strideFlipTicks) > 0 ? Number(value.strideFlipTicks) : 3}"${Number(value.strideFlipTicks) > 0 ? '' : ' disabled'}></label></div>`;
+            <label class="stride-period">반전 주기 (틱)<input data-key="strideFlipTicks" type="number" min="1" max="60" value="${Number(value.strideFlipTicks) > 0 ? Number(value.strideFlipTicks) : 3}"${Number(value.strideFlipTicks) > 0 ? '' : ' disabled'}></label>
+            <label class="wide projectile-recoil-toggle"><span>발사 반동</span><input type="checkbox"${value.projectileRecoil ? ' checked' : ''}></label></div>`;
+        // The destination grid is intentionally collapsible: it contains every
+        // placement preset, but it should not bury the current BEAT's timing
+        // and audio controls during ordinary review work.
+        const anchorEditorNode = host.querySelector('.anchor-editor');
+        const anchorDisclosure = document.createElement('details');
+        anchorDisclosure.className = 'anchor-disclosure';
+        // Placement, target and facing are first-class authored data.  They
+        // must not look like missing controls on an untouched editor session.
+        anchorDisclosure.open = app.anchorEditorExpanded !== false;
+        anchorDisclosure.innerHTML = '<summary><b>배치 · 방향</b><span>도착 위치 · 대상 · 이미지 좌우</span></summary>';
+        anchorEditorNode.before(anchorDisclosure);
+        anchorDisclosure.append(anchorEditorNode);
+        anchorDisclosure.ontoggle = () => { app.anchorEditorExpanded = anchorDisclosure.open; };
         host.querySelector('.beat-select').onchange = event => selectPart({ beatId: event.target.value });
         host.querySelectorAll('.anchor-map button').forEach(button => button.onclick = () => {
             const key = button.closest('.anchor-map').dataset.anchorKey;
@@ -1010,6 +1416,10 @@
             app.session.updateBeat(beatId, { aimBodyAt: event.target.checked ? 'target' : null });
             renderPatternDesk(); previewBeatDestination(beatId);
         };
+        host.querySelectorAll('[data-origin]').forEach(button => button.onclick = () => {
+            app.session.updateBeat(beatId, { origin: button.dataset.origin });
+            renderPatternDesk(); sendPreview({ scrub: true }); seekPreview(app.session.scrub.tick);
+        });
         const customAnchor = host.querySelector('[data-anchor-custom]');
         const applyCustomAnchor = () => {
             app.session.updateBeat(beatId, { [customAnchor.dataset.anchorCustom]: customAnchor.value || null });
@@ -1027,9 +1437,52 @@
             });
             renderPatternDesk(); sendPreview({ scrub: true }); seekPreview(app.session.scrub.tick);
         };
+        host.querySelector('.projectile-recoil-toggle input').onchange = event => {
+            app.session.updateBeat(beatId, { projectileRecoil: event.target.checked });
+            renderPatternDesk(); sendPreview({ scrub: true }); seekPreview(app.session.scrub.tick);
+        };
+        const applyRotationDegrees = (direction, rawDegrees) => {
+            const current = rotationEditorModel(app.session.snapshot(), beatId, app.session.snapshot().draft[beatId]);
+            const degrees = Math.max(0, Number(rawDegrees) || 0);
+            const sign = direction === 'counterclockwise' ? -1 : 1;
+            app.session.updateBeat(beatId, {
+                rotationDirection: direction, rotationDegrees: degrees,
+                rotation: null, rotateBy: null,
+                rotateByFacing: null, keepRotation: null
+            });
+            // Direction is authored as a signed BEAT value.  Scrub the shared
+            // renderer to this BEAT's terminal frame instead of starting a
+            // separate timer-driven preview; full playback then keeps the
+            // same clock and cannot be paused/replaced by this edit path.
+            renderPatternDesk(); previewBeatDestination(beatId);
+        };
+        host.querySelectorAll('[data-rotation-direction]').forEach(button => button.onclick = () => {
+            applyRotationDegrees(button.dataset.rotationDirection, host.querySelector('.rotation-degrees').value);
+        });
+        host.querySelector('.rotation-degrees').onchange = event => {
+            const current = rotationEditorModel(app.session.snapshot(), beatId, app.session.snapshot().draft[beatId]);
+            applyRotationDegrees(current.direction, event.target.value);
+        };
+        host.querySelector('.rotation-final').onchange = event => {
+            const current = rotationEditorModel(app.session.snapshot(), beatId, app.session.snapshot().draft[beatId]);
+            const rawFinal = Number(event.target.value) || 0;
+            const final = current.resetMode === 'auto'
+                ? rawFinal + 360 * Math.round((current.previous - rawFinal) / 360)
+                : rawFinal;
+            const delta = final - current.previous;
+            app.session.updateBeat(beatId, {
+                rotation: null, rotationDegrees: Math.abs(delta),
+                rotationDirection: delta < 0 ? 'counterclockwise' : 'clockwise',
+                rotateBy: null, rotateByFacing: null, keepRotation: null
+            });
+            renderPatternDesk(); previewBeatDestination(beatId);
+        };
         host.querySelectorAll('[data-key]').forEach(input => input.onchange = () => {
-            const key = input.dataset.key, textKeys = new Set(['at', 'to', 'origin', 'moveEasing', 'rotationEasing']);
+            const key = input.dataset.key, textKeys = new Set([
+                'at', 'to', 'origin', 'moveEasing', 'rotationEasing', 'rotationResetMode'
+            ]);
             const patch = { [key]: textKeys.has(key) ? input.value : input.value === '' ? null : Number(input.value) };
+            if (key === 'rotationResetMode') patch.keepRotation = null;
             app.session.updateBeat(beatId, patch); renderPatternDesk(); sendPreview({ scrub: true }); seekPreview(app.session.scrub.tick);
         });
     }
@@ -1047,13 +1500,32 @@
         button.disabled = true; button.textContent = '검증 중…';
         try {
             const result = await api('/api/hunt-pattern-motion', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, beats,
+                body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id,
+                    candidate: app.candidateId === app.monster ? app.candidateId : '', beats,
+                    graphHash: pattern.beatGraphHash || '',
                     expectedRevision: app.revisions.motion }) });
             assertGeneratedMotion(result);
-            const reloaded = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}`);
+            const candidateQuery = app.candidateId && app.candidateId === app.monster
+                ? `&candidate=${encodeURIComponent(app.candidateId)}` : '';
+            const reloaded = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}${candidateQuery}`);
             const persisted = reloaded.patterns.find(item => item.id === pattern.id);
             const verify = MonsterAudioReviewState.createMotionDraft(persisted, persisted.timeline);
-            if (!MonsterAudioReviewState.motionValuesEqual(beats, verify)) throw new Error('저장 후 재로드 검증 실패');
+            // The server owns persistence normalization and returns the exact
+            // representation it atomically reloaded from disk. Compare that
+            // canonical value with the catalog reload; comparing the raw UI
+            // draft here produced false failures after canonical cleanup (for
+            // example when changing rotationResetMode).
+            if (result.graphHash && persisted?.beatGraphHash) {
+                if (String(result.graphHash) !== String(persisted.beatGraphHash)) {
+                    throw new Error('저장 후 재로드 검증 실패 · graph hash 불일치');
+                }
+            } else {
+                const savedBeats = result.beats || beats;
+                const comparison = MonsterAudioReviewState.compareMotionValues(savedBeats, verify);
+                if (!comparison.equal) {
+                throw new Error(`저장 후 재로드 검증 실패 · 불일치: ${comparison.differences.join(', ')}`);
+                }
+            }
             app.patterns = reloaded.patterns; app.revisions = reloaded.revisions || app.revisions;
             app.selectedPatternId = pattern.id; app.session.load(persisted);
             renderPatternList(); renderPatternDesk(); button.textContent = '저장';
@@ -1078,6 +1550,13 @@
 
     function selectPattern(id, autoplay) {
         const pattern = app.patterns.find(item => item.id === id); if (!pattern) return;
+        // Playing the already-selected pattern must execute the live editor
+        // draft. Reloading here silently discarded unsaved transform changes,
+        // so both rotation buttons replayed the same persisted direction.
+        if (app.selectedPatternId === id && app.session.snapshot().timeline.beats.length) {
+            if (autoplay) playCurrentPreview();
+            return;
+        }
         app.selectedPatternId = id; app.session.load(pattern); app.selectedSlot = app.session.selection.slotId;
         renderPatternList(); renderPatternDesk(); refreshSourceSelection(); app.renderScenario?.();
         if (autoplay) playCurrentPreview();
@@ -1090,7 +1569,9 @@
     }
 
     async function loadPatterns(keepPattern = '', keepSlot = '') {
-        const result = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}`);
+        const candidateQuery = app.candidateId && app.candidateId === app.monster
+            ? `&candidate=${encodeURIComponent(app.candidateId)}` : '';
+        const result = await api(`/api/hunt-patterns?monster=${encodeURIComponent(app.monster)}${candidateQuery}`);
         app.huntId = result.huntId;
         const commonBreakRoute = globalThis.HUNT_MONSTER_PATTERN_AUDIO_ROUTES
             ?.common?.['__visual.part-break']?.['beat:se'] || null;
@@ -1110,7 +1591,7 @@
     }
 
     async function saveRoute(payload) {
-        const result = await api('/api/hunt-pattern-route', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, expectedRevision: app.revisions.audio }) });
+        const result = await api('/api/hunt-pattern-route', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, candidate: app.candidateId === app.monster ? app.candidateId : '', expectedRevision: app.revisions.audio }) });
         assertGeneratedAudioRoute(result);
         app.revisions.audio = result.sourceRevision || app.revisions.audio;
         const pattern = app.patterns.find(item => item.id === payload.patternId);
@@ -1120,9 +1601,12 @@
             const assigned = files.length ? {
                 label: payload.label || null,
                 ...(result.mode === 'random' ? { mode: 'random' } : {}),
+                ...(result.when ? { when: result.when } : {}),
                 layers: files.map(file => [file, Number(payload.gain) || .7, Number(payload.delay) || 0])
-            } : (result.disabled ? { disabled: true } : null);
+            } : (result.disabled ? { disabled: true, ...(result.when ? { when: result.when } : {}) }
+                : (result.when ? { when: result.when } : null));
             slot.override = assigned;
+            if (result.when) slot.when = result.when;
             slot.muted = assigned?.disabled === true;
             slot.assigned = slot.muted ? null : (assigned || slot.current || null);
             slot.effective = slot.assigned;
@@ -1140,7 +1624,7 @@
     }
 
     function assertGeneratedMotion(result) {
-        if (!result.generated) throw new Error('저장 검증 실패: 런타임 모션 모듈 미생성');
+        if (!result.generated && !result.candidateSaved) throw new Error('저장 검증 실패: 런타임 모션 모듈 미생성');
     }
 
     function assertGeneratedAudioRoute(result) {
@@ -1153,7 +1637,15 @@
 
     async function assignSource(source) {
         const pattern = selectedPattern(), slot = selectedSlot(); if (!pattern || !slot || !source.path) return;
-        await saveRoute({ huntId: app.huntId, patternId: pattern.id, slot: slot.slot, files: [source.path] });
+        await assignSourceToSlot(source, pattern.id, slot.slot);
+    }
+
+    async function assignSourceToSlot(source, patternId, slotId) {
+        if (!source?.path || !patternId || !slotId) return;
+        const slot = app.patterns.find(pattern => pattern.id === patternId)?.slots
+            .find(item => item.slot === slotId);
+        await saveRoute({ huntId: app.huntId, patternId, slot: slotId, files: [source.path],
+            ...(slot?.judgmentGroup ? { when: slot.when || slot.effective?.when || 'hit' } : {}) });
     }
 
     async function assignSourceGroup(group, sources) {
@@ -1171,19 +1663,44 @@
             slot: slot.slot,
             files: available.map(source => source.path),
             mode: available.length > 1 ? 'random' : null,
+            ...(slot.judgmentGroup ? { when: slot.when || slot.effective?.when || 'hit' } : {}),
             label: available.length > 1 ? `${group.bank} · EVENT ${group.eventId}` : null
         });
     }
 
     function installRouteDrag(row, pattern, slot) {
-        row.querySelectorAll('[data-route-file]').forEach(file => file.ondragstart = event => event.dataTransfer.setData('application/json', JSON.stringify({ patternId: pattern.id, fromSlot: slot.slot, file: file.dataset.routeFile })));
-        row.ondragover = event => event.preventDefault();
+        row.querySelectorAll('[data-route-file]').forEach(file => {
+            file.ondragstart = event => beginRouteDrag(event, {
+                kind: 'route-file', patternId: pattern.id, fromSlot: slot.slot, file: file.dataset.routeFile
+            }, 'move');
+            file.ondragend = finishRouteDrag;
+        });
+        row.ondragover = event => {
+            event.preventDefault();
+            if (event.dataTransfer) event.dataTransfer.dropEffect = app.dragPayload?.kind === 'route-file' ? 'move' : 'copy';
+            row.classList.add('drag-over');
+        };
+        row.ondragleave = event => {
+            if (!row.contains(event.relatedTarget)) row.classList.remove('drag-over');
+        };
         row.ondrop = async event => {
-            event.preventDefault(); let payload; try { payload = JSON.parse(event.dataTransfer.getData('application/json')); } catch { return; }
-            if (!payload || payload.fromSlot === slot.slot) return;
-            await api('/api/hunt-pattern-route-move', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, fromSlot: payload.fromSlot, toSlot: slot.slot, file: payload.file, expectedRevision: app.revisions.audio }) });
-            await loadPatterns(pattern.id, slot.slot);
-            renderPatternList(); renderPatternDesk(); refreshSourceSelection();
+            event.preventDefault(); row.classList.remove('drag-over');
+            const payload = droppedRoutePayload(event);
+            try {
+                if (payload?.kind === 'source') {
+                    await assignSourceToSlot({ path: payload.path }, pattern.id, slot.slot);
+                    return;
+                }
+                if (!payload || payload.kind !== 'route-file' || payload.fromSlot === slot.slot) return;
+                if (payload.patternId !== pattern.id) throw new Error('다른 패턴의 배정 음원은 복사 버튼으로 복사한 뒤 대상 순간에 배정해주세요.');
+                await api('/api/hunt-pattern-route-move', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ huntId: app.huntId, patternId: pattern.id, candidate: app.candidateId === app.monster ? app.candidateId : '', fromSlot: payload.fromSlot, toSlot: slot.slot, file: payload.file, expectedRevision: app.revisions.audio }) });
+                await loadPatterns(pattern.id, slot.slot);
+                renderPatternList(); renderPatternDesk(); refreshSourceSelection();
+            } catch (error) {
+                alert(error.message || '음원 드래그 배정에 실패했습니다.');
+            } finally {
+                finishRouteDrag();
+            }
         };
     }
 
@@ -1322,10 +1839,14 @@
         root.textContent = '';
         const banner = document.createElement('div'); banner.className = 'selection-banner'; banner.innerHTML = slot ? `배정 대상 · <b>${esc(pattern.name)} / ${esc(slot.label)}</b>` : '타임라인에서 사운드 순간을 선택하세요.'; root.appendChild(banner);
         let matchedGroups = 0, renderedGroups = 0;
-        const sourcePool = filter === 'common' ? app.commonGroups : app.groups;
+        const commonFilter = filter === 'common' || filter === 'common-part-break' || filter === 'common-items';
+        const sourcePool = commonFilter ? app.commonGroups : app.groups;
+        app.autoFavoriteSourceGroups = AUTO_FAVORITE_MAPPED_MONSTERS.has(app.huntId)
+            ? new Set(sourcePool.filter(group => group.sources.some(source => linkedPaths.has(source.path))).map(sourceGroupKey))
+            : new Set();
         const orderedGroups = sourcePool.map((group, order) => ({ group, order })).sort((left, right) => {
-            const favoriteDelta = Number(app.favoriteSourceGroups.has(sourceGroupKey(right.group)))
-                - Number(app.favoriteSourceGroups.has(sourceGroupKey(left.group)));
+            const favoriteDelta = Number(sourceGroupIsFavorite(sourceGroupKey(right.group)))
+                - Number(sourceGroupIsFavorite(sourceGroupKey(left.group)));
             if (favoriteDelta) return favoriteDelta;
             if (!app.linkedSourcesFirst) return left.order - right.order;
             const leftLinked = left.group.sources.some(source => linkedPaths.has(source.path));
@@ -1339,7 +1860,12 @@
             const groupHidden = app.hiddenSourceGroups.has(groupKey);
             if (groupHidden && !app.showHiddenSources && !containsFocus) continue;
             if (!containsFocus && query && !haystack.includes(query)) continue;
-            if (!containsFocus && (filter === 'voice' && group.sourceLayer !== 'voice' || filter === 'sound-effect' && group.sourceLayer !== 'sound-effect' || filter === 'reviewed' && !reviewed || filter === 'unreviewed' && reviewed)) continue;
+            if (!containsFocus && (filter === 'common-part-break' && group.commonCategory !== 'part-break'
+                || filter === 'common-items' && !String(group.commonCategory || '').startsWith('items-')
+                || filter === 'voice' && group.sourceLayer !== 'voice'
+                || filter === 'sound-effect' && group.sourceLayer !== 'sound-effect'
+                || filter === 'reviewed' && !reviewed
+                || filter === 'unreviewed' && reviewed)) continue;
             matchedGroups += 1;
             const containsCurrent = group.sources.some(source => current.has(source.path));
             if (renderedGroups >= app.sourceRenderLimit && !containsCurrent && !containsFocus) continue;
@@ -1347,9 +1873,11 @@
             const details = document.createElement('details'); details.className = 'event-group';
             details.dataset.groupKey = groupKey;
             details.classList.toggle('hidden-source-group', groupHidden);
-            details.classList.toggle('favorite-source-group', app.favoriteSourceGroups.has(groupKey));
+            const autoFavorite = app.autoFavoriteSourceGroups.has(groupKey);
+            const favorite = sourceGroupIsFavorite(groupKey);
+            details.classList.toggle('favorite-source-group', favorite);
             details.open = containsFocus || openGroups.has(details.dataset.groupKey);
-            details.innerHTML = `<summary><span class="group-audio-actions"><button class="play-group" title="그룹 재생">▶</button><button class="hide-group" title="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}" aria-label="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}">${groupHidden ? '🙈' : '👁'}</button><button class="favorite-group${app.favoriteSourceGroups.has(groupKey) ? ' active' : ''}" title="즐겨찾기" aria-label="즐겨찾기" aria-pressed="${app.favoriteSourceGroups.has(groupKey)}">★</button></span><span class="event-title"><strong>${esc(group.bank)} · EVENT ${esc(group.eventId)}</strong><small>${group.sources.length} SOURCES${group.groupTags.length ? ` · ${esc(group.groupTags.join(', '))}` : ''}</small></span><span class="event-badges"><span class="badge">${esc(group.sourceLayer || '')}</span></span></summary><div class="event-classify"><button data-preset="smallFlinch">소경직</button><button data-preset="knockdown">대경직</button><button data-preset="death">죽음</button><input placeholder="직접 태그"><button data-preset="custom">저장</button><button data-preset="clear">지우기</button><span class="save-state"></span></div><div class="sources"></div>`;
+            details.innerHTML = `<summary><span class="group-audio-actions"><button class="play-group" title="그룹 재생">▶</button><button class="hide-group" title="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}" aria-label="${groupHidden ? '그룹 숨김 해제' : '그룹 숨기기'}">${groupHidden ? '🙈' : '👁'}</button><button class="favorite-group${favorite ? ' active' : ''}" title="${autoFavorite ? '기존 맵핑 자동 즐겨찾기' : '즐겨찾기'}" aria-label="${autoFavorite ? '기존 맵핑 자동 즐겨찾기' : '즐겨찾기'}" aria-pressed="${favorite}">★</button></span><span class="event-title"><strong>${esc(group.bank)} · EVENT ${esc(group.eventId)}</strong><small>${group.sources.length} SOURCES${group.groupTags.length ? ` · ${esc(group.groupTags.join(', '))}` : ''}</small></span><span class="event-badges"><span class="badge">${esc(group.categoryLabel || group.sourceLayer || '')}</span></span></summary><div class="event-classify"><button data-preset="smallFlinch">소경직</button><button data-preset="knockdown">대경직</button><button data-preset="death">죽음</button><input placeholder="직접 태그"><button data-preset="custom">저장</button><button data-preset="clear">지우기</button><span class="save-state"></span></div><div class="sources"></div>`;
             details.querySelector('.play-group').onclick = event => { event.preventDefault(); const available = group.sources.filter(source => source.path); if (available.length) playSource(available[0], event.currentTarget); };
             details.querySelector('.hide-group').onclick = event => { event.preventDefault(); event.stopPropagation(); toggleSourceGroupHidden(groupKey); };
             details.querySelector('.favorite-group').onclick = event => { event.preventDefault(); event.stopPropagation(); toggleSourceGroupFavorite(groupKey); };
@@ -1374,7 +1902,14 @@
                 if (hidden && !app.showHiddenSources && !temporarilyVisible) continue;
                 const mappings = mappingIndex.get(source.path) || [];
                 const row = document.createElement('div'); row.className = `source${current.has(source.path) ? ' current-slot-source' : ''}${source.path ? '' : ' no-file'}${hidden ? ' hidden-source' : ''}`;
+                row.draggable = Boolean(source.path);
                 row.innerHTML = `<button class="source-eye"${source.path ? '' : ' disabled'} title="${hidden ? '숨김 해제' : '이 음원 숨기기'}" aria-label="${hidden ? '숨김 해제' : '이 음원 숨기기'}">${hidden ? '🙈' : '👁'}</button><button class="play"${source.path ? '' : ' disabled'}>▶</button><span class="source-meta"><strong>ID ${esc(source.sourceId)}${source.stream != null ? ` · STREAM ${esc(source.stream)}` : ''}</strong><small>${esc(source.path ? fileName(source.path) : '디코딩 파일 없음')}</small></span><span class="source-row-actions"><span class="source-map-links"></span><button class="slot-pick"${source.path && slot ? '' : ' disabled'}>${current.has(source.path) ? '현재' : '배정'}</button></span>`;
+                row.ondragstart = event => {
+                    if (!source.path || event.target.closest('button')) { event.preventDefault(); return; }
+                    beginRouteDrag(event, { kind: 'source', path: source.path }, 'copy');
+                    row.classList.add('dragging-source');
+                };
+                row.ondragend = () => { row.classList.remove('dragging-source'); finishRouteDrag(); };
                 row.querySelector('.source-eye').onclick = () => toggleSourceHidden(source.path);
                 row.querySelector('.play').onclick = event => playSource(source, event.currentTarget);
                 renderSourceMappingButtons(row.querySelector('.source-map-links'), mappings);
@@ -1473,8 +2008,9 @@
         panel.querySelector('.primary-options').onclick = event => { const button = event.target.closest('button'); if (!button) return; app.session.setScenario({ primaryTargetIndex: Number(button.dataset.index) }); render(); syncPreviewSettings(); };
         panel.querySelector('.forced-options').onclick = event => { const button = event.target.closest('button'); if (!button) return; const values = new Set(app.session.scenario.forcedTargetIndices); values.has(Number(button.dataset.index)) ? values.delete(Number(button.dataset.index)) : values.add(Number(button.dataset.index)); app.session.setScenario({ forcedTargetIndices: [...values] }); render(); syncPreviewSettings(); };
         panel.querySelector('.impact-options').onclick = event => { const button = event.target.closest('button'), row = event.target.closest('.impact-option'); if (!button || !row) return; const impactIndex = Number(row.dataset.impact), target = Number(button.dataset.index), entries = app.session.scenario.forcedImpactTargets.map(entry => ({ ...entry, targetIndices: [...entry.targetIndices] })), entry = entries.find(item => item.impactIndex === impactIndex) || { impactIndex, targetIndices: [] }, values = new Set(entry.targetIndices); values.has(target) ? values.delete(target) : values.add(target); entry.targetIndices = [...values]; app.session.setScenario({ forcedImpactTargets: [...entries.filter(item => item.impactIndex !== impactIndex), entry] }); render(); syncPreviewSettings(); };
-        $('#previewTarget').onchange = syncPreviewSettings;
+        $('#previewTarget').onchange = () => { app.previewRandomPairTarget = ''; syncPreviewSettings(); };
         $('#previewState').onchange = () => { app.session.setScenario({ monsterState: $('#previewState').value }); syncPreviewSettings(); };
+        $('#anatomyToggle').classList.toggle('active', app.anatomy);
         $('#anatomyToggle').onclick = () => { app.anatomy = !app.anatomy; $('#anatomyToggle').classList.toggle('active', app.anatomy); bridge.send('bubblechat:pattern-anatomy', { enabled: app.anatomy }); };
         app.renderScenario = render; render();
     }
@@ -1493,7 +2029,15 @@
             const beatId = message.beatId; if (!app.session.draft[beatId]) return;
             if (message.commit) { app.gizmoEditingBeat = ''; renderPatternDesk(); return; }
             const first = app.gizmoEditingBeat !== beatId; app.gizmoEditingBeat = beatId;
-            app.session.updateBeat(beatId, message.patch || {}, { record: first }); renderTimelineVisualOnly(); renderInspector(selectedPattern()); return;
+            const patch = { ...(message.patch || {}) };
+            // A freehand gizmo angle is an absolute terminal angle. Clear the
+            // directed representation so the same beat cannot have two
+            // competing rotation owners.
+            if (patch.rotation !== undefined) {
+                patch.rotationDirection = null;
+                patch.rotationDegrees = null;
+            }
+            app.session.updateBeat(beatId, patch, { record: first }); renderTimelineVisualOnly(); renderInspector(selectedPattern()); return;
         }
         if (message.type === 'bubblechat:monster-anatomy-edit') {
             const result = await api('/api/hunt-monster-anatomy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ monsterId: app.huntId, geometry: message.geometry, expectedRevision: app.revisions.anatomy }) });
@@ -1517,10 +2061,24 @@
         if (metadata.apiVersion !== 3 || metadata.buildId !== 'unified-editor-v3') throw new Error('편집기 서버 버전 불일치 · 서버를 재시작하세요.');
         app.capabilities = metadata.capabilities || []; app.buildId = metadata.buildId; app.presets = metadata.presets || {}; app.monsters = metadata.monsters || []; app.categories = metadata.categories || [];
         installPairPreviewTargets();
-        previewFrame().src = metadata.previewPath || '/preview/?embed=1';
+        const reviewQuery = new URLSearchParams(location.search);
+        const candidate = String(reviewQuery.get('candidate') || '').trim().toLowerCase();
+        app.candidateId = candidate;
+        const requestedPreviewMonster = String(reviewQuery.get('monster') || '').trim();
+        const previewPath = metadata.previewPath || '/preview/?embed=1';
+        const previewQuery = new URLSearchParams(previewPath.includes('?')
+            ? previewPath.slice(previewPath.indexOf('?') + 1) : '');
+        if (candidate) previewQuery.set('candidate', candidate);
+        // The iframe must receive the selected monster before its first paint.
+        // Otherwise the lab's Tigerx default flashes briefly before the editor
+        // posts the actual selection.
+        if (requestedPreviewMonster) previewQuery.set('monster', requestedPreviewMonster);
+        previewFrame().src = `${previewPath.split('?')[0]}?${previewQuery.toString()}`;
         const resizePreview = () => { const stage = $('#previewStage'); previewFrame().style.transform = `scale(${stage.clientWidth / 1920})`; };
         new ResizeObserver(resizePreview).observe($('#previewStage')); resizePreview();
-        installScenarioControls(); $('#monsterPickerToggle').onclick = () => $('#monsterPickerPanel').hidden ? openPicker() : closePicker();
+        installScenarioControls();
+        installCombatSimulationControls();
+        $('#monsterPickerToggle').onclick = () => $('#monsterPickerPanel').hidden ? openPicker() : closePicker();
         $('.undo-motion').onclick = () => { app.session.undo(); renderPatternDesk(); sendPreview({ scrub: true }); };
         $('.redo-motion').onclick = () => { app.session.redo(); renderPatternDesk(); sendPreview({ scrub: true }); };
         $('.reset-motion').onclick = resetMotion;
@@ -1530,7 +2088,7 @@
         $('#sourceSearch').oninput = () => { cancelAnimationFrame(sourceFilterFrame); sourceFilterFrame = requestAnimationFrame(() => { app.sourceRenderLimit = 80; renderSources(); }); };
         $('#scopeFilter').onchange = async () => {
             app.sourceRenderLimit = 80;
-            if ($('#scopeFilter').value === 'common' && !app.commonGroups.length) {
+            if ($('#scopeFilter').value.startsWith('common') && !app.commonGroups.length) {
                 const result = await api('/api/common-groups');
                 app.commonGroups = result.groups || [];
             }

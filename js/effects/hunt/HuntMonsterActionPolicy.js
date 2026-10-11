@@ -34,6 +34,27 @@ class HuntMonsterActionPolicy {
         return [...targetable].sort((a, b) => Number(a.index) - Number(b.index));
     }
 
+    // `pair:*` is a placement vocabulary as well as a judgment vocabulary.
+    // A visual-only pair anchor must still receive one authored adjacent lane;
+    // otherwise the anchor falls back to the union of every hit recipient and
+    // silently becomes the fixed middle (H2-H3) point.
+    static usesPairAnchor(pattern = {}) {
+        const beats = Array.isArray(pattern.motionGraph?.beats)
+            ? pattern.motionGraph.beats : (Array.isArray(pattern.motion) ? pattern.motion : []);
+        return beats.some(beat => ['to', 'at', 'face', 'align'].some(key =>
+            /(?:^|[.:])pair(?::|\b)/.test(String(beat?.[key] || ''))
+        ));
+    }
+
+    static randomAdjacentPair(targetable = [], random = Math.random) {
+        const ordered = this.orderedTargets(targetable);
+        const pairs = ordered.slice(0, -1).map((target, index) => [target, ordered[index + 1]])
+            .filter(([left, right]) => Number(right.index) - Number(left.index) === 1);
+        if (!pairs.length) return ordered.slice(0, 2);
+        return pairs[Math.min(pairs.length - 1, Math.floor(Math.max(0, Math.min(.999999,
+            Number(random()) || 0)) * pairs.length))];
+    }
+
     static judgmentTargetMode(target = '') {
         return ({
             primary: 'judgment-primary',
@@ -100,10 +121,14 @@ class HuntMonsterActionPolicy {
         return reverseChance && random() >= .5 ? lane.reverse() : lane;
     }
 
-    static adjacentLaneTargets(targetable, count, random = Math.random) {
+    static adjacentLaneTargets(targetable, count, random = Math.random, primaryIndex = null) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
-        const anchor = ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
+        const prepared = Number.isInteger(Number(primaryIndex))
+            ? ordered.find(target => Number(target.index) === Number(primaryIndex))
+            : null;
+        const anchor = prepared
+            || ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
         if (Number(count || 1) < 2) return [anchor];
         const adjacent = ordered.filter(target =>
             target.index !== anchor.index && Math.abs(Number(target.index) - Number(anchor.index)) === 1);
@@ -112,10 +137,14 @@ class HuntMonsterActionPolicy {
         return [anchor, neighbour];
     }
 
-    static primaryAdjacentBothTargets(targetable, count, random = Math.random) {
+    static primaryAdjacentBothTargets(targetable, count, random = Math.random, primaryIndex = null) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
-        const anchor = ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
+        const prepared = Number.isInteger(Number(primaryIndex))
+            ? ordered.find(target => Number(target.index) === Number(primaryIndex))
+            : null;
+        const anchor = prepared
+            || ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
         const neighbours = ordered.filter(target =>
             target.index !== anchor.index && Math.abs(Number(target.index) - Number(anchor.index)) === 1);
         return [anchor, ...neighbours].slice(0, Math.max(1, Number(count || 1)));
@@ -166,11 +195,15 @@ class HuntMonsterActionPolicy {
         });
     }
 
-    static centerLeftRightSequence(targetable, random = Math.random) {
+    static centerLeftRightSequence(targetable, random = Math.random, primaryIndex = null) {
         const ordered = this.orderedTargets(targetable);
         if (!ordered.length) return [];
-        const anchor = ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
         const byIndex = new Map(ordered.map(target => [Number(target.index), target]));
+        // The selected primary hunter is the centre shot.  Randomize only when
+        // no primary is authored so Preview and live hunts share 2 → 1 → 3
+        // rather than silently choosing a different centre for each surface.
+        const anchor = byIndex.get(Number(primaryIndex))
+            || ordered[Math.min(ordered.length - 1, Math.floor(random() * ordered.length))];
         return [
             [anchor],
             [byIndex.get(Number(anchor.index) - 1)].filter(Boolean),
@@ -199,7 +232,7 @@ class HuntMonsterActionPolicy {
         return Array.from({ length: passes }, (_, i) => pairs[(start + i) % pairs.length]);
     }
 
-    static adjacentPairSequentialPasses(targetable, random = Math.random, anchorIndex = null) {
+    static adjacentPairSequentialPasses(targetable, random = Math.random, pairTargetIndices = null) {
         const lanes = [...targetable].sort((a, b) => Number(a.index) - Number(b.index));
         if (!lanes.length) return [];
         if (lanes.length === 1) return [[lanes[0]], [lanes[0]]];
@@ -207,12 +240,14 @@ class HuntMonsterActionPolicy {
             .map((lane, index) => [lane, lanes[index + 1]])
             .filter(pair => Number(pair[1].index) - Number(pair[0].index) === 1);
         if (!pairs.length) return [[lanes[0]], [lanes[0]]];
-        const anchored = Number.isInteger(anchorIndex)
-            ? pairs.filter(pair => pair.some(lane => Number(lane.index) === Number(anchorIndex)))
-            : [];
-        const candidates = anchored.length ? anchored : pairs;
-        const pair = candidates[Math.min(candidates.length - 1,
-            Math.floor(random() * candidates.length))];
+        const forcedPair = Array.isArray(pairTargetIndices) && pairTargetIndices.length === 2
+            ? pairs.find(pair => pair.every((lane, index) =>
+                Number(lane.index) === Number(pairTargetIndices[index])))
+            : null;
+        // The pair is its own target choice. A separately rolled primary hunter
+        // must not narrow the pool (primary 4 used to force every action to 3-4).
+        const pair = forcedPair || pairs[Math.min(pairs.length - 1,
+            Math.floor(Math.max(0, Math.min(.999999, Number(random()) || 0)) * pairs.length))];
         return pair.map(target => [target]);
     }
 
@@ -289,14 +324,21 @@ class HuntMonsterActionPolicy {
         // 회전 축처럼 "지정한 헌터"가 결과를 좌우하는 모드용. defaultTargets[0]은
         // 호출부에 따라 중앙 정렬된 레인 창의 시작점일 수 있어 표적과 다르다.
         primaryIndex = null,
+        pairTargetIndices = null,
         // independent-passes에서 패스마다 다른 헌터를 뽑을지 여부.
         distinctPasses = false
     } = {}) {
         if (mode === 'adjacent-lane') {
-            return { targets: this.adjacentLaneTargets(targetable, count, random), runtime: {} };
+            return {
+                targets: this.adjacentLaneTargets(targetable, count, random, primaryIndex),
+                runtime: {}
+            };
         }
         if (mode === 'primary-adjacent-both') {
-            return { targets: this.primaryAdjacentBothTargets(targetable, count, random), runtime: {} };
+            return {
+                targets: this.primaryAdjacentBothTargets(targetable, count, random, primaryIndex),
+                runtime: {}
+            };
         }
         if (mode === 'lane') {
             return { targets: this.laneTargets(targetable, count, random, false), runtime: {} };
@@ -365,7 +407,7 @@ class HuntMonsterActionPolicy {
             };
         }
         if (mode === 'center-left-right') {
-            const passes = this.centerLeftRightSequence(targetable, random);
+            const passes = this.centerLeftRightSequence(targetable, random, primaryIndex);
             return {
                 targets: passes.flat(),
                 runtime: {
@@ -428,14 +470,15 @@ class HuntMonsterActionPolicy {
         }
         if (mode === 'adjacent-pair-sequential') {
             const passes = this.adjacentPairSequentialPasses(
-                targetable, random,
-                Number.isInteger(primaryIndex) ? primaryIndex : defaultTargets[0]?.index);
+                targetable, random, pairTargetIndices);
             const pair = passes.map(pass => pass[0]).filter(Boolean);
             return {
                 targets: pair,
                 runtime: {
                     runtimeImpactTargetSequence: passes.map(pass => pass.map(target => target.index)),
                     runtimePivotPairs: [pair.map(target => target.index)],
+                    runtimePairTargets: pair.map(target => target.index)
+                        .filter(Number.isInteger).sort((left, right) => left - right),
                     runtimeImpactAllowEmptySequence: true
                 }
             };
@@ -496,7 +539,7 @@ class HuntMonsterActionPolicy {
     }
 
     static requiresDelayedImpact(pattern = {}) {
-        if (pattern.runtimeImpactCommit) return false;
+        if (pattern.runtimeImpactCommit || pattern.runtimeJudgment) return false;
         if (pattern.impact?.disabled || pattern.tags?.includes('no-impact')) return false;
         if (pattern.tags?.includes('burrow-enter')) return false;
         const type = String(pattern.type || '').toLowerCase();
@@ -556,13 +599,62 @@ class HuntMonsterActionPolicy {
 
     static impactTimeline(pattern = {}, monsterState = 'normal') {
         const stateTimeline = pattern.impactTimelineByState?.[monsterState];
-        const authored = Array.isArray(stateTimeline)
+        let authored = Array.isArray(stateTimeline)
             ? stateTimeline
             : (Array.isArray(pattern.impactTimeline) ? pattern.impactTimeline : null);
+        // Native BEAT judgments are already the authored gameplay timeline.
+        // Falling through to one synthesized legacy impact discarded later
+        // hits (Rathian's two half-turns became one target), so derive the
+        // compatibility projection directly from those events when needed.
+        if (!authored?.length && Array.isArray(pattern.beatV2?.events)) {
+            const judgments = pattern.beatV2.events.filter(event =>
+                ['damage', 'roar', 'tremor', 'wind'].includes(String(event?.kind || '')));
+            const groups = new Map();
+            judgments.forEach((judgment, index) => {
+                const key = String(judgment.group || judgment.id ||
+                    `${judgment.atTicks || 0}:${judgment.kind}:${index}`);
+                const entry = groups.get(key) || {
+                    atTicks: Math.max(1, Math.round(Number(judgment.atTicks) || 1)),
+                    judgments: []
+                };
+                entry.atTicks = Math.min(entry.atTicks,
+                    Math.max(1, Math.round(Number(judgment.atTicks) || 1)));
+                entry.judgments.push(judgment);
+                groups.set(key, entry);
+            });
+            authored = [...groups.values()].map(group => {
+                const damage = group.judgments.find(item => item.kind === 'damage');
+                const effect = group.judgments.find(item =>
+                    ['roar', 'tremor', 'wind'].includes(String(item.kind || '')));
+                const authority = damage || effect || group.judgments[0];
+                const authoredDamageRatio = Math.max(.0001, Number(pattern.damageRatio) || 1);
+                const damageScale = damage
+                    ? (Number.isFinite(Number(damage.damagePercent))
+                        ? (Number(damage.damagePercent) / 100) / authoredDamageRatio
+                        : Number(damage.damageScale ?? 1))
+                    : 0;
+                return {
+                    atTicks: group.atTicks,
+                    targetMode: this.judgmentTargetMode(authority?.target),
+                    damageScale,
+                    judgmentGroup: String(authority?.group || authority?.id || ''),
+                    ...(damage && ['strong', 'butt-stumble', 'weak'].includes(damage.hitReactionKind)
+                        ? { hitReactionKind: damage.hitReactionKind === 'butt-stumble'
+                            ? 'weak' : damage.hitReactionKind } : {}),
+                    ...(effect ? { secondaryInterference: {
+                        kind: effect.kind,
+                        size: effect.size === 'small' ? 'small' : 'large',
+                        scope: effect.target === 'all' ? 'all'
+                            : effect.target === 'primary-adjacent' ? 'adjacent' : 'primary',
+                        directHitSupersedes: effect.directHitSupersedes === true
+                    } } : {})
+                };
+            }).sort((left, right) => left.atTicks - right.atTicks);
+        }
         if (authored?.length) {
             const compiledTicks = pattern.beatV2
                 && pattern.runtimeJudgmentGroups === true
-                && pattern.beatV2Approved === true
+                && (pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
                 ? this.#beatV2GameplayTicks(pattern.beatV2)
                 : [];
             return authored.map((entry, index) => {
@@ -580,6 +672,8 @@ class HuntMonsterActionPolicy {
                     targetMode: String(source.targetMode || ''),
                     targetShape: String(source.targetShape || ''),
                     damageScale: Number(source.damageScale ?? 1),
+                    hitReactionKind: source.hitReactionKind || null,
+                    judgmentGroup: source.judgmentGroup || null,
                     secondaryInterference: source.secondaryInterference || null,
                     audioCue: source.audioCue || null,
                     eventKind: source.eventKind || null,
@@ -633,7 +727,7 @@ class HuntMonsterActionPolicy {
         pattern = {}, monsterState = 'normal', targetable = [], count = 1,
         passCount = 2, random = Math.random, mode = '', defaultTargets = [],
         primaryIndex = null, distinctPasses = false, forcedTargetIndices = null,
-        forcedImpactTargets = null
+        forcedImpactTargets = null, pairTargetIndices = null
     } = {}) {
         const byIndex = new Map(targetable.filter(target => Number.isInteger(target?.index))
             .map(target => [target.index, target]));
@@ -643,9 +737,25 @@ class HuntMonsterActionPolicy {
         forced?.filter(index => !byIndex.has(index))
             .forEach(index => warnings.push(`target-unavailable:${index}`));
         const resolved = this.resolveTargeting({ targetable, count, passCount, random, mode,
-            defaultTargets, primaryIndex, distinctPasses });
+            defaultTargets, primaryIndex, distinctPasses, pairTargetIndices });
         const targets = forced ? forced.map(index => byIndex.get(index)).filter(Boolean) : resolved.targets;
         const runtime = { ...resolved.runtime };
+        // Placement-only two-hunter presets select their own lane once per
+        // action. Keep that lane separate from damage recipients: an area
+        // action can still hit all hunters while moving through 1-2, 2-3, or
+        // 3-4 instead of always anchoring at the all-target midpoint.
+        if (!Array.isArray(runtime.runtimePairTargets) && this.usesPairAnchor(pattern)) {
+            // A pivot pattern has already selected its exact adjacent lane for
+            // impact. Reuse that lane for pair anchors instead of rolling a
+            // second, unrelated one (which made the editor's “2인 위” anchor
+            // drift away from the two judgments).
+            const authoredPivot = Array.isArray(runtime.runtimePivotPairs)
+                ? runtime.runtimePivotPairs.find(pair => Array.isArray(pair) && pair.length)
+                : null;
+            runtime.runtimePairTargets = (authoredPivot || this.randomAdjacentPair(targetable, random))
+                .map(target => Number.isInteger(target?.index) ? target.index : target)
+                .filter(Number.isInteger);
+        }
         const forcedByImpact = new Map((forcedImpactTargets || [])
             .filter(item => Number.isInteger(item?.impactIndex))
             .map(item => [item.impactIndex,
@@ -735,8 +845,8 @@ class HuntMonsterActionPolicy {
         const policy = pattern.whiffReaction;
         if (!policy) return false;
         if (policy.pass === 'last'
-            && pattern.runtimeImpactTimelineEvent
-            && pattern.runtimeImpactTimelineFinal !== true) return false;
+            && (pattern.runtimeImpactTimelineEvent || pattern.runtimeJudgment)
+            && (pattern.runtimeJudgment?.timelineFinal ?? pattern.runtimeImpactTimelineFinal) !== true) return false;
         if (this.allPartsBroken(partState, policy.disabledWhenAllBroken || [])) return false;
         const passSizes = pattern.runtimeChargePassSizes || [];
         let inspected = attackResults;

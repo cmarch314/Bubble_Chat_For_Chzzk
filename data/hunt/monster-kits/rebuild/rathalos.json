@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "monsterId": "rathalos",
+  "status": "planned",
+  "sourcePolicy": "reference-only-clean-beat",
+  "cutover": { "mode": "atomic", "keepCurrentRuntimeUntilApproved": true },
+  "references": [
+    "data/hunt/rathalos-interview-audit.md",
+    "data/hunt/monster-kits/notes/rathalos.md",
+    "js/effects/hunt/HuntMonsterProfiles.js",
+    "data/hunt/monster-pattern-motion-overrides.json"
+  ],
+  "actions": [
+    { "id": "rathalos.roar", "name": "포효", "acceptance": ["transition-roar 종료 전 후속 행동 금지", "공중 포효는 명시 패턴에서만 허용"] },
+    { "id": "rathalos.bite", "name": "물어뜯기", "acceptance": ["목표 측면 접근 후 입 접촉", "약공·엉덩방아 판정"] },
+    { "id": "rathalos.rush", "name": "돌진 물어뜯기", "acceptance": ["현재 위치에서 목표 직선으로 즉시 가속", "접촉 궤도와 HIT 일치"] },
+    { "id": "rathalos.fireball", "name": "화염구 브레스", "acceptance": ["1초 조준 후 머리 방향 발사", "발사·착탄 음향 분리"] },
+    { "id": "rathalos.aerial_fireball", "name": "공중 화염구", "acceptance": ["비행 위치를 유지한 채 머리에서 발사", "발사 후 착지로 강제 전환하지 않음"] },
+    { "id": "rathalos.aerial_triple_fireball", "name": "공중 삼연 화염구", "acceptance": ["세 발의 조준·발사점·판정 독립", "비행 상태와 BEAT 완료가 같은 세션"] },
+    { "id": "rathalos.backstep_fireball", "name": "백스텝 브레스", "acceptance": ["뒤로 도약하며 비행 전환", "도약과 발사가 끊기거나 순간이동하지 않음"] },
+    { "id": "rathalos.claw_dive", "name": "독조 강습", "acceptance": ["공중에서 발로 할퀴며 목표를 통과", "독조 충돌 프레임과 HIT 일치"] },
+    { "id": "rathalos.tail_sweep", "name": "꼬리 회전", "acceptance": ["180도씩 나눈 전역 회전", "복귀 역회전 금지"] },
+    { "id": "rathalos.aerial_tail_sweep", "name": "공중 꼬리 휩쓸기", "acceptance": ["비행 높이와 반경을 유지", "회전 구간별 목표·판정 분리"] },
+    { "id": "rathalos.hop_stomp", "name": "도약 발톱 내려찍기", "acceptance": ["도약 정점 후 목표에 발톱 착지", "착지 충돌과 HIT 일치"] },
+    { "id": "rathalos.stomp", "name": "독조 내려찍기", "acceptance": ["공중에서 발톱으로 내려찍고 착지", "착지 상태 전환은 BEAT 완료 시점"] },
+    { "id": "rathalos.glide", "name": "저공 활공 돌진", "acceptance": ["활강 직선 횡단으로 다수 목표를 통과", "화면 밖 종료 후 상단에서 자연 복귀"] }
+  ]
+}

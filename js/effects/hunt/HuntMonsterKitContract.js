@@ -86,6 +86,16 @@ class HuntMonsterKitContract {
             } else if (kit.runtime.mechanicModules.some(moduleId => !/^[a-z0-9-]+$/.test(String(moduleId)))) {
                 add('runtime.mechanicModules', 'contains an invalid module ID');
             }
+            if (kit.runtime.actionManifest != null
+                && (!String(kit.runtime.actionManifest).startsWith('data/hunt/monster-kits/actions/')
+                    || !String(kit.runtime.actionManifest).endsWith('.json'))) {
+                add('runtime.actionManifest', 'must reference a monster action manifest under data/hunt/monster-kits/actions');
+            }
+            if (kit.runtime.goldenTrace != null
+                && (!String(kit.runtime.goldenTrace).startsWith('data/hunt/monster-kits/golden/')
+                    || !String(kit.runtime.goldenTrace).endsWith('.json'))) {
+                add('runtime.goldenTrace', 'must reference a golden trace under data/hunt/monster-kits/golden');
+            }
         }
 
         if (!Array.isArray(kit.evidenceRefs) || !kit.evidenceRefs.length) {

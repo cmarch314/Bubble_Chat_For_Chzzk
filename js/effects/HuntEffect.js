@@ -1002,8 +1002,29 @@ class HuntEffect extends BaseEffect {
             this.renderer.spawnCombatChatBubble(hunter.index, '💩🌈 퍽 발현!');
         });
 
-        // Initialize pure Simulation Engine
-        this.engine = new HuntEngine({
+        this.combatPresenter = new HuntCombatPresenter({
+            renderer: this.renderer,
+            audio: this.audioManager,
+            getHunters: () => this.selectedWeapons,
+            getEngine: () => this.engine,
+            hooks: {
+                onLog: (text, color) => this.addCombatLog(text, color),
+                onCart: carts => { this.cartCount = carts; },
+                onGameEnd: (victory, winner) => this.endGame(container, victory, winner),
+                onNextConsecutive: () => this.spawnNextConsecutiveMonster(container)
+            }
+        });
+        // Live and Preview advance the same HuntEngine through one BEAT clock.
+        // HuntEffect owns lifecycle/UI only; it must not create a second tick loop.
+        this.combatRuntime = new HuntCombatRuntime({
+            mode: 'live',
+            clockMode: 'auto',
+            tickMs: 100,
+            timers: this.timers,
+            tick: () => {
+                if (this.phase === 'fighting') this.processFightTickSafely();
+            },
+            engineConfig: {
             selectedWeapons: this.selectedWeapons,
             selectedMonster: this.selectedMonster,
             bets: this.bets,
@@ -1032,134 +1053,15 @@ class HuntEffect extends BaseEffect {
             timeLimit: timeLimitVal,
             sharedSupply: journeySupply,
             schedule: (callback, delay) => this.timers.timeout(callback, delay),
-            callbacks: {
-                onLog: (text, color) => this.addCombatLog(text, color),
-                onPlaySFX: (fileName, fallbackKey, context) => this.audioManager.playMHAsset(fileName, fallbackKey, context),
-                onCancelWhetstoneCue: hunterIndex => this.audioManager.cancelWhetstoneCue(hunterIndex),
-                onPlayAudioFile: (subPath, durationLimitMs, volumeMultiplier, audioContext) => this.audioManager.playMHAudioFile(subPath, durationLimitMs, volumeMultiplier, audioContext),
-                onShakeWeapon: (idx, borderClr, isAttack, actionOrName, isDodge = false, hitContext = null) => {
-                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
-                        || this.selectedWeapons[idx];
-                    this.renderer.shakeWeapon(idx, w, borderClr, isAttack, actionOrName, isDodge, hitContext);
-                },
-                onShakeMonster: () => this.renderer.shakeMonster(),
-                onRestoreBorder: (idx) => {
-                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
-                        || this.selectedWeapons[idx];
-                    this.renderer.restoreBorder(idx, w);
-                },
-                onUpdateHpUI: (w) => this.renderer.updateHpUI(w),
-                onUpdateMonsterHpUI: (hp, maxHp) => this.renderer.updateMonsterHpUI(hp, maxHp),
-                onUpdateSmallMonsterSwarmUI: (state) => this.renderer.updateSmallMonsterSwarmUI(state),
-                onUpdateWeaponAtbUI: (idx, atb) => {
-                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
-                        || this.selectedWeapons[idx];
-                    this.renderer.updateWeaponAtbUI(idx, atb, w);
-                },
-                onUpdateSharpnessUI: (idx, hunter) => this.renderer.updateSharpnessUI(idx, hunter),
-                onUpdateMonsterAtbUI: (atb) => this.renderer.updateMonsterAtbUI(atb),
-                onUpdateMonsterStateUI: (stateName, title, colorInfo) => this.renderer.updateMonsterStateUI(stateName, title, colorInfo),
-                onUpdateMonsterFlightUI: (airborne, progress, damage, threshold, remainingTicks) =>
-                    this.renderer.updateMonsterFlightUI(airborne, progress, damage, threshold, remainingTicks),
-                onUpdateMonsterTraitVisual: traits => this.renderer.updateMonsterTraitVisual(traits),
-                onUpdateMonsterPartsUI: parts => this.renderer.updateMonsterPartsUI(parts),
-                onUpdateTailSeverUI: (visible, carved, displayName) => this.renderer.updateTailSeverUI(visible, carved, displayName),
-                onUpdatePotionCountUI: (idx, count) => this.renderer.updatePotionCountUI(idx, count),
-                onUpdateHunterItemUI: (hunter) => this.renderer.updateHunterItemUI(hunter, this.engine?.sharedSupply),
-                onUpdateOverheatUI: (idx, duration) => this.renderer.updateOverheatUI(idx, duration),
-                onUpdatePhialsUI: (idx, phials) => this.renderer.updatePhialsUI(idx, phials),
-                onUpdateExtractsUI: (idx, buffs) => this.renderer.updateExtractsUI(idx, buffs),
-                onUpdateHunterBlightUI: (idx, blights) => this.renderer.updateHunterBlightUI(idx, blights),
-                onUpdateCartUI: (carts, limit) => {
-                    this.cartCount = carts;
-                    this.renderer.updateCartUI(carts, limit);
-                },
-                onUpdateTimerUI: (timeSec) => this.renderer.updateTimerUI(timeSec),
-                onShowSkillBubble: (idxOrMonster, text) => this.renderer.showSkillBubble(idxOrMonster, text),
-                onSpawnEmojiBubble: (idx, emoji, options) => this.renderer.spawnVictoryEmoji(idx, emoji, options),
-                onTriggerMonsterRoar: (monster) => {
-                    this.renderer.triggerMonsterRoar();
-                    this.audioManager.playMonsterRoar(monster);
-                },
-                onTriggerMonsterCharge: () => this.renderer.triggerMonsterCharge(),
-                onTriggerMonsterAttack: (type, emoji, targets, attackName, pattern) => {
-                    this.renderer.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
-                },
-                onTriggerMonsterTelegraphFx: effect => this.renderer.triggerMonsterTelegraphFx(effect),
-                onResolveMonsterImpactTimeline: (pattern, targetIndices) =>
-                    this.renderer.resolveMonsterImpactTimeline(pattern, targetIndices),
-                onTriggerMonsterBurrowPhase: (phase, targetIndex, durationMs) => {
-                    this.renderer.combatAnimator.triggerMonsterBurrowPhase(phase, targetIndex, durationMs);
-                },
-                onResetMonsterMotion: reason => {
-                    this.renderer.combatAnimator.monsterAttackAnimator?.clearMonsterMotion?.(reason);
-                },
-                onTriggerHunterInterference: (idx, kind, size, active) => {
-                    this.renderer.combatAnimator.triggerHunterInterference(idx, kind, size, active);
-                },
-                onTriggerGuardShake: (idx) => {
-                    this.renderer.combatAnimator.triggerGuardImpact(idx);
-                },
-                onInterruptWeaponVisual: (idx) => {
-                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
-                        || this.selectedWeapons[idx];
-                    this.renderer.combatAnimator.interruptWeaponVisual(idx, w);
-                },
-                onTriggerRollAnimation: (idx) => this.renderer.triggerRollAnimation(idx),
-                onTriggerInvincibleJump: (idx, active) => this.renderer.triggerInvincibleJump(idx, active),
-                onTriggerHitAnimation: (idx, reaction) => {
-                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
-                        || this.selectedWeapons[idx];
-                    this.renderer.triggerHitAnimation(idx, w, reaction);
-                },
-                onCancelHitAnimation: (idx) => this.renderer.cancelHitAnimation(idx),
-                onTriggerDeathTag: (idx, timerSeconds) => {
-                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
-                        || this.selectedWeapons[idx];
-                    this.renderer.triggerDeathTag(idx, w, timerSeconds || 5);
-                },
-                onTriggerHunterReturn: (idx) => {
-                    const w = this.selectedWeapons.find(candidate => candidate?.index === idx)
-                        || this.selectedWeapons[idx];
-                    this.renderer.triggerHunterReturn(idx, w);
-                },
-                onTriggerStunUI: (idx, isStunned) => this.renderer.triggerStunUI(idx, isStunned),
-                onTriggerRoarStun: (idx, isStunned) => this.renderer.triggerRoarStun(idx, isStunned),
-                onTriggerMonsterKnockdownAnim: (details = null) => {
-                    // Traps, perks, and forced landings can trigger knockdown
-                    // outside HuntEngine.checkMonsterKnockdown().
-                    if (this.engine?.pendingMonsterAction
-                        || this.engine?.monsterBurrowState
-                        || this.engine?.monsterTraversalState
-                        || Number(this.engine?.monsterActionLockTicks || 0) > 0) {
-                        this.engine.interruptMonsterMovement?.('knockdown');
-                    }
-                    this.renderer.triggerMonsterKnockdownAnim(details);
-                },
-                onTriggerMonsterPartBreakReaction: (kind, durationTicks, partKind) => {
-                    if (this.engine?.pendingMonsterAction
-                        || this.engine?.monsterBurrowState
-                        || this.engine?.monsterTraversalState
-                        || Number(this.engine?.monsterActionLockTicks || 0) > 0) {
-                        this.engine.interruptMonsterMovement?.(`part-break:${partKind || 'unknown'}`);
-                    }
-                    this.renderer.triggerMonsterPartBreakReaction(kind, durationTicks, partKind);
-                },
-                onTriggerMonsterPartBreakVisual: partKind =>
-                    this.renderer.triggerMonsterPartBreakVisual(partKind),
-                onTriggerMonsterSleepAnim: details =>
-                    this.renderer.triggerMonsterSleepAnim(details),
-                onTriggerMonsterTraitReaction: (kind, durationTicks) =>
-                    this.renderer.triggerMonsterTraitReaction(kind, durationTicks),
-                onTriggerEnvironmentEffect: (kind, hunterIndex, details) =>
-                    this.renderer.triggerEnvironmentEffect(kind, hunterIndex, details),
-                onGameEnd: (victory, winner) => this.endGame(container, victory, winner),
-                onNextConsecutive: () => this.spawnNextConsecutiveMonster(container),
-                onTriggerValstraxAmbush: () => {
-                    this.renderer.triggerValstraxAmbushWarning();
-                }
+            callbacks: this.combatPresenter.callbacks()
             }
         });
+        this.engine = this.combatRuntime.engine;
+        // `renderFight()` replaces the card DOM.  Re-emit the current anatomy
+        // after the engine is attached so the live hunt always shows the same
+        // material-backed part icons as Preview, even when a renderer or
+        // callback was initialized one frame later.
+        this.engine.updateMonsterPartsUI?.();
         if (this.engine.sharedSupply) this.selectedWeapons.forEach(hunter =>
             this.renderer.updateHunterItemUI(hunter, this.engine.sharedSupply));
         this.selectedWeapons.forEach(hunter => {
@@ -1185,11 +1087,10 @@ class HuntEffect extends BaseEffect {
         const initialLimit = this.config.getHuntConfig()?.timeLimit !== undefined ? this.config.getHuntConfig().timeLimit : 480;
         this.renderer.updateTimerUI(initialLimit);
 
-        // Tick loop (Process through HuntEngine)
-        this.fightInterval = this.timers.interval(() => {
-            if (this.phase !== 'fighting') return;
-            this.processFightTickSafely();
-        }, 100);
+        // One transport owns every gameplay tick. `fightInterval` remains a
+        // compatibility marker only and never stores a browser timer handle.
+        this.combatRuntime.start();
+        this.fightInterval = this.combatRuntime.clock;
         if (this.huntMode === 'journey' && this.runDirector) {
             this.runDirector.checkpoint({
                 party: HuntRunPartyAdapter.snapshot(this.selectedWeapons),
@@ -1289,7 +1190,8 @@ class HuntEffect extends BaseEffect {
 
     clearAllTimers() {
         if (this.gameTimer) { this.timers.clear(this.gameTimer); this.gameTimer = null; }
-        if (this.fightInterval) { this.timers.clear(this.fightInterval); this.fightInterval = null; }
+        this.combatRuntime?.stop?.();
+        this.fightInterval = null;
         this.timers.clearAll();
         this.victoryEmojiTimeouts = [];
     }
@@ -1397,6 +1299,11 @@ class HuntEffect extends BaseEffect {
             smallMonsterCount: this.smallMonsterCount
         });
 
+        // Consecutive hunts re-render the card while retaining the same
+        // engine. Restore the part icon panel from the engine-owned state
+        // instead of leaving the freshly-created panel empty/hidden.
+        this.engine.updateMonsterPartsUI?.();
+
         // Restore actual UI states for monster HP, timer, and hunter HP
         this.renderer.updateMonsterHpUI(this.engine.monsterHp, this.engine.monsterMaxHp);
         if (this.engine.smallMonsterSwarm) this.renderer.updateSmallMonsterSwarmUI(this.engine.smallMonsterSwarm.snapshot());
@@ -1407,11 +1314,9 @@ class HuntEffect extends BaseEffect {
         // Restore borders
         this.selectedWeapons.forEach(w => this.renderer.restoreBorder(w.index, w));
 
-        // Restart Tick loop (Process through HuntEngine)
-        this.fightInterval = this.timers.interval(() => {
-            if (this.phase !== 'fighting') return;
-            this.processFightTickSafely();
-        }, 100);
+        // Resume the same engine/BEAT transport for the next monster.
+        this.combatRuntime?.start?.();
+        this.fightInterval = this.combatRuntime?.clock || null;
     }
 
     endGame(container, isVictory, winner = null) {

@@ -44,30 +44,49 @@ assert.doesNotMatch(html, /\.js\?v=/,
     '패턴 랩은 손관리 캐시 토큰을 쓰지 않는다 (프리뷰 서버가 no-store를 보낸다)');
 assert.match(html, /id="css-build"/,
     '무엇이 로드됐는지 눈으로 확인할 빌드 표시가 필요하다');
-assert.match(html, /labAudio\?\.playPattern\(pattern,pattern\.runtimeResolvedImpactTimeline\|\|\[\]\)/,
-    'preview audio must follow the resolved multi-impact timeline');
+assert.match(html, /function playPreviewMotionOnly\(pattern,\s*selection\)/,
+    'Preview must expose a dedicated monster-motion-only editor path');
+assert.match(html, /animator\.playBeatMotion\(\s*monsterImg,motionPattern,motionPattern\.id,targetCard,targets\)/,
+    'Preview must render the same authored monster BEAT graph without starting a hunter combat simulation');
+assert.match(html, /const targets=\[\];/,
+    'Preview must preserve target geometry without creating hunter impact recipients');
+assert.match(html, /runtimePreviewMotionOnly:true/,
+    'Preview motion must be explicitly marked as editor-only');
+assert.match(html, /runtimeResolvedImpactTimeline:Array\.isArray\(pattern\.runtimeResolvedImpactTimeline\)/,
+    'Preview must retain authored judgment timing for visual markers');
+assert.match(html, /dataset\.previewHunterResolution='disabled'/,
+    'Preview must not resolve hunter damage/reactions while editing monster motion');
+assert.doesNotMatch(html, /playPreviewMotionOnly\(pattern,selection\)[\s\S]{0,500}previewRuntime\.executeMonsterPattern/,
+    'the editor motion path must not re-enter the combat runtime');
+assert.doesNotMatch(html, /new HuntCombatRuntime\(/,
+    'the embedded editor must not construct a second combat runtime at all');
+assert.doesNotMatch(html,
+    /labAudio\?\.playPattern\(pattern,pattern\.runtimeResolvedImpactTimeline\|\|\[\]\)/,
+    'Preview must not schedule a second audio/impact timeline beside the BEAT engine');
 assert.match(html, /onMonsterProjectileLaunchAudio=.*playProjectileLaunch/,
     'the pattern lab must reproduce projectile launch audio callbacks');
-assert.match(html, /\.lab-controls\{position:fixed;z-index:2147483647;/,
-    'the inspection console must float in its own top layer without changing combat geometry');
-assert.match(html, /backdrop-filter:blur\(6px\);[^}]*opacity:\.76/,
-    'the floating inspection console must remain translucent over the production scene');
-assert.match(html, /function renderCombatChrome\(\)/);
-assert.match(html, /class="hunt-monster-vitals lab-vitals"/,
-    'the preview must include the production monster HP and ATB structure');
-assert.match(html, /class="hunt-monster-aux-rail lab-aux"/,
-    'the preview must include the production parts, cart, and timer rails');
-assert.match(html, /class="hunt-hunter-heading"/);
-assert.match(html, /class="hunt-atb-row"/);
-assert.match(html, /class="hunt-item-list"/);
-assert.match(html, /class="game-hunt-weapon-name"/,
-    'preview hunter cards must preserve production combat-card information order');
+assert.match(html, /id="preview-editor-tools"/,
+    'design gizmos may add an overlay but must not restyle the production combat board');
+assert.doesNotMatch(html, /id="lab-preview-overrides"/,
+    'the retired Preview-only combat layout stylesheet must not survive');
+assert.match(html, /new HuntRenderer\(/,
+    'Preview must mount the production combat renderer itself');
+assert.match(html, /previewRenderer\.renderFight\(\{/,
+    'Preview combat markup must come from HuntRenderer.renderFight');
+assert.doesNotMatch(html, /function renderCombatChrome\(\)/,
+    'the retired hand-written combat-board clone must not survive');
+assert.doesNotMatch(html, /const previewRenderer=\{/,
+    'Preview must not maintain a hand-written renderer facade');
+for (const productionScript of ['HuntNotificationRenderer.js', 'HuntRenderer.js']) {
+    assert.match(html, new RegExp(productionScript.replace(/\./g, '\\.')),
+        `${productionScript} must be loaded by the embedded real-hunt Preview`);
+}
 // 레이어 순서(placement > pose > aim > facing > image)는
 // tests/hunt-monster-layer-contract.test.js가 실수렵 마크업과 직접 대조한다.
 // 여기서 정규식으로 한 번 더 적으면 레이어가 늘 때마다 두 곳을 고쳐야 하고,
 // 한쪽을 잊으면 "검수 화면과 실제 화면이 다르다"가 다시 생긴다.
-assert.match(html, /class="hunt-monster-pose-layer"/,
-    'the preview must carry the production pose layer');
+assert.match(html, /id="preview-overlay" class="game-overlay-container"/,
+    'the production renderer must receive the same overlay/card ownership shape as live combat');
 
 // ---- 부위 파괴는 상태와 나란히 실험할 수 있어야 한다 ----
 //
@@ -115,8 +134,8 @@ assert.doesNotMatch(html, /class="hunt-monster-facing-layer">\s*<div class="hunt
     'flipping a travel wrapper mirrors its coordinates and teleports the monster across the board');
 assert.match(html, /HUNT_RELEASED_MONSTER_DATA/,
     'the lab must derive its monster dropdown from the reviewed release catalog');
-assert.match(html, /HUNT_MONSTER_PATTERN_OVERRIDES\[monster\.id\]/,
-    'pattern buttons must be generated from live authored monster data');
+assert.match(html, /const patternsForMonster=monsterId=>\{/,
+    'pattern buttons must be generated from the live authored candidate-or-release catalog');
 assert.match(html, /HuntMonsterActionPolicy\.resolveTargetScenario/,
     'automatic and manual targets must use the shared target policy');
 assert.match(html, /runtimeResolvedImpactTimeline/,
@@ -130,6 +149,12 @@ assert.match(html, /applyState\('normal',true\)/,
 assert.match(html, /--target-color/);
 assert.match(html, /classList\.toggle\('is-targeted'/,
     'random target selection must illuminate the matching hunter card');
+assert.match(html, /pair:random-adjacent/,
+    'the preview target selector must offer a random adjacent pair rather than only a primary hunter');
+assert.match(html, /const adjacentPairs=\[\[0,1\],\[1,2\],\[2,3\]\]/,
+    'random adjacent targeting must choose only the 1·2, 2·3, or 3·4 lanes');
+assert.match(html, /Its movement anchor stays fixed\s+\/\/ for this action/,
+    'a random pair must be picked once and retained for the whole preview action');
 assert.match(html, /자동→\$\{linked\+1\}/,
     'the automatic target button must reveal the selected slot');
 assert.match(html, /하단 15%/);
@@ -139,17 +164,33 @@ assert.match(html, /new URL\(document\.referrer\)\.origin/,
     'preview readiness must return to the active loopback review-server origin, including agent-specific ports');
 assert.match(html, /embedded-preview/,
     'embedded production preview must hide its own control overlay');
-assert.match(html, /seekBeatMotion\(message\.progress\)/,
-    'the embedded lab must seek the real compiled animation without applying combat damage');
+assert.match(html, /animator\.seekBeatMotion\(Math\.max\(0,Math\.min\(1,Number\(progress\|\|0\)\)\)\)/,
+    'the embedded editor must scrub the shared BEAT animation directly');
 assert.match(html, /bubblechat:pattern-preview-playback/,
     'the embedded runtime must acknowledge playback so the editor timeline follows real playback');
 assert.match(html, /!pattern\.runtimePreviewMuteAudio/,
     'the embedded production renderer must stay silent when the review timeline owns preview audio');
 assert.match(html, /if\(!selection\.targets\.length\)/,
     'every preview pattern must receive a safe visual target even when combat targeting resolves empty');
+assert.match(html, /new HuntActionSession\([\s\S]*?observeMonsterBeatEvent/,
+    'motion-only Preview must feed its compiled BEAT events through the shared action session');
+assert.doesNotMatch(html, /previewBeatEventTimer|setInterval\(\(\)=>\{[\s\S]*?previewActionSession/,
+    'motion-only Preview must not create a second event clock');
+assert.doesNotMatch(html, /schedulePreviewProjectile/,
+    'motion-only Preview must not create a renderer-owned projectile schedule');
+assert.match(html, /pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern\(pattern\)/,
+    'native candidate preview must compile its judgment timeline before target resolution');
+assert.doesNotMatch(html, /if\(!pattern\.nativeBeatCandidate\)pattern=HuntMonsterPatternCatalog\.synchronizeEditedPattern/,
+    'native candidates must not bypass the same BEAT compiler used by live hunts');
 assert.match(html, /bubblechat:pattern-anatomy/,
     'the editor must be able to toggle the monster anatomy position/direction guide');
 assert.match(html, /monster-anatomy-guide/);
+assert.match(html, /let anatomyGuideEnabled=true/,
+    'the embedded editor must show anatomy guides by default');
+assert.match(html, /previewRenderer\.updateMonsterPartsUI\(\s*HuntMonsterAnatomyCatalog\.partDisplaySlots\(partState\)/,
+    'Preview must render the production material-backed part list instead of a second emoji-only HUD');
+assert.doesNotMatch(html, /const PART_ICONS=|function partIcon\(/,
+    'Preview must not maintain a second hand-authored part icon map');
 assert.match(html, /part-handle/,
     'each anatomy part must expose an interactive drag handle');
 assert.match(html, /syncAnatomyTransform/,

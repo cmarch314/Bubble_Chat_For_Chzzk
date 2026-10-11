@@ -232,6 +232,14 @@ for (const [monsterId, patterns] of Object.entries(pilotCatalog)) {
         }
     }
 }
+{
+    const activeEngine = {
+        pendingMonsterAction: null,
+        isMonsterActionSessionActive: () => true
+    };
+    assert.strictEqual(HuntMonsterTurnExecutor.prepare(activeEngine), false,
+        'monster turn preparation must reject every caller while an approved BEAT session is active');
+}
 const savedTailWhip = pilotCatalog.nargacuga.find(pattern =>
     pattern.id === 'nargacuga.tail_whip');
 assert.deepStrictEqual(savedTailWhip.motion.map(beat => beat.beat),
@@ -256,6 +264,17 @@ for (const monsterId of ['bazelgeuse', 'chameleos', 'rathian', 'rathalos', 'diab
         && !pattern.tags.includes('ultimate')),
     `${monsterId} must use sourced complete actions without a fabricated ultimate`);
 }
+const liveDiablosHornSweep = pilotCatalog.diablos
+    .find(pattern => pattern.id === 'diablos.horn_sweep');
+assert.deepStrictEqual(liveDiablosHornSweep.motion
+    .flatMap(beat => beat.judgments || [])
+    .filter(judgment => judgment.kind === 'damage')
+    .map(judgment => judgment.target),
+['pair-left', 'pair-right'],
+'Diablos horn sweep judgments must strike opposite hunters around one adjacent-pair midpoint');
+assert.deepStrictEqual(liveDiablosHornSweep.impactTimeline.map(event => event.targetMode),
+    ['runtime-pair-left', 'runtime-pair-right'],
+    'the live catalog must preserve the authored left/right pair split instead of primary twice');
 assert.ok(pilotCatalog.black_diablos.every(pattern =>
     pattern.runtimePolicy === 'reviewed-variant-kit'
     && pattern.id.startsWith('black_diablos.')),

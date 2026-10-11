@@ -1,5 +1,9 @@
 'use strict';
 
+const HuntRotation = typeof globalThis === 'object' && globalThis.HuntRotationContract
+    ? globalThis.HuntRotationContract
+    : (typeof require === 'function' ? require('./HuntRotationContract.js') : null);
+
 // 비트 목록을 Web Animations 키프레임으로 컴파일한다 (재설계안 원칙 3).
 //
 // 저작자는 이렇게 쓴다:
@@ -63,6 +67,18 @@ class HuntMotionCompiler {
         return this.EASING_PRESETS[name] || this.EASING_PRESETS.smooth;
     }
 
+    static equivalentRotation(angle, previous = 0) {
+        return HuntRotation.equivalent(angle, previous);
+    }
+
+    static directedRotation(beat = {}, previous = 0) {
+        return HuntRotation.resolve(beat, previous).final;
+    }
+
+    static rotationResetMode(beat = {}) {
+        return HuntRotation.resetMode(beat);
+    }
+
     // beats: 비트 배열
     // options: { anchors, rig, poses, ticksPerSecond }
     // align: 'part:tail' — 몸 중심이 아니라 그 부위가 목적지에 오도록 놓는다.
@@ -99,7 +115,8 @@ class HuntMotionCompiler {
     }
 
     static compile(beats, {
-        anchors, rig = 'winged', poses = null, ticksPerSecond = null, partOffset = null
+        anchors, rig = 'winged', poses = null, ticksPerSecond = null, partOffset = null,
+        baseFacing = 'front'
     } = {}) {
         const offsetOf = partOffset || (() => ({ x: 0, y: 0 }));
         const Poses = poses || (typeof HuntMotionPoses !== 'undefined'
@@ -120,6 +137,11 @@ class HuntMotionCompiler {
             return sum + ticks;
         }, 0);
 
+        // Authored rotation describes the monster's native-image motion. A
+        // horizontally mirrored sprite must execute the opposite inner turn;
+        // keeping one sign made asymmetric anatomy (head/tail/wings) sweep in
+        // the wrong direction after a facing change.
+        const baseDirection = baseFacing === 'left' ? -1 : baseFacing === 'right' ? 1 : 1;
         const state = {
             point: { x: 0, y: 0 },
             depth: 1,
@@ -128,7 +150,8 @@ class HuntMotionCompiler {
             origin: null,
             opacity: 1,
             filter: null,
-            facing: 1,
+            facing: baseDirection,
+            rotationSign: 1,
             scaleX: 1,
             scaleY: 1,
             skewX: 0,
@@ -255,6 +278,7 @@ class HuntMotionCompiler {
             if (state.facing !== previous.facing || (!wasFacingActive && facingActive)) {
                 facing.push({ offset: startAt, direction: state.facing });
             }
+            state.rotationSign = state.facing === baseDirection ? 1 : -1;
             const strideFlipTicks = Math.max(0, Math.floor(Number(beat.strideFlipTicks) || 0));
             if (strideFlipTicks > 0) strideWindows.push({ startTicks, endTicks, intervalTicks: strideFlipTicks });
 
@@ -283,36 +307,39 @@ class HuntMotionCompiler {
             // 거꾸로 되감으며 집으로 간다. 한 바퀴 회전은 누적 각도를 끝까지
             // 유지하고 모션 owner가 animation.cancel()로만 초기화한다. 반 바퀴
             // 같은 비정규 자세는 복귀 시작점에서 즉시 세운 뒤 이동한다.
-            if (definition.resetRotation && previous.rotation) {
-                const turns = previous.rotation / 360;
-                const completedFullTurn = Math.abs(turns - Math.round(turns)) < 1e-6;
-                if (completedFullTurn) {
-                    state.rotation = previous.rotation;
-                    state.origin = previous.origin;
-                } else {
-                    pose.push({
-                        offset: Math.max(0, startAt - this.EPS),
-                        ...this.#poseFrame(previous)
-                    });
-                    state.rotation = 0;
-                    state.origin = null;
-                    pose.push({ offset: startAt, ...this.#poseFrame(state) });
-                }
-            } else if (definition.resetRotation) {
-                state.rotation = 0;
-                state.origin = null;
+            // A reviewed BEAT can explicitly carry its current angle through an
+            // idle/recovery pose. This is vital for full rotations: resetting
+            // the pose first makes the renderer interpolate the shortest path
+            // backwards (the old double tail-sweep failure).
+            const rotationResetMode = this.rotationResetMode(beat);
+            const rotationResolution = HuntRotation.resolve(beat, previous.rotation);
+            const preserveHomeRotation = rotationResolution.preserve && beat.to === 'home';
+            const hasDirectedRotation = ['clockwise', 'counterclockwise']
+                .includes(String(beat.rotationDirection || ''))
+                && beat.rotationDegrees !== undefined && beat.rotationDegrees !== null
+                && Number.isFinite(Number(beat.rotationDegrees));
+            const hasExplicitRotation = beat.rotation !== undefined || hasDirectedRotation;
+            let snapRotationAtStart = false;
+            let snapRotationAtEnd = false;
+            if (rotationResetMode === 'preserve' || preserveHomeRotation) {
+                state.rotation = previous.rotation;
+                state.origin = previous.origin;
             }
 
-            // 명시적 편집값은 포즈의 기본 리셋보다 우선한다.
+            // A direct final angle is authoritative. `0` is a real authored
+            // value; legacy deltas must never turn it into a visible spin.
             if (beat.origin) state.origin = beat.origin;
-            if (beat.rotation !== undefined) state.rotation = Number(beat.rotation) || 0;
-            if (beat.rotationToward !== undefined) {
+            if (hasExplicitRotation && rotationResetMode !== 'preserve' && !preserveHomeRotation) {
+                state.rotation = rotationResolution.final;
+                snapRotationAtEnd = rotationResetMode === 'snap-end';
+            }
+            if (!hasExplicitRotation && beat.rotationToward !== undefined) {
                 const degrees = Number(beat.rotationToward) || 0;
                 const travelX = state.point.x - previous.point.x;
                 const direction = Math.sign(travelX) || state.facing || 1;
                 state.rotation = direction * degrees;
             }
-            if (beat.alignRotationToTravel) {
+            if (!hasExplicitRotation && beat.alignRotationToTravel) {
                 const travelX = state.point.x - previous.point.x;
                 const travelY = state.point.y - previous.point.y;
                 if (travelX || travelY) {
@@ -320,7 +347,7 @@ class HuntMotionCompiler {
                     state.rotation = direction * Math.atan2(travelY, Math.max(1e-6, Math.abs(travelX))) * 180 / Math.PI;
                 }
             }
-            if (beat.aimBodyAt) {
+            if (!hasExplicitRotation && beat.aimBodyAt) {
                 const aim = anchors.resolve(beat.aimBodyAt, { bounds: 'pivot' });
                 const torso = offsetOf('part:torso', state.facing);
                 const leftFoot = offsetOf('part:left-front-leg', state.facing);
@@ -339,9 +366,12 @@ class HuntMotionCompiler {
                     state.rotation = (aimAngle - nativeAngle) * 180 / Math.PI;
                 }
             }
-            const rotationDelta = beat.rotateByFacing !== undefined
+            // Rotation is authored data, never a pose side effect. This keeps
+            // the editor's 0° truthful and makes Preview/live replayable from
+            // the same BEAT graph.
+            const rotationDelta = hasExplicitRotation ? 0 : beat.rotateByFacing !== undefined
                 ? Math.abs(Number(beat.rotateByFacing) || 0) * (state.facing || 1)
-                : beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0 : Number(definition.rotate) || 0;
+                : beat.rotateBy !== undefined ? Number(beat.rotateBy) || 0 : 0;
             if (rotationDelta) {
                 const sign = Math.sign(rotationDelta);
                 const windup = Number(definition.windup) || 0;
@@ -360,7 +390,8 @@ class HuntMotionCompiler {
                 });
                 state.rotation = swung - sign * recoil;
             } else if (definition.hold && ![
-                'rotation', 'rotationToward', 'rotateBy', 'rotateByFacing',
+                'rotation', 'rotationDirection', 'rotationDegrees', 'rotationToward',
+                'rotateBy', 'rotateByFacing',
                 'alignRotationToTravel', 'aimBodyAt', 'scaleX', 'scaleY',
                 'skewX', 'skewY'
             ].some(key => beat[key] !== undefined && beat[key] !== null && beat[key] !== false)) {
@@ -388,13 +419,66 @@ class HuntMotionCompiler {
                     });
                 }
             }
+            // Projectile launch recoil stays inside the authored BEAT. It is
+            // therefore seekable and shares the exact launch tick in Preview
+            // and live combat instead of becoming a renderer-owned timer.
+            if (beat.projectileRecoil === true) {
+                const span = endAt - startAt;
+                const direction = state.facing || baseDirection || 1;
+                // A breath is not a firearm kick.  Keep the body orientation
+                // stable at the head anchor and sell the exhale through a deep
+                // chest squeeze, a brief neck-led stretch, then a settle.
+                // Do not put the squeeze on the first rendered frame: the
+                // projectile still launches on tick zero, while the torso
+                // reaches its exhale peak at the authored first-hit tick.
+                // This is authored pose data on the same BEAT clock.
+                pose.push({
+                    offset: startAt + span * .035,
+                    ...this.#poseFrame({ ...state,
+                        scaleX: state.scaleX * .96,
+                        scaleY: state.scaleY * 1.035,
+                        skewY: state.skewY - direction * .55 })
+                });
+                pose.push({
+                    offset: startAt + span * .15,
+                    ...this.#poseFrame({ ...state,
+                        scaleX: state.scaleX * .82,
+                        scaleY: state.scaleY * 1.12,
+                        skewY: state.skewY - direction * 1.45 })
+                });
+                pose.push({
+                    offset: startAt + span * .34,
+                    ...this.#poseFrame({ ...state,
+                        scaleX: state.scaleX * 1.025,
+                        scaleY: state.scaleY * .96,
+                        skewY: state.skewY + direction * .3 })
+                });
+                pose.push({ offset: startAt + span * .64, ...this.#poseFrame(state) });
+            }
             pose.push({
                 offset: startAt,
                 ...this.#poseFrame(beat.instantPose
+                    || snapRotationAtStart
                     ? state
-                    : { ...previous, origin: beat.origin || previous.origin }),
+                    : { ...previous,
+                        // Facing changes are stepwise at this same boundary.
+                        // Apply the matching rotation sign immediately so the
+                        // pose track cannot spend a beat using the old mirror.
+                        facing: state.facing,
+                        rotationSign: state.rotationSign,
+                        origin: beat.origin || previous.origin }),
                 easing: this.easing(beat.rotationEasing)
             });
+            if (snapRotationAtEnd) {
+                pose.push({
+                    offset: Math.max(startAt, endAt - this.EPS),
+                    ...this.#poseFrame({
+                        ...state,
+                        rotation: previous.rotation,
+                        origin: previous.origin
+                    })
+                });
+            }
             pose.push({ offset: endAt, ...this.#poseFrame(state) });
 
             // ---- 판정과 음향 ----
@@ -457,6 +541,8 @@ class HuntMotionCompiler {
                 offsetX: Number(beat.offsetX) || 0,
                 offsetY: Number(beat.offsetY) || 0,
                 rotation: state.rotation,
+                rotationDirection: hasDirectedRotation ? beat.rotationDirection : null,
+                rotationDegrees: hasDirectedRotation ? Math.abs(Number(beat.rotationDegrees)) : null,
                 rotationToward: beat.rotationToward === undefined ? null : Number(beat.rotationToward) || 0,
                 alignRotationToTravel: Boolean(beat.alignRotationToTravel),
                 continueTravel: Boolean(beat.continueTravel),
@@ -499,7 +585,7 @@ class HuntMotionCompiler {
         const root = Math.sqrt(state.squash > 0 ? state.squash : 1);
         const size = state.depth > 0 ? state.depth : 1;
         const frame = {
-            transform: `rotate(${state.rotation.toFixed(2)}deg) skew(${state.skewX.toFixed(2)}deg, ${state.skewY.toFixed(2)}deg) scale(${(size * root * state.scaleX).toFixed(4)}, ${(size / root * state.scaleY).toFixed(4)})`
+            transform: `rotate(${(state.rotation * (state.rotationSign || 1)).toFixed(2)}deg) skew(${state.skewX.toFixed(2)}deg, ${state.skewY.toFixed(2)}deg) scale(${(size * root * state.scaleX).toFixed(4)}, ${(size / root * state.scaleY).toFixed(4)})`
         };
         if (state.origin) {
             if (/%/.test(String(state.origin))) frame.origin = state.origin;

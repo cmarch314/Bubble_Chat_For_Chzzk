@@ -1,6 +1,19 @@
 'use strict';
 
 class HuntHunterBeatCatalog {
+    // Approval is intentionally action-scoped, never weapon-scoped. New Great
+    // Sword actions may use the BEAT runtime immediately, but must remain
+    // migrated until their authored graph has passed visual/audio review.
+    static APPROVED_ACTION_IDS = new Set([
+        'great_sword.charge_1', 'great_sword.charge_2', 'great_sword.charge_3',
+        'great_sword.charged_slash',
+        'great_sword.strong_charge_1', 'great_sword.strong_charge_2', 'great_sword.strong_charge_3',
+        'great_sword.strong_charged_slash',
+        'great_sword.true_charge_1', 'great_sword.true_charge_2', 'great_sword.true_charge_3',
+        'great_sword.true_charged_slash',
+        'great_sword.tackle', 'great_sword.wide_slash', 'great_sword.kick'
+    ]);
+
     static get WEAPON_IDS() {
         return Object.freeze([
             'great_sword', 'long_sword', 'sword_shield', 'dual_blades', 'hammer', 'hunting_horn',
@@ -100,6 +113,8 @@ class HuntHunterBeatCatalog {
         const release = action.tags?.includes('charge-release');
         const tackle = action.tags?.includes('tackle');
         const trueChargedSlash = id === 'great_sword.true_charged_slash';
+        const wideSlash = id === 'great_sword.wide_slash';
+        const kick = id === 'great_sword.kick';
         let beats;
         if (preparation) {
             beats = [
@@ -109,21 +124,48 @@ class HuntHunterBeatCatalog {
                 ] }
             ];
         } else if (trueChargedSlash) {
-            const firstSwing = Math.max(1, Math.floor(totalTicks * .38));
-            const plant = Math.max(1, Math.floor(totalTicks * .14));
-            const recovery = Math.max(1, Math.floor(totalTicks * .12));
-            const rebound = Math.max(1, totalTicks - firstSwing - plant - recovery);
+            const spin = Math.max(1, Math.round(totalTicks * .38));
+            const plant = Math.max(1, Math.round(totalTicks * .14));
+            const recovery = Math.max(1, Math.floor(totalTicks * .10));
+            const slash = Math.max(2, totalTicks - spin - plant - recovery);
             beats = [
-                { id: 'first-swing', ticks: firstSwing, events: [{
-                    id: `${id}:hit:1`, kind: 'damage', target: 'primary',
-                    hitIndex: 0, hitCount: 2, offsetTicks: firstSwing - 1
-                }] },
+                { id: 'spin-in-place', ticks: spin, events: [] },
                 { id: 'blade-plant', ticks: plant, events: [{
                     id: `${id}:plant-audio`, kind: 'audio', slot: 'impact', offsetTicks: 0
                 }] },
-                { id: 'rebound-swing', ticks: rebound, events: [{
-                    id: `${id}:hit:2`, kind: 'damage', target: 'primary',
-                    hitIndex: 1, hitCount: 2, offsetTicks: rebound - 1
+                { id: 'rebound-slash', ticks: slash, events: [
+                    {
+                        id: `${id}:hit:1`, kind: 'damage', target: 'primary',
+                        hitIndex: 0, hitCount: 2, offsetTicks: Math.max(0, slash - 5)
+                    },
+                    {
+                        id: `${id}:hit:2`, kind: 'damage', target: 'primary',
+                        hitIndex: 1, hitCount: 2, offsetTicks: slash - 1
+                    }
+                ] },
+                { id: 'recovery', ticks: recovery, events: [] }
+            ];
+        } else if (wideSlash) {
+            const draw = Math.max(1, Math.min(2, totalTicks - 2));
+            const sweep = Math.max(1, Math.floor(totalTicks * .45));
+            const recovery = Math.max(1, totalTicks - draw - sweep);
+            beats = [
+                { id: 'draw-side', ticks: draw, events: [] },
+                { id: 'horizontal-sweep', ticks: sweep, events: [{
+                    id: `${id}:hit:1`, kind: 'damage', target: 'primary',
+                    hitIndex: 0, hitCount: 1, offsetTicks: sweep - 1
+                }] },
+                { id: 'recovery', ticks: recovery, events: [] }
+            ];
+        } else if (kick) {
+            const brace = 1;
+            const strike = Math.max(1, Math.min(2, totalTicks - 2));
+            const recovery = Math.max(1, totalTicks - brace - strike);
+            beats = [
+                { id: 'brace', ticks: brace, events: [] },
+                { id: 'kick', ticks: strike, events: [{
+                    id: `${id}:hit:1`, kind: 'damage', target: 'primary',
+                    hitIndex: 0, hitCount: 1, offsetTicks: strike - 1
                 }] },
                 { id: 'recovery', ticks: recovery, events: [] }
             ];
@@ -150,7 +192,7 @@ class HuntHunterBeatCatalog {
         return HuntBeatV2Contract.compile({
             schemaVersion: 2,
             backend: 'beat-v2',
-            reviewStatus: 'approved',
+            reviewStatus: this.APPROVED_ACTION_IDS.has(id) ? 'approved' : 'migrated',
             id,
             actor: 'hunter',
             source: Object.freeze({ kind: 'weapon-action', weaponId: 'great_sword' }),

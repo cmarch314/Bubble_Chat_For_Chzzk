@@ -51,7 +51,7 @@ class HuntMonsterPartMaterialCatalog {
         gold_rathian: 'brightness(.98) sepia(1) saturate(4.1) hue-rotate(352deg) contrast(1.12)',
         diablos: 'brightness(.94) sepia(1) saturate(1.9) hue-rotate(350deg) contrast(1.1)',
         black_diablos: 'brightness(.48) sepia(1) saturate(1.35) hue-rotate(218deg) contrast(1.3)',
-        bazelgeuse: 'brightness(.86) sepia(1) saturate(2.9) hue-rotate(338deg) contrast(1.16)',
+        bazelgeuse: 'brightness(.86) saturate(0) contrast(1.16)',
         seething_bazelgeuse: 'brightness(.88) sepia(1) saturate(4.5) hue-rotate(297deg) contrast(1.18)',
         chameleos: 'brightness(.88) sepia(1) saturate(3.7) hue-rotate(218deg) contrast(1.13)',
         legiana: 'brightness(1.02) sepia(1) saturate(2.8) hue-rotate(153deg) contrast(1.1)',
@@ -69,15 +69,15 @@ class HuntMonsterPartMaterialCatalog {
     // This prevents white source interiors from surviving a CSS filter while
     // the original luminance detail remains as a restrained overlay.
     static MONSTER_PALETTES = Object.freeze({
-        rathalos: { base: '#a6332b', highlight: '#e48a5d', shadow: '#4d1717', glow: '#ff7658' },
-        azure_rathalos: { base: '#286da8', highlight: '#80c4e5', shadow: '#153954', glow: '#65c8ff' },
+        rathalos: { base: '#b72b20', highlight: '#e48a5d', shadow: '#4d1717', glow: '#ff7658' },
+        azure_rathalos: { base: '#176fc1', highlight: '#80c4e5', shadow: '#153954', glow: '#65c8ff' },
         silver_rathalos: { base: '#aeb9c4', highlight: '#f1f5f7', shadow: '#505b66', glow: '#dcecff' },
         rathian: { base: '#57883b', highlight: '#b7d77a', shadow: '#273f21', glow: '#aeea6d' },
         pink_rathian: { base: '#bd6687', highlight: '#f0aec4', shadow: '#633044', glow: '#ff98bd' },
         gold_rathian: { base: '#bd8e27', highlight: '#f5db79', shadow: '#60430e', glow: '#ffd85a' },
         diablos: { base: '#b69a70', highlight: '#ead5a8', shadow: '#5c4931', glow: '#f1cc85' },
         black_diablos: { base: '#343238', highlight: '#77727d', shadow: '#141318', glow: '#a494b1' },
-        bazelgeuse: { base: '#776c61', highlight: '#b7aa96', shadow: '#38322d', glow: '#d7ad72' },
+        bazelgeuse: { base: '#73797b', highlight: '#c8ced0', shadow: '#2d3234', glow: '#959da0' },
         seething_bazelgeuse: { base: '#774058', highlight: '#cf829e', shadow: '#321b29', glow: '#f06ca4' },
         legiana: { base: '#7fb6c9', highlight: '#d8f3f6', shadow: '#395f76', glow: '#9cecff' },
         shrieking_legiana: { base: '#9fcbd5', highlight: '#eefcff', shadow: '#4d7480', glow: '#caf7ff' },
@@ -141,6 +141,9 @@ class HuntMonsterPartMaterialCatalog {
         const side = this.displaySide(part);
         const template = this.TEMPLATES[kind] || this.TEMPLATES.part;
         const monsterName = String(monster?.nameKO || monster?.name || monster?.nameKo || monster?.nameEN || '').trim();
+        const palette = Object.freeze(this.MONSTER_PALETTES[monsterId] || {
+            base: '#8e9298', highlight: '#e8edf2', shadow: '#3f444a', glow: '#b9c1ca'
+        });
         return Object.freeze({
             ...template,
             monsterId,
@@ -150,9 +153,11 @@ class HuntMonsterPartMaterialCatalog {
             label: `${monsterName ? `${monsterName} ` : ''}${this.PART_LABELS[kind] || this.PART_LABELS.part}`,
             path: `${this.ITEM_ROOT}${template.sourceId}.png`,
             tint: this.MONSTER_TINTS[monsterId] || 'grayscale(1) brightness(1.08)',
-            palette: Object.freeze(this.MONSTER_PALETTES[monsterId] || {
-                base: '#8e9298', highlight: '#e8edf2', shadow: '#3f444a', glow: '#b9c1ca'
-            }),
+            // Keep the single solid fill as a compatibility alias. New renderers
+            // consume the full palette; callers that only need the alpha-mask
+            // base colour must not silently lose the reviewed material tint.
+            color: palette.base,
+            palette,
             evidence: 'rise-kiranico-neutral-material-template-with-hash-audit'
         });
     }

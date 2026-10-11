@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "monsterId": "rathian",
+  "status": "planned",
+  "sourcePolicy": "reference-only-clean-beat",
+  "cutover": { "mode": "atomic", "keepCurrentRuntimeUntilApproved": true },
+  "references": [
+    "data/hunt/rathian-implementation-audit.md",
+    "data/hunt/monster-kits/notes/rathian.md",
+    "js/effects/hunt/HuntMonsterProfiles.js",
+    "data/hunt/monster-pattern-motion-overrides.json"
+  ],
+  "actions": [
+    { "id": "rathian.roar", "name": "포효", "acceptance": ["transition-roar BEAT 완료 전 후속 행동 금지", "포효 판정과 음성은 저작 이벤트에서만 발생"] },
+    { "id": "rathian.bite", "name": "물어뜯기", "acceptance": ["목표 측면 접근 후 입으로 접촉", "약공·엉덩방아 판정"] },
+    { "id": "rathian.tail_sweep", "name": "이단 꼬리 회전", "acceptance": ["화면 중앙 하단에서 180도씩 두 번", "좌측 2명 다음 우측 2명", "복귀 역회전 금지"] },
+    { "id": "rathian.fireball", "name": "화염구", "acceptance": ["1초 조준 후 현재 머리 방향에서 발사", "발사와 착탄 음향을 각각 이벤트로 소유"] },
+    { "id": "rathian.triple_fireball", "name": "삼연 화염구", "acceptance": ["1·2·3 발사마다 조준 방향과 발사점 갱신", "3타 각각 독립 판정"] },
+    { "id": "rathian.fireball_fizzle", "name": "탈진 화염구 불발", "acceptance": ["투사체와 피해 없음", "연기는 입 위치에서 발생"] },
+    { "id": "rathian.charge", "name": "돌진", "acceptance": ["현재 위치에서 목표 직선으로 즉시 가속", "충돌 시점과 HIT 일치", "화면 밖 종료 시 상단 자연 복귀"] },
+    { "id": "rathian.triple_charge", "name": "삼연속 돌진", "acceptance": ["각 패스 시작부터 동일한 빠른 속도", "각 패스마다 이동 방향에 맞게 이미지 방향 결정", "헌터 도착 후 꺾지 않음"] },
+    { "id": "rathian.somersault", "name": "서머솔트", "acceptance": ["접근 완료 후 반시계 45도 준비", "시계방향으로 올려치는 한 바퀴", "회전과 접근을 섞지 않음"] },
+    { "id": "rathian.double_somersault", "name": "이단 서머솔트", "acceptance": ["두 서머솔트가 독립 목표·판정을 가짐", "첫 피격 복귀 뒤 무적이 아니면 두 번째 판정 유효"] },
+    { "id": "rathian.bite_somersault", "name": "공중 물어뜯기 연계", "acceptance": ["물어뜯기 종료 위치에서 서머솔트가 연속됨", "순간이동 없이 하나의 BEAT 세션"] },
+    { "id": "rathian.somersault_glide", "name": "서머솔트 저공 활공", "acceptance": ["서머솔트 후 거리를 벌린 뒤 활강", "S자 직선 활강과 착지·미끄러짐이 이어짐"] },
+    { "id": "rathian.glide", "name": "저공 활공", "acceptance": ["비행 높이에서 S자 궤도로 빠르게 접근", "한 손을 축으로 180도 회전 착지 후 미끄러짐"] }
+  ]
+}

@@ -1,18 +1,15 @@
 'use strict';
 
 (function exposeReviewState(root, factory) {
-    const api = factory();
+    const contract = typeof module === 'object' && module.exports
+        ? require('./monster-motion-authoring-contract.js')
+        : root?.MonsterMotionAuthoringContract;
+    const api = factory(contract);
     if (typeof module === 'object' && module.exports) module.exports = api;
     if (root) root.MonsterAudioReviewState = api;
-}(typeof globalThis === 'object' ? globalThis : this, () => {
-    const EDITABLE_MOTION_FIELDS = Object.freeze(['ticks', 'at', 'to', 'origin', 'moveEasing',
-        'rotationEasing', 'pose', 'face', 'align', 'bounds', 'fade', 'sfx', 'label', 'aimBodyAt',
-        'targetMode', 'offsetX', 'offsetY', 'depth', 'rotation', 'rotationToward', 'rotateBy',
-        'rotateByFacing', 'scaleX', 'scaleY', 'skewX', 'skewY', 'opacity', 'damageScale', 'hit', 'hitOffsetTicks',
-        'judgmentOffsets', 'judgments',
-        'alignRotationToTravel', 'instantOpacity', 'instantPose', 'continueTravel', 'flipFacing', 'strideFlipTicks',
-        'stompSteps', 'fx', 'fxAnchor', 'fxDurationTicks', 'fxSecondary', 'fxSecondaryAnchor',
-        'fxSecondaryDurationTicks', 'fxSecondaryAngleMode', 'fxAdditional']);
+}(typeof globalThis === 'object' ? globalThis : this, contract => {
+    if (!contract) throw new Error('MonsterMotionAuthoringContract is unavailable');
+    const EDITABLE_MOTION_FIELDS = contract.EDITABLE_FIELDS;
     function slotIdsForBeat(beat) {
         return Array.isArray(beat?.audioSlots) ? beat.audioSlots.filter(Boolean) : [];
     }
@@ -38,18 +35,42 @@
     }
 
     function ticks(value) {
-        return Math.max(1, Math.min(600, Math.round(Number(
-            typeof value === 'object' ? value?.ticks : value
-        ) || 1)));
+        return contract.ticks(value);
     }
 
     function createMotionDraft(pattern = {}, timeline = {}) {
-        const graphBeats = Array.isArray(pattern.motionGraph?.beats)
-            ? pattern.motionGraph.beats : (pattern.motion || []);
-        const authored = new Map(graphBeats.map((beat, index) => [
-            beat.beat || `beat-${index + 1}`, beat
-        ]));
-        return Object.fromEntries((timeline.beats || []).map(beat => {
+        // The compiled BEAT graph is the only source that contains the full
+        // event lifecycle (launch/contact/finish). motionGraph is a visual
+        // projection and must never shadow those events in the editor.
+        const graphBeats = Array.isArray(pattern.beatV2?.beats)
+            ? pattern.beatV2.beats
+            : Array.isArray(pattern.motionGraph?.beats) ? pattern.motionGraph.beats : (pattern.motion || []);
+        // Native BEAT graphs keep appearance under tracks.visual[].value,
+        // whereas migration projections already expose it at the beat root.
+        // The editor must begin from the same flat visual data regardless of
+        // authoring form; otherwise scale/skew/origin silently became 1/0 for
+        // newly authored graphs even though the runtime graph contained them.
+        const authored = new Map(graphBeats.map((beat, index) => {
+            const visualFrames = Array.isArray(beat?.tracks?.visual) ? beat.tracks.visual : [];
+            const visual = visualFrames.length
+                ? clone([...visualFrames].sort((left, right) => Number(left?.offsetTicks || 0)
+                    - Number(right?.offsetTicks || 0)).at(-1)?.value || {}) : {};
+            const key = beat.id || beat.beat || `beat-${index + 1}`;
+            // Keep graph envelope/event metadata out of the editable draft.
+            // Saving those implementation fields back as motion values caused
+            // reload verification to compare two different representations.
+            const projectileEvents = (Array.isArray(beat?.events) ? beat.events : [])
+                .filter(event => contract.PROJECTILE_EVENT_KINDS.includes(event?.kind))
+                .map(event => clone(event));
+            const judgments = (Array.isArray(beat?.events) ? beat.events : [])
+                .filter(event => contract.JUDGMENT_KINDS.includes(event?.kind))
+                .map(event => clone(event));
+            const { id, beat: legacyBeat, tracks, events, ...flat } = beat || {};
+            return [key, { ...flat, ...visual,
+                ...(judgments.length ? { judgments } : {}),
+                ...(projectileEvents.length ? { projectileEvents } : {}), ticks: ticks(beat?.ticks) }];
+        }));
+        const draft = Object.fromEntries((timeline.beats || []).map(beat => {
             const source = { ...(authored.get(beat.id) || {}) };
             delete source.beat;
             const legacyJudgments = [];
@@ -65,6 +86,9 @@
                     size: String(pattern.interference?.size || pattern.secondaryInterference?.size || 'large') });
             }
             const judgments = Array.isArray(source.judgments) ? clone(source.judgments).map(item => {
+                if (item.kind === 'damage' && item.hitReactionKind === 'butt-stumble') {
+                    item.hitReactionKind = 'weak';
+                }
                 if (item.kind !== 'damage' || Number.isFinite(Number(item.damagePercent))) return item;
                 const next = { ...item, damagePercent: Math.max(0, Number(pattern.damageRatio || 0) * 100
                     * Number(item.damageScale ?? 1)) };
@@ -78,6 +102,50 @@
             }
             return [beat.id, { ...source, ...(judgments.length ? { judgments } : {}), ticks: ticks(beat.ticks) }];
         }));
+        return contract.normalizeBeats(draft);
+    }
+
+    function buildEditedBeatV2(pattern = {}, draft = {}) {
+        if (pattern.beatV2?.backend !== 'beat-v2' || !Array.isArray(pattern.beatV2.beats)) return null;
+        const graph = clone(pattern.beatV2);
+        let elapsed = 0;
+        const allEvents = [];
+        graph.beats = graph.beats.map(sourceBeat => {
+            const id = String(sourceBeat.id || sourceBeat.beat || '');
+            const authored = draft[id] || {};
+            const beat = clone(sourceBeat);
+            beat.ticks = ticks(authored.ticks ?? beat.ticks);
+            beat.startTicks = elapsed;
+            beat.endTicks = elapsed + beat.ticks;
+            beat.beat = id;
+            beat.id = id;
+            elapsed += beat.ticks;
+            const preserved = (beat.events || []).filter(event =>
+                !contract.JUDGMENT_KINDS.includes(event?.kind)
+                && !contract.PROJECTILE_EVENT_KINDS.includes(event?.kind));
+            const events = [
+                ...preserved,
+                ...(Array.isArray(authored.projectileEvents) ? authored.projectileEvents : []),
+                ...(Array.isArray(authored.judgments) ? authored.judgments : [])
+            ].map(event => ({ ...clone(event), beatId: id,
+                offsetTicks: Math.max(0, Math.min(beat.ticks - 1,
+                    Math.round(Number(event.offsetTicks) || 0))),
+                atTicks: beat.startTicks + Math.max(0, Math.min(beat.ticks - 1,
+                    Math.round(Number(event.offsetTicks) || 0))) }));
+            beat.events = events;
+            const frames = Array.isArray(beat.tracks?.visual) ? clone(beat.tracks.visual) : [];
+            if (!frames.length) frames.push({ offsetTicks: 0, value: {} });
+            const index = frames.length - 1;
+            frames[index] = { ...frames[index], value: contract.visualValue(authored) };
+            beat.tracks = { ...(beat.tracks || {}), visual: frames };
+            allEvents.push(...events);
+            return beat;
+        });
+        graph.totalTicks = elapsed;
+        graph.events = allEvents.sort((left, right) => left.atTicks - right.atTicks
+            || String(left.id || '').localeCompare(String(right.id || '')));
+        graph.eventIds = graph.events.map(event => event.id).filter(Boolean);
+        return graph;
     }
 
     function buildPreviewMotion(pattern = {}, timeline = {}, draft = {}) {
@@ -95,7 +163,8 @@
                     beat.hitOffsetTicks ?? timeline.beats?.[index]?.hitOffsetTicks
                 ) || 0))
             })),
-            renderer: useBeatMotion ? 'beat' : 'keyframe-beat'
+            renderer: useBeatMotion ? 'beat' : 'keyframe-beat',
+            beatV2: buildEditedBeatV2(pattern, draft)
         });
     }
 
@@ -111,7 +180,9 @@
                 : (authored.hit === undefined ? Boolean(beat.hit) : Boolean(authored.hit));
             const hitOffsetTicks = hit ? Math.max(0, Math.min(length - 1,
                 Math.round(Number(authored.hitOffsetTicks ?? beat.hitOffsetTicks) || 0))) : 0;
-            const projected = { ...beat, hit, hitOffsetTicks, judgments,
+            const projectileEvents = (Array.isArray(authored.projectileEvents)
+                ? authored.projectileEvents : []).map(item => clone(item));
+            const projected = { ...beat, hit, hitOffsetTicks, judgments, projectileEvents,
                 judgmentOffsets: clone(authored.judgmentOffsets || beat.judgmentOffsets || {}), ticks: length,
                 startTicks: elapsed, endTicks: elapsed + length };
             elapsed += length;
@@ -143,6 +214,27 @@
             * Math.max(0, Math.min(1, Number(beatProgress) || 0)));
     }
 
+    function authoredEventTicks(projected = {}, draft = {}) {
+        const ticksById = new Map();
+        const projectileById = new Map();
+        for (const beat of projected.beats || []) {
+            for (const event of draft[beat.id]?.judgments || []) {
+                const atTicks = beat.startTicks + Number(event.offsetTicks || 0);
+                ticksById.set(event.id, atTicks);
+                if (event.projectileId) projectileById.set(event.projectileId,
+                    { ...(projectileById.get(event.projectileId) || {}), outcome: event, outcomeAt: atTicks });
+            }
+            for (const event of draft[beat.id]?.projectileEvents || []) {
+                const atTicks = beat.startTicks + Number(event.offsetTicks || 0);
+                ticksById.set(event.id, atTicks);
+                const key = event.kind === 'projectile-launch' ? 'launch' : 'finish';
+                projectileById.set(event.projectileId,
+                    { ...(projectileById.get(event.projectileId) || {}), [key]: event, [`${key}At`]: atTicks });
+            }
+        }
+        return { ticksById, projectileById };
+    }
+
     function normalizePreviewScenario(value = {}) {
         const clampHunter = item => {
             const index = Math.round(Number(item));
@@ -156,7 +248,10 @@
             targetIndices: uniqueHunters(entry?.targetIndices)
         })).filter(entry => entry.impactIndex >= 0);
         return Object.freeze({
-            view: value.view === 'design' ? 'design' : 'runtime',
+            // The review surface is an authoring tool.  Keep target and
+            // per-impact controls visible by default; runtime remains an
+            // explicit opt-in view for a clean unforced playback check.
+            view: value.view === 'runtime' ? 'runtime' : 'design',
             monsterState: ['normal', 'enraged', 'exhausted', 'airborne'].includes(value.monsterState)
                 ? value.monsterState : 'normal',
             primaryTargetIndex: clampHunter(value.primaryTargetIndex),
@@ -171,16 +266,11 @@
     }
 
     function canonicalJson(value) {
-        const normalize = item => {
-            if (Array.isArray(item)) return item.map(normalize);
-            if (!item || typeof item !== 'object') return item;
-            return Object.fromEntries(Object.keys(item).sort().map(key => [key, normalize(item[key])]));
-        };
-        return JSON.stringify(normalize(value));
+        return contract.canonicalJson(value);
     }
 
     function motionValuesEqual(left, right) {
-        return canonicalJson(left) === canonicalJson(right);
+        return contract.compareBeats(left, right).equal;
     }
 
     class EditorSession {
@@ -276,7 +366,7 @@
             const next = { ...this.draft[beatId], ...filtered };
             next.ticks = ticks(next.ticks);
             for (const key of Object.keys(next)) if (next[key] === '' || next[key] == null) delete next[key];
-            this.draft[beatId] = next;
+            this.draft[beatId] = contract.normalizeBeat(next, { id: beatId });
             const tick = tickAtBeatProgress(this.timeline, this.draft,
                 this.scrub.beatId || beatId, this.scrub.beatProgress);
             const located = locateTick(this.timeline, this.draft, tick);
@@ -355,7 +445,11 @@
             list.push({ id, group: String(input.group || id), kind,
                 target: String(input.target || 'primary'), offsetTicks: Math.max(0, Number(input.offsetTicks) || 0),
                 ...(kind === 'damage' ? { damagePercent: Math.max(0, Math.min(1000,
-                    Number(input.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100))) }
+                    Number(input.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100))),
+                    hitReactionKind: input.hitReactionKind === 'butt-stumble' ? 'weak'
+                        : ['strong', 'weak'].includes(input.hitReactionKind) ? input.hitReactionKind : 'strong',
+                    ...(['fire', 'water', 'thunder', 'ice', 'dragon', 'paralysis', 'sleep', 'blast']
+                        .includes(input.element) ? { element: input.element } : {}) }
                     : { size: input.size || 'large' }) });
             this.draft[beatId] = { ...this.draft[beatId], judgments: list };
             return this.emit('add-judgment', { beatId, id });
@@ -374,9 +468,15 @@
                         delete next.damageScale;
                         next.damagePercent = Math.max(0, Math.min(1000,
                             Number(next.damagePercent ?? Number(this.pattern?.damageRatio || 0) * 100)));
+                        next.hitReactionKind = next.hitReactionKind === 'butt-stumble' ? 'weak'
+                            : ['strong', 'weak'].includes(next.hitReactionKind) ? next.hitReactionKind : 'strong';
+                        if (!['fire', 'water', 'thunder', 'ice', 'dragon', 'paralysis', 'sleep', 'blast']
+                            .includes(next.element)) delete next.element;
                     } else {
                         delete next.damageScale;
                         delete next.damagePercent;
+                        delete next.hitReactionKind;
+                        delete next.element;
                         next.size = next.size === 'small' ? 'small' : 'large';
                     }
                     next.target = ['primary', 'left', 'right', 'pair', 'pair-left', 'pair-right',
@@ -405,15 +505,23 @@
 
         moveJudgmentById(id, requestedTick) {
             const projected = projectTimeline(this.timeline, this.draft);
-            const tick = Math.max(0, Math.min(Math.max(0, projected.durationTicks - 1), Math.round(Number(requestedTick) || 0)));
-            const target = projected.beats.find(beat => tick >= beat.startTicks && tick < beat.endTicks) || projected.beats.at(-1);
+            let tick = Math.max(0, Math.min(Math.max(0, projected.durationTicks - 1),
+                Math.round(Number(requestedTick) || 0)));
             let value = null;
             for (const beat of Object.values(this.draft)) {
                 if (!Array.isArray(beat.judgments)) continue;
                 const match = beat.judgments.find(item => item.id === id);
                 if (match) value = clone(match);
             }
-            if (!value || !target) throw new Error(`Unknown judgment: ${id}`);
+            if (!value) throw new Error(`Unknown judgment: ${id}`);
+            if (value.projectileId) {
+                const lifecycle = authoredEventTicks(projected, this.draft).projectileById.get(value.projectileId);
+                if (Number.isFinite(lifecycle?.launchAt)) tick = Math.max(tick, lifecycle.launchAt + 1);
+                if (Number.isFinite(lifecycle?.finishAt)) tick = Math.min(tick, lifecycle.finishAt - 1);
+            }
+            const target = projected.beats.find(beat => tick >= beat.startTicks && tick < beat.endTicks)
+                || projected.beats.at(-1);
+            if (!target) throw new Error(`Unknown judgment target tick: ${id}`);
             this.checkpoint();
             for (const beat of Object.values(this.draft)) if (Array.isArray(beat.judgments)) {
                 beat.judgments = beat.judgments.filter(item => item.id !== id);
@@ -423,6 +531,39 @@
             this.draft[target.id] = { ...this.draft[target.id], judgments: list };
             this.scrub = { tick, beatId: target.id, beatProgress: (tick - target.startTicks) / Math.max(1, target.ticks) };
             return this.emit('move-judgment-id', { id, targetId: target.id, tick });
+        }
+
+        moveProjectileEventById(id, requestedTick) {
+            const projected = projectTimeline(this.timeline, this.draft);
+            let tick = Math.max(0, Math.min(Math.max(0, projected.durationTicks - 1),
+                Math.round(Number(requestedTick) || 0)));
+            let value = null;
+            for (const beat of Object.values(this.draft)) {
+                const match = beat.projectileEvents?.find(item => item.id === id);
+                if (match) value = clone(match);
+            }
+            if (!value) throw new Error(`Unknown projectile event: ${id}`);
+            const lifecycle = authoredEventTicks(projected, this.draft).projectileById.get(value.projectileId);
+            if (value.kind === 'projectile-launch' && Number.isFinite(lifecycle?.outcomeAt)) {
+                tick = Math.min(tick, lifecycle.outcomeAt - 1);
+            }
+            if (value.kind === 'projectile-finish' && Number.isFinite(lifecycle?.outcomeAt)) {
+                tick = Math.max(tick, lifecycle.outcomeAt + 1);
+            }
+            const target = projected.beats.find(beat => tick >= beat.startTicks && tick < beat.endTicks)
+                || projected.beats.at(-1);
+            if (!target) throw new Error(`Unknown projectile event target tick: ${id}`);
+            this.checkpoint();
+            for (const beat of Object.values(this.draft)) if (Array.isArray(beat.projectileEvents)) {
+                beat.projectileEvents = beat.projectileEvents.filter(item => item.id !== id);
+            }
+            const list = Array.isArray(this.draft[target.id].projectileEvents)
+                ? this.draft[target.id].projectileEvents : [];
+            list.push({ ...value, offsetTicks: tick - target.startTicks });
+            this.draft[target.id] = { ...this.draft[target.id], projectileEvents: list };
+            this.scrub = { tick, beatId: target.id,
+                beatProgress: (tick - target.startTicks) / Math.max(1, target.ticks) };
+            return this.emit('move-projectile-event', { id, targetId: target.id, tick });
         }
 
         setScenario(patch = {}) {
@@ -479,13 +620,14 @@
         slotIdsForBeat,
         ticks,
         createMotionDraft,
-        buildPreviewMotion,
+        buildPreviewMotion, buildEditedBeatV2,
         projectTimeline,
         locateTick,
         tickAtBeatProgress,
         normalizePreviewScenario,
         EDITABLE_MOTION_FIELDS,
         canonicalJson,
+        compareMotionValues: contract.compareBeats,
         motionValuesEqual,
         createEditorSession
     });

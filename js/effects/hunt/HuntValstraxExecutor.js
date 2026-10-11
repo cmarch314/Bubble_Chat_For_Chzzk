@@ -70,7 +70,9 @@ class HuntValstraxExecutor {
         const attackResults = [];
 
         targets.forEach(target => {
-            if (HuntMonsterTurnExecutor.isHunterImpactImmune(target)) {
+            if (HuntMonsterTurnExecutor.isHunterImpactImmune(target, {
+                resolveCounterAttempt: true
+            })) {
                 attackResults.push({ index: target.index, result: 'invulnerable' });
                 return;
             }
@@ -106,7 +108,9 @@ class HuntValstraxExecutor {
             });
             if (counter.handled) {
                 ({ damage, isGuard, isDodge, isForesightSlash, isIaiCounter } = counter);
-                if (counter.counterProtected) {
+                if (counter.counterAttempted && !counter.counterSucceeded) {
+                    HuntMonsterTurnExecutor.clearCounterInvulnerability(target);
+                } else if (counter.counterProtected) {
                     HuntMonsterTurnExecutor.grantCounterInvulnerability(target);
                 }
             } else if (hasShield && defendRoll < guardProb) {
@@ -141,7 +145,7 @@ class HuntValstraxExecutor {
                         engine.addLog(`🛡️ [방패 가드] ${target.name}이(가) 혜성 습격 폭발을 방어해냈습니다! (-${damage} HP)`, '#00ffff');
                         engine.playSFX('hunter_guard', null, { hunterIndex: target.index, action: 'guard' });
                         engine.shakeWeapon(target.index, '#00ffff');
-                        if (engine.callbacks.onTriggerGuardShake) engine.callbacks.onTriggerGuardShake(target.index);
+                        engine.presentHunterImpact?.(target.index, 'guard');
                         target.guardDuration = 6;
                         attackResults.push({ index: target.index, result: 'guard' });
                     } else {
@@ -157,8 +161,10 @@ class HuntValstraxExecutor {
                         target.hitStartedThisTick = true;
                         target.hitReactionKind = hitReaction.kind;
                         target.hitKnockbackDirection = hitReaction.knockbackDirection;
+                        target.hitReactionGeneration = Number(target.hitReactionGeneration || 0) + 1;
+                        hitReaction.generation = target.hitReactionGeneration;
                         engine.addLog(`💥 [피격] ${target.name}이(가) 혜성 습격 직격! 치명적인 데미지를 입었습니다. (-${damage} HP)`, '#ff5555');
-                        engine.triggerHitAnimation(target.index, hitReaction);
+                        engine.presentHunterImpact?.(target.index, 'hit', { reaction: hitReaction });
                         attackResults.push({ index: target.index, result: 'hit' });
                     }
                 }
@@ -177,7 +183,7 @@ class HuntValstraxExecutor {
                     engine.playSFX('hunter_evade', null, { hunterIndex: target.index, action: 'evade' });
                     engine.shakeWeapon(target.index, '#2eff7b', false, null, true);
                 }
-                if (engine.callbacks.onTriggerRollAnimation) engine.callbacks.onTriggerRollAnimation(target.index);
+                engine.presentHunterImpact?.(target.index, 'dodge');
                 target.rollDuration = 6;
                 attackResults.push({ index: target.index, result: 'dodge' });
             }

@@ -68,6 +68,23 @@ const adapterPreview = buildPreviewMotion({ motionGraph: { renderer: 'keyframe-b
 assert.strictEqual(adapterPreview.motion, null);
 assert.strictEqual(adapterPreview.runtimeTimingBeats[0].offsetX, 30,
     'profile-backed patterns must retain editor transforms without replacing their base animation');
+const nativeGraphDraft = createMotionDraft({ motionGraph: { renderer: 'beat', beats: [
+    { id: 'hop', ticks: 4, tracks: { visual: [{ offsetTicks: 0,
+        value: { scaleX: 1.18, scaleY: .78, skewX: -6, origin: 'part:feet' } }] } },
+    { id: 'impact', ticks: 2, tracks: { visual: [{ offsetTicks: 0, value: { pose: 'land' } }] } },
+    { id: 'return', ticks: 5, tracks: { visual: [{ offsetTicks: 0, value: { to: 'home' } }] } }
+] } }, timed);
+assert.deepStrictEqual(
+    { scaleX: nativeGraphDraft.hop.scaleX, scaleY: nativeGraphDraft.hop.scaleY,
+        skewX: nativeGraphDraft.hop.skewX, origin: nativeGraphDraft.hop.origin },
+    { scaleX: 1.18, scaleY: .78, skewX: -6, origin: 'part:feet' },
+    'native BEAT visual transforms must reach the editor draft intact');
+const nativeGraphPreview = buildPreviewMotion({ motionGraph: { renderer: 'beat' } }, timed, nativeGraphDraft);
+assert.deepStrictEqual(
+    { scaleX: nativeGraphPreview.motion[0].scaleX, scaleY: nativeGraphPreview.motion[0].scaleY,
+        skewX: nativeGraphPreview.motion[0].skewX, origin: nativeGraphPreview.motion[0].origin },
+    { scaleX: 1.18, scaleY: .78, skewX: -6, origin: 'part:feet' },
+    'native BEAT visual transforms must reach the compiled preview unchanged');
 const authoredPreview = buildPreviewMotion(motionPattern, timed, draft);
 assert.strictEqual(authoredPreview.useBeatMotion, true);
 assert.strictEqual(authoredPreview.motion[0].to, 'target');
@@ -83,6 +100,8 @@ assert.deepStrictEqual(normalizePreviewScenario({
 });
 
 const session = createEditorSession();
+assert.strictEqual(session.snapshot().scenario.view, 'design',
+    'editor sessions must expose target and impact authoring controls by default');
 session.load({ id: 'test.pattern', slots: pattern.slots, timeline: timed, motion: motionPattern.motion });
 session.select({ beatId: 'impact' });
 assert.strictEqual(session.snapshot().selection.beatId, 'impact');
@@ -129,6 +148,10 @@ assert.strictEqual(motionValuesEqual(
     { hop: { to: 'target', ticks: 6 }, impact: { rotation: 45, ticks: 4 } },
     { impact: { ticks: 4, rotation: 45 }, hop: { ticks: 6, to: 'target' } }
 ), true, 'save verification must ignore JSON object key insertion order');
+assert.strictEqual(motionValuesEqual(
+    { impact: { ticks: 4, judgments: [{ id: 'quake', directHitSupersedes: false }] } },
+    { impact: { ticks: 4, judgments: [{ id: 'quake' }] } }
+), true, 'an omitted opt-in judgment flag must be semantically equal to its explicit false default');
 const reorderedSaved = Object.fromEntries(Object.entries(session.serialize()).reverse().map(([id, beat]) =>
     [id, Object.fromEntries(Object.entries(beat).reverse())]));
 assert.doesNotThrow(() => session.markSaved(reorderedSaved),
@@ -158,9 +181,11 @@ judgmentSession.updateJudgment('j1', { kind: 'tremor', target: 'all' });
 assert.deepStrictEqual(judgmentSession.serialize().impact.judgments[0], {
     id: 'j1', group: 'g1', kind: 'tremor', target: 'all', size: 'large', offsetTicks: 2
 }, 'changing judgment kind must remove incompatible damage fields before save verification');
-judgmentSession.updateJudgment('j1', { kind: 'damage', target: 'pair-left', damagePercent: 30 });
+judgmentSession.updateJudgment('j1', { kind: 'damage', target: 'pair-left', damagePercent: 30, element: 'thunder' });
 assert.strictEqual(judgmentSession.serialize().impact.judgments[0].target, 'pair-left',
     'the editor must preserve reusable two-hunter simultaneous/left/right target presets');
+assert.strictEqual(judgmentSession.serialize().impact.judgments[0].element, 'thunder',
+    'damage-element authoring must persist through the editor state session');
 assert.strictEqual(judgmentSession.serialize().impact.fxSecondary, 'target-impact-dust',
     'secondary visual effects must remain in the canonical editable motion payload');
 
@@ -180,6 +205,32 @@ assert.deepStrictEqual(mixedSchemaSession.serialize()['old-impact'].judgments, [
 assert.strictEqual(mixedSchemaSession.serialize()['new-impact'].judgments[0].offsetTicks, 2);
 assert.strictEqual(mixedSchemaSession.snapshot().timeline.beats[0].hit, false,
     'the projected editor timeline must have only one HIT authority');
+
+const projectileSession = createEditorSession();
+projectileSession.load({ id: 'test.projectile',
+    timeline: { beats: [{ id: 'spit', ticks: 7 }, { id: 'recover', ticks: 5 }] },
+    motion: [{ beat: 'spit', ticks: 7, judgments: [{ id: 'contact', group: 'contact', kind: 'damage',
+        target: 'primary', damagePercent: 30, offsetTicks: 4 }] }, { beat: 'recover', ticks: 5 }],
+    beatV2: { backend: 'beat-v2', beats: [
+        { id: 'spit', ticks: 7, tracks: { visual: [{ offsetTicks: 0, value: {} }] }, events: [
+            { id: 'launch', kind: 'projectile-launch', offsetTicks: 1, projectileId: 'fireball',
+                target: 'primary', origin: 'part:head', outcomeEventId: 'contact' },
+            { id: 'contact', group: 'contact', kind: 'damage', target: 'primary', projectileId: 'fireball',
+                damagePercent: 30, offsetTicks: 4 }
+        ] },
+        { id: 'recover', ticks: 5, tracks: { visual: [{ offsetTicks: 0, value: {} }] }, events: [
+            { id: 'finish', kind: 'projectile-finish', offsetTicks: 2, projectileId: 'fireball' }
+        ] }
+    ] }
+});
+projectileSession.moveJudgmentById('contact', 2);
+assert.strictEqual(projectileSession.serialize().spit.judgments[0].offsetTicks, 2,
+    'a projectile HIT marker must remain independently draggable');
+assert.strictEqual(projectileSession.serialize().spit.projectileEvents[0].offsetTicks, 1,
+    'moving contact must not silently move launch');
+projectileSession.moveProjectileEventById('launch', 0);
+assert.strictEqual(projectileSession.serialize().spit.projectileEvents[0].offsetTicks, 0,
+    'launch must have its own independently draggable timeline marker');
 
 judgmentSession.removeJudgment('j1');
 assert.deepStrictEqual(judgmentSession.serialize().impact.judgments, [],

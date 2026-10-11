@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920,initial-scale=1">
+  <title>대검 횡베기·발차기 미리보기</title>
+  <link rel="stylesheet" href="../../styles/hunt-runtime.css">
+  <style>
+    html,body{width:1920px;height:1080px;margin:0;overflow:hidden;background:#0b0806;color:#fff;font-family:sans-serif}
+    main{position:relative;width:1848px;height:880px;margin:24px 36px;border:3px solid #876a3b;border-radius:18px;background:radial-gradient(circle at 50% 40%,#473526,#17110d 68%);overflow:hidden}
+    h1{margin:28px 36px;color:#f3d89b;font-size:34px}
+    #monster-showcase-panel{position:absolute;inset:100px 120px 70px;overflow:visible}
+    #fight-monster-img{position:absolute;left:50%;top:50%;width:560px;height:430px;transform:translate(-50%,-50%);border-radius:48% 55% 45% 52%;background:radial-gradient(ellipse at 42% 38%,#9d7749,#49351f 55%,#17100b 78%);filter:drop-shadow(0 28px 16px #000c)}
+    footer{position:fixed;inset:auto 0 0;height:162px;border-top:2px dashed #00ffaa88;background:#000b;display:grid;place-items:center;color:#77d8b5;font-size:22px;font-weight:900}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>대검 횡베기 · 발차기 타격 프레임</h1>
+    <section id="monster-showcase-panel">
+      <div id="fight-monster-img" aria-label="몬스터 표적"></div>
+    </section>
+  </main>
+  <footer>OBS 채팅 안전영역 · 하단 15%</footer>
+  <script>
+    const stage = document.getElementById('monster-showcase-panel');
+    const wide = document.createElement('span');
+    wide.className = 'hunt-action-effect hunt-weapon-impact-accent hunt-weapon-impact-wide-slash';
+    wide.style.cssText = 'left:50%;top:50%;--hunt-impact-width:360px;--hunt-impact-height:220px';
+    wide.innerHTML = '<i></i><b></b>';
+    stage.appendChild(wide);
+    const kick = document.createElement('span');
+    kick.className = 'hunt-action-effect hunt-weapon-impact-accent hunt-weapon-impact-kick is-from-right';
+    kick.style.cssText = 'left:50%;top:50%';
+    kick.textContent = '🦶';
+    stage.appendChild(kick);
+  </script>
+</body>
+</html>

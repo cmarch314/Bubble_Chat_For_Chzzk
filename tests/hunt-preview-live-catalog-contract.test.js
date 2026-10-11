@@ -44,5 +44,15 @@ for (const [monsterId, patterns] of Object.entries(catalog)) {
     }
 }
 
+for (const pattern of catalog.diablos || []) {
+    for (const impact of pattern.impactTimeline || []) {
+        if (!(Number(impact.damageScale) > 0)) continue;
+        assert.ok(['strong', 'weak'].includes(impact.hitReactionKind),
+            `diablos/${pattern.id}: approved damage judgment lost its Preview-authored reaction`);
+        assert.strictEqual(impact.hitRecoveryTicks, undefined,
+            `diablos/${pattern.id}: monster graph must not own hunter recovery timing`);
+    }
+}
+
 assert.ok(checked > 100, 'catalog audit must cover the full roster rather than a single monster');
 console.log(`[test] Preview/live catalog contract passed (${checked} patterns).`);

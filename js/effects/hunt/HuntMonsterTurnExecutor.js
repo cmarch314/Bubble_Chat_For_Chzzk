@@ -103,12 +103,26 @@ class HuntMonsterTurnExecutor {
         return (typeof globalThis !== 'undefined' && globalThis.HuntMonsterActionPolicy) || {};
     }
 
+    static judgment(pattern = {}) {
+        return pattern?.runtimeJudgment && typeof pattern.runtimeJudgment === 'object'
+            ? pattern.runtimeJudgment : null;
+    }
+
+    static judgmentField(pattern, field, legacyField, fallback = null) {
+        const judgment = HuntMonsterTurnExecutor.judgment(pattern);
+        if (judgment && judgment[field] !== undefined) return judgment[field];
+        if (legacyField && pattern?.[legacyField] !== undefined) return pattern[legacyField];
+        return fallback;
+    }
+
     static hitReactionForPattern(pattern = {}, target = {}) {
         const tags = Array.isArray(pattern.tags) ? pattern.tags.map(tag => String(tag).toLowerCase()) : [];
-        const authoredKind = String(pattern.runtimeImpactHitReactionKind || '').toLowerCase();
-        const kind = ['weak', 'strong'].includes(authoredKind)
-            ? authoredKind
-            : tags.includes('weak') || tags.includes('butt-stumble') ? 'weak' : 'strong';
+        const authoredKind = String(HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'hitReactionKind', 'runtimeImpactHitReactionKind', '')
+        ).toLowerCase();
+        const kind = authoredKind === 'butt-stumble' ? 'weak'
+            : ['weak', 'strong'].includes(authoredKind) ? authoredKind
+                : tags.includes('butt-stumble') || tags.includes('weak') ? 'weak' : 'strong';
         const hasExplicitKnockback = pattern.knockbackDirection !== undefined
             && pattern.knockbackDirection !== null;
         const authoredDirection = hasExplicitKnockback
@@ -121,11 +135,15 @@ class HuntMonsterTurnExecutor {
         }
         if (direction && !hasExplicitKnockback) direction *= -1;
         if (!direction) direction = Number(target.index || 0) < 2 ? -1 : 1;
+        const HunterTurns = typeof HuntHunterTurnExecutor !== 'undefined'
+            ? HuntHunterTurnExecutor
+            : (typeof require === 'function' ? require('./HuntHunterTurnExecutor.js') : null);
+        if (!HunterTurns?.hitReactionDurationTicks) {
+            throw new Error('HuntHunterTurnExecutor must own hunter hit recovery duration');
+        }
         return {
             kind,
-            durationTicks: Number.isFinite(Number(pattern.runtimeImpactHitRecoveryTicks))
-                ? Math.max(1, Number(pattern.runtimeImpactHitRecoveryTicks))
-                : kind === 'weak' ? 15 : 40,
+            durationTicks: HunterTurns.hitReactionDurationTicks(kind),
             knockbackDirection: direction < 0 ? -1 : 1
         };
     }
@@ -152,9 +170,33 @@ class HuntMonsterTurnExecutor {
         return Number(target.hitDuration || 0) > 0;
     }
 
-    static isHunterImpactImmune(target = {}) {
-        return HuntMonsterTurnExecutor.isHunterHitRecovering(target)
-            || Number(target.counterInvulnerabilityTicks || 0) > 0;
+    static isHunterImpactImmune(target = {}, options = {}) {
+        return HuntMonsterTurnExecutor.hunterImpactImmunityReason(target, options) !== null;
+    }
+
+    static hasFreshCounterAttempt(target = {}) {
+        const action = target.currentAction;
+        const tags = new Set(Array.isArray(action?.tags) ? action.tags : []);
+        const authoredWindow = [
+            'iai', 'perfect-guard', 'hammer-offset', 'lance-counter',
+            'lance-power-guard', 'charge-blade-guard',
+            'switch-axe-sword-counter', 'hbg-wyverncounter', 'tackle'
+        ].some(tag => tags.has(tag));
+        return authoredWindow || HuntMonsterTurnExecutor.longSwordCanForesight(target);
+    }
+
+    static hunterImpactImmunityReason(target = {}, options = {}) {
+        const resolvingFreshCounter = options.resolveCounterAttempt === true
+            && HuntMonsterTurnExecutor.hasFreshCounterAttempt(target);
+        if (Number(target.counterInvulnerabilityTicks || 0) > 0 && !resolvingFreshCounter) {
+            return 'counter';
+        }
+        if (Number(target.rollDuration || 0) > 0) return 'evade';
+        // Once a damaging reaction owns the hunter, its recovery window wins
+        // over any stale interference flag. This prevents later hits in the
+        // same combo from reopening an already translucent/tumbling hunter.
+        if (HuntMonsterTurnExecutor.isHunterHitRecovering(target)) return 'hit-recovery';
+        return null;
     }
 
     static grantCounterInvulnerability(target, ticks = 10) {
@@ -165,6 +207,28 @@ class HuntMonsterTurnExecutor {
         );
         target.counterInvulnerabilityStartedThisTick = true;
         return target.counterInvulnerabilityTicks;
+    }
+
+    static clearCounterInvulnerability(target) {
+        if (!target) return;
+        target.counterInvulnerabilityTicks = 0;
+        target.counterInvulnerabilityStartedThisTick = false;
+    }
+
+    static consumeFailedCounterAttempt(target, actionMachine = null) {
+        HuntMonsterTurnExecutor.clearCounterInvulnerability(target);
+        [
+            'hbgCounterWaiting', 'hbgCounterReady',
+            'switchCounterWaiting', 'switchCounterReady',
+            'hammerOffsetWaiting', 'hammerOffsetFollowupReady',
+            'snsPerfectGuardReady', 'snsCounterReady',
+            'cbGuardWaiting', 'cbGuardReady',
+            'lanceCounterWaiting', 'lanceCounterReady',
+            'powerGuardWaiting', 'powerGuardReady'
+        ].forEach(key => {
+            if (key in target) target[key] = false;
+        });
+        actionMachine?.cancel?.(target, 'idle');
     }
 
     static isHunterDefenseLocked(target = {}) {
@@ -236,10 +300,12 @@ class HuntMonsterTurnExecutor {
     static get STANCE_CYCLE_TICKS() { return 300; }
 
     static impactSlotKey(pattern) {
-        const cue = pattern?.runtimeImpactAudioCue;
+        const cue = HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'audioCue', 'runtimeImpactAudioCue');
         if (cue && cue !== 'none') return `impact:${cue}`;
         const total = Array.isArray(pattern?.impactTimeline) ? pattern.impactTimeline.length : 1;
-        const index = Number(pattern?.runtimeImpactTimelineIndex || 0);
+        const index = Number(HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'timelineIndex', 'runtimeImpactTimelineIndex', 0));
         return total > 1 ? `impact-${index + 1}` : 'impact';
     }
 
@@ -344,6 +410,8 @@ class HuntMonsterTurnExecutor {
         const iaiCounterProb = Number(ctx.iaiCounterProb ?? 0.58);
         const foresightProb = Number(ctx.foresightProb ?? 0.70);
         const isStunned = Boolean(ctx.isStunned);
+        const counterAttempted = !isStunned
+            && HuntMonsterTurnExecutor.hasFreshCounterAttempt(target);
         let damage = incomingDamage;
         let handled = false;
         let isGuard = false, isDodge = false, isForesightSlash = false, isIaiCounter = false;
@@ -419,7 +487,7 @@ class HuntMonsterTurnExecutor {
             if (actionMachine) actionMachine.cancel(target, 'guard');
             engine.addLog(`🛡️⚡ [가드 포인트] ${target.name}이(가) 정확히 막아 병 폭발을 일으키고 고출력 반격 자세로 전환했습니다!`, '#ff79c6');
             engine.showSkillBubble(target.index, '가드 포인트!');
-            engine.callbacks?.onTriggerGuardShake?.(target.index);
+            engine.presentHunterImpact?.(target.index, 'counter');
             engine.shakeWeapon(target.index, '#ff79c6', true, { id: 'charge_blade.guard_point' });
         } else if (!isStunned && (canLanceCounter || canPowerGuard)) {
             handled = true;
@@ -442,7 +510,7 @@ class HuntMonsterTurnExecutor {
             if (actionMachine) actionMachine.cancel(target, 'guard');
             engine.addLog(`🛡️ [${canPowerGuard ? '파워 가드' : '카운터 가드'}] ${target.name}이(가) 정면에서 버티며 반격권을 확보했습니다!`, '#87ceeb');
             engine.showSkillBubble(target.index, canPowerGuard ? `파워 가드 ${target.powerGuardCharge}단계!` : '카운터 가드!');
-            engine.callbacks?.onTriggerGuardShake?.(target.index);
+            engine.presentHunterImpact?.(target.index, 'counter');
             engine.shakeWeapon(target.index, '#87ceeb', true, { id: canPowerGuard ? 'lance.power_guard' : 'lance.counter_stance' });
         } else if (!isStunned && canHammerOffset && defendRoll < specialChance(.70)) {
             handled = true;
@@ -470,7 +538,7 @@ class HuntMonsterTurnExecutor {
             if (actionMachine) actionMachine.cancel(target, 'guard');
             engine.addLog(`🛡️ [퍼펙트 가드] ${target.name}이(가) 공격을 정확히 막아내고 카운터베기 연계권을 얻었습니다!`, '#f5f8ff');
             engine.showSkillBubble(target.index, '퍼펙트 가드!');
-            engine.callbacks?.onTriggerGuardShake?.(target.index);
+            engine.presentHunterImpact?.(target.index, 'perfect-guard');
             engine.shakeWeapon(target.index, '#f5f8ff', true, { id: 'sword_shield.perfect_guard' });
         } else if (!isStunned && target.id === 'long_sword' && hasIaiAttempt) {
             handled = true;
@@ -514,10 +582,16 @@ class HuntMonsterTurnExecutor {
                 counterProtected = foresight.success;
             }
         }
+        const counterSucceeded = counterAttempted
+            && Boolean(counterProtected || isGuard || isDodge);
+        if (counterAttempted && !counterSucceeded) {
+            handled = true;
+            HuntMonsterTurnExecutor.consumeFailedCounterAttempt(target, actionMachine);
+        }
         return {
             handled, damage, isGuard, isDodge, isForesightSlash, isIaiCounter,
             isPerfectGuard, isHammerOffset, isLanceCounter, isChargeBladeGuardPoint,
-            isSwitchAxeCounter, counterProtected
+            isSwitchAxeCounter, counterProtected, counterAttempted, counterSucceeded
         };
     }
 
@@ -592,7 +666,8 @@ class HuntMonsterTurnExecutor {
         if (pattern.guardable === false || String(pattern.guardable).toLowerCase() === 'false') {
             return false;
         }
-        if (pattern.runtimeDefenseMode === 'emergency-jump') return false;
+        if (HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'defenseMode', 'runtimeDefenseMode') === 'emergency-jump') return false;
         const tags = new Set((pattern.tags || []).map(tag => String(tag).toLowerCase()));
         return !['unguardable', 'unblockable', 'guard-break', 'guard-piercing', 'no-guard']
             .some(tag => tags.has(tag));
@@ -606,6 +681,7 @@ class HuntMonsterTurnExecutor {
             && (!actionMachine || actionMachine.canGuard(target));
         const canEvade = !actionMachine || actionMachine.canEvade(target);
         const isCharging = HuntMonsterTurnExecutor.isGreatSwordCharging(target);
+        const canTackle = isCharging && HuntMonsterTurnExecutor.isPatternGuardable(pattern);
         const hasShield = canGuard && !isCharging
             && (target.type === 'shield' || target.id === 'heavy_bowgun');
         const guaranteedLanceGuard = target.id === 'lance' && hasShield;
@@ -615,11 +691,64 @@ class HuntMonsterTurnExecutor {
                 && Number(target.spiritGauge || 0) > 0);
         const attemptChance = target.personality === 'newbie' ? .90
             : target.personality === 'offensive' ? .96 : .99;
+        const tackleChance = HuntMonsterTurnExecutor.personalityProfiles()
+            ?.specialActionChance?.(target, .90) ?? .90;
         return {
             attempted: guaranteedLanceGuard
-                || ((canGuard || canEvade) && engine.random() < attemptChance),
+                || ((canTackle || canGuard || canEvade)
+                    && engine.random() < (canTackle ? tackleChance : attemptChance)),
+            preferred: canTackle ? 'tackle'
+                : counterReady ? 'counter' : hasShield ? 'guard' : canEvade ? 'evade' : 'none'
+        };
+    }
+
+    static resolveHunterResponseIntent(engine, target, pattern = {}, plannedIntent = null) {
+        const planned = plannedIntent
+            || HuntMonsterTurnExecutor.planHunterResponseIntent(engine, target, pattern);
+        if (!planned?.attempted || HuntMonsterTurnExecutor.isHunterDefenseLocked(target)) {
+            return { attempted: false, preferred: 'none' };
+        }
+        const actionMachine = engine.actionStateMachine;
+        if (HuntMonsterTurnExecutor.isGreatSwordCharging(target)
+            && HuntMonsterTurnExecutor.isPatternGuardable(pattern)) {
+            return { attempted: true, preferred: 'tackle' };
+        }
+        const canGuard = HuntMonsterTurnExecutor.isPatternGuardable(pattern)
+            && (!actionMachine || actionMachine.canGuard(target));
+        const canEvade = !actionMachine || actionMachine.canEvade(target);
+        const hasShield = canGuard
+            && (target.type === 'shield' || target.id === 'heavy_bowgun');
+        const counterReady = Boolean(target.currentAction?.tags?.includes('counter'))
+            || (target.id === 'long_sword'
+                && target.longSwordForesightEligible
+                && Number(target.spiritGauge || 0) > 0);
+        return {
+            attempted: canGuard || canEvade || counterReady,
             preferred: counterReady ? 'counter' : hasShield ? 'guard' : canEvade ? 'evade' : 'none'
         };
+    }
+
+    static activateReactiveGreatSwordTackle(engine, target) {
+        if (!HuntMonsterTurnExecutor.isGreatSwordCharging(target)) return false;
+        const Mechanics = engine.weaponMechanics?.constructor?.actionsFor
+            ? engine.weaponMechanics.constructor
+            : (typeof require === 'function' ? require('./HuntWeaponMechanics.js') : null);
+        const tackle = Mechanics?.actionsFor?.('great_sword')
+            ?.find(action => action.id === 'great_sword.tackle');
+        if (!tackle) return false;
+        engine.cancelHunterBeatAction?.(target, 'reactive-tackle');
+        engine.callbacks?.onInterruptWeaponVisual?.(target.index);
+        engine.weaponMechanics?.applyAction?.(engine, target, tackle);
+        engine.beginHunterBeatAction?.(target, tackle);
+        engine.actionStateMachine?.begin?.(target, tackle);
+        // Hunter BEAT owns action timing, but the combat renderer still needs
+        // the authored weapon profile to make the shoulder check visible.
+        // Starting only the runtime state made a successful auto-tackle look
+        // like an unexplained immunity/HP reduction in live hunts.
+        engine.shakeWeapon?.(target.index, '#ff9500', true, tackle);
+        target.greatSwordChargeLocked = false;
+        engine.showSkillBubble?.(target.index, '태클!');
+        return true;
     }
 
     static repeatTargetsForState(targets, pattern, monsterState = 'normal') {
@@ -638,7 +767,8 @@ class HuntMonsterTurnExecutor {
     }
 
     static brokenPartDamageModifier(engine, pattern) {
-        if (pattern?.runtimeImpactIgnoreBrokenPartDamage) return 1;
+        if (HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'ignoreBrokenPartDamage', 'runtimeImpactIgnoreBrokenPartDamage', false)) return 1;
         const authored = HuntMonsterTurnExecutor.actionPolicy().brokenPartDamageModifier(
             engine.monsterPartState || [], pattern);
         const usedPartPenalty = pattern?.runtimeUsedPart
@@ -649,7 +779,8 @@ class HuntMonsterTurnExecutor {
     }
 
     static statusAllowed(engine, pattern) {
-        if (pattern?.runtimeImpactSuppressStatus) return false;
+        if (HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'suppressStatus', 'runtimeImpactSuppressStatus', false)) return false;
         return HuntMonsterTurnExecutor.actionPolicy().statusAllowed(
             engine.monsterPartState || [], pattern);
     }
@@ -734,8 +865,16 @@ class HuntMonsterTurnExecutor {
             : stancePool[Math.floor(engine.random() * stancePool.length)];
     }
 
+    static applyPendingTransitionRoarContext(engine, pattern) {
+        const kind = String(engine.pendingMonsterTransitionRoarKind || '');
+        if (!['encounter', 'rage'].includes(kind)
+            || !pattern?.tags?.includes('transition-roar')) return pattern;
+        engine.pendingMonsterTransitionRoarKind = null;
+        return { ...pattern, runtimeTransitionRoarKind: kind };
+    }
+
     static prepare(engine) {
-        if (engine.pendingMonsterAction) return false;
+        if (engine.pendingMonsterAction || engine.isMonsterActionSessionActive?.()) return false;
         if (typeof engine.random !== 'function') engine.random = Math.random;
         // Do not begin (or pay for) an action while every hunter is temporarily
         // unavailable. This commonly happens while the party is carting, at
@@ -770,6 +909,7 @@ class HuntMonsterTurnExecutor {
             pattern = HuntMonsterTurnExecutor.selectPattern(engine);
         }
         if (!pattern) return false;
+        pattern = HuntMonsterTurnExecutor.applyPendingTransitionRoarContext(engine, pattern);
         pattern = HuntMonsterTurnExecutor.decorateHabitatVariant(engine,
             engine.monsterTraitRuntime?.decorateAction?.(engine, pattern) || pattern);
         if (pattern.partUse?.mode === 'random-front-leg') {
@@ -815,7 +955,7 @@ class HuntMonsterTurnExecutor {
         // Approved graphs already contain their telegraph BEAT. A separate
         // pending windup makes live combat slower than preview and creates a
         // second interruption owner for the same action.
-        const windupTicks = pattern.beatV2Approved === true ? 0 : legacyWindupTicks;
+        const windupTicks = (pattern.beatV2Enabled === true || pattern.beatV2Approved === true) ? 0 : legacyWindupTicks;
         const animationProfile = HuntMonsterTurnExecutor.animationCatalog()?.resolve?.(
             pattern,
             HuntMonsterTurnExecutor.displayPatternName(pattern, engine.selectedMonster),
@@ -850,7 +990,7 @@ class HuntMonsterTurnExecutor {
             : Number(engine.monsterAtb || 0) - actionCost;
         if (!engine.smallMonsterSwarm) engine.updateMonsterAtbUI(engine.monsterAtb);
         let targetIndex = null;
-        if (isBurrowEmerge && pattern.beatV2Approved !== true) {
+        if (isBurrowEmerge && !(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)) {
             const targetable = HuntMonsterTurnExecutor.targetableHunters(engine);
             if (!targetable.length) {
                 return HuntMonsterTurnExecutor.cancelPreparedTargetAction(engine);
@@ -878,7 +1018,7 @@ class HuntMonsterTurnExecutor {
         // 울려야 한다. 꼬리를 휘두르는 순간이 아니라 몸을 세우는 순간이 울음의 자리다.
         const hasSomersaultCue = (pattern.impactTimeline || [])
             .some(event => event?.audioCue === 'somersault');
-        if (pattern.beatV2Approved !== true && (!pattern.suppressPrepareAudio || hasSomersaultCue)) {
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && (!pattern.suppressPrepareAudio || hasSomersaultCue)) {
             engine.playSFX?.('monster_telegraph', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
@@ -900,7 +1040,20 @@ class HuntMonsterTurnExecutor {
         return true;
     }
 
+    static executeJudgment(engine, command = {}) {
+        if (!command.pattern) return false;
+        return HuntMonsterTurnExecutor.execute(
+            engine,
+            { ...command.pattern, runtimeJudgment: command },
+            command.attackerIndex,
+            command.targetIndices?.[0] ?? command.primaryTargetIndex
+        );
+    }
+
     static execute(engine, preparedPattern = null, preparedAttackerIndex = null, preparedTargetIndex = null) {
+        if (engine.monsterBeatRuntime?.has?.('monster')
+            && !HuntMonsterTurnExecutor.judgment(preparedPattern)
+            && preparedPattern?.runtimeImpactCommit !== true) return false;
         if (engine.smallMonsterSwarm) {
             const attacker = Number.isInteger(preparedAttackerIndex)
                 ? engine.smallMonsterSwarm.units[preparedAttackerIndex]
@@ -913,7 +1066,8 @@ class HuntMonsterTurnExecutor {
             pattern = HuntMonsterTurnExecutor.selectPattern(engine);
         }
         if (!pattern) return;
-        const isImpactCommit = pattern.runtimeImpactCommit === true;
+        const runtimeJudgment = HuntMonsterTurnExecutor.judgment(pattern);
+        const isImpactCommit = Boolean(runtimeJudgment) || pattern.runtimeImpactCommit === true;
         // Hit recovery never changes targeting or the authored attack path.
         // Only impact resolution grants temporary damage/reaction immunity.
         const targetable = HuntMonsterTurnExecutor.targetableHunters(engine);
@@ -934,7 +1088,7 @@ class HuntMonsterTurnExecutor {
         }
         const attackName = HuntMonsterTurnExecutor.displayPatternName(pattern, engine.selectedMonster);
 
-        if (pattern.beatV2Approved !== true
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
             && pattern.tags?.includes('burrow-enter') && pattern.followUp) {
             if (pattern.secondaryInterference) {
                 HuntMonsterTurnExecutor.targetableHunters(engine).forEach(target => {
@@ -966,7 +1120,10 @@ class HuntMonsterTurnExecutor {
 
         if (pattern.type === 'roar' && isImpactCommit) {
             if (engine.telemetry) engine.telemetry.recordMonsterPattern(engine.selectedMonster.id, pattern, 'roar', 0);
-            engine.triggerMonsterRoarFlinch(false);
+            engine.triggerMonsterRoarFlinch(
+                pattern.runtimeTransitionRoarKind === 'encounter',
+                { actionOwned: pattern.beatV2Enabled === true || pattern.beatV2Approved === true }
+            );
             if (Number(pattern.damageRatio || 0) <= 0) {
                 engine.monsterTraitRuntime?.afterAction?.(engine, pattern, []);
                 engine.monsterRecoveryDuration = 0;
@@ -974,7 +1131,7 @@ class HuntMonsterTurnExecutor {
             }
         }
 
-        if (pattern.beatV2Approved !== true
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
             && !isImpactCommit && pattern.type !== 'roar' && !pattern.suppressPrepareAudio) {
             engine.playSFX('monster_attack', null, {
                 monsterId: engine.selectedMonster.id,
@@ -985,8 +1142,9 @@ class HuntMonsterTurnExecutor {
                 patternDelivery: pattern.delivery,
                 audioPhase: 'action-start'
             });
-        } else if (pattern.beatV2Approved !== true
-            && isImpactCommit && pattern.runtimeImpactAudioCue === 'tigrex-final-vocal') {
+        } else if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
+            && isImpactCommit && HuntMonsterTurnExecutor.judgmentField(
+                pattern, 'audioCue', 'runtimeImpactAudioCue') === 'tigrex-final-vocal') {
             engine.playSFX?.('monster_attack', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
@@ -1000,7 +1158,7 @@ class HuntMonsterTurnExecutor {
         // Phase-slot triggers (타격/후딜): fire the user-mapped pattern override at
         // the exact impact frame and again for recovery on the final hit. These are
         // overrideOnly, so they stay silent until a sound is assigned in the tool.
-        if (pattern.beatV2Approved !== true && isImpactCommit && pattern.type !== 'roar') {
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && isImpactCommit && pattern.type !== 'roar') {
             engine.playSFX?.('monster_impact', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
@@ -1008,7 +1166,8 @@ class HuntMonsterTurnExecutor {
                 patternSlot: HuntMonsterTurnExecutor.impactSlotKey(pattern),
                 overrideOnly: true
             });
-            if (pattern.runtimeImpactTimelineFinal !== false) {
+            if (HuntMonsterTurnExecutor.judgmentField(
+                pattern, 'timelineFinal', 'runtimeImpactTimelineFinal', true) !== false) {
                 engine.playSFX?.('monster_recovery', null, {
                     monsterId: engine.selectedMonster.id,
                     patternId: pattern.id,
@@ -1041,8 +1200,10 @@ class HuntMonsterTurnExecutor {
         const isCrossCharge = pattern.tags?.includes('cross-charge');
         const targetingMode = String(pattern.targeting?.mode || '');
         const isSpecialCharge = ['adjacent-lane', 'primary-adjacent-both', 'return-adjacent-passes', 'screen-sweep'].includes(targetingMode);
-        const preparedTargetIndices = isImpactCommit && Array.isArray(pattern.runtimeImpactTargetIndices)
-            ? pattern.runtimeImpactTargetIndices.filter(Number.isInteger)
+        const judgmentTargetIndices = HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'targetIndices', 'runtimeImpactTargetIndices', []);
+        const preparedTargetIndices = isImpactCommit && Array.isArray(judgmentTargetIndices)
+            ? judgmentTargetIndices.filter(Number.isInteger)
             : Number.isInteger(preparedTargetIndex) ? [preparedTargetIndex] : [];
         const preparedTarget = Number.isInteger(preparedTargetIndex)
             ? targetable.find(target => target.index === preparedTargetIndex)
@@ -1052,7 +1213,8 @@ class HuntMonsterTurnExecutor {
             : pattern.tags?.includes('burrow-emerge')
                 ? targetable[Math.floor(engine.random() * targetable.length)].index
                 : null;
-        let targetsToHit = isImpactCommit && pattern.runtimeImpactEmpty === true
+        let targetsToHit = isImpactCommit && HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'allowEmpty', 'runtimeImpactEmpty', false) === true
             ? []
             : isImpactCommit && preparedTargetIndices.length
             ? targetable.filter(target => preparedTargetIndices.includes(target.index))
@@ -1080,6 +1242,7 @@ class HuntMonsterTurnExecutor {
                 random: engine.random.bind(engine),
                 mode: targetingMode,
                 defaultTargets: targetsToHit,
+                primaryIndex: resolvedPreparedTargetIndex,
                 distinctPasses: Boolean(pattern.targeting?.distinctPasses)
             });
         targetsToHit = targetPlan.targets;
@@ -1104,7 +1267,7 @@ class HuntMonsterTurnExecutor {
                 engine.addLog(`🛡️ [희생 방패] ${sacrifice.hunterName}이(가) ${protectedHunter.hunterName} 앞을 막아섰습니다!`, '#8fd7ff');
             }
         }
-        if (!pattern.runtimeImpactTimelineEvent) {
+        if (!isImpactCommit && !pattern.runtimeImpactTimelineEvent) {
             targetsToHit = HuntMonsterTurnExecutor.repeatTargetsForState(
                 targetsToHit,
                 pattern,
@@ -1112,8 +1275,9 @@ class HuntMonsterTurnExecutor {
             );
         }
 
+        const beatDriven = (pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && Boolean(pattern.beatV2);
         const traversal = HuntMonsterTurnExecutor.movementForPattern(pattern, engine.monsterState);
-        if (!isImpactCommit && traversal) {
+        if (!beatDriven && !isImpactCommit && traversal) {
             engine.beginMonsterTraversal?.(
                 traversal.kind,
                 traversal.ticks,
@@ -1136,7 +1300,7 @@ class HuntMonsterTurnExecutor {
                 return;
             }
             const policy = HuntMonsterTurnExecutor.actionPolicy();
-            const measuredImpact = pattern.beatV2Approved === true ? null
+            const measuredImpact = (pattern.beatV2Enabled === true || pattern.beatV2Approved === true) ? null
                 : engine.callbacks.onResolveMonsterImpactTimeline?.(
                     pattern,
                     uniqueTargets.map(target => target.index)
@@ -1158,37 +1322,45 @@ class HuntMonsterTurnExecutor {
             ]));
             const impactDelayTicks = events[0]?.atTicks
                 || HuntMonsterTurnExecutor.impactDelayTicks(pattern, engine.monsterState);
-            engine.pendingMonsterImpact = {
-                pattern: {
-                    ...pattern,
-                    runtimeSweepVector: measuredImpact?.runtimeSweepVector,
-                    runtimeImpactCommit: true,
-                    runtimeImpactTimelineEvent: true,
-                    runtimeDefenseIntents
-                },
-                remainingTicks: impactDelayTicks,
-                totalTicks: impactDelayTicks,
-                attackerIndex: preparedAttackerIndex,
-                targetIndex,
-                events,
-                nextEventIndex: 0
+            const sessionPattern = {
+                ...pattern,
+                runtimeSweepVector: measuredImpact?.runtimeSweepVector,
+                runtimeDefenseIntents
             };
-            if (pattern.beatV2Approved === true && pattern.beatV2) {
+            if (beatDriven) {
+                engine.pendingMonsterImpact = null;
                 engine.beginMonsterBeatAction?.(pattern.beatV2, {
                     patternId: pattern.id,
-                    pattern,
+                    pattern: sessionPattern,
                     targetIndex,
-                    attackerIndex: preparedAttackerIndex
+                    attackerIndex: preparedAttackerIndex,
+                    judgmentEvents: events
                 });
+            } else {
+                engine.pendingMonsterImpact = {
+                    pattern: {
+                        ...sessionPattern,
+                        runtimeImpactCommit: true,
+                        runtimeImpactTimelineEvent: true
+                    },
+                    remainingTicks: impactDelayTicks,
+                    totalTicks: impactDelayTicks,
+                    attackerIndex: preparedAttackerIndex,
+                    targetIndex,
+                    events,
+                    nextEventIndex: 0
+                };
             }
             const { type: pendingAttackType, emoji: pendingEmoji } = engine.getMonsterAttackType(attackName, pattern);
-            engine.monsterActionPresentationTicks = Math.max(
-                Number(engine.monsterActionPresentationTicks || 0),
-                Number(pattern.movement?.ticks || 0),
-                Array.isArray(pattern.motion)
-                    ? pattern.motion.reduce((sum, beat) => sum + Math.max(1, Number(beat?.ticks) || 1), 0)
-                    : 0
-            );
+            if (!beatDriven) {
+                engine.monsterActionPresentationTicks = Math.max(
+                    Number(engine.monsterActionPresentationTicks || 0),
+                    Number(pattern.movement?.ticks || 0),
+                    Array.isArray(pattern.motion)
+                        ? pattern.motion.reduce((sum, beat) => sum + Math.max(1, Number(beat?.ticks) || 1), 0)
+                        : 0
+                );
+            }
             engine.callbacks.onTriggerMonsterAttack?.(
                 pendingAttackType,
                 pendingEmoji,
@@ -1202,18 +1374,16 @@ class HuntMonsterTurnExecutor {
                     runtimeResolvedImpactTimeline: events
                 }
             );
-            // The renderer may synchronously replace authored ticks with
-            // measured collision ticks (Tigrex charge passes, screen sweeps,
-            // projectile travel). Keep the engine's first countdown on that
-            // same mutated timeline instead of retaining the pre-render value.
-            const synchronizedImpactDelay = Math.max(1, Number(
-                events[0]?.atTicks || impactDelayTicks
-            ));
-            engine.pendingMonsterImpact.remainingTicks = synchronizedImpactDelay;
-            engine.pendingMonsterImpact.totalTicks = synchronizedImpactDelay;
+            // Approved BEAT actions keep authored ticks immutable. Only legacy
+            // actions retain the compatibility countdown below.
+            const synchronizedImpactDelay = Math.max(1, Number(events[0]?.atTicks || impactDelayTicks));
+            if (engine.pendingMonsterImpact) {
+                engine.pendingMonsterImpact.remainingTicks = synchronizedImpactDelay;
+                engine.pendingMonsterImpact.totalTicks = synchronizedImpactDelay;
+            }
             const synchronizedFinalImpactTick = events.reduce((latest, event) =>
                 Math.max(latest, Number(event?.atTicks || 0)), synchronizedImpactDelay);
-            if (engine.monsterTraversalState) {
+            if (!beatDriven && engine.monsterTraversalState) {
                 engine.monsterTraversalState.remainingTicks = Math.max(
                     Number(engine.monsterTraversalState.remainingTicks || 0),
                     synchronizedFinalImpactTick
@@ -1227,7 +1397,7 @@ class HuntMonsterTurnExecutor {
             return;
         }
 
-        if (!isImpactCommit && pattern.beatV2Approved === true && pattern.beatV2) {
+        if (!isImpactCommit && (pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && pattern.beatV2) {
             engine.beginMonsterBeatAction?.(pattern.beatV2, {
                 patternId: pattern.id,
                 pattern,
@@ -1239,8 +1409,9 @@ class HuntMonsterTurnExecutor {
         // Creature vocals may accompany the action start, but authored and
         // fallback SE belongs to the actual contact/projectile/explosion event.
         // Delayed and multi-hit timelines re-enter here once per committed event.
-        if (pattern.beatV2Approved !== true
-            && pattern.type !== 'roar' && pattern.runtimeImpactAudioCue !== 'somersault') {
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
+            && pattern.type !== 'roar' && HuntMonsterTurnExecutor.judgmentField(
+                pattern, 'audioCue', 'runtimeImpactAudioCue') !== 'somersault') {
             engine.playSFX('monster_attack', null, {
                 monsterId: engine.selectedMonster.id,
                 patternId: pattern.id,
@@ -1249,14 +1420,16 @@ class HuntMonsterTurnExecutor {
                 patternTags: pattern.tags,
                 patternDelivery: pattern.delivery,
                 audioPhase: 'impact',
-                impactEventKind: pattern.runtimeImpactEventKind || null,
-                impactTimelineIndex: pattern.runtimeImpactTimelineIndex
+                impactEventKind: HuntMonsterTurnExecutor.judgmentField(
+                    pattern, 'eventKind', 'runtimeImpactEventKind'),
+                impactTimelineIndex: HuntMonsterTurnExecutor.judgmentField(
+                    pattern, 'timelineIndex', 'runtimeImpactTimelineIndex')
             });
         }
 
         // Charge trigger
         const isChargeAttack = attackName.includes('돌진') || attackName.includes('급습') || attackName.includes('휩쓸기') || attackName.includes('강습') || attackName.includes('활공') || attackName.includes('진격') || attackName.includes('습격') || attackName.includes('들이받기');
-        if (pattern.beatV2Approved !== true
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true)
             && !isImpactCommit && isChargeAttack && !isChargePattern) {
             if (engine.callbacks.onTriggerMonsterCharge) engine.callbacks.onTriggerMonsterCharge();
         }
@@ -1284,7 +1457,8 @@ class HuntMonsterTurnExecutor {
                 return;
             }
             directDamageTargetIds.add(target.index);
-            if (Number(pattern.runtimeImpactDamageScale) === 0) {
+            if (Number(HuntMonsterTurnExecutor.judgmentField(
+                pattern, 'damageScale', 'runtimeImpactDamageScale', 1)) === 0) {
                 attackResults.push({ index: target.index, result: 'effect' });
                 return;
             }
@@ -1294,8 +1468,22 @@ class HuntMonsterTurnExecutor {
             }
             // The monster may keep its chosen target, but a hunter already tumbling
             // through hit recovery silently ignores every follow-up hit.
-            if (HuntMonsterTurnExecutor.isHunterImpactImmune(target)) {
-                attackResults.push({ index: target.index, result: 'invulnerable' });
+            const immunityReason = HuntMonsterTurnExecutor.hunterImpactImmunityReason(target, {
+                resolveCounterAttempt: true
+            });
+            if (immunityReason) {
+                if (immunityReason === 'counter') {
+                    // Counter protection used to discard the impact silently,
+                    // making a sharpening/charging hunter look inexplicably
+                    // immune. Keep the authored one-second protection, but show
+                    // the guard recoil that explains why no damage landed.
+                    engine.presentHunterImpact?.(target.index, 'counter');
+                }
+                attackResults.push({
+                    index: target.index,
+                    result: immunityReason === 'evade' ? 'dodge'
+                        : immunityReason === 'counter' ? 'counter' : 'invulnerable'
+                });
                 return;
             }
             const resistedBy = engine.perkRuntime && engine.perkRuntime.ignoresPattern(target, pattern);
@@ -1317,7 +1505,10 @@ class HuntMonsterTurnExecutor {
             let baseDmg = Math.max(1, Math.floor(target.maxHp
                 * Number(isUltimate ? 0.90 : (authoredTargetRatio ?? pattern.damageRatio ?? 0.22))
                 * (isUltimate ? 1 : partDamageModifier)));
-            baseDmg = Math.max(1, Math.floor(baseDmg * Number(pattern.runtimeImpactDamageScale ?? 1)));
+            baseDmg = Math.max(1, Math.floor(baseDmg * Number(
+                HuntMonsterTurnExecutor.judgmentField(
+                    pattern, 'damageScale', 'runtimeImpactDamageScale', 1)
+            )));
             baseDmg = Math.max(1, Math.floor(baseDmg * Math.max(0,
                 Number(engine.difficultyProfile?.monsterDamageMultiplier ?? 1))));
             // Signature ultimates are a readable 90%-max-HP check before hunter-side
@@ -1329,11 +1520,23 @@ class HuntMonsterTurnExecutor {
             if (Number(target.hornDefenseBuffTicks || 0) > 0) damage = Math.max(1, Math.floor(damage * 0.88));
 
             const actionMachine = engine.actionStateMachine;
+            const plannedResponseIntent = pattern.runtimeDefenseIntents?.[target.index] || null;
+            const responseIntent = HuntMonsterTurnExecutor.resolveHunterResponseIntent(
+                engine,
+                target,
+                pattern,
+                plannedResponseIntent
+            );
 
-            // Great Sword tackle is now a real counter window, never an implicit combo-index bonus.
-            const isGreatSwordTackling = target.id === 'great_sword'
+            // Great Sword tackle is a real impact-time response. A charge that
+            // was active when the telegraph began, or began during a long
+            // approach, may convert to the authored tackle BEAT at contact.
+            const alreadyGreatSwordTackling = target.id === 'great_sword'
                 && actionMachine
                 && actionMachine.canCounter(target, 'tackle');
+            const reactiveGreatSwordTackle = responseIntent.preferred === 'tackle'
+                && HuntMonsterTurnExecutor.activateReactiveGreatSwordTackle(engine, target);
+            const isGreatSwordTackling = alreadyGreatSwordTackling || reactiveGreatSwordTackle;
             if (isGreatSwordTackling) {
                 HuntMonsterTurnExecutor.grantCounterInvulnerability(target);
                 damage = Math.floor(damage * 0.5);
@@ -1374,7 +1577,7 @@ class HuntMonsterTurnExecutor {
                 engine.addLog(`🛡️ [태클 카운터] ${target.name}이(가) 태클로 공격을 맞받아쳐 피해를 50% 경감하고 다음 모으기 연계로 진입합니다! (-${damage} HP, 반사 피해: -${counterDmg} HP, 기절치 +${counterStun})`, '#ff9500');
                 engine.updateHpUI(target);
                 engine.shakeWeapon(target.index, '#ff9500');
-                if (engine.callbacks.onTriggerGuardShake) engine.callbacks.onTriggerGuardShake(target.index);
+                engine.presentHunterImpact?.(target.index, 'tackle');
                 attackResults.push({ index: target.index, result: 'tackle' });
                 if (engine.telemetry) engine.telemetry.recordMonsterPattern(engine.selectedMonster.id, pattern, 'guard', damage);
                 if (target.hp <= 0) {
@@ -1401,8 +1604,7 @@ class HuntMonsterTurnExecutor {
             );
             const isStunned = guaranteedByInterference
                 || HuntMonsterTurnExecutor.isHunterDefenseLocked(target);
-            const responseIntent = pattern.runtimeDefenseIntents?.[target.index] || null;
-            const intendsDefense = !responseIntent || responseIntent.attempted;
+            const intendsDefense = responseIntent.attempted;
             const actionAllowsGuard = intendsDefense
                 && responseIntent?.preferred !== 'evade'
                 && HuntMonsterTurnExecutor.isPatternGuardable(pattern)
@@ -1412,7 +1614,8 @@ class HuntMonsterTurnExecutor {
                 && (!actionMachine || actionMachine.canEvade(target))
                 && !['tremor', 'wind'].includes(target.interference?.kind);
             const isGreatSwordCharging = HuntMonsterTurnExecutor.isGreatSwordCharging(target);
-            const emergencyJumpRequired = pattern.runtimeDefenseMode === 'emergency-jump';
+            const emergencyJumpRequired = HuntMonsterTurnExecutor.judgmentField(
+                pattern, 'defenseMode', 'runtimeDefenseMode') === 'emergency-jump';
             const emergencyJumpAvailable = emergencyJumpRequired
                 && !isStunned
                 && (!engine.blightRuntime?.canAct || engine.blightRuntime.canAct(target))
@@ -1468,7 +1671,9 @@ class HuntMonsterTurnExecutor {
                 ({ damage, isGuard, isDodge, isForesightSlash, isIaiCounter,
                     isPerfectGuard, isHammerOffset, isLanceCounter,
                     isChargeBladeGuardPoint, isSwitchAxeCounter } = counter);
-                if (counter.counterProtected) {
+                if (counter.counterAttempted && !counter.counterSucceeded) {
+                    HuntMonsterTurnExecutor.clearCounterInvulnerability(target);
+                } else if (counter.counterProtected) {
                     HuntMonsterTurnExecutor.grantCounterInvulnerability(target);
                 }
             } else if (hasShield && (guaranteedLanceGuard || defendRoll < guardProb)) {
@@ -1530,7 +1735,7 @@ class HuntMonsterTurnExecutor {
                         engine.addLog(`🛡️ [방패 가드] ${target.name}이(가) 몬스터의 [${attackName}]을(를) 방어해냈습니다! (-${damage} HP)`, '#00ffff');
                         engine.playSFX('hunter_guard', null, { hunterIndex: target.index, action: 'guard' });
                         engine.shakeWeapon(target.index, '#00ffff');
-                        if (engine.callbacks.onTriggerGuardShake) engine.callbacks.onTriggerGuardShake(target.index);
+                        engine.presentHunterImpact?.(target.index, 'guard');
                         target.guardDuration = 6;
                         attackResults.push({ index: target.index, result: 'guard' });
                     } else if (hazardHpOnly) {
@@ -1540,6 +1745,8 @@ class HuntMonsterTurnExecutor {
                         // A real hit owns the reaction state. Stop ear-covering,
                         // tremor wobble, or wind-pressure before knockback starts.
                         engine.clearHunterInterference?.(target, 'hit');
+                        engine.cancelHunterBeatAction?.(target, 'hit');
+                        engine.callbacks?.onInterruptWeaponVisual?.(target.index);
                         if (actionMachine) actionMachine.cancel(target, 'hitstun');
                         if (engine.weaponMechanics) engine.weaponMechanics.onHit(target);
                         target.atb = 0;
@@ -1555,10 +1762,12 @@ class HuntMonsterTurnExecutor {
                         target.hitStartedThisTick = true;
                         target.hitReactionKind = hitReaction.kind;
                         target.hitKnockbackDirection = hitReaction.knockbackDirection;
+                        target.hitReactionGeneration = Number(target.hitReactionGeneration || 0) + 1;
+                        hitReaction.generation = target.hitReactionGeneration;
                         engine.addLog(`💥 [피격] ${engine.selectedMonster.nameKO}이(가) [${attackName}] 시전! ${target.name}에게 큰 타격! (-${damage} HP, 행동 게이지 초기화)`, '#ff5555');
                         // Hunter-hit voice is deferred until the stun result is known.
                         engine.shakeMonster();
-                        engine.triggerHitAnimation(target.index, hitReaction);
+                        engine.presentHunterImpact?.(target.index, 'hit', { reaction: hitReaction });
                         if (engine.expressHunterEmotion) engine.expressHunterEmotion(target, 'hurt');
                         attackResults.push({ index: target.index, result: 'hit' });
                     }
@@ -1610,11 +1819,15 @@ class HuntMonsterTurnExecutor {
                     );
                     engine.callbacks?.onTriggerInvincibleJump?.(target.index, true);
                     engine.showSkillBubble?.(target.index, '긴급회피!');
+                } else if (isForesightSlash || isIaiCounter) {
+                    // Their dedicated weapon motion was already started above.
+                    // A generic dodge here used to cancel it immediately and
+                    // replace it with the roll CSS, making the counter invisible.
                 } else if (isPerfectGuard || isHammerOffset || isLanceCounter || isChargeBladeGuardPoint) {
                     // A perfect guard holds the shield line; it must not borrow the evade-roll pose.
                     target.guardDuration = 6;
                 } else {
-                    if (engine.callbacks.onTriggerRollAnimation) engine.callbacks.onTriggerRollAnimation(target.index);
+                    engine.presentHunterImpact?.(target.index, 'dodge');
                     target.rollDuration = 6;
                 }
                 attackResults.push({ index: target.index, result: (isHammerOffset || isLanceCounter || isChargeBladeGuardPoint) ? 'counter' : 'dodge' });
@@ -1685,10 +1898,12 @@ class HuntMonsterTurnExecutor {
             }
         });
 
-        const isTigrexExhaustedTrip = pattern.runtimeImpactEventKind === 'tigrex-exhausted-trip';
+        const isTigrexExhaustedTrip = HuntMonsterTurnExecutor.judgmentField(
+            pattern, 'eventKind', 'runtimeImpactEventKind') === 'tigrex-exhausted-trip';
         const isTigrexReturnDodgeStuck = pattern.tags?.includes('tigrex-charge-chain')
             && engine.monsterState === 'enraged'
-            && Number(pattern.runtimeImpactTimelineIndex) === 1
+            && Number(HuntMonsterTurnExecutor.judgmentField(
+                pattern, 'timelineIndex', 'runtimeImpactTimelineIndex', 0)) === 1
             && attackResults.some(result => ['dodge', 'miss'].includes(result.result))
             && engine.random() < Number(pattern.stateMachine?.secondReturnDodgeStuck?.chance || 0);
         if (isTigrexExhaustedTrip || isTigrexReturnDodgeStuck) {
@@ -1706,16 +1921,23 @@ class HuntMonsterTurnExecutor {
             }
         }
 
+        if (isImpactCommit) {
+            const judgment = HuntMonsterTurnExecutor.judgment(pattern) || {};
+            engine.callbacks?.onResolveMonsterProjectileImpact?.(pattern, judgment, attackResults);
+        }
+
         // Trigger dynamic monster attack animation
         const { type: attackType, emoji } = engine.getMonsterAttackType(attackName, pattern);
         if (!isImpactCommit && engine.callbacks.onTriggerMonsterAttack) {
-            engine.monsterActionPresentationTicks = Math.max(
-                Number(engine.monsterActionPresentationTicks || 0),
-                Number(pattern.movement?.ticks || 0),
-                Array.isArray(pattern.motion)
-                    ? pattern.motion.reduce((sum, beat) => sum + Math.max(1, Number(beat?.ticks) || 1), 0)
-                    : 0
-            );
+            if (!beatDriven) {
+                engine.monsterActionPresentationTicks = Math.max(
+                    Number(engine.monsterActionPresentationTicks || 0),
+                    Number(pattern.movement?.ticks || 0),
+                    Array.isArray(pattern.motion)
+                        ? pattern.motion.reduce((sum, beat) => sum + Math.max(1, Number(beat?.ticks) || 1), 0)
+                        : 0
+                );
+            }
             engine.callbacks.onTriggerMonsterAttack(attackType, emoji, attackResults, attackName, pattern);
         }
         const authoredInterference = pattern.interference?.kind
@@ -1728,7 +1950,8 @@ class HuntMonsterTurnExecutor {
             }
             : null;
         const impactInterferences = [
-            pattern.runtimeImpactSecondaryInterference,
+            HuntMonsterTurnExecutor.judgmentField(
+                pattern, 'secondaryInterference', 'runtimeImpactSecondaryInterference'),
             pattern.secondaryInterference,
             authoredInterference
         ].filter((value, index, list) => value?.kind && list.findIndex(candidate =>
@@ -1767,7 +1990,7 @@ class HuntMonsterTurnExecutor {
                 }
             });
         });
-        if (pattern.beatV2Approved !== true && pattern.tags?.includes('burrow-emerge')) {
+        if (!(pattern.beatV2Enabled === true || pattern.beatV2Approved === true) && pattern.tags?.includes('burrow-emerge')) {
             engine.monsterBurrowState = null;
             engine.callbacks?.onTriggerMonsterBurrowPhase?.(
                 'emerge',
@@ -1794,6 +2017,10 @@ class HuntMonsterTurnExecutor {
         engine.monsterRecoveryDuration = 0;
         if (engine.monsterFlightRuntime) engine.monsterFlightRuntime.afterAction(engine, pattern);
         engine.monsterTraitRuntime?.afterAction?.(engine, pattern, attackResults);
+        if (isImpactCommit) {
+            return { patternId: pattern.id, judgment: HuntMonsterTurnExecutor.judgment(pattern) || {}, results: attackResults };
+        }
+        return true;
     }
 }
 

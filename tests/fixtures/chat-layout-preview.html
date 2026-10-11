@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <base href="../../">
+  <title>채팅 크기 · 분할 검증</title>
+  <link rel="stylesheet" href="../../style.css">
+  <style>
+    html, body { width: 100%; height: 100%; margin: 0; }
+    body { background: linear-gradient(#24334a, #101725); }
+    .guide { position: absolute; inset: 85% 0 0; border-top: 1px dashed #8096af; pointer-events: none; }
+    .label { position: absolute; top: 24px; left: 24px; color: #dfeaff; font: 22px sans-serif; }
+  </style>
+</head>
+<body>
+  <div class="guide"></div><div class="label"></div><div id="chat"></div>
+  <script src="../../config.js"></script>
+  <script src="../../config/cmc-catalog.js"></script>
+  <script src="../../js/runtime/SafeContent.js"></script>
+  <script src="../../js/runtime/DisposableScope.js"></script>
+  <script src="../../js/runtime/ManagedTimers.js"></script>
+  <script src="../../js/utils.js"></script>
+  <script src="../../js/chat/ChatMessageNormalizer.js"></script>
+  <script src="../../js/chat/ChatMediaBubbleController.js"></script>
+  <script src="../../js/chat/ChatSpecialBubbleCommand.js"></script>
+  <script src="../../js/ChatRenderer.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const columns = ChatRenderer.resolveColumns(params.get('columns') || window.HIVE_CHAT_LAYOUT.columns);
+    const renderer = new ChatRenderer(null, null, { columns });
+    // One deterministic real clip makes geometry comparisons repeatable.
+    window.HIVE_CMC_COMMAND_GROUPS['거짓말'] = ['거짓말'];
+    document.querySelector('.label').textContent = `${columns}분할 · 기존 크기의 ${(500 / columns).toFixed(1)}% · 점선: 하단 15%`;
+    const emote = 'https://chat-layout.test/emote.svg';
+    const samples = [
+      { nickname: '계정명이길어도크기는함께축소', message: '채팅 본문도 이름도 같이 작아집니다. 긴 문장 줄바꿈 확인용 메시지입니다.', badges: [{ imageUrl: emote }] },
+      { nickname: '짧은반응', message: '와' },
+      { nickname: '광대헌터', message: '!광대 아니 이러다 모두 죽어!!!' },
+      { nickname: '이모티콘', message: '{preview}', emojis: { preview: emote } },
+      { nickname: 'AI CMC', message: '#거짓말' },
+      { nickname: '흔들리는채팅', message: '안녕 반가워요 👋' },
+      { nickname: '영문긴문장', message: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' },
+      { nickname: '긴광대문장', message: '!광대 정말 이대로 가면 우리 모두 아무것도 못 하고 끝나는 거 아니냐고!!!' }
+    ];
+    window.renderSamples = (sampleIndex = null) => {
+      // Reopen the fixture between scenarios; this path only feeds the production renderer.
+      for (let index = 0; index < columns; index++) {
+        renderer.render({ uid: String(index), color: '#8cd0bd', ...samples[sampleIndex ?? index % samples.length] });
+      }
+      // Test artwork only; production emote URL validation still runs above.
+      document.querySelectorAll('img[src="https://chat-layout.test/emote.svg"]').forEach(image => {
+        image.src = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect width="100" height="100" rx="20" fill="#ffcc44"/><text x="50" y="68" text-anchor="middle" font-size="60">★</text></svg>');
+      });
+    };
+    window.renderer = renderer;
+    renderSamples(params.has('sample') ? Number(params.get('sample')) : null);
+    document.fonts.ready.then(() => { document.documentElement.dataset.previewReady = 'true'; });
+  </script>
+</body>
+</html>

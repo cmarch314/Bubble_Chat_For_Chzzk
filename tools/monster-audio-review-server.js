@@ -8,18 +8,24 @@ const { generate: generateReviewRoutes } = require('../scripts/generate-world-mo
 const { loadHuntPatternAudioMap, savePatternRoute, movePatternRouteFile, savePatternMotion,
     savePartReactionMappings } = require('./hunt-audio-pattern-map');
 const { CATEGORY_CATALOG, categoryForMonster } = require('./hunt-monster-review-categories');
+const { HUNT_VERIFIED_LOCAL_ITEM_CUES, HUNT_LOCAL_ITEM_SURROGATE_CUES } = require('../js/effects/hunt/HuntAudioCatalog');
+const MotionAuthoringContract = require('./monster-motion-authoring-contract.js');
+const { HuntBeatV2Contract } = require('../js/effects/hunt/HuntBeatV2Contract.js');
 
 const ROOT = path.resolve(__dirname, '..');
 const GRAPH_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'audio_graph');
 const AUDIO_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world', 'monster');
+const WORLD_AUDIO_ROOT = path.join(ROOT, 'local_assets', 'monster_hunter', 'world');
 const COMMON_AUDIO_ROOT = path.join(AUDIO_ROOT, 'common');
 const LABELS_PATH = path.join(ROOT, 'data', 'hunt', 'world-monster-audio-review-labels.json');
 const ANATOMY_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-visual-geometry-overrides.json');
 const ANATOMY_RUNTIME_PATH = path.join(ROOT, 'js', 'effects', 'hunt', 'data', 'MonsterVisualGeometryOverrides.generated.js');
 const PATTERN_AUDIO_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-pattern-audio-routes.json');
 const PATTERN_MOTION_OVERRIDES_PATH = path.join(ROOT, 'data', 'hunt', 'monster-pattern-motion-overrides.json');
+const CANDIDATE_KITS_DIR = path.join(ROOT, 'data', 'hunt', 'monster-kits', 'candidates');
 const UI_PATH = path.join(__dirname, 'monster-audio-review.html');
 const APP_PATH = path.join(__dirname, 'monster-audio-review-app.js');
+const MOTION_AUTHORING_CONTRACT_PATH = path.join(__dirname, 'monster-motion-authoring-contract.js');
 const PREVIEW_PATH = path.join(ROOT, 'tests', 'fixtures', 'hunt-monster-pattern-lab.html');
 const HOST = '127.0.0.1';
 const DEFAULT_PORT = 17930;
@@ -139,6 +145,43 @@ function readJson(file, fallback) {
     }
 }
 
+function readCandidateKits() {
+    if (!fs.existsSync(CANDIDATE_KITS_DIR)) return {};
+    const kits = {};
+    for (const entry of fs.readdirSync(CANDIDATE_KITS_DIR, { withFileTypes: true })) {
+        if (!entry.isFile() || !entry.name.endsWith('.json')) continue;
+        const kit = readJson(path.join(CANDIDATE_KITS_DIR, entry.name), null);
+        if (kit?.monsterId) kits[String(kit.monsterId)] = kit;
+    }
+    return kits;
+}
+
+function candidateKitFor(input, huntId) {
+    const candidateId = String(input?.candidate || '').trim().toLowerCase();
+    if (!candidateId) return null;
+    const kit = readCandidateKits()[candidateId] || null;
+    if (!kit) throw new Error(`존재하지 않는 후보 키트입니다: ${candidateId}`);
+    if (String(kit.monsterId || '').toLowerCase() !== huntId) {
+        throw new Error(`후보 키트와 몬스터가 다릅니다: ${candidateId} / ${huntId}`);
+    }
+    return kit;
+}
+
+function candidateKitRecordFor(input, huntId, candidateKitsDir = CANDIDATE_KITS_DIR) {
+    const candidateId = String(input?.candidate || '').trim().toLowerCase();
+    if (!candidateId) return null;
+    if (!fs.existsSync(candidateKitsDir)) throw new Error(`후보 키트 폴더를 찾을 수 없습니다: ${candidateKitsDir}`);
+    const entry = fs.readdirSync(candidateKitsDir, { withFileTypes: true })
+        .find(item => item.isFile() && item.name.endsWith('.json')
+            && String(readJson(path.join(candidateKitsDir, item.name), {})?.monsterId || '').toLowerCase() === candidateId);
+    if (!entry) throw new Error(`후보 키트 원본을 찾을 수 없습니다: ${candidateId}`);
+    const kit = readJson(path.join(candidateKitsDir, entry.name), null);
+    if (String(kit?.monsterId || '').toLowerCase() !== String(huntId || '').toLowerCase()) {
+        throw new Error(`후보 키트와 몬스터가 다릅니다: ${candidateId} / ${huntId}`);
+    }
+    return { id: candidateId, file: path.join(candidateKitsDir, entry.name), kit };
+}
+
 function evidenceScope(bank) {
     const normalized = String(bank || '').toLowerCase();
     if (/_vo(?:_|$)/.test(normalized)) {
@@ -234,10 +277,58 @@ function groupEvents(graph, labels) {
         .sort((a, b) => a.bank.localeCompare(b.bank) || a.eventId - b.eventId);
 }
 
+function commonSourceId(key, offset = 0) {
+    let hash = 2166136261;
+    for (const char of String(key)) {
+        hash ^= char.charCodeAt(0);
+        hash = Math.imul(hash, 16777619);
+    }
+    return offset + (hash >>> 0) % 900000;
+}
+
+function commonCatalogGroups(catalog, category, categoryLabel, bank, records) {
+    return Object.entries(catalog || {}).flatMap(([cue, variants]) => (variants || []).map((variant, variantIndex) => {
+        const paths = [...new Set((variant.layers || []).map(layer => layer?.[0]).filter(Boolean))]
+            .filter(file => fs.existsSync(path.resolve(ROOT, file)));
+        if (!paths.length) return null;
+        const isSurrogate = /surrogate/i.test(String(variant.evidence || ''));
+        const effectiveCategory = isSurrogate ? 'items-surrogate' : category;
+        const effectiveLabel = isSurrogate ? '아이템 대체음 (검수 필요)' : categoryLabel;
+        const effectiveBank = isSurrogate ? 'item_surrogate_se' : bank;
+        const eventId = commonSourceId(`${effectiveBank}:${cue}:${variantIndex}`, effectiveBank.includes('surrogate') ? 500000 : 100000);
+        const sourceId = commonSourceId(`${effectiveBank}:${cue}:${variantIndex}:source`);
+        const reviews = records.filter(record => record.bank === effectiveBank && Number(record.eventId) === eventId && Number(record.sourceId) === sourceId);
+        return {
+            key: `${effectiveBank}:${eventId}`,
+            bank: effectiveBank,
+            eventId,
+            sourceLayer: 'sound-effect',
+            reuseScope: 'cross-title-semantic',
+            common: true,
+            commonCategory: effectiveCategory,
+            categoryLabel: effectiveLabel,
+            evidence: variant.evidence || null,
+            structures: ['single'],
+            sources: paths.map((file, sourceIndex) => ({
+                sourceId: sourceIndex ? sourceId + sourceIndex : sourceId,
+                stream: null,
+                duration: null,
+                path: file,
+                variant: effectiveCategory,
+                structure: ['single'],
+                evidence: variant.evidence || null
+            })),
+            groupTags: [...new Set(reviews.flatMap(record => record.tags || []))],
+            reviewedSources: reviews.length,
+            cue
+        };
+    }).filter(Boolean));
+}
+
 function listCommonAudioGroups(labels = { records: [] }) {
-    if (!fs.existsSync(COMMON_AUDIO_ROOT)) return [];
     const records = labels.records || [];
-    return fs.readdirSync(COMMON_AUDIO_ROOT, { withFileTypes: true })
+    const groups = fs.existsSync(COMMON_AUDIO_ROOT)
+        ? fs.readdirSync(COMMON_AUDIO_ROOT, { withFileTypes: true })
         .filter(entry => entry.isFile() && /\.(mp3|wav|ogg)$/i.test(entry.name))
         .sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }))
         .map((entry, index) => {
@@ -251,6 +342,8 @@ function listCommonAudioGroups(labels = { records: [] }) {
                 eventId: sourceId,
                 sourceLayer: 'sound-effect',
                 reuseScope: 'cross-title-semantic',
+                commonCategory: 'part-break',
+                categoryLabel: '공통 부위파괴',
                 structures: ['single'],
                 sources: [{
                     sourceId,
@@ -264,7 +357,13 @@ function listCommonAudioGroups(labels = { records: [] }) {
                 reviewedSources: reviews.length,
                 common: true
             };
-        });
+        })
+        : [];
+    return [
+        ...groups,
+        ...commonCatalogGroups(HUNT_VERIFIED_LOCAL_ITEM_CUES, 'items-verified', '검증된 아이템·숫돌·섬광', 'item_common_se', records),
+        ...commonCatalogGroups(HUNT_LOCAL_ITEM_SURROGATE_CUES, 'items-surrogate', '폭탄·아이템 대체음 (검수 필요)', 'item_surrogate_se', records)
+    ];
 }
 
 function normalizeTags(category, customLabel) {
@@ -494,7 +593,12 @@ function validatePatternRouteInput(input) {
     const huntId = String(input?.huntId || '').toLowerCase();
     const patternId = String(input?.patternId || '');
     const slot = String(input?.slot || '');
-    const pattern = loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
+    const candidateKit = candidateKitFor(input, huntId);
+    const isJudgmentSlot = slot.startsWith('judgment:');
+    const pattern = loadHuntPatternAudioMap(huntId, { candidateKit }).patterns.find(item => item.id === patternId);
+    if (isJudgmentSlot && pattern?.slots.some(item => item.slot === slot)) {
+        return { ...input, huntId, patternId, slot };
+    }
     if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
     if (!slot.startsWith('beat:')) throw new Error(`구형 사운드 슬롯 저장은 차단되었습니다: ${slot}`);
     if (!pattern.slots.some(item => item.slot === slot)) throw new Error(`현재 모션에 존재하지 않는 사운드 순간입니다: ${slot}`);
@@ -504,17 +608,129 @@ function validatePatternRouteInput(input) {
 function validatePatternMotionInput(input) {
     const huntId = String(input?.huntId || '').toLowerCase();
     const patternId = String(input?.patternId || '');
-    const pattern = loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
+    const candidateRecord = candidateKitRecordFor(input, huntId);
+    const pattern = candidateRecord
+        ? loadHuntPatternAudioMap(huntId, { candidateKit: candidateRecord.kit }).patterns.find(item => item.id === patternId)
+        : loadHuntPatternAudioMap(huntId).patterns.find(item => item.id === patternId);
     if (!pattern) throw new Error(`존재하지 않는 패턴입니다: ${huntId}/${patternId}`);
-    if (input?.reset) return { ...input, huntId, patternId };
-    const expected = new Set(pattern.timeline.beats.map(beat => beat.id));
+    if (input?.reset) return { ...input, huntId, patternId, candidateRecord };
+    // Candidate save validation must compare against the candidate's native
+    // graph, not the audio-review projection.  The projection may add
+    // judgment/audio rows while a candidate beat is being split, which made a
+    // valid editor draft look like it had missing or foreign motion items.
+    const candidateAction = candidateRecord?.kit?.actions?.find(item => item?.id === patternId);
+    const expected = new Set(candidateAction?.graph?.beats?.map(beat =>
+        String(beat?.id || beat?.beat || ''))?.filter(Boolean)
+        || pattern.timeline.beats.map(beat => beat.id));
     const submitted = Object.keys(input?.beats || {});
     const unknown = submitted.filter(id => !expected.has(id));
     const missing = [...expected].filter(id => !submitted.includes(id));
     if (unknown.length || missing.length) {
         throw new Error(`모션 BEAT 불일치 · 누락:${missing.join(',') || '-'} · 알 수 없음:${unknown.join(',') || '-'}`);
     }
-    return { ...input, huntId, patternId };
+    return { ...input, huntId, patternId, candidateRecord,
+        beats: MotionAuthoringContract.normalizeBeats(input?.beats || {}) };
+}
+
+function saveCandidatePatternMotion(input, { candidateKitsDir = CANDIDATE_KITS_DIR } = {}) {
+    const record = input?.candidateRecord || candidateKitRecordFor(input, input?.huntId, candidateKitsDir);
+    if (!record) throw new Error('후보 키트 저장에는 후보 ID가 필요합니다.');
+    const sourcePath = record.file;
+    const previousText = fs.readFileSync(sourcePath, 'utf8');
+    const kit = readJson(sourcePath, null);
+    const action = kit?.actions?.find(item => item?.id === input.patternId);
+    if (!action?.graph?.beats) throw new Error(`후보 패턴을 찾을 수 없습니다: ${input.patternId}`);
+    const currentGraphHash = HuntBeatV2Contract.fingerprint(action.graph);
+    if (input.graphHash && String(input.graphHash) !== currentGraphHash) {
+        throw new Error('candidate graph is stale; reload before saving');
+    }
+    const submitted = input.beats || {};
+    const expected = action.graph.beats.map(beat => String(beat.id || beat.beat));
+    const unknown = Object.keys(submitted).filter(id => !expected.includes(id));
+    const missing = expected.filter(id => !Object.prototype.hasOwnProperty.call(submitted, id));
+    if (unknown.length || missing.length) throw new Error(`후보 모션 BEAT 불일치 · 누락:${missing.join(',') || '-'} · 없음:${unknown.join(',') || '-'}`);
+    try {
+        const normalizedBeats = MotionAuthoringContract.normalizeBeats(submitted);
+        for (const beat of action.graph.beats) {
+            const id = String(beat.id || beat.beat);
+            const draft = normalizedBeats[id] || { ticks: beat.ticks };
+            beat.ticks = draft.ticks;
+            const preservedEvents = (beat.events || []).filter(event =>
+                !MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind)
+                && !MotionAuthoringContract.PROJECTILE_EVENT_KINDS.includes(event?.kind));
+            const authoredJudgments = new Map((beat.events || [])
+                .filter(event => MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind))
+                .map(event => [String(event.id || ''), event]));
+            const judgmentEvents = Array.isArray(draft.judgments)
+                ? draft.judgments.map(judgment => {
+                    // The editor owns timing, target, damage, and reaction.
+                    // It must preserve typed runtime links such as projectileId
+                    // and event-specific delivery metadata that are not motion
+                    // fields.  Replacing the full event stripped projectileId,
+                    // then the graph validator correctly rejected the save and
+                    // rolled back an otherwise valid tick edit.
+                    const authored = authoredJudgments.get(String(judgment?.id || '')) || {};
+                    return { ...authored, ...judgment };
+                }) : [];
+            const projectileEvents = Array.isArray(draft.projectileEvents)
+                ? draft.projectileEvents.map(event => ({ ...event })) : [];
+            beat.events = [...preservedEvents, ...projectileEvents, ...judgmentEvents].map(event => ({ ...event,
+                offsetTicks: Math.max(0, Math.min(beat.ticks - 1,
+                    Math.round(Number(event.offsetTicks) || 0)))
+            }));
+            beat.tracks = beat.tracks || {};
+            const frames = Array.isArray(beat.tracks.visual) ? beat.tracks.visual : [];
+            if (!frames.length) frames.push({ offsetTicks: 0, value: {} });
+            const frameIndex = frames.length - 1;
+            const previous = { ...(frames[frameIndex].value || {}) };
+            for (const key of MotionAuthoringContract.VISUAL_FIELDS) delete previous[key];
+            frames[frameIndex] = { ...frames[frameIndex],
+                value: { ...previous, ...MotionAuthoringContract.visualValue(draft) } };
+            beat.tracks.visual = frames;
+            if (draft.label) beat.label = draft.label;
+        }
+        // Persist the canonical projectile lifecycle rather than merely
+        // accepting it during compilation.  A judgment editor can move a HIT
+        // without owning the launch/outcome linkage; this hydrates the linked
+        // outcome before the atomic write so reload and live hunt read exactly
+        // the same valid graph.
+        action.graph = HuntBeatV2Contract.hydrateProjectileLifecycle(action.graph);
+        require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(kit);
+        const temporary = `${sourcePath}.tmp`;
+        fs.writeFileSync(temporary, `${JSON.stringify(kit, null, 2)}\n`, 'utf8');
+        fs.renameSync(temporary, sourcePath);
+        const persisted = readJson(sourcePath, null);
+        require('../js/effects/hunt/HuntMonsterCandidateCatalog.js').compileKit(persisted);
+        const persistedAction = persisted.actions.find(item => item?.id === input.patternId);
+        const persistedGraphHash = HuntBeatV2Contract.fingerprint(persistedAction.graph);
+        const persistedBeats = Object.fromEntries(persistedAction.graph.beats.map(beat => {
+            const visual = (beat.tracks?.visual || []).at(-1)?.value || {};
+            const judgments = (beat.events || []).filter(event =>
+                MotionAuthoringContract.JUDGMENT_KINDS.includes(event?.kind));
+            const projectileEvents = (beat.events || []).filter(event =>
+                MotionAuthoringContract.PROJECTILE_EVENT_KINDS.includes(event?.kind));
+            const expectedBeat = normalizedBeats[beat.id] || {};
+            return [beat.id, { ticks: beat.ticks, ...(beat.label ? { label: beat.label } : {}),
+                ...visual,
+                ...(projectileEvents.length ? { projectileEvents }
+                    : Array.isArray(expectedBeat.projectileEvents) ? { projectileEvents: [] } : {}),
+                ...(judgments.length ? { judgments }
+                    : Array.isArray(expectedBeat.judgments) ? { judgments: [] } : {}),
+                ...(expectedBeat.hit === false ? { hit: false } : {}) }];
+        }));
+        const comparison = MotionAuthoringContract.compareBeats(normalizedBeats, persistedBeats);
+        if (!comparison.equal) {
+            throw new Error(`후보 모션 왕복 불일치: ${comparison.differences.join(', ')}`);
+        }
+        return { huntId: input.huntId, patternId: input.patternId, candidateSaved: true,
+            beats: comparison.actual, graphHash: persistedGraphHash,
+            revision: fileRevision(sourcePath), sourcePath };
+    } catch (error) {
+        const rollback = `${sourcePath}.rollback.tmp`;
+        fs.writeFileSync(rollback, previousText, 'utf8');
+        fs.renameSync(rollback, sourcePath);
+        throw new Error(`후보 모션 저장 롤백: ${error.message}`);
+    }
 }
 
 function readBody(request) {
@@ -586,8 +802,11 @@ function safeAudioPath(relativePath) {
     const normalized = String(relativePath || '').replace(/\\/g, '/');
     if (!normalized.toLowerCase().endsWith('.mp3')) return null;
     const absolute = path.resolve(ROOT, normalized);
-    const relative = path.relative(AUDIO_ROOT, absolute);
-    if (relative.startsWith('..') || path.isAbsolute(relative)) return null;
+    const allowedRoots = [AUDIO_ROOT, path.join(WORLD_AUDIO_ROOT, 'unknown'), path.join(WORLD_AUDIO_ROOT, 'weapon')];
+    if (!allowedRoots.some(root => {
+        const relative = path.relative(root, absolute);
+        return !relative.startsWith('..') && !path.isAbsolute(relative);
+    })) return null;
     return absolute;
 }
 
@@ -605,7 +824,11 @@ function assertExpectedRevision(input, file, label) {
 
 function safeEditorAssetPath(pathname) {
     const decoded = decodeURIComponent(String(pathname || ''));
-    const allowed = ['/js/', '/styles/', '/tests/fixtures/', '/img/', '/local_assets/', '/style.css'];
+    const allowed = [
+        '/js/', '/styles/', '/tests/fixtures/', '/img/', '/local_assets/', '/fonts/',
+        '/config/', '/BGM/', '/SFX/', '/Unified_SFX/', '/AI CMC/',
+        '/style.css', '/config.js'
+    ];
     if (!allowed.some(prefix => decoded === prefix || decoded.startsWith(prefix))) return null;
     const absolute = path.resolve(ROOT, `.${decoded}`);
     const relative = path.relative(ROOT, absolute);
@@ -644,10 +867,25 @@ function createServer(options = {}) {
                 response.end(shell);
                 return;
             }
+            if (request.method === 'GET' && url.pathname === '/index.html') {
+                response.writeHead(200, {
+                    'Content-Type': 'text/html; charset=utf-8',
+                    'Cache-Control': 'no-store',
+                    'X-Content-Type-Options': 'nosniff'
+                });
+                response.end(fs.readFileSync(path.join(ROOT, 'index.html')));
+                return;
+            }
             if (request.method === 'GET' && url.pathname === '/review-app.js') {
                 response.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8',
                     'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
                 response.end(fs.readFileSync(APP_PATH));
+                return;
+            }
+            if (request.method === 'GET' && url.pathname === '/candidate-kits.js') {
+                response.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8',
+                    'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+                response.end(`window.HUNT_MONSTER_CANDIDATE_KITS=${JSON.stringify(readCandidateKits())};`);
                 return;
             }
             if (request.method === 'GET' && (url.pathname === '/preview' || url.pathname === '/preview/')) {
@@ -672,6 +910,15 @@ function createServer(options = {}) {
                     'X-Content-Type-Options': 'nosniff'
                 });
                 response.end(fs.readFileSync(path.join(__dirname, 'monster-audio-review-state.js')));
+                return;
+            }
+            if (request.method === 'GET' && url.pathname === '/motion-authoring-contract.js') {
+                response.writeHead(200, {
+                    'Content-Type': 'application/javascript; charset=utf-8',
+                    'Cache-Control': 'no-store',
+                    'X-Content-Type-Options': 'nosniff'
+                });
+                response.end(fs.readFileSync(MOTION_AUTHORING_CONTRACT_PATH));
                 return;
             }
             if (request.method === 'GET' && url.pathname === '/api/monsters') {
@@ -711,9 +958,20 @@ function createServer(options = {}) {
             if (request.method === 'GET' && url.pathname === '/api/hunt-patterns') {
                 const huntId = String(url.searchParams.get('monster') || '').toLowerCase();
                 if (!/^[a-z0-9_]+$/i.test(huntId)) throw new Error('잘못된 몬스터 ID입니다.');
-                sendJson(response, 200, { ...loadHuntPatternAudioMap(huntId), revisions: {
+                const candidateKit = candidateKitFor({ candidate: url.searchParams.get('candidate') }, huntId);
+                const candidateRecord = candidateKitRecordFor({ candidate: url.searchParams.get('candidate') }, huntId);
+                const patternCatalog = loadHuntPatternAudioMap(huntId, { candidateKit });
+                const candidateHashes = new Map((candidateRecord?.kit?.actions || [])
+                    .filter(action => action?.id && action?.graph)
+                    .map(action => [String(action.id), HuntBeatV2Contract.fingerprint(action.graph)]));
+                const patterns = (patternCatalog.patterns || []).map(pattern => ({
+                    ...pattern,
+                    beatGraphHash: candidateHashes.get(String(pattern.id))
+                        || (pattern.beatV2 ? HuntBeatV2Contract.fingerprint(pattern.beatV2) : null)
+                }));
+                sendJson(response, 200, { ...patternCatalog, patterns, revisions: {
                     audio: fileRevision(PATTERN_AUDIO_OVERRIDES_PATH),
-                    motion: fileRevision(PATTERN_MOTION_OVERRIDES_PATH),
+                    motion: candidateRecord ? fileRevision(candidateRecord.file) : fileRevision(PATTERN_MOTION_OVERRIDES_PATH),
                     anatomy: fileRevision(ANATOMY_OVERRIDES_PATH)
                 } });
                 return;
@@ -736,9 +994,10 @@ function createServer(options = {}) {
             }
             if (request.method === 'POST' && url.pathname === '/api/hunt-pattern-motion') {
                 const input = validatePatternMotionInput(await readBody(request));
-                assertExpectedRevision(input, PATTERN_MOTION_OVERRIDES_PATH, '모션 데이터');
-                const result = savePatternMotion(input);
-                sendJson(response, 200, { ok: true, ...result, sourceRevision: fileRevision(PATTERN_MOTION_OVERRIDES_PATH) });
+                const sourcePath = input.candidateRecord?.file || PATTERN_MOTION_OVERRIDES_PATH;
+                assertExpectedRevision(input, sourcePath, '모션 데이터');
+                const result = input.candidateRecord ? saveCandidatePatternMotion(input) : savePatternMotion(input);
+                sendJson(response, 200, { ok: true, ...result, sourceRevision: fileRevision(sourcePath) });
                 return;
             }
             if (request.method === 'POST' && url.pathname === '/api/hunt-part-reactions') {
@@ -820,6 +1079,8 @@ module.exports = {
     reviewStatusForGraphId,
     saveReviewCompletion,
     saveGroupReview,
+    candidateKitRecordFor,
+    saveCandidatePatternMotion,
     validatePatternRouteInput,
     validatePatternMotionInput
 };

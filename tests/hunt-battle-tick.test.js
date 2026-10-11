@@ -101,6 +101,35 @@ function createEngine(overrides = {}) {
 }
 
 {
+    const roarPattern = {
+        id: 'diablos.roar', type: 'roar', tags: ['roar', 'transition-roar'],
+        beatV2Approved: true, beatV2: { backend: 'beat-v2', totalTicks: 45 }
+    };
+    let directRoars = 0;
+    let prepared = 0;
+    const { engine } = createEngine({
+        monsterTier: 'large',
+        monsterAtb: 100,
+        pendingMonsterEncounterRoar: true,
+        selectedMonster: { id: 'diablos', nameKO: 'Diablos' },
+        MONSTER_PATTERNS: { diablos: [roarPattern] },
+        triggerEncounterRoar() { directRoars++; },
+        prepareMonsterTurn() {
+            prepared++;
+            assert.strictEqual(this.forcedMonsterPatternId, 'diablos.roar');
+            this.pendingMonsterAction = { pattern: roarPattern, remainingTicks: 0 };
+            return true;
+        }
+    });
+    assert.strictEqual(context.HuntBattleTickExecutor.flushTransitionRoar(engine), true);
+    assert.strictEqual(prepared, 1,
+        'an approved encounter roar must enter the ordinary monster action pipeline');
+    assert.strictEqual(directRoars, 0,
+        'an approved transition roar must not use the fixed-duration direct callback path');
+    assert.strictEqual(engine.pendingMonsterTransitionRoarKind, 'encounter');
+}
+
+{
     let resolved = null;
     const pattern = { id: 'test.telegraph', name: '예고 공격', windupTicks: 3 };
     const { engine } = createEngine({
@@ -133,6 +162,39 @@ function createEngine(overrides = {}) {
     assert.deepStrictEqual(resolutions, [[impactPattern, null, 0]],
         'the collision tick must resolve against the originally approached hunter');
     assert.strictEqual(engine.pendingMonsterImpact, null);
+}
+
+{
+    const beatV2 = { id: 'diablos.burrow_enter', backend: 'beat-v2' };
+    const impactPattern = {
+        id: 'diablos.burrow_enter', beatV2Approved: true, beatV2,
+        runtimeImpactCommit: true, runtimeImpactTimelineEvent: true
+    };
+    const resolutions = [];
+    const { engine } = createEngine({
+        tickMonsterBeatAction() {},
+        monsterBeatRuntime: {
+            get: () => ({ action: beatV2, elapsedTicks: 41 })
+        },
+        monsterBeatJudgmentTicks: new Map(),
+        pendingMonsterImpact: {
+            pattern: impactPattern,
+            remainingTicks: 1,
+            totalTicks: 40,
+            attackerIndex: null,
+            targetIndex: 0,
+            nextEventIndex: 0,
+            events: [{ atTicks: 40, targetIndices: [0], damageScale: 1 }]
+        },
+        executeMonsterTurn: (...args) => resolutions.push(args)
+    });
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(resolutions.length, 1,
+        'an authored eruption whose due tick has passed must commit even if its notification was missed');
+    assert.strictEqual(resolutions[0][0].runtimeImpactTargetIndices[0], 0,
+        'the recovered eruption commit must retain the locked hunter');
+    assert.strictEqual(engine.pendingMonsterImpact, null,
+        'a recovered overdue judgment must not remain stuck at one tick forever');
 }
 
 {
@@ -656,15 +718,16 @@ function createEngine(overrides = {}) {
     const { engine } = createEngine({
         monsterAtb: 75,
         monsterState: 'knocked_down',
-        monsterKnockdownDuration: 10,
+        monsterKnockdownDuration: 14,
         activeTrapControl: {
             kind: 'shocktrap',
-            durationTicks: 10,
+            durationTicks: 14,
             recoveryPerTick: 2.5,
             retainedAtb: 75,
             useCount: 3,
             elapsedTicks: 0,
             struggleSchedule: [],
+            releaseTicks: 12,
             nextStruggleIndex: 0,
             releasing: false
         },
@@ -678,19 +741,22 @@ function createEngine(overrides = {}) {
     context.HuntBattleTickExecutor.execute(engine);
     assert.strictEqual(engine.monsterAtb, 80);
     assert.strictEqual(engine.activeTrapControl.releasing, true,
-        'escape must begin at the start of its reserved eight-tick timeline segment');
+        'escape must begin at the start of its Preview-authored timeline segment');
     assert.strictEqual(JSON.stringify(effects),
-        JSON.stringify([['trap-release', null, { kind: 'shocktrap', useCount: 3 }]]),
+        JSON.stringify([['trap-release', null, { kind: 'shocktrap', useCount: 3, releaseTicks: 12 }]]),
         'the trap visual must release exactly once at the authored escape beat');
     assert.strictEqual(monsterTurns, 0,
         'trap release and the next monster pattern must never share a frame');
-    for (let tick = 0; tick < 8; tick++) {
+    for (let tick = 0; tick < 12; tick++) {
         context.HuntBattleTickExecutor.execute(engine);
         assert.strictEqual(monsterTurns, 0,
             'the monster must stay locked until the authored escape animation completes');
     }
     assert.strictEqual(engine.activeTrapControl, null);
     assert.strictEqual(effects.length, 1, 'escape must not be emitted again when its final tick completes');
+    context.HuntBattleTickExecutor.execute(engine);
+    assert.strictEqual(monsterTurns, 0,
+        'the renderer handoff tick must finish before another BEAT can claim the monster layer');
     context.HuntBattleTickExecutor.execute(engine);
     assert.strictEqual(monsterTurns, 1,
         'the full ATB action may start only after the complete escape handoff');

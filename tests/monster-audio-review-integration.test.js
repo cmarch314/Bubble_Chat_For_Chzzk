@@ -20,18 +20,61 @@ const { createServer } = require('../tools/monster-audio-review-server');
 
         const shell = await fetch(`${origin}/`).then(response => response.text());
         assert.ok(shell.includes('<script src="/review-app.js"></script>'));
+        assert.ok(shell.includes('<script src="/motion-authoring-contract.js"></script>'),
+            'the browser editor must load the same motion contract as both save backends');
+        assert.ok(shell.includes('<script src="/js/effects/hunt/HuntRotationContract.js"></script>'),
+            'the editor must load the same rotation semantics as Preview and live hunts');
+        const motionContract = await fetch(`${origin}/motion-authoring-contract.js`).then(response => response.text());
+        assert.ok(motionContract.includes('normalizeBeats') && motionContract.includes('compareBeats'),
+            'the versioned review server must serve the shared authoring contract');
+        const rotationContract = await fetch(`${origin}/js/effects/hunt/HuntRotationContract.js`).then(response => response.text());
+        assert.ok(rotationContract.includes('HuntRotationContract') && rotationContract.includes("beat.to === 'home'"),
+            'the review server must expose the canonical runtime rotation contract');
+        assert.ok(shell.includes('value="common-part-break"') && shell.includes('value="common-items"'),
+            'the source rail must split shared part-break and item/bomb Common groups');
         assert.ok(shell.includes('value="common">COMMON 범용 음향'),
             'the source rail must expose the shared common sound folder explicitly');
         assert.ok(!shell.includes('const state='), 'legacy monkey-patch application must not be served');
         assert.ok(shell.includes('src="/preview/?embed=1"'), 'preview must use the versioned same-origin server');
+        assert.ok(shell.includes('id="simulationStart"')
+            && shell.includes('id="simulationPause"')
+            && shell.includes('id="simulationSpeed"'),
+        'the review preview must expose live-combat start, pause and speed controls');
+
+        const liveShell = await fetch(`${origin}/index.html?huntSimulation=1`).then(response => response.text());
+        assert.ok(liveShell.includes('js/BubbleChatApp.js') && liveShell.includes('js/main.js'),
+            'simulation mode must mount the production BubbleChat application, not a duplicate fixture');
 
         const app = await fetch(`${origin}/review-app.js`).then(response => response.text());
+        const fixture = await fetch(`${origin}/preview/`).then(response => response.text());
         assert.ok(app.includes('MonsterAudioReviewState.createEditorSession()'));
+        assert.ok(app.includes("previewFrame().src = `/index.html?huntSimulation=1")
+            && app.includes('simulationWindow()?.processMessage')
+            && app.includes("sendSimulationChat('!참가'")
+            && app.includes("sendSimulationChat('!준비'"),
+        'live simulation must drive the real chat router through the production index');
+        assert.ok(app.includes('simulationRuntime().clock?.setRate?.'),
+            'simulation speed must control the shared combat clock');
         const commonGroups = await fetch(`${origin}/api/common-groups`).then(response => response.json());
         assert.ok(Array.isArray(commonGroups.groups), 'the common source endpoint must return a stable group list');
-        assert.ok(commonGroups.groups.every(group => group.common === true
+        assert.ok(commonGroups.groups.every(group => group.common === true),
+            'COMMON mode must contain only explicitly shared groups');
+        assert.ok(commonGroups.groups.some(group => group.commonCategory === 'part-break'
             && group.sources.every(source => source.path.includes('/monster/common/'))),
-        'COMMON mode must be restricted to the shared monster/common audio folder');
+            'COMMON mode must retain the shared monster/common part-break bank');
+        const commonItems = commonGroups.groups.filter(group => String(group.commonCategory || '').startsWith('items-'));
+        assert.ok(commonItems.length >= 6, 'COMMON mode must expose the verified item and bomb cue groups');
+        assert.ok(commonItems.some(group => group.cue === 'flash_pod')
+            && commonItems.some(group => group.cue === 'whetstone_stroke')
+            && commonItems.some(group => group.cue === 'barrel_bomb'),
+            'item Common groups must include flash, whetstone and clearly-labelled bomb cues');
+        assert.ok(commonItems.every(group => group.sources.every(source => !source.path.includes('/monster/common/'))),
+            'item Common groups must not be mistaken for monster part-break audio');
+        const flashPath = commonItems.find(group => group.cue === 'flash_pod').sources[0].path;
+        assert.strictEqual((await fetch(`${origin}/audio?path=${encodeURIComponent(flashPath)}`)).status, 200,
+            'verified non-monster Common assets must remain playable through the review server');
+        assert.strictEqual((await fetch(`${origin}/audio?path=${encodeURIComponent('local_assets/monster_hunter/world/bgm_build/forbidden.mp3')}`)).status, 404,
+            'audio serving must not expand beyond approved world audio roots');
         assert.ok(app.includes('function refreshTimingEditVisuals()'),
             'tick editing must use a lightweight DOM refresh path');
         assert.ok(app.includes('refreshTimingEditVisuals();') && app.includes('syncTimingPreviewAfterPaint();'),
@@ -41,11 +84,28 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.ok(!/renderMotionEditor\s*=\s*function/.test(app));
         assert.ok(!app.includes('markSaved(result.beats)'),
             'storage projection must not be compared with the fully merged effective motion');
-        assert.ok(app.includes('motionValuesEqual(beats, verify)'),
-            'save verification must reload and compare the final effective motion');
+        assert.ok(app.includes('const savedBeats = result.beats || beats')
+            && app.includes('compareMotionValues(savedBeats, verify)'),
+            'save verification must compare the server-confirmed value with the reloaded motion');
+        assert.ok(app.includes('function previewBeatDestination(beatId)')
+            && app.includes('previewBeatDestination(beatId)')
+            && !app.includes('function previewBeatRotation(beatId)')
+            && app.includes('rotateByFacing: null'),
+            'rotation-direction edits must scrub the shared BEAT renderer and clear legacy facing rotation');
+        assert.ok(app.includes('runtimePreviewProgress: scrubProgress')
+            && app.includes('scrubProgress: scrub')
+            && fixture.includes('previewScenario?.scrubProgress||0'),
+            'the authored normalized scrub progress must travel with a new preview pattern so iframe startup cannot lose it');
         assert.ok(app.includes('hiddenSourceGroups: new Set()')
             && app.includes('favoriteSourceGroups: new Set()'),
             'group hide and favorite preferences must be first-class persisted editor state');
+        assert.ok(app.includes('AUTO_FAVORITE_MAPPED_MONSTERS')
+            && app.includes("'rathian', 'rathalos', 'bazelgeuse', 'tigrex', 'barioth', 'legiana'")
+            && app.includes('기존 맵핑 자동 즐겨찾기'),
+        'previously reviewed Rathian, Rathalos, Bazelgeuse, Tigrex, Barioth, and Legiana routes must surface as automatic source favorites');
+        assert.ok(app.includes('sourceGroupIsFavorite(groupKey)')
+            && app.includes('app.autoFavoriteSourceGroups = AUTO_FAVORITE_MAPPED_MONSTERS.has(app.huntId)'),
+        'automatic mapped favorites must sort with manual favorites without overwriting local reviewer preferences');
         assert.ok(app.includes('toggleSourceGroupHidden(groupKey)')
             && app.includes('toggleSourceGroupFavorite(groupKey)'),
             'every source group header must expose hide and favorite controls');
@@ -53,6 +113,30 @@ const { createServer } = require('../tools/monster-audio-review-server');
             'group controls must remain compact beside the group playback button');
         assert.ok(app.includes('씰룩씰룩 좌우 반전') && app.includes('strideFlipTicks'),
             'the BEAT inspector must expose the runtime stride-flip option instead of requiring raw JSON edits');
+        assert.ok(app.includes("node('pair:center', '◎ 2인 사이'")
+            && app.includes('1·2 / 2·3 / 3·4 중 한 쌍을 정하면'),
+        'the anchor editor must expose pair:center as the shared midpoint for a randomly selected adjacent pair');
+        assert.ok(app.includes("['part:torso','몸통 중심']")
+            && app.includes("['part:feet','발 중심']"),
+        'the editor must expose explicit torso and foot-center transform pivots');
+        assert.ok(app.includes('data-rotation-direction="counterclockwise"')
+            && app.includes('class="rotation-degrees"')
+            && app.includes('class="rotation-final"')
+            && app.includes('select data-key="rotationResetMode"')
+            && app.includes('function rotationEditorModel('),
+        'the BEAT inspector must make turn direction, degrees, final angle, and return behavior explicit');
+        assert.ok(app.includes("'rotationEasing', 'rotationResetMode'"),
+        'return rotation must use the same persisted transform-field path as every other editor control');
+        assert.ok(app.includes('HuntRotationContract.resolve(authored, previous)')
+            && app.includes('HuntRotationContract.resolve(value, previous)'),
+            'the editor must not maintain a second rotation calculator');
+        assert.ok(app.includes('if (app.selectedPatternId === id && app.session.snapshot().timeline.beats.length)')
+            && app.includes('if (autoplay) playCurrentPreview();'),
+            'replaying the selected pattern must preserve and execute the current unsaved editor draft');
+        const preview = await fetch(`${origin}/preview/?embed=1&candidate=rathian`).then(response => response.text());
+        assert.ok(preview.includes('const source=previewPattern?')
+            && preview.includes('nativeBeatCandidate:Boolean(authored?.nativeBeatCandidate)'),
+            'candidate Preview must execute the current editor projection while retaining the native BEAT path');
         assert.ok(app.includes("label: '📣 포효'") && app.includes("label: '〰️ 지진'")
             && app.includes("label: '🌪️ 풍압'"),
             'timeline judgments must distinguish roar, tremor and wind pressure with emoji labels');
@@ -121,10 +205,20 @@ const { createServer } = require('../tools/monster-audio-review-server');
         assert.strictEqual(burrow.secondaryInterference, null,
             'Diablos digging dust must not survive as a legacy wind-pressure route');
 
-        const preview = await fetch(`${origin}/preview/?embed=1`).then(response => response.text());
-        assert.ok(preview.includes('hunt-monster-pattern-lab-audio.js'));
-        assert.ok(preview.includes('function playRuntimeReaction(pattern)')
-            && preview.includes('HuntMonsterAnatomyCatalog.breakReaction'),
+        const rathianCandidate = await fetch(`${origin}/api/hunt-patterns?monster=rathian&candidate=rathian`)
+            .then(response => response.json());
+        assert.strictEqual(rathianCandidate.patterns.filter(pattern => !pattern.id.startsWith('__')).length, 13,
+            'candidate editing must expose the same complete native BEAT kit used by its preview');
+        const candidateFireball = rathianCandidate.patterns.find(pattern => pattern.id === 'rathian.fireball');
+        assert.ok(candidateFireball.slots.find(slot => slot.slot === 'beat:look')?.assigned,
+            'a rebuilt candidate must inherit the prior reviewed fireball windup route');
+        assert.ok(candidateFireball.slots.find(slot => slot.slot === 'beat:spit')?.assigned,
+            'a rebuilt candidate must inherit the prior reviewed fireball contact route');
+
+        const previewHtml = await fetch(`${origin}/preview/?embed=1`).then(response => response.text());
+        assert.ok(previewHtml.includes('hunt-monster-pattern-lab-audio.js'));
+        assert.ok(previewHtml.includes('function playRuntimeReaction(pattern)')
+            && previewHtml.includes('HuntMonsterAnatomyCatalog.breakReaction'),
             'reaction and part-break previews must call the same runtime owners as a live hunt');
         const runtimeScript = await fetch(`${origin}/js/effects/hunt/HuntMotionCompiler.js`);
         assert.strictEqual(runtimeScript.status, 200, 'preview must load the production compiler from the same server');

@@ -26,6 +26,7 @@ class EmotionHarness {
 }
 
 const methods = source.slice(methodStart, methodEnd);
+assert(!/[💀☠]/u.test(methods), 'emotion-only pools must not reuse skull icons reserved for poison and death states');
 const Harness = Function(`return class extends arguments[0] {\n${methods}\n}`)(EmotionHarness);
 const engine = new Harness([0.1, 0]);
 const hunter = { id: 'great_sword', index: 2, status: 'alive' };

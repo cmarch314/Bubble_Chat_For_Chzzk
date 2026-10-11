@@ -261,7 +261,9 @@ class HuntMonsterFlightRuntime {
     }
 
     afterAction(engine, pattern = {}) {
-        if (pattern.runtimeImpactTimelineEvent && pattern.runtimeImpactTimelineFinal !== true) return;
+        const judgment = pattern.runtimeJudgment || null;
+        if ((pattern.runtimeImpactTimelineEvent || judgment)
+            && (judgment?.timelineFinal ?? pattern.runtimeImpactTimelineFinal) !== true) return;
         if (pattern.flightTransition === 'takeoff' && engine.monsterFlightState === 'grounded') {
             this.takeOff(engine);
             return;

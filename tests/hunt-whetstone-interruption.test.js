@@ -87,6 +87,7 @@ const evadingHunter = {
     hitDuration: 0
 };
 let evadeCancelledAudio = 0;
+let evadePresentationCount = 0;
 const evadeEngine = {
     ...engine,
     selectedWeapons: [evadingHunter],
@@ -95,8 +96,10 @@ const evadeEngine = {
     random: () => 0,
     callbacks: {
         ...engine.callbacks,
-        onCancelWhetstoneCue: () => { evadeCancelledAudio++; }
-    }
+        onCancelWhetstoneCue: () => { evadeCancelledAudio++; },
+        onTriggerRollAnimation: () => { evadePresentationCount++; }
+    },
+    presentHunterImpact: HuntEngine.prototype.presentHunterImpact
 };
 
 HuntMonsterTurnExecutor.execute(evadeEngine);
@@ -105,6 +108,53 @@ assert.strictEqual(evadingHunter.hp, evadingHunter.maxHp, 'a sharpening hunter m
 assert.strictEqual(evadingHunter.pendingSharpnessRestore, false, 'evading must revoke pending sharpness restoration');
 assert.strictEqual(evadingHunter.itemDuration, 0, 'evading must end the sharpening item lock');
 assert.strictEqual(evadeCancelledAudio, 1, 'evading must invalidate delayed whetstone scraping audio');
+assert.strictEqual(evadePresentationCount, 1,
+    'a sharpening hunter may avoid damage only with a committed visible roll');
+
+const liveStateHunter = {
+    ...evadingHunter,
+    pendingSharpnessRestore: true,
+    itemDuration: 20,
+    currentAction: null,
+    rollDuration: 0
+};
+assert.deepStrictEqual(
+    HuntMonsterTurnExecutor.resolveHunterResponseIntent({
+        random: () => 0,
+        actionStateMachine: new HuntActionStateMachine()
+    }, liveStateHunter, { type: 'charge', tags: ['charge'] }, {
+        attempted: true,
+        preferred: 'guard'
+    }),
+    { attempted: true, preferred: 'evade' },
+    'impact-time state must replace a stale telegraph guard choice with the only legal visible response'
+);
+
+const protectedHunter = {
+    ...hunter,
+    hp: 100,
+    pendingSharpnessRestore: true,
+    itemDuration: 20,
+    hitDuration: 0,
+    counterInvulnerabilityTicks: 5
+};
+let counterProtectionPresentation = 0;
+const protectedEngine = {
+    ...engine,
+    selectedWeapons: [protectedHunter],
+    monsterHp: 1000,
+    monsterAtb: 100,
+    presentHunterImpact: HuntEngine.prototype.presentHunterImpact,
+    callbacks: {
+        ...engine.callbacks,
+        onTriggerGuardShake: () => { counterProtectionPresentation++; }
+    }
+};
+HuntMonsterTurnExecutor.execute(protectedEngine);
+assert.strictEqual(protectedHunter.hp, protectedHunter.maxHp,
+    'the authored one-second post-counter protection must still negate damage');
+assert.strictEqual(counterProtectionPresentation, 1,
+    'post-counter protection must never discard an impact without visible feedback');
 
 // Test 0-damage hit interruption
 const zeroDmgHunter = {

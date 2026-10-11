@@ -7,6 +7,8 @@ global.HuntMonsterPatternCatalog = HuntMonsterPatternCatalog;
 const profiles = require('../js/effects/hunt/HuntMonsterProfiles.js');
 const motionOverrides = require('../js/effects/hunt/data/MonsterPatternMotionOverrides.generated.js');
 const HuntBeatV2Adapter = require('../js/effects/hunt/HuntBeatV2Adapter.js');
+const HuntBeatActionRuntime = require('../js/effects/hunt/HuntBeatActionRuntime.js');
+const HuntCombatJudgmentRuntime = require('../js/effects/hunt/HuntCombatJudgmentRuntime.js');
 const HuntMotionCompiler = require('../js/effects/hunt/HuntMotionCompiler.js');
 const HuntStageAnchors = require('../js/effects/hunt/HuntStageAnchors.js');
 
@@ -32,6 +34,24 @@ for (const pattern of profiles.diablos) {
         (synchronized.impactTimeline || []).map(event => Number(event.atTicks)).sort((a, b) => a - b),
         `${pattern.id} preview judgments and live gameplay impacts must share one tick source`
     );
+    const impactEvents = synchronized.impactTimeline || [];
+    const judgments = new HuntCombatJudgmentRuntime();
+    judgments.begin('monster', compiled, { pattern: synchronized, judgmentEvents: impactEvents });
+    const beatRuntime = new HuntBeatActionRuntime({
+        onEvent: (_state, event) => judgments.observeBeatEvent('monster', event)
+    });
+    beatRuntime.begin('monster', compiled, {});
+    const committed = [];
+    judgments.drain(command => committed.push(command));
+    for (let tick = 1; tick <= compiled.totalTicks; tick++) {
+        beatRuntime.tick('monster');
+        judgments.drain(command => committed.push(command));
+    }
+    assert.deepStrictEqual(committed.map(command => command.atTicks),
+        impactEvents.map(event => Number(event.atTicks)),
+        `${pattern.id} must commit the exact Preview-authored judgment ticks`);
+    assert.strictEqual(new Set(committed.map(command => command.judgmentId)).size, committed.length,
+        `${pattern.id} must commit each judgment id once`);
 }
 
 {
@@ -53,6 +73,10 @@ for (const pattern of profiles.diablos) {
         'the authored large tremor must cover the locked target lane and only its live neighbours');
 
     const source = profiles.diablos.find(pattern => pattern.id === 'diablos.burrow_enter');
+    assert.strictEqual(source.movement?.untargetable, true,
+        'Diablos must be unhittable for the complete sink-through-emergence traversal');
+    assert.strictEqual(source.movement?.kind, 'diablos-burrow-complete',
+        'burrow invulnerability must be typed data rather than a monster-id runtime branch');
     const motion = source.motion.map(beat => ({ ...beat, ...(burrow[beat.beat] || {}) }));
     const rect = (left, top, width, height) => ({ left, top, width, height });
     const compileForTarget = primaryTarget => HuntMotionCompiler.compile(motion, {

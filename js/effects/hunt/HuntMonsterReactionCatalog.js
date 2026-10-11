@@ -166,6 +166,45 @@ class HuntMonsterReactionCatalog {
         const requested = overrides[partKind] || this.defaultProfile(monsterId, partKind, airborne);
         return this.applyAuthoredMotion(monsterId, this.profile(requested));
     }
+
+    // Reactions share the authored BEAT vocabulary with attacks. Renderers
+    // project `motion`, while the runtime owns every audio/event tick.
+    static compile(profile, options = {}) {
+        if (!profile?.patternId || !Array.isArray(profile.motion) || !profile.motion.length) return null;
+        const Contract = typeof HuntBeatV2Contract !== 'undefined'
+            ? HuntBeatV2Contract
+            : (typeof require === 'function' ? require('./HuntBeatV2Contract.js').HuntBeatV2Contract : null);
+        if (!Contract) return null;
+        const includeAudio = options.includeAudio !== false;
+        return Contract.compile({
+            id: String(profile.patternId),
+            actor: 'reaction',
+            backend: Contract.BACKEND,
+            schemaVersion: Contract.VERSION,
+            reviewStatus: 'approved',
+            reactionProfile: String(profile.id || 'reaction'),
+            visualType: String(profile.visualType || 'reaction'),
+            controlType: String(profile.controlType || 'reaction'),
+            beats: profile.motion.map((beat, index) => {
+                const id = String(beat?.beat || beat?.id || `beat-${index + 1}`);
+                const ticks = Math.max(1, Math.floor(Number(beat?.ticks) || 1));
+                const events = includeAudio ? [{
+                    id: `audio:${id}`,
+                    kind: 'audio',
+                    offsetTicks: 0
+                }] : [];
+                // The held sleep cue is authored as a real loop in the same
+                // graph, not a wall-clock timeout outside the action session.
+                if (includeAudio && id === 'held') {
+                    for (let offsetTicks = 30; offsetTicks < ticks; offsetTicks += 30) {
+                        events.push({ id: `audio:${id}:repeat-${offsetTicks}`,
+                            kind: 'audio', offsetTicks });
+                    }
+                }
+                return { ...beat, id, ticks, events };
+            })
+        });
+    }
 }
 
 if (typeof module !== 'undefined' && module.exports) module.exports = HuntMonsterReactionCatalog;

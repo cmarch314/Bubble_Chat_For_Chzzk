@@ -2,15 +2,19 @@
 // [Class 4] Chat Renderer (DOM & Animation)
 // ==========================================
 class ChatRenderer {
-    constructor(eventBus, audioManager = null) {
+    constructor(eventBus, audioManager = null, layout = {}) {
         this.eventBus = eventBus;
         this.audioManager = audioManager;
         this.scope = new DisposableScope();
         this.timers = new ManagedTimers();
         this.scope.add(() => this.timers.clearAll());
         this.container = document.getElementById('chat');
-        this.boxPos = 0;
+        this.nextSlot = 0;
+        this.columns = ChatRenderer.resolveColumns(layout?.columns);
+        this.container.style.setProperty('--chat-scale', String(5 / this.columns));
         this.activeBubbles = [];
+        this.liveBubbles = new Set();
+        this.bubbleDisposers = new WeakMap();
         this.mediaBubbleController = new ChatMediaBubbleController(this);
 
         if (this.eventBus) {
@@ -24,10 +28,15 @@ class ChatRenderer {
         }
     }
 
+    static resolveColumns(value) {
+        const columns = Number(value);
+        return Number.isInteger(columns) && columns >= 5 && columns <= 12 ? columns : 7;
+    }
+
     dispose() {
         this.timers.clearAll();
         this.scope.dispose();
-        for (const bubble of this.activeBubbles) bubble?.remove?.();
+        for (const bubble of [...this.liveBubbles]) this._removeBubble(bubble);
         this.activeBubbles = [];
     }
 
@@ -81,36 +90,28 @@ class ChatRenderer {
         if (specialBubble?.kind === 'clown') {
             chatLineInner.classList.add('chat-line-inner--clown');
             messageEle.classList.add('message--clown');
-            messageEle.textContent = specialBubble.text;
-
-            const textLen = specialBubble.text.length;
-            let fontSize = 3.2;
-            if (textLen <= 4) {
-                fontSize = 3.6;
-            } else if (textLen <= 8) {
-                fontSize = 3.0;
-            } else if (textLen <= 14) {
-                fontSize = 2.4;
-            } else if (textLen <= 22) {
-                fontSize = 2.0;
-            } else if (textLen <= 35) {
-                fontSize = 1.7;
-            } else if (textLen <= 50) {
-                fontSize = 1.4;
-            } else {
-                fontSize = 1.2;
-            }
-            messageEle.style.fontSize = `${fontSize}em`;
+            const artwork = document.createElement('img');
+            artwork.className = 'chat-clown-art';
+            artwork.src = 'img/광대.jpg';
+            artwork.alt = '';
+            artwork.width = 588;
+            artwork.height = 340;
+            chatLineInner.appendChild(artwork);
+            messageEle.textContent = this._normalizeClownText(specialBubble.text);
             timeout = 10000;
         } else if (videoQueue.length > 0) {
             const mediaResult = this.mediaBubbleController.mount(originalMessage, elements, videoQueue);
             timeout = mediaResult.timeout;
+            this.bubbleDisposers.set(chatBox, mediaResult.dispose);
         } else {
             // 특수 효과 필터 (채팅 내용 기반)
             this._applyTextFilters(originalMessage, elements, userColor);
 
             // 이모티콘 처리 및 메시지 삽입
-            messageEle.innerHTML = renderMessageWithEmotesHTML(displayMessage, emotes);
+            const isSingleEmote = this._isSingleEmoteMessage(displayMessage, emotes);
+            messageEle.innerHTML = renderMessageWithEmotesHTML(displayMessage, emotes, isSingleEmote ? 0.75 : 1);
+            if (isSingleEmote) messageEle.classList.add('message--single-emote');
+            else messageEle.classList.add('message--text');
 
             // Ensure Twemoji is applied
             if (window.twemoji) {
@@ -118,8 +119,8 @@ class ChatRenderer {
             }
 
             // 메시지 길이 기반 스타일 조정
-            if (displayMessage.length <= 5) {
-                messageEle.style.fontSize = (2.6 - displayMessage.length / 3) + "em";
+            if (!isSingleEmote && displayMessage.length <= 5) {
+                messageEle.style.fontSize = `max(var(--chat-message-min-font-size), ${2.6 - displayMessage.length / 3}em)`;
                 messageEle.style.textAlign = "center";
             }
 
@@ -146,8 +147,17 @@ class ChatRenderer {
         elements.chatLineBg.appendChild(chatLineInner);
 
         this.container.appendChild(chatBox);
+        this.liveBubbles.add(chatBox);
 
-        requestAnimationFrame(() => chatBox.classList.add('visible'));
+        requestAnimationFrame(() => {
+            if (specialBubble?.kind === 'clown') this._fitClownCaption(messageEle);
+            chatBox.classList.add('visible');
+        });
+        if (specialBubble?.kind === 'clown' && document.fonts?.ready) {
+            document.fonts.ready.then(() => {
+                if (messageEle.isConnected) this._fitClownCaption(messageEle);
+            }).catch(() => {});
+        }
 
         // 타임아웃 제거
         if (timeout) {
@@ -155,8 +165,7 @@ class ChatRenderer {
                 if (chatBox.parentElement) {
                     chatBox.classList.remove('visible');
                     this.timers.timeout(() => {
-                        chatBox.remove();
-                        this._releaseBubbleSlots(chatBox);
+                        this._removeBubble(chatBox);
                     }, 1000);
                 }
             }, timeout);
@@ -180,9 +189,49 @@ class ChatRenderer {
         return { chatBox, chatLine, chatLineBg, chatLineInner, chatUser, nameBox, nameEle, badgeEle, messageEle };
     }
 
+    _isSingleEmoteMessage(message, emotes) {
+        const match = String(message ?? '').trim().match(/^\{([^}]+)\}$/);
+        if (!match) return false;
+        const emoteId = match[1].replace(/:/g, '').trim();
+        const descriptor = emotes?.[emoteId];
+        const rawUrl = typeof descriptor === 'string'
+            ? descriptor
+            : descriptor?.imageUrl || descriptor?.url;
+        return Boolean(SafeContent.remoteImageUrl(rawUrl));
+    }
+
+    _normalizeClownText(text) {
+        return String(text ?? '').replace(/\s+/gu, ' ').trim() || '...';
+    }
+
+    _fitClownCaption(element) {
+        if (!element) return;
+        const minPx = 14;
+        const maxPx = 32;
+        const maxHeight = 84;
+        let low = minPx;
+        let high = maxPx;
+        let best = minPx;
+
+        element.style.fontSize = `${minPx}px`;
+        for (let step = 0; step < 8; step++) {
+            const candidate = (low + high) / 2;
+            element.style.fontSize = `${candidate}px`;
+            const fitsWidth = element.scrollWidth <= element.clientWidth + 1;
+            const fitsHeight = element.scrollHeight <= maxHeight + 1;
+            if (fitsWidth && fitsHeight) {
+                best = candidate;
+                low = candidate;
+            } else {
+                high = candidate;
+            }
+        }
+        element.style.fontSize = `${Math.floor(best * 10) / 10}px`;
+    }
+
     _claimBubbleSlots(chatBox, requestedSpan = 1) {
-        const slotCount = 5;
-        const span = Math.max(1, Math.min(slotCount, Number(requestedSpan) || 1));
+        const slotCount = this.columns;
+        const span = Math.max(1, Math.min(slotCount, Math.floor(Number(requestedSpan)) || 1));
         this.activeBubbles = this.activeBubbles.filter(bubble => bubble && bubble.parentElement);
 
         const findAvailableStart = () => {
@@ -193,7 +242,7 @@ class ChatRenderer {
                 if (!Number.isFinite(start)) return;
                 for (let slot = start; slot < start + bubbleSpan; slot++) occupied.add(slot);
             });
-            const cursor = Math.floor((this.boxPos % 100) / 20);
+            const cursor = this.nextSlot;
             for (let offset = 0; offset < slotCount; offset++) {
                 const start = (cursor + offset) % slotCount;
                 if (start + span > slotCount) continue;
@@ -209,21 +258,31 @@ class ChatRenderer {
         let start = findAvailableStart();
         while (start === null && this.activeBubbles.length) {
             const oldest = this.activeBubbles.shift();
-            oldest?.remove?.();
+            this._removeBubble(oldest);
             start = findAvailableStart();
         }
         if (start === null) start = 0;
 
         chatBox.dataset.chatSlotStart = String(start);
         chatBox.dataset.chatSlotSpan = String(span);
-        chatBox.style.left = `${start * 20}%`;
-        this.boxPos = ((start + span) % slotCount) * 20;
+        chatBox.style.left = `${start * 100 / slotCount}%`;
+        chatBox.style.right = `${(slotCount - start - span) * 100 / slotCount}%`;
+        this.nextSlot = (start + span) % slotCount;
         this.activeBubbles.push(chatBox);
         return { start, span };
     }
 
     _releaseBubbleSlots(chatBox) {
         this.activeBubbles = this.activeBubbles.filter(bubble => bubble !== chatBox && bubble?.parentElement);
+        if (!chatBox.parentElement) this.liveBubbles.delete(chatBox);
+    }
+
+    _removeBubble(chatBox) {
+        const dispose = this.bubbleDisposers.get(chatBox);
+        this.bubbleDisposers.delete(chatBox);
+        dispose?.();
+        chatBox.remove();
+        this._releaseBubbleSlots(chatBox);
     }
 
     _resolveColor(color, uid) {
@@ -288,6 +347,7 @@ class ChatRenderer {
             chatBox.style.width = "auto"; messageEle.style.whiteSpace = "nowrap";
             chatBox.style.left = "0"; chatBox.style.top = "0"; chatBox.style.bottom = "auto";
             chatBox.style.transform = "none";
+            chatBox.style.transformOrigin = "top left";
             chatBox.style.animation = "chat-hvn-slideDiagonal 3s linear forwards";
             messageEle.style.fontSize = "2.5em";
             timeout = 3500;
@@ -362,23 +422,26 @@ class ChatRenderer {
         } else if (["지나갑니다", "실례합니다", "수레"].includes(message) || this._includesAny(["가즈아", "드가자"], message) || message.endsWith("ㅏㅏ")) {
             usesSlot = false;
             const fromLeft = Math.random() >= 0.5;
-            chatBox.style.left = fromLeft ? "-350px" : "auto"; chatBox.style.right = fromLeft ? "auto" : "-350px";
+            chatBox.style.left = fromLeft ? "0" : "auto"; chatBox.style.right = fromLeft ? "auto" : "0";
             chatBox.style.animation = `${fromLeft ? 'chat-hvn-passThroughLtoR' : 'chat-hvn-passThroughRtoL'} 3.5s ease-in forwards`;
-            timeout = 3000;
+            timeout = 3500;
         } else if (["나락", "떡락"].includes(message) || normOriginal.startsWith("!나락") || normOriginal.startsWith("!떡락")) {
             usesSlot = false;
             chatBox.style.width = "auto"; messageEle.style.whiteSpace = "nowrap";
-            chatBox.style.left = Math.random() * 90 + "%"; chatBox.style.bottom = "1300px";
+            chatBox.style.left = `calc((100% - 380px * var(--chat-scale, 1)) * ${Math.random()})`;
+            chatBox.style.top = "0"; chatBox.style.bottom = "auto";
             chatBox.style.animation = "chat-hvn-passThrough2 3s cubic-bezier(0.31, 0.44, 0.445, 1.65) forwards";
             messageEle.style.fontSize = "2.5em"; timeout = 3500;
         } else if (["극락", "떡상", "🦇"].includes(message) || normOriginal.startsWith("!극락") || normOriginal.startsWith("!떡상")) {
             usesSlot = false;
             chatBox.style.width = "auto"; messageEle.style.whiteSpace = "nowrap";
-            chatBox.style.left = Math.random() * 90 + "%"; chatBox.style.bottom = "-500px";
+            chatBox.style.left = `calc((100% - 380px * var(--chat-scale, 1)) * ${Math.random()})`;
+            chatBox.style.top = "auto"; chatBox.style.bottom = "0";
             chatBox.style.animation = "chat-hvn-passThrough3 3s cubic-bezier(0.31, 0.44, 0.445, 1.65) forwards";
             messageEle.style.fontSize = "2.5em"; timeout = 3500;
         }
 
+        if (!usesSlot) chatBox.classList.add('chat-box--travel');
         return { usesSlot, timeout };
     }
 

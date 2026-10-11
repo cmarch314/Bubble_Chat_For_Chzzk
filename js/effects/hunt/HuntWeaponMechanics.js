@@ -238,9 +238,8 @@ class HuntWeaponMechanics {
                 prep('great_sword.true_charge_2', '참 모아베기 · 2차지', { greatSwordChain: 2, greatSwordCharge: 1 }, { greatSwordCharge: 2, atbAfterAction: 93 }, 'wilds-motion-reference:true-charged-slash-hold-loop', greatSwordChargeTicks),
                 prep('great_sword.true_charge_3', '참 모아베기 · 3차지', { greatSwordChain: 2, greatSwordCharge: 2 }, { greatSwordCharge: 3, atbAfterAction: 92 }, 'wilds-motion-reference:true-charged-slash-hold-loop', greatSwordChargeTicks),
                 { id: 'great_sword.true_charged_slash', name: '참 모아베기', dmg: 760, motionValue: 190, hits: [15, 175], requirements: { greatSwordChain: 2, minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, greatSwordChain: 0 }, tags: ['sever', 'charge-release', 'heavy', 'finisher'], audioCue: 'true_charged_slash', durationTicks: 21, mechanicEvidence: 'wilds-action-class:cSpiritVerticalSlash' },
-                { id: 'great_sword.tackle', name: '차지 태클', dmg: 95, motionValue: 26, stun: 55, requirements: { minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, advanceGreatSwordChain: true, atbAfterAction: 86 }, tags: ['blunt', 'counter', 'tackle'], audioCue: 'blunt_light', durationTicks: 7, mechanicEvidence: 'wilds-action-class:cTackle' },
-                { id: 'great_sword.wide_slash', name: '횡베기', dmg: 168, motionValue: 42, effects: {}, next: ['great_sword.side_blow'], tags: ['sever'], audioCue: 'slash_heavy', durationTicks: 9, mechanicEvidence: 'wilds-motion-values:wide-slash-42' },
-                { id: 'great_sword.side_blow', name: '옆면치기', dmg: 64, motionValue: 16, stun: 20, effects: {}, next: ['great_sword.kick'], tags: ['blunt'], audioCue: 'blunt_light', durationTicks: 6, mechanicEvidence: 'wilds-motion-values:side-blow-16-stun-20' },
+                { id: 'great_sword.tackle', name: '태클', dmg: 95, motionValue: 26, stun: 55, requirements: { minGreatSwordCharge: 1 }, effects: { greatSwordCharge: 0, advanceGreatSwordChain: true, atbAfterAction: 86 }, tags: ['blunt', 'counter', 'tackle'], audioCue: 'blunt_light', durationTicks: 7, mechanicEvidence: 'wilds-action-class:cTackle' },
+                { id: 'great_sword.wide_slash', name: '횡베기', dmg: 168, motionValue: 42, effects: {}, next: ['great_sword.kick'], tags: ['sever'], audioCue: 'slash_heavy', durationTicks: 9, mechanicEvidence: 'wilds-motion-values:wide-slash-42' },
                 { id: 'great_sword.kick', name: '발차기', dmg: 20, motionValue: 5, stun: 10, effects: {}, tags: ['blunt'], audioCue: 'blunt_light', durationTicks: 5, mechanicEvidence: 'wilds-motion-values:kick-5-stun-10' }
             ],
             long_sword: [
@@ -677,13 +676,12 @@ class HuntWeaponMechanics {
             const prefixes = ['great_sword.charge', 'great_sword.strong_charge', 'great_sword.true_charge'];
             const releases = ['great_sword.charged_slash', 'great_sword.strong_charged_slash', 'great_sword.true_charged_slash'];
             if (charge === 0 && chain === 0 && !context.monsterDowned) {
-                const normalMoves = new Set(['great_sword.wide_slash', 'great_sword.side_blow']);
+                const normalMoves = new Set(['great_sword.wide_slash']);
                 const linked = normalMoves.has(hunter.lastActionId) ? linkedFromLast() : -1;
                 if (linked >= 0 && this.random() < 0.62) return linked;
                 const route = this.random();
-                if (route < 0.24) return byId('great_sword.wide_slash');
-                if (route < 0.36) return byId('great_sword.side_blow');
-                if (route < 0.44) return byId('great_sword.kick');
+                if (route < 0.30) return byId('great_sword.wide_slash');
+                if (route < 0.42) return byId('great_sword.kick');
             }
             if (charge === 0) return byId(`${prefixes[chain]}_1`);
             if (charge >= 3) return byId(releases[chain]);
@@ -693,14 +691,11 @@ class HuntWeaponMechanics {
             const riskBias = hunter.personality === 'offensive' ? 7
                 : (hunter.personality === 'defensive' || hunter.personality === 'support' ? -6 : 0);
             const continueLimit = (charge === 1 ? 76 : 84) + riskBias + ((this.random() - 0.5) * 12);
-            // Check the charge-cancel reaction before extending the charge.
-            // Previously the early continue return made tackle unreachable through
-            // most of its useful window. An imminent attack is deterministic;
-            // earlier pressure still respects the personality special-action rate.
-            const tackleBase = monsterAtb >= 90 ? .9 : (monsterAtb >= 78 ? .68 : .42);
-            const tackleChance = HuntWeaponMechanics.specialActionChance(hunter, tackleBase);
-            if (hunter._mechanicMonsterPressure
-                && (monsterAtb >= 94 || this.random() < tackleChance)) return byId('great_sword.tackle');
+            // Tackle is an impact-time response owned by
+            // HuntMonsterTurnExecutor.activateReactiveGreatSwordTackle(). Merely
+            // seeing high monster ATB must not manufacture a tackle here: doing
+            // so resets charge to zero, advances the chain, and can trap the final
+            // tier in an endless charge -> tackle loop without an incoming hit.
             if (monsterAtb < continueLimit) return byId(`${prefixes[chain]}_${charge + 1}`);
             return byId(releases[chain]);
         }
@@ -1122,7 +1117,7 @@ class HuntWeaponMechanics {
                 const names = ['모아베기', '강 모아베기', '참 모아베기'];
                 engine.addLog(`⚔️ [${names[hunter.greatSwordChain] || names[0]} ${hunter.greatSwordCharge}차지] ${hunter.hunterName}가 다음 판단까지 짧게 힘을 모읍니다.`, '#f2d18b');
             } else if (action?.tags?.includes('tackle')) {
-                engine.addLog(`🛡️ [차지 태클] ${hunter.hunterName}가 공격을 받아내며 다음 모아베기 연계로 넘어갑니다.`, '#d9e4f2');
+                engine.addLog(`🛡️ [태클] ${hunter.hunterName}가 공격을 받아내며 다음 모아베기 연계로 넘어갑니다.`, '#d9e4f2');
             }
         }
         if (hunter.id === 'long_sword') {

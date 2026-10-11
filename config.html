@@ -1055,6 +1055,8 @@ window.CHZZK_CHANNEL_ID = "${chzzkId}"; // [Optional] Set your Channel ID here t
 
 window.HIVE_VOLUME_CONFIG = ${JSON.stringify(volumeConfig, null, 4)};
 
+window.HIVE_CHAT_LAYOUT = ${JSON.stringify(window.HIVE_CHAT_LAYOUT || { columns: 7 }, null, 4)};
+
 // [Startup Configuration]
 window.RANDOM_NAMES = ${JSON.stringify(randomNames, null, 4)};
 

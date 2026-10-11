@@ -1,4 +1,7 @@
 class HuntCombatAnimator {
+    static PITFALL_RELEASE_TICK_MS = 100;
+    static PITFALL_RELEASE_TICKS = 8;
+
     constructor(owner) {
         this.owner = owner;
         this.activeWeaponAnimations = new Map();
@@ -25,6 +28,26 @@ class HuntCombatAnimator {
             : Number(durationMs || 0);
     }
 
+    cartExitDistance(anchor, direction) {
+        const mapRect = this.card?.getBoundingClientRect?.();
+        const anchorRect = anchor?.getBoundingClientRect?.();
+        const fallbackWidth = Number(globalThis?.innerWidth || 1920);
+        const mapLeft = Number.isFinite(mapRect?.left) ? mapRect.left : 0;
+        const mapRight = Number.isFinite(mapRect?.right) && mapRect.right > mapLeft
+            ? mapRect.right
+            : fallbackWidth;
+        const anchorCenter = Number.isFinite(anchorRect?.left) && Number.isFinite(anchorRect?.width)
+            ? anchorRect.left + (anchorRect.width / 2)
+            : fallbackWidth / 2;
+        // Move the 84px cart completely beyond the combat map, not merely away
+        // from its hunter card. The same distance drives the carried weapon.
+        const exitPadding = Math.max(72, Number(anchorRect?.width || 0) * .75);
+        const distance = direction > 0
+            ? mapRight - anchorCenter + exitPadding
+            : anchorCenter - mapLeft + exitPadding;
+        return Math.max(520, Math.ceil(distance));
+    }
+
     clearWeaponAnimations() {
         this.activeWeaponAnimations.forEach(animation => {
             try { animation.cancel(); } catch (_) { /* detached OBS node */ }
@@ -36,6 +59,15 @@ class HuntCombatAnimator {
             this.cancelWeaponAnimation(weaponImg);
             weaponImg.style.removeProperty('transform');
         });
+        this.card.querySelectorAll('.game-hunt-weapon-img-container').forEach(container => {
+            this.cancelWeaponAnimation(container);
+            container.style.removeProperty('transform');
+            container.style.removeProperty('filter');
+            container.style.removeProperty('opacity');
+        });
+        this.card.querySelectorAll('[id^="fight-card-"]').forEach(weaponCard => {
+            delete weaponCard.dataset.hunterHitReactionActive;
+        });
         this.card.querySelectorAll('.hunt-split-shield').forEach(shieldImg => {
             this.cancelWeaponAnimation(shieldImg);
             shieldImg.style.removeProperty('transform');
@@ -44,7 +76,7 @@ class HuntCombatAnimator {
         this.card.querySelectorAll('.hunt-environment-effect').forEach(effect => effect.remove());
         this.card.querySelectorAll('.hunt-hit-impact').forEach(effect => effect.remove());
         this.card.querySelectorAll('.hunt-damage-number').forEach(number => number.remove());
-        this.card.querySelectorAll('.hunt-guard-impact').forEach(effect => effect.remove());
+        this.card.querySelectorAll('.hunt-guard-impact, .hunt-tackle-impact').forEach(effect => effect.remove());
         this.card.querySelectorAll('.monster-part-break-visual').forEach(effect => effect.remove());
         this.card.querySelectorAll('.monster-stun-head-marker').forEach(effect => effect.remove());
         this.monsterStunMarkerGeneration += 1;
@@ -252,22 +284,24 @@ class HuntCombatAnimator {
         }, visibleDuration);
     }
 
-    triggerGuardImpact(idx) {
+    triggerGuardImpact(idx, outcome = 'guard') {
         if (!this.card || typeof document === 'undefined') return;
         const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         const container = weaponCard?.querySelector('.game-hunt-weapon-img-container');
         if (!container) return;
 
-        weaponCard.classList.remove('hunter-card-guard-shake');
+        const isTackle = outcome === 'tackle';
+        const shakeClass = isTackle ? 'hunter-card-hit-shake' : 'hunter-card-guard-shake';
+        weaponCard.classList.remove('hunter-card-hit-shake', 'hunter-card-guard-shake');
         void weaponCard.offsetWidth;
-        weaponCard.classList.add('hunter-card-guard-shake');
-        this.animationTimers.timeout(() => weaponCard?.classList.remove('hunter-card-guard-shake'), 300);
+        weaponCard.classList.add(shakeClass);
+        this.animationTimers.timeout(() => weaponCard?.classList.remove(shakeClass), isTackle ? 360 : 300);
 
-        container.querySelectorAll('.hunt-guard-impact').forEach(effect => effect.remove());
+        container.querySelectorAll('.hunt-guard-impact, .hunt-tackle-impact').forEach(effect => effect.remove());
         const hasSplitShield = Boolean(container.querySelector('.hunt-split-shield'));
         const impact = document.createElement('span');
-        impact.className = `hunt-guard-impact${hasSplitShield ? ' is-split-shield' : ' is-weapon-fallback'}`;
-        impact.textContent = '🛡️';
+        impact.className = `${isTackle ? 'hunt-tackle-impact' : 'hunt-guard-impact'}${hasSplitShield ? ' is-split-shield' : ' is-weapon-fallback'}`;
+        impact.textContent = isTackle ? '💥' : '🛡️';
         impact.setAttribute('aria-hidden', 'true');
         container.appendChild(impact);
         this.animationTimers.timeout(() => impact.remove(), 620);
@@ -340,6 +374,10 @@ class HuntCombatAnimator {
         return this.monsterAttackAnimator.triggerMonsterAttack(type, emoji, targets, attackName, pattern);
     }
 
+    resolveMonsterProjectileImpact(pattern, judgment, results) {
+        return this.monsterAttackAnimator.resolveElementalProjectileOutcome(pattern, judgment, results);
+    }
+
     triggerMonsterTelegraphFx(effect) {
         return this.monsterAttackAnimator.triggerMonsterTelegraphFx(effect);
     }
@@ -383,8 +421,14 @@ class HuntCombatAnimator {
 
     static strongHitKeyframes({ x = 0, y = 0, direction = 1, angleOffset = 0 } = {}) {
         const spinDirection = Number(direction) < 0 ? -1 : 1;
-        const spin = spinDirection * 720;
-        const fallen = `translate(${Math.round(x)}px, ${Math.round(y)}px) rotate(${spin + Number(angleOffset || 0)}deg) scale(.82)`;
+        const fallSpin = spinDirection * 540;
+        const standingSpin = spinDirection * 720;
+        const proneSkew = spinDirection * 12;
+        // Keep the five-second recovery/invulnerability contract unchanged,
+        // but finish the visible launch and tumble in 1.1s. The remaining
+        // lock is a prone hold plus the existing 0.6s walk home, not a slow fall.
+        const tumbleEndOffset = 1100 / 5000;
+        const fallen = `translate(${Math.round(x)}px, ${Math.round(y)}px) rotate(${fallSpin + Number(angleOffset || 0)}deg) skewX(${proneSkew}deg) scale(.82, .76)`;
         const tumbleFrame = (offset, progress, degrees, lift = 0) => {
             const scale = progress === 1 ? '.82' : String(Number((1 - .18 * progress).toFixed(3)));
             return {
@@ -396,34 +440,48 @@ class HuntCombatAnimator {
         };
         return [
             { offset: 0, transform: 'translate(0, 0) rotate(0deg) scale(1)', filter: 'brightness(1)', opacity: 1 },
-            // Explicit quarter-turn waypoints prevent transform matrix
-            // normalization from treating rotate(720deg) as rotate(0deg).
-            // The hunter now visibly tumbles twice while travelling along the
-            // measured collision vector instead of merely sliding in parallel.
-            tumbleFrame(.0375, .25, 180, 18),
-            tumbleFrame(.075, .50, 360, 26),
-            tumbleFrame(.1125, .75, 540, 14),
-            tumbleFrame(.15, 1, 720),
-            // 3.0 s: remain down at the exact final rotation and position.
-            { offset: .90, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
-            // Return only the position/pose. Keeping the equivalent 720-degree
-            // orientation prevents WAAPI from rewinding both spins on recovery.
-            { offset: 1, transform: `translate(0, 0) rotate(${spin}deg) scale(1)`, filter: 'brightness(1)', opacity: 1 }
+            // Explicit waypoints prevent transform matrix normalization from
+            // collapsing the 1.5-turn fall into parallel translation.
+            // The same 1.5-turn path lands in 1.1s instead of reading as slow motion.
+            tumbleFrame(tumbleEndOffset * .25, .25, 135, 18),
+            tumbleFrame(tumbleEndOffset * .50, .50, 270, 28),
+            tumbleFrame(tumbleEndOffset * .75, .75, 405, 16),
+            { offset: tumbleEndOffset, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            // Stay visibly prone instead of ending on an upright full turn.
+            { offset: .88, transform: fallen, filter: 'brightness(.62) sepia(.5) hue-rotate(-50deg)', opacity: .68 },
+            // Stand without rewinding, then return with alternating planted
+            // steps. The final 12% of the five-second reaction is an exact
+            // 0.6-second walk home: readable without restoring the old 1.2s drag.
+            { offset: .90, transform: `translate(${Math.round(x * .78)}px, ${Math.round(y * .78)}px) rotate(${standingSpin}deg) scale(.94, 1.02)`, filter: 'brightness(.78)', opacity: .76 },
+            { offset: .93, transform: `translate(${Math.round(x * .60)}px, ${Math.round(y * .60 - 5)}px) rotate(${standingSpin - spinDirection * 7}deg) skewX(${spinDirection * 4}deg) scale(.96)`, filter: 'brightness(.84)', opacity: .82 },
+            { offset: .96, transform: `translate(${Math.round(x * .40)}px, ${Math.round(y * .40)}px) rotate(${standingSpin + spinDirection * 7}deg) skewX(${-spinDirection * 4}deg) scale(.97)`, filter: 'brightness(.9)', opacity: .88 },
+            { offset: .98, transform: `translate(${Math.round(x * .18)}px, ${Math.round(y * .18 - 4)}px) rotate(${standingSpin - spinDirection * 5}deg) skewX(${spinDirection * 3}deg) scale(.99)`, filter: 'brightness(.96)', opacity: .95 },
+            { offset: 1, transform: `translate(0, 0) rotate(${standingSpin}deg) scale(1)`, filter: 'brightness(1)', opacity: 1 }
         ];
     }
 
     triggerHitAnimation(idx, w, reaction = {}) {
         if (!this.card || !w || w.hp <= 0) return;
+        const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
+        if (!weaponCard) return;
+        // Runtime impact commits are authoritative, but keep the renderer
+        // idempotent too. A stale/speculative callback must never restart the
+        // tumble while the same hunter is still inside hit recovery.
+        const reactionGeneration = Math.max(0, Number(reaction.generation || 0));
+        const activeGeneration = Math.max(0, Number(weaponCard.dataset.hunterHitReactionGeneration || 0));
+        if (weaponCard.dataset.hunterHitReactionActive === 'true'
+            && Number(w.hitDuration || 0) > 0
+            && (reactionGeneration === 0 || reactionGeneration === activeGeneration)) return;
         // A damaging hit replaces roar, tremor, and wind-pressure presentation.
         // Keep this defensive cleanup even when the runtime callback arrives late.
         this.triggerHunterInterference(idx, '', '', false);
         this.interruptWeaponVisual(idx, w);
         this.cancelHitAnimation(idx);
-        const weaponCard = this.card.querySelector(`#fight-card-${idx}`);
         const weaponLayers = weaponCard?.querySelectorAll(
             '.game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
         ) || [];
-        if (!weaponCard) return;
+        weaponCard.dataset.hunterHitReactionActive = 'true';
+        weaponCard.dataset.hunterHitReactionGeneration = String(reactionGeneration);
 
         // Interference used a CSS animation with !important. Remove its DOM
         // ownership synchronously as well as clearing the runtime state above,
@@ -434,9 +492,9 @@ class HuntCombatAnimator {
         delete weaponCard.dataset.interferenceSize;
         weaponCard.querySelector('.hunter-interference-overlay')?.remove();
 
-        const kind = reaction.kind === 'weak' ? 'weak' : 'strong';
+        const kind = ['weak', 'butt-stumble'].includes(reaction.kind) ? 'weak' : 'strong';
         const cardShakeClass = 'hunter-card-hit-shake';
-        const durationMs = kind === 'weak' ? 1500 : 4000;
+        const durationMs = kind === 'weak' ? 1500 : 5000;
         const authoredDirection = Number(
             reaction.knockbackDirection || w.hitKnockbackDirection || (idx < 2 ? -1 : 1)
         ) < 0 ? -1 : 1;
@@ -467,7 +525,14 @@ class HuntCombatAnimator {
         });
         void weaponCard.offsetWidth;
         weaponCard.classList.add(cardShakeClass);
-        weaponLayers.forEach(layer => {
+        // Own knockback on the stable wrapper. Live HUD refreshes legitimately
+        // update child weapon/shield transforms; animating those children made
+        // their rotation disappear while translation appeared to survive.
+        // One wrapper track keeps every visual layer together and guarantees
+        // the authored two-turn tumble remains visible in production.
+        const hitLayers = hunterAnchor && typeof hunterAnchor.animate === 'function'
+            ? [hunterAnchor] : [...weaponLayers];
+        hitLayers.forEach(layer => {
             if (typeof layer.animate !== 'function') return;
             const x = Math.round(strongX * (layer.classList.contains('hunt-split-shield') ? .88 : 1));
             const y = Math.round(strongY * (layer.classList.contains('hunt-split-shield') ? .92 : 1));
@@ -490,7 +555,14 @@ class HuntCombatAnimator {
                 });
             const animation = layer.animate(keyframes, {
                 duration: durationMs,
-                easing: kind === 'weak' ? 'ease-in-out' : 'cubic-bezier(.18,.72,.2,1)',
+                // Strong-hit frame offsets are authored as real clock
+                // fractions (the final 10% is the 0.5s walk home). Applying
+                // an effect-wide acceleration curve remaps that clock and
+                // makes the short return take several seconds. Keep the
+                // strong reaction linear; its weight/easing is expressed by
+                // the deliberately spaced tumble, prone, stand, and step
+                // keyframes instead.
+                easing: kind === 'weak' ? 'ease-in-out' : 'linear',
                 iterations: 1,
                 fill: 'both'
             });
@@ -516,10 +588,12 @@ class HuntCombatAnimator {
     cancelHitAnimation(idx) {
         const weaponCard = this.card?.querySelector?.(`#fight-card-${idx}`);
         if (!weaponCard) return;
+        delete weaponCard.dataset.hunterHitReactionActive;
+        delete weaponCard.dataset.hunterHitReactionGeneration;
         weaponCard.classList.remove('hunter-card-large-shake', 'hunter-card-small-shake',
             'hunter-card-hit-shake', 'hunter-card-guard-shake');
         weaponCard.querySelectorAll(
-            '.game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
+            '.game-hunt-weapon-img-container, .game-hunt-weapon-img, .hunt-split-shield, .game-hunt-weapon-overlay'
         ).forEach(layer => {
             this.cancelWeaponAnimation(layer);
             layer.style.removeProperty('transform');
@@ -551,6 +625,12 @@ class HuntCombatAnimator {
         if (shieldImg) {
             this.cancelWeaponAnimation(shieldImg);
             shieldImg.style.removeProperty('transform');
+        }
+        if (weaponContainer) {
+            this.cancelWeaponAnimation(weaponContainer);
+            weaponContainer.style?.removeProperty?.('transform');
+            weaponContainer.style?.removeProperty?.('filter');
+            weaponContainer.style?.removeProperty?.('opacity');
         }
         if (['great_sword', 'hammer'].includes(w?.id)) {
             if (weaponContainer?.dataset) delete weaponContainer.dataset.weaponChargeReleaseStage;
@@ -635,6 +715,7 @@ class HuntCombatAnimator {
         const travelDirection = idx < 2 ? 1 : -1;
         const fallDistance = 220;
         const cartLiftDistance = 62;
+        const exitDistance = this.cartExitDistance(imgContainer || weaponCard, travelDirection);
         layers.forEach(layer => {
             this.cancelWeaponAnimation(layer);
             if (typeof layer.animate !== 'function') return;
@@ -643,7 +724,8 @@ class HuntCombatAnimator {
                 { offset: .4, transform: `translate(0,${fallDistance}px) rotate(720deg) scale(.86)`, opacity: 1, filter: 'grayscale(.55) brightness(.68)' },
                 { offset: .62, transform: `translate(0,${fallDistance}px) rotate(720deg) scale(.86)`, opacity: 1, filter: 'grayscale(.55) brightness(.68)' },
                 { offset: .7, transform: `translate(0,${fallDistance - cartLiftDistance}px) rotate(720deg) scale(.72)`, opacity: 1, filter: 'brightness(2.8)' },
-                { offset: 1, transform: `translate(${travelDirection * 520}px,${fallDistance - cartLiftDistance}px) rotate(720deg) scale(.72)`, opacity: 0, filter: 'brightness(1.2)' }
+                { offset: .96, transform: `translate(${travelDirection * exitDistance}px,${fallDistance - cartLiftDistance}px) rotate(720deg) scale(.72)`, opacity: 1, filter: 'brightness(1.2)' },
+                { offset: 1, transform: `translate(${travelDirection * exitDistance}px,${fallDistance - cartLiftDistance}px) rotate(720deg) scale(.72)`, opacity: 0, filter: 'brightness(1.2)' }
             ], { duration: 3000, easing: 'linear', fill: 'forwards' });
             this.activeWeaponAnimations.set(layer, animation);
         });
@@ -658,7 +740,8 @@ class HuntCombatAnimator {
             { offset: .4, transform: `translate(${travelDirection * -360}px,${fallDistance}px)`, opacity: 0 },
             { offset: .62, transform: `translate(0,${fallDistance}px)`, opacity: 1 },
             { offset: .7, transform: `translate(0,${fallDistance - cartLiftDistance}px) scale(1.12)`, opacity: 1, filter: 'brightness(2.8)' },
-            { offset: 1, transform: `translate(${travelDirection * 520}px,${fallDistance - cartLiftDistance}px) scale(1.12)`, opacity: 0, filter: 'brightness(1)' }
+            { offset: .96, transform: `translate(${travelDirection * exitDistance}px,${fallDistance - cartLiftDistance}px) scale(1.12)`, opacity: 1, filter: 'brightness(1)' },
+            { offset: 1, transform: `translate(${travelDirection * exitDistance}px,${fallDistance - cartLiftDistance}px) scale(1.12)`, opacity: 0, filter: 'brightness(1)' }
         ], { duration: 3000, easing: 'linear', fill: 'forwards' });
         const flash = document.createElement('span');
         flash.className = 'hunter-cart-sequence-flash';
@@ -830,29 +913,9 @@ class HuntCombatAnimator {
             } else monsterImg.classList.add('monster-knockdown-sequence');
             this.setMonsterStunHeadMarker(details?.kind === 'stun');
 
-            // The initial fall keeps the existing authoritative knockdown cue.
-            // Every struggle/rise beat is independently addressable in the
-            // review tool and is emitted at the same authored runtime tick.
-            let elapsedTicks = knockdownBeatTicks.reaction;
-            const audioMoments = Object.keys(knockdownBeatTicks).slice(1).map(beatId => {
-                const moment = [beatId, elapsedTicks * 100];
-                elapsedTicks += knockdownBeatTicks[beatId];
-                return moment;
-            });
-            // Stun differs only by its head marker; it inherits the reviewed
-            // large-knockdown sound mapping beat-for-beat.
-            const audioPatternId = '__reaction.knockdown';
-            audioMoments.forEach(([beatId, delayMs]) => {
-                this.animationTimers.timeout(() => {
-                    if (monsterImg.dataset.monsterKnockdownSequence !== 'active') return;
-                    this.owner?.playSFX?.('monster_attack', null, {
-                        monsterId,
-                        patternId: audioPatternId,
-                        patternSlot: `beat:${beatId}`,
-                        overrideOnly: true
-                    });
-                }, delayMs);
-            });
+            // Audio belongs to the shared reaction BEAT session in HuntEngine.
+            // This renderer only projects the already-compiled motion and must
+            // not recreate an independent timeout schedule for each struggle.
             this.animationTimers.timeout(() => {
                 if (monsterImg.dataset.monsterKnockdownSequence !== 'active') return;
                 this.monsterKnockdownAnimation?.cancel?.();
@@ -1128,6 +1191,16 @@ class HuntCombatAnimator {
                         });
 
                         if (monsterImg && profile.impact) {
+                            const impactAccent = this.createWeaponImpactAccent(
+                                profile,
+                                impactStage,
+                                monsterImg,
+                                idx
+                            );
+                            if (impactAccent) {
+                                (impactStage || weaponCard).appendChild(impactAccent);
+                                this.animationTimers.timeout(() => impactAccent.remove(), 760);
+                            }
                             this.showDamageAtImpact(
                                 monsterImg,
                                 visualDamage,
@@ -1309,11 +1382,41 @@ class HuntCombatAnimator {
             if (!hasActivePitfall) return;
             const lifecycle = Number(monsterImg?.dataset?.pitfallLifecycle || 0) + 1;
             if (monsterImg?.dataset) monsterImg.dataset.pitfallLifecycle = String(lifecycle);
-            effects.forEach(effect => effect.classList.add('is-releasing'));
+            const releaseTicks = Math.max(
+                HuntCombatAnimator.PITFALL_RELEASE_TICKS,
+                Number(details?.releaseTicks) || HuntCombatAnimator.PITFALL_RELEASE_TICKS
+            );
+            const releaseFadeMs = releaseTicks * HuntCombatAnimator.PITFALL_RELEASE_TICK_MS;
+            effects.forEach(effect => {
+                effect.classList.add('is-releasing');
+                effect.style.setProperty('--pitfall-release-fade-ms', `${releaseFadeMs}ms`);
+                // OBS must show the fade even if a stale stylesheet or another
+                // CSS animation wins the cascade. WAAPI owns the actual opacity
+                // from the first escape tick; CSS remains the fallback.
+                effect._pitfallReleaseAnimation?.cancel?.();
+                effect._pitfallReleaseAnimation = effect.animate?.(
+                    [{ opacity: 1 }, { opacity: 0 }],
+                    { duration: releaseFadeMs, easing: 'ease-in', fill: 'forwards' }
+                ) || null;
+                // The foreground rim is also the visual lower-body mask.  It
+                // must receive its own fade because its z-index can put it in
+                // a separate compositing layer from the enclosing trap in OBS.
+                // Without this, the hole fades but the mask can appear to pop
+                // off while the monster is climbing out.
+                effect.querySelectorAll?.('.pitfall-front').forEach(mask => {
+                    mask.classList.add('is-releasing');
+                    mask.style.setProperty('--pitfall-release-fade-ms', `${releaseFadeMs}ms`);
+                    mask._pitfallReleaseAnimation?.cancel?.();
+                    mask._pitfallReleaseAnimation = mask.animate?.(
+                        [{ opacity: 1 }, { opacity: 0 }],
+                        { duration: releaseFadeMs, easing: 'ease-in', fill: 'forwards' }
+                    ) || null;
+                });
+            });
             monsterImg?.classList?.remove('monster-pitfall-struggle-pulse');
-            if (monsterImg?.dataset?.pitfallBeatOwned !== 'true') {
-                monsterImg?.classList?.add('monster-pitfall-releasing');
-            }
+            // Renderer uses this lifecycle guard to keep the trap mounted until
+            // its release fade finishes. BEAT owns motion, not DOM persistence.
+            monsterImg?.classList?.add('monster-pitfall-releasing');
             this.animationTimers.timeout(() => {
                 if (Number(monsterImg?.dataset?.pitfallLifecycle || 0) !== lifecycle) return;
                 effects.forEach(effect => effect.remove());
@@ -1327,7 +1430,7 @@ class HuntCombatAnimator {
                 );
                 if (monsterImg?.dataset) delete monsterImg.dataset.pitfallLifecycle;
                 if (monsterImg?.dataset) delete monsterImg.dataset.pitfallBeatOwned;
-            }, 800);
+            }, releaseFadeMs);
             return;
         }
         if (!showcase || !monsterImg || !['pitfall', 'pitfall-pending', 'rockfall', 'flash', 'bomb'].includes(kind)) return;
@@ -1449,7 +1552,10 @@ class HuntCombatAnimator {
     }
 
     playWeaponAnimation(weaponImg, weaponId, idx, profile, target = null) {
-        this.cancelWeaponAnimation(weaponImg);
+        // Action motion owns only its WAAPI transform. Persistent weapon-state
+        // CSS (notably Long Sword spirit-color pulse) must remain visible while
+        // Special Sheathe and other authored motions run on the same image.
+        this.cancelWeaponAnimation(weaponImg, { preserveResourceAnimations: true });
         if (typeof weaponImg.animate === 'function') {
             const targetVector = profile.trackTarget
                 ? this.resolveWeaponTargetVector(weaponImg, target)
@@ -1486,13 +1592,16 @@ class HuntCombatAnimator {
         this.animationTimers.timeout(() => weaponImg.classList.remove(fallbackClass), profile.durationMs);
     }
 
-    cancelWeaponAnimation(weaponImg) {
+    cancelWeaponAnimation(weaponImg, { preserveResourceAnimations = false } = {}) {
         if (!weaponImg) return;
         const animation = this.activeWeaponAnimations.get(weaponImg);
         const animations = typeof weaponImg.getAnimations === 'function'
             ? weaponImg.getAnimations()
             : [];
         new Set([animation, ...animations].filter(Boolean)).forEach(activeAnimation => {
+            const isPersistentResourceAnimation = activeAnimation !== animation
+                && activeAnimation?.animationName === 'ls-spirit-img-pulse-3';
+            if (preserveResourceAnimations && isPersistentResourceAnimation) return;
             try { activeAnimation.cancel(); } catch (_) { /* detached OBS node */ }
         });
         this.activeWeaponAnimations.delete(weaponImg);
@@ -1527,6 +1636,28 @@ class HuntCombatAnimator {
         }
         effect.setAttribute('aria-hidden', 'true');
         return effect;
+    }
+
+    createWeaponImpactAccent(profile, stage = null, target = null, hunterIndex = 0) {
+        if (typeof document === 'undefined' || !profile?.impactAccent) return null;
+        const stageRect = stage?.getBoundingClientRect?.();
+        const targetRect = target?.getBoundingClientRect?.();
+        if (!(stageRect?.width > 0) || !(targetRect?.width > 0)) return null;
+
+        const accent = document.createElement('span');
+        accent.className = `hunt-action-effect hunt-weapon-impact-accent hunt-weapon-impact-${profile.impactAccent}`;
+        if (Number(hunterIndex) >= 2) accent.classList.add('is-from-right');
+        accent.dataset.actionId = String(profile.actionId || '');
+        accent.style.left = `${targetRect.left - stageRect.left + targetRect.width / 2}px`;
+        accent.style.top = `${targetRect.top - stageRect.top + targetRect.height / 2}px`;
+        accent.style.setProperty('--hunt-impact-width', `${Math.round(Math.max(170, Math.min(360, targetRect.width * .95)))}px`);
+        accent.style.setProperty('--hunt-impact-height', `${Math.round(Math.max(100, Math.min(220, targetRect.height * .62)))}px`);
+        if (profile.impactAccent === 'wide-slash') accent.innerHTML = '<i></i><b></b>';
+        else if (profile.impactAccent === 'kick') {
+            accent.textContent = '🦶';
+        }
+        accent.setAttribute('aria-hidden', 'true');
+        return accent;
     }
 
     shakeMonster() {

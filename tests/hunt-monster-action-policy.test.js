@@ -79,6 +79,23 @@ const HuntMonsterAnimationCatalog = require('../js/effects/hunt/HuntMonsterAnima
 }
 
 {
+    const hunters = [0, 1, 2, 3].map(index => ({ index }));
+    const anchored = HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern: { impactTimeline: [{ atTicks: 8, targetMode: 'judgment-primary' }] },
+        targetable: hunters,
+        count: 2,
+        random: () => .999,
+        mode: 'adjacent-lane',
+        defaultTargets: [hunters[1]],
+        primaryIndex: 1
+    });
+    assert.deepStrictEqual(anchored.targets.map(target => target.index), [1],
+        'a primary-only judgment must preserve the prepared live target');
+    assert.deepStrictEqual(anchored.impactTimeline[0].targetIndices, [1],
+        'the authored primary judgment must hit the same hunter used by the visible route');
+}
+
+{
     const sourcePattern = {
         id: 'future_monster.submerge',
         phase: { kind: 'burrow', enterVisualMs: 900, emergeVisualMs: 1200 },
@@ -161,6 +178,30 @@ const HuntMonsterAnimationCatalog = require('../js/effects/hunt/HuntMonsterAnima
         'an adjacent pair must be struck one hunter at a time from left to right');
     assert.deepStrictEqual(plan.runtime.runtimePivotPairs, [[1, 2]],
         'the selected 1-2, 2-3 or 3-4 boundary must remain one stable pivot pair');
+    assert.deepStrictEqual(plan.runtime.runtimePairTargets, [1, 2],
+        'pair-left and pair-right judgments must resolve from the same stable adjacent pair');
+}
+
+{
+    const hunters = [0, 1, 2, 3].map(index => ({ index }));
+    const plan = HuntMonsterActionPolicy.resolveTargetScenario({
+        pattern: {
+            motionGraph: { beats: [{ to: 'above:pair:center 180' }] },
+            impactTimeline: [
+                { atTicks: 12, targetMode: 'runtime-pair-left' },
+                { atTicks: 24, targetMode: 'runtime-pair-right' }
+            ]
+        },
+        targetable: hunters,
+        count: 2,
+        passCount: 2,
+        random: () => .99,
+        mode: 'adjacent-pair-pivot'
+    });
+    assert.deepStrictEqual(plan.runtime.runtimePairTargets, [2, 3],
+        'a pair placement anchor must reuse the action\'s selected 2인 lane');
+    assert.deepStrictEqual(plan.impactTimeline.map(event => event.targetIndices), [[2], [3]],
+        'pair-left/right impacts must stay bound to that same lane');
 }
 
 {

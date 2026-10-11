@@ -634,18 +634,20 @@ HUNT_MONSTER_PATTERN_OVERRIDES.rathian = pilot('world_iceborne', PILOT_SOURCES.r
         ]
     }],
     ['rathian.tail_sweep', '이단 꼬리 회전', 'area', 0.27, {
-        sourceMoveNameJA: '尻尾回転', minTargets: 4, maxTargets: 4, recovery: 1,
+        sourceMoveNameJA: '尻尾回転', minTargets: 2, maxTargets: 2, recovery: 1,
         tags: ['area', 'tail', 'ground-only', 'target-contact'], monsterAtbCost: 0.58,
-        movement: { ticks: 42 }, targeting: { mode: 'left-right-halves' },
+        movement: { ticks: 46 }, targeting: { mode: 'adjacent-pair-sequential', passCount: 2 },
         impactTimeline: [
             { atTicks: 24, damageScale: 1 },
-            { atTicks: 34, damageScale: 1 }
+            { atTicks: 38, damageScale: 1 }
         ],
-        animationProfile: 'rathian-tail-sweep-double', animationDurationMs: 4200,
+        animationProfile: 'rathian-tail-sweep-double', animationDurationMs: 4600,
         motion: [
             { beat: 'center', label: '중앙 진입', ticks: 12, to: 'arena:center-lower .56', face: 'target', pose: 'brace' },
             { beat: 'wind', label: '꼬리 준비', ticks: 12, rotateByFacing: -36, origin: '76% 72%', pose: 'crouch' },
             { beat: 'left-half', label: '좌측 반회전', ticks: 10, rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
+            { beat: 'rest', label: '회전 사이 숨 고르기', ticks: 4, rotation: 180,
+                origin: '76% 72%', pose: 'settle', keepRotation: true },
             { beat: 'right-half', label: '우측 반회전', ticks: 4, rotateByFacing: 180, origin: '76% 72%', pose: 'stretch-strong', hit: true, sfx: 'impact' },
             { beat: 'return', label: '복귀', ticks: 4, to: 'home', pose: 'idle', rotation: 0 }
         ],
@@ -919,6 +921,9 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.d
     ['diablos.burrow_enter', '지중 잠행·급습', 'charge', 0.46, {
         sourceMoveNameJA: '地中潜行→地中急襲', maxTargets: 1, windup: 5, recovery: 1, cooldown: 56,
         tags: ['charge', 'burrow', 'burrow-combo', 'locked-target', 'horn', 'strong', 'tremor-large'], monsterAtbCost: 0.75,
+        // The complete authored graph is one traversal. Hunters cannot damage,
+        // stagger, break, or stun Diablos between sinking and emergence.
+        movement: { kind: 'diablos-burrow-complete', ticks: 69, untargetable: true },
         // Tremor [L] occupies the eruption lane and its immediate neighbours,
         // including the directly struck lane. Adjacency is clipped naturally
         // at the left/right edge.
@@ -981,28 +986,30 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.d
         ],
         targeting: { mode: 'adjacent-pair-sequential', passCount: 2 },
         motion: [
-            { beat: 'telegraph', label: '두 헌터 사이 접근', ticks: 7, to: 'between:pass:1,pass:2', face: 'pass:1', pose: 'brace', moveEasing: 'linear' },
-            { beat: 'lower-1', label: '첫 뿔 낮추기', ticks: 4, face: 'pass:1',
+            { beat: 'telegraph', label: '두 헌터 사이 접근', ticks: 7, to: 'between:pass:1,pass:2', face: 'target-group', pose: 'brace', moveEasing: 'linear' },
+            { beat: 'lower-1', label: '왼쪽 뿔 낮추기', ticks: 4, face: 'pass:1',
                 pose: 'crouch', origin: '50% 52%', rotationToward: 10 },
-            { beat: 'impact-1', label: '첫 쳐올리기', ticks: 4, offsetY: -18,
-                pose: 'idle', origin: '50% 52%', rotationToward: -34, moveEasing: 'snap', hit: true, sfx: 'impact',
+            { beat: 'impact-1', label: '왼쪽 뿔 쳐올리기', ticks: 4, face: 'pass:1', offsetY: -24,
+                pose: 'idle', origin: '50% 52%', rotationToward: -34,
+                scaleX: 1, scaleY: 1.03, moveEasing: 'snap', hit: true, sfx: 'impact',
                 fx: 'part-dust', fxAnchor: 'head', fxDurationTicks: 6,
                 fxSecondary: 'target-impact-dust', fxSecondaryAnchor: 'target', fxSecondaryDurationTicks: 6,
                 fxSecondaryAngleMode: 'upward-diagonal',
                 fxAdditional: [{ fx: 'part-swing-arc', anchor: 'head', durationTicks: 5,
                     angleMode: 'upward-diagonal' }] },
             { beat: 'recenter', label: '중앙 자세 전환', ticks: 5,
-                pose: 'settle', rotation: 0, offsetY: 0, moveEasing: 'decelerate' },
-            { beat: 'lower-2', label: '둘째 뿔 낮추기', ticks: 4, face: 'pass:2',
+                pose: 'settle', origin: '50% 52%', rotation: 0, offsetY: 0, moveEasing: 'decelerate' },
+            { beat: 'lower-2', label: '오른쪽 뿔 낮추기', ticks: 4, face: 'pass:2',
                 pose: 'crouch', origin: '50% 52%', rotationToward: 10 },
-            { beat: 'impact-2', label: '둘째 쳐올리기', ticks: 4, offsetY: -18,
-                pose: 'idle', origin: '50% 52%', rotationToward: -34, moveEasing: 'snap', hit: true, sfx: 'impact',
+            { beat: 'impact-2', label: '오른쪽 뿔 쳐올리기', ticks: 4, face: 'pass:2', offsetY: -24,
+                pose: 'idle', origin: '50% 52%', rotationToward: -34,
+                scaleX: 1, scaleY: 1.03, moveEasing: 'snap', hit: true, sfx: 'impact',
                 fx: 'part-dust', fxAnchor: 'head', fxDurationTicks: 6,
                 fxSecondary: 'target-impact-dust', fxSecondaryAnchor: 'target', fxSecondaryDurationTicks: 6,
                 fxSecondaryAngleMode: 'upward-diagonal',
                 fxAdditional: [{ fx: 'part-swing-arc', anchor: 'head', durationTicks: 5,
                     angleMode: 'upward-diagonal' }] },
-            { beat: 'recover', label: '상체 복구', ticks: 6, offsetY: -8, pose: 'settle',
+            { beat: 'recover', label: '상체 복구', ticks: 6, offsetY: -10, pose: 'settle',
                 origin: '50% 52%', rotationToward: -8, moveEasing: 'decelerate' },
             { beat: 'return', label: '제자리 복귀', ticks: 8, to: 'home', pose: 'idle', rotation: 0,
                 origin: '50% 50%', moveEasing: 'decelerate' }
@@ -1080,11 +1087,6 @@ HUNT_MONSTER_PATTERN_OVERRIDES.diablos = pilot('world_iceborne', PILOT_SOURCES.d
                 rotation: 180, skewX: 0, scaleX: 1, scaleY: 1, opacity: 1,
                 pose: 'idle', origin: '74% 30%', moveEasing: 'decelerate', flipFacing: true }
         ],
-        whiffReaction: {
-            pass: 'last', result: 'dodge',
-            disabledWhenAllBroken: ['left-horn', 'right-horn'],
-            kind: 'knockdown'
-        },
         brokenPartDamageModifiers: { 'left-horn': 0.906, 'right-horn': 0.906 }
     }]
 ]);
@@ -1691,7 +1693,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         // 전조/접근·휘두르기/접촉 유지/복귀가 편집한 폭 그대로 재생된다.
         motion: [
             { beat: 'telegraph', label: '전조', ticks: 5, pose: 'crouch', face: 'target' },
-            { beat: 'action-1', label: '접근·휘두르기', ticks: 10, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-whip', moveEasing: 'slow-fast-slow' },
+            { beat: 'action-1', label: '접근·휘두르기', ticks: 10, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-whip', rotation: -160, origin: 'part:torso', moveEasing: 'slow-fast-slow' },
             { beat: 'impact-1', label: '꼬리 접촉', ticks: 2, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'settle', hit: true, sfx: 'impact' },
             { beat: 'action-2', label: '회수·복귀', ticks: 8, to: 'home', pose: 'idle', moveEasing: 'decelerate', rotationEasing: 'decelerate' }
         ],
@@ -1749,7 +1751,7 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
             { beat: 'aim', ticks: 5, to: 'above:target 260', pose: 'stretch-soft', scaleX: .92, scaleY: 1.20 },
             // bounds 'reach' — 접합 보정이 채팅 안전선을 넘어야 한다. 여기서는 회전축이
             // 곧 접합 부위(꼬리)라, 180도 회전이 몸을 도로 위로 올린다.
-            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-slam', scaleX: .92, scaleY: 1.08, hit: true, sfx: 'impact' },
+            { beat: 'slam', ticks: 3, to: 'target', align: 'part:tail', bounds: 'reach', pose: 'tail-slam', rotation: 180, origin: 'part:tail', scaleX: .92, scaleY: 1.08, hit: true, sfx: 'impact' },
             // 꼬리가 박힌 채 버틴다. 회전은 유지되고 idle이 풀어준다.
             { beat: 'brace', ticks: 26, pose: 'brace' },
             { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
@@ -1923,8 +1925,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.nargacuga = pilot('world_iceborne',
         // 화면 밖으로 빠졌다 되돌아오는 연출의 의미가 없어진다.
         targeting: { mode: 'independent-passes', passCount: 3, distinctPasses: true },
         impactTimeline: [
-            { atTicks: 22, targetMode: 'sequential', damageScale: 1, hitRecoveryTicks: 15, hitReactionKind: 'weak' },
-            { atTicks: 38, targetMode: 'sequential', damageScale: 0.92, hitRecoveryTicks: 15, hitReactionKind: 'weak' },
+            { atTicks: 22, targetMode: 'sequential', damageScale: 1, hitReactionKind: 'weak' },
+            { atTicks: 38, targetMode: 'sequential', damageScale: 0.92, hitReactionKind: 'weak' },
             { atTicks: 54, targetMode: 'sequential', damageScale: 0.92 }
         ],
         motion: [
@@ -2131,8 +2133,8 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
         motion: [
             { beat: 'step-back', ticks: 5, to: 'toward:target -32%', pose: 'brace', face: 'target', moveEasing: 'decelerate' },
             { beat: 'coil', ticks: 4, pose: 'crouch' },
-            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
-            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotateBy: 26, origin: 'part:torso', hit: true, damageScale: .5 },
+            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', rotation: -160, origin: 'part:torso', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
+            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotation: -134, origin: 'part:torso', hit: true, damageScale: .5 },
             { beat: 'unwind', ticks: 4, pose: 'brace', moveEasing: 'decelerate' },
             { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
         ],
@@ -2159,10 +2161,10 @@ HUNT_MONSTER_PATTERN_OVERRIDES.barioth = worldFlying([
             { beat: 'coil', ticks: 4, pose: 'crouch' },
             // 꼬리를 표적 상단에 얹는다. 표적 중심에 얹으면 벨리오로스 꼬리 앵커가
             // 이미지 위쪽(y .15)이라 몸이 133px 아래로 밀려 채팅 안전선을 넘는다.
-            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
+            { beat: 'sweep', ticks: 6, to: 'target.top', align: 'part:tail', pose: 'tail-whip', rotation: -160, origin: 'part:torso', hit: true, sfx: 'impact', moveEasing: 'slow-fast-slow' },
             // 몸이 멈춘 뒤에도 꼬리 끝이 계속 돌아 나온다. 몸통을 축으로 조금 더
             // 돌려 그 지연을 만든다.
-            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotateBy: 26, origin: 'part:torso', hit: true, damageScale: .5 },
+            { beat: 'tip-lag', ticks: 4, pose: 'settle', rotation: -134, origin: 'part:torso', hit: true, damageScale: .5 },
             { beat: 'unwind', ticks: 4, pose: 'brace', moveEasing: 'decelerate' },
             { beat: 'return', ticks: 5, to: 'home', pose: 'idle', moveEasing: 'smooth' }
         ],

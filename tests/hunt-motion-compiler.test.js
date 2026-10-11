@@ -56,6 +56,73 @@ assert.ok(heldRotation.pose.some(frame => frame.offset === turnBoundary
     && frame.transform.includes('rotate(0.00deg)') && frame.pivot === 'part:torso'),
     'the authored pivot must be active from the first frame of the rotation interval');
 
+const directedHeldRotation = HuntMotionCompiler.compile([
+    { beat: 'center', ticks: 7, pose: 'brace' },
+    { beat: 'wind', ticks: 13, pose: 'crouch',
+        rotationDirection: 'counterclockwise', rotationDegrees: 30 }
+], { anchors });
+const directedBoundary = 7 / 20;
+assert.ok(directedHeldRotation.pose.some(frame => frame.offset === directedBoundary
+    && frame.transform.includes('rotate(0.00deg)')),
+    'a directed turn must begin from the previous angle');
+assert.ok(!directedHeldRotation.pose.some(frame => frame.offset > directedBoundary
+    && frame.offset < directedBoundary + HuntMotionCompiler.EPS * 2
+    && frame.transform.includes('rotate(-30.00deg)')),
+    'hold poses must not inject the directed terminal angle at beat start');
+assert.ok(directedHeldRotation.pose.some(frame => frame.offset === 1
+    && frame.transform.includes('rotate(-30.00deg)')),
+    'a directed hold-pose turn must reach its terminal angle at beat end');
+
+const authoredDoubleTail = HuntMotionCompiler.compile([
+    { beat: 'cock', ticks: 3, pose: 'crouch', rotation: -30, origin: 'part:tail' },
+    { beat: 'left-half', ticks: 3, pose: 'tail-whip', rotation: 150, origin: 'part:tail' },
+    { beat: 'right-half', ticks: 3, pose: 'tail-whip', rotation: 330, origin: 'part:tail' },
+    { beat: 'return', ticks: 3, pose: 'idle', rotation: 360, origin: 'part:tail', keepRotation: true }
+], { anchors });
+const authoredTailAngles = authoredDoubleTail.timeline.map(beat => Number(authoredDoubleTail.pose
+    .filter(frame => frame.offset <= beat.endTicks / 12).at(-1)
+    .transform.match(/rotate\((-?[\d.]+)deg\)/)[1]));
+assert.deepStrictEqual(authoredTailAngles, [-30, 150, 330, 360],
+    'explicit BEAT final angles must not receive the legacy tail-whip pose rotation or reverse on return');
+
+const explicitZeroRotation = HuntMotionCompiler.compile([
+    { beat: 'wind', ticks: 5, pose: 'crouch', rotation: 0, rotateBy: 30, rotateByFacing: -36 },
+    { beat: 'hold', ticks: 3, pose: 'brace', rotation: 0 }
+], { anchors });
+const zeroAngles = explicitZeroRotation.pose.map(frame => Number(frame.transform
+    .match(/rotate\((-?[\d.]+)deg\)/)[1]));
+assert.ok(zeroAngles.every(angle => angle === 0),
+    'an editor-authored 0° must suppress stale legacy rotation deltas');
+
+const completedTurnHold = HuntMotionCompiler.compile([
+    { beat: 'turn', ticks: 5, pose: 'stretch-strong', rotation: 360 },
+    { beat: 'return', ticks: 5, pose: 'idle', rotation: 0 }
+], { anchors });
+const completedTurnAngles = completedTurnHold.pose.map(frame => Number(frame.transform
+    .match(/rotate\((-?[\d.]+)deg\)/)[1]));
+assert.ok(completedTurnAngles.slice(-2).every(angle => angle === 360),
+    '0° after a completed turn must retain the equivalent 360° angle instead of reverse-rotating');
+
+const selectableRotationReturn = mode => HuntMotionCompiler.compile([
+    { beat: 'turn', ticks: 5, pose: 'stretch-strong', rotation: 360 },
+    { beat: 'return', ticks: 5, pose: 'idle', rotation: 0, rotationResetMode: mode }
+], { anchors }).pose.map(frame => ({
+    offset: frame.offset,
+    angle: Number(frame.transform.match(/rotate\((-?[\d.]+)deg\)/)[1])
+}));
+const preservedReturn = selectableRotationReturn('preserve');
+assert.ok(preservedReturn.slice(-2).every(frame => frame.angle === 360),
+    'preserve must carry the accumulated angle through recovery without a reverse spin');
+const snappedReturn = selectableRotationReturn('snap-end');
+assert.equal(snappedReturn.at(-2).angle, 360,
+    'snap-end must hold the accumulated angle until the recovery endpoint');
+assert.equal(snappedReturn.at(-1).angle, 0,
+    'snap-end must normalize only on the final frame');
+const animatedReturn = selectableRotationReturn('animate');
+assert.ok(animatedReturn.some(frame => frame.offset === .5 && frame.angle === 360)
+    && animatedReturn.at(-1).angle === 0,
+    'animate must deliberately interpolate from the accumulated angle to the exact final angle');
+
 const reviewedCutwingAmbush = HuntMotionCompiler.compile([
     { beat: 'windup', ticks: 5, pose: 'crouch' },
     { beat: 'leap-out', ticks: 4, to: 'offscreen:left', offsetY: -280, pose: 'stretch', opacity: 0 },
@@ -112,6 +179,19 @@ assert.ok(transformed.placement.some(frame => frame.easing === HuntMotionCompile
 assert.ok(transformed.pose.some(frame => frame.easing === HuntMotionCompiler.EASING_PRESETS['slow-fast-slow']));
 assert.ok(transformed.pose.some(frame => frame.transform.includes('skew(5.00deg, -3.00deg)')));
 assert.ok(transformed.pose.some(frame => frame.transform.includes('scale(1.2000, 0.8000)')));
+
+const projectileRecoil = HuntMotionCompiler.compile([
+    { beat: 'inhale', ticks: 6, pose: 'brace', scaleX: 1.08, scaleY: 1.12 },
+    { beat: 'spit', ticks: 7, pose: 'brace', scaleX: .9, scaleY: .84,
+        projectileRecoil: true, projectileRecoilDegrees: 11 }
+], { anchors });
+const recoilStart = 6 / 13;
+assert.ok(projectileRecoil.pose.some(frame => frame.offset > recoilStart
+    && frame.offset < recoilStart + .03
+    && frame.transform.includes('rotate(0.00deg)')
+    && frame.transform.includes('scale(')
+    && frame.transform.includes('skew(0.00deg, -0.55deg)')),
+    'a projectile recoil must visibly exhale from the head anchor without a firearm-like body rotation');
 assert.ok(transformed.pose.some(frame => frame.origin === '25% 75%'));
 
 const continuousCharge = HuntMotionCompiler.compile([
@@ -131,12 +211,13 @@ assert.strictEqual(continuousCharge.timeline[1].continueTravel, true);
 
 const directionalTilt = HuntMotionCompiler.compile([
     { beat: 'right-hit', ticks: 3, to: 'hunter:3', pose: 'brace', rotationToward: 28 },
-    { beat: 'recover', ticks: 5, to: 'home', pose: 'brace', rotation: 0 }
+    { beat: 'recover', ticks: 5, to: 'home', pose: 'brace', rotation: 0,
+        rotationResetMode: 'animate' }
 ], { anchors });
 assert.strictEqual(directionalTilt.timeline[0].rotation, 28,
     'rightward shoulder travel tilts the sprite upper edge to the right');
 assert.strictEqual(directionalTilt.timeline[1].rotation, 0,
-    'explicit recovery returns the sprite upright');
+    'explicit animated recovery returns the sprite upright');
 
 const travelAligned = HuntMotionCompiler.compile([
     { beat: 'left-flight', ticks: 4, to: 'hunter:0', face: 'hunter:0', pose: 'stretch', alignRotationToTravel: true },
@@ -184,6 +265,48 @@ const temporaryMirror = HuntMotionCompiler.compile([
 assert.deepStrictEqual(temporaryMirror.facing.map(frame => [frame.offset, frame.direction]), [
     [4 / 12, -1], [8 / 12, 1]
 ], 'a temporary mirrored strike must flip only its authored BEAT and restore on settle');
+const mirroredRotation = HuntMotionCompiler.compile([
+    { beat: 'turn-to-right', ticks: 4, face: 'right', pose: 'stretch', rotation: 45 }
+], { anchors, baseFacing: 'left' });
+const unmirroredRotation = HuntMotionCompiler.compile([
+    { beat: 'turn-to-left', ticks: 4, face: 'left', pose: 'stretch', rotation: 45 }
+], { anchors, baseFacing: 'left' });
+assert.match(mirroredRotation.pose.at(-1).transform, /rotate\(-45\.00deg\)/,
+    'a horizontally mirrored sprite must reverse its authored inner rotation');
+assert.match(unmirroredRotation.pose.at(-1).transform, /rotate\(45\.00deg\)/,
+    'the native sprite direction must retain the authored rotation sign');
+const mirroredDirectedRotation = HuntMotionCompiler.compile([{
+    beat: 'mirrored-counterclockwise', ticks: 4, face: 'right',
+    rotationDirection: 'counterclockwise', rotationDegrees: 15
+}], { anchors, baseFacing: 'left' });
+assert.match(mirroredDirectedRotation.pose.at(-1).transform, /rotate\(15\.00deg\)/,
+    'a mirrored sprite must reverse directed rotation through the shared facing state');
+const flipDuringTurns = HuntMotionCompiler.compile([
+    { beat: 'native-turn', ticks: 4, face: 'left', rotationDirection: 'clockwise', rotationDegrees: 20 },
+    { beat: 'mirrored-turn', ticks: 4, face: 'right', rotationDirection: 'clockwise', rotationDegrees: 20 }
+], { anchors, baseFacing: 'left' });
+assert.match(flipDuringTurns.pose.filter(frame => frame.offset === .5).at(-1)?.transform || '', /rotate\(-20\.00deg\)/,
+    'the facing boundary must immediately adopt the mirrored rotation sign');
+assert.match(flipDuringTurns.pose.at(-1).transform, /rotate\(-40\.00deg\)/,
+    'every later turn in the mirrored interval must keep the opposite sign');
+const clockwiseHalfTurn = HuntMotionCompiler.compile([{
+    beat: 'clockwise-half', ticks: 4, rotation: -180,
+    rotationDirection: 'clockwise', rotationDegrees: 180, rotateByFacing: -72
+}], { anchors });
+const counterclockwiseHalfTurn = HuntMotionCompiler.compile([{
+    beat: 'counterclockwise-half', ticks: 4, rotation: 180,
+    rotationDirection: 'counterclockwise', rotationDegrees: 180
+}], { anchors });
+assert.strictEqual(clockwiseHalfTurn.timeline[0].rotation, 180,
+    'the authored clockwise direction must own the path even when stale final/facing rotations disagree');
+assert.strictEqual(counterclockwiseHalfTurn.timeline[0].rotation, -180,
+    'the authored counterclockwise direction must own the path even when a stale final angle disagrees');
+const directedFullTurns = ['clockwise', 'counterclockwise'].map(rotationDirection =>
+    HuntMotionCompiler.compile([{
+        beat: rotationDirection, ticks: 4, rotation: 0, rotationDirection, rotationDegrees: 360
+    }], { anchors }).timeline[0].rotation);
+assert.deepStrictEqual(directedFullTurns, [360, -360],
+    'visually equivalent final angles must retain their explicitly authored full-turn direction');
 const pairAnchors = primaryTarget => new HuntStageAnchors({
     monsterRect: anchors.monsterRect,
     cardRect: anchors.cardRect,
@@ -363,17 +486,15 @@ assert.ok(settleFrames.length >= 2,
 // ---- 회전 자세: 반동 -> 오버슛 -> 되감기 ----
 
 const spin = HuntMotionCompiler.compile([
-    { beat: 'spin', ticks: 12, pose: 'spin-right' },
-    { beat: 'settle', ticks: 3, pose: 'idle' }
+    { beat: 'spin', ticks: 12, pose: 'spin-right', rotation: 360, origin: 'part:foreleg.screen-right' },
+    { beat: 'settle', ticks: 3, pose: 'idle', rotation: 360, keepRotation: true }
 ], { anchors });
 
 const angles = spin.pose.map(frame => Number(frame.transform.match(/rotate\((-?[\d.]+)deg\)/)[1]));
-const windup = Math.min(...angles);
 const peak = Math.max(...angles);
-assert.ok(windup < 0, '시계 회전은 먼저 반시계로 감았다가 푼다 (반동)');
-assert.strictEqual(peak, 375, '한 바퀴 + 15도까지 돈다 (관성 오버슛)');
-// 오버슛 뒤 되감김. 375에서 recoil 15만큼 돌아온다.
-assert.ok(angles.includes(360), '접촉 후 15도 되감겨야 한다');
+assert.strictEqual(Math.min(...angles), 0, 'pose must not inject a hidden windup rotation');
+assert.strictEqual(peak, 360, 'the visible final angle must be exactly the authored BEAT value');
+assert.ok(angles.includes(360), 'the authored full turn must remain held through recovery');
 
 // 회전 자세는 축을 함께 들고 있어야 한다. 축이 CSS에 흩어져 있으면 특이도
 // 사고(rig 기본 축이 모션별 축을 이기던 22개 규칙)가 다시 생긴다.
@@ -409,7 +530,7 @@ assert.ok(Math.abs(ratio(near.pose[near.pose.length - 1]) - ratio(far.pose[far.p
 // 풀리지 않는다. 대신 idle이 "똑바로 선다"를 뜻하고, 복귀 비트가 그걸로 끝난다.
 // 이게 없으면 몬스터가 뒤집힌 채 제자리에 돌아간다.
 const held = HuntMotionCompiler.compile([
-    { beat: 'slam', ticks: 3, pose: 'tail-slam' },
+    { beat: 'slam', ticks: 3, pose: 'tail-slam', rotation: 180, origin: 'part:tail' },
     { beat: 'brace', ticks: 20, pose: 'brace' },
     { beat: 'return', ticks: 4, pose: 'idle' }
 ], { anchors });
@@ -417,12 +538,13 @@ const angleAt = offset => Number(held.pose
     .filter(frame => frame.offset <= offset).pop()
     .transform.match(/rotate\((-?[\d.]+)deg\)/)[1]);
 assert.strictEqual(angleAt(.5), 180, '버티는 동안 회전이 유지돼야 한다');
-assert.strictEqual(angleAt(1), 0, '복귀는 똑바로 선 채로 끝나야 한다');
+assert.strictEqual(angleAt(1), 180,
+    '자세는 회전을 몰래 초기화하지 않으며 action owner가 완료 뒤 한 번만 정리해야 한다');
 
 // 한 바퀴를 마친 회전은 복귀 중 0도로 보간하면 역회전해 보인다. 누적 각도를
 // 유지한 채 이동하고, 애니메이션 종료 시 owner가 transform을 제거해야 한다.
 const fullTurnReturn = HuntMotionCompiler.compile([
-    { beat: 'spin', ticks: 12, pose: 'spin-right' },
+    { beat: 'spin', ticks: 12, pose: 'spin-right', rotation: 360, origin: 'part:foreleg.screen-right' },
     { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
 ], { anchors });
 const returnStart = 12 / 16;
@@ -432,22 +554,24 @@ const returnAngles = fullTurnReturn.pose
 assert.ok(returnAngles.every(angle => angle === 360),
     '한 바퀴 회전은 복귀 중 역회전하지 않고 360도를 유지해야 한다');
 
-// 반 바퀴 자세는 복귀 구간에 걸쳐 되감지 않고 경계에서 즉시 기본 자세가 된다.
+// 반 바퀴 자세도 복귀 구간에서는 현재각을 유지한다. 자세 초기화는 모션 owner가
+// 완료 후 한 번만 수행하며, BEAT 경계에서 별도의 회전을 만들지 않는다.
 const halfTurnReturn = HuntMotionCompiler.compile([
-    { beat: 'slam', ticks: 3, pose: 'tail-slam' },
+    { beat: 'slam', ticks: 3, pose: 'tail-slam', rotation: 180, origin: 'part:tail' },
     { beat: 'return', ticks: 4, to: 'home', pose: 'idle' }
 ], { anchors });
 const halfReturnAngles = halfTurnReturn.pose
     .filter(frame => frame.offset > 3 / 7)
     .map(frame => Number(frame.transform.match(/rotate\((-?[\d.]+)deg\)/)[1]));
-assert.ok(halfReturnAngles.every(angle => angle === 0),
-    '반 바퀴 자세도 복귀 중 되감지 말고 복귀 시작점에서 즉시 세워야 한다');
+assert.ok(halfReturnAngles.every(angle => angle === 180),
+    '반 바퀴 자세도 home 복귀 중 누적각을 유지해야 한다');
 
 // 축도 회전과 함께 유지돼야 한다. 회전이 남았는데 축만 기본값으로 돌아가면
 // 버티는 구간으로 넘어가는 순간 몸이 튄다.
 const pivotAt = offset => held.pose.filter(frame => frame.offset <= offset).pop().pivot || null;
 assert.strictEqual(pivotAt(.5), 'part:tail', '버티는 동안 축이 유지돼야 한다');
-assert.strictEqual(pivotAt(1), null, '똑바로 서면 축도 기본으로 돌아간다');
+assert.strictEqual(pivotAt(1), 'part:tail',
+    '회전축도 자세가 몰래 초기화하지 않고 action owner가 완료 뒤 정리한다');
 
 // ---- align: 몸 중심이 아니라 그 부위를 목적지에 얹는다 ----
 //

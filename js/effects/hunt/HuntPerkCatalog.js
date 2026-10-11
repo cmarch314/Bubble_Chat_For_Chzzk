@@ -241,7 +241,7 @@ class HuntPerkCatalog {
             '폭탄 배달부': { issuedBombs: 1 },
             '캠프 수호자': { issuedPotions: 2 },
             '완벽주의': { attackRate: 0.96, hitChance: 0.08, counterChance: 0.08 },
-            '💩': { hitChance: 0.09, critChance: 0.60, evadeChance: 0.35, guardChance: 0.35, counterChance: 0.25 }
+            '💩': { hitChance: 0.10, critChance: 0.10, evadeChance: 0.10, guardChance: 0.10, counterChance: 0.10 }
         };
         return exact[name] || {};
     }

@@ -21,13 +21,20 @@ assert.match(animatorSource,
     /createTargetImpactDustEffect\(targetCard,[\s\S]*?fxStage[\s\S]*?weaponRect[\s\S]*?fxStage\.appendChild\(dust\)/,
     'target impact dust must use the live weapon centre while living in the combat-board top FX layer');
 assert.match(animatorSource,
+    /addCssTrack\(facingLayer, 'facing', facingFrames, 'steps\(1,end\)'\)/,
+    'BEAT facing must use the dependable scoped CSS track in Preview and embedded Chromium');
+assert.match(animatorSource,
     /resolvedImpactTargets\.length \? resolvedImpactTargets : fallbackTargetIndices/,
     'target impact dust must cover every hunter struck by a shared impact tick');
+assert.match(animatorSource, /schedulePreviewJudgmentMarkers\(pattern\)/,
+    'motion-only Preview must display authored judgment markers without resolving hunter reactions');
+assert.match(animatorSource, /damage: 'HIT',[\s\S]*roar: '귀마개',[\s\S]*tremor: '지진',[\s\S]*wind: '풍압'/,
+    'Preview judgment markers must distinguish damage, roar, tremor and wind judgments');
 assert.doesNotMatch(animatorSource, /owner\.playSFX\?\.\('monster_attack'/,
     'the renderer must not silently call the engine-only playSFX API');
 assert.match(animatorSource,
-    /if \(Array\.isArray\(pattern\?\.motion\)[\s\S]*?reason: 'beat-motion-unavailable'[\s\S]*?return null;/,
-    'an authored BEAT pattern must fail closed instead of falling into a legacy CSS motion');
+    /motionFromCompiledBeat\(pattern\)[\s\S]*?if \(Array\.isArray\(renderedPattern\?\.motion\)[\s\S]*?reason: 'beat-motion-unavailable'[\s\S]*?return null;/,
+    'live rendering must observe the compiled BEAT graph and fail closed instead of falling into a legacy CSS motion');
 assert.match(huntEffectSource,
     /renderer\.onMonsterPatternAudio\s*=\s*\(fileName, fallbackKey, context\)[\s\S]*?audioManager\.playMHAsset\(fileName, fallbackKey, context\)/,
     'real hunts must connect reviewed BEAT audio cues to HuntAudioManager');
@@ -65,6 +72,13 @@ assert.strictEqual(
 const enter = profiles.diablos.find(pattern => pattern.id === 'diablos.burrow_enter');
 const roar = profiles.diablos.find(pattern => pattern.id === 'diablos.roar');
 {
+    const runtimeEnter = HuntMonsterPatternCatalog.synchronizeMotionTiming({
+        ...enter,
+        motion: enter.motion.map(beat => ({
+            ...beat,
+            ...(motionOverrides.diablos?.[enter.id]?.beats?.[beat.beat] || {})
+        }))
+    });
     const hunters = [0, 1, 2, 3].map(index => ({
         index, name: `Hunter ${index + 1}`, hunterName: `Hunter ${index + 1}`,
         status: 'alive', hp: 100, maxHp: 100, cartRecoveryTicks: 0,
@@ -82,12 +96,18 @@ const roar = profiles.diablos.find(pattern => pattern.id === 'diablos.roar');
             beginMonsterTraversal(kind, ticks) {
                 this.monsterTraversalState = { kind, remainingTicks: ticks };
             },
+            beginMonsterBeatAction(action, context) {
+                this.startedBeatAction = action;
+                this.startedBeatContext = context;
+            },
             getMonsterAttackType: () => ({ type: 'physical', emoji: 'impact' })
         };
-        HuntMonsterTurnExecutor.execute(engine, enter, null, intendedTarget.index);
-        assert.strictEqual(engine.pendingMonsterImpact.targetIndex, intendedTarget.index,
-            'burrow damage reservation must keep the selected hunter');
-        assert.deepStrictEqual(engine.pendingMonsterImpact.events[0].targetIndices, [intendedTarget.index],
+        HuntMonsterTurnExecutor.execute(engine, runtimeEnter, null, intendedTarget.index);
+        assert.strictEqual(engine.pendingMonsterImpact, null,
+            'approved BEAT actions must not create the legacy delayed-impact countdown');
+        assert.strictEqual(engine.startedBeatContext.targetIndex, intendedTarget.index,
+            'burrow judgment session must keep the selected hunter');
+        assert.deepStrictEqual(engine.startedBeatContext.judgmentEvents[0].targetIndices, [intendedTarget.index],
             'burrow eruption damage must not migrate to a different hunter');
         assert.strictEqual(animationCalls[0][4].runtimePrimaryTargetIndex, intendedTarget.index,
             'burrow tracking dust and eruption animation must follow the same hunter as damage');
@@ -187,8 +207,8 @@ assert.match(animatorSource, /pattern\?\.chargeLaunchStyle === 'stomp-burst'/,
     'BEAT-authored Diablos charges must not lose their stomp dust when the resolved profile id is the pattern id');
 assert.match(animatorSource, /schedulePreviewImpactCardReactions[\s\S]*event\.atTicks/,
     'preview hunter-card reactions must be scheduled from resolved HIT ticks');
-assert.match(animatorSource, /if \(!pattern\?\.runtimeImpactPending\) \{[\s\S]*shakeTargets\(0\)/,
-    'delayed BEAT impacts must not retain the legacy percentage-based charge shake timer');
+assert.doesNotMatch(animatorSource, /shakeTargets\(/,
+    'delayed BEAT impacts must not retain a renderer-owned percentage hit timer');
 assert.strictEqual(hornCharge.motion[1].moveEasing, 'linear',
     'the charge must launch at full route speed instead of inheriting the old CSS acceleration');
 assert.deepStrictEqual(
@@ -371,6 +391,17 @@ assert.deepStrictEqual(
         ['tail-cross-one', 0, 0, -6, 202],
         ['tail-cross-two', 0, 0, 6, 158]
     ], 'the two tail contacts must cross around the flipped torso without translating the monster');
+    assert.deepStrictEqual(
+        rageCharge.motion.filter(beat => beat.flipFacing).map(beat => beat.beat),
+        ['tail-wind-right', 'return'],
+        'the authored base profile keeps its recovery mirror; review motion overrides own the X-swing flips'
+    );
+    const rageChargeOverride = motionOverrides.diablos['diablos.rage_charge'].beats;
+    assert.deepStrictEqual(
+        ['tail-cross-one', 'tail-cross-two'].map(id => rageChargeOverride[id].flipFacing),
+        [false, false],
+        'the reviewed X-tail override must preserve each prepared tail direction through both strike images'
+    );
     assert.ok(rageCharge.motion.filter(beat => beat.beat.startsWith('tail-'))
         .every(beat => beat.origin === 'part:torso'),
     'the flipped follow-up must pivot around the torso instead of reusing the unflipped tail coordinates');
@@ -410,17 +441,47 @@ assert.ok(profiles.black_diablos.every(pattern =>
         ['target-impact-dust', 'upward-diagonal', 'part-swing-arc', 'upward-diagonal'],
         ['target-impact-dust', 'upward-diagonal', 'part-swing-arc', 'upward-diagonal']
     ], 'both live horn-sweep HIT beats must retain their target-specific upward FX');
+    assert.deepStrictEqual(liveSweep.motion
+        .flatMap(beat => beat.judgments || [])
+        .filter(judgment => judgment.kind === 'damage')
+        .map(judgment => judgment.target),
+    ['pair-left', 'pair-right'],
+    'the two horn sweeps must bind their judgments to opposite hunters in the selected pair');
+    assert.deepStrictEqual(liveSweep.impactTimeline.map(event => event.targetMode),
+        ['runtime-pair-left', 'runtime-pair-right'],
+        'live combat must not collapse both horn-sweep impacts back onto the primary hunter');
+    assert.deepStrictEqual(liveSweep.motion
+        .filter(beat => beat.beat === 'impact-1' || beat.beat === 'impact-2')
+        .map(beat => [beat.face, beat.rotationToward]),
+    [['pass:1', -34], ['pass:2', -34]],
+    'the pair midpoint choreography must mirror the approved uppercut toward each hunter');
     assert.ok(runtime.diablos.every(pattern => !pattern.runtimePreviewScrub
         && !pattern.runtimePreviewCardReactions && !pattern.runtimePreviewMuteAudio),
     'live hunt patterns must not inherit preview-only gates');
+    const damagingJudgments = runtime.diablos.flatMap(pattern =>
+        (pattern.impactTimeline || [])
+            .filter(impact => Number(impact.damageScale ?? 1) > 0)
+            .map(impact => ({ patternId: pattern.id, reaction: impact.hitReactionKind }))
+    );
+    assert.ok(damagingJudgments.length > 0, 'Diablos must expose reviewed damaging judgments');
+    damagingJudgments.forEach(judgment => {
+        assert.strictEqual(judgment.reaction,
+            judgment.patternId === 'diablos.bite' ? 'weak' : 'strong',
+            `${judgment.patternId} must use the approved hunter reaction class`);
+    });
     for (const basePattern of runtime.diablos) {
         const variantId = basePattern.id.replace(/^diablos\./, 'black_diablos.');
         const variant = runtime.black_diablos.find(pattern => pattern.id === variantId);
         assert.ok(variant, `${variantId} must exist`);
         assert.deepStrictEqual(variant.motion, basePattern.motion,
             `${variantId} must use the reviewed base-species motion override`);
-        assert.deepStrictEqual(variant.impactTimeline, basePattern.impactTimeline,
-            `${variantId} must keep HIT timing synchronized with the inherited BEAT graph`);
+        assert.deepStrictEqual(
+            variant.impactTimeline.map(({ atTicks, targetMode, hitReactionKind }) =>
+                ({ atTicks, targetMode, hitReactionKind })),
+            basePattern.impactTimeline.map(({ atTicks, targetMode, hitReactionKind }) =>
+                ({ atTicks, targetMode, hitReactionKind })),
+            `${variantId} must keep HIT timing, targets, and reaction synchronized with the inherited BEAT graph`
+        );
     }
     global.HUNT_MONSTER_PATTERN_OVERRIDES = previousProfiles;
     global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = previousMotion;
@@ -491,6 +552,20 @@ assert.ok(profiles.black_diablos.every(pattern =>
     const bite = profiles.diablos.find(pattern => pattern.id.endsWith('.bite'));
     assert.strictEqual(bite.motion.find(beat => beat.beat === 'approach').aimBodyAt, 'target',
         'Diablos bite approach must rotate its body axis toward the selected hunter, not only mirror horizontally');
+    assert.ok(!bite.tags.includes('butt-stumble'),
+        'approved Diablos reactions must not be duplicated in legacy profile tags');
+    const previousProfiles = global.HUNT_MONSTER_PATTERN_OVERRIDES;
+    const previousMotion = global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES;
+    global.HUNT_MONSTER_PATTERN_OVERRIDES = profiles;
+    global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = motionOverrides;
+    const liveBite = HuntMonsterPatternCatalog.build({}, [{ id: 'diablos' }])
+        .diablos.find(pattern => pattern.id === 'diablos.bite');
+    global.HUNT_MONSTER_PATTERN_OVERRIDES = previousProfiles;
+    global.HUNT_MONSTER_PATTERN_MOTION_OVERRIDES = previousMotion;
+    assert.strictEqual(liveBite.impactTimeline[0].hitReactionKind, 'weak',
+        'Diablos bite must preserve its Preview-authored small/butt-stumble reaction');
+    assert.strictEqual(liveBite.impactTimeline[0].hitRecoveryTicks, undefined,
+        'Diablos impacts must not own hunter recovery timing');
     const sideTackle = profiles.diablos.find(pattern => pattern.id.endsWith('.side_tackle'));
     assert.strictEqual(sideTackle.motion.find(beat => beat.beat === 'side-hop').to,
         'pair-flank:targets 150',
@@ -537,47 +612,27 @@ assert.ok(profiles.black_diablos.every(pattern =>
         'a one-hunter return charge must not expand onto another card');
 }
 {
-    const pattern = {
-        ...profiles.diablos.find(candidate => candidate.id.endsWith('.rage_charge')),
-        runtimeChargePassSizes: [1, 1]
-    };
-    const partState = [];
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, pattern, [
-        { result: 'hit' }, { result: 'dodge' }
-    ]), true, 'only the return pass must miss for Diablos to become stuck');
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, {
+    const pattern = profiles.diablos.find(candidate => candidate.id.endsWith('.rage_charge'));
+    assert.strictEqual(pattern.whiffReaction, null,
+        'the approved return-charge and tail-cross action must finish at recovery without appending knockdown');
+    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction([], {
         ...pattern,
-        runtimeImpactTimelineEvent: true,
-        runtimeImpactTimelineFinal: false
+        runtimeJudgment: { id: 'tail-cross-two-damage', timelineFinal: true }
     }, [{ result: 'dodge' }]), false,
-    'a missed outbound pass must not trigger the return-pass terrain collision early');
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, {
-        ...pattern,
-        runtimeImpactTimelineEvent: true,
-        runtimeImpactTimelineFinal: true
-    }, [{ result: 'dodge' }]), true,
-    'the final off-screen return pass owns the terrain-stuck reaction');
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, pattern, [
-        { result: 'dodge' }, { result: 'hit' }
-    ]), false);
-    partState.push(
-        { kind: 'left-horn', broken: true },
-        { kind: 'right-horn', broken: true }
-    );
-    assert.strictEqual(HuntMonsterActionPolicy.shouldTriggerWhiffReaction(partState, pattern, [
-        { result: 'hit' }, { result: 'dodge' }
-    ]), false, 'two broken horns must disable the terrain-stuck opening');
+    'dodging the final tail-cross judgment must not be mistaken for a charge collision');
 }
 {
     const traversal = {
         callbacks: { onResetMonsterMotion() {} },
         monsterActionLockTicks: 0,
+        monsterActionPresentationTicks: 0,
         monsterTraversalGeneration: 0,
         monsterTraversalState: null
     };
     traversal.beginMonsterTraversal = HuntEngine.prototype.beginMonsterTraversal;
     traversal.clearMonsterTraversal = HuntEngine.prototype.clearMonsterTraversal;
     traversal.interruptMonsterMovement = HuntEngine.prototype.interruptMonsterMovement;
+    traversal.cancelMonsterBeatAction = () => {};
     traversal.beginMonsterTraversal('diablos-return-charge', 57, { untargetable: true });
     assert.strictEqual(traversal.monsterActionLockTicks, 57);
     assert.strictEqual(traversal.monsterTraversalState.untargetable, true);
@@ -683,6 +738,8 @@ function interferenceHarness({ atb = 100, random = 0.99, shield = false, resiste
     engine.applyHunterInterference = HuntEngine.prototype.applyHunterInterference;
     engine.clearHunterInterference = HuntEngine.prototype.clearHunterInterference;
     engine.interruptHunterItemAction = HuntEngine.prototype.interruptHunterItemAction;
+    engine.cancelHunterBeatAction = () => {};
+    engine.presentHunterImpact = () => {};
     return { engine, hunter, calls };
 }
 

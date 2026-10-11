@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "diablos",
+  "source": "HuntMonsterProfiles.js",
+  "purpose": "Approval manifest for the Diablos golden BEAT kit. The compiler verifies this list against the authored profile until the action source itself is fully extracted.",
+  "actions": [
+    { "id": "diablos.roar", "reviewStatus": "approved" },
+    { "id": "diablos.horn_charge", "reviewStatus": "approved" },
+    { "id": "diablos.burrow_enter", "reviewStatus": "approved" },
+    { "id": "diablos.horn_uppercut", "reviewStatus": "approved" },
+    { "id": "diablos.horn_sweep", "reviewStatus": "approved" },
+    { "id": "diablos.tail_slam_rock", "reviewStatus": "approved" },
+    { "id": "diablos.bite", "reviewStatus": "approved" },
+    { "id": "diablos.side_tackle", "reviewStatus": "approved" },
+    { "id": "diablos.rage_charge", "reviewStatus": "approved" }
+  ]
+}

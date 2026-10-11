@@ -11546,17 +11546,6 @@ window.HIVE_AUDIO_LEVELS = {
     "bytes": 83699,
     "mtimeMs": 1771975754870
   },
-  "SFX/Chzzk_Signatures/스트레스많이받.mp3": {
-    "category": "chat_voice",
-    "inputLufs": -14.89,
-    "truePeakDb": -3,
-    "gainDb": -3.11,
-    "measurement": "loudnorm",
-    "policyVersion": 2,
-    "duration": 2.66,
-    "bytes": 64235,
-    "mtimeMs": 1770428927056
-  },
   "SFX/Chzzk_Signatures/스트레스받.mp3": {
     "category": "chat_voice",
     "inputLufs": -13.66,

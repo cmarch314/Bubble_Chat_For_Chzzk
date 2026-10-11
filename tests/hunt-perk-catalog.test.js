@@ -74,12 +74,12 @@ const dung = all.find(perk => perk.name === '💩');
 assert.strictEqual(dung.id, HuntPerkCatalog.DUNG_PERK_ID);
 assert.strictEqual(dung.description, '아들아... 네가 태어나던 날, 온 세상이 코를...');
 assert.deepStrictEqual(dung.modifiers, {
-    hitChance: 0.09,
-    critChance: 0.60,
-    evadeChance: 0.35,
-    guardChance: 0.35,
-    counterChance: 0.25
-}, 'Dung must dramatically boost probability rolls without changing ATB, damage, recovery, or action duration');
+    hitChance: 0.10,
+    critChance: 0.10,
+    evadeChance: 0.10,
+    guardChance: 0.10,
+    counterChance: 0.10
+}, 'Dung must add a uniform ten percentage points without changing ATB, damage, recovery, or action duration');
 const dungAggregate = HuntPerkCatalog.aggregate([dung]);
 assert.strictEqual(dungAggregate.atbRate, 1, 'Dung must leave ATB recovery exactly unchanged');
 assert.strictEqual(dungAggregate.attackRate, 1, 'Dung must leave fixed attack power exactly unchanged');

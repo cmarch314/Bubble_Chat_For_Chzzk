@@ -9,18 +9,38 @@ const frames = HuntCombatAnimator.strongHitKeyframes({
     direction: -1
 });
 
-assert.deepStrictEqual(frames.map(frame => frame.offset), [0, .0375, .075, .1125, .15, .90, 1],
-    'strong hit must force four visible half-turns before the downed hold');
+const tumbleEndOffset = 1100 / 5000;
+assert.deepStrictEqual(frames.map(frame => frame.offset), [
+    0, tumbleEndOffset * .25, tumbleEndOffset * .5, tumbleEndOffset * .75,
+    tumbleEndOffset, .88, .90, .93, .96, .98, 1
+], 'strong hit must finish tumbling in 1.1 seconds, remain prone, and preserve the stepped return');
+assert.strictEqual(frames[4].offset * 5000, 1100,
+    'the full one-and-a-half-turn fall must take exactly 1.1 seconds');
 assert.deepStrictEqual(
     frames.slice(1, 5).map(frame => Number(frame.transform.match(/rotate\((-?\d+(?:\.\d+)?)deg\)/)?.[1])),
-    [-180, -360, -540, -720],
-    'explicit rotation waypoints must prevent a two-turn tumble from collapsing into parallel translation'
+    [-135, -270, -405, -540],
+    'explicit rotation waypoints must prevent the tumble from collapsing into parallel translation'
 );
-assert.match(frames[4].transform, /translate\(240px, 170px\) rotate\(-720deg\)/,
-    'the tumble must finish two turns away along the collision vector');
+assert.match(frames[4].transform, /translate\(240px, 170px\) rotate\(-540deg\) skewX\(-12deg\)/,
+    'the tumble must finish one and a half turns away in a visibly prone pose');
 assert.strictEqual(frames[5].transform, frames[4].transform,
     'the hunter must remain at the fallen pose without reverse rotation');
-assert.match(frames[6].transform, /translate\(0, 0\) rotate\(-720deg\)/,
+assert.match(frames[10].transform, /translate\(0, 0\) rotate\(-720deg\)/,
     'recovery must return naturally without rewinding the tumble');
+assert.notStrictEqual(frames[7].transform, frames[8].transform,
+    'return frames must alternate planted steps instead of parallel-sliding home');
+
+const fs = require('fs');
+const path = require('path');
+const animatorSource = fs.readFileSync(
+    path.resolve(__dirname, '../js/effects/hunt/HuntCombatAnimator.js'),
+    'utf8'
+);
+assert.match(animatorSource,
+    /easing:\s*kind === 'weak' \? 'ease-in-out' : 'linear'/,
+    'strong-hit offsets must stay on a linear real-time clock so the final 0.5s remains 0.5s');
+assert.doesNotMatch(animatorSource,
+    /easing:\s*kind === 'weak' \? 'ease-in-out' : 'cubic-bezier/,
+    'an effect-wide easing curve must not stretch the authored walk-home segment');
 
 console.log('[test] Hunter visible tumble keyframes passed.');

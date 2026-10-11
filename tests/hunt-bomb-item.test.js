@@ -8,6 +8,9 @@ const events = [];
 const engine = {
     monsterHp: 10000,
     monsterMaxHp: 10000,
+    monsterState: 'normal',
+    monsterKnockdownDuration: 0,
+    monsterStunDuration: 0,
     random: () => 0,
     updateMonsterHpUI: () => events.push('hp'),
     updateHunterItemUI: () => events.push('items'),
@@ -22,6 +25,11 @@ assert.strictEqual(runtime.useBomb(normal, '검사'), true);
 assert.strictEqual(normal.bombs, 0);
 assert.strictEqual(engine.monsterHp, 9800, 'a barrel bomb must deal the fixed cross-title balance damage');
 assert.ok(events.includes('bomb'), 'a barrel bomb must trigger its dedicated visual effect');
+assert.deepStrictEqual(
+    [engine.monsterState, engine.monsterKnockdownDuration, engine.monsterStunDuration],
+    ['normal', 0, 0],
+    'barrel bombs must deal HP damage without creating or extending monster control'
+);
 
 engine.monsterHp = 20000;
 engine.monsterMaxHp = 20000;
@@ -51,6 +59,12 @@ decisionEngine.monsterState = 'knocked_down';
 decisionHunter.perks = [{ name: '폭파광' }];
 assert.strictEqual(HuntHunterDecisionPolicy.chooseSupportAction(decisionEngine, decisionHunter)?.kind, 'bomb',
     'Bombardier AI may use bombs during other safe control windows');
+decisionEngine.monsterControlEnteredAtTick = decisionEngine.battleTime;
+assert.strictEqual(HuntHunterDecisionPolicy.chooseSupportAction(decisionEngine, decisionHunter), null,
+    'Bombardier must not make a fresh knockdown look as though the bomb caused it');
+decisionEngine.battleTime += 6;
+assert.strictEqual(HuntHunterDecisionPolicy.chooseSupportAction(decisionEngine, decisionHunter)?.kind, 'bomb',
+    'Bombardier may follow up after the control cause has remained readable for six ticks');
 
 const loadout = { bombs: 1, perks: [{ name: '폭파광' }] };
 runtime.initialize(loadout);

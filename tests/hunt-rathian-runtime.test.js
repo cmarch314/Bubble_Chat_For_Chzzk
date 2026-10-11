@@ -76,6 +76,9 @@ const fourHunters = [0, 1, 2, 3].map(index => ({ index }));
 const centerSequence = ActionPolicy.centerLeftRightSequence(fourHunters, () => .01);
 assert.deepStrictEqual(centerSequence.map(pass => pass.map(target => target.index)), [[0], [], [1]],
     'a side shot outside the party must remain a visible whiff lane');
+const primarySecondSequence = ActionPolicy.centerLeftRightSequence(fourHunters, () => .99, 1);
+assert.deepStrictEqual(primarySecondSequence.map(pass => pass.map(target => target.index)), [[1], [0], [2]],
+    'an authored second hunter must fire primary → left → right as 2 → 1 → 3, without rerolling centre');
 const targetPlan = ActionPolicy.resolveTargeting({
     targetable: fourHunters,
     count: 1,
@@ -110,11 +113,16 @@ assert.strictEqual(biteSomersault.impactTimeline[0].ignoreBrokenPartDamage, true
 assert.strictEqual(somersaultGlide.impactTimeline[1].secondaryInterference.scope, 'adjacent');
 assert.strictEqual(byId('rathian.bite').maxConsecutiveUses, 1);
 assert.ok(byId('rathian.bite').tags.includes('weak'), 'Rathian bite must use the weak-hit contract');
-assert.deepStrictEqual(byId('rathian.tail_sweep').impactTimeline.map(event => event.atTicks), [24, 34]);
-assert.strictEqual(byId('rathian.tail_sweep').animationDurationMs, 4200);
+assert.deepStrictEqual(byId('rathian.tail_sweep').impactTimeline.map(event => event.atTicks), [24, 38]);
+assert.strictEqual(byId('rathian.tail_sweep').animationDurationMs, 4600);
 assert.strictEqual(byId('rathian.tail_sweep').animationProfile, 'rathian-tail-sweep-double');
-assert.strictEqual(byId('rathian.tail_sweep').targeting.mode, 'left-right-halves');
-assert.strictEqual(byId('rathian.tail_sweep').maxTargets, 4);
+assert.deepStrictEqual(
+    byId('rathian.tail_sweep').motion.map(beat => beat.beat),
+    ['center', 'wind', 'left-half', 'rest', 'right-half', 'return'],
+    'the double tail sweep must keep an authored rest beat between two contacts'
+);
+assert.strictEqual(byId('rathian.tail_sweep').targeting.mode, 'adjacent-pair-sequential');
+assert.strictEqual(byId('rathian.tail_sweep').maxTargets, 2);
 assert.deepStrictEqual(byId('rathian.tail_sweep').animationGeometry, {
     anchor: 'arena-center-lower', yRatio: 0.56, approachX: 1, approachY: 1
 });
@@ -349,7 +357,7 @@ assert.match(turnExecutorSource,
     /!isImpactCommit && pattern\.type !== 'roar' && !pattern\.suppressPrepareAudio/,
     'somersault vocals must not fire when the action merely starts');
 assert.match(turnExecutorSource,
-    /pattern\.type !== 'roar' && pattern\.runtimeImpactAudioCue !== 'somersault'/,
+    /pattern\.type !== 'roar'[\s\S]*judgmentField\(\s*pattern, 'audioCue', 'runtimeImpactAudioCue'\) !== 'somersault'/,
     'the authored somersault contact vocal must not be doubled by the default impact route');
 
 console.log('[test] Reviewed World Rathian runtime contract passed.');
