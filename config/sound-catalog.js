@@ -1836,10 +1836,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/aang.mp3",
         "volume": 0.7
     },
-    "아야!": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
-        "volume": 0.7
-    },
     "아예~": {
         "src": "Chzzk_Signatures/아예.mp3",
         "volume": 0.7
@@ -2664,10 +2660,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/Half-falling.mp3",
         "volume": 0.7
     },
-    "으악!": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
-        "volume": 0.7
-    },
     "으에": [
         {
             "src": "Chzzk_Signatures/에에.mp3",
@@ -2736,10 +2728,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
             "volume": 0.7
         }
     ],
-    "윽!": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
-        "volume": 0.7
-    },
     "음?": {
         "src": "Chzzk_Signatures/Huh.mp3",
         "volume": 0.7
@@ -3402,14 +3390,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
     },
     "타격음_무겁": {
         "src": "MonsterHunter_Hunters/mh_heavy_hit.mp3",
-        "volume": 0.7
-    },
-    "타격음_베기": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
-        "volume": 0.7
-    },
-    "타격음_타격": {
-        "src": "MonsterHunter_Hunters/mh_slash_hit.mp3",
         "volume": 0.7
     },
     "타티": {
