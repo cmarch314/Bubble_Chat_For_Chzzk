@@ -2660,74 +2660,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
         "src": "Chzzk_Signatures/Half-falling.mp3",
         "volume": 0.7
     },
-    "으에": [
-        {
-            "src": "Chzzk_Signatures/에에.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에2.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에3.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에4.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에5.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에6.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에7.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에8.mp3",
-            "volume": 0.7
-        }
-    ],
-    "으에!": [
-        {
-            "src": "Chzzk_Signatures/에에.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에2.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에3.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에4.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에5.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에6.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에7.mp3",
-            "volume": 0.7
-        },
-        {
-            "src": "Chzzk_Signatures/에에8.mp3",
-            "volume": 0.7
-        }
-    ],
     "음?": {
         "src": "Chzzk_Signatures/Huh.mp3",
         "volume": 0.7
@@ -3192,10 +3124,6 @@ window.HIVE_SOUND_CONFIG = window.HIVE_SOUND_CONFIG || {
     },
     "조룡!": {
         "src": "Chzzk_Signatures/조룡!.mp3",
-        "volume": 0.7
-    },
-    "조심해": {
-        "src": "Chzzk_Signatures/키요츠케테.mp3",
         "volume": 0.7
     },
     "존나몬창": {
